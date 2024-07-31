@@ -7,6 +7,7 @@ import { StoryInteractiveLocation } from './location.js'
 import { StoryInteractiveReaction } from './reaction.js'
 import { StoryInteractiveUrl } from './url.js'
 import { StoryInteractiveVenue } from './venue.js'
+import { StoryInteractiveWeather } from './weather.js'
 
 export * from './input.js'
 export {
@@ -15,6 +16,7 @@ export {
     StoryInteractiveReaction,
     StoryInteractiveUrl,
     StoryInteractiveVenue,
+    StoryInteractiveWeather,
 }
 
 export type StoryInteractiveElement =
@@ -23,6 +25,7 @@ export type StoryInteractiveElement =
     | StoryInteractiveVenue
     | StoryInteractiveChannelPost
     | StoryInteractiveUrl
+    | StoryInteractiveWeather
 
 export function _storyInteractiveElementFromTl(raw: tl.TypeMediaArea, peers: PeersIndex): StoryInteractiveElement {
     switch (raw._) {
@@ -36,6 +39,8 @@ export function _storyInteractiveElementFromTl(raw: tl.TypeMediaArea, peers: Pee
             return new StoryInteractiveChannelPost(raw, peers)
         case 'mediaAreaUrl':
             return new StoryInteractiveUrl(raw)
+        case 'mediaAreaWeather':
+            return new StoryInteractiveWeather(raw)
         case 'inputMediaAreaVenue':
         case 'inputMediaAreaChannelPost':
             throw new MtTypeAssertionError('StoryInteractiveElement', '!input*', raw._)

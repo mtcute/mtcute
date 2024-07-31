@@ -181,6 +181,16 @@ export class User {
         return this.raw.contactRequirePremium!
     }
 
+    /** Number of bot's active users, if available */
+    get botActiveUsers(): number | null {
+        return this.raw.botActiveUsers ?? null
+    }
+
+    /** Whether this bot has a main app */
+    get hasMainApp(): boolean {
+        return this.raw.botHasMainApp!
+    }
+
     /** User's or bot's first name */
     get firstName(): string {
         return this.raw.firstName ?? 'Deleted Account'

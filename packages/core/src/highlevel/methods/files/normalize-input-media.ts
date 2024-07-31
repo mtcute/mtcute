@@ -379,7 +379,7 @@ export async function _normalizeInputMedia(
     if (media.type !== 'voice') {
         attributes.push({
             _: 'documentAttributeFilename',
-            fileName: media.fileName || inputFile.name,
+            fileName: media.fileName || (inputFile._ === 'inputFileStoryDocument' ? 'story' : inputFile.name),
         })
     }
 

@@ -85,6 +85,10 @@ export class Video extends RawDocument {
     get ttlSeconds(): number | null {
         return this.media?.ttlSeconds ?? null
     }
+
+    get videoStartTs(): number | null {
+        return this.attr._ === 'documentAttributeVideo' ? this.attr.videoStartTs ?? null : null
+    }
 }
 
 memoizeGetters(Video, ['fileName', 'thumbnails', 'fileId', 'uniqueFileId', 'isAnimation'])

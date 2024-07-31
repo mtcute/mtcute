@@ -474,6 +474,26 @@ export interface ActionPaymentRefunded {
     charge: tl.TypePaymentCharge
 }
 
+/** Telegram Stars were gifted by the other chat participant */
+export interface ActionStarsGifted {
+    readonly type: 'stars_gifted'
+
+    /** Whether `currency` is a cryptocurrency */
+    isCrypto: boolean
+
+    /** Currency in which the stars were paid for */
+    currency: string
+
+    /** Amount of `currency` that was paid */
+    amount: tl.Long
+
+    /** Amount of Telegram Stars that were gifted */
+    stars: tl.Long
+
+    /** Transaction ID, if available */
+    transactionId?: string
+}
+
 export type MessageAction =
     | ActionChatCreated
     | ActionChannelCreated
@@ -518,6 +538,7 @@ export type MessageAction =
     | ActionGiveawayEnded
     | ActionBoostApply
     | ActionPaymentRefunded
+    | ActionStarsGifted
     | null
 
 /** @internal */
@@ -783,6 +804,15 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 amount: act.totalAmount,
                 payload: act.payload,
                 charge: act.charge,
+            }
+        case 'messageActionGiftStars':
+            return {
+                type: 'stars_gifted',
+                isCrypto: Boolean(act.cryptoCurrency),
+                currency: act.cryptoCurrency ?? act.currency,
+                amount: act.cryptoAmount ?? act.amount,
+                stars: act.stars,
+                transactionId: act.transactionId,
             }
         default:
             return null
