@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/bun",
     "private": true,
-    "version": "0.16.2",
+    "version": "0.16.3",
     "description": "Meta-package for Bun",
     "author": "alina sireneva <alina@tei.su>",
     "license": "MIT",
