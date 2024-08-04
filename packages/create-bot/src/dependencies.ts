@@ -90,5 +90,8 @@ export async function installDependencies(cwd: string, config: UserConfig) {
     }
 
     await exec(cwd, ...getInstallCommand({ mgr: config.packageManager, packages: dependencies }))
-    await exec(cwd, ...getInstallCommand({ mgr: config.packageManager, packages: devDepdenencies, dev: true }))
+
+    if (devDepdenencies.length) {
+        await exec(cwd, ...getInstallCommand({ mgr: config.packageManager, packages: devDepdenencies, dev: true }))
+    }
 }
