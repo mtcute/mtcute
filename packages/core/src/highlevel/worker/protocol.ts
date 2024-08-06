@@ -62,6 +62,8 @@ export type WorkerCustomMethods = Record<string, (...args: any[]) => Promise<any
 export type SerializedResult<T> = { __serialized__: T }
 
 export function serializeResult<T>(result: T): SerializedResult<T> {
+    if (ArrayBuffer.isView(result)) return result as unknown as SerializedResult<T>
+
     if (Array.isArray(result)) {
         return result.map(serializeResult) as unknown as SerializedResult<T>
     }
@@ -102,6 +104,8 @@ export function serializeResult<T>(result: T): SerializedResult<T> {
 }
 
 export function deserializeResult<T>(result: SerializedResult<T>): T {
+    if (ArrayBuffer.isView(result)) return result as unknown as T
+
     if (Array.isArray(result)) {
         return result.map(deserializeResult) as unknown as T
     }
