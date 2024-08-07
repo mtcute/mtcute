@@ -230,6 +230,7 @@ function buildPackageJson() {
 
 // clean
 fs.rmSync(path.join(outDir), { recursive: true, force: true })
+fs.rmSync(path.join(packageDir, 'tsconfig.tsbuildinfo'), { recursive: true, force: true })
 fs.mkdirSync(path.join(outDir), { recursive: true })
 
 // for jsr - copy typescript sources
@@ -577,11 +578,12 @@ if (IS_JSR) {
     // make shims for esnext resolution (that doesn't respect package.json `exports` field)
     function makeShim(name, target) {
         if (name === '.') name = './index.js'
+        if (!name.endsWith('.js')) return
+        if (fs.existsSync(path.join(outDir, name))) return
+        if (name === target) throw new Error(`cannot make shim to itself: ${name}`)
 
-        if (!fs.existsSync(path.join(outDir, name))) {
-            fs.writeFileSync(path.join(outDir, name), `export * from '${target}'\n`)
-            fs.writeFileSync(path.join(outDir, name.replace(/\.js$/, '.d.ts')), `export * from '${target}'\n`)
-        }
+        fs.writeFileSync(path.join(outDir, name), `export * from '${target}'\n`)
+        fs.writeFileSync(path.join(outDir, name.replace(/\.js$/, '.d.ts')), `export * from '${target}'\n`)
     }
 
     if (typeof builtPkgJson.exports === 'string') {
