@@ -80,11 +80,23 @@ export class Thumbnail extends FileLocation {
                 width = height = NaN
                 size = location.length
                 break
-            case 'photoPathSize': // lazily
-                location = () => svgPathToFile(this._path!)
-                width = height = NaN
+            case 'photoPathSize': {
+                // try to find documentAttributeImageSize
+                const imageSize = media._ === 'document' ?
+                    media.attributes.find((it) => it._ === 'documentAttributeImageSize') as tl.RawDocumentAttributeImageSize :
+                    undefined
+                // lazily
+                location = () => svgPathToFile(this._path!, imageSize)
+
+                if (imageSize) {
+                    width = imageSize.w
+                    height = imageSize.h
+                } else {
+                    width = height = 512
+                }
                 size = Infinity // this doesn't really matter
                 break
+            }
             case 'videoSizeEmojiMarkup':
             case 'videoSizeStickerMarkup':
                 location = () => {

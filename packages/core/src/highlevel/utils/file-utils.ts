@@ -1,3 +1,5 @@
+import { tl } from '@mtcute/tl'
+
 import { getPlatform } from '../../platform.js'
 import { MtArgumentError } from '../../types/errors.js'
 import { concatBuffers } from '../../utils/buffer-utils.js'
@@ -110,13 +112,14 @@ export function inflateSvgPath(encoded: Uint8Array): string {
 
 /**
  * Convert SVG path to SVG file
- * @param path
+ * @param path  SVG path
+ * @param size  Size attribute of the document, if available
  */
-export function svgPathToFile(path: string): Uint8Array {
+export function svgPathToFile(path: string, size?: tl.RawDocumentAttributeImageSize): Uint8Array {
     return getPlatform().utf8Encode(
         '<?xml version="1.0" encoding="utf-8"?>' +
             '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"' +
-            'viewBox="0 0 512 512" xml:space="preserve">' +
+            `viewBox="0 0 ${size?.w ?? 512} ${size?.h ?? 512}" xml:space="preserve">` +
             '<path d="' +
             path +
             '"/>' +
