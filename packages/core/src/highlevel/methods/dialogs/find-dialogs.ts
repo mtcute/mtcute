@@ -54,6 +54,11 @@ export async function findDialogs(client: ITelegramClient, peers: MaybeArray<str
         foundIdxToOriginalIdx.set(foundInputPeers.length - 1, i)
     }
 
+    if (foundInputPeers.length === 0) {
+        // we didn't find anything, we can't even fetch the dialogs
+        throw new MtPeerNotFoundError(`Could not find dialogs with peers: ${peers.join(', ')}`)
+    }
+
     const dialogs = await getPeerDialogs(client, foundInputPeers)
 
     if (foundInputPeers.length === peers.length) {
