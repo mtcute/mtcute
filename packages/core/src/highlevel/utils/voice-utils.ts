@@ -48,7 +48,7 @@ export function decodeWaveform(wf: Uint8Array): number[] {
  */
 export function encodeWaveform(wf: number[]): Uint8Array {
     const bitsCount = wf.length * 5
-    const bytesCount = ~~(bitsCount + 7) / 8
+    const bytesCount = ~~((bitsCount + 7) / 8)
     const result = new Uint8Array(bytesCount + 1)
     const dv = dataViewFromBuffer(result)
 
