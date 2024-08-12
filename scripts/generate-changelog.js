@@ -1,5 +1,9 @@
-const fs = require('fs')
-const { getLatestTag, getCommitsSince, parseConventionalCommit, findChangedFilesSince } = require('./git-utils')
+import { randomUUID } from 'crypto'
+import { appendFileSync } from 'fs'
+import { EOL } from 'os'
+import { fileURLToPath } from 'url'
+
+import { findChangedFilesSince, getCommitsSince, getLatestTag, parseConventionalCommit } from './git-utils.js'
 
 function generateChangelog(onlyPackages) {
     const byPackage = {}
@@ -52,7 +56,7 @@ function generateChangelog(onlyPackages) {
     return ret
 }
 
-if (require.main === module) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
     let onlyPackages = null
 
     if (process.argv[2]) {
@@ -62,8 +66,8 @@ if (require.main === module) {
     const res = generateChangelog(onlyPackages)
 
     if (process.env.CI && process.env.GITHUB_OUTPUT) {
-        const delim = `---${require('crypto').randomUUID()}---${require('os').EOL}`
-        fs.appendFileSync(process.env.GITHUB_OUTPUT, `changelog<<${delim}${res}${delim}`)
+        const delim = `---${randomUUID()}---${EOL}`
+        appendFileSync(process.env.GITHUB_OUTPUT, `changelog<<${delim}${res}${delim}`)
     } else {
         console.log(res)
     }

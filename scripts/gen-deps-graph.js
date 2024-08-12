@@ -1,5 +1,5 @@
-// node scripts/gen-deps-graph.mjs | dot -Tsvg > deps.svg
-import { getPackageJsons } from './utils.mjs'
+// node scripts/gen-deps-graph.js | dot -Tsvg > deps.svg
+import { getPackageJsons } from './utils.js'
 
 const packageJsons = await getPackageJsons()
 

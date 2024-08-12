@@ -1,7 +1,7 @@
 import { Plugin } from 'vite'
 import { fileURLToPath } from 'url'
 
-const setupFile = fileURLToPath(new URL('./test-setup.mts', import.meta.url))
+const setupFile = fileURLToPath(new URL('./test-setup.ts', import.meta.url))
 
 export function testSetup(params?: { additionalCode?: string }): Plugin {
     const { additionalCode = '' } = params || {}

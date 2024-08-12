@@ -1,12 +1,18 @@
-const fs = require('fs')
-const path = require('path')
-const cp = require('child_process')
-const stc = require('@teidesu/slow-types-compiler')
+import * as cp from 'child_process'
+import * as fs from 'fs'
+import { createRequire } from 'module'
+import * as path from 'path'
+import { fileURLToPath } from 'url'
 
+import * as stc from '@teidesu/slow-types-compiler'
 const IS_JSR = process.env.JSR === '1'
 const MAIN_REGISTRY = IS_JSR ? 'https://jsr.io/' : 'https://registry.npmjs.org'
 let REGISTRY = process.env.REGISTRY || MAIN_REGISTRY
-exports.REGISTRY = REGISTRY
+const EXPORTED_REGISTRY = REGISTRY
+
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
+const require = createRequire(import.meta.url)
+
 if (!REGISTRY.endsWith('/')) REGISTRY += '/'
 
 if (process.env.E2E && IS_JSR) {
@@ -148,8 +154,6 @@ function listPackages(all = false) {
     return packages
 }
 
-exports.listPackages = listPackages
-
 async function main(arg = process.argv[2]) {
     if (!arg) {
         console.log('Usage: publish.js <package name | all | updated>')
@@ -248,11 +252,8 @@ async function main(arg = process.argv[2]) {
     process.exit(0) // idk why but it sometimes hangs indefinitely
 }
 
-exports.main = main
+export { listPackages, main, EXPORTED_REGISTRY as REGISTRY }
 
-if (require.main === module) {
-    main().catch((e) => {
-        console.error(e)
-        process.exit(1)
-    })
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    await main()
 }

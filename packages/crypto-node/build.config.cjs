@@ -4,7 +4,7 @@ const fs = require('fs')
 const cp = require('child_process')
 const { Readable } = require('stream')
 
-const git = require('../../scripts/git-utils')
+let git
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
 let SKIP_PREBUILT = process.env.BUILD_FOR_DOCS === '1'
@@ -151,6 +151,8 @@ async function extractArtifacts(artifacts) {
 
 module.exports = ({ fs, glob, path, packageDir, outDir }) => ({
     async final() {
+        // eslint-disable-next-line import/no-relative-packages
+        git = await import('../../scripts/git-utils.js')
         const libDir = path.join(packageDir, 'lib')
 
         if (!SKIP_PREBUILT) {

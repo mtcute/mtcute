@@ -1,12 +1,15 @@
 /* eslint-disable no-inner-declarations */
-const cp = require('child_process')
-const path = require('path')
-const fs = require('fs')
-const glob = require('glob')
-const ts = require('typescript')
-const stc = require('@teidesu/slow-types-compiler')
-// @ts-ignore
-const rootPackageJson = require('../package.json')
+import * as cp from 'child_process'
+import * as fs from 'fs'
+import * as glob from 'glob'
+import { createRequire } from 'module'
+import * as path from 'path'
+import ts from 'typescript'
+
+import * as stc from '@teidesu/slow-types-compiler'
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
+
+const rootPackageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf-8'))
 
 if (process.argv.length < 3) {
     console.log('Usage: build-package.js <package name>')
@@ -29,6 +32,9 @@ function transformFile(file, transform) {
     const res = transform(content, file)
     if (res != null) fs.writeFileSync(file, res)
 }
+
+// todo make them esm
+const require = createRequire(import.meta.url)
 
 const buildConfig = {
     buildTs: true,
@@ -617,12 +623,12 @@ if (!IS_JSR) {
     fs.writeFileSync(path.join(outDir, '.npmignore'), '*.tsbuildinfo\n')
 }
 
-Promise.resolve(buildConfig.final()).then(() => {
-    if (IS_JSR && !process.env.CI) {
-        console.log('[i] Trying to publish with --dry-run')
-        exec('deno publish --dry-run --allow-dirty --quiet', { cwd: outDir })
-        console.log('[v] All good!')
-    } else {
-        console.log('[v] Done!')
-    }
-})
+await buildConfig.final()
+
+if (IS_JSR && !process.env.CI) {
+    console.log('[i] Trying to publish with --dry-run')
+    exec('deno publish --dry-run --allow-dirty --quiet', { cwd: outDir })
+    console.log('[v] All good!')
+} else {
+    console.log('[v] Done!')
+}

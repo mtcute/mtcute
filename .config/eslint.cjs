@@ -167,6 +167,7 @@ module.exports = {
         'import/no-relative-packages': 'error',
         'import/no-mutable-exports': 'error',
         'import/no-default-export': 'error',
+        'import/no-unresolved': 'off',
         'no-console': ['error', { allow: ['warn', 'error'] }],
     },
     ignorePatterns: [
@@ -281,15 +282,8 @@ module.exports = {
         {
             files: ['packages/bun/**', 'packages/deno/**'],
             rules: {
-                'import/no-unresolved': 'off',
                 'no-restricted-imports': 'off',
                 'import/no-relative-packages': 'off', // common-internals is symlinked from node
-            }
-        },
-        {
-            files: ['e2e/deno/**'],
-            rules: {
-                'import/no-unresolved': 'off',
             }
         },
     ],

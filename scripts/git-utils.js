@@ -1,14 +1,14 @@
-const cp = require('child_process')
+import { execSync } from 'child_process'
 
 function getLatestTag() {
     try {
-        const res = cp.execSync('git describe --abbrev=0 --tags', { encoding: 'utf8', stdio: 'pipe' }).trim()
+        const res = execSync('git describe --abbrev=0 --tags', { encoding: 'utf8', stdio: 'pipe' }).trim()
 
         return res
     } catch (e) {
         if (e.stderr.match(/^fatal: (No names found|No tags can describe)/i)) {
             // no tags found, let's just return the first commit
-            return cp.execSync('git rev-list --max-parents=0 HEAD', { encoding: 'utf8' }).trim()
+            return execSync('git rev-list --max-parents=0 HEAD', { encoding: 'utf8' }).trim()
         }
 
         throw e
@@ -16,14 +16,13 @@ function getLatestTag() {
 }
 
 function findChangedFilesSince(tag, until = 'HEAD') {
-    return cp.execSync(`git diff --name-only ${tag} ${until}`, { encoding: 'utf8', stdio: 'pipe' }).trim().split('\n')
+    return execSync(`git diff --name-only ${tag} ${until}`, { encoding: 'utf8', stdio: 'pipe' }).trim().split('\n')
 }
 
 function getCommitsSince(tag, until = 'HEAD') {
     const delim = `---${Math.random().toString(36).slice(2)}---`
 
-    const lines = cp
-        .execSync(`git log --pretty="format:%H %s%n%b%n${delim}" ${tag}..${until}`, { encoding: 'utf8', stdio: 'pipe' })
+    const lines = execSync(`git log --pretty="format:%H %s%n%b%n${delim}" ${tag}..${until}`, { encoding: 'utf8', stdio: 'pipe' })
         .trim()
         .split('\n')
 
@@ -50,11 +49,11 @@ function getCommitsSince(tag, until = 'HEAD') {
 }
 
 function getCurrentCommit() {
-    return cp.execSync('git rev-parse HEAD', { encoding: 'utf8', stdio: 'pipe' }).trim()
+    return execSync('git rev-parse HEAD', { encoding: 'utf8', stdio: 'pipe' }).trim()
 }
 
 function getCurrentBranch() {
-    return cp.execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8', stdio: 'pipe' }).trim()
+    return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8', stdio: 'pipe' }).trim()
 }
 
 function parseConventionalCommit(msg) {
@@ -67,11 +66,11 @@ function parseConventionalCommit(msg) {
     return { type, scope, breaking: Boolean(breaking), subject }
 }
 
-module.exports = {
-    getLatestTag,
+export {
     findChangedFilesSince,
     getCommitsSince,
-    parseConventionalCommit,
-    getCurrentCommit,
     getCurrentBranch,
+    getCurrentCommit,
+    getLatestTag,
+    parseConventionalCommit,
 }

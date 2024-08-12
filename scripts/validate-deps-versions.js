@@ -1,7 +1,7 @@
 import semver from 'semver'
 import { fileURLToPath } from 'url'
 
-import { getPackageJsons } from './utils.mjs'
+import { getPackageJsons } from './utils.js'
 
 export async function validateDepsVersions() {
     const packageJsons = await getPackageJsons(true)

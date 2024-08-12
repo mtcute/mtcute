@@ -52,7 +52,7 @@ jobs:
         with:
           bun-version: '1.1.4'
       - name: 'Build tests'
-        run: pnpm exec vite build -c .config/vite.bun.mts
+        run: pnpm exec vite build -c .config/vite.bun.ts
       - name: 'Run tests'
         run: cd dist/tests && bun test
   
@@ -65,7 +65,7 @@ jobs:
         with:
           deno-version: '1.43.1'
       - name: 'Build tests'
-        run: pnpm exec vite build -c .config/vite.deno.mts
+        run: pnpm exec vite build -c .config/vite.deno.ts
       - name: 'Run tests'
         run: cd dist/tests && deno test -A --unstable-ffi
   

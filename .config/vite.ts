@@ -20,7 +20,7 @@ export default defineConfig({
             ]
         },
         setupFiles: [
-            './.config/vite-utils/test-setup.mts'
+            './.config/vite-utils/test-setup.ts'
         ]
     },
     define: {
