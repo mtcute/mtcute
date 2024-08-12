@@ -37,7 +37,6 @@ export const chat =
         (msg) =>
             msg.chat.chatType === type
 
-// prettier-ignore
 /**
  * Filter updates by marked chat ID(s) or username(s)
  *

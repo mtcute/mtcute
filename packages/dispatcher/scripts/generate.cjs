@@ -1,4 +1,4 @@
-const { types, toSentence, replaceSections, formatFile } = require('../../core/scripts/generate-updates.cjs')
+const { types, toSentence, replaceSections } = require('../../core/scripts/generate-updates.cjs')
 
 function generateHandler() {
     const lines = []
@@ -105,9 +105,6 @@ ${
 async function main() {
     generateHandler()
     generateDispatcher()
-
-    await formatFile('handler.ts', __dirname)
-    await formatFile('dispatcher.ts', __dirname)
 }
 
 module.exports = { types, toSentence }

@@ -38,7 +38,6 @@
         "lint:tsc:ci": "pnpm -r exec tsc --build",
         "lint:dpdm": "dpdm -T --no-warning --no-tree --exit-code circular:1 packages/*",
         "lint:fix": "eslint --fix .",
-        "format": "prettier --write \"packages/**/*.ts\"",
         "publish-all": "node scripts/publish.js all",
         "docs": "typedoc --options .config/typedoc/config.cjs",
         "build-package": "node scripts/build-package.js"
@@ -61,14 +60,12 @@
         "dpdm": "3.14.0",
         "esbuild": "0.23.0",
         "eslint": "8.47.0",
-        "eslint-config-prettier": "8.8.0",
         "eslint-import-resolver-typescript": "3.6.0",
         "eslint-plugin-ascii": "1.0.0",
         "eslint-plugin-import": "2.28.0",
         "eslint-plugin-simple-import-sort": "10.0.0",
         "glob": "11.0.0",
         "playwright": "1.42.1",
-        "prettier": "3.0.3",
         "rimraf": "6.0.1",
         "semver": "7.5.1",
         "ts-node": "10.9.1",
@@ -80,7 +77,6 @@
         "vitest": "2.0.5"
     },
     "packageManager": "pnpm@9.0.6",
-    "prettier": "./.config/prettier.cjs",
     "eslintConfig": {
         "extends": "./.config/eslint.cjs"
     }

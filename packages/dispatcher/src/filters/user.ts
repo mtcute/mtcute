@@ -32,7 +32,6 @@ export const me: UpdateFilter<Message, { sender: User }> = (msg) =>
  */
 export const bot: UpdateFilter<Message, { sender: User }> = (msg) => msg.sender.constructor === User && msg.sender.isBot
 
-// prettier-ignore
 /**
  * Filter updates by user ID(s) or username(s)
  *

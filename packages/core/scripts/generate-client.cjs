@@ -1,7 +1,6 @@
 const ts = require('typescript')
 const path = require('path')
 const fs = require('fs')
-const prettier = require('prettier')
 const updates = require('./generate-updates.cjs')
 
 const schema = require('../../tl/api-schema.json')
@@ -183,16 +182,6 @@ function determineCommonAvailability(methods, resolver = (v) => v) {
     }
 
     return common
-}
-
-async function runPrettier(targetFile) {
-    const prettierConfig = await prettier.resolveConfig(targetFile)
-    let fullSource = await fs.promises.readFile(targetFile, 'utf-8')
-    fullSource = await prettier.format(fullSource, {
-        ...(prettierConfig || {}),
-        filepath: targetFile,
-    })
-    await fs.promises.writeFile(targetFile, fullSource)
 }
 
 function runEslint(targetFile) {
@@ -780,10 +769,6 @@ withParams(params: RpcCallOptions): this\n`)
 
     await new Promise((resolve) => { outputMethods.end(resolve) })
     await new Promise((resolve) => { output.end(resolve) })
-
-    // format the resulting files with prettier and eslint
-    runPrettier(targetFile)
-    runPrettier(targetFileMethods)
 
     runEslint(targetFile)
     runEslint(targetFileMethods)

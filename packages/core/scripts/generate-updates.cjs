@@ -1,6 +1,5 @@
 const fs = require('fs')
 const path = require('path')
-const prettier = require('prettier')
 
 const snakeToCamel = (s) => {
     return s.replace(/(?<!^|_)(_[a-z0-9])/gi, ($1) => {
@@ -65,17 +64,6 @@ function replaceSections(filename, sections, dir = __dirname) {
 
 const types = parseUpdateTypes()
 
-async function formatFile(filename, dir = __dirname) {
-    const targetFile = path.join(dir, '../src/', filename)
-    const prettierConfig = await prettier.resolveConfig(targetFile)
-    let fullSource = await fs.promises.readFile(targetFile, 'utf-8')
-    fullSource = await prettier.format(fullSource, {
-        ...(prettierConfig || {}),
-        filepath: targetFile,
-    })
-    await fs.promises.writeFile(targetFile, fullSource)
-}
-
 function toSentence(type, stype = 'inline') {
     const name = camelToSnake(type.handlerTypeName).toLowerCase().replace(/_/g, ' ')
 
@@ -100,7 +88,7 @@ async function main() {
     generateParsedUpdate()
 }
 
-module.exports = { types, toSentence, replaceSections, formatFile }
+module.exports = { types, toSentence, replaceSections }
 
 if (require.main === module) {
     main().catch(console.error)

@@ -59,9 +59,6 @@ importers:
       eslint:
         specifier: 8.47.0
         version: 8.47.0
-      eslint-config-prettier:
-        specifier: 8.8.0
-        version: 8.8.0(eslint@8.47.0)
       eslint-import-resolver-typescript:
         specifier: 3.6.0
         version: 3.6.0(@typescript-eslint/parser@6.4.0(eslint@8.47.0)(typescript@5.4.3))(eslint-plugin-import@2.28.0)(eslint@8.47.0)
@@ -80,9 +77,6 @@ importers:
       playwright:
         specifier: 1.42.1
         version: 1.42.1
-      prettier:
-        specifier: 3.0.3
-        version: 3.0.3
       rimraf:
         specifier: 6.0.1
         version: 6.0.1
@@ -1801,12 +1795,6 @@ packages:
     resolution: {integrity: sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==}
     engines: {node: '>=12'}
 
-  eslint-config-prettier@8.8.0:
-    resolution: {integrity: sha512-wLbQiFre3tdGgpDv67NQKnJuTlcUVYHas3k+DZCc2U2BadthoEY4B7hLPvAxaqdyOGCzuLfii2fqGph10va7oA==}
-    hasBin: true
-    peerDependencies:
-      eslint: '>=7.0.0'
-
   eslint-import-resolver-node@0.3.7:
     resolution: {integrity: sha512-gozW2blMLJCeFpBwugLTGyvVjNoeo1knonXAcatC6bjPBZitotxdWf7Gimr25N4c0AAOo4eOUfaG82IJPDpqCA==}
 
@@ -2752,11 +2740,6 @@ packages:
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
-
-  prettier@3.0.3:
-    resolution: {integrity: sha512-L/4pUDMxcNa8R/EthV08Zt42WBO4h1rarVtK0K+QJG0X187OLo7l699jWw0GKuwzkPQ//jMFA/8Xm6Fh3J/DAg==}
-    engines: {node: '>=14'}
-    hasBin: true
 
   pretty-format@27.5.1:
     resolution: {integrity: sha512-Qb1gy5OrP5+zDf2Bvnzdl3jsTf1qXVMazbvCoKhtKqVs4/YK4ozX4gKQJJVyNe+cajNPn0KoC0MC3FUmaHWEmQ==}
@@ -4852,10 +4835,6 @@ snapshots:
 
   escape-string-regexp@5.0.0: {}
 
-  eslint-config-prettier@8.8.0(eslint@8.47.0):
-    dependencies:
-      eslint: 8.47.0
-
   eslint-import-resolver-node@0.3.7:
     dependencies:
       debug: 3.2.7
@@ -5933,8 +5912,6 @@ snapshots:
       tunnel-agent: 0.6.0
 
   prelude-ls@1.2.1: {}
-
-  prettier@3.0.3: {}
 
   pretty-format@27.5.1:
     dependencies:
