@@ -1,11 +1,11 @@
 /// <reference types="vitest" />
-import { defineConfig, mergeConfig } from 'vite'
+import { mergeConfig } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 import baseConfig from './vite.mjs'
 import { fixupCjs } from './vite-utils/fixup-cjs'
 
-export default mergeConfig(baseConfig, defineConfig({
+export default mergeConfig(baseConfig, {
     test: {
         browser: {
             enabled: true,
@@ -36,7 +36,12 @@ export default mergeConfig(baseConfig, defineConfig({
             },
         })
     ],
+    build: {
+        rollupOptions: {
+            external: ['bun:sqlite']
+        }
+    },
     define: {
         'import.meta.env.TEST_ENV': '"browser"'
     }
-}))
+})

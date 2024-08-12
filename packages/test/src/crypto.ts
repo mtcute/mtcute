@@ -53,7 +53,7 @@ export function useFakeMathRandom(source = DEFAULT_ENTROPY): void {
     const sourceBytes = getPlatform().hexDecode(source)
     const dv = dataViewFromBuffer(sourceBytes)
 
-    let spy: MockInstance<[], number>
+    let spy: MockInstance<() => number>
 
     beforeEach(() => {
         let offset = 0

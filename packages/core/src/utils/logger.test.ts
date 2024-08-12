@@ -10,7 +10,7 @@ describe('logger', () => {
         const mgr = new LogManager()
         mgr.level = LogManager.INFO
 
-        const spy = vi.fn<Parameters<typeof mgr.handler>>()
+        const spy = vi.fn<typeof mgr.handler>()
         mgr.handler = spy
 
         return [mgr, spy] as const
