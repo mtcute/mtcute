@@ -1,5 +1,6 @@
-import { ITelegramStorageProvider } from '../../highlevel/storage/provider.js'
-import { IMtStorageProvider } from '../provider.js'
+import type { ITelegramStorageProvider } from '../../highlevel/storage/provider.js'
+import type { IMtStorageProvider } from '../provider.js'
+
 import { BaseSqliteStorageDriver } from './driver.js'
 import { SqliteAuthKeysRepository } from './repository/auth-keys.js'
 import { SqliteKeyValueRepository } from './repository/kv.js'

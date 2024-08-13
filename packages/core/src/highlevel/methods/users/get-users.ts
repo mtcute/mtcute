@@ -1,8 +1,10 @@
-import { MaybeArray } from '../../../types/utils.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, User } from '../../types/index.js'
+import type { MaybeArray } from '../../../types/utils.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { User } from '../../types/index.js'
 import { toInputUser } from '../../utils/peer-utils.js'
 import { _getUsersBatched } from '../chats/batched-queries.js'
+
 import { resolveUser } from './resolve-peer.js'
 import { resolvePeerMany } from './resolve-peer-many.js'
 
@@ -25,7 +27,7 @@ export async function getUsers(client: ITelegramClient, ids: MaybeArray<InputPee
     const inputPeers = await resolvePeerMany(client, ids, toInputUser)
 
     // pooling will be done by the helper
-    const res = await Promise.all(inputPeers.map((peer) => _getUsersBatched(client, peer)))
+    const res = await Promise.all(inputPeers.map(peer => _getUsersBatched(client, peer)))
 
-    return res.map((it) => (it ? new User(it) : null))
+    return res.map(it => (it ? new User(it) : null))
 }

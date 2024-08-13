@@ -1,6 +1,8 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { isPresent } from '../type-assertions.js'
+import { assertNever } from '../../types/utils.js'
+
 import { deeplinkBuilder } from './common.js'
 
 /**
@@ -76,6 +78,9 @@ function normalizeBotAdmin(rights?: BotAdminRight[]): string | undefined {
                     return 'edit_stories'
                 case 'deleteStories':
                     return 'delete_stories'
+                default:
+                    assertNever(it)
+                    return ''
             }
         })
         .join('+')

@@ -1,5 +1,7 @@
 import { computeConstructorIdFromEntry } from '../ctor-id.js'
-import { TL_PRIMITIVES, TlEntry } from '../types.js'
+import type { TlEntry } from '../types.js'
+import { TL_PRIMITIVES } from '../types.js'
+
 import { snakeToCamel } from './utils.js'
 
 export interface ReaderCodegenOptions {
@@ -53,7 +55,7 @@ export function generateReaderCodeForTlEntry(entry: TlEntry, params = DEFAULT_OP
     const pre = `${entry.id}:function(r){`
 
     if (!entry.arguments.length) {
-        return pre + `return{_:'${entry.name}'}},`
+        return `${pre}return{_:'${entry.name}'}},`
     }
 
     let beforeReturn = ''
@@ -88,12 +90,12 @@ export function generateReaderCodeForTlEntry(entry: TlEntry, params = DEFAULT_OP
             const predicate = arg.typeModifiers.predicate
             const s = predicate.split('.')
             const fieldName = s[0]
-            const bitIndex = parseInt(s[1])
+            const bitIndex = Number.parseInt(s[1])
 
             if (!(fieldName in flagsFields)) {
                 throw new Error(`Invalid predicate: ${predicate} - unknown field (in ${entry.name})`)
             }
-            if (isNaN(bitIndex) || bitIndex < 0 || bitIndex > 32) {
+            if (Number.isNaN(bitIndex) || bitIndex < 0 || bitIndex > 32) {
                 throw new Error(`Invalid predicate: ${predicate} - invalid bit`)
             }
 
@@ -152,9 +154,9 @@ export function generateReaderCodeForTlEntry(entry: TlEntry, params = DEFAULT_OP
         }
 
         if (isBeforeLastFlag) {
-            beforeReturn += code + ';'
+            beforeReturn += `${code};`
         } else {
-            returnCode += code + ','
+            returnCode += `${code},`
         }
     })
 
@@ -174,7 +176,7 @@ export function generateReaderCodeForTlEntries(entries: TlEntry[], params = DEFA
     entries.forEach((entry) => {
         if (entry.kind === 'method' && !includeMethods) return
 
-        ret += generateReaderCodeForTlEntry(entry, params) + '\n'
+        ret += `${generateReaderCodeForTlEntry(entry, params)}\n`
     })
 
     const usedInBareVector: Record<string, 1> = {}
@@ -215,5 +217,5 @@ export function generateReaderCodeForTlEntries(entries: TlEntry[], params = DEFA
         ret += '},\n'
     }
 
-    return ret + '}'
+    return `${ret}}`
 }

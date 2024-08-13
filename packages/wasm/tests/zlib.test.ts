@@ -1,9 +1,10 @@
 import { inflateSync } from 'node:zlib'
-import { beforeAll, describe, expect, it } from 'vitest'
 
+import { beforeAll, describe, expect, it } from 'vitest'
 import { getPlatform } from '@mtcute/core/platform.js'
 
 import { __getWasm, deflateMaxSize } from '../src/index.js'
+
 import { initWasm } from './init.js'
 
 beforeAll(async () => {
@@ -28,7 +29,7 @@ describe('zlib deflate', () => {
         const res = deflateMaxSize(p.utf8Encode('hello world'), 100)
 
         expect(res).not.toBeNull()
-        expect(res!.slice(0, 2)).toEqual(new Uint8Array([0x78, 0x9c]))
+        expect(res!.slice(0, 2)).toEqual(new Uint8Array([0x78, 0x9C]))
     })
 
     it('should return null if compressed data is larger than size', () => {

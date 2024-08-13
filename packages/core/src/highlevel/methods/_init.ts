@@ -1,30 +1,31 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
+import type { PartialOnly } from '../../types/index.js'
+import { MtUnsupportedError } from '../../types/index.js'
+import type { BaseTelegramClientOptions } from '../base.js'
+import { BaseTelegramClient } from '../base.js'
+import type { TelegramClient } from '../client.js'
+import type { ITelegramClient } from '../client.types.js'
 // @copy
-import { MtUnsupportedError, PartialOnly } from '../../types/index.js'
-import { BaseTelegramClient, BaseTelegramClientOptions } from '../base.js'
-import { TelegramClient } from '../client.js'
-import { ITelegramClient } from '../client.types.js'
-// @copy
-import { ITelegramStorageProvider } from '../storage/provider.js'
+import type { ITelegramStorageProvider } from '../storage/provider.js'
 // @copy
 import { Conversation } from '../types/conversation.js'
 // @copy
-import { makeParsedUpdateHandler, ParsedUpdateHandlerParams } from '../updates/parsed.js'
+import type { ParsedUpdateHandlerParams } from '../updates/parsed.js'
+// @copy
+import { makeParsedUpdateHandler } from '../updates/parsed.js'
 
 // @copy
 type TelegramClientOptions = (
     | (PartialOnly<Omit<BaseTelegramClientOptions, 'storage'>, 'transport' | 'crypto'> & {
-          /**
-           * Storage to use for this client.
-           *
-           * If a string is passed, it will be used as
-           * a name for the default platform-specific storage provider to use.
-           *
-           * @default `"client.session"`
-           */
-          storage?: string | ITelegramStorageProvider
-      })
+        /**
+         * Storage to use for this client.
+         *
+         * If a string is passed, it will be used as
+         * a name for the default platform-specific storage provider to use.
+         *
+         * @default `"client.session"`
+         */
+        storage?: string | ITelegramStorageProvider
+    })
     | { client: ITelegramClient }
 ) & {
     /**

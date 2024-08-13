@@ -1,20 +1,20 @@
 {
-    "extends": "../../tsconfig.json",
-    "compilerOptions": {
-        "outDir": "./dist",
-        "rootDir": "./src",
-        "types": [
-            "bun-types",
-            "vite/client"
-        ]
-    },
-    "include": [
-        "./src",
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "types": [
+      "bun-types",
+      "vite/client"
     ],
-    "references": [
-        { "path": "../core" },
-        { "path": "../dispatcher" },
-        { "path": "../html-parser" },
-        { "path": "../markdown-parser" }
-    ]
+    "outDir": "./dist"
+  },
+  "references": [
+    { "path": "../core" },
+    { "path": "../dispatcher" },
+    { "path": "../html-parser" },
+    { "path": "../markdown-parser" }
+  ],
+  "include": [
+    "./src"
+  ]
 }

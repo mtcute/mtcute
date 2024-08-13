@@ -1,8 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
-import { ITelegramClient } from '../../client.types.js'
-import { FullChat, InputPeerLike } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { FullChat } from '../../types/index.js'
 import {
     INVITE_LINK_REGEX,
     isInputPeerChannel,
@@ -52,14 +53,16 @@ export async function getFullChat(client: ITelegramClient, chatId: InputPeerLike
     } else if (isInputPeerUser(peer)) {
         res = await client.call({
             _: 'users.getFullUser',
-            id: toInputUser(peer)!,
+            id: toInputUser(peer),
         })
     } else if (isInputPeerChat(peer)) {
         res = await client.call({
             _: 'messages.getFullChat',
             chatId: peer.chatId,
         })
-    } else throw new Error('should not happen')
+    } else {
+        throw new Error('should not happen')
+    }
 
     return FullChat._parse(res)
 }

@@ -6,32 +6,32 @@ export function setupChai(chai: any, vitestExpect: any) {
         utils.addMethod(
             chai.Assertion.prototype,
             'toMatchInlineSnapshot',
-            function (properties?: object, inlineSnapshot?: string, message?: string) {
+            function (properties?: object, inlineSnapshot?: string) {
                 // based on https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/integrations/snapshot/chai.ts
 
                 const received = utils.flag(this, 'object')
                 if (typeof properties === 'string') {
-                    message = inlineSnapshot
                     inlineSnapshot = properties
                     properties = undefined
                 }
 
                 if (typeof inlineSnapshot !== 'string') {
-                    throw new Error('toMatchInlineSnapshot requires a string argument')
+                    throw new TypeError('toMatchInlineSnapshot requires a string argument')
                 }
 
                 // todo use @vitest/snapshot
                 if (typeof received === 'string') {
-                    const snapshot = '"' + received + '"'
+                    const snapshot = `"${received}"`
                     return chai.expect(snapshot).eql(inlineSnapshot.trim())
                 } else {
-                    const obj = eval('(' + inlineSnapshot + ')') // idc lol
+                    // eslint-disable-next-line no-eval
+                    const obj = eval(`(${inlineSnapshot})`) // idc lol
                     return chai.expect(received).eql(obj)
                 }
             },
         )
 
-        utils.addMethod(chai.Assertion.prototype, 'toMatchSnapshot', function () {
+        utils.addMethod(chai.Assertion.prototype, 'toMatchSnapshot', () => {
             // todo use @vitest/snapshot
         })
     })
@@ -71,6 +71,7 @@ export function unstubAllGlobals() {
     stubbedGlobal.clear()
 }
 
+// eslint-disable-next-line ts/no-unsafe-function-type
 export async function waitFor(fn: Function) {
     // less customizations than vi.waitFor but it's good enough for now
     const timeout = Date.now() + 5000
@@ -81,7 +82,7 @@ export async function waitFor(fn: Function) {
             return await fn()
         } catch (e) {
             lastError = e
-            await new Promise((resolve) => setTimeout(resolve, 10))
+            await new Promise(resolve => setTimeout(resolve, 10))
         }
     }
 

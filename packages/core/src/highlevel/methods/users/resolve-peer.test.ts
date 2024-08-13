@@ -1,9 +1,9 @@
 import Long from 'long'
 import { describe, expect, it, vi } from 'vitest'
-
-import { createStub, StubTelegramClient } from '@mtcute/test'
+import { StubTelegramClient, createStub } from '@mtcute/test'
 
 import { Chat, MtPeerNotFoundError, User } from '../../types/index.js'
+
 import { resolvePeer } from './resolve-peer.js'
 
 describe('resolvePeer', () => {

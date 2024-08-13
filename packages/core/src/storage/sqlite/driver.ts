@@ -1,6 +1,7 @@
 import { getPlatform } from '../../platform.js'
 import { BaseStorageDriver } from '../driver.js'
-import { ISqliteDatabase, ISqliteStatement } from './types.js'
+
+import type { ISqliteDatabase, ISqliteStatement } from './types.js'
 
 const MIGRATIONS_TABLE_NAME = 'mtcute_migrations'
 const MIGRATIONS_TABLE_SQL = `
@@ -124,7 +125,7 @@ export abstract class BaseSqliteStorageDriver extends BaseStorageDriver {
 
     abstract _createDatabase(): ISqliteDatabase
 
-    _load(): void {
+    async _load(): Promise<void> {
         this.db = this._createDatabase()
 
         this._runMany = this.db.transaction((stmts: [ISqliteStatement, unknown[]][]) => {

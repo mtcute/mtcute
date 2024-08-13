@@ -5,7 +5,7 @@ import { deeplinkBuilder } from './common.js'
  *
  * Used to share a prepared message and URL into a chosen chat's text field.
  */
-export const share = deeplinkBuilder<{ url: string; text?: string }>({
+export const share = deeplinkBuilder<{ url: string, text?: string }>({
     internalBuild: ({ url, text }) => ['msg_url', { url, text }],
     internalParse: (path, query) => {
         if (path !== 'msg_url') return null
@@ -54,7 +54,7 @@ export const boost = deeplinkBuilder<{ username: string } | { channelId: number 
 
         const channelId = Number(query.get('channel'))
 
-        if (!isNaN(channelId)) {
+        if (!Number.isNaN(channelId)) {
             return { channelId: Number(channelId) }
         }
 
@@ -72,7 +72,7 @@ export const boost = deeplinkBuilder<{ username: string } | { channelId: number 
 
         if (path.startsWith('c/')) {
             const channelId = Number(path.slice(2))
-            if (isNaN(channelId)) return null
+            if (Number.isNaN(channelId)) return null
 
             return { channelId }
         }

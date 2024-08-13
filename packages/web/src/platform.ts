@@ -1,4 +1,4 @@
-import { ICorePlatform } from '@mtcute/core/platform.js'
+import type { ICorePlatform } from '@mtcute/core/platform.js'
 
 import { base64Decode, base64Encode } from './common-internals-web/base64.js'
 import { hexDecode, hexEncode } from './common-internals-web/hex.js'
@@ -19,9 +19,9 @@ export class WebPlatform implements ICorePlatform {
 
     getDefaultLogLevel(): number | null {
         if (typeof localStorage !== 'undefined') {
-            const localLogLevel = parseInt(localStorage.MTCUTE_LOG_LEVEL as string)
+            const localLogLevel = Number.parseInt(localStorage.MTCUTE_LOG_LEVEL as string)
 
-            if (!isNaN(localLogLevel)) {
+            if (!Number.isNaN(localLogLevel)) {
                 return localLogLevel
             }
         }

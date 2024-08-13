@@ -1,11 +1,11 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
-import { LongMap } from '../../../utils/long-utils.js'
+import type { LongMap } from '../../../utils/long-utils.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { parseSticker } from '../media/document-utils.js'
-import { Sticker } from '../media/sticker.js'
+import type { Sticker } from '../media/sticker.js'
 
 export class MessageEffect {
     constructor(

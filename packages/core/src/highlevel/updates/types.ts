@@ -1,8 +1,8 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { AsyncLock, ConditionVariable, Deque, EarlyTimer, Logger, SortedLinkedList } from '../../utils/index.js'
-import { CurrentUserInfo } from '../storage/service/current-user.js'
-import { PeersIndex } from '../types/peers/peers-index.js'
+import type { AsyncLock, ConditionVariable, Deque, EarlyTimer, Logger, SortedLinkedList } from '../../utils/index.js'
+import type { CurrentUserInfo } from '../storage/service/current-user.js'
+import type { PeersIndex } from '../types/peers/peers-index.js'
 
 /**
  * Function to be called for each update.

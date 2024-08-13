@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { describe, expect, it } from 'vitest'
 
 import { links } from './index.js'
 
-describe('Deep links', function () {
+describe('Deep links', () => {
     describe('Video chat links', () => {
         it('should generate t.me/username?videochat links', () => {
             expect(links.videoChat({ username: 'username' })).eq('https://t.me/username?videochat')

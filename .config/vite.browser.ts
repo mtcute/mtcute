@@ -14,7 +14,7 @@ export default mergeConfig(baseConfig, {
             slowHijackESM: false,
         },
         fakeTimers: {
-            toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date']
+            toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'],
         },
         retry: process.env.CI ? 3 : 0,
         isolate: false,
@@ -28,20 +28,20 @@ export default mergeConfig(baseConfig, {
     plugins: [
         fixupCjs(),
         nodePolyfills({
-            include: ['stream', 'path', 'zlib', 'util'],
+            include: ['stream', 'path', 'zlib', 'util', 'events'],
             globals: {
                 Buffer: false,
                 global: false,
                 process: false,
             },
-        })
+        }),
     ],
     build: {
         rollupOptions: {
-            external: ['bun:sqlite']
-        }
+            external: ['bun:sqlite'],
+        },
     },
     define: {
-        'import.meta.env.TEST_ENV': '"browser"'
-    }
+        'import.meta.env.TEST_ENV': '"browser"',
+    },
 })

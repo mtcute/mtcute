@@ -1,8 +1,9 @@
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 
-import { ITelegramTransport, TransportState } from '@mtcute/core'
-import { ICryptoProvider, Logger } from '@mtcute/core/utils.js'
-import { tl } from '@mtcute/tl'
+import type { ITelegramTransport } from '@mtcute/core'
+import { TransportState } from '@mtcute/core'
+import type { ICryptoProvider, Logger } from '@mtcute/core/utils.js'
+import type { tl } from '@mtcute/tl'
 
 export class StubTelegramTransport extends EventEmitter implements ITelegramTransport {
     constructor(
@@ -16,7 +17,7 @@ export class StubTelegramTransport extends EventEmitter implements ITelegramTran
         super()
 
         if (params.getMtproxyInfo) {
-            (this as ITelegramTransport).getMtproxyInfo = params.getMtproxyInfo
+            (this as unknown as ITelegramTransport).getMtproxyInfo = params.getMtproxyInfo
         }
     }
 
@@ -60,7 +61,6 @@ export class StubTelegramTransport extends EventEmitter implements ITelegramTran
         this.params.onClose?.()
     }
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     async send(data: Uint8Array): Promise<void> {
         this.params.onMessage?.(data)
     }

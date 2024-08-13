@@ -1,10 +1,10 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
-import { Audio } from '../media/audio.js'
+import type { Audio } from '../media/audio.js'
 import { Contact } from '../media/contact.js'
 import { Dice } from '../media/dice.js'
-import { Document } from '../media/document.js'
+import type { Document } from '../media/document.js'
 import { parseDocument } from '../media/document-utils.js'
 import { Game } from '../media/game.js'
 import { Invoice } from '../media/invoice.js'
@@ -12,34 +12,34 @@ import { LiveLocation, Location } from '../media/location.js'
 import { PaidMedia } from '../media/paid-media.js'
 import { Photo } from '../media/photo.js'
 import { Poll } from '../media/poll.js'
-import { Sticker } from '../media/sticker.js'
+import type { Sticker } from '../media/sticker.js'
 import { MediaStory } from '../media/story.js'
 import { Venue } from '../media/venue.js'
-import { Video } from '../media/video.js'
-import { Voice } from '../media/voice.js'
+import type { Video } from '../media/video.js'
+import type { Voice } from '../media/voice.js'
 import { WebPage } from '../media/web-page.js'
-import { PeersIndex } from '../peers/peers-index.js'
+import type { PeersIndex } from '../peers/peers-index.js'
 
 /** A media inside of a {@link Message} */
 export type MessageMedia =
-    | Photo
-    | Dice
-    | Contact
-    | Audio
-    | Voice
-    | Sticker
-    | Document
-    | Video
-    | Location
-    | LiveLocation
-    | Game
-    | WebPage
-    | Venue
-    | Poll
-    | Invoice
-    | MediaStory
-    | PaidMedia
-    | null
+  | Photo
+  | Dice
+  | Contact
+  | Audio
+  | Voice
+  | Sticker
+  | Document
+  | Video
+  | Location
+  | LiveLocation
+  | Game
+  | WebPage
+  | Venue
+  | Poll
+  | Invoice
+  | MediaStory
+  | PaidMedia
+  | null
 export type MessageMediaType = Exclude<MessageMedia, null>['type']
 
 // todo: successful_payment, connected_website
@@ -84,8 +84,8 @@ export function _messageMediaFromTl(peers: PeersIndex | null, m: tl.TypeMessageM
 
             return new Poll(m.poll, peers, m.results)
         case 'messageMediaInvoice': {
-            const extended =
-                m.extendedMedia?._ === 'messageExtendedMedia' ? _messageMediaFromTl(peers, m.extendedMedia.media) : null
+            const extended
+                = m.extendedMedia?._ === 'messageExtendedMedia' ? _messageMediaFromTl(peers, m.extendedMedia.media) : null
 
             return new Invoice(m, extended)
         }

@@ -1,10 +1,10 @@
 import Long from 'long'
-
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { ArrayPaginated, InputPeerLike, Message, PeersIndex, SearchFilters } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { ArrayPaginated, InputPeerLike } from '../../types/index.js'
+import { Message, PeersIndex, SearchFilters } from '../../types/index.js'
 import { makeArrayPaginated, normalizeDate } from '../../utils/misc-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -154,7 +154,7 @@ export async function searchMessages(
 
     const peers = PeersIndex.from(res)
 
-    const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(msg, peers))
+    const msgs = res.messages.filter(msg => msg._ !== 'messageEmpty').map(msg => new Message(msg, peers))
 
     const last = msgs[msgs.length - 1]
     const next = last ? last.id : undefined

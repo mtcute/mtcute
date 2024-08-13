@@ -1,5 +1,5 @@
-import { MaybePromise } from '../types/utils.js'
-import { Logger } from '../utils/logger.js'
+import type { MaybePromise } from '../types/utils.js'
+import type { Logger } from '../utils/logger.js'
 
 /**
  * Basic storage driver interface,
@@ -14,7 +14,7 @@ export interface IStorageDriver {
      * May be called more than once, handle this with care
      * (or use {@link BaseStorageDriver} that handles this for you)
      */
-    load?(): MaybePromise<void>
+    load?: () => MaybePromise<void>
     /**
      * Save session to some external storage.
      * Should be used to commit pending changes in the session.
@@ -24,20 +24,20 @@ export interface IStorageDriver {
      * It is safe to batch all changes and only commit them here,
      * unless stated otherwise in the method description
      */
-    save?(): MaybePromise<void>
+    save?: () => MaybePromise<void>
     /**
      * Cleanup session and release all used resources.
      *
      * May be called more than once, handle this with care
      * (or use {@link BaseStorageDriver} that handles this for you)
      */
-    destroy?(): MaybePromise<void>
+    destroy?: () => MaybePromise<void>
 
     /**
      * Setup the driver, passing the logger instance,
      * in case your driver needs it
      */
-    setup?(log: Logger): void
+    setup?: (log: Logger) => void
 }
 
 /**

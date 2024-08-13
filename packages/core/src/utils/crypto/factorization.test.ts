@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-
 import { defaultCryptoProvider } from '@mtcute/test'
 
 import { bigIntToBuffer, bufferToBigInt } from '../bigint-utils.js'
+
 import { factorizePQSync } from './factorization.js'
 
 describe('prime factorization', () => {

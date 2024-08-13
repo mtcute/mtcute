@@ -1,8 +1,7 @@
 import * as schema_ from '@mtcute/tl/api-schema.json' assert { type: 'json' }
+import type { TlEntry } from '@mtcute/tl-utils'
 
 const schema = ('default' in schema_ ? schema_.default : schema_) as { e: TlEntry[] }
-
-import type { TlEntry } from '@mtcute/tl-utils'
 
 let _cachedEntriesMap: Map<string, TlEntry> | null = null
 let _cachedUnionsMap: Map<string, TlEntry[]> | null = null

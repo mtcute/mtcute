@@ -1,5 +1,5 @@
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, Message } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike, Message } from '../../types/index.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
 import { resolveChannel } from '../users/resolve-peer.js'
 

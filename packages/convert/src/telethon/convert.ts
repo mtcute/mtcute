@@ -1,9 +1,11 @@
-import { BasicDcOption, readStringSession, StringSessionData } from '@mtcute/core/utils.js'
+import type { BasicDcOption, StringSessionData } from '@mtcute/core/utils.js'
+import { readStringSession } from '@mtcute/core/utils.js'
 
 import { isTestDc } from '../dcs.js'
+
 import { parseTelethonSession } from './parse.js'
 import { serializeTelethonSession } from './serialize.js'
-import { TelethonSession } from './types.js'
+import type { TelethonSession } from './types.js'
 
 export function convertFromTelethonSession(session: TelethonSession | string): StringSessionData {
     if (typeof session === 'string') {

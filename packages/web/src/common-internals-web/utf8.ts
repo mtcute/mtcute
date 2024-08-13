@@ -7,9 +7,9 @@ export function utf8ByteLength(str: string): number {
 
     for (let i = str.length - 1; i >= 0; i--) {
         const code = str.charCodeAt(i)
-        if (code > 0x7f && code <= 0x7ff) s++
-        else if (code > 0x7ff && code <= 0xffff) s += 2
-        if (code >= 0xdc00 && code <= 0xdfff) i-- //trail surrogate
+        if (code > 0x7F && code <= 0x7FF) s++
+        else if (code > 0x7FF && code <= 0xFFFF) s += 2
+        if (code >= 0xDC00 && code <= 0xDFFF) i-- // trail surrogate
     }
 
     return s

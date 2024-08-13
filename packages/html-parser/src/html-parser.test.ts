@@ -1,19 +1,15 @@
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
-
-import { MessageEntity, TextWithEntities, tl } from '@mtcute/core'
+import type { TextWithEntities, tl } from '@mtcute/core'
+import { MessageEntity } from '@mtcute/core'
 
 // prettier has "html" special-cased which breaks the formatting
 // this is not an issue when using normally, since we properly handle newlines/spaces,
 // but here we want to test everything as it is
-import { html as htm, HtmlUnparseOptions } from './index.js'
+import type { HtmlUnparseOptions } from './index.js'
+import { html as htm } from './index.js'
 
-const createEntity = <T extends tl.TypeMessageEntity['_']>(
-    type: T,
-    offset: number,
-    length: number,
-    additional?: Omit<tl.FindByName<tl.TypeMessageEntity, T>, '_' | 'offset' | 'length'>,
-): tl.TypeMessageEntity => {
+function createEntity<T extends tl.TypeMessageEntity['_']>(type: T, offset: number, length: number, additional?: Omit<tl.FindByName<tl.TypeMessageEntity, T>, '_' | 'offset' | 'length'>): tl.TypeMessageEntity {
     return {
         _: type,
         offset,
@@ -384,20 +380,20 @@ describe('HtmlMessageEntityParser', () => {
                 </i>
                 </pre>`,
                 [createEntity('messageEntityPre', 0, 203, { language: '' })],
-                '\n' +
-                    indent +
-                    'this  is  some  indented  text\n' +
-                    indent +
-                    'with    newlines     and\n' +
-                    indent +
-                    '\n' +
-                    indent +
-                    '    indented tags\n' +
-                    indent +
-                    ' yeah so cool\n' +
-                    indent +
-                    '\n' +
-                    indent,
+                `\n${
+                    indent
+                    }this  is  some  indented  text\n${
+                    indent
+                    }with    newlines     and\n${
+                    indent
+                    }\n${
+                    indent
+                    }    indented tags\n${
+                    indent
+                    } yeah so cool\n${
+                    indent
+                    }\n${
+                    indent}`,
             )
         })
 

@@ -1,10 +1,10 @@
 import Long from 'long'
 import { beforeAll, describe, expect, it } from 'vitest'
-
-import { createStub, StubTelegramClient } from '@mtcute/test'
+import { StubTelegramClient, createStub } from '@mtcute/test'
 
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { User } from '../../types/index.js'
+
 import { getUsers } from './get-users.js'
 
 describe('getUsers', () => {
@@ -17,8 +17,7 @@ describe('getUsers', () => {
             if (it.userId === 1) return { _: 'userEmpty', id: 1 }
 
             return createStub('user', { id: it.userId, accessHash: Long.ZERO })
-        }),
-    )
+        }))
 
     beforeAll(async () => {
         await client.registerPeers(

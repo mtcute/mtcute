@@ -2,13 +2,14 @@ import { Buffer } from 'node:buffer'
 import { createCipheriv, createHash, createHmac, pbkdf2 } from 'node:crypto'
 import { deflateSync, gunzipSync } from 'node:zlib'
 
-import { BaseCryptoProvider, IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
+import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
+import { BaseCryptoProvider } from '@mtcute/core/utils.js'
 import { getWasmUrl, ige256Decrypt, ige256Encrypt, initSync } from '@mtcute/wasm'
 
 // node:crypto is properly implemented in deno, so we can just use it
 // largely just copy-pasting from @mtcute/node
 
-const toUint8Array = (buf: Buffer | Uint8Array): Uint8Array => {
+function toUint8Array(buf: Buffer | Uint8Array): Uint8Array {
     if (!Buffer.isBuffer(buf)) return buf
 
     return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength)
@@ -16,8 +17,7 @@ const toUint8Array = (buf: Buffer | Uint8Array): Uint8Array => {
 
 export class DenoCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
     async initialize(): Promise<void> {
-        // eslint-disable-next-line no-restricted-globals
-        const wasm = await fetch(getWasmUrl()).then((res) => res.arrayBuffer())
+        const wasm = await fetch(getWasmUrl()).then(res => res.arrayBuffer())
         initSync(wasm)
     }
 
@@ -40,8 +40,7 @@ export class DenoCryptoProvider extends BaseCryptoProvider implements ICryptoPro
     ): Promise<Uint8Array> {
         return new Promise((resolve, reject) =>
             pbkdf2(password, salt, iterations, keylen, algo, (err: Error | null, buf: Uint8Array) =>
-                err !== null ? reject(err) : resolve(toUint8Array(buf)),
-            ),
+                err !== null ? reject(err) : resolve(toUint8Array(buf))),
         )
     }
 
@@ -77,7 +76,6 @@ export class DenoCryptoProvider extends BaseCryptoProvider implements ICryptoPro
                 }),
             )
             // hot path, avoid additional runtime checks
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
             if (e.code === 'ERR_BUFFER_TOO_LARGE') {
                 return null

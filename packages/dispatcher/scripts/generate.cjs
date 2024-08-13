@@ -8,9 +8,9 @@ function generateHandler() {
 
     types.forEach((type) => {
         lines.push(
-            `export type ${type.handlerTypeName}Handler<T = ${type.context}` +
-                `${type.state ? ', S = never' : ''}> = ParsedUpdateHandler<` +
-                `'${type.typeName}', T${type.state ? ', S' : ''}>`,
+            `export type ${type.handlerTypeName}Handler<T = ${type.context}`
+            + `${type.state ? ', S = never' : ''}> = ParsedUpdateHandler<`
+            + `'${type.typeName}', T${type.state ? ', S' : ''}>`,
         )
         names.push(`${type.handlerTypeName}Handler`)
     })
@@ -19,7 +19,7 @@ function generateHandler() {
         'handler.ts',
         {
             codegen:
-                lines.join('\n') + '\n\nexport type UpdateHandler = \n' + names.map((i) => `    | ${i}\n`).join(''),
+                `${lines.join('\n')}\n\nexport type UpdateHandler = \n${names.map(i => `    | ${i}\n`).join('')}`,
         },
         __dirname,
     )
@@ -44,8 +44,8 @@ function generateDispatcher() {
 }['callback'], group?: number): void
 
 ${
-    type.state ?
-        `
+    type.state
+        ? `
     /**
      * Register ${toSentence(type)} with a filter
      *
@@ -60,8 +60,8 @@ ${
 }, Mod>, State extends never ? never : UpdateState<State>>['callback'],
         group?: number
     ): void
-    ` :
-        ''
+    `
+        : ''
 }
 
     /**
@@ -89,14 +89,14 @@ ${
     replaceSections(
         'dispatcher.ts',
         {
-            codegen: lines.join('\n'),
+            'codegen': lines.join('\n'),
             'codegen-imports':
-                'import {\n' +
+                `import {\n${
                 imports
                     .sort()
-                    .map((i) => `    ${i},\n`)
-                    .join('') +
-                "} from './handler.js'",
+                    .map(i => `    ${i},\n`)
+                    .join('')
+                }} from './handler.js'`,
         },
         __dirname,
     )

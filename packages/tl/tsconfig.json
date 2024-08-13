@@ -1,13 +1,13 @@
 {
-    "extends": "../../tsconfig.json",
-    "include": [
-        "./index.d.ts",
-        "./errors.d.ts",
-        "./raw-schema.d.ts",
-        "./binary/reader.d.ts",
-        "./binary/writer.d.ts",
-        "./binary/rsa-keys.d.ts",
-        "./scripts",
-        "./tests/types.ts"
-    ]
+  "extends": "../../tsconfig.json",
+  "include": [
+    "./index.d.ts",
+    "./errors.d.ts",
+    "./raw-schema.d.ts",
+    "./binary/reader.d.ts",
+    "./binary/writer.d.ts",
+    "./binary/rsa-keys.d.ts",
+    "./scripts",
+    "./tests/types.ts"
+  ]
 }

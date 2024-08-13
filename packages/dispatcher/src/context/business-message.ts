@@ -1,13 +1,14 @@
-import { BusinessMessage, OmitInputMessageId, ParametersSkip1 } from '@mtcute/core'
-import { TelegramClient } from '@mtcute/core/client.js'
-import {
+import type { OmitInputMessageId, ParametersSkip1 } from '@mtcute/core'
+import { BusinessMessage } from '@mtcute/core'
+import type { TelegramClient } from '@mtcute/core/client.js'
+import type {
     DeleteMessagesParams,
     ForwardMessageOptions,
     SendCopyGroupParams,
     SendCopyParams,
 } from '@mtcute/core/methods.js'
 
-import { UpdateContext } from './base.js'
+import type { UpdateContext } from './base.js'
 
 /**
  * Context of a business message related update.
@@ -39,7 +40,7 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
         const msg = Array.isArray(message) ? message[message.length - 1] : message
         super(msg.update, msg._peers)
 
-        this.messages = Array.isArray(message) ? message.map((it) => new BusinessMessageContext(client, it)) : [this]
+        this.messages = Array.isArray(message) ? message.map(it => new BusinessMessageContext(client, it)) : [this]
         this.isMessageGroup = Array.isArray(message)
     }
 
@@ -121,7 +122,7 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     delete(params?: DeleteMessagesParams) {
         return this.client.deleteMessagesById(
             this.chat.inputPeer,
-            this.messages.map((it) => it.id),
+            this.messages.map(it => it.id),
             params,
         )
     }
@@ -156,7 +157,7 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     forwardTo(params: ForwardMessageOptions) {
         return this.client.forwardMessagesById({
             fromChatId: this.chat.inputPeer,
-            messages: this.messages.map((it) => it.id),
+            messages: this.messages.map(it => it.id),
             ...params,
         })
     }

@@ -1,6 +1,5 @@
 import { assertEquals, assertNotEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
-
-import { Message } from '@mtcute/core'
+import type { Message } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
 
 import { getApiParams, waitFor } from '../utils.ts'
@@ -18,7 +17,7 @@ Deno.test('4. handling updates', { sanitizeResources: false }, async (t) => {
     await t.step('should send and receive messages', async () => {
         const tg1Messages: Message[] = []
 
-        tg1.on('new_message', (msg) => tg1Messages.push(msg))
+        tg1.on('new_message', msg => tg1Messages.push(msg))
 
         const [tg1User] = await tg1.getUsers('self')
         let username = tg1User!.username
@@ -36,7 +35,7 @@ Deno.test('4. handling updates', { sanitizeResources: false }, async (t) => {
 
         await waitFor(() => {
             assertNotEquals(
-                tg1Messages.find((msg) => msg.text === messageText),
+                tg1Messages.find(msg => msg.text === messageText),
                 undefined,
             )
         })

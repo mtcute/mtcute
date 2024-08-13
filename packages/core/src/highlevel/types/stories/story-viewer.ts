@@ -1,11 +1,14 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Message } from '../messages/index.js'
-import { parsePeer, Peer, PeersIndex, User } from '../peers/index.js'
-import { ReactionEmoji, toReactionEmoji } from '../reactions/index.js'
+import type { Peer } from '../peers/index.js'
+import { PeersIndex, User, parsePeer } from '../peers/index.js'
+import type { ReactionEmoji } from '../reactions/index.js'
+import { toReactionEmoji } from '../reactions/index.js'
+
 import { Story } from './story.js'
 
 /**

@@ -1,7 +1,8 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../../types/errors.js'
-import { PeersIndex } from '../types/peers/peers-index.js'
+import type { PeersIndex } from '../types/peers/peers-index.js'
+
 import type { PendingUpdate } from './types.js'
 
 export function messageToUpdate(message: tl.TypeMessage): tl.TypeUpdate {
@@ -31,11 +32,11 @@ export function extractChannelIdFromUpdate(upd: tl.TypeUpdate): number | undefin
     if ('channelId' in upd) {
         res = upd.channelId
     } else if (
-        'message' in upd &&
-        typeof upd.message !== 'string' &&
-        'peerId' in upd.message &&
-        upd.message.peerId &&
-        'channelId' in upd.message.peerId
+        'message' in upd
+        && typeof upd.message !== 'string'
+        && 'peerId' in upd.message
+        && upd.message.peerId
+        && 'channelId' in upd.message.peerId
     ) {
         res = upd.message.peerId.channelId
     }
@@ -48,7 +49,7 @@ export function extractChannelIdFromUpdate(upd: tl.TypeUpdate): number | undefin
 export function toPendingUpdate(upd: tl.TypeUpdate, peers: PeersIndex, fromDifference = false): PendingUpdate {
     const channelId = extractChannelIdFromUpdate(upd) || 0
     const pts = 'pts' in upd ? upd.pts : undefined
-    // eslint-disable-next-line no-nested-ternary
+
     const ptsCount = 'ptsCount' in upd ? upd.ptsCount : pts ? 0 : undefined
     const qts = 'qts' in upd ? upd.qts : undefined
 

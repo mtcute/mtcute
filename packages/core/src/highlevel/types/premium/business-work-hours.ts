@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/inspectable.js'
@@ -174,10 +174,10 @@ export class BusinessWorkHours {
             const interval = day.intervals[0]
 
             if (
-                interval.startHour === 0 &&
-                interval.startMinute === 0 &&
-                ((interval.endHour === 24 && interval.endMinute === 0) ||
-                    (interval.endHour === 23 && interval.endMinute === 59))
+                interval.startHour === 0
+                && interval.startMinute === 0
+                && ((interval.endHour === 24 && interval.endMinute === 0)
+                || (interval.endHour === 23 && interval.endMinute === 59))
             ) {
                 (day as tl.Mutable<BusinessWorkHoursDay>).is24h = true
             }

@@ -1,4 +1,4 @@
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 
 /**
  * Send a code to email needed to recover your password
@@ -10,5 +10,5 @@ export function sendRecoveryCode(client: ITelegramClient): Promise<string> {
         .call({
             _: 'auth.requestPasswordRecovery',
         })
-        .then((res) => res.emailPattern)
+        .then(res => res.emailPattern)
 }

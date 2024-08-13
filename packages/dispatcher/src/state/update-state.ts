@@ -1,10 +1,9 @@
-/* eslint-disable dot-notation */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MtArgumentError, MtcuteError } from '@mtcute/core'
 import { sleep } from '@mtcute/core/utils.js'
 
 import type { Dispatcher } from '../dispatcher.js'
-import { StateService } from './service.js'
+
+import type { StateService } from './service.js'
 
 /**
  * Error thrown by `.rateLimit()`
@@ -59,9 +58,10 @@ export class UpdateState<State extends object> {
     }
 
     private _updateLocalKey(): void {
-        if (!this._scoped) this._localKey = this._localKeyBase
-        else {
-            this._localKey = this._scene ? this._scene + '_' + this._localKeyBase : this._localKeyBase
+        if (!this._scoped) {
+            this._localKey = this._localKeyBase
+        } else {
+            this._localKey = this._scene ? `${this._scene}_${this._localKeyBase}` : this._localKeyBase
         }
     }
 

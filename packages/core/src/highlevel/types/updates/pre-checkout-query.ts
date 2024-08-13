@@ -1,8 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { PeersIndex, User } from '../peers/index.js'
+import type { PeersIndex } from '../peers/index.js'
+import { User } from '../peers/index.js'
 
 export class PreCheckoutQuery {
     constructor(

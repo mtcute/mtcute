@@ -9,8 +9,8 @@ import { getRandomInt } from './misc-utils.js'
  * @param unsigned  Whether the number should be unsigned
  */
 export function randomLong(unsigned = false): Long {
-    const lo = getRandomInt(0xffffffff)
-    const hi = getRandomInt(0xffffffff)
+    const lo = getRandomInt(0xFFFFFFFF)
+    const hi = getRandomInt(0xFFFFFFFF)
 
     return new Long(lo, hi, unsigned)
 }
@@ -94,11 +94,11 @@ export function longFromFastString(val: string, unsigned = false): Long {
     const parts = val.split('|')
 
     if (parts.length !== 2) throw new Error(`Invalid long fast string: ${val}`)
-    const low = parseInt(parts[0])
-    const high = parseInt(parts[1])
+    const low = Number.parseInt(parts[0])
+    const high = Number.parseInt(parts[1])
 
-    if (isNaN(low) || isNaN(high)) {
-        throw new Error(`Invalid long fast string: ${val}`)
+    if (Number.isNaN(low) || Number.isNaN(high)) {
+        throw new TypeError(`Invalid long fast string: ${val}`)
     }
 
     return new Long(low, high, unsigned)

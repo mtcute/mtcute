@@ -1,8 +1,8 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { LongMap } from '../../../utils/long-utils.js'
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { MessageEffect } from '../../types/index.js'
 
 // @available=user
@@ -24,5 +24,5 @@ export async function getAvailableMessageEffects(client: ITelegramClient): Promi
         documentsMap.set(doc.id, doc)
     }
 
-    return res.effects.map((effect) => new MessageEffect(effect, documentsMap))
+    return res.effects.map(effect => new MessageEffect(effect, documentsMap))
 }

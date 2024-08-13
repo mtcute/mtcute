@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { execSync } from 'child_process'
+import { execSync } from 'node:child_process'
 
 function getDockerContainerIp(name) {
     const containerId = execSync(`docker compose ps -q ${name}`).toString().trim()
@@ -51,7 +51,7 @@ const resp = await fetch(`${API_URL}api/scopes`, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
-        Cookie: 'token=token',
+        'Cookie': 'token=token',
     },
     body: JSON.stringify({ scope: 'mtcute' }),
 })

@@ -1,11 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
-
 import { defaultTestCryptoProvider, u8HexDecode } from '@mtcute/test'
 
 import { getPlatform } from '../../platform.js'
 import { LogManager } from '../../utils/index.js'
+
 import { IntermediatePacketCodec } from './intermediate.js'
-import { MtProxyInfo, ObfuscatedPacketCodec } from './obfuscated.js'
+import type { MtProxyInfo } from './obfuscated.js'
+import { ObfuscatedPacketCodec } from './obfuscated.js'
 
 const p = getPlatform()
 
@@ -26,7 +27,7 @@ describe('ObfuscatedPacketCodec', () => {
             const tag = await codec.tag()
 
             expect(p.hexEncode(tag)).toEqual(
-                'ff'.repeat(56) + 'fce8ab2203db2bff', // encrypted part
+                `${'ff'.repeat(56)}fce8ab2203db2bff`, // encrypted part
             )
         })
 
@@ -44,7 +45,7 @@ describe('ObfuscatedPacketCodec', () => {
                 const tag = await codec.tag()
 
                 expect(p.hexEncode(tag)).toEqual(
-                    'ff'.repeat(56) + 'ecec4cbda8bb188b', // encrypted part with dcId = 1
+                    `${'ff'.repeat(56)}ecec4cbda8bb188b`, // encrypted part with dcId = 1
                 )
             })
 
@@ -61,7 +62,7 @@ describe('ObfuscatedPacketCodec', () => {
                 const tag = await codec.tag()
 
                 expect(p.hexEncode(tag)).toEqual(
-                    'ff'.repeat(56) + 'ecec4cbdb89c188b', // encrypted part with dcId = 10001
+                    `${'ff'.repeat(56)}ecec4cbdb89c188b`, // encrypted part with dcId = 10001
                 )
             })
 
@@ -78,7 +79,7 @@ describe('ObfuscatedPacketCodec', () => {
                 const tag = await codec.tag()
 
                 expect(p.hexEncode(tag)).toEqual(
-                    'ff'.repeat(56) + 'ecec4cbd5644188b', // encrypted part with dcId = -1
+                    `${'ff'.repeat(56)}ecec4cbd5644188b`, // encrypted part with dcId = -1
                 )
             })
         })

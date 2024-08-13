@@ -1,8 +1,10 @@
 import { gzipSync, inflateSync } from 'node:zlib'
-import { afterEach, beforeAll, beforeEach, describe, expect, it, MockInstance, vi } from 'vitest'
 
+import type { MockInstance } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getPlatform } from '@mtcute/core/platform.js'
-import { dataViewFromBuffer, ICryptoProvider } from '@mtcute/core/utils.js'
+import type { ICryptoProvider } from '@mtcute/core/utils.js'
+import { dataViewFromBuffer } from '@mtcute/core/utils.js'
 
 import { defaultCryptoProvider } from './platform.js'
 
@@ -43,7 +45,7 @@ export function withFakeRandom(provider: ICryptoProvider, source = DEFAULT_ENTRO
         get(target, prop, receiver) {
             if (prop === 'randomFill') return getRandomValues
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            // eslint-disable-next-line ts/no-unsafe-return
             return Reflect.get(target, prop, receiver)
         },
     })
@@ -59,7 +61,7 @@ export function useFakeMathRandom(source = DEFAULT_ENTROPY): void {
         let offset = 0
 
         spy = vi.spyOn(globalThis.Math, 'random').mockImplementation(() => {
-            const ret = dv.getUint32(offset, true) / 0xffffffff
+            const ret = dv.getUint32(offset, true) / 0xFFFFFFFF
             offset += 4
 
             return ret

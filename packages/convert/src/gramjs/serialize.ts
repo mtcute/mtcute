@@ -2,7 +2,7 @@ import { MtArgumentError } from '@mtcute/core'
 import { getPlatform } from '@mtcute/core/platform.js'
 import { dataViewFromBuffer } from '@mtcute/core/utils.js'
 
-import { TelethonSession } from '../telethon/types.js'
+import type { TelethonSession } from '../telethon/types.js'
 
 export function serializeGramjsSession(session: TelethonSession) {
     if (session.authKey.length !== 256) {
@@ -24,5 +24,5 @@ export function serializeGramjsSession(session: TelethonSession) {
     pos += 2
     u8.set(session.authKey, pos)
 
-    return '1' + getPlatform().base64Encode(u8)
+    return `1${getPlatform().base64Encode(u8)}`
 }

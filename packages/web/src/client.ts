@@ -1,9 +1,11 @@
-import { ITelegramStorageProvider, PartialOnly } from '@mtcute/core'
+import type { ITelegramStorageProvider, PartialOnly } from '@mtcute/core'
+import type {
+    BaseTelegramClientOptions as BaseTelegramClientOptionsBase,
+    TelegramClientOptions,
+} from '@mtcute/core/client.js'
 import {
     BaseTelegramClient as BaseTelegramClientBase,
-    BaseTelegramClientOptions as BaseTelegramClientOptionsBase,
     TelegramClient as TelegramClientBase,
-    TelegramClientOptions,
 } from '@mtcute/core/client.js'
 import { setPlatform } from '@mtcute/core/platform.js'
 
@@ -44,9 +46,9 @@ export class BaseTelegramClient extends BaseTelegramClientBase {
             transport: () => new WebSocketTransport(),
             ...opts,
             storage:
-                typeof opts.storage === 'string' ?
-                    new IdbStorage(opts.storage) :
-                    opts.storage ?? new IdbStorage('client.session'),
+                typeof opts.storage === 'string'
+                    ? new IdbStorage(opts.storage)
+                    : opts.storage ?? new IdbStorage('client.session'),
         })
     }
 }

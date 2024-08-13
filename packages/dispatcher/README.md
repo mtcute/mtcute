@@ -1,6 +1,6 @@
 # @mtcute/dispatcher
 
-📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_dispatcher.html)  
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_dispatcher.html)
 🧐 [Guide](https://mtcute.dev/guide/dispatcher/intro.html)
 
 Dispatcher and bot framework based on @mtcute/core.

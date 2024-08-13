@@ -1,10 +1,11 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
-import { ITelegramClient } from '../../client.types.js'
-import { Message } from '../../types/messages/message.js'
-import { TextWithEntities } from '../../types/misc/entities.js'
-import { InputPeerLike } from '../../types/peers/peer.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { Message } from '../../types/messages/message.js'
+import type { TextWithEntities } from '../../types/misc/entities.js'
+import type { InputPeerLike } from '../../types/peers/peer.js'
+
 import { sendMedia } from './send-media.js'
 import { sendMediaGroup } from './send-media-group.js'
 import { sendText } from './send-text.js'

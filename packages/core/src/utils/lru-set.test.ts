@@ -9,7 +9,7 @@ describe('LruSet', () => {
             const set = new LruSet(2)
 
             set.add('first')
-            expect(set.has('first')).true
+            expect(set.has('first')).toEqual(true)
         })
 
         it('when =capacity items are added, they are all in the set', () => {
@@ -18,8 +18,8 @@ describe('LruSet', () => {
             set.add('first')
             set.add('second')
 
-            expect(set.has('first')).true
-            expect(set.has('second')).true
+            expect(set.has('first')).toEqual(true)
+            expect(set.has('second')).toEqual(true)
         })
 
         it('when >capacity items are added, only the last <capacity> are in the set', () => {
@@ -29,9 +29,9 @@ describe('LruSet', () => {
             set.add('second')
             set.add('third')
 
-            expect(set.has('first')).false
-            expect(set.has('second')).true
-            expect(set.has('third')).true
+            expect(set.has('first')).toEqual(false)
+            expect(set.has('second')).toEqual(true)
+            expect(set.has('third')).toEqual(true)
         })
 
         it('when the same added is while not eliminated, it is ignored', () => {
@@ -42,9 +42,9 @@ describe('LruSet', () => {
             set.add('first')
             set.add('third')
 
-            expect(set.has('first')).false
-            expect(set.has('second')).true
-            expect(set.has('third')).true
+            expect(set.has('first')).toEqual(false)
+            expect(set.has('second')).toEqual(true)
+            expect(set.has('third')).toEqual(true)
         })
     })
 
@@ -53,7 +53,7 @@ describe('LruSet', () => {
             const set = new LruSet(2, true)
 
             set.add(Long.fromNumber(1))
-            expect(set.has(Long.fromNumber(1))).true
+            expect(set.has(Long.fromNumber(1))).toEqual(true)
         })
 
         it('when =capacity items are added, they are all in the set', () => {
@@ -62,8 +62,8 @@ describe('LruSet', () => {
             set.add(Long.fromNumber(1))
             set.add(Long.fromNumber(2))
 
-            expect(set.has(Long.fromNumber(1))).true
-            expect(set.has(Long.fromNumber(2))).true
+            expect(set.has(Long.fromNumber(1))).toEqual(true)
+            expect(set.has(Long.fromNumber(2))).toEqual(true)
         })
 
         it('when >capacity items are added, only the last <capacity> are in the set', () => {
@@ -73,9 +73,9 @@ describe('LruSet', () => {
             set.add(Long.fromNumber(2))
             set.add(Long.fromNumber(3))
 
-            expect(set.has(Long.fromNumber(1))).false
-            expect(set.has(Long.fromNumber(2))).true
-            expect(set.has(Long.fromNumber(3))).true
+            expect(set.has(Long.fromNumber(1))).toEqual(false)
+            expect(set.has(Long.fromNumber(2))).toEqual(true)
+            expect(set.has(Long.fromNumber(3))).toEqual(true)
         })
 
         it('when the same added is while not eliminated, it is ignored', () => {
@@ -86,9 +86,9 @@ describe('LruSet', () => {
             set.add(Long.fromNumber(1))
             set.add(Long.fromNumber(3))
 
-            expect(set.has(Long.fromNumber(1))).false
-            expect(set.has(Long.fromNumber(2))).true
-            expect(set.has(Long.fromNumber(3))).true
+            expect(set.has(Long.fromNumber(1))).toEqual(false)
+            expect(set.has(Long.fromNumber(2))).toEqual(true)
+            expect(set.has(Long.fromNumber(3))).toEqual(true)
         })
     })
 })

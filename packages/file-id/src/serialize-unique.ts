@@ -1,12 +1,13 @@
-import { ITlPlatform, TlBinaryWriter } from '@mtcute/tl-runtime'
+import type { ITlPlatform } from '@mtcute/tl-runtime'
+import { TlBinaryWriter } from '@mtcute/tl-runtime'
 
 import { tdFileId as td } from './types.js'
 import { assertNever, telegramRleEncode } from './utils.js'
 
 export type InputUniqueLocation =
-    | Pick<td.RawWebRemoteFileLocation, '_' | 'url'>
-    | Pick<td.RawPhotoRemoteFileLocation, '_' | 'id' | 'source'>
-    | Pick<td.RawCommonRemoteFileLocation, '_' | 'id'>
+  | Pick<td.RawWebRemoteFileLocation, '_' | 'url'>
+  | Pick<td.RawPhotoRemoteFileLocation, '_' | 'id' | 'source'>
+  | Pick<td.RawCommonRemoteFileLocation, '_' | 'id'>
 
 /**
  * Serialize an object with information about file

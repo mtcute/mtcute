@@ -1,5 +1,6 @@
-import * as colors from 'colorette'
 import process from 'node:process'
+
+import * as colors from 'colorette'
 
 export function getPackageManagerVersion(): [string, string] | null {
     if (typeof Deno !== 'undefined') {
@@ -56,7 +57,7 @@ export function getPackageManager(): PackageManager {
     }
 }
 
-export function getInstallCommand(params: { mgr: PackageManager; packages: string[]; dev?: boolean }): string[] {
+export function getInstallCommand(params: { mgr: PackageManager, packages: string[], dev?: boolean }): string[] {
     const { mgr, packages, dev } = params
 
     const exec: string[] = [mgr]

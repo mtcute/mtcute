@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 /**
  * Reply keyboard markup
@@ -39,8 +39,8 @@ export interface InlineKeyboardMarkup {
 }
 
 export type ReplyMarkup =
-    | ReplyKeyboardMarkup
-    | ReplyKeyboardHide
-    | ReplyKeyboardForceReply
-    | InlineKeyboardMarkup
-    | tl.TypeReplyMarkup
+  | ReplyKeyboardMarkup
+  | ReplyKeyboardHide
+  | ReplyKeyboardForceReply
+  | InlineKeyboardMarkup
+  | tl.TypeReplyMarkup

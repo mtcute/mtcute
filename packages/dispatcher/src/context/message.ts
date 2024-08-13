@@ -1,8 +1,9 @@
-import { Message, MtPeerNotFoundError, OmitInputMessageId, ParametersSkip1, Peer } from '@mtcute/core'
-import { TelegramClient } from '@mtcute/core/client.js'
-import { DeleteMessagesParams, ForwardMessageOptions, SendCopyGroupParams, SendCopyParams } from '@mtcute/core/methods.js'
+import type { OmitInputMessageId, ParametersSkip1, Peer } from '@mtcute/core'
+import { Message, MtPeerNotFoundError } from '@mtcute/core'
+import type { TelegramClient } from '@mtcute/core/client.js'
+import type { DeleteMessagesParams, ForwardMessageOptions, SendCopyGroupParams, SendCopyParams } from '@mtcute/core/methods.js'
 
-import { UpdateContext } from './base.js'
+import type { UpdateContext } from './base.js'
 
 /**
  * Context of a message-related update.
@@ -34,7 +35,7 @@ export class MessageContext extends Message implements UpdateContext<Message> {
         const msg = Array.isArray(message) ? message[message.length - 1] : message
         super(msg.raw, msg._peers, msg.isScheduled)
 
-        this.messages = Array.isArray(message) ? message.map((it) => new MessageContext(client, it)) : [this]
+        this.messages = Array.isArray(message) ? message.map(it => new MessageContext(client, it)) : [this]
         this.isMessageGroup = Array.isArray(message)
     }
 
@@ -140,7 +141,7 @@ export class MessageContext extends Message implements UpdateContext<Message> {
     delete(params?: DeleteMessagesParams) {
         return this.client.deleteMessagesById(
             this.chat.inputPeer,
-            this.messages.map((it) => it.id),
+            this.messages.map(it => it.id),
             params,
         )
     }
@@ -175,7 +176,7 @@ export class MessageContext extends Message implements UpdateContext<Message> {
     forwardTo(params: ForwardMessageOptions) {
         return this.client.forwardMessagesById({
             fromChatId: this.chat.inputPeer,
-            messages: this.messages.map((it) => it.id),
+            messages: this.messages.map(it => it.id),
             ...params,
         })
     }

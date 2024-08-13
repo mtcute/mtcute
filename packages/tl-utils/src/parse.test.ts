@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { parseTlToEntries } from './parse.js'
-import { TlEntry } from './types.js'
+import type { TlEntry } from './types.js'
 
 describe('tl parser', () => {
     const test = (tl: string, expected: TlEntry[], params?: Parameters<typeof parseTlToEntries>[1]) => {
@@ -40,7 +40,7 @@ boolTrue#997275b5 = Bool;
             {
                 kind: 'class',
                 name: 'inputUserSelf',
-                id: 0xf7c1b13f,
+                id: 0xF7C1B13F,
                 type: 'InputUser',
                 arguments: [],
             },
@@ -52,7 +52,7 @@ boolTrue#997275b5 = Bool;
             {
                 kind: 'class',
                 name: 'inputUser',
-                id: 0xf21158c6,
+                id: 0xF21158C6,
                 type: 'InputUser',
                 arguments: [
                     {
@@ -73,7 +73,7 @@ boolTrue#997275b5 = Bool;
             {
                 kind: 'class',
                 name: 'msg_resend_req',
-                id: 0x7d861a08,
+                id: 0x7D861A08,
                 type: 'MsgResendReq',
                 arguments: [
                     {
@@ -94,7 +94,7 @@ boolTrue#997275b5 = Bool;
             {
                 kind: 'class',
                 name: 'future_salts',
-                id: 0xae500895,
+                id: 0xAE500895,
                 type: 'FutureSalts',
                 arguments: [
                     {
@@ -119,20 +119,20 @@ boolTrue#997275b5 = Bool;
 
     it('parses bare unions', () => {
         test(
-            'message#0949d9dc = Message;\n' + // stub so we can reference it
-                'msg_container#73f1f8dc messages:vector<%Message> = MessageContainer;',
+            'message#0949d9dc = Message;\n' // stub so we can reference it
+            + 'msg_container#73f1f8dc messages:vector<%Message> = MessageContainer;',
             [
                 {
                     kind: 'class',
                     name: 'message',
-                    id: 0x0949d9dc,
+                    id: 0x0949D9DC,
                     type: 'Message',
                     arguments: [],
                 },
                 {
                     kind: 'class',
                     name: 'msg_container',
-                    id: 0x73f1f8dc,
+                    id: 0x73F1F8DC,
                     type: 'MessageContainer',
                     arguments: [
                         {
@@ -141,7 +141,7 @@ boolTrue#997275b5 = Bool;
                             typeModifiers: {
                                 isBareVector: true,
                                 isBareUnion: true,
-                                constructorId: 0x0949d9dc,
+                                constructorId: 0x0949D9DC,
                             },
                         },
                     ],
@@ -152,20 +152,20 @@ boolTrue#997275b5 = Bool;
 
     it('parses bare types', () => {
         test(
-            'future_salt#0949d9dc = FutureSalt;\n' + // stub so we can reference it
-                'future_salts#ae500895 req_msg_id:long now:int salts:vector<future_salt> = FutureSalts;',
+            'future_salt#0949d9dc = FutureSalt;\n' // stub so we can reference it
+            + 'future_salts#ae500895 req_msg_id:long now:int salts:vector<future_salt> = FutureSalts;',
             [
                 {
                     kind: 'class',
                     name: 'future_salt',
-                    id: 0x0949d9dc,
+                    id: 0x0949D9DC,
                     type: 'FutureSalt',
                     arguments: [],
                 },
                 {
                     kind: 'class',
                     name: 'future_salts',
-                    id: 0xae500895,
+                    id: 0xAE500895,
                     type: 'FutureSalts',
                     arguments: [
                         {
@@ -182,7 +182,7 @@ boolTrue#997275b5 = Bool;
                             typeModifiers: {
                                 isBareVector: true,
                                 isBareType: true,
-                                constructorId: 0x0949d9dc,
+                                constructorId: 0x0949D9DC,
                             },
                         },
                     ],
@@ -196,7 +196,7 @@ boolTrue#997275b5 = Bool;
             {
                 kind: 'method',
                 name: 'auth.exportAuthorization',
-                id: 0xe5bfffcd,
+                id: 0xE5BFFFCD,
                 type: 'auth.ExportedAuthorization',
                 arguments: [
                     {
@@ -213,14 +213,14 @@ boolTrue#997275b5 = Bool;
             {
                 kind: 'class',
                 name: 'jsonNull',
-                id: 0x3f6d7b68,
+                id: 0x3F6D7B68,
                 type: 'JSONValue',
                 arguments: [],
             },
             {
                 kind: 'class',
                 name: 'jsonBool',
-                id: 0xc7345e6a,
+                id: 0xC7345E6A,
                 type: 'JSONValue',
                 arguments: [
                     {
@@ -237,7 +237,7 @@ boolTrue#997275b5 = Bool;
             {
                 kind: 'method',
                 name: 'invokeWithLayer',
-                id: 0xda9b0d0d,
+                id: 0xDA9B0D0D,
                 type: 'X',
                 generics: [
                     {
@@ -266,7 +266,7 @@ boolTrue#997275b5 = Bool;
                 {
                     kind: 'class',
                     name: 'help.promoData',
-                    id: 0x8c39793f,
+                    id: 0x8C39793F,
                     type: 'help.PromoData',
                     arguments: [
                         {
@@ -317,10 +317,10 @@ account.getAccountTTL = AccountDaysTTL;
 users.getUsers id:Vector<InputUser> = Vector<User>;
 `,
         )
-        expect(items[0].id).toEqual(0xda9b0d0d)
-        expect(items[1].id).toEqual(0x8c39793f)
-        expect(items[2].id).toEqual(0x8fc711d)
-        expect(items[3].id).toEqual(0xd91a548)
+        expect(items[0].id).toEqual(0xDA9B0D0D)
+        expect(items[1].id).toEqual(0x8C39793F)
+        expect(items[2].id).toEqual(0x8FC711D)
+        expect(items[3].id).toEqual(0xD91A548)
     })
 
     it('parses preceding comments', () => {
@@ -328,7 +328,7 @@ users.getUsers id:Vector<InputUser> = Vector<User>;
             {
                 kind: 'class',
                 name: 'inputUserSelf',
-                id: 0xf7c1b13f,
+                id: 0xF7C1B13F,
                 type: 'InputUser',
                 arguments: [],
                 comment: 'Self input user',
@@ -339,7 +339,7 @@ users.getUsers id:Vector<InputUser> = Vector<User>;
             {
                 kind: 'class',
                 name: 'inputUserSelf',
-                id: 0xf7c1b13f,
+                id: 0xF7C1B13F,
                 type: 'InputUser',
                 arguments: [],
                 comment: 'Self input user yes',
@@ -352,7 +352,7 @@ users.getUsers id:Vector<InputUser> = Vector<User>;
             {
                 kind: 'class',
                 name: 'inputUserSelf',
-                id: 0xf7c1b13f,
+                id: 0xF7C1B13F,
                 type: 'InputUser',
                 arguments: [],
             },
@@ -361,18 +361,18 @@ users.getUsers id:Vector<InputUser> = Vector<User>;
 
     it('parses tdlib-style comments', () => {
         test(
-            '//@description A file defined by its remote ID. The remote ID is guaranteed to be usable ' +
-                'only if the corresponding file is still accessible to the user and known to TDLib.\n' +
-                '//-For example, if the file is from a message, then the message must be not deleted and ' +
-                'accessible to the user. If the file database is disabled, then the corresponding object ' +
-                'with the file must be preloaded by the application\n' +
-                '//@id Remote file identifier\n' +
-                'inputFileRemote id:string = InputFile;\n',
+            '//@description A file defined by its remote ID. The remote ID is guaranteed to be usable '
+            + 'only if the corresponding file is still accessible to the user and known to TDLib.\n'
+            + '//-For example, if the file is from a message, then the message must be not deleted and '
+            + 'accessible to the user. If the file database is disabled, then the corresponding object '
+            + 'with the file must be preloaded by the application\n'
+            + '//@id Remote file identifier\n'
+            + 'inputFileRemote id:string = InputFile;\n',
             [
                 {
                     kind: 'class',
                     name: 'inputFileRemote',
-                    id: 0xf9968b3e,
+                    id: 0xF9968B3E,
                     type: 'InputFile',
                     arguments: [
                         {
@@ -382,11 +382,11 @@ users.getUsers id:Vector<InputUser> = Vector<User>;
                         },
                     ],
                     comment:
-                        'A file defined by its remote ID. The remote ID is guaranteed to be usable ' +
-                        'only if the corresponding file is still accessible to the user and known to TDLib.\n' +
-                        'For example, if the file is from a message, then the message must be not deleted and ' +
-                        'accessible to the user. If the file database is disabled, then the corresponding object ' +
-                        'with the file must be preloaded by the application',
+                        'A file defined by its remote ID. The remote ID is guaranteed to be usable '
+                        + 'only if the corresponding file is still accessible to the user and known to TDLib.\n'
+                        + 'For example, if the file is from a message, then the message must be not deleted and '
+                        + 'accessible to the user. If the file database is disabled, then the corresponding object '
+                        + 'with the file must be preloaded by the application',
                 },
             ],
         )
@@ -397,7 +397,7 @@ users.getUsers id:Vector<InputUser> = Vector<User>;
         parseTlToEntries(
             '// some comment idk\n\n' + '//another comment\n' + '//but multiline\n\n' + '//yet another at the end',
             {
-                onOrphanComment: (s) => orphaned.push(s),
+                onOrphanComment: s => orphaned.push(s),
             },
         )
 
@@ -406,20 +406,20 @@ users.getUsers id:Vector<InputUser> = Vector<User>;
 
     it('applies prefix to constructors', () => {
         test(
-            'future_salt#0949d9dc = FutureSalt;\n' + // stub to reference
-                'future_salts#ae500895 salts:vector<future_salt> current:FutureSalt = FutureSalts;',
+            'future_salt#0949d9dc = FutureSalt;\n' // stub to reference
+            + 'future_salts#ae500895 salts:vector<future_salt> current:FutureSalt = FutureSalts;',
             [
                 {
                     kind: 'class',
                     name: 'mt_future_salt',
-                    id: 0x0949d9dc,
+                    id: 0x0949D9DC,
                     type: 'FutureSalt',
                     arguments: [],
                 },
                 {
                     kind: 'class',
                     name: 'mt_future_salts',
-                    id: 0xae500895,
+                    id: 0xAE500895,
                     type: 'FutureSalts',
                     arguments: [
                         {
@@ -428,7 +428,7 @@ users.getUsers id:Vector<InputUser> = Vector<User>;
                             typeModifiers: {
                                 isBareVector: true,
                                 isBareType: true,
-                                constructorId: 0x0949d9dc,
+                                constructorId: 0x0949D9DC,
                             },
                         },
                         {

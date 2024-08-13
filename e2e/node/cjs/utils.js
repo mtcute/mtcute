@@ -12,7 +12,7 @@ exports.getApiParams = () => {
     setPlatform(new NodePlatform())
 
     return {
-        apiId: parseInt(process.env.API_ID),
+        apiId: Number.parseInt(process.env.API_ID),
         apiHash: process.env.API_HASH,
         testMode: true,
         storage: new MemoryStorage(),

@@ -1,4 +1,4 @@
-import { Readable } from 'stream'
+import { Readable } from 'node:stream'
 
 import { isNodeVersionAfter } from './version.js'
 
@@ -31,8 +31,8 @@ export function nodeStreamToWeb(stream: Readable): ReadableStream<Uint8Array> {
 
 export function webStreamToNode(stream: ReadableStream<Uint8Array>): Readable {
     if (
-        typeof Readable.fromWeb === 'function' &&
-        isNodeVersionAfter(18, 13, 0) // https://github.com/nodejs/node/issues/42694
+        typeof Readable.fromWeb === 'function'
+        && isNodeVersionAfter(18, 13, 0) // https://github.com/nodejs/node/issues/42694
     ) {
         // @ts-expect-error node typings are wrong lmao
         return Readable.fromWeb(stream)

@@ -1,6 +1,6 @@
-import { Readable } from 'stream'
+import { Readable } from 'node:stream'
 
-import { FileDownloadLocation, FileDownloadParameters, ITelegramClient } from '@mtcute/core'
+import type { FileDownloadLocation, FileDownloadParameters, ITelegramClient } from '@mtcute/core'
 import { downloadAsStream } from '@mtcute/core/methods.js'
 
 /**

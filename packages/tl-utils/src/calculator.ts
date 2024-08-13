@@ -1,16 +1,16 @@
-import { TlEntry } from './types.js'
+import type { TlEntry } from './types.js'
 
 const PRIMITIVES_SIZES: Record<string, number> = {
-    int: 4,
-    long: 8,
-    int53: 8,
-    int128: 16,
-    int256: 32,
-    double: 8,
-    boolFalse: 4,
-    boolTrue: 4,
-    bool: 4,
-    Bool: 4,
+    'int': 4,
+    'long': 8,
+    'int53': 8,
+    'int128': 16,
+    'int256': 32,
+    'double': 8,
+    'boolFalse': 4,
+    'boolTrue': 4,
+    'bool': 4,
+    'Bool': 4,
     '#': 4,
 }
 

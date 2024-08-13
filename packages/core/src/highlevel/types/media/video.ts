@@ -1,8 +1,9 @@
 import { tdFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
+
 import { RawDocument } from './document.js'
 
 /**
@@ -57,8 +58,8 @@ export class Video extends RawDocument {
      */
     get isAnimation(): boolean {
         return (
-            this.attr._ === 'documentAttributeImageSize' ||
-            this.raw.attributes.some((it) => it._ === 'documentAttributeAnimated')
+            this.attr._ === 'documentAttributeImageSize'
+            || this.raw.attributes.some(it => it._ === 'documentAttributeAnimated')
         )
     }
 

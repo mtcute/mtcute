@@ -2,7 +2,7 @@ import { Long, MtArgumentError } from '@mtcute/core'
 import { getPlatform } from '@mtcute/core/platform.js'
 import { dataViewFromBuffer } from '@mtcute/core/utils.js'
 
-import { PyrogramSession } from './types.js'
+import type { PyrogramSession } from './types.js'
 
 const SESSION_STRING_SIZE_OLD = 267
 const SESSION_STRING_SIZE = 271

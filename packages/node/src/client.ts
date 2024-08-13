@@ -1,11 +1,14 @@
-import { createInterface, Interface as RlInterface } from 'readline'
+import type { Interface as RlInterface } from 'node:readline'
+import { createInterface } from 'node:readline'
 
-import { FileDownloadLocation, FileDownloadParameters, ITelegramStorageProvider, PartialOnly, User } from '@mtcute/core'
+import type { FileDownloadLocation, FileDownloadParameters, ITelegramStorageProvider, PartialOnly, User } from '@mtcute/core'
+import type {
+    BaseTelegramClientOptions as BaseTelegramClientOptionsBase,
+    TelegramClientOptions,
+} from '@mtcute/core/client.js'
 import {
     BaseTelegramClient as BaseTelegramClientBase,
-    BaseTelegramClientOptions as BaseTelegramClientOptionsBase,
     TelegramClient as TelegramClientBase,
-    TelegramClientOptions,
 } from '@mtcute/core/client.js'
 import { setPlatform } from '@mtcute/core/platform.js'
 
@@ -18,18 +21,16 @@ import { TcpTransport } from './utils/tcp.js'
 
 export type { TelegramClientOptions }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let nativeCrypto: any
 
 try {
-    /* eslint-disable @typescript-eslint/prefer-ts-expect-error, @typescript-eslint/ban-ts-comment */
-    /* eslint-disable import/no-unresolved */
+    /* eslint-disable ts/ban-ts-comment,ts/no-unsafe-assignment */
+
     // @ts-ignore  not in deps
     // @esm-replace-import
-    nativeCrypto = (await import('@mtcute/crypto-node')).NodeNativeCryptoProvider // eslint-disable-line
-    /* eslint-enable @typescript-eslint/prefer-ts-expect-error, @typescript-eslint/ban-ts-comment */
-    /* eslint-enable import/no-unresolved */
-} catch (e) {}
+    nativeCrypto = (await import('@mtcute/crypto-node')).NodeNativeCryptoProvider
+    /* eslint-enable ts/ban-ts-comment,ts/no-unsafe-assignment */
+} catch {}
 
 export interface BaseTelegramClientOptions
     extends PartialOnly<Omit<BaseTelegramClientOptionsBase, 'storage'>, 'transport' | 'crypto'> {
@@ -62,9 +63,9 @@ export class BaseTelegramClient extends BaseTelegramClientBase {
             transport: () => new TcpTransport(),
             ...opts,
             storage:
-                typeof opts.storage === 'string' ?
-                    new SqliteStorage(opts.storage) :
-                    opts.storage ?? new SqliteStorage('client.session'),
+                typeof opts.storage === 'string'
+                    ? new SqliteStorage(opts.storage)
+                    : opts.storage ?? new SqliteStorage('client.session'),
         })
     }
 }
@@ -105,7 +106,7 @@ export class TelegramClient extends TelegramClientBase {
             })
         }
 
-        return new Promise((res) => this._rl?.question(text, res))
+        return new Promise(res => this._rl?.question(text, res))
     }
 
     close(): Promise<void> {
@@ -145,7 +146,7 @@ export class TelegramClient extends TelegramClientBase {
 
         this.start(params)
             .then(then)
-            .catch((err) => this.emitError(err))
+            .catch(err => this.emitError(err))
     }
 
     downloadToFile(

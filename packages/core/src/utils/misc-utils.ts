@@ -3,11 +3,10 @@
  *
  * @param ms  Number of ms to sleep
  */
-export const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+export const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms))
 
 export function sleepWithAbort(ms: number, signal: AbortSignal): Promise<void> {
     return new Promise((resolve, reject) => {
-        // eslint-disable-next-line prefer-const
         let timeout: NodeJS.Timeout
 
         const onAbort = () => {

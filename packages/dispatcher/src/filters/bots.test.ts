@@ -1,19 +1,21 @@
 import { describe, expect, it } from 'vitest'
-
-import { Message, PeersIndex, tl } from '@mtcute/core'
-import { createStub, StubTelegramClient } from '@mtcute/test'
+import type { tl } from '@mtcute/core'
+import { Message, PeersIndex } from '@mtcute/core'
+import { StubTelegramClient, createStub } from '@mtcute/test'
 
 import { MessageContext } from '../index.js'
+
 import { command, deeplink } from './bots.js'
 
 const peers = new PeersIndex()
 peers.users.set(1, createStub('user', { id: 1 }))
 peers.chats.set(1, createStub('channel', { id: 1 }))
-const createMessageContext = (partial: Partial<tl.RawMessage>) =>
-    new MessageContext(
+function createMessageContext(partial: Partial<tl.RawMessage>) {
+    return new MessageContext(
         StubTelegramClient.full(), // eslint-disable-line
         new Message(createStub('message', partial), peers, false),
     )
+}
 
 describe('filters.command', () => {
     const getParsedCommand = (text: string, ...params: Parameters<typeof command>) => {
@@ -89,7 +91,7 @@ describe('filters.deeplink', () => {
 
         expect(deeplink('bar')(ctx)).toEqual(false)
         expect(deeplink('foo')(ctx)).toEqual(true)
-        // eslint-disable-next-line
+
         expect((ctx as any).command).toEqual(['start', 'foo'])
     })
 
@@ -100,7 +102,7 @@ describe('filters.deeplink', () => {
         })
 
         expect(deeplink(/^foo_(\d+)$/)(ctx)).toEqual(true)
-        // eslint-disable-next-line
+
         expect((ctx as any).command).toEqual(['start', 'foo_123', '123'])
     })
 
@@ -111,7 +113,7 @@ describe('filters.deeplink', () => {
         })
 
         expect(deeplink(['foo', 'bar'])(ctx)).toEqual(true)
-        // eslint-disable-next-line
+
         expect((ctx as any).command).toEqual(['start', 'foo'])
     })
 
@@ -122,7 +124,7 @@ describe('filters.deeplink', () => {
         })
 
         expect(deeplink([/foo/, /bar/])(ctx)).toEqual(true)
-        // eslint-disable-next-line
+
         expect((ctx as any).command).toEqual(['start', 'foo'])
     })
 

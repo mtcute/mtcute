@@ -1,6 +1,6 @@
-import { ChatMemberUpdate, ChatMemberUpdateType, MaybeArray, UserStatus, UserStatusUpdate } from '@mtcute/core'
+import type { ChatMemberUpdate, ChatMemberUpdateType, MaybeArray, UserStatus, UserStatusUpdate } from '@mtcute/core'
 
-import { UpdateFilter } from './types.js'
+import type { UpdateFilter } from './types.js'
 
 /**
  * Create a filter for {@link ChatMemberUpdate} by update type
@@ -14,12 +14,12 @@ export const chatMember: {
 } = (types: MaybeArray<ChatMemberUpdateType>): UpdateFilter<ChatMemberUpdate> => {
     if (Array.isArray(types)) {
         const index: Partial<Record<ChatMemberUpdateType, true>> = {}
-        types.forEach((typ) => (index[typ] = true))
+        types.forEach(typ => (index[typ] = true))
 
-        return (upd) => upd.type in index
+        return upd => upd.type in index
     }
 
-    return (upd) => upd.type === types
+    return upd => upd.type === types
 }
 
 /**
@@ -43,16 +43,16 @@ export const userStatus: {
 } = (statuses: MaybeArray<UserStatus>): UpdateFilter<UserStatusUpdate> => {
     if (Array.isArray(statuses)) {
         const index: Partial<Record<UserStatus, true>> = {}
-        statuses.forEach((typ) => (index[typ] = true))
+        statuses.forEach(typ => (index[typ] = true))
 
-        return (upd) => upd.status in index
+        return upd => upd.status in index
     }
 
-    return (upd) => upd.status === statuses
+    return upd => upd.status === statuses
 }
 
 /**
  * Create a filter for {@link ChatMemberUpdate} for updates
  * regarding current user
  */
-export const chatMemberSelf: UpdateFilter<ChatMemberUpdate, { isSelf: true }> = (upd) => upd.isSelf
+export const chatMemberSelf: UpdateFilter<ChatMemberUpdate, { isSelf: true }> = upd => upd.isSelf

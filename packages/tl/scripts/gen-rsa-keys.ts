@@ -1,13 +1,14 @@
-import { createReadStream } from 'fs'
-import { writeFile } from 'fs/promises'
-import { join } from 'path'
-import readline from 'readline'
+import { createReadStream } from 'node:fs'
+import { writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import readline from 'node:readline'
 
 import { parsePublicKey } from '@mtcute/core/utils.js'
 import { NodeCryptoProvider } from '@mtcute/node/utils.js'
 
-import { TlPublicKey } from '../binary/rsa-keys.js'
-import { __dirname, ESM_PRELUDE } from './constants.js'
+import type { TlPublicKey } from '../binary/rsa-keys.js'
+
+import { ESM_PRELUDE, __dirname } from './constants.js'
 
 const IN_TXT_FILE = join(__dirname, '../data/rsa-keys.txt')
 const OUT_JS_FILE = join(__dirname, '../binary/rsa-keys.js')
@@ -33,7 +34,7 @@ async function* parseInputFile(): AsyncIterableIterator<InputKey> {
 
         if (line[0] === '#') continue
 
-        current += line + '\n'
+        current += `${line}\n`
 
         if (line === '-----END RSA PUBLIC KEY-----') {
             yield {
@@ -54,7 +55,7 @@ async function main() {
         obj[parsed.fingerprint] = parsed
     }
 
-    await writeFile(OUT_JS_FILE, ESM_PRELUDE + "exports.default=JSON.parse('" + JSON.stringify(obj) + "');")
+    await writeFile(OUT_JS_FILE, `${ESM_PRELUDE}exports.default=JSON.parse('${JSON.stringify(obj)}');`)
 }
 
 main().catch(console.error)

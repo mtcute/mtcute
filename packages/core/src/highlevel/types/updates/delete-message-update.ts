@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { toggleChannelIdMark } from '../../../utils/peer-utils.js'
 import { makeInspectable } from '../../utils/index.js'

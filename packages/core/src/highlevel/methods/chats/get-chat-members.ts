@@ -1,11 +1,11 @@
 import Long from 'long'
-
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { assertNever } from '../../../types/utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { ArrayWithTotal, ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { ArrayWithTotal, InputPeerLike } from '../../types/index.js'
+import { ChatMember, MtInvalidPeerTypeError, PeersIndex } from '../../types/index.js'
 import { makeArrayWithTotal } from '../../utils/index.js'
 import { isInputPeerChannel, isInputPeerChat, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -78,15 +78,15 @@ export async function getChatMembers(
 
         assertTypeIs('getChatMember (@ messages.getFullChat)', res.fullChat, 'chatFull')
 
-        let members =
-            res.fullChat.participants._ === 'chatParticipantsForbidden' ? [] : res.fullChat.participants.participants
+        let members
+            = res.fullChat.participants._ === 'chatParticipantsForbidden' ? [] : res.fullChat.participants.participants
 
         if (offset) members = members.slice(offset)
         if (limit) members = members.slice(0, limit)
 
         const peers = PeersIndex.from(res)
 
-        const ret = members.map((m) => new ChatMember(m, peers))
+        const ret = members.map(m => new ChatMember(m, peers))
 
         return makeArrayWithTotal(ret, ret.length)
     }
@@ -138,7 +138,7 @@ export async function getChatMembers(
 
         const peers = PeersIndex.from(res)
 
-        const ret = res.participants.map((i) => new ChatMember(i, peers))
+        const ret = res.participants.map(i => new ChatMember(i, peers))
 
         return makeArrayWithTotal(ret, res.count)
     }

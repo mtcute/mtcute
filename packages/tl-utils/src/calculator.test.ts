@@ -45,10 +45,10 @@ describe('calculateStaticSizes', () => {
 
     it('correctly handles static-sized children', () => {
         test(
-            'peerUser#9db1bc6d user_id:int53 = Peer;\n' +
-                'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:peerUser = help.PromoData;',
+            'peerUser#9db1bc6d user_id:int53 = Peer;\n'
+            + 'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:peerUser = help.PromoData;',
             {
-                peerUser: 12,
+                'peerUser': 12,
                 'help.promoData': 20,
             },
         )
@@ -56,12 +56,12 @@ describe('calculateStaticSizes', () => {
 
     it('correctly handles static-sized union children', () => {
         test(
-            'peerUser#9db1bc6d user_id:int53 = Peer;\n' +
-                'peerChannel#9db1bc6d channel_id:int53 = Peer;\n' +
-                'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:Peer = help.PromoData;',
+            'peerUser#9db1bc6d user_id:int53 = Peer;\n'
+            + 'peerChannel#9db1bc6d channel_id:int53 = Peer;\n'
+            + 'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:Peer = help.PromoData;',
             {
-                peerUser: 12,
-                peerChannel: 12,
+                'peerUser': 12,
+                'peerChannel': 12,
                 'help.promoData': 24,
             },
         )
@@ -69,9 +69,9 @@ describe('calculateStaticSizes', () => {
 
     it('correctly handles differently sized union children', () => {
         test(
-            'peerUser user_id:int53 = Peer;\n' +
-                'peerChannel channel_id:int53 access_hash:long = Peer;\n' +
-                'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:Peer = help.PromoData;',
+            'peerUser user_id:int53 = Peer;\n'
+            + 'peerChannel channel_id:int53 access_hash:long = Peer;\n'
+            + 'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:Peer = help.PromoData;',
             {
                 peerUser: 12,
                 peerChannel: 20,
@@ -81,17 +81,17 @@ describe('calculateStaticSizes', () => {
 
     it('correctly handles non static-sized union children', () => {
         test(
-            'peerUser user_id:int53 = Peer;\n' +
-                'peerChannel channel_id:int53 access_hash:bytes = Peer;\n' +
-                'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:Peer = help.PromoData;',
+            'peerUser user_id:int53 = Peer;\n'
+            + 'peerChannel channel_id:int53 access_hash:bytes = Peer;\n'
+            + 'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:Peer = help.PromoData;',
             {
                 peerUser: 12,
             },
         )
         test(
-            'peerUser user_id:int53 access_hash:bytes = Peer;\n' +
-                'peerChannel channel_id:int53 access_hash:bytes = Peer;\n' +
-                'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:Peer = help.PromoData;',
+            'peerUser user_id:int53 access_hash:bytes = Peer;\n'
+            + 'peerChannel channel_id:int53 access_hash:bytes = Peer;\n'
+            + 'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:Peer = help.PromoData;',
             {},
         )
     })

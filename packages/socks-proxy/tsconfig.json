@@ -3,11 +3,11 @@
   "compilerOptions": {
     "outDir": "./dist/esm"
   },
-  "include": [
-    "./index.ts"
-  ],
   "references": [
     { "path": "../core" },
     { "path": "../node" }
+  ],
+  "include": [
+    "./index.ts"
   ]
 }

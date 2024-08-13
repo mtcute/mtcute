@@ -1,8 +1,8 @@
-const crypto = require('crypto')
-const path = require('path')
-const fs = require('fs')
-const cp = require('child_process')
-const { Readable } = require('stream')
+const crypto = require('node:crypto')
+const path = require('node:path')
+const fs = require('node:fs')
+const cp = require('node:child_process')
+const { Readable } = require('node:stream')
 
 let git
 
@@ -15,7 +15,7 @@ if (!GITHUB_TOKEN && !SKIP_PREBUILT) {
 }
 
 const GITHUB_HEADERS = {
-    Authorization: `Bearer ${GITHUB_TOKEN}`,
+    'Authorization': `Bearer ${GITHUB_TOKEN}`,
     'Content-Type': 'application/json',
     'X-GitHub-Api-Version': '2022-11-28',
 }
@@ -23,22 +23,22 @@ const API_PREFIX = 'https://api.github.com/repos/mtcute/mtcute/actions/workflows
 const PLATFORMS = ['ubuntu', 'macos', 'windows']
 
 async function findArtifactsByHash(hash) {
-    const runs = await fetch(`${API_PREFIX}/runs?per_page=100`, { headers: GITHUB_HEADERS }).then((r) => r.json())
+    const runs = await fetch(`${API_PREFIX}/runs?per_page=100`, { headers: GITHUB_HEADERS }).then(r => r.json())
 
     for (const run of runs.workflow_runs) {
         if (run.conclusion !== 'success' || run.status !== 'completed') continue
 
         const artifacts = await fetch(`${run.url}/artifacts`, { headers: GITHUB_HEADERS })
-            .then((r) => r.json())
-            .then((r) => r.artifacts)
+            .then(r => r.json())
+            .then(r => r.artifacts)
 
         for (const it of artifacts) {
             if (it.expired) continue
             const parts = it.name.split('-')
 
-            if (parts[0] === 'prebuilt' &&
-                PLATFORMS.includes(parts[1]) &&
-                parts[3] === hash) {
+            if (parts[0] === 'prebuilt'
+              && PLATFORMS.includes(parts[1])
+              && parts[3] === hash) {
                 return artifacts
             }
         }
@@ -64,16 +64,16 @@ async function runWorkflow(commit, hash) {
 
     // wait for the workflow to finish
     // github api is awesome and doesn't return the run id, so let's just assume it's the last one
-    await new Promise((resolve) => setTimeout(resolve, 5000))
+    await new Promise(resolve => setTimeout(resolve, 5000))
     const runsRes = await fetch(`${API_PREFIX}/runs`, {
         headers: GITHUB_HEADERS,
-    }).then((r) => r.json())
+    }).then(r => r.json())
 
     let run = runsRes.workflow_runs[0]
 
     while (run.status === 'queued' || run.status === 'in_progress') {
-        await new Promise((resolve) => setTimeout(resolve, 5000))
-        run = await fetch(run.url, { headers: GITHUB_HEADERS }).then((r) => r.json())
+        await new Promise(resolve => setTimeout(resolve, 5000))
+        run = await fetch(run.url, { headers: GITHUB_HEADERS }).then(r => r.json())
     }
 
     if (run.status !== 'completed') {
@@ -86,16 +86,16 @@ async function runWorkflow(commit, hash) {
 
     // fetch artifacts
     const artifacts = await fetch(`${run.url}/artifacts`, { headers: GITHUB_HEADERS })
-        .then((r) => r.json())
-        .then((r) => r.artifacts)
+        .then(r => r.json())
+        .then(r => r.artifacts)
 
     // validate their names
     for (const it of artifacts) {
         const parts = it.name.split('-')
 
-        if (parts[0] !== 'prebuilt' ||
-            !PLATFORMS.includes(parts[1]) ||
-            parts[3] !== hash) {
+        if (parts[0] !== 'prebuilt'
+          || !PLATFORMS.includes(parts[1])
+          || parts[3] !== hash) {
             throw new Error(`Invalid artifact name: ${it.name}`)
         }
     }

@@ -1,6 +1,6 @@
-import { MaybePromise } from '../../../types/utils.js'
+import type { MaybePromise } from '../../../types/utils.js'
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
+// eslint-disable-next-line ts/no-namespace
 export namespace IPeersRepository {
     /** Information about a cached peer */
     export interface PeerInfo {
@@ -24,14 +24,14 @@ export namespace IPeersRepository {
 }
 
 export interface IPeersRepository {
-    /** Store the given peer*/
-    store(peer: IPeersRepository.PeerInfo): MaybePromise<void>
+    /** Store the given peer */
+    store: (peer: IPeersRepository.PeerInfo) => MaybePromise<void>
     /** Find a peer by their `id` */
-    getById(id: number): MaybePromise<IPeersRepository.PeerInfo | null>
+    getById: (id: number) => MaybePromise<IPeersRepository.PeerInfo | null>
     /** Find a peer by their username (where `usernames` includes `username`) */
-    getByUsername(username: string): MaybePromise<IPeersRepository.PeerInfo | null>
+    getByUsername: (username: string) => MaybePromise<IPeersRepository.PeerInfo | null>
     /** Find a peer by their `phone` */
-    getByPhone(phone: string): MaybePromise<IPeersRepository.PeerInfo | null>
+    getByPhone: (phone: string) => MaybePromise<IPeersRepository.PeerInfo | null>
 
-    deleteAll(): MaybePromise<void>
+    deleteAll: () => MaybePromise<void>
 }

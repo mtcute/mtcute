@@ -3,7 +3,8 @@ import { getPlatform } from '@mtcute/core/platform.js'
 import { dataViewFromBuffer } from '@mtcute/core/utils.js'
 
 import { parseIpFromBytes } from '../utils/ip.js'
-import { TelethonSession } from './types.js'
+
+import type { TelethonSession } from './types.js'
 
 export function parseTelethonSession(session: string): TelethonSession {
     if (session[0] !== '1') {

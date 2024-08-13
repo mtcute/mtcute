@@ -1,6 +1,5 @@
 import { Parser } from 'htmlparser2'
 import Long from 'long'
-
 import type { InputText, MessageEntity, TextWithEntities, tl } from '@mtcute/core'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
@@ -33,7 +32,7 @@ function parse(
         if (!pendingText.length) return
 
         if (!stacks.pre?.length && !keepWhitespace) {
-            pendingText = pendingText.replace(/[^\S\u00A0]+/gs, ' ')
+            pendingText = pendingText.replace(/[^\S\u00A0]+/g, ' ')
 
             if (tagEnd) pendingText = pendingText.trimEnd()
 
@@ -152,7 +151,7 @@ function parse(
                     const mention = MENTION_REGEX.exec(url)
 
                     if (mention) {
-                        const id = parseInt(mention[1])
+                        const id = Number.parseInt(mention[1])
                         const accessHash = mention[2]
 
                         if (accessHash) {
@@ -175,7 +174,7 @@ function parse(
                             }
                         }
                     } else {
-                        if (url.match(/^\/\//)) url = 'http:' + url
+                        if (url.match(/^\/\//)) url = `http:${url}`
 
                         entity = {
                             _: 'messageEntityTextUrl',
@@ -215,7 +214,6 @@ function parse(
         ontext(data) {
             pendingText += data
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     })
 
     // a hack for interpolating inside attributes
@@ -249,10 +247,13 @@ function parse(
         if (isInsideAttrib) {
             let text: string
 
-            if (typeof it === 'string') text = it
-            else if (typeof it === 'number') text = it.toString()
-            else if (Long.isLong(it)) text = it.toString(10)
-            else {
+            if (typeof it === 'string') {
+                text = it
+            } else if (typeof it === 'number') {
+                text = it.toString()
+            } else if (Long.isLong(it)) {
+                text = it.toString(10)
+            } else {
                 // obviously we can't have entities inside attributes, so just use the text
                 text = it.text
             }
@@ -394,9 +395,9 @@ function _unparse(
             case 'messageEntityPre':
                 html.push(
                     `<pre${entity.language ? ` language="${entity.language}"` : ''}>${
-                        params.syntaxHighlighter && entity.language ?
-                            params.syntaxHighlighter(entityText, entity.language) :
-                            entityText
+                        params.syntaxHighlighter && entity.language
+                            ? params.syntaxHighlighter(entityText, entity.language)
+                            : entityText
                     }</pre>`,
                 )
                 break

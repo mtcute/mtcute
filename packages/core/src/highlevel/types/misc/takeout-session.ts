@@ -1,9 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { RpcCallOptions } from '../../../network/network-manager.js'
-import { MustEqual } from '../../../types/utils.js'
+import type { RpcCallOptions } from '../../../network/network-manager.js'
+import type { MustEqual } from '../../../types/utils.js'
 import { assertTrue } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { makeInspectable } from '../../utils/index.js'
 
 /**
@@ -35,13 +35,12 @@ export class TakeoutSession {
         message: MustEqual<T, tl.RpcMethod>,
         params?: RpcCallOptions,
     ): Promise<tl.RpcCallReturn[T['_']]> {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        // eslint-disable-next-line ts/no-unsafe-return
         return this.client.call(
             {
                 _: 'invokeWithTakeout',
                 takeoutId: this.id,
                 query: message,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
             params,
         )
@@ -65,21 +64,21 @@ export class TakeoutSession {
      *     Returning `true` will use takeout session, `false` will not.
      */
     createProxy(predicate?: (obj: tl.TlObject) => boolean): ITelegramClient {
-        const boundCall: TakeoutSession['call'] = predicate ?
-            (obj, params) => {
+        const boundCall: TakeoutSession['call'] = predicate
+            ? (obj, params) => {
                 if (predicate(obj)) {
                     return this.call(obj, params)
                 }
 
                 return this.client.call(obj, params)
-            } :
-            this.call.bind(this)
+            }
+            : this.call.bind(this)
 
         return new Proxy(this.client, {
             get(target, prop, receiver) {
                 if (prop === 'call') return boundCall
 
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+                // eslint-disable-next-line ts/no-unsafe-return
                 return Reflect.get(target, prop, receiver)
             },
         })

@@ -1,13 +1,13 @@
-// eslint-disable-next-line no-restricted-imports
-import { join } from 'path'
+import { join } from 'node:path'
 
-import { MaybePromise, MemoryStorage } from '@mtcute/core'
+import type { MaybePromise } from '@mtcute/core'
+import { MemoryStorage } from '@mtcute/core'
 import { setPlatform } from '@mtcute/core/platform.js'
 import { LogManager, sleep } from '@mtcute/core/utils.js'
 import { NodePlatform, SqliteStorage, TcpTransport } from '@mtcute/node'
 import { NodeCryptoProvider } from '@mtcute/node/utils.js'
 
-export const getApiParams = (storage?: string) => {
+export function getApiParams(storage?: string) {
     if (!process.env.API_ID || !process.env.API_HASH) {
         throw new Error('API_ID and API_HASH env variables must be set')
     }
@@ -15,7 +15,7 @@ export const getApiParams = (storage?: string) => {
     setPlatform(new NodePlatform())
 
     return {
-        apiId: parseInt(process.env.API_ID),
+        apiId: Number.parseInt(process.env.API_ID),
         apiHash: process.env.API_HASH,
         testMode: true,
         storage: storage ? new SqliteStorage(join(__dirname, storage)) : new MemoryStorage(),

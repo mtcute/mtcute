@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtArgumentError, MtTypeAssertionError } from '../../../types/errors.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
@@ -6,10 +6,11 @@ import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MessageEntity } from '../messages/message-entity.js'
 import { EmojiStatus } from '../reactions/emoji-status.js'
+
 import { ChatColors } from './chat-colors.js'
 import { ChatPermissions } from './chat-permissions.js'
 import { ChatPhoto } from './chat-photo.js'
-import { PeersIndex } from './peers-index.js'
+import type { PeersIndex } from './peers-index.js'
 import { User } from './user.js'
 
 /**
@@ -306,8 +307,8 @@ export class Chat {
         if (!('usernames' in this.peer)) return null
 
         return (
-            this.peer.usernames ??
-            (this.peer.username ? [{ _: 'username', username: this.peer.username, active: true }] : null)
+            this.peer.usernames
+            ?? (this.peer.username ? [{ _: 'username', username: this.peer.username, active: true }] : null)
         )
     }
 
@@ -335,7 +336,7 @@ export class Chat {
     get displayName(): string {
         if (this.peer._ === 'user') {
             if (this.peer.lastName) {
-                return this.peer.firstName + ' ' + this.peer.lastName
+                return `${this.peer.firstName} ${this.peer.lastName}`
             }
 
             return this.peer.firstName ?? 'Deleted Account'
@@ -352,9 +353,9 @@ export class Chat {
      */
     get photo(): ChatPhoto | null {
         if (
-            !('photo' in this.peer) ||
-            !this.peer.photo ||
-            (this.peer.photo._ !== 'userProfilePhoto' && this.peer.photo._ !== 'chatPhoto')
+            !('photo' in this.peer)
+            || !this.peer.photo
+            || (this.peer.photo._ !== 'userProfilePhoto' && this.peer.photo._ !== 'chatPhoto')
         ) {
             return null
         }

@@ -1,11 +1,12 @@
-import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { getPlatform } from '../platform.js'
 import { asyncResettable } from '../utils/index.js'
-import { Logger } from '../utils/logger.js'
-import { IMtStorageProvider } from './provider.js'
+import type { Logger } from '../utils/logger.js'
+
+import type { IMtStorageProvider } from './provider.js'
 import { AuthKeysService } from './service/auth-keys.js'
-import { ServiceOptions } from './service/base.js'
+import type { ServiceOptions } from './service/base.js'
 import { DefaultDcsService } from './service/default-dcs.js'
 import { FutureSaltsService } from './service/future-salts.js'
 
@@ -71,12 +72,13 @@ export class StorageManager {
 
         if (this.options.cleanup ?? true) {
             this._cleanupRestore = getPlatform().beforeExit(() => {
-                this._destroy().catch((err) => this.log.error('cleanup error: %e', err))
+                this._destroy().catch(err => this.log.error('cleanup error: %e', err))
             })
         }
 
         await this.driver.load?.()
     })
+
     load(): Promise<void> {
         return this._load.run()
     }

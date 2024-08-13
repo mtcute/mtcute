@@ -1,7 +1,8 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
+
 import { Thumbnail } from './thumbnail.js'
 
 export class ExtendedMediaPreview {

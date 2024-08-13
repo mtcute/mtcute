@@ -1,6 +1,6 @@
-import { readdir, readFile } from 'fs/promises'
-import { dirname, join } from 'path'
-import { fileURLToPath } from 'url'
+import { readFile, readdir } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 export const rootDir = join(dirname(fileURLToPath(import.meta.url)), '../')
 
@@ -20,9 +20,9 @@ export async function tryParsePackageJson(packageName) {
 
 export async function getPackageJsons(includeRoot = false) {
     const packages = (await readdir(join(rootDir, 'packages')))
-        .filter((s) => !s.startsWith('.'))
+        .filter(s => !s.startsWith('.'))
 
     if (includeRoot) packages.push('$root')
 
-    return Promise.all(packages.map(tryParsePackageJson)).then((f) => f.filter(Boolean))
+    return Promise.all(packages.map(tryParsePackageJson)).then(f => f.filter(Boolean))
 }

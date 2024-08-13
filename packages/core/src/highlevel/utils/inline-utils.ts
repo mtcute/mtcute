@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
 
 import { getPlatform } from '../../platform.js'

@@ -8,9 +8,9 @@ export async function loadWasmBinary(input?: WasmInitInput): Promise<WebAssembly
     }
 
     if (
-        typeof input === 'string' ||
-        (typeof Request === 'function' && input instanceof Request) ||
-        (typeof URL === 'function' && input instanceof URL)
+        typeof input === 'string'
+        || (typeof Request === 'function' && input instanceof Request)
+        || (typeof URL === 'function' && input instanceof URL)
     ) {
         input = await fetch(input)
     }
@@ -40,5 +40,5 @@ export async function loadWasmBinary(input?: WasmInitInput): Promise<WebAssembly
         return instance
     }
 
-    return await WebAssembly.instantiate(input)
+    return WebAssembly.instantiate(input)
 }

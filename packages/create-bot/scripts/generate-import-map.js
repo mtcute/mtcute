@@ -1,4 +1,4 @@
-import * as fs from 'fs'
+import * as fs from 'node:fs'
 
 const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url)))
 

@@ -1,14 +1,16 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { RpcCallOptions } from '../../network/network-manager.js'
-import { MustEqual } from '../../types/utils.js'
+import type { RpcCallOptions } from '../../network/network-manager.js'
+import type { MustEqual } from '../../types/utils.js'
 import { LogManager } from '../../utils/logger.js'
-import { ConnectionState, ITelegramClient, ServerUpdateHandler } from '../client.types.js'
+import type { ConnectionState, ITelegramClient, ServerUpdateHandler } from '../client.types.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
-import { RawUpdateHandler } from '../updates/types.js'
+import type { RawUpdateHandler } from '../updates/types.js'
+
 import { AppConfigManagerProxy } from './app-config.js'
 import { WorkerInvoker } from './invoker.js'
-import { ClientMessageHandler, deserializeResult, SendFn, SomeWorker, WorkerCustomMethods } from './protocol.js'
+import type { ClientMessageHandler, SendFn, SomeWorker, WorkerCustomMethods } from './protocol.js'
+import { deserializeResult } from './protocol.js'
 import { TelegramStorageProxy } from './storage.js'
 
 export interface TelegramWorkerPortOptions {
@@ -109,6 +111,7 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     onError(handler: (err: unknown) => void): void {
         this._errorHandler = handler
     }
+
     emitError(err: unknown): void {
         this._errorHandler(err)
     }

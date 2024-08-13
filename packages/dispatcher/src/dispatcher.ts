@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/unified-signatures,@typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,max-depth,dot-notation */
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/ban-types */
+/* eslint-disable ts/no-unsafe-assignment */
+/* eslint-disable ts/no-unsafe-argument */
+/* eslint-disable ts/no-empty-object-type */
 // ^^ will be looked into in MTQ-29
 
-import {
+import type {
     BotReactionCountUpdate,
     BotReactionUpdate,
     BotStoppedUpdate,
@@ -15,21 +15,23 @@ import {
     DeleteStoryUpdate,
     HistoryReadUpdate,
     MaybePromise,
-    MtArgumentError,
     ParsedUpdate,
     PeersIndex,
     PollUpdate,
     PollVoteUpdate,
     StoryUpdate,
-    tl,
     UserStatusUpdate,
     UserTypingUpdate,
+    tl,
 } from '@mtcute/core'
-import { TelegramClient } from '@mtcute/core/client.js'
-
-import { UpdateContext } from './context/base.js'
-import { BusinessMessageContext } from './context/business-message.js'
 import {
+    MtArgumentError,
+} from '@mtcute/core'
+import type { TelegramClient } from '@mtcute/core/client.js'
+
+import type { UpdateContext } from './context/base.js'
+import type { BusinessMessageContext } from './context/business-message.js'
+import type {
     BusinessCallbackQueryContext,
     CallbackQueryContext,
     ChatJoinRequestUpdateContext,
@@ -39,11 +41,12 @@ import {
     MessageContext,
     PreCheckoutQueryContext,
 } from './context/index.js'
-import { _parsedUpdateToContext, UpdateContextType } from './context/parse.js'
+import type { UpdateContextType } from './context/parse.js'
+import { _parsedUpdateToContext } from './context/parse.js'
 import { SceneTransitionContext } from './context/scene-transition.js'
-import { filters, UpdateFilter } from './filters/index.js'
+import type { UpdateFilter, filters } from './filters/index.js'
 // begin-codegen-imports
-import {
+import type {
     BotChatJoinRequestHandler,
     BotReactionCountUpdateHandler,
     BotReactionUpdateHandler,
@@ -76,8 +79,9 @@ import {
     UserTypingHandler,
 } from './handler.js'
 // end-codegen-imports
-import { PropagationAction } from './propagation.js'
-import { defaultStateKeyDelegate, IStateStorageProvider, StateKeyDelegate, UpdateState } from './state/index.js'
+import type { PropagationAction } from './propagation.js'
+import type { IStateStorageProvider, StateKeyDelegate } from './state/index.js'
+import { UpdateState, defaultStateKeyDelegate } from './state/index.js'
 import { StateService } from './state/service.js'
 
 export interface DispatcherParams {
@@ -323,7 +327,7 @@ export class Dispatcher<State extends object = never> {
 
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
-        this.dispatchRawUpdateNow(update, peers).catch((err) => this._client!.emitError(err))
+        this.dispatchRawUpdateNow(update, peers).catch(err => this._client!.emitError(err))
     }
 
     /**
@@ -355,7 +359,9 @@ export class Dispatcher<State extends object = never> {
                     if (!h.check || (await h.check(this._client, update, peers))) {
                         result = await h.callback(this._client, update, peers)
                         handled = true
-                    } else continue
+                    } else {
+                        continue
+                    }
 
                     switch (result) {
                         case 'continue':
@@ -393,7 +399,7 @@ export class Dispatcher<State extends object = never> {
 
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
-        this.dispatchUpdateNow(update).catch((err) => this._client!.emitError(err))
+        this.dispatchUpdateNow(update).catch(err => this._client!.emitError(err))
     }
 
     /**
@@ -423,15 +429,15 @@ export class Dispatcher<State extends object = never> {
 
         if (parsedScene === undefined) {
             if (
-                this._storage &&
-                this._scenes &&
-                (update.name === 'new_message' ||
-                    update.name === 'edit_message' ||
-                    update.name === 'callback_query' ||
-                    update.name === 'message_group' ||
-                    update.name === 'new_business_message' ||
-                    update.name === 'edit_business_message' ||
-                    update.name === 'business_message_group')
+                this._storage
+                && this._scenes
+                && (update.name === 'new_message'
+                || update.name === 'edit_message'
+                || update.name === 'callback_query'
+                || update.name === 'message_group'
+                || update.name === 'new_business_message'
+                || update.name === 'edit_business_message'
+                || update.name === 'business_message_group')
             ) {
                 // no need to fetch scene if there are no registered scenes
 
@@ -466,14 +472,14 @@ export class Dispatcher<State extends object = never> {
 
         if (parsedState === undefined) {
             if (
-                this._storage &&
-                (update.name === 'new_message' ||
-                    update.name === 'edit_message' ||
-                    update.name === 'callback_query' ||
-                    update.name === 'message_group' ||
-                    update.name === 'new_business_message' ||
-                    update.name === 'edit_business_message' ||
-                    update.name === 'business_message_group')
+                this._storage
+                && (update.name === 'new_message'
+                || update.name === 'edit_message'
+                || update.name === 'callback_query'
+                || update.name === 'message_group'
+                || update.name === 'new_business_message'
+                || update.name === 'edit_business_message'
+                || update.name === 'business_message_group')
             ) {
                 if (!parsedContext) parsedContext = _parsedUpdateToContext(this._client, update)
                 const key = await this._stateKeyDelegate!(parsedContext as any)
@@ -482,8 +488,8 @@ export class Dispatcher<State extends object = never> {
                     let customKey
 
                     if (
-                        !this._customStateKeyDelegate ||
-                        (customKey = await this._customStateKeyDelegate(parsedContext as any))
+                        !this._customStateKeyDelegate
+                        || (customKey = await this._customStateKeyDelegate(parsedContext as any))
                     ) {
                         parsedState = new UpdateState(
                             this._storage,
@@ -530,7 +536,9 @@ export class Dispatcher<State extends object = never> {
                             if (!h.check || (await h.check(parsedContext as any, parsedState as never))) {
                                 result = await h.callback(parsedContext as any, parsedState as never)
                                 handled = true
-                            } else continue
+                            } else {
+                                continue
+                            }
 
                             if (parsedState && this._scenes) {
                                 // check if scene transition was made
@@ -559,6 +567,7 @@ export class Dispatcher<State extends object = never> {
                                                 const scene = parsedState.scene
                                                 const dp = scene ? nextDp._scenes!.get(scene)! : nextDp._parent!
 
+                                                // eslint-disable-next-line ts/return-await
                                                 return dp._dispatchUpdateNowImpl(update, undefined, scene, true)
                                             }
                                         }
@@ -583,6 +592,7 @@ export class Dispatcher<State extends object = never> {
                                     const scene = parsedState.scene
                                     const dp = scene ? this._scenes!.get(scene)! : this._parent!
 
+                                    // eslint-disable-next-line ts/return-await
                                     return dp._dispatchUpdateNowImpl(update, undefined, scene, true)
                                 }
                             }
@@ -765,10 +775,10 @@ export class Dispatcher<State extends object = never> {
     private _prepareChild(child: Dispatcher<any>): void {
         if (child._client) {
             throw new MtArgumentError(
-                'Provided dispatcher is ' +
-                    (child._parent ?
-                        'already a child. Use parent.removeChild() before calling addChild()' :
-                        'already bound to a client. Use unbind() before calling addChild()'),
+                `Provided dispatcher is ${
+                    child._parent
+                        ? 'already a child. Use parent.removeChild() before calling addChild()'
+                        : 'already bound to a client. Use unbind() before calling addChild()'}`,
             )
         }
 
@@ -1070,7 +1080,7 @@ export class Dispatcher<State extends object = never> {
         if (typeof handler === 'number' || typeof handler === 'undefined') {
             this.addUpdateHandler(
                 {
-                    name: name,
+                    name,
                     callback: filter,
                 } as UpdateHandler,
                 handler,

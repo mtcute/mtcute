@@ -105,8 +105,8 @@ You can interpolate one of the following:
 - `number` - will be converted to string and appended to plain text as-is
 - `TextWithEntities` or `MessageEntity` - will add the text and its entities to the output. This is the type returned by `html` itself:
   ```ts
-    const bold = html`**bold**`
-    const text = html`Hello, ${bold}!`
+  const bold = html`**bold**`
+  const text = html`Hello, ${bold}!`
   ```
 - falsy value (i.e. `null`, `undefined`, `false`) - will be ignored
 

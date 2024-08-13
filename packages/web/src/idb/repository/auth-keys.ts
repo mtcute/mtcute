@@ -1,6 +1,6 @@
-import { IAuthKeysRepository } from '@mtcute/core'
+import type { IAuthKeysRepository } from '@mtcute/core'
 
-import { IdbStorageDriver } from '../driver.js'
+import type { IdbStorageDriver } from '../driver.js'
 import { reqToPromise, txToPromise } from '../utils.js'
 
 const TABLE_AUTH_KEYS = 'authKeys'

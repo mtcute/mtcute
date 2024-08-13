@@ -1,12 +1,13 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
-import { MaybeArray } from '../../../types/utils.js'
+import type { MaybeArray } from '../../../types/utils.js'
 import { assertTypeIs, isPresent } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
+
 import { getChatlistPreview } from './get-chatlist-preview.js'
 
 /**
@@ -32,7 +33,7 @@ export async function joinChatlist(
         peers = all.filter(isPresent)
     } else {
         const preview = await getChatlistPreview(client, link)
-        peers = preview.chats.filter((it) => !it.isUnavailable).map((it) => it.inputPeer)
+        peers = preview.chats.filter(it => !it.isUnavailable).map(it => it.inputPeer)
     }
 
     const res = await client.call({
@@ -44,7 +45,7 @@ export async function joinChatlist(
     assertIsUpdatesGroup('joinChatlist', res)
     client.handleClientUpdate(res)
 
-    const filter = res.updates.find((it) => it._ === 'updateDialogFilter') as tl.RawUpdateDialogFilter
+    const filter = res.updates.find(it => it._ === 'updateDialogFilter') as tl.RawUpdateDialogFilter
 
     if (!filter?.filter) {
         throw new MtTypeAssertionError('joinChatlist', 'updateDialogFilter', 'nothing')

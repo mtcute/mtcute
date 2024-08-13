@@ -1,5 +1,6 @@
-import { ITelegramClient } from '../../client.types.js'
-import { ArrayPaginated, ForumTopic, InputPeerLike } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { ArrayPaginated, InputPeerLike } from '../../types/index.js'
+import { ForumTopic } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/index.js'
 import { resolveChannel } from '../users/resolve-peer.js'
 
@@ -64,13 +65,13 @@ export async function getForumTopics(
     const topics = ForumTopic.parseTlForumTopics(res)
 
     const last = topics[topics.length - 1]
-    const next = last ?
-        {
+    const next = last
+        ? {
             date: res.orderByCreateDate ? last.raw.date : last.lastMessage.raw.date,
             id: last.raw.topMessage,
             topic: last.raw.id,
-        } :
-        undefined
+        }
+        : undefined
 
     return makeArrayPaginated(topics, res.count, next)
 }

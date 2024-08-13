@@ -31,7 +31,7 @@ export function createChunkedReader(stream: ReadableStream<Uint8Array>, chunkSiz
     const buffer: Uint8Array[] = []
     let bufferLength = 0
 
-    let next: Uint8Array | undefined = undefined
+    let next: Uint8Array | undefined
     let first = true
 
     async function readInner(): Promise<Uint8Array | undefined> {

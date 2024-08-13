@@ -1,10 +1,11 @@
-import { MaybeArray, MaybePromise, Message } from '@mtcute/core'
+import type { MaybeArray, MaybePromise, Message } from '@mtcute/core'
 
-import { BusinessMessageContext } from '../context/business-message.js'
-import { MessageContext } from '../context/message.js'
+import type { BusinessMessageContext } from '../context/business-message.js'
+import type { MessageContext } from '../context/message.js'
+
 import { chat } from './chat.js'
 import { and, or } from './logic.js'
-import { UpdateFilter } from './types.js'
+import type { UpdateFilter } from './types.js'
 
 /**
  * Filter messages that call the given command(s)..
@@ -22,20 +23,17 @@ import { UpdateFilter } from './types.js'
  *   Can be `null` to disable prefixes altogether
  * @param caseSensitive
  */
-export const command = (
-    commands: MaybeArray<string | RegExp>,
-    {
-        prefixes = '/',
-        caseSensitive = false,
-    }: {
-        prefixes?: MaybeArray<string> | null
-        caseSensitive?: boolean
-    } = {},
-): UpdateFilter<MessageContext | BusinessMessageContext, { command: string[] }> => {
+export function command(commands: MaybeArray<string | RegExp>, {
+    prefixes = '/',
+    caseSensitive = false,
+}: {
+    prefixes?: MaybeArray<string> | null
+    caseSensitive?: boolean
+} = {}): UpdateFilter<MessageContext | BusinessMessageContext, { command: string[] }> {
     if (!Array.isArray(commands)) commands = [commands]
 
     if (!caseSensitive) {
-        commands = commands.map((i) => (typeof i === 'string' ? i.toLowerCase() : i))
+        commands = commands.map(i => (typeof i === 'string' ? i.toLowerCase() : i))
     }
 
     const argumentsRe = /(["'])(.*?)(?<!\\)\1|(\S+)/g
@@ -107,50 +105,50 @@ export const start = and(chat('private'), command('start'))
  */
 export const startGroup = and(or(chat('supergroup'), chat('group')), command('start'))
 
-const deeplinkBase =
-    (base: UpdateFilter<MessageContext | BusinessMessageContext, { command: string[] }>) =>
-        (
-            params: MaybeArray<string | RegExp>,
-        ): UpdateFilter<MessageContext | BusinessMessageContext, { command: string[] }> => {
-            if (!Array.isArray(params)) {
-                return and(start, (_msg: Message) => {
-                    const msg = _msg as Message & { command: string[] }
-
-                    if (msg.command.length !== 2) return false
-
-                    const p = msg.command[1]
-                    if (typeof params === 'string' && p === params) return true
-
-                    const m = p.match(params)
-                    if (!m) return false
-
-                    msg.command.push(...m.slice(1))
-
-                    return true
-                })
-            }
-
-            return and(base, (_msg: Message) => {
+function deeplinkBase(base: UpdateFilter<MessageContext | BusinessMessageContext, { command: string[] }>) {
+    return (
+        params: MaybeArray<string | RegExp>,
+    ): UpdateFilter<MessageContext | BusinessMessageContext, { command: string[] }> => {
+        if (!Array.isArray(params)) {
+            return and(start, (_msg: Message) => {
                 const msg = _msg as Message & { command: string[] }
 
                 if (msg.command.length !== 2) return false
 
                 const p = msg.command[1]
+                if (typeof params === 'string' && p === params) return true
 
-                for (const param of params) {
-                    if (typeof param === 'string' && p === param) return true
+                const m = p.match(params)
+                if (!m) return false
 
-                    const m = p.match(param)
-                    if (!m) continue
+                msg.command.push(...m.slice(1))
 
-                    msg.command.push(...m.slice(1))
-
-                    return true
-                }
-
-                return false
+                return true
             })
         }
+
+        return and(base, (_msg: Message) => {
+            const msg = _msg as Message & { command: string[] }
+
+            if (msg.command.length !== 2) return false
+
+            const p = msg.command[1]
+
+            for (const param of params) {
+                if (typeof param === 'string' && p === param) return true
+
+                const m = p.match(param)
+                if (!m) continue
+
+                msg.command.push(...m.slice(1))
+
+                return true
+            }
+
+            return false
+        })
+    }
+}
 
 /**
  * Filter for deep links (i.e. `/start <deeplink_parameter>`).

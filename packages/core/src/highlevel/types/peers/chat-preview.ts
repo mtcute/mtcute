@@ -1,8 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Photo } from '../media/photo.js'
+
 import { User } from './user.js'
 
 /**
@@ -70,7 +71,7 @@ export class ChatPreview {
      * ordered before others.
      */
     get someMembers(): ReadonlyArray<User> {
-        return this.invite.participants?.map((it) => new User(it)) ?? []
+        return this.invite.participants?.map(it => new User(it)) ?? []
     }
 
     /**

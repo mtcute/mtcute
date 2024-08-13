@@ -1,20 +1,22 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { hasValueAtKey } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MtMessageNotFoundError } from '../errors.js'
 import { DraftMessage, Message } from '../messages/index.js'
-import { parsePeer, Peer } from './peer.js'
+
+import type { Peer } from './peer.js'
+import { parsePeer } from './peer.js'
 import { PeersIndex } from './peers-index.js'
 
 export class ForumTopic {
-    static COLOR_BLUE = 0x6fb9f0
-    static COLOR_YELLOW = 0xffd67e
-    static COLOR_PURPLE = 0xcb86db
-    static COLOR_GREEN = 0x8eee98
-    static COLOR_PINK = 0xff93b2
-    static COLOR_RED = 0xfb6f5f
+    static COLOR_BLUE = 0x6FB9F0
+    static COLOR_YELLOW = 0xFFD67E
+    static COLOR_PURPLE = 0xCB86DB
+    static COLOR_GREEN = 0x8EEE98
+    static COLOR_PINK = 0xFF93B2
+    static COLOR_RED = 0xFB6F5F
 
     constructor(
         readonly raw: tl.RawForumTopic,
@@ -32,7 +34,7 @@ export class ForumTopic {
             messages.set(msg.id, msg)
         })
 
-        return topics.topics.filter(hasValueAtKey('_', 'forumTopic')).map((it) => new ForumTopic(it, peers, messages))
+        return topics.topics.filter(hasValueAtKey('_', 'forumTopic')).map(it => new ForumTopic(it, peers, messages))
     }
 
     /**

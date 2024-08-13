@@ -1,6 +1,6 @@
-import { IReferenceMessagesRepository } from '../../../highlevel/storage/repository/ref-messages.js'
-import { BaseSqliteStorageDriver } from '../driver.js'
-import { ISqliteStatement } from '../types.js'
+import type { IReferenceMessagesRepository } from '../../../highlevel/storage/repository/ref-messages.js'
+import type { BaseSqliteStorageDriver } from '../driver.js'
+import type { ISqliteStatement } from '../types.js'
 
 interface ReferenceMessageDto {
     peer_id: number

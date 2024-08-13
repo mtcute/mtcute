@@ -1,11 +1,12 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../types/errors.js'
-import { PublicPart } from '../../types/utils.js'
+import type { PublicPart } from '../../types/utils.js'
 import type { CurrentUserInfo, CurrentUserService } from '../storage/service/current-user.js'
 import type { PeersService } from '../storage/service/peers.js'
-import { TelegramStorageManager } from '../storage/storage.js'
-import { WorkerInvoker } from './invoker.js'
+import type { TelegramStorageManager } from '../storage/storage.js'
+
+import type { WorkerInvoker } from './invoker.js'
 
 class CurrentUserServiceProxy implements PublicPart<CurrentUserService> {
     private _store

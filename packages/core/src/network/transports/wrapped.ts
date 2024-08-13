@@ -1,7 +1,8 @@
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 
-import { ICryptoProvider, Logger } from '../../utils/index.js'
-import { IPacketCodec } from './abstract.js'
+import type { ICryptoProvider, Logger } from '../../utils/index.js'
+
+import type { IPacketCodec } from './abstract.js'
 
 export abstract class WrappedCodec extends EventEmitter {
     protected _crypto!: ICryptoProvider
@@ -10,8 +11,8 @@ export abstract class WrappedCodec extends EventEmitter {
     constructor(inner: IPacketCodec) {
         super()
         this._inner = inner
-        this._inner.on('error', (err) => this.emit('error', err))
-        this._inner.on('packet', (buf) => this.emit('packet', buf))
+        this._inner.on('error', err => this.emit('error', err))
+        this._inner.on('packet', buf => this.emit('packet', buf))
     }
 
     removeAllListeners(): this {

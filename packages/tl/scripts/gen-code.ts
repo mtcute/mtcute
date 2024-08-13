@@ -1,18 +1,21 @@
-import { readFile, writeFile } from 'fs/promises'
-import { join } from 'path'
+import { readFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 
+import type {
+    TlEntry,
+    TlErrors,
+    TlFullSchema,
+} from '@mtcute/tl-utils'
 import {
     generateReaderCodeForTlEntries,
     generateTypescriptDefinitionsForTlSchema,
     generateWriterCodeForTlEntries,
     parseFullTlSchema,
-    TlEntry,
-    TlErrors,
-    TlFullSchema,
 } from '@mtcute/tl-utils'
 
-import { __dirname, API_SCHEMA_JSON_FILE, ERRORS_JSON_FILE, ESM_PRELUDE, MTP_SCHEMA_JSON_FILE } from './constants.js'
-import { TlPackedSchema, unpackTlSchema } from './schema.js'
+import { API_SCHEMA_JSON_FILE, ERRORS_JSON_FILE, ESM_PRELUDE, MTP_SCHEMA_JSON_FILE, __dirname } from './constants.js'
+import type { TlPackedSchema } from './schema.js'
+import { unpackTlSchema } from './schema.js'
 
 const OUT_TYPINGS_FILE = join(__dirname, '../index.d.ts')
 const OUT_TYPINGS_JS_FILE = join(__dirname, '../index.js')
@@ -24,12 +27,13 @@ async function generateTypings(apiSchema: TlFullSchema, apiLayer: number, mtpSch
     const [apiTs, apiJs] = generateTypescriptDefinitionsForTlSchema(apiSchema, apiLayer, undefined, errors)
     const [mtpTs, mtpJs] = generateTypescriptDefinitionsForTlSchema(mtpSchema, 0, 'mtp')
 
-    await writeFile(OUT_TYPINGS_FILE, apiTs + '\n\n' + mtpTs.replace("import _Long from 'long';", ''))
-    await writeFile(OUT_TYPINGS_JS_FILE, ESM_PRELUDE + apiJs + '\n\n' + mtpJs)
+    await writeFile(OUT_TYPINGS_FILE, `${apiTs}\n\n${mtpTs.replace("import _Long from 'long';", '')}`)
+    await writeFile(OUT_TYPINGS_JS_FILE, `${ESM_PRELUDE + apiJs}\n\n${mtpJs}`)
 }
 
-const removeInternalEntries = (entries: TlEntry[]) =>
-    entries.filter((it) => !it.name.startsWith('mtcute.') || it.name === 'mtcute.customMethod')
+function removeInternalEntries(entries: TlEntry[]) {
+    return entries.filter(it => !it.name.startsWith('mtcute.') || it.name === 'mtcute.customMethod')
+}
 
 async function generateReaders(apiSchema: TlFullSchema, mtpSchema: TlFullSchema) {
     console.log('Generating readers...')
@@ -71,7 +75,7 @@ async function generateWriters(apiSchema: TlFullSchema, mtpSchema: TlFullSchema)
 
     // for mtcute.customMethod we want to generate a writer that writes obj.bytes directly
     const newCode = code.replace(
-        /^('mtcute.customMethod':function\(w,v\){)w.uint\(2440218877\);w.bytes\(h\(v,'bytes'\)\)/m,
+        /^('mtcute.customMethod':function\(w,v\)\{)w.uint\(2440218877\);w.bytes\(h\(v,'bytes'\)\)/m,
         "$1w.raw(h(v,'bytes'))",
     )
 

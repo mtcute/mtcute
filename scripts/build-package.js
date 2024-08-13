@@ -1,12 +1,12 @@
-/* eslint-disable no-inner-declarations */
-import * as cp from 'child_process'
-import * as fs from 'fs'
-import * as glob from 'glob'
-import { createRequire } from 'module'
-import * as path from 'path'
-import ts from 'typescript'
+import * as cp from 'node:child_process'
+import * as fs from 'node:fs'
+import { createRequire } from 'node:module'
+import * as path from 'node:path'
 
+import * as glob from 'glob'
+import ts from 'typescript'
 import * as stc from '@teidesu/slow-types-compiler'
+
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 
 const rootPackageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf-8'))
@@ -217,7 +217,7 @@ function buildPackageJson() {
                 const value = pkgJson.exports[key]
 
                 if (typeof value !== 'string') {
-                    throw new Error('Conditional exports are not supported')
+                    throw new TypeError('Conditional exports are not supported')
                 }
 
                 pkgJson.exports[key] = fixValue(value)
@@ -364,7 +364,7 @@ if (buildConfig.buildTs && !IS_JSR) {
             let content = fs.readFileSync(f, 'utf8')
             let changed = false
 
-            if (content.indexOf('/// <reference types="') !== -1) {
+            if (content.includes('/// <reference types="')) {
                 changed = true
                 content = content.replace(/\/\/\/ <reference types="(node|deno\/ns)".+?\/>\n?/g, '')
             }
@@ -399,7 +399,7 @@ if (buildConfig.buildTs && !IS_JSR) {
                 changedTs = true
                 imp.moduleSpecifier = {
                     kind: ts.SyntaxKind.StringLiteral,
-                    text: mod.slice(0, -3) + '.ts',
+                    text: `${mod.slice(0, -3)}.ts`,
                 }
             }
         }
@@ -419,17 +419,17 @@ if (buildConfig.buildTs && !IS_JSR) {
             setImmediate: '(cb: (...args: any[]) => void, ...args: any[]) => number',
             clearImmediate: '(id: number) => void',
             Buffer:
-                '{ ' +
-                'concat: (...args: any[]) => Uint8Array, ' +
-                'from: (data: any, encoding?: string) => { toString(encoding?: string): string }, ' +
-                ' }',
+                '{ '
+                + 'concat: (...args: any[]) => Uint8Array, '
+                + 'from: (data: any, encoding?: string) => { toString(encoding?: string): string }, '
+                + ' }',
             SharedWorker: ['type', 'never'],
             WorkerGlobalScope:
-                '{ ' +
-                '  new (): typeof WorkerGlobalScope, ' +
-                '  postMessage: (message: any, transfer?: Transferable[]) => void, ' +
-                '  addEventListener: (type: "message", listener: (ev: MessageEvent) => void) => void, ' +
-                ' }',
+                '{ '
+                + '  new (): typeof WorkerGlobalScope, '
+                + '  postMessage: (message: any, transfer?: Transferable[]) => void, '
+                + '  addEventListener: (type: "message", listener: (ev: MessageEvent) => void) => void, '
+                + ' }',
             process: '{ ' + 'hrtime: { bigint: () => bigint }, ' + '}',
         }
 
@@ -442,9 +442,9 @@ if (buildConfig.buildTs && !IS_JSR) {
                 const decl = isType ? decl_[1] : decl_
 
                 if (isType) {
-                    fileContent = `declare type ${name} = ${decl};\n` + fileContent
+                    fileContent = `declare type ${name} = ${decl};\n${fileContent}`
                 } else {
-                    fileContent = `declare const ${name}: ${decl};\n` + fileContent
+                    fileContent = `declare const ${name}: ${decl};\n${fileContent}`
                 }
             }
         }
@@ -489,7 +489,7 @@ if (typeof globalThis !== 'undefined' && !globalThis._MTCUTE_CJS_DEPRECATION_WAR
 
     for (const entry of entrypoints) {
         if (!entry.endsWith('.js')) continue
-        transformFile(path.join(outDir, entry), (content) => `${CJS_DEPRECATION_WARNING}\n${content}`)
+        transformFile(path.join(outDir, entry), content => `${CJS_DEPRECATION_WARNING}\n${content}`)
     }
 }
 
@@ -574,7 +574,7 @@ if (IS_JSR) {
     console.log('[i] Processing with slow-types-compiler...')
     const project = stc.createProject()
     stc.processPackage(project, denoJson)
-    const unsavedSourceFiles = project.getSourceFiles().filter((s) => !s.isSaved())
+    const unsavedSourceFiles = project.getSourceFiles().filter(s => !s.isSaved())
 
     if (unsavedSourceFiles.length > 0) {
         console.log('[v] Changed %d files', unsavedSourceFiles.length)
@@ -614,7 +614,7 @@ if (IS_JSR) {
 try {
     fs.cpSync(path.join(packageDir, 'README.md'), path.join(outDir, 'README.md'))
 } catch (e) {
-    console.log('[!] Failed to copy README.md: ' + e.message)
+    console.log(`[!] Failed to copy README.md: ${e.message}`)
 }
 
 fs.cpSync(path.join(__dirname, '../LICENSE'), path.join(outDir, 'LICENSE'))

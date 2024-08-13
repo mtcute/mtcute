@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/tl'
 
 import { assertNever } from '../../../types/utils.js'
-import { ITelegramClient } from '../../client.types.js'
-import { BotCommands } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { BotCommands } from '../../types/index.js'
 import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 
 /** @internal */

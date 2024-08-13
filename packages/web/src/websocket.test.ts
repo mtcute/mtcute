@@ -1,8 +1,8 @@
-import { describe, expect, it, Mock, MockedObject, vi } from 'vitest'
-
+import type { Mock, MockedObject } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { TransportState } from '@mtcute/core'
 import { getPlatform } from '@mtcute/core/platform.js'
-import { defaultProductionDc, LogManager } from '@mtcute/core/utils.js'
+import { LogManager, defaultProductionDc } from '@mtcute/core/utils.js'
 import { defaultTestCryptoProvider, u8HexDecode } from '@mtcute/test'
 
 import { WebSocketTransport } from './websocket.js'
@@ -94,7 +94,6 @@ describe('WebSocketTransport', () => {
         await vi.waitFor(() => expect(t.state()).toEqual(TransportState.Ready))
 
         await t.close()
-        console.log('kek')
 
         expect(socket.close).toHaveBeenCalled()
     })

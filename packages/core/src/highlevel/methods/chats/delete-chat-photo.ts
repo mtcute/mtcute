@@ -1,5 +1,6 @@
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { MtInvalidPeerTypeError } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerChat, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -26,7 +27,9 @@ export async function deleteChatPhoto(client: ITelegramClient, chatId: InputPeer
             channel: toInputChannel(chat),
             photo: { _: 'inputChatPhotoEmpty' },
         })
-    } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+    } else {
+        throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+    }
 
     client.handleClientUpdate(res)
 }

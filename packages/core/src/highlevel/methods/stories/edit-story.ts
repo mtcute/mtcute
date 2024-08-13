@@ -1,11 +1,12 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { ITelegramClient } from '../../client.types.js'
-import { InputMediaLike, InputPeerLike, InputPrivacyRule, InputText, Story } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputMediaLike, InputPeerLike, InputPrivacyRule, InputText, Story } from '../../types/index.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizePrivacyRules } from '../misc/normalize-privacy-rules.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { _findStoryInUpdate } from './find-in-update.js'
 
 /**
@@ -53,9 +54,9 @@ export async function editStory(
 ): Promise<Story> {
     const { id, peer = 'me', interactiveElements } = params
 
-    let caption: string | undefined = undefined
+    let caption: string | undefined
     let entities: tl.TypeMessageEntity[] | undefined
-    let media: tl.TypeInputMedia | undefined = undefined
+    let media: tl.TypeInputMedia | undefined
 
     if (params.media) {
         media = await _normalizeInputMedia(client, params.media)

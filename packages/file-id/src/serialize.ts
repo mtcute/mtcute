@@ -1,4 +1,5 @@
-import { ITlPlatform, TlBinaryWriter } from '@mtcute/tl-runtime'
+import type { ITlPlatform } from '@mtcute/tl-runtime'
+import { TlBinaryWriter } from '@mtcute/tl-runtime'
 
 import { tdFileId as td } from './types.js'
 import { assertNever, telegramRleEncode } from './utils.js'

@@ -1,7 +1,7 @@
-import { randomUUID } from 'crypto'
-import { appendFileSync } from 'fs'
-import { EOL } from 'os'
-import { fileURLToPath } from 'url'
+import { randomUUID } from 'node:crypto'
+import { appendFileSync } from 'node:fs'
+import { EOL } from 'node:os'
+import { fileURLToPath } from 'node:url'
 
 import { findChangedFilesSince, getCommitsSince, getLatestTag, parseConventionalCommit } from './git-utils.js'
 
@@ -25,13 +25,13 @@ function generateChangelog(onlyPackages) {
         let line = `- ${commit.hash}: ${breaking ? '**❗ BREAKING** ' : ''}${commit.msg}`
 
         if (breaking && commit.description) {
-            line +=
-                '\n' +
-                commit.description
+            line
+                += `\n${
+                 commit.description
                     .trim()
                     .split('\n')
-                    .map((line) => `  ${line}`)
-                    .join('\n')
+                    .map(line => `  ${line}`)
+                    .join('\n')}`
         }
 
         for (const file of changed) {

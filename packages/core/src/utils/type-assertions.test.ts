@@ -65,16 +65,14 @@ describe('assertTypeIs', () => {
     })
 
     it('should throw for incorrect types', () => {
-        // eslint-disable-next-line
         expect(() => assertTypeIs('peerUser', { _: 'peerChannel', channelId: 1 } as any, 'peerUser')).toThrow()
-        // eslint-disable-next-line
+
         expect(() => mtpAssertTypeIs('peerUser', { _: 'mt_rpc_answer_unknown' } as any, 'peerUser')).toThrow()
     })
 })
 
 describe('assertTypeIsNot', () => {
     it('should not throw for correct types', () => {
-        // eslint-disable-next-line
         assertTypeIsNot('peerUser', { _: 'peerChannel', channelId: 1 } as any, 'peerUser')
     })
 

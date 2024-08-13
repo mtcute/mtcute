@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-
 import { createStub } from '@mtcute/test'
 
 import { MtArgumentError } from '../../../types/errors.js'
+
 import { PeersIndex } from './peers-index.js'
 
 describe('PeersIndex', () => {

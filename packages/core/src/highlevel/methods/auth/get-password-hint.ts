@@ -1,4 +1,4 @@
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 
 /**
  * Get your Two-Step Verification password hint.
@@ -10,5 +10,5 @@ export function getPasswordHint(client: ITelegramClient): Promise<string | null>
         .call({
             _: 'account.getPassword',
         })
-        .then((res) => res.hint ?? null)
+        .then(res => res.hint ?? null)
 }

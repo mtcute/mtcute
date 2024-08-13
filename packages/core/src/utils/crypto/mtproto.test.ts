@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-
 import { defaultTestCryptoProvider, u8HexDecode } from '@mtcute/test'
 
 import { getPlatform } from '../../platform.js'
 import { concatBuffers } from '../index.js'
+
 import { createAesIgeForMessage, createAesIgeForMessageOld, generateKeyAndIvFromNonce } from './mtproto.js'
 
 const p = getPlatform()

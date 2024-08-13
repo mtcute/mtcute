@@ -1,4 +1,4 @@
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 
 /**
  * Change user status to offline or online

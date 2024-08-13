@@ -1,11 +1,13 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
+
 import { ChatPermissions } from './chat-permissions.js'
-import { PeersIndex } from './index.js'
 import { User } from './user.js'
+
+import type { PeersIndex } from './index.js'
 
 /**
  * Status of the member:

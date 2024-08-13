@@ -1,4 +1,4 @@
-import { mtp, tl } from '@mtcute/tl'
+import type { mtp, tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../types/errors.js'
 
@@ -66,7 +66,7 @@ export function assertTypeIsNot<T extends tl.TlObject, K extends T['_']>(
     expectedNot: K,
 ): asserts obj is Exclude<T, tl.FindByName<T, K>> {
     if (obj._ === expectedNot) {
-        throw new MtTypeAssertionError(context, 'not ' + expectedNot, obj._)
+        throw new MtTypeAssertionError(context, `not ${expectedNot}`, obj._)
     }
 }
 

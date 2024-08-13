@@ -1,17 +1,17 @@
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 
-const snakeToCamel = (s) => {
+function snakeToCamel(s) {
     return s.replace(/(?<!^|_)(_[a-z0-9])/gi, ($1) => {
         return $1.substr(1).toUpperCase()
     })
 }
 
-const camelToPascal = (s) => s[0].toUpperCase() + s.substr(1)
+const camelToPascal = s => s[0].toUpperCase() + s.substr(1)
 
-const camelToSnake = (s) => {
+function camelToSnake(s) {
     return s.replace(/(?<=[a-zA-Z0-9])([A-Z0-9]+(?=[A-Z]|$)|[A-Z0-9])/g, ($1) => {
-        return '_' + $1.toLowerCase()
+        return `_${$1.toLowerCase()}`
     })
 }
 
@@ -19,8 +19,8 @@ function parseUpdateTypes() {
     const lines = fs
         .readFileSync(path.join(__dirname, 'update-types.txt'), 'utf-8')
         .split('\n')
-        .map((it) => it.trim())
-        .filter((it) => it && it[0] !== '#')
+        .map(it => it.trim())
+        .filter(it => it && it[0] !== '#')
 
     const ret = []
 
@@ -41,11 +41,11 @@ function parseUpdateTypes() {
 }
 
 function replaceSections(filename, sections, dir = __dirname) {
-    let lines = fs.readFileSync(path.join(dir, '../src', filename), 'utf-8').split('\n')
+    const lines = fs.readFileSync(path.join(dir, '../src', filename), 'utf-8').split('\n')
 
     const findMarker = (marker) => {
-        const idx = lines.findIndex((line) => line.trim() === `// ${marker}`)
-        if (idx === -1) throw new Error(marker + ' not found')
+        const idx = lines.findIndex(line => line.trim() === `// ${marker}`)
+        if (idx === -1) throw new Error(`${marker} not found`)
 
         return idx
     }
@@ -79,8 +79,8 @@ function toSentence(type, stype = 'inline') {
 function generateParsedUpdate() {
     replaceSections('highlevel/types/updates/index.ts', {
         codegen:
-            'export type ParsedUpdate =\n' +
-            types.map((typ) => `    | { name: '${typ.typeName}'; data: ${typ.updateType} }\n`).join(''),
+            `export type ParsedUpdate =\n${
+            types.map(typ => `    | { name: '${typ.typeName}'; data: ${typ.updateType} }\n`).join('')}`,
     })
 }
 

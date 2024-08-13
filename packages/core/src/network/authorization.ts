@@ -1,7 +1,6 @@
 import Long from 'long'
-
 import { mtp } from '@mtcute/tl'
-import { TlPublicKey } from '@mtcute/tl/binary/rsa-keys.js'
+import type { TlPublicKey } from '@mtcute/tl/binary/rsa-keys.js'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
 
 import { MtArgumentError, MtSecurityError, MtTypeAssertionError } from '../types/index.js'
@@ -10,18 +9,20 @@ import { findKeyByFingerprints } from '../utils/crypto/keys.js'
 import { millerRabin } from '../utils/crypto/miller-rabin.js'
 import { generateKeyAndIvFromNonce } from '../utils/crypto/mtproto.js'
 import { xorBuffer, xorBufferInPlace } from '../utils/crypto/utils.js'
-import { bigIntModPow, bigIntToBuffer, bufferToBigInt, ICryptoProvider, Logger } from '../utils/index.js'
+import type { ICryptoProvider, Logger } from '../utils/index.js'
+import { bigIntModPow, bigIntToBuffer, bufferToBigInt } from '../utils/index.js'
 import { mtpAssertTypeIs } from '../utils/type-assertions.js'
-import { SessionConnection } from './session-connection.js'
+
+import type { SessionConnection } from './session-connection.js'
 
 // Heavily based on code from https://github.com/LonamiWebs/Telethon/blob/master/telethon/network/authenticator.py
 
 // see https://core.telegram.org/mtproto/security_guidelines
 // const DH_SAFETY_RANGE = bigInt[2].pow(2048 - 64)
 const DH_SAFETY_RANGE = 2n ** (2048n - 64n)
-const KNOWN_DH_PRIME =
-    // eslint-disable-next-line max-len
-    0xc71caeb9c6b1c9048e6c522f70f13f73980d40238e3e21c14934d037563d930f48198a0aa7c14058229493d22530f4dbfa336f6e0ac925139543aed44cce7c3720fd51f69458705ac68cd4fe6b6b13abdc9746512969328454f18faf8c595f642477fe96bb2a941d5bcd1d4ac8cc49880708fa9b378e3c4f3a9060bee67cf9a4a4a695811051907e162753b56b0f6b410dba74d8a84b2a14b3144e0ef1284754fd17ed950d5965b4b9dd46582db1178d169c6bc465b0d6ff9ca3928fef5b9ae4e418fc15e83ebea0f87fa9ff5eed70050ded2849f47bf959d956850ce929851f0d8115f635b105ee2e4e15d04b2454bf6f4fadf034b10403119cd8e3b92fcc5bn
+const KNOWN_DH_PRIME
+
+    = 0xC71CAEB9C6B1C9048E6C522F70F13F73980D40238E3E21C14934D037563D930F48198A0AA7C14058229493D22530F4DBFA336F6E0AC925139543AED44CCE7C3720FD51F69458705AC68CD4FE6B6B13ABDC9746512969328454F18FAF8C595F642477FE96BB2A941D5BCD1D4AC8CC49880708FA9B378E3C4F3A9060BEE67CF9A4A4A695811051907E162753B56B0F6B410DBA74D8A84B2A14B3144E0EF1284754FD17ED950D5965B4B9DD46582DB1178D169C6BC465B0D6FF9CA3928FEF5B9AE4E418FC15E83EBEA0F87FA9FF5EED70050DED2849F47BF959D956850CE929851F0D8115F635B105EE2E4E15D04B2454BF6F4FADF034B10403119CD8E3B92FCC5Bn
 const TWO_POW_2047 = 2n ** 2047n
 const TWO_POW_2048 = 2n ** 2048n
 
@@ -39,7 +40,7 @@ function checkDhPrime(crypto: ICryptoProvider, log: Logger, dhPrime: bigint, g: 
         return
     }
 
-    let checkedPrime = checkedPrimesCache.find((x) => x.prime === dhPrime)
+    let checkedPrime = checkedPrimesCache.find(x => x.prime === dhPrime)
 
     if (!checkedPrime) {
         if (dhPrime <= TWO_POW_2047 || dhPrime >= TWO_POW_2048) {
@@ -190,7 +191,6 @@ export async function doAuthorization(
     crypto: ICryptoProvider,
     expiresIn?: number,
 ): Promise<[Uint8Array, Long, number]> {
-    // eslint-disable-next-line dot-notation
     const session = connection['_session']
     const readerMap = session._readerMap
     const writerMap = session._writerMap
@@ -238,7 +238,7 @@ export async function doAuthorization(
         throw new MtSecurityError('Step 1: invalid nonce from server')
     }
 
-    const serverKeys = resPq.serverPublicKeyFingerprints.map((it) => it.toUnsigned().toString(16))
+    const serverKeys = resPq.serverPublicKeyFingerprints.map(it => it.toUnsigned().toString(16))
     log.debug('received PQ, keys: %j', serverKeys)
 
     // Step 2: DH exchange
@@ -246,7 +246,7 @@ export async function doAuthorization(
 
     if (!publicKey) {
         throw new MtSecurityError(
-            'Step 2: Could not find server public key with any of these fingerprints: ' + serverKeys.join(', '),
+            `Step 2: Could not find server public key with any of these fingerprints: ${serverKeys.join(', ')}`,
         )
     }
     log.debug('found server key, fp = %s, old = %s', publicKey.fingerprint, publicKey.old)
@@ -277,9 +277,9 @@ export async function doAuthorization(
     }
     const pqInnerData = TlBinaryWriter.serializeObject(writerMap, _pqInnerData)
 
-    const encryptedData = publicKey.old ?
-        rsaEncrypt(pqInnerData, crypto, publicKey) :
-        rsaPad(pqInnerData, crypto, publicKey)
+    const encryptedData = publicKey.old
+        ? rsaEncrypt(pqInnerData, crypto, publicKey)
+        : rsaPad(pqInnerData, crypto, publicKey)
 
     log.debug('requesting DH params')
 
@@ -325,10 +325,10 @@ export async function doAuthorization(
     mtpAssertTypeIs('auth step 3', serverDhInner, 'mt_server_DH_inner_data')
 
     if (!buffersEqual(serverDhInner.nonce, nonce)) {
-        throw Error('Step 3: invalid nonce from server')
+        throw new Error('Step 3: invalid nonce from server')
     }
     if (!buffersEqual(serverDhInner.serverNonce, resPq.serverNonce)) {
-        throw Error('Step 3: invalid server nonce from server')
+        throw new Error('Step 3: invalid server nonce from server')
     }
 
     const dhPrime = bufferToBigInt(serverDhInner.dhPrime)
@@ -429,7 +429,7 @@ export async function doAuthorization(
             continue
         }
 
-        if (dhGen._ !== 'mt_dh_gen_ok') throw new Error() // unreachable
+        if (dhGen._ !== 'mt_dh_gen_ok') throw new Error('unreachable')
 
         const expectedHash = crypto.sha1(concatBuffers([newNonce, new Uint8Array([1]), authKeyAuxHash]))
 

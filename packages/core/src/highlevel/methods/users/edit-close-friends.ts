@@ -1,7 +1,8 @@
 import { assertTrue } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
 import { toInputUser } from '../../utils/index.js'
+
 import { resolvePeerMany } from './resolve-peer-many.js'
 
 /**
@@ -26,7 +27,7 @@ export async function editCloseFriendsRaw(client: ITelegramClient, ids: number[]
 export async function editCloseFriends(client: ITelegramClient, ids: InputPeerLike[]): Promise<void> {
     const r = await client.call({
         _: 'contacts.editCloseFriends',
-        id: await resolvePeerMany(client, ids, toInputUser).then((r) =>
+        id: await resolvePeerMany(client, ids, toInputUser).then(r =>
             r.map((u) => {
                 if ('userId' in u) return u.userId
 

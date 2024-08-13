@@ -1,9 +1,11 @@
-import { readStringSession, StringSessionData } from '@mtcute/core/utils.js'
+import type { StringSessionData } from '@mtcute/core/utils.js'
+import { readStringSession } from '@mtcute/core/utils.js'
 
 import { DC_MAPPING_PROD, DC_MAPPING_TEST } from '../dcs.js'
+
 import { parseMtkrutoSession } from './parse.js'
 import { serializeMtkrutoSession } from './serialize.js'
-import { MtkrutoSession } from './types.js'
+import type { MtkrutoSession } from './types.js'
 
 export function convertFromMtkrutoSession(session: MtkrutoSession | string): StringSessionData {
     if (typeof session === 'string') {

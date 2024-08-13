@@ -24,7 +24,7 @@ describe('@mtcute/tl-runtime', () => {
 
     describe('TlBinaryReader', () => {
         const map = {
-            '85337187': function (r) {
+            85337187(r) {
                 const ret = {}
                 ret._ = 'mt_resPQ'
                 ret.nonce = r.int128()
@@ -35,8 +35,8 @@ describe('@mtcute/tl-runtime', () => {
                 return ret
             },
         }
-        const data =
-            '000000000000000001c8831ec97ae55140000000632416053e0549828cca27e966b301a48fece2fca5cf4d33f4a11ea877ba4aa5739073300817ed48941a08f98100000015c4b51c01000000216be86c022bb4c3'
+        const data
+            = '000000000000000001c8831ec97ae55140000000632416053e0549828cca27e966b301a48fece2fca5cf4d33f4a11ea877ba4aa5739073300817ed48941a08f98100000015c4b51c01000000216be86c022bb4c3'
 
         it('should work with Buffers', () => {
             const buf = Buffer.from(data, 'hex')
@@ -64,7 +64,7 @@ describe('@mtcute/tl-runtime', () => {
 
     describe('TlBinaryWriter', () => {
         const map = {
-            mt_resPQ: function (w, obj) {
+            mt_resPQ(w, obj) {
                 w.uint(85337187)
                 w.bytes(obj.pq)
                 w.vector(w.long, obj.serverPublicKeyFingerprints)

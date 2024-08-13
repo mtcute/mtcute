@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { toggleChannelIdMark } from '../../../../utils/peer-utils.js'
 import { assertTypeIs } from '../../../../utils/type-assertions.js'
@@ -9,7 +9,7 @@ import { ChatLocation } from '../chat-location.js'
 import { ChatMember } from '../chat-member.js'
 import { ChatPermissions } from '../chat-permissions.js'
 import { ForumTopic } from '../forum-topic.js'
-import { PeersIndex } from '../peers-index.js'
+import type { PeersIndex } from '../peers-index.js'
 import { User } from '../user.js'
 
 /** A user has joined the channel (in the case of big groups, info of the user that has joined isn't shown) */
@@ -356,43 +356,43 @@ export interface ChatActionTopicDeleted {
 
 /** Chat event action (`null` if unsupported) */
 export type ChatAction =
-    | ChatActionUserJoined
-    | ChatActionUserLeft
-    | ChatActionUserInvited
-    | ChatActionTitleChanged
-    | ChatActionDescriptionChanged
-    | ChatActionUsernameChanged
-    | ChatActionUsernamesChanged
-    | ChatActionPhotoChanged
-    | ChatActionInvitesToggled
-    | ChatActionSignaturesToggled
-    | ChatActionMessagePinned
-    | ChatActionMessageEdited
-    | ChatActionMessageDeleted
-    | ChatActionUserPermissionsChanged
-    | ChatActionUserAdminPermissionsChanged
-    | ChatActionStickersetChanged
-    | ChatActionHistoryToggled
-    | ChatActionDefaultPermissionsChanged
-    | ChatActionPollStopped
-    | ChatActionLinkedChatChanged
-    | ChatActionLocationChanged
-    | ChatActionSlowModeChanged
-    | ChatActionCallStarted
-    | ChatActionCallEnded
-    | ChatActionCallSettingChanged
-    | ChatActionUserJoinedInvite
-    | ChatActionInviteLinkDeleted
-    | ChatActionInviteLinkEdited
-    | ChatActionInviteLinkRevoked
-    | ChatActionUserJoinedApproved
-    | ChatActionTtlChanged
-    | ChatActionNoForwardsToggled
-    | ChatActionForumToggled
-    | ChatActionTopicCreated
-    | ChatActionTopicEdited
-    | ChatActionTopicDeleted
-    | null
+  | ChatActionUserJoined
+  | ChatActionUserLeft
+  | ChatActionUserInvited
+  | ChatActionTitleChanged
+  | ChatActionDescriptionChanged
+  | ChatActionUsernameChanged
+  | ChatActionUsernamesChanged
+  | ChatActionPhotoChanged
+  | ChatActionInvitesToggled
+  | ChatActionSignaturesToggled
+  | ChatActionMessagePinned
+  | ChatActionMessageEdited
+  | ChatActionMessageDeleted
+  | ChatActionUserPermissionsChanged
+  | ChatActionUserAdminPermissionsChanged
+  | ChatActionStickersetChanged
+  | ChatActionHistoryToggled
+  | ChatActionDefaultPermissionsChanged
+  | ChatActionPollStopped
+  | ChatActionLinkedChatChanged
+  | ChatActionLocationChanged
+  | ChatActionSlowModeChanged
+  | ChatActionCallStarted
+  | ChatActionCallEnded
+  | ChatActionCallSettingChanged
+  | ChatActionUserJoinedInvite
+  | ChatActionInviteLinkDeleted
+  | ChatActionInviteLinkEdited
+  | ChatActionInviteLinkRevoked
+  | ChatActionUserJoinedApproved
+  | ChatActionTtlChanged
+  | ChatActionNoForwardsToggled
+  | ChatActionForumToggled
+  | ChatActionTopicCreated
+  | ChatActionTopicEdited
+  | ChatActionTopicDeleted
+  | null
 
 /** @internal */
 export function _actionFromTl(e: tl.TypeChannelAdminLogEventAction, peers: PeersIndex): ChatAction {

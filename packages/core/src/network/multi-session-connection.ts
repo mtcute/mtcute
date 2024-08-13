@@ -1,11 +1,14 @@
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 
-import { mtp, tl } from '@mtcute/tl'
+import type { mtp, tl } from '@mtcute/tl'
 
-import { createControllablePromise, Logger } from '../utils/index.js'
+import type { Logger } from '../utils/index.js'
+import { createControllablePromise } from '../utils/index.js'
+
 import { MtprotoSession } from './mtproto-session.js'
-import { SessionConnection, SessionConnectionParams } from './session-connection.js'
-import { TransportFactory } from './transports/index.js'
+import type { SessionConnectionParams } from './session-connection.js'
+import { SessionConnection } from './session-connection.js'
+import type { TransportFactory } from './transports/index.js'
 
 export class MultiSessionConnection extends EventEmitter {
     private _log: Logger
@@ -160,9 +163,9 @@ export class MultiSessionConnection extends EventEmitter {
             )
 
             if (this.params.isMainConnection && this.params.isMainDcConnection) {
-                conn.on('update', (update) => this.emit('update', update))
+                conn.on('update', update => this.emit('update', update))
             }
-            conn.on('error', (err) => this.emit('error', err, conn))
+            conn.on('error', err => this.emit('error', err, conn))
             conn.on('key-change', (key) => {
                 this.emit('key-change', i, key)
 
@@ -173,7 +176,7 @@ export class MultiSessionConnection extends EventEmitter {
                 }
             })
             conn.on('tmp-key-change', (key, expires) => this.emit('tmp-key-change', i, key, expires))
-            conn.on('future-salts', (salts) => this.emit('future-salts', salts))
+            conn.on('future-salts', salts => this.emit('future-salts', salts))
             conn.on('auth-begin', () => {
                 this._log.debug('received auth-begin from connection %d', i)
                 this.emit('auth-begin', i)
@@ -191,7 +194,7 @@ export class MultiSessionConnection extends EventEmitter {
             conn.on('flood-done', () => {
                 this._log.debug('received flood-done from connection %d', i)
 
-                this._connections.forEach((it) => it.flushWhenIdle())
+                this._connections.forEach(it => it.flushWhenIdle())
             })
 
             this._connections.push(conn)
@@ -202,8 +205,8 @@ export class MultiSessionConnection extends EventEmitter {
 
     _destroyed = false
     async destroy(): Promise<void> {
-        await Promise.all(this._connections.map((conn) => conn.destroy()))
-        this._sessions.forEach((sess) => sess.reset())
+        await Promise.all(this._connections.map(conn => conn.destroy()))
+        this._sessions.forEach(sess => sess.reset())
         this.removeAllListeners()
 
         this._destroyed = true
@@ -320,7 +323,7 @@ export class MultiSessionConnection extends EventEmitter {
     }
 
     changeTransport(factory: TransportFactory): void {
-        this._connections.forEach((conn) => conn.changeTransport(factory))
+        this._connections.forEach(conn => conn.changeTransport(factory))
     }
 
     getPoolSize(): number {

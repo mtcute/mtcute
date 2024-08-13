@@ -1,7 +1,7 @@
 import Long from 'long'
 
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { User } from '../../types/index.js'
 
 /**
@@ -14,5 +14,5 @@ export async function getContacts(client: ITelegramClient): Promise<User[]> {
     })
     assertTypeIs('getContacts', res, 'contacts.contacts')
 
-    return res.users.map((user) => new User(user))
+    return res.users.map(user => new User(user))
 }

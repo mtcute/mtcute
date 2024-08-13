@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
-
 import { Long } from '@mtcute/core'
 import { setPlatform } from '@mtcute/core/platform.js'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
@@ -19,7 +17,7 @@ Deno.test('encodings', () => {
 
 Deno.test('TlBinaryReader', () => {
     const map = {
-        '85337187': function (r: any) {
+        85337187(r: any) {
             const ret: any = {}
             ret._ = 'mt_resPQ'
             ret.nonce = r.int128()
@@ -30,8 +28,8 @@ Deno.test('TlBinaryReader', () => {
             return ret
         },
     }
-    const data =
-        '000000000000000001c8831ec97ae55140000000632416053e0549828cca27e966b301a48fece2fca5cf4d33f4a11ea877ba4aa5739073300817ed48941a08f98100000015c4b51c01000000216be86c022bb4c3'
+    const data
+        = '000000000000000001c8831ec97ae55140000000632416053e0549828cca27e966b301a48fece2fca5cf4d33f4a11ea877ba4aa5739073300817ed48941a08f98100000015c4b51c01000000216be86c022bb4c3'
     const buf = p.hexDecode(data)
 
     const r = new TlBinaryReader(map, buf, 8)
@@ -45,7 +43,7 @@ Deno.test('TlBinaryReader', () => {
 
 Deno.test('TlBinaryWriter', () => {
     const map = {
-        mt_resPQ: function (w: any, obj: any) {
+        mt_resPQ(w: any, obj: any) {
             w.uint(85337187)
             w.bytes(obj.pq)
             w.vector(w.long, obj.serverPublicKeyFingerprints)

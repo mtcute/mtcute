@@ -1,4 +1,4 @@
-import { TlEntry } from './types.js'
+import type { TlEntry } from './types.js'
 import { stringifyArgumentType } from './utils.js'
 
 function normalizeType(s: string): string {
@@ -21,7 +21,7 @@ export function writeTlEntryToString(entry: TlEntry, forIdComputation = false): 
     let str = entry.name
 
     if (!forIdComputation && entry.id) {
-        str += '#' + entry.id.toString(16)
+        str += `#${entry.id.toString(16)}`
     }
 
     str += ' '
@@ -29,9 +29,9 @@ export function writeTlEntryToString(entry: TlEntry, forIdComputation = false): 
     if (entry.generics) {
         for (const g of entry.generics) {
             if (forIdComputation) {
-                str += g.name + ':' + g.type + ' '
+                str += `${g.name}:${g.type} `
             } else {
-                str += '{' + g.name + ':' + g.type + '} '
+                str += `{${g.name}:${g.type}} `
             }
         }
     }
@@ -41,23 +41,23 @@ export function writeTlEntryToString(entry: TlEntry, forIdComputation = false): 
             continue
         }
 
-        str += arg.name + ':'
+        str += `${arg.name}:`
 
         const type = stringifyArgumentType(arg.type, arg.typeModifiers)
 
         if (forIdComputation) {
-            str += normalizeType(type) + ' '
+            str += `${normalizeType(type)} `
         } else {
-            str += type + ' '
+            str += `${type} `
         }
     }
 
     const type = entry.typeModifiers ? stringifyArgumentType(entry.type, entry.typeModifiers) : entry.type
 
     if (forIdComputation) {
-        str += '= ' + normalizeType(type)
+        str += `= ${normalizeType(type)}`
     } else {
-        str += '= ' + type + ';'
+        str += `= ${type};`
     }
 
     return str

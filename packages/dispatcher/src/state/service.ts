@@ -1,6 +1,6 @@
-import { asyncResettable, LruMap } from '@mtcute/core/utils.js'
+import { LruMap, asyncResettable } from '@mtcute/core/utils.js'
 
-import { IStateStorageProvider } from './provider.js'
+import type { IStateStorageProvider } from './provider.js'
 
 const makeCurrentSceneKey = (key: string) => `$current_scene_${key}`
 
@@ -15,6 +15,7 @@ export class StateService {
         await this.provider.driver.load?.()
         this._loaded = true
     })
+
     async load() {
         await this._load.run()
         this._vacuumTimer = setInterval(() => {

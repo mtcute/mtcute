@@ -1,10 +1,12 @@
 import { MtArgumentError } from '../../../types/errors.js'
 import { randomLong } from '../../../utils/long-utils.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, Message, PeersIndex } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { Message, PeersIndex } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { _normalizeQuickReplyShortcut } from './send-common.js'
 
 // @exported
@@ -151,6 +153,6 @@ export async function forwardMessages(
     return forwardMessagesById(client, {
         ...rest,
         fromChatId: messages[0].chat.inputPeer,
-        messages: messages.map((it) => it.id),
+        messages: messages.map(it => it.id),
     })
 }

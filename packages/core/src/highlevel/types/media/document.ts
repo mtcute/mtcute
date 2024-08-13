@@ -1,10 +1,11 @@
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { getPlatform } from '../../../platform.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { FileLocation } from '../files/index.js'
+
 import { Thumbnail } from './thumbnail.js'
 
 /**
@@ -36,9 +37,9 @@ export abstract class RawDocument extends FileLocation {
      * attributes.
      */
     get fileName(): string | null {
-        const attr = this.raw.attributes.find((it) => it._ === 'documentAttributeFilename')
+        const attr = this.raw.attributes.find(it => it._ === 'documentAttributeFilename')
 
-        return attr ? (attr as tl.RawDocumentAttributeFilename).fileName : null
+        return attr?.fileName ?? null
     }
 
     /**
@@ -63,8 +64,8 @@ export abstract class RawDocument extends FileLocation {
     get thumbnails(): ReadonlyArray<Thumbnail> {
         const arr: Thumbnail[] = []
 
-        this.raw.thumbs?.forEach((sz) => arr.push(new Thumbnail(this.raw, sz)))
-        this.raw.videoThumbs?.forEach((sz) => arr.push(new Thumbnail(this.raw, sz)))
+        this.raw.thumbs?.forEach(sz => arr.push(new Thumbnail(this.raw, sz)))
+        this.raw.videoThumbs?.forEach(sz => arr.push(new Thumbnail(this.raw, sz)))
 
         return arr
     }

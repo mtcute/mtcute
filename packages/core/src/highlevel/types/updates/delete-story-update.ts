@@ -1,6 +1,7 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { parsePeer, Peer, PeersIndex } from '../../types/peers/index.js'
+import type { Peer, PeersIndex } from '../../types/peers/index.js'
+import { parsePeer } from '../../types/peers/index.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 

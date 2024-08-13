@@ -3,11 +3,11 @@ import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 
 import { CurrentUserService } from '../../../highlevel/storage/service/current-user.js'
 import { UpdatesStateService } from '../../../highlevel/storage/service/updates.js'
-import { IKeyValueRepository } from '../../repository/key-value.js'
-import { ServiceOptions } from '../../service/base.js'
+import type { IKeyValueRepository } from '../../repository/key-value.js'
+import type { ServiceOptions } from '../../service/base.js'
 import { DefaultDcsService } from '../../service/default-dcs.js'
-import { BaseSqliteStorageDriver } from '../driver.js'
-import { ISqliteStatement } from '../types.js'
+import type { BaseSqliteStorageDriver } from '../driver.js'
+import type { ISqliteStatement } from '../types.js'
 
 interface KeyValueDto {
     key: string
@@ -33,12 +33,11 @@ export class SqliteKeyValueRepository implements IKeyValueRepository {
 
         // awkward dependencies, unsafe code, awful crutches
         // all in the name of backwards compatibility
-        /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */
-        /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-floating-promises */
-        /* eslint-disable @typescript-eslint/no-unsafe-argument */
+        /* eslint-disable ts/no-unsafe-assignment, ts/no-floating-promises */
+        /* eslint-disable ts/no-unsafe-argument */
         _driver.registerLegacyMigration('kv', (db) => {
             // fetch all values from the old table
-            const all = db.prepare('select key, value from kv').all() as { key: string; value: string }[]
+            const all = db.prepare('select key, value from kv').all() as { key: string, value: string }[]
             const obj: Record<string, any> = {}
 
             for (const { key, value } of all) {
@@ -52,7 +51,6 @@ export class SqliteKeyValueRepository implements IKeyValueRepository {
                 driver: this._driver,
                 readerMap: __tlReaderMap,
                 writerMap: __tlWriterMap,
-                // eslint-disable-next-line dot-notation
                 log: this._driver['_log'],
             }
 
@@ -85,9 +83,8 @@ export class SqliteKeyValueRepository implements IKeyValueRepository {
                 new DefaultDcsService(this, options).store(obj.def_dc)
             }
         })
-        /* eslint-enable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */
-        /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-floating-promises */
-        /* eslint-enable @typescript-eslint/no-unsafe-argument */
+        /* eslint-enable ts/no-unsafe-assignment, ts/no-floating-promises */
+        /* eslint-enable ts/no-unsafe-argument */
     }
 
     private _set!: ISqliteStatement

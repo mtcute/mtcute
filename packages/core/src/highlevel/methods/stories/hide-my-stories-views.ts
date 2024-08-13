@@ -1,6 +1,6 @@
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { hasValueAtKey } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { StoriesStealthMode } from '../../types/stories/stealth-mode.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 

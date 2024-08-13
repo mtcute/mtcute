@@ -1,4 +1,4 @@
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { PeersIndex } from '../../types/index.js'
 import { BoostSlot } from '../../types/premium/boost-slot.js'
 
@@ -15,5 +15,5 @@ export async function getMyBoostSlots(client: ITelegramClient): Promise<BoostSlo
 
     const peers = PeersIndex.from(res)
 
-    return res.myBoosts.map((it) => new BoostSlot(it, peers))
+    return res.myBoosts.map(it => new BoostSlot(it, peers))
 }

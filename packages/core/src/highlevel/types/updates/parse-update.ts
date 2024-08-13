@@ -1,6 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-argument */
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
+import type {
+    ParsedUpdate,
+    PeersIndex,
+} from '../index.js'
 import {
     BotChatJoinRequestUpdate,
     BotReactionCountUpdate,
@@ -20,8 +23,6 @@ import {
     InlineCallbackQuery,
     InlineQuery,
     Message,
-    ParsedUpdate,
-    PeersIndex,
     PollUpdate,
     PollVoteUpdate,
     PreCheckoutQuery,

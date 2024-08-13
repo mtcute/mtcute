@@ -1,5 +1,5 @@
-import { IKeyValueRepository } from '../../repository/key-value.js'
-import { MemoryStorageDriver } from '../driver.js'
+import type { IKeyValueRepository } from '../../repository/key-value.js'
+import type { MemoryStorageDriver } from '../driver.js'
 
 export class MemoryKeyValueRepository implements IKeyValueRepository {
     readonly state

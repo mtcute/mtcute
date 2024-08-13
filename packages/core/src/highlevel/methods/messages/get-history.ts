@@ -1,10 +1,10 @@
 import Long from 'long'
-
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { ArrayPaginated, InputPeerLike, Message, PeersIndex } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { ArrayPaginated, InputPeerLike } from '../../types/index.js'
+import { Message, PeersIndex } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -119,17 +119,17 @@ export async function getHistory(
     assertTypeIsNot('getHistory', res, 'messages.messagesNotModified')
 
     const peers = PeersIndex.from(res)
-    const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(msg, peers))
+    const msgs = res.messages.filter(msg => msg._ !== 'messageEmpty').map(msg => new Message(msg, peers))
 
     if (reverse) msgs.reverse()
 
     const last = msgs[msgs.length - 1]
-    const next = last ?
-        {
+    const next = last
+        ? {
             id: last.id + (reverse ? 1 : 0),
             date: last.raw.date,
-        } :
-        undefined
+        }
+        : undefined
 
     return makeArrayPaginated(msgs, (res as tl.messages.RawMessagesSlice).count ?? msgs.length, next)
 }

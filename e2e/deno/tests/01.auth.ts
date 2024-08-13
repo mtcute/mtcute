@@ -1,14 +1,14 @@
 import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
-
-import { tl, User } from '@mtcute/core'
+import { User, tl } from '@mtcute/core'
 import { BaseTelegramClient, TelegramClient } from '@mtcute/core/client.js'
 
 import { getApiParams } from '../utils.ts'
 
-const getAccountId = () =>
-    Math.floor(Math.random() * 10000)
+function getAccountId() {
+    return Math.floor(Math.random() * 10000)
         .toString()
         .padStart(4, '0')
+}
 
 async function authorizeInDc(dc: number, base: BaseTelegramClient) {
     const tg = new TelegramClient({ client: base })

@@ -1,8 +1,8 @@
-import { BaseNodeCryptoProvider, IEncryptionScheme } from '@mtcute/node/utils.js'
+import type { IEncryptionScheme } from '@mtcute/node/utils.js'
+import { BaseNodeCryptoProvider } from '@mtcute/node/utils.js'
 
 import { native } from './native.cjs'
 
-// eslint-disable-next-line camelcase
 const { ige256_decrypt, ige256_encrypt } = native
 
 /**

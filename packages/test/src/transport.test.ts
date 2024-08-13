@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest'
-
 import { MemoryStorage } from '@mtcute/core'
 import { BaseTelegramClient } from '@mtcute/core/client.js'
 

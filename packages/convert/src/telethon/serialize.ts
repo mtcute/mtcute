@@ -3,7 +3,8 @@ import { getPlatform } from '@mtcute/core/platform.js'
 import { dataViewFromBuffer } from '@mtcute/core/utils.js'
 
 import { serializeIpv4ToBytes, serializeIpv6ToBytes } from '../utils/ip.js'
-import { TelethonSession } from './types.js'
+
+import type { TelethonSession } from './types.js'
 
 export function serializeTelethonSession(session: TelethonSession) {
     if (session.authKey.length !== 256) {
@@ -33,5 +34,5 @@ export function serializeTelethonSession(session: TelethonSession) {
     let b64 = getPlatform().base64Encode(u8, true)
     while (b64.length % 4 !== 0) b64 += '=' // for some reason telethon uses padding
 
-    return '1' + b64
+    return `1${b64}`
 }

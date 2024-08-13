@@ -1,4 +1,3 @@
-/* eslint-disable indent,func-call-spacing */
 import { deeplinkBuilder } from './common.js'
 
 /**
@@ -18,10 +17,10 @@ export const chatInvite = deeplinkBuilder<{ hash: string }>({
     },
     externalBuild: ({ hash }) => [`+${hash}`, null],
     externalParse: (path) => {
-        const m = path.match(/^(?:\+|joinchat\/)([a-zA-Z0-9_-]+)$/)
+        const m = path.match(/^(?:\+|joinchat\/)([\w-]+)$/)
         if (!m) return null
 
-        if (m[1].match(/^[0-9]+$/)) {
+        if (m[1].match(/^\d+$/)) {
             // phone number
             return null
         }
@@ -63,7 +62,7 @@ function parseMediaTimestamp(timestamp: string) {
         return Number(m[1]) * 60 + Number(m[2])
     }
 
-    if ((m = timestamp.match(/^(?:(\d+)h)?(?:(\d{1,2})m)?(?:(\d{1,2})s)$/))) {
+    if ((m = timestamp.match(/^(?:(\d+)h)?(?:(\d{1,2})m)?(\d{1,2})s$/))) {
         return (Number(m[1]) || 0) * 3600 + (Number(m[2]) || 0) * 60 + (Number(m[3]) || 0)
     }
 
@@ -103,101 +102,101 @@ export const message = deeplinkBuilder<
         single?: boolean
     }
 >({
-    internalBuild: (params) => {
-        const common = {
-            post: params.id,
-            thread: params.threadId,
-            comment: params.commentId,
-            t: params.mediaTimestamp,
-            single: params.single ? '' : undefined,
-        }
+            internalBuild: (params) => {
+                const common = {
+                    post: params.id,
+                    thread: params.threadId,
+                    comment: params.commentId,
+                    t: params.mediaTimestamp,
+                    single: params.single ? '' : undefined,
+                }
 
-        if ('username' in params) {
-            return ['resolve', { domain: params.username, ...common }]
-        }
+                if ('username' in params) {
+                    return ['resolve', { domain: params.username, ...common }]
+                }
 
-        return ['privatepost', { channel: params.channelId, ...common }]
-    },
-    internalParse: (path, query) => {
-        const common = {
-            id: Number(query.get('post')),
-            threadId: query.has('thread') ? Number(query.get('thread')) : undefined,
-            commentId: query.has('comment') ? Number(query.get('comment')) : undefined,
-            mediaTimestamp: query.has('t') ? parseMediaTimestamp(query.get('t')!) : undefined,
-            single: query.has('single'),
-        }
+                return ['privatepost', { channel: params.channelId, ...common }]
+            },
+            internalParse: (path, query) => {
+                const common = {
+                    id: Number(query.get('post')),
+                    threadId: query.has('thread') ? Number(query.get('thread')) : undefined,
+                    commentId: query.has('comment') ? Number(query.get('comment')) : undefined,
+                    mediaTimestamp: query.has('t') ? parseMediaTimestamp(query.get('t')!) : undefined,
+                    single: query.has('single'),
+                }
 
-        if (path === 'resolve') {
-            const username = query.get('domain')
-            if (!username) return null
+                if (path === 'resolve') {
+                    const username = query.get('domain')
+                    if (!username) return null
 
-            return { username, ...common }
-        }
+                    return { username, ...common }
+                }
 
-        if (path === 'privatepost') {
-            const channelId = Number(query.get('channel'))
-            if (!channelId) return null
+                if (path === 'privatepost') {
+                    const channelId = Number(query.get('channel'))
+                    if (!channelId) return null
 
-            return { channelId, ...common }
-        }
+                    return { channelId, ...common }
+                }
 
-        return null
-    },
+                return null
+            },
 
-    externalBuild: (params) => {
-        const common = {
-            comment: params.commentId,
-            t: params.mediaTimestamp,
-            single: params.single ? '' : undefined,
-        }
+            externalBuild: (params) => {
+                const common = {
+                    comment: params.commentId,
+                    t: params.mediaTimestamp,
+                    single: params.single ? '' : undefined,
+                }
 
-        if ('username' in params) {
-            if (params.threadId) {
-                return [`${params.username}/${params.threadId}/${params.id}`, common]
-            }
+                if ('username' in params) {
+                    if (params.threadId) {
+                        return [`${params.username}/${params.threadId}/${params.id}`, common]
+                    }
 
-            return [`${params.username}/${params.id}`, common]
-        }
+                    return [`${params.username}/${params.id}`, common]
+                }
 
-        if (params.threadId) {
-            return [`c/${params.channelId}/${params.threadId}/${params.id}`, common]
-        }
+                if (params.threadId) {
+                    return [`c/${params.channelId}/${params.threadId}/${params.id}`, common]
+                }
 
-        return [`c/${params.channelId}/${params.id}`, common]
-    },
-    externalParse: (path, query) => {
-        const chunks = path.split('/')
+                return [`c/${params.channelId}/${params.id}`, common]
+            },
+            externalParse: (path, query) => {
+                const chunks = path.split('/')
 
-        if (chunks.length < 2) return null
+                if (chunks.length < 2) return null
 
-        const id = Number(chunks[chunks.length - 1])
-        if (isNaN(id)) return null
+                const id = Number(chunks[chunks.length - 1])
+                if (Number.isNaN(id)) return null
 
-        const common = {
-            id,
-            commentId: query.has('comment') ? Number(query.get('comment')) : undefined,
-            mediaTimestamp: query.has('t') ? parseMediaTimestamp(query.get('t')!) : undefined,
-            single: query.has('single'),
-        }
+                const common = {
+                    id,
+                    commentId: query.has('comment') ? Number(query.get('comment')) : undefined,
+                    mediaTimestamp: query.has('t') ? parseMediaTimestamp(query.get('t')!) : undefined,
+                    single: query.has('single'),
+                }
 
-        if (chunks[0] === 'c') {
-            const channelId = Number(chunks[1])
-            if (isNaN(channelId)) return null
+                if (chunks[0] === 'c') {
+                    const channelId = Number(chunks[1])
+                    if (Number.isNaN(channelId)) return null
 
-            return {
-                channelId,
-                threadId: chunks[3] ? Number(chunks[2]) : undefined,
-                ...common,
-            }
-        }
+                    return {
+                        channelId,
+                        threadId: chunks[3] ? Number(chunks[2]) : undefined,
+                        ...common,
+                    }
+                }
 
-        const username = chunks[0]
-        if (username[0] === '+') return null
+                const username = chunks[0]
+                if (username[0] === '+') return null
 
-        return {
-            username,
-            threadId: chunks[2] ? Number(chunks[1]) : undefined,
-            ...common,
-        }
-    },
-})
+                return {
+                    username,
+                    threadId: chunks[2] ? Number(chunks[1]) : undefined,
+                    ...common,
+                }
+            },
+        })

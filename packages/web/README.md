@@ -31,6 +31,9 @@ You can also use this package with web workers to offload most of the heavy lift
 // worker.ts
 import { BaseTelegramClient, TelegramWorker } from '@mtcute/web'
 
+// main.ts
+import { TelegramClient, TelegramWorkerPort } from '@mtcute/web'
+
 const client = new BaseTelegramClient({
     apiId: 12345,
     apiHash: 'abcdef',
@@ -38,9 +41,6 @@ const client = new BaseTelegramClient({
 })
 
 new TelegramWorker({ client })
-
-// main.ts
-import { TelegramClient, TelegramWorkerPort } from '@mtcute/web'
 
 const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' }) // or SharedWorker
 const port = new TelegramWorkerPort({ worker })

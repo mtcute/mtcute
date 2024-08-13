@@ -143,7 +143,7 @@ describe('Deque', () => {
         d.pushBack(4)
         d.pushBack(5)
 
-        d.removeBy((it) => it >= 2)
+        d.removeBy(it => it >= 2)
 
         expect(d.toArray()).eql([1, 3, 4, 5])
     })

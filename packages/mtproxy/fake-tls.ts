@@ -1,16 +1,18 @@
 /* eslint-disable no-restricted-globals */
-import { IPacketCodec, WrappedCodec } from '@mtcute/node'
-import { bigIntModInv, bigIntModPow, bigIntToBuffer, bufferToBigInt, ICryptoProvider } from '@mtcute/node/utils.js'
+import type { IPacketCodec } from '@mtcute/node'
+import { WrappedCodec } from '@mtcute/node'
+import type { ICryptoProvider } from '@mtcute/node/utils.js'
+import { bigIntModInv, bigIntModPow, bigIntToBuffer, bufferToBigInt } from '@mtcute/node/utils.js'
 
 const MAX_TLS_PACKET_LENGTH = 2878
 const TLS_FIRST_PREFIX = Buffer.from('140303000101', 'hex')
 
 // ref: https://github.com/tdlib/td/blob/master/td/mtproto/TlsInit.cpp
-const KEY_MOD = 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffedn
+const KEY_MOD = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEDn
 // 2^255 - 19
-const QUAD_RES_MOD = 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffedn
+const QUAD_RES_MOD = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEDn
 // (mod - 1) / 2 = 2^254 - 10
-const QUAD_RES_POW = 0x3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6n
+const QUAD_RES_POW = 0x3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6n
 
 function _getY2(x: bigint, mod: bigint): bigint {
     // returns y = x^3 + x^2 * 486662 + x
@@ -45,14 +47,14 @@ function _isQuadraticResidue(a: bigint): boolean {
 }
 
 interface TlsOperationHandler {
-    string(buf: Buffer): void
-    zero(size: number): void
-    random(size: number): void
-    domain(): void
-    grease(seed: number): void
-    beginScope(): void
-    endScope(): void
-    key(): void
+    string: (buf: Buffer) => void
+    zero: (size: number) => void
+    random: (size: number) => void
+    domain: () => void
+    grease: (seed: number) => void
+    beginScope: () => void
+    endScope: () => void
+    key: () => void
 }
 
 function executeTlsOperations(h: TlsOperationHandler): void {
@@ -148,7 +150,7 @@ function initGrease(crypto: ICryptoProvider, size: number): Buffer {
     const buf = crypto.randomBytes(size)
 
     for (let i = 0; i < size; i++) {
-        buf[i] = (buf[i] & 0xf0) + 0x0a
+        buf[i] = (buf[i] & 0xF0) + 0x0A
     }
 
     for (let i = 1; i < size; i += 2) {

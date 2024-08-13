@@ -41,8 +41,8 @@ export function serializeIpv6ToBytes(ip: string, buf: Uint8Array) {
     }
 
     for (let i = 0; i < 8; i++) {
-        const val = parseInt(parts[i], 16)
+        const val = Number.parseInt(parts[i], 16)
         buf[i * 2] = val >> 8
-        buf[i * 2 + 1] = val & 0xff
+        buf[i * 2 + 1] = val & 0xFF
     }
 }

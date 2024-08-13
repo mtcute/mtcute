@@ -1,37 +1,37 @@
 {
-    "name": "@mtcute/tl",
-    "version": "185.1.0",
-    "description": "TL schema used for mtcute",
-    "author": "alina sireneva <alina@tei.su>",
-    "license": "MIT",
-    "scripts": {
-        "test": "tsc --noEmit --esModuleInterop tests/types.ts",
-        "fetch-mtp": "node --loader ts-node/esm scripts/fetch-mtp.ts",
-        "fetch-api": "node --loader ts-node/esm scripts/fetch-api.ts",
-        "fetch-errors": "node --loader ts-node/esm scripts/fetch-errors.ts",
-        "docs-cli": "node --loader ts-node/esm scripts/documentation.ts",
-        "gen-code": "node --loader ts-node/esm scripts/gen-code.ts",
-        "gen-rsa": "node --loader ts-node/esm scripts/gen-rsa-keys.ts",
-        "fetch-and-gen": "pnpm run fetch-api && pnpm run gen-code",
-        "build": "pnpm run -w build-package tl"
-    },
-    "dependencies": {
-        "long": "5.2.3"
-    },
-    "devDependencies": {
-        "@mtcute/core": "workspace:^",
-        "@mtcute/node": "workspace:^",
-        "@mtcute/tl-utils": "workspace:^",
-        "@types/js-yaml": "^4.0.5",
-        "cheerio": "1.0.0-rc.12",
-        "csv-parse": "^5.5.0",
-        "eager-async-pool": "^1.0.0",
-        "js-yaml": "4.1.0"
-    },
-    "typedoc": {
-        "entryPoint": "index.d.ts"
-    },
-    "jsrOnlyFields": {
-        "exports": {}
-    }
+  "name": "@mtcute/tl",
+  "version": "185.1.0",
+  "description": "TL schema used for mtcute",
+  "author": "alina sireneva <alina@tei.su>",
+  "license": "MIT",
+  "scripts": {
+    "test": "tsc --noEmit --esModuleInterop tests/types.ts",
+    "fetch-mtp": "node --loader ts-node/esm scripts/fetch-mtp.ts",
+    "fetch-api": "node --loader ts-node/esm scripts/fetch-api.ts",
+    "fetch-errors": "node --loader ts-node/esm scripts/fetch-errors.ts",
+    "docs-cli": "node --loader ts-node/esm scripts/documentation.ts",
+    "gen-code": "node --loader ts-node/esm scripts/gen-code.ts",
+    "gen-rsa": "node --loader ts-node/esm scripts/gen-rsa-keys.ts",
+    "fetch-and-gen": "pnpm run fetch-api && pnpm run gen-code",
+    "build": "pnpm run -w build-package tl"
+  },
+  "dependencies": {
+    "long": "5.2.3"
+  },
+  "devDependencies": {
+    "@mtcute/core": "workspace:^",
+    "@mtcute/node": "workspace:^",
+    "@mtcute/tl-utils": "workspace:^",
+    "@types/js-yaml": "^4.0.5",
+    "cheerio": "1.0.0-rc.12",
+    "csv-parse": "^5.5.0",
+    "eager-async-pool": "^1.0.0",
+    "js-yaml": "4.1.0"
+  },
+  "typedoc": {
+    "entryPoint": "index.d.ts"
+  },
+  "jsrOnlyFields": {
+    "exports": {}
+  }
 }

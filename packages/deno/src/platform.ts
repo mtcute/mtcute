@@ -1,4 +1,4 @@
-import { ICorePlatform } from '@mtcute/core/platform.js'
+import type { ICorePlatform } from '@mtcute/core/platform.js'
 
 import { base64Decode, base64Encode } from './common-internals-web/base64.js'
 import { hexDecode, hexEncode } from './common-internals-web/hex.js'
@@ -17,9 +17,9 @@ export class DenoPlatform implements ICorePlatform {
     }
 
     getDefaultLogLevel(): number | null {
-        const envLogLevel = parseInt(Deno.env.get('MTCUTE_LOG_LEVEL') ?? '')
+        const envLogLevel = Number.parseInt(Deno.env.get('MTCUTE_LOG_LEVEL') ?? '')
 
-        if (!isNaN(envLogLevel)) {
+        if (!Number.isNaN(envLogLevel)) {
             return envLogLevel
         }
 

@@ -1,18 +1,20 @@
 /* eslint-disable no-restricted-globals */
 // todo fixme
 
-import { connect } from 'net'
+import { connect } from 'node:net'
 
+import type {
+    IPacketCodec,
+    tl,
+} from '@mtcute/node'
 import {
     BaseTcpTransport,
     IntermediatePacketCodec,
-    IPacketCodec,
-    MtcuteError,
     MtSecurityError,
     MtUnsupportedError,
+    MtcuteError,
     ObfuscatedPacketCodec,
     PaddedIntermediatePacketCodec,
-    tl,
     TransportState,
 } from '@mtcute/node'
 import { buffersEqual } from '@mtcute/node/utils.js'
@@ -81,10 +83,10 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
 
         if (secret.length === 16) {
             this._rawSecret = secret
-        } else if (secret.length === 17 && secret[0] === 0xdd) {
+        } else if (secret.length === 17 && secret[0] === 0xDD) {
             this._rawSecret = secret.slice(1)
             this._randomPadding = true
-        } else if (secret.length >= 18 && secret[0] === 0xee) {
+        } else if (secret.length >= 18 && secret[0] === 0xEE) {
             this._rawSecret = secret.slice(1, 17)
             this._fakeTlsDomain = secret.slice(17).toString()
         } else {
@@ -141,8 +143,8 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
             }
 
             this._packetCodec.setup?.(this._crypto, this.log)
-            this._packetCodec.on('error', (err) => this.emit('error', err))
-            this._packetCodec.on('packet', (buf) => this.emit('message', buf))
+            this._packetCodec.on('error', err => this.emit('error', err))
+            this._packetCodec.on('packet', buf => this.emit('message', buf))
         }
 
         this._state = TransportState.Connecting
@@ -153,7 +155,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
                 this._proxy.port,
                 this._proxy.host,
                 // MTQ-55
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                // eslint-disable-next-line ts/no-misused-promises
                 this._handleConnectFakeTls.bind(this),
             )
         } else {
@@ -164,7 +166,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
 
                 this.handleConnect.bind(this),
             )
-            this._socket.on('data', (data) => this._packetCodec.feed(data))
+            this._socket.on('data', data => this._packetCodec.feed(data))
         }
         this._socket.on('error', this.handleError.bind(this))
         this._socket.on('close', this.close.bind(this))
@@ -236,7 +238,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
 
                         return this.handleConnect()
                     })
-                    .catch((err) => this._socket!.emit('error', err))
+                    .catch(err => this._socket!.emit('error', err))
             }
 
             this._socket!.write(hello)

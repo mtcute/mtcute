@@ -1,5 +1,6 @@
+import { fileURLToPath } from 'node:url'
+
 import semver from 'semver'
-import { fileURLToPath } from 'url'
 
 import { getPackageJsons } from './utils.js'
 
@@ -41,7 +42,7 @@ export async function validateDepsVersions() {
 
     if (errors.length > 0) {
         console.log('⚠️ Found external dependencies mismatch:')
-        errors.forEach((err) => console.log(err))
+        errors.forEach(err => console.log(err))
         process.exit(1)
     }
 

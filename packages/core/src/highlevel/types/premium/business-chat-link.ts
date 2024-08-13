@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
@@ -22,7 +22,7 @@ export class BusinessChatLink {
 
     /** Entities for the text */
     get entities(): MessageEntity[] {
-        return this.raw.entities?.map((x) => new MessageEntity(x)) ?? []
+        return this.raw.entities?.map(x => new MessageEntity(x)) ?? []
     }
 
     /** Custom title for the link */

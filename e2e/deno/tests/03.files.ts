@@ -1,7 +1,8 @@
-import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 import { createHash } from 'node:crypto'
 
-import { FileDownloadLocation, Thumbnail } from '@mtcute/core'
+import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
+import type { FileDownloadLocation } from '@mtcute/core'
+import { Thumbnail } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
 import { sleep } from '@mtcute/core/utils.js'
 

@@ -1,8 +1,9 @@
 import { tl } from '@mtcute/tl'
 
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputFileLike } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputFileLike } from '../../types/index.js'
+
 import { _normalizeInputMedia } from './normalize-input-media.js'
 
 /**

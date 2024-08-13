@@ -1,8 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { PartialExcept } from '../../../types/utils.js'
+import type { PartialExcept } from '../../../types/utils.js'
 import { assertTrue } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
+
 import { getFolders } from './get-folders.js'
 
 /**

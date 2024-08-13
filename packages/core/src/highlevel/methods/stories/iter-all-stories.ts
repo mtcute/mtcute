@@ -1,5 +1,6 @@
-import { ITelegramClient } from '../../client.types.js'
-import { PeerStories } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { PeerStories } from '../../types/index.js'
+
 import { getAllStories } from './get-all-stories.js'
 
 /**

@@ -1,4 +1,4 @@
-import {
+import type {
     BotChatJoinRequestUpdate,
     BusinessMessage,
     Chat,
@@ -13,29 +13,28 @@ import {
     UserTypingUpdate,
 } from '@mtcute/core'
 
-import { UpdateContextDistributed } from '../context/base.js'
-import { EmptyObject, Modify, UpdateFilter } from './types.js'
+import type { UpdateContextDistributed } from '../context/base.js'
+
+import type { EmptyObject, Modify, UpdateFilter } from './types.js'
 
 /**
  * Filter updates by type of the chat where they happened
  */
-export const chat =
-    <T extends ChatType, Obj extends { chat: Chat }>(
-        type: T,
-    ): UpdateFilter<
-        Obj,
-        {
-            chat: Modify<Chat, { chatType: T }>
-        } & (Obj extends Message
-            ? T extends 'private' | 'bot' | 'group'
-                ? {
-                      sender: User
-                  }
-                : EmptyObject
-            : EmptyObject)
-    > =>
-        (msg) =>
-            msg.chat.chatType === type
+export function chat<T extends ChatType, Obj extends { chat: Chat }>(type: T): UpdateFilter<
+    Obj,
+    {
+        chat: Modify<Chat, { chatType: T }>
+    } & (Obj extends Message
+        ? T extends 'private' | 'bot' | 'group'
+            ? {
+                sender: User
+            }
+            : EmptyObject
+        : EmptyObject)
+> {
+    return msg =>
+        msg.chat.chatType === type
+}
 
 /**
  * Filter updates by marked chat ID(s) or username(s)
@@ -47,21 +46,21 @@ export const chat =
  */
 export const chatId: {
     (id: MaybeArray<number>): UpdateFilter<UpdateContextDistributed<
-        | Message
-        | BusinessMessage
-        | ChatMemberUpdate
-        | PollVoteUpdate
-        | BotChatJoinRequestUpdate
+      | Message
+      | BusinessMessage
+      | ChatMemberUpdate
+      | PollVoteUpdate
+      | BotChatJoinRequestUpdate
     >>
     (id: MaybeArray<number | string>): UpdateFilter<UpdateContextDistributed<
-        | Message
-        | BusinessMessage
-        | ChatMemberUpdate
-        | UserTypingUpdate
-        | HistoryReadUpdate
-        | PollVoteUpdate
-        | BotChatJoinRequestUpdate
-        | DeleteBusinessMessageUpdate
+      | Message
+      | BusinessMessage
+      | ChatMemberUpdate
+      | UserTypingUpdate
+      | HistoryReadUpdate
+      | PollVoteUpdate
+      | BotChatJoinRequestUpdate
+      | DeleteBusinessMessageUpdate
     >>
 } = (id) => {
     const indexId = new Set<number>()
@@ -85,8 +84,8 @@ export const chatId: {
                 const peer = upd.peer
 
                 return peer.type === 'chat' && (
-                    indexId.has(peer.id) ||
-                    Boolean(peer.usernames?.some((u) => indexUsername.has(u.username)))
+                    indexId.has(peer.id)
+                    || Boolean(peer.usernames?.some(u => indexUsername.has(u.username)))
                 )
             }
             case 'history_read':
@@ -99,8 +98,8 @@ export const chatId: {
 
         const chat = upd.chat
 
-        return (matchSelf && chat.isSelf) ||
-            indexId.has(chat.id) ||
-            Boolean(chat.usernames?.some((u) => indexUsername.has(u.username)))
+        return (matchSelf && chat.isSelf)
+          || indexId.has(chat.id)
+          || Boolean(chat.usernames?.some(u => indexUsername.has(u.username)))
     }
 }

@@ -1,23 +1,26 @@
 import Long from 'long'
-
-import { mtp, tl } from '@mtcute/tl'
-import { TlBinaryWriter, TlReaderMap, TlSerializationCounter, TlWriterMap } from '@mtcute/tl-runtime'
+import type { mtp, tl } from '@mtcute/tl'
+import type { TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+import { TlSerializationCounter } from '@mtcute/tl-runtime'
 
 import { MtcuteError } from '../types/index.js'
-import {
-    compareLongs,
+import type {
     ControllablePromise,
-    Deque,
-    getRandomInt,
     ICryptoProvider,
     Logger,
+} from '../utils/index.js'
+import {
+    Deque,
     LongMap,
     LruSet,
-    randomLong,
     SortedArray,
+    compareLongs,
+    getRandomInt,
+    randomLong,
 } from '../utils/index.js'
+
 import { AuthKey } from './auth-key.js'
-import { ServerSaltManager } from './server-salt.js'
+import type { ServerSaltManager } from './server-salt.js'
 
 export interface PendingRpc {
     method: string
@@ -42,47 +45,47 @@ export interface PendingRpc {
 }
 
 export type PendingMessage =
-    | {
-          _: 'rpc'
-          rpc: PendingRpc
-      }
-    | {
-          _: 'container'
-          msgIds: Long[]
-      }
-    | {
-          _: 'state'
-          msgIds: Long[]
-          containerId: Long
-      }
-    | {
-          _: 'resend'
-          msgIds: Long[]
-          containerId: Long
-      }
-    | {
-          _: 'ping'
-          pingId: Long
-          containerId: Long
-      }
-    | {
-          _: 'destroy_session'
-          sessionId: Long
-          containerId: Long
-      }
-    | {
-          _: 'cancel'
-          msgId: Long
-          containerId: Long
-      }
-    | {
-          _: 'future_salts'
-          containerId: Long
-      }
-    | {
-          _: 'bind'
-          promise: ControllablePromise
-      }
+  | {
+      _: 'rpc'
+      rpc: PendingRpc
+  }
+  | {
+      _: 'container'
+      msgIds: Long[]
+  }
+  | {
+      _: 'state'
+      msgIds: Long[]
+      containerId: Long
+  }
+  | {
+      _: 'resend'
+      msgIds: Long[]
+      containerId: Long
+  }
+  | {
+      _: 'ping'
+      pingId: Long
+      containerId: Long
+  }
+  | {
+      _: 'destroy_session'
+      sessionId: Long
+      containerId: Long
+  }
+  | {
+      _: 'cancel'
+      msgId: Long
+      containerId: Long
+  }
+  | {
+      _: 'future_salts'
+      containerId: Long
+  }
+  | {
+      _: 'bind'
+      promise: ControllablePromise<boolean | mtp.RawMt_rpc_error>
+  }
 
 /**
  * Class encapsulating a single MTProto session and storing
@@ -119,7 +122,7 @@ export class MtprotoSession {
     pendingMessages = new LongMap<PendingMessage>()
     destroySessionIdToMsgId = new LongMap<Long>()
 
-    lastPingRtt = NaN
+    lastPingRtt = Number.NaN
     lastPingTime = 0
     lastPingMsgId = Long.ZERO
     lastSessionCreatedUid = Long.ZERO
@@ -147,10 +150,10 @@ export class MtprotoSession {
 
     get hasPendingMessages(): boolean {
         return Boolean(
-            this.queuedRpc.length ||
-                this.queuedAcks.length ||
-                this.queuedStateReq.length ||
-                this.queuedResendReq.length,
+            this.queuedRpc.length
+            || this.queuedAcks.length
+            || this.queuedStateReq.length
+            || this.queuedResendReq.length,
         )
     }
 
@@ -246,7 +249,7 @@ export class MtprotoSession {
         const timeTicks = Date.now()
         const timeSec = Math.floor(timeTicks / 1000) - this._timeOffset
         const timeMSec = timeTicks % 1000
-        const random = getRandomInt(0xffff)
+        const random = getRandomInt(0xFFFF)
 
         let messageId = new Long((timeMSec << 21) | (random << 3) | 4, timeSec)
 
@@ -314,9 +317,9 @@ export class MtprotoSession {
         const messageId = this.getMessageId()
         const seqNo = this.getSeqNo(isContentRelated)
 
-        const length = ArrayBuffer.isView(content) ?
-            content.length :
-            TlSerializationCounter.countNeededBytes(writer.objectMap!, content)
+        const length = ArrayBuffer.isView(content)
+            ? content.length
+            : TlSerializationCounter.countNeededBytes(writer.objectMap!, content)
 
         writer.long(messageId)
         writer.int(seqNo)

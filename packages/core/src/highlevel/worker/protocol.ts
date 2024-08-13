@@ -1,52 +1,53 @@
-import Long from 'long'
 import type { Worker as NodeWorker } from 'node:worker_threads'
 
-import { tl } from '@mtcute/tl'
+import Long from 'long'
+import type { tl } from '@mtcute/tl'
 
-import { ConnectionState } from '../client.types.js'
-import { SerializedError } from './errors.js'
+import type { ConnectionState } from '../client.types.js'
+
+import type { SerializedError } from './errors.js'
 
 export type WorkerInboundMessage =
-    | {
-          type: 'invoke'
-          id: number
-          target: 'custom' | 'client' | 'storage' | 'storage-self' | 'storage-peers' | 'app-config'
-          method: string
-          args: SerializedResult<unknown[]>
-          void: boolean
-          withAbort: boolean
-      }
-    | {
-          type: 'abort'
-          id: number
-      }
+  | {
+      type: 'invoke'
+      id: number
+      target: 'custom' | 'client' | 'storage' | 'storage-self' | 'storage-peers' | 'app-config'
+      method: string
+      args: SerializedResult<unknown[]>
+      void: boolean
+      withAbort: boolean
+  }
+  | {
+      type: 'abort'
+      id: number
+  }
 
 export type WorkerOutboundMessage =
-    | { type: 'server_update'; update: SerializedResult<tl.TypeUpdates> }
-    | {
-          type: 'update'
-          update: SerializedResult<tl.TypeUpdate>
-          users: SerializedResult<Map<number, tl.TypeUser>>
-          chats: SerializedResult<Map<number, tl.TypeChat>>
-          hasMin: boolean
-      }
-    | { type: 'error'; error: unknown }
-    | { type: 'stop' }
-    | { type: 'conn_state'; state: ConnectionState }
-    | {
-          type: 'log'
-          color: number
-          level: number
-          tag: string
-          fmt: string
-          args: unknown[]
-      }
-    | {
-          type: 'result'
-          id: number
-          result?: SerializedResult<unknown>
-          error?: SerializedError
-      }
+  | { type: 'server_update', update: SerializedResult<tl.TypeUpdates> }
+  | {
+      type: 'update'
+      update: SerializedResult<tl.TypeUpdate>
+      users: SerializedResult<Map<number, tl.TypeUser>>
+      chats: SerializedResult<Map<number, tl.TypeChat>>
+      hasMin: boolean
+  }
+  | { type: 'error', error: unknown }
+  | { type: 'stop' }
+  | { type: 'conn_state', state: ConnectionState }
+  | {
+      type: 'log'
+      color: number
+      level: number
+      tag: string
+      fmt: string
+      args: unknown[]
+  }
+  | {
+      type: 'result'
+      id: number
+      result?: SerializedResult<unknown>
+      error?: SerializedError
+  }
 
 export type SomeWorker = NodeWorker | Worker | SharedWorker
 
@@ -56,10 +57,9 @@ export type ClientMessageHandler = (message: WorkerOutboundMessage) => void
 export type RespondFn = (message: WorkerOutboundMessage) => void
 export type WorkerMessageHandler = (message: WorkerInboundMessage, respond: RespondFn) => void
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type WorkerCustomMethods = Record<string, (...args: any[]) => Promise<any>>
 
-export type SerializedResult<T> = { __serialized__: T }
+export interface SerializedResult<T> { __serialized__: T }
 
 export function serializeResult<T>(result: T): SerializedResult<T> {
     if (ArrayBuffer.isView(result)) return result as unknown as SerializedResult<T>
@@ -82,7 +82,6 @@ export function serializeResult<T>(result: T): SerializedResult<T> {
 
         for (const [key, value] of Object.entries(result)) {
             if (Long.isLong(value)) {
-                // eslint-disable-next-line
                 newResult[key] = {
                     __type: 'long',
                     low: value.low,
@@ -90,7 +89,6 @@ export function serializeResult<T>(result: T): SerializedResult<T> {
                     unsigned: value.unsigned,
                 }
             } else if (typeof value === 'object') {
-                // eslint-disable-next-line
                 newResult[key] = serializeResult(value)
             } else {
                 newResult[key] = value
@@ -112,7 +110,7 @@ export function deserializeResult<T>(result: SerializedResult<T>): T {
 
     if (result instanceof Map) {
         for (const [key, value] of result.entries()) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            // eslint-disable-next-line ts/no-unsafe-argument
             result.set(key, deserializeResult(value))
         }
 
@@ -122,10 +120,8 @@ export function deserializeResult<T>(result: SerializedResult<T>): T {
     if (result && typeof result === 'object') {
         for (const [key, value] of Object.entries(result)) {
             if (value && typeof value === 'object' && (value as Record<string, string>).__type === 'long') {
-                // eslint-disable-next-line
                 ;(result as any)[key] = Long.fromValue(value as unknown as Long)
             } else if (typeof value === 'object') {
-                // eslint-disable-next-line
                 ;(result as any)[key] = deserializeResult(value as SerializedResult<unknown>)
             }
         }

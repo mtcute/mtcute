@@ -1,8 +1,8 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { PeersIndex } from '../peers/index.js'
+import type { PeersIndex } from '../peers/index.js'
 import { PeerReaction } from '../reactions/peer-reaction.js'
 import { ReactionCount } from '../reactions/reaction-count.js'
 
@@ -30,7 +30,7 @@ export class MessageReactions {
      * Reactions on the message, along with their counts
      */
     get reactions(): ReactionCount[] {
-        return this.raw.results.map((it) => new ReactionCount(it))
+        return this.raw.results.map(it => new ReactionCount(it))
     }
 
     /**
@@ -38,7 +38,7 @@ export class MessageReactions {
      * To get a full list of users, use {@link getUsers}
      */
     get recentReactions(): PeerReaction[] {
-        return this.raw.recentReactions?.map((reaction) => new PeerReaction(reaction, this._peers)) ?? []
+        return this.raw.recentReactions?.map(reaction => new PeerReaction(reaction, this._peers)) ?? []
     }
 }
 

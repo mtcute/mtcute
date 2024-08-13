@@ -1,28 +1,28 @@
 {
-    "compilerOptions": {
-        "outDir": "./dist",
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
-        "target": "es2020",
-        "allowJs": true,
-        "sourceMap": true,
-        "inlineSources": true,
-        "declaration": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "strict": true,
-        "noImplicitAny": true,
-        "noImplicitThis": true,
-        "incremental": true,
-        "stripInternal": true,
-        "skipLibCheck": true,
-        "rootDir": "."
-    },
-    "exclude": [
-        "**/node_modules",
-    ],
-    "include": [
-        "./tests",
-        "./utils.ts"
-    ]
+  "compilerOptions": {
+    "incremental": true,
+    "target": "es2020",
+    "rootDir": ".",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowJs": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "declaration": true,
+    "inlineSources": true,
+    "outDir": "./dist",
+    "sourceMap": true,
+    "stripInternal": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "./tests",
+    "./utils.ts"
+  ],
+  "exclude": [
+    "**/node_modules"
+  ]
 }

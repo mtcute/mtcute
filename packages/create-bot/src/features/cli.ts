@@ -1,6 +1,7 @@
-import { CheckboxChoiceOptions } from 'inquirer'
+import type { CheckboxChoiceOptions } from 'inquirer'
 
 import { PackageManager } from '../package-manager.js'
+
 import { MtcuteFeature } from './types.js'
 
 export function getFeatureChoices(packageMananger: PackageManager): CheckboxChoiceOptions[] {

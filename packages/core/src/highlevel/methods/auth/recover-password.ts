@@ -1,5 +1,6 @@
-import { ITelegramClient } from '../../client.types.js'
-import { User } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { User } from '../../types/index.js'
+
 import { _onAuthorization } from './utils.js'
 
 /**

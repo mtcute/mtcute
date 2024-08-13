@@ -1,4 +1,4 @@
-import Long from 'long'
+import type Long from 'long'
 
 export const PERSISTENT_ID_VERSION_OLD = 2
 export const PERSISTENT_ID_VERSION = 4
@@ -149,14 +149,14 @@ export interface RawPhotoSizeSourceStickerSetThumbnailVersion extends Omit<RawPh
 }
 
 export type TypePhotoSizeSource =
-    | RawPhotoSizeSourceLegacy
-    | RawPhotoSizeSourceThumbnail
-    | RawPhotoSizeSourceDialogPhoto
-    | RawPhotoSizeSourceStickerSetThumbnail
-    | RawPhotoSizeSourceFullLegacy
-    | RawPhotoSizeSourceDialogPhotoLegacy
-    | RawPhotoSizeSourceStickerSetThumbnailLegacy
-    | RawPhotoSizeSourceStickerSetThumbnailVersion
+  | RawPhotoSizeSourceLegacy
+  | RawPhotoSizeSourceThumbnail
+  | RawPhotoSizeSourceDialogPhoto
+  | RawPhotoSizeSourceStickerSetThumbnail
+  | RawPhotoSizeSourceFullLegacy
+  | RawPhotoSizeSourceDialogPhotoLegacy
+  | RawPhotoSizeSourceStickerSetThumbnailLegacy
+  | RawPhotoSizeSourceStickerSetThumbnailVersion
 
 /**
  * An external web file
@@ -226,7 +226,7 @@ export interface RawFullRemoteFileLocation {
 
 export function isFileIdLike(obj: unknown): obj is string | RawFullRemoteFileLocation {
     return (
-        typeof obj === 'string' ||
-        (obj !== null && typeof obj === 'object' && (obj as { _: unknown })._ === 'remoteFileLocation')
+        typeof obj === 'string'
+        || (obj !== null && typeof obj === 'object' && (obj as { _: unknown })._ === 'remoteFileLocation')
     )
 }

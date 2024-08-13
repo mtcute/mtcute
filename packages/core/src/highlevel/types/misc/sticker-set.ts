@@ -5,9 +5,10 @@ import { LongMap } from '../../../utils/long-utils.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MtEmptyError } from '../errors.js'
-import { InputFileLike } from '../files/index.js'
+import type { InputFileLike } from '../files/index.js'
 import { parseSticker } from '../media/document-utils.js'
-import { MaskPosition, Sticker, StickerSourceType, StickerType, Thumbnail } from '../media/index.js'
+import type { MaskPosition, Sticker, StickerSourceType, StickerType } from '../media/index.js'
+import { Thumbnail } from '../media/index.js'
 
 /**
  * Input sticker set.
@@ -28,20 +29,20 @@ import { MaskPosition, Sticker, StickerSourceType, StickerType, Thumbnail } from
  *      - `"default_channel_statuses"` - Default custom emoji status stickerset for channels
  */
 export type InputStickerSet =
-    | tl.TypeInputStickerSet
-    | { dice: string }
-    | {
-          system:
-              | 'animated'
-              | 'animated_animations'
-              | 'premium_gifts'
-              | 'generic_animations'
-              | 'default_statuses'
-              | 'default_topic_icons'
-              | 'default_channel_statuses'
-      }
-    | StickerSet
-    | string
+  | tl.TypeInputStickerSet
+  | { dice: string }
+  | {
+      system:
+        | 'animated'
+        | 'animated_animations'
+        | 'premium_gifts'
+        | 'generic_animations'
+        | 'default_statuses'
+        | 'default_topic_icons'
+        | 'default_channel_statuses'
+  }
+  | StickerSet
+  | string
 
 export function normalizeInputStickerSet(input: InputStickerSet): tl.TypeInputStickerSet {
     if (typeof input === 'string') {
@@ -274,9 +275,9 @@ export class StickerSet {
             case 'stickerSetCovered':
                 return [parseStickerOrThrow(this.cover.cover as tl.RawDocument)]
             case 'stickerSetMultiCovered':
-                return this.cover.covers.map((it) => parseStickerOrThrow(it as tl.RawDocument))
+                return this.cover.covers.map(it => parseStickerOrThrow(it as tl.RawDocument))
             case 'stickerSetFullCovered':
-                return this.cover.documents.map((it) => parseStickerOrThrow(it as tl.RawDocument))
+                return this.cover.documents.map(it => parseStickerOrThrow(it as tl.RawDocument))
             case 'stickerSetNoCovered':
                 return []
         }
@@ -289,7 +290,7 @@ export class StickerSet {
      * (i.e. first sticker should be used as thumbnail)
      */
     get thumbnails(): ReadonlyArray<Thumbnail> {
-        return this.brief.thumbs?.map((sz) => new Thumbnail(this.brief, sz)) ?? []
+        return this.brief.thumbs?.map(sz => new Thumbnail(this.brief, sz)) ?? []
     }
 
     /**
@@ -302,7 +303,7 @@ export class StickerSet {
      * @param type  Thumbnail type
      */
     getThumbnail(type: string): Thumbnail | null {
-        return this.thumbnails.find((it) => it.type === type) ?? null
+        return this.thumbnails.find(it => it.type === type) ?? null
     }
 
     /**
@@ -313,7 +314,7 @@ export class StickerSet {
      *     In case this object does not contain info about stickers (i.e. {@link isFull} = false)
      */
     getStickersByEmoji(emoji: string): StickerInfo[] {
-        return this.stickers.filter((it) => it.alt === emoji || it.emoji.includes(emoji))
+        return this.stickers.filter(it => it.alt === emoji || it.emoji.includes(emoji))
     }
 
     private _getInputDocument(idx: number): tl.TypeInputDocument {

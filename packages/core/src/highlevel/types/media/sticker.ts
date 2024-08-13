@@ -1,9 +1,10 @@
 import { tdFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
+
 import { RawDocument } from './document.js'
 
 export const MASK_POSITION_POINT_TO_TL = {
@@ -95,7 +96,7 @@ export class Sticker extends RawDocument {
      * (has premium fullscreen animation)
      */
     get isPremiumSticker(): boolean {
-        return Boolean(this.raw.videoThumbs?.some((s) => s._ === 'videoSize' && s.type === 'f'))
+        return Boolean(this.raw.videoThumbs?.some(s => s._ === 'videoSize' && s.type === 'f'))
     }
 
     /**

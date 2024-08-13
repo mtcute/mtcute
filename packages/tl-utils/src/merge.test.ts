@@ -34,33 +34,33 @@ describe('mergeTlEntries', () => {
 
     it('merges true flags', () => {
         test(
-            'test flags:# = Test;\n' +
-                'test flags:# foo:flags.0?true = Test;\n' +
-                'test flags:# bar:flags.0?true = Test;\n' +
-                'test flags:# baz:flags.1?true = Test;',
+            'test flags:# = Test;\n'
+            + 'test flags:# foo:flags.0?true = Test;\n'
+            + 'test flags:# bar:flags.0?true = Test;\n'
+            + 'test flags:# baz:flags.1?true = Test;',
             'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;',
         )
         // ordering of optional flags should not matter
         test(
-            'test flags:# foo:flags.0?true = Test;\n' +
-                'test flags:# bar:flags.0?true = Test;\n' +
-                'test flags:# baz:flags.1?true = Test;',
+            'test flags:# foo:flags.0?true = Test;\n'
+            + 'test flags:# bar:flags.0?true = Test;\n'
+            + 'test flags:# baz:flags.1?true = Test;',
             'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;',
         )
         test(
-            'test flags:# foo:flags.0?true = Test;\n' +
-                'test flags:# foo:flags.0?true bar:flags.0?true = Test;\n' +
-                'test flags:# baz:flags.1?true = Test;\n' +
-                'test flags:# bar:flags.0?true baz:flags.1?true = Test;',
+            'test flags:# foo:flags.0?true = Test;\n'
+            + 'test flags:# foo:flags.0?true bar:flags.0?true = Test;\n'
+            + 'test flags:# baz:flags.1?true = Test;\n'
+            + 'test flags:# bar:flags.0?true baz:flags.1?true = Test;',
             'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;',
         )
     })
 
     it('merges true flags with multiple flags fields', () => {
         test(
-            'test flags:# flags2:# = Test;\n' +
-                'test flags:# foo:flags.0?true flags2:# = Test;\n' +
-                'test flags:# flags2:# bar:flags2.0?true = Test;\n',
+            'test flags:# flags2:# = Test;\n'
+            + 'test flags:# foo:flags.0?true flags2:# = Test;\n'
+            + 'test flags:# flags2:# bar:flags2.0?true = Test;\n',
             'test#5ca39a98 flags:# foo:flags.0?true flags2:# bar:flags2.0?true = Test;',
         )
     })
@@ -69,8 +69,8 @@ describe('mergeTlEntries', () => {
 describe('mergeTlSchemas', () => {
     const test = async (schemas: string[][], onConflict: number, ...expected: string[]) => {
         const res = await mergeTlSchemas(
-            schemas.map((tl) => parseFullTlSchema(parseTlToEntries(tl.join('\n')))),
-            (opts) => opts[onConflict],
+            schemas.map(tl => parseFullTlSchema(parseTlToEntries(tl.join('\n')))),
+            opts => opts[onConflict],
         )
 
         expect(

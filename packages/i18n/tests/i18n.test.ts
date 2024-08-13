@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-
 import { Message, PeersIndex } from '@mtcute/core'
 import { MessageContext } from '@mtcute/dispatcher'
 
-import { createMtcuteI18n, OtherLanguageWrap } from '../src/index.js'
+import type { OtherLanguageWrap } from '../src/index.js'
+import { createMtcuteI18n } from '../src/index.js'
 import { createPluralEnglish, pluralizeEnglish } from '../src/plurals/english.js'
 import { createPluralRussian } from '../src/plurals/russian.js'
 
@@ -19,7 +19,7 @@ describe('i18n', () => {
                 fn: () => 'Hello',
             },
         },
-        plural: createPluralEnglish('a message', (n) => `${n} messages`),
+        plural: createPluralEnglish('a message', n => `${n} messages`),
         plural2: createPluralEnglish('a message', (n: number, s: string) => `${n} messages from ${s}`),
         plural3: (n: number) => `${n} ${pluralizeEnglish(n, 'message', 'messages')}`,
     }
@@ -32,9 +32,9 @@ describe('i18n', () => {
             },
         },
         plural: createPluralRussian(
-            (n) => `${n} сообщение`,
-            (n) => `${n} сообщения`,
-            (n) => `${n === 0 ? 'нет' : n} сообщений`,
+            n => `${n} сообщение`,
+            n => `${n} сообщения`,
+            n => `${n === 0 ? 'нет' : n} сообщений`,
         ),
     }
 

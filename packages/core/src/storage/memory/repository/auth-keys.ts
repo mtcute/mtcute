@@ -1,5 +1,5 @@
-import { IAuthKeysRepository } from '../../repository/auth-keys.js'
-import { MemoryStorageDriver } from '../driver.js'
+import type { IAuthKeysRepository } from '../../repository/auth-keys.js'
+import type { MemoryStorageDriver } from '../driver.js'
 
 interface AuthKeysState {
     authKeys: Map<number, Uint8Array>

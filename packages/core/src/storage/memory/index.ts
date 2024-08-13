@@ -1,5 +1,6 @@
-import { ITelegramStorageProvider } from '../../highlevel/storage/provider.js'
-import { IMtStorageProvider } from '../provider.js'
+import type { ITelegramStorageProvider } from '../../highlevel/storage/provider.js'
+import type { IMtStorageProvider } from '../provider.js'
+
 import { MemoryStorageDriver } from './driver.js'
 import { MemoryAuthKeysRepository } from './repository/auth-keys.js'
 import { MemoryKeyValueRepository } from './repository/kv.js'

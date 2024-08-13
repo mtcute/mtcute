@@ -1,12 +1,14 @@
+const path = require('node:path')
+const fs = require('node:fs')
+
 const ts = require('typescript')
-const path = require('path')
-const fs = require('fs')
-const updates = require('./generate-updates.cjs')
 
 const schema = require('../../tl/api-schema.json')
 
+const updates = require('./generate-updates.cjs')
+
 function findMethodAvailability(method) {
-    const entry = schema.e.find((it) => it.kind === 'method' && it.name === method)
+    const entry = schema.e.find(it => it.kind === 'method' && it.name === method)
     if (!entry) return null
 
     return entry.available ?? null
@@ -21,7 +23,7 @@ async function* getFiles(dir) {
         const res = path.resolve(dir, dirent.name)
 
         if (dirent.isDirectory()) {
-            yield* getFiles(res)
+            yield * getFiles(res)
         } else {
             yield res
         }
@@ -73,15 +75,15 @@ function findRawApiUsages(ast, fileName) {
 
     visitRecursively(
         ast,
-        (node) => node.kind === ts.SyntaxKind.CallExpression,
+        node => node.kind === ts.SyntaxKind.CallExpression,
         (call) => {
             if (call.expression.kind !== ts.SyntaxKind.PropertyAccessExpression) return
             const prop = call.expression
 
             if (
-                prop.name.escapedText === 'call' &&
-                prop.expression.kind === ts.SyntaxKind.Identifier &&
-                prop.expression.escapedText === firstParamName
+                prop.name.escapedText === 'call'
+                && prop.expression.kind === ts.SyntaxKind.Identifier
+                && prop.expression.escapedText === firstParamName
             ) {
                 usages.push(call)
             }
@@ -101,7 +103,7 @@ function findRawApiUsages(ast, fileName) {
             )
         }
 
-        const method = arg.properties.find((it) => it.name.escapedText === '_')
+        const method = arg.properties.find(it => it.name.escapedText === '_')
 
         if (!method || method.kind !== ts.SyntaxKind.PropertyAssignment) {
             throwError(call, fileName, 'First argument to this.call() must have a _ property')
@@ -141,18 +143,18 @@ function findDependencies(ast) {
 
     visitRecursively(
         ast,
-        (node) => node.kind === ts.SyntaxKind.CallExpression,
+        node => node.kind === ts.SyntaxKind.CallExpression,
         (call) => {
             if (call.expression.kind !== ts.SyntaxKind.PropertyAccessExpression) return
             const prop = call.expression
 
             if (
-                prop.name.escapedText !== 'call' &&
-                prop.name.escapedText !== '_emitError' &&
-                prop.name.escapedText !== '_cachePeersFrom' &&
-                prop.name.escapedText !== 'importSession' &&
-                prop.name.escapedText !== 'emit' &&
-                prop.expression.kind === ts.SyntaxKind.ThisKeyword
+                prop.name.escapedText !== 'call'
+                && prop.name.escapedText !== '_emitError'
+                && prop.name.escapedText !== '_cachePeersFrom'
+                && prop.name.escapedText !== 'importSession'
+                && prop.name.escapedText !== 'emit'
+                && prop.expression.kind === ts.SyntaxKind.ThisKeyword
             ) {
                 deps.add(prop.name.escapedText)
             }
@@ -162,14 +164,14 @@ function findDependencies(ast) {
     return [...deps]
 }
 
-function determineCommonAvailability(methods, resolver = (v) => v) {
+function determineCommonAvailability(methods, resolver = v => v) {
     let common = 'both'
 
     for (const method of methods) {
         const available = resolver(method)
 
         if (available === null) {
-            console.log('availability null for ' + method)
+            console.log(`availability null for ${method}`)
 
             return null
         }
@@ -185,7 +187,7 @@ function determineCommonAvailability(methods, resolver = (v) => v) {
 }
 
 function runEslint(targetFile) {
-    require('child_process').execSync(`pnpm exec eslint --fix ${targetFile}`, {
+    require('node:child_process').execSync(`pnpm exec eslint --fix ${targetFile}`, {
         stdio: 'inherit',
     })
 }
@@ -200,15 +202,15 @@ async function addSingleMethod(state, fileName) {
 
     function getLeadingComments(ast) {
         return (ts.getLeadingCommentRanges(fileFullText, ast.pos) || [])
-            .map((range) => fileFullText.substring(range.pos, range.end))
+            .map(range => fileFullText.substring(range.pos, range.end))
             .join('\n')
     }
 
     function checkForFlag(ast, flag) {
         return getLeadingComments(ast)
             .split('\n')
-            .map((i) => i.replace(/^(\/\/|\s*\*+|\/\*\*+\s*)/g, '').trim())
-            .find((i) => i.startsWith(flag))
+            .map(i => i.replace(/^(\/\/|\s*\*+|\/\*{2,}\s*)/g, '').trim())
+            .find(i => i.startsWith(flag))
     }
 
     const hasOverloads = {}
@@ -221,8 +223,8 @@ async function addSingleMethod(state, fileName) {
             if (!isCopy) continue
 
             if (
-                !stmt.importClause.namedBindings ||
-                stmt.importClause.namedBindings.kind !== ts.SyntaxKind.NamedImports
+                !stmt.importClause.namedBindings
+                || stmt.importClause.namedBindings.kind !== ts.SyntaxKind.NamedImports
             ) {
                 throwError(stmt, fileName, 'Only named imports are supported!')
             }
@@ -236,7 +238,7 @@ async function addSingleMethod(state, fileName) {
                 const modName = path.basename(modFullPath)
 
                 module = path.join(path.relative(targetDir, modPath), modName).replace(/\\/g, '/') // replace path delim to unix
-                if (module[0] !== '.') module = './' + module
+                if (module[0] !== '.') module = `./${module}`
             }
 
             if (module === './client') {
@@ -263,8 +265,8 @@ async function addSingleMethod(state, fileName) {
                 )
             }
 
-            const isExported = (stmt.modifiers || []).find((mod) => mod.kind === ts.SyntaxKind.ExportKeyword)
-            const isDeclare = (stmt.modifiers || []).find((mod) => mod.kind === ts.SyntaxKind.DeclareKeyword)
+            const isExported = (stmt.modifiers || []).find(mod => mod.kind === ts.SyntaxKind.ExportKeyword)
+            const isDeclare = (stmt.modifiers || []).find(mod => mod.kind === ts.SyntaxKind.DeclareKeyword)
             const isInitialize = checkForFlag(stmt, '@initialize')
             const isManualImpl = checkForFlag(stmt, '@manual-impl')
             const isInitializeSuper = isInitialize === 'super'
@@ -291,7 +293,7 @@ async function addSingleMethod(state, fileName) {
                 return available
             })()
             const rawApiMethods = available === null && findRawApiUsages(stmt, fileName)
-            const dependencies = findDependencies(stmt).filter((it) => it !== name)
+            const dependencies = findDependencies(stmt).filter(it => it !== name)
 
             if (isInitialize && isExported) {
                 throwError(isExported, fileName, 'Initialization methods must not be exported')
@@ -380,7 +382,7 @@ async function addSingleMethod(state, fileName) {
                 continue
             }
 
-            const isExported = (stmt.modifiers || []).find((mod) => mod.kind === ts.SyntaxKind.ExportKeyword)
+            const isExported = (stmt.modifiers || []).find(mod => mod.kind === ts.SyntaxKind.ExportKeyword)
 
             if (isTypeExported) {
                 if (!isExported) {
@@ -414,7 +416,7 @@ async function addSingleMethod(state, fileName) {
                 })
             }
         } else if (stmt.kind === ts.SyntaxKind.TypeAliasDeclaration && isTypeExported) {
-            const isExported = (stmt.modifiers || []).find((mod) => mod.kind === ts.SyntaxKind.ExportKeyword)
+            const isExported = (stmt.modifiers || []).find(mod => mod.kind === ts.SyntaxKind.ExportKeyword)
 
             if (!isExported) {
                 throwError(stmt, fileName, 'Exported type aliases must be exported')
@@ -460,11 +462,10 @@ async function main() {
     }
 
     output.write(
-        '/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging, @typescript-eslint/unified-signatures */\n' +
-        '/* eslint-disable @typescript-eslint/no-unsafe-argument */\n' +
-        '/* THIS FILE WAS AUTO-GENERATED */\n' +
-        "import EventEmitter from 'events'\n" +
-        "import Long from 'long'\n",
+        '/* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument */\n'
+        + '/* THIS FILE WAS AUTO-GENERATED */\n'
+        + "import EventEmitter from 'events'\n"
+        + "import Long from 'long'\n",
     )
     Object.entries(state.imports).forEach(([module, items]) => {
         items = [...items]
@@ -507,7 +508,7 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
     })
 
     output.write(`
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line ts/no-explicit-any
 on(name: string, handler: (...args: any[]) => void): this\n
 
 /**
@@ -543,7 +544,7 @@ withParams(params: RpcCallOptions): this\n`)
                 // try to determine it automatically
                 const checkDepsAvailability = (deps) => {
                     return determineCommonAvailability(deps, (name) => {
-                        const method = state.methods.list.find((it) => it.name === name && !it.overload)
+                        const method = state.methods.list.find(it => it.name === name && !it.overload)
 
                         if (!method) {
                             throwError(
@@ -572,12 +573,12 @@ withParams(params: RpcCallOptions): this\n`)
 
             // create method that calls that function and passes `this`
             // first let's determine the signature
-            const returnType = func.type ? ': ' + func.type.getText() : ''
-            const generics = func.typeParameters ?
-                `<${func.typeParameters.map((it) => it.getFullText()).join(', ')}>` :
-                ''
+            const returnType = func.type ? `: ${func.type.getText()}` : ''
+            const generics = func.typeParameters
+                ? `<${func.typeParameters.map(it => it.getFullText()).join(', ')}>`
+                : ''
             const rawParams = (func.parameters || []).filter(
-                (it) => !it.type || it.type.getText() !== 'ITelegramClient',
+                it => !it.type || it.type.getText() !== 'ITelegramClient',
             )
             const parameters = rawParams
                 .map((it) => {
@@ -589,16 +590,16 @@ withParams(params: RpcCallOptions): this\n`)
                             // no explicit type.
                             // infer from initializer
                             if (
-                                it.initializer.kind === ts.SyntaxKind.TrueKeyword ||
-                                it.initializer.kind === ts.SyntaxKind.FalseKeyword
+                                it.initializer.kind === ts.SyntaxKind.TrueKeyword
+                                || it.initializer.kind === ts.SyntaxKind.FalseKeyword
                             ) {
                                 it.type = { kind: ts.SyntaxKind.BooleanKeyword }
                             } else if (it.initializer.kind === ts.SyntaxKind.StringLiteral) {
                                 it.type = { kind: ts.SyntaxKind.StringKeyword }
                             } else if (
-                                it.initializer.kind === ts.SyntaxKind.NumericLiteral ||
-                                (it.initializer.kind === ts.SyntaxKind.Identifier &&
-                                    (it.initializer.escapedText === 'NaN' || it.initializer.escapedText === 'Infinity'))
+                                it.initializer.kind === ts.SyntaxKind.NumericLiteral
+                                || (it.initializer.kind === ts.SyntaxKind.Identifier
+                                && (it.initializer.escapedText === 'NaN' || it.initializer.escapedText === 'Infinity'))
                             ) {
                                 it.type = { kind: ts.SyntaxKind.NumberKeyword }
                             } else {
@@ -609,7 +610,7 @@ withParams(params: RpcCallOptions): this\n`)
 
                         const deleteParents = (obj) => {
                             if (Array.isArray(obj)) {
-                                return obj.forEach((it) => deleteParents(it))
+                                return obj.forEach(it => deleteParents(it))
                             }
 
                             if (obj.parent) delete obj.parent
@@ -637,15 +638,16 @@ withParams(params: RpcCallOptions): this\n`)
 
             // remove @internal mark and set default values for parameters
             comment = comment
-                .replace(/^\s*\/\/+\s*@(alias|available|manual).*$/gm, '')
-                .replace(/(\n^|\/\*)\s*\*\s*@internal.*/m, '')
-                .replace(/((?:\n^|\/\*)\s*\*\s*@param )([^\s]+?)($|\s+)/gm, (_, pref, arg, post) => {
-                    const param = rawParams.find((it) => it.name.escapedText === arg)
+                .replace(/^\s*\/{2,}\s*@(alias|available|manual).*$/gm, '')
+                .replace(/(\n|\/\*)\s*\*\s*@internal.*/, '')
+                .replace(/((?:\n|\/\*)\s*\*\s*@param )(\S+)($|\s+)/gm, (_, pref, arg, post) => {
+                    const param = rawParams.find(it => it.name.escapedText === arg)
                     if (!param) return _
                     if (!param._savedDefault) return _
 
                     return `${pref}[${arg}=${param._savedDefault.trim()}]${post}`
                 })
+                // eslint-disable-next-line regexp/optimal-lookaround-quantifier
                 .replace(/(?<=\/\*.*)(?=\n\s*\*\s*(?:@[a-z]+|\/))/s, () => {
                     switch (available) {
                         case 'user':
@@ -663,7 +665,7 @@ withParams(params: RpcCallOptions): this\n`)
                 if (!hasOverloads) {
                     if (!comment.match(/\/\*\*?\s*\*\//)) {
                         // empty comment, no need to write it
-                        output.write(comment + '\n')
+                        output.write(`${comment}\n`)
                     }
 
                     output.write(`${name}${generics}(${parameters})${returnType}\n`)
@@ -696,11 +698,11 @@ withParams(params: RpcCallOptions): this\n`)
     output.write('constructor(opts: TelegramClientOptions) {\n')
     output.write('    super()\n')
     state.init.forEach((code) => {
-        output.write(code + '\n')
+        output.write(`${code}\n`)
     })
     output.write('}\n')
 
-    classContents.forEach((line) => output.write(line + '\n'))
+    classContents.forEach(line => output.write(`${line}\n`))
 
     output.write(`    withParams(params: RpcCallOptions): this {
         return withParams(this, params)
@@ -708,7 +710,7 @@ withParams(params: RpcCallOptions): this\n`)
 
     output.write('}\n')
 
-    classProtoDecls.forEach((line) => output.write(line + '\n'))
+    classProtoDecls.forEach(line => output.write(`${line}\n`))
     // proxied methods
     ;[
         'prepare',
@@ -736,18 +738,18 @@ withParams(params: RpcCallOptions): this\n`)
         'changePrimaryDc',
     ].forEach((name) => {
         output.write(
-            `TelegramClient.prototype.${name} = function(...args) {\n` +
-            `    return this._client.${name}(...args)\n` +
-            '}\n',
+            `TelegramClient.prototype.${name} = function(...args) {\n`
+            + `    return this._client.${name}(...args)\n`
+            + '}\n',
         )
     })
     // disabled methods - they are used internally and we don't want to expose them
     // if the user *really* needs them, they can use `client._client` to access the underlying client
     ;['onServerUpdate', 'onUpdate'].forEach((name) => {
         output.write(
-            `TelegramClient.prototype.${name} = function() {\n` +
-            `    throw new Error('${name} is not available for TelegramClient, use .on() methods instead')\n` +
-            '}\n',
+            `TelegramClient.prototype.${name} = function() {\n`
+            + `    throw new Error('${name} is not available for TelegramClient, use .on() methods instead')\n`
+            + '}\n',
         )
     })
     state.impls.forEach(({ name, code }) => output.write(`TelegramClient.prototype.${name} = ${code}\n`))

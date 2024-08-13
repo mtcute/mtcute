@@ -1,5 +1,5 @@
-import { IReferenceMessagesRepository } from '../../../highlevel/storage/repository/ref-messages.js'
-import { MemoryStorageDriver } from '../driver.js'
+import type { IReferenceMessagesRepository } from '../../../highlevel/storage/repository/ref-messages.js'
+import type { MemoryStorageDriver } from '../driver.js'
 
 interface RefMessagesState {
     refs: Map<number, Set<string>>

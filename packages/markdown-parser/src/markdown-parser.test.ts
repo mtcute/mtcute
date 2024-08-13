@@ -1,17 +1,12 @@
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
-
-import { MessageEntity, TextWithEntities, tl } from '@mtcute/core'
+import type { TextWithEntities, tl } from '@mtcute/core'
+import { MessageEntity } from '@mtcute/core'
 
 // md is special cased in prettier, we don't want that here
 import { md as md_ } from './index.js'
 
-const createEntity = <T extends tl.TypeMessageEntity['_']>(
-    type: T,
-    offset: number,
-    length: number,
-    additional?: Omit<tl.FindByName<tl.TypeMessageEntity, T>, '_' | 'offset' | 'length'>,
-): tl.TypeMessageEntity => {
+function createEntity<T extends tl.TypeMessageEntity['_']>(type: T, offset: number, length: number, additional?: Omit<tl.FindByName<tl.TypeMessageEntity, T>, '_' | 'offset' | 'length'>): tl.TypeMessageEntity {
     return {
         _: type,
         offset,

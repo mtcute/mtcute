@@ -1,10 +1,11 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { assertNever } from '../../../types/utils.js'
 import { assertTrue } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, TypingStatus } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike, TypingStatus } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 
 /**

@@ -1,7 +1,8 @@
 import { MtArgumentError } from '../../../types/errors.js'
-import { ITelegramClient } from '../../client.types.js'
-import { Message } from '../../types/messages/message.js'
-import { ParametersSkip2 } from '../../types/utils.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { Message } from '../../types/messages/message.js'
+import type { ParametersSkip2 } from '../../types/utils.js'
+
 import { sendMedia } from './send-media.js'
 import { sendMediaGroup } from './send-media-group.js'
 import { replyMedia, replyMediaGroup, replyText } from './send-reply.js'

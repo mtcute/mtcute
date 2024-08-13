@@ -1,7 +1,7 @@
-import { ParsedUpdate } from '@mtcute/core'
-import { TelegramClient } from '@mtcute/core/client.js'
+import type { ParsedUpdate } from '@mtcute/core'
+import type { TelegramClient } from '@mtcute/core/client.js'
 
-import { UpdateContextDistributed } from './base.js'
+import type { UpdateContextDistributed } from './base.js'
 import { BusinessMessageContext } from './business-message.js'
 import { BusinessCallbackQueryContext, CallbackQueryContext, InlineCallbackQueryContext } from './callback-query.js'
 import { ChatJoinRequestUpdateContext } from './chat-join-request.js'

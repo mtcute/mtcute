@@ -1,30 +1,35 @@
-/* eslint-disable @typescript-eslint/require-await */
-import { mtp, tl } from '@mtcute/tl'
+import type { mtp } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import { MtClient, MtClientOptions } from '../network/client.js'
-import { ConnectionKind, RpcCallOptions } from '../network/network-manager.js'
-import { StorageManagerExtraOptions } from '../storage/storage.js'
+import type { MtClientOptions } from '../network/client.js'
+import { MtClient } from '../network/client.js'
+import type { ConnectionKind, RpcCallOptions } from '../network/network-manager.js'
+import type { StorageManagerExtraOptions } from '../storage/storage.js'
 import { MtArgumentError } from '../types/errors.js'
-import { MustEqual } from '../types/utils.js'
+import type { MustEqual } from '../types/utils.js'
 import { reportUnknownError } from '../utils/error-reporting.js'
+import type {
+    ICryptoProvider,
+    Logger,
+    StringSessionData,
+} from '../utils/index.js'
 import {
     asyncResettable,
     computeNewPasswordHash,
     computeSrpParams,
-    ICryptoProvider,
     isTlRpcError,
-    Logger,
     readStringSession,
-    StringSessionData,
     writeStringSession,
 } from '../utils/index.js'
 import { LogManager } from '../utils/logger.js'
-import { ConnectionState, ITelegramClient, ServerUpdateHandler } from './client.types.js'
+
+import type { ConnectionState, ITelegramClient, ServerUpdateHandler } from './client.types.js'
 import { AppConfigManager } from './managers/app-config-manager.js'
-import { ITelegramStorageProvider } from './storage/provider.js'
-import { TelegramStorageManager, TelegramStorageManagerExtraOptions } from './storage/storage.js'
+import type { ITelegramStorageProvider } from './storage/provider.js'
+import type { TelegramStorageManagerExtraOptions } from './storage/storage.js'
+import { TelegramStorageManager } from './storage/storage.js'
 import { UpdatesManager } from './updates/manager.js'
-import { RawUpdateHandler, UpdatesManagerParams } from './updates/types.js'
+import type { RawUpdateHandler, UpdatesManagerParams } from './updates/types.js'
 
 export interface BaseTelegramClientOptions extends MtClientOptions {
     storage: ITelegramStorageProvider
@@ -88,6 +93,7 @@ export class BaseTelegramClient implements ITelegramClient {
             ...this.params.storageOptions,
         })
     }
+
     readonly appConfig = new AppConfigManager(this)
 
     private _prepare = asyncResettable(async () => {
@@ -197,6 +203,7 @@ export class BaseTelegramClient implements ITelegramClient {
         const res = await this.mt.call(message, params)
 
         if (isTlRpcError(res)) {
+            // eslint-disable-next-line unicorn/error-message
             const error = makeRpcError(res, new Error().stack ?? '', message._)
 
             if (error.unknown && this.params.enableErrorReporting) {
@@ -208,7 +215,7 @@ export class BaseTelegramClient implements ITelegramClient {
 
         await this.storage.peers.updatePeersFrom(res)
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        // eslint-disable-next-line ts/no-unsafe-return
         return res
     }
 
@@ -233,9 +240,9 @@ export class BaseTelegramClient implements ITelegramClient {
 
         if (data.testMode && !this.params.testMode) {
             throw new Error(
-                'This session string is not for the current backend. ' +
-                    `Session is ${data.testMode ? 'test' : 'prod'}, ` +
-                    `but the client is ${this.params.testMode ? 'test' : 'prod'}`,
+                'This session string is not for the current backend. '
+                + `Session is ${data.testMode ? 'test' : 'prod'}, `
+                + `but the client is ${this.params.testMode ? 'test' : 'prod'}`,
             )
         }
 
@@ -346,6 +353,7 @@ export class BaseTelegramClient implements ITelegramClient {
     computeSrpParams(request: tl.account.RawPassword, password: string): Promise<tl.RawInputCheckPasswordSRP> {
         return computeSrpParams(this.crypto, request, password)
     }
+
     computeNewPasswordHash(algo: tl.TypePasswordKdfAlgo, password: string): Promise<Uint8Array> {
         return computeNewPasswordHash(this.crypto, algo, password)
     }

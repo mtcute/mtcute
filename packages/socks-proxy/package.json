@@ -1,19 +1,19 @@
 {
-    "name": "@mtcute/socks-proxy",
-    "private": true,
-    "version": "0.16.0",
-    "description": "SOCKS4/5 proxy support for mtcute",
-    "author": "alina sireneva <alina@tei.su>",
-    "license": "MIT",
-    "type": "module",
-    "sideEffects": false,
-    "scripts": {
-        "docs": "typedoc",
-        "build": "pnpm run -w build-package socks-proxy"
-    },
-    "exports": "./index.ts",
-    "dependencies": {
-        "@mtcute/node": "workspace:^",
-        "ip6": "0.2.7"
-    }
+  "name": "@mtcute/socks-proxy",
+  "type": "module",
+  "version": "0.16.0",
+  "private": true,
+  "description": "SOCKS4/5 proxy support for mtcute",
+  "author": "alina sireneva <alina@tei.su>",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": "./index.ts",
+  "scripts": {
+    "docs": "typedoc",
+    "build": "pnpm run -w build-package socks-proxy"
+  },
+  "dependencies": {
+    "@mtcute/node": "workspace:^",
+    "ip6": "0.2.7"
+  }
 }

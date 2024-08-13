@@ -1,4 +1,5 @@
-import { BaseCryptoProvider, IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
+import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
+import { BaseCryptoProvider } from '@mtcute/core/utils.js'
 import {
     createCtr256,
     ctr256,
@@ -12,7 +13,8 @@ import {
     sha256,
 } from '@mtcute/wasm'
 
-import { loadWasmBinary, WasmInitInput } from './wasm.js'
+import type { WasmInitInput } from './wasm.js'
+import { loadWasmBinary } from './wasm.js'
 
 const ALGO_TO_SUBTLE: Record<string, string> = {
     sha256: 'SHA-256',
@@ -41,15 +43,15 @@ export class WebCryptoProvider extends BaseCryptoProvider implements ICryptoProv
         const ctx = createCtr256(key, iv)
 
         return {
-            process: (data) => ctr256(ctx, data),
+            process: data => ctr256(ctx, data),
             close: () => freeCtr256(ctx),
         }
     }
 
     createAesIge(key: Uint8Array, iv: Uint8Array): IEncryptionScheme {
         return {
-            encrypt: (data) => ige256Encrypt(data, key, iv),
-            decrypt: (data) => ige256Decrypt(data, key, iv),
+            encrypt: data => ige256Encrypt(data, key, iv),
+            decrypt: data => ige256Decrypt(data, key, iv),
         }
     }
 
@@ -96,7 +98,7 @@ export class WebCryptoProvider extends BaseCryptoProvider implements ICryptoProv
                 keyMaterial,
                 (keylen || 64) * 8,
             )
-            .then((result) => new Uint8Array(result))
+            .then(result => new Uint8Array(result))
     }
 
     async hmacSha256(data: Uint8Array, key: Uint8Array): Promise<Uint8Array> {

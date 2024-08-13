@@ -1,14 +1,15 @@
-import { appendFileSync, readdirSync, readFileSync, writeFileSync } from 'fs'
-import { EOL } from 'os'
-import { dirname, join } from 'path'
+import { appendFileSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { EOL } from 'node:os'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import { inc, rcompare } from 'semver'
-import { fileURLToPath } from 'url'
 
 const __dirname = dirname(new URL(import.meta.url).pathname)
 
 function collectPackageJsons() {
     return readdirSync(join(__dirname, '../packages'))
-        .filter((s) => !s.startsWith('.'))
+        .filter(s => !s.startsWith('.'))
         .map((name) => {
             try {
                 return JSON.parse(readFileSync(join(__dirname, '../packages', name, 'package.json'), 'utf-8'))
@@ -24,8 +25,8 @@ function collectPackageJsons() {
 function bumpVersions(packages, kind) {
     const pkgJsons = collectPackageJsons()
     const maxVersion = pkgJsons
-        .filter((it) => it.name !== '@mtcute/tl')
-        .map((it) => it.version)
+        .filter(it => it.name !== '@mtcute/tl')
+        .map(it => it.version)
         .sort(rcompare)[0]
 
     const nextVersion = inc(maxVersion, kind)
@@ -33,7 +34,7 @@ function bumpVersions(packages, kind) {
 
     for (const pkg of packages) {
         if (pkg === 'tl') continue // own versioning
-        const pkgJson = pkgJsons.find((it) => it.name === `@mtcute/${pkg}`)
+        const pkgJson = pkgJsons.find(it => it.name === `@mtcute/${pkg}`)
 
         if (!pkgJson) {
             console.error(`Package ${pkg} not found!`)
@@ -43,13 +44,13 @@ function bumpVersions(packages, kind) {
         pkgJson.version = nextVersion
         writeFileSync(
             join(__dirname, '../packages', pkg, 'package.json'),
-            JSON.stringify(pkgJson, null, 4) + '\n',
+            `${JSON.stringify(pkgJson, null, 4)}\n`,
         )
     }
 
     const rootPkgJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'))
     rootPkgJson.version = nextVersion
-    writeFileSync(join(__dirname, '../package.json'), JSON.stringify(rootPkgJson, null, 4) + '\n')
+    writeFileSync(join(__dirname, '../package.json'), `${JSON.stringify(rootPkgJson, null, 4)}\n`)
 
     return nextVersion
 }

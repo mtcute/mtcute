@@ -1,12 +1,12 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Chat } from '../peers/chat.js'
-import { parsePeer, PeerSender } from '../peers/peer.js'
-import { PeersIndex } from '../peers/peers-index.js'
-import { _messageMediaFromTl } from './message-media.js'
+import type { PeerSender } from '../peers/peer.js'
+import { parsePeer } from '../peers/peer.js'
+import type { PeersIndex } from '../peers/peers-index.js'
 
 /**
  * Information about forwarded message origin

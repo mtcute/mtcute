@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-
-import { IKeyValueRepository, IStorageDriver } from '@mtcute/core'
+import type { IKeyValueRepository, IStorageDriver } from '@mtcute/core'
 
 export function fakeKeyValueRepository(): IKeyValueRepository {
     return {

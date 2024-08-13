@@ -2,11 +2,11 @@ import { tl } from '@mtcute/tl'
 
 import {
     MtArgumentError,
-    MtcuteError,
     MtSecurityError,
     MtTimeoutError,
     MtTypeAssertionError,
     MtUnsupportedError,
+    MtcuteError,
 } from '../../types/errors.js'
 import { MtEmptyError, MtInvalidPeerTypeError, MtMessageNotFoundError, MtPeerNotFoundError } from '../types/errors.js'
 
@@ -53,13 +53,21 @@ export function serializeError(error: unknown): SerializedError {
     } else if (ctor === tl.RpcError) {
         res.name = 'RpcError'
         res.custom = { ...error }
-    } else if (ctor === MtArgumentError) res.name = 'MtArgumentError'
-    else if (ctor === MtSecurityError) res.name = 'MtSecurityError'
-    else if (ctor === MtUnsupportedError) res.name = 'MtUnsupportedError'
-    else if (ctor === MtPeerNotFoundError) res.name = 'MtPeerNotFoundError'
-    else if (ctor === MtInvalidPeerTypeError) res.name = 'MtInvalidPeerTypeError'
-    else if (ctor === MtEmptyError) res.name = 'MtEmptyError'
-    else if (ctor instanceof MtcuteError) res.name = 'MtcuteError'
+    } else if (ctor === MtArgumentError) {
+        res.name = 'MtArgumentError'
+    } else if (ctor === MtSecurityError) {
+        res.name = 'MtSecurityError'
+    } else if (ctor === MtUnsupportedError) {
+        res.name = 'MtUnsupportedError'
+    } else if (ctor === MtPeerNotFoundError) {
+        res.name = 'MtPeerNotFoundError'
+    } else if (ctor === MtInvalidPeerTypeError) {
+        res.name = 'MtInvalidPeerTypeError'
+    } else if (ctor === MtEmptyError) {
+        res.name = 'MtEmptyError'
+    } else if (ctor instanceof MtcuteError) {
+        res.name = 'MtcuteError'
+    }
 
     return res
 }
@@ -69,7 +77,7 @@ export function deserializeError(error: SerializedError): Error {
 
     switch (error.name) {
         case 'MtTypeAssertionError': {
-            const custom = error.custom as { context: string; expected: string; actual: string }
+            const custom = error.custom as { context: string, expected: string, actual: string }
 
             err2 = new MtTypeAssertionError(custom.context, custom.expected, custom.actual)
             break
@@ -81,7 +89,7 @@ export function deserializeError(error: SerializedError): Error {
             break
         }
         case 'MtMessageNotFoundError': {
-            const custom = error.custom as { peerId: number; messageId: number; context?: string }
+            const custom = error.custom as { peerId: number, messageId: number, context?: string }
 
             err2 = new MtMessageNotFoundError(custom.peerId, custom.messageId, custom.context)
             break

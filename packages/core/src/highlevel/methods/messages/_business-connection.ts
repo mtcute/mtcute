@@ -1,16 +1,16 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { RpcCallOptions } from '../../../network/network-manager.js'
-import { MustEqual } from '../../../types/utils.js'
+import type { RpcCallOptions } from '../../../network/network-manager.js'
+import type { MustEqual } from '../../../types/utils.js'
 import { LruMap } from '../../../utils/lru-map.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { getBusinessConnection } from '../premium/get-business-connection.js'
 
 // temporary solution
 // todo – rework once we have either a more generic caching solution
 const DC_MAP_SYMBOL = Symbol('dcMap')
 
-const getDcMap = (client: ITelegramClient): LruMap<string, number> => {
+function getDcMap(client: ITelegramClient): LruMap<string, number> {
     const client_ = client as typeof client & { [DC_MAP_SYMBOL]?: LruMap<string, number> }
 
     if (!client_[DC_MAP_SYMBOL]) {
@@ -44,7 +44,7 @@ export async function _maybeInvokeWithBusinessConnection<T extends tl.RpcMethod>
 
     const dcId = dcMap.get(businessConnectionId)!
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    // eslint-disable-next-line ts/no-unsafe-return
     return client.call(
         {
             _: 'invokeWithBusinessConnection',

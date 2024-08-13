@@ -1,7 +1,8 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../../../../types/errors.js'
-import { PeersIndex } from '../../peers/index.js'
+import type { PeersIndex } from '../../peers/index.js'
+
 import { StoryInteractiveChannelPost } from './channel-post.js'
 import { StoryInteractiveLocation } from './location.js'
 import { StoryInteractiveReaction } from './reaction.js'
@@ -20,12 +21,12 @@ export {
 }
 
 export type StoryInteractiveElement =
-    | StoryInteractiveReaction
-    | StoryInteractiveLocation
-    | StoryInteractiveVenue
-    | StoryInteractiveChannelPost
-    | StoryInteractiveUrl
-    | StoryInteractiveWeather
+  | StoryInteractiveReaction
+  | StoryInteractiveLocation
+  | StoryInteractiveVenue
+  | StoryInteractiveChannelPost
+  | StoryInteractiveUrl
+  | StoryInteractiveWeather
 
 export function _storyInteractiveElementFromTl(raw: tl.TypeMediaArea, peers: PeersIndex): StoryInteractiveElement {
     switch (raw._) {

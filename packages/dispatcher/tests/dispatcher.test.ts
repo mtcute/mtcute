@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest'
-
 import { Message, PeersIndex } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
-import { createStub, StubTelegramClient } from '@mtcute/test'
+import { StubTelegramClient, createStub } from '@mtcute/test'
 
 import { Dispatcher, PropagationAction } from '../src/index.js'
 
@@ -40,7 +39,7 @@ describe('Dispatcher', () => {
             const log: string[] = []
 
             dp.onRawUpdate((cl, upd) => {
-                log.push('(no) received ' + upd._)
+                log.push(`(no) received ${upd._}`)
 
                 return PropagationAction.Continue
             })
@@ -48,7 +47,7 @@ describe('Dispatcher', () => {
             dp.onRawUpdate(
                 () => true,
                 (cl, upd) => {
-                    log.push('(true) received ' + upd._)
+                    log.push(`(true) received ${upd._}`)
 
                     return PropagationAction.Continue
                 },
@@ -57,7 +56,7 @@ describe('Dispatcher', () => {
             dp.onRawUpdate(
                 () => false,
                 (cl, upd) => {
-                    log.push('(false) received ' + upd._)
+                    log.push(`(false) received ${upd._}`)
 
                     return PropagationAction.Continue
                 },
@@ -78,16 +77,16 @@ describe('Dispatcher', () => {
             const log: string[] = []
 
             dp.onRawUpdate((cl, upd) => {
-                log.push('(grp0) received ' + upd._)
+                log.push(`(grp0) received ${upd._}`)
             }, 0)
             dp.onRawUpdate((cl, upd) => {
-                log.push('(grp0 2) received ' + upd._)
+                log.push(`(grp0 2) received ${upd._}`)
             }, 0)
             dp.onRawUpdate((cl, upd) => {
-                log.push('(grp1) received ' + upd._)
+                log.push(`(grp1) received ${upd._}`)
             }, 1)
             dp.onRawUpdate((cl, upd) => {
-                log.push('(grp2) received ' + upd._)
+                log.push(`(grp2) received ${upd._}`)
             }, 2)
 
             await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
@@ -105,21 +104,21 @@ describe('Dispatcher', () => {
             const log: string[] = []
 
             dp.onRawUpdate((cl, upd) => {
-                log.push('(grp0) received ' + upd._)
+                log.push(`(grp0) received ${upd._}`)
 
                 return PropagationAction.Continue
             }, 0)
             dp.onRawUpdate((cl, upd) => {
-                log.push('(grp0 2) received ' + upd._)
+                log.push(`(grp0 2) received ${upd._}`)
             }, 0)
             dp.onRawUpdate((cl, upd) => {
-                log.push('(grp1) received ' + upd._)
+                log.push(`(grp1) received ${upd._}`)
             }, 1)
             dp.onRawUpdate((cl, upd) => {
-                log.push('(grp1 2) received ' + upd._)
+                log.push(`(grp1 2) received ${upd._}`)
             }, 1)
             dp.onRawUpdate((cl, upd) => {
-                log.push('(grp2) received ' + upd._)
+                log.push(`(grp2) received ${upd._}`)
             }, 2)
 
             await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
@@ -138,23 +137,23 @@ describe('Dispatcher', () => {
             const log: string[] = []
 
             dp.onRawUpdate((cl, upd) => {
-                log.push('(grp0) received ' + upd._)
+                log.push(`(grp0) received ${upd._}`)
 
                 return PropagationAction.Continue
             }, 0)
             dp.onRawUpdate((cl, upd) => {
-                log.push('(grp0 2) received ' + upd._)
+                log.push(`(grp0 2) received ${upd._}`)
             }, 0)
             dp.onRawUpdate((cl, upd) => {
-                log.push('(grp1) received ' + upd._)
+                log.push(`(grp1) received ${upd._}`)
 
                 return PropagationAction.Stop
             }, 1)
             dp.onRawUpdate((cl, upd) => {
-                log.push('(grp1 2) received ' + upd._)
+                log.push(`(grp1 2) received ${upd._}`)
             }, 1)
             dp.onRawUpdate((cl, upd) => {
-                log.push('(grp2) received ' + upd._)
+                log.push(`(grp2) received ${upd._}`)
             }, 2)
 
             await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
@@ -176,11 +175,11 @@ describe('Dispatcher', () => {
             const log: string[] = []
 
             dp.onRawUpdate((cl, upd) => {
-                log.push('(parent) received ' + upd._)
+                log.push(`(parent) received ${upd._}`)
             })
 
             child.onRawUpdate((cl, upd) => {
-                log.push('(child) received ' + upd._)
+                log.push(`(child) received ${upd._}`)
             })
 
             await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
@@ -196,35 +195,35 @@ describe('Dispatcher', () => {
             const log: string[] = []
 
             dp.onRawUpdate((cl, upd) => {
-                log.push('(parent 0) received ' + upd._)
+                log.push(`(parent 0) received ${upd._}`)
 
                 return PropagationAction.Continue
             }, 0)
 
             dp.onRawUpdate((cl, upd) => {
-                log.push('(parent 1) received ' + upd._)
+                log.push(`(parent 1) received ${upd._}`)
 
                 return PropagationAction.Stop
             }, 1)
 
             dp.onRawUpdate((cl, upd) => {
-                log.push('(parent 2) received ' + upd._)
+                log.push(`(parent 2) received ${upd._}`)
             }, 1)
 
             child.onRawUpdate((cl, upd) => {
-                log.push('(child 0) received ' + upd._)
+                log.push(`(child 0) received ${upd._}`)
 
                 return PropagationAction.Continue
             }, 0)
 
             child.onRawUpdate((cl, upd) => {
-                log.push('(child 1) received ' + upd._)
+                log.push(`(child 1) received ${upd._}`)
 
                 return PropagationAction.Stop
             }, 1)
 
             child.onRawUpdate((cl, upd) => {
-                log.push('(child 2) received ' + upd._)
+                log.push(`(child 2) received ${upd._}`)
             }, 1)
 
             await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
@@ -247,14 +246,12 @@ describe('Dispatcher', () => {
             const log: string[] = []
 
             dp.onNewMessage(() => {
-                // eslint-disable-next-line
                 log.push(`received ${(dp.deps as any).foo}`)
             })
 
             const dp2 = Dispatcher.child()
 
             dp2.onNewMessage(() => {
-                // eslint-disable-next-line
                 log.push(`received ${(dp.deps as any).foo} (child)`)
             })
 

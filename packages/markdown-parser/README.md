@@ -129,8 +129,8 @@ You can interpolate one of the following:
 - `number` - will be converted to string and appended to plain text as-is
 - `TextWithEntities` or `MessageEntity` - will add the text and its entities to the output. This is the type returned by `md` itself:
   ```ts
-    const bold = md`**bold**`
-    const text = md`Hello, ${bold}!`
+  const bold = md`**bold**`
+  const text = md`Hello, ${bold}!`
   ```
 - falsy value (i.e. `null`, `undefined`, `false`) - will be ignored
 

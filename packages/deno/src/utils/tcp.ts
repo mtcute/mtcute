@@ -1,8 +1,8 @@
 import EventEmitter from 'node:events'
 
-import { IntermediatePacketCodec, IPacketCodec, ITelegramTransport, MtcuteError, TransportState } from '@mtcute/core'
-import { BasicDcOption, ICryptoProvider, Logger } from '@mtcute/core/utils.js'
-
+import type { IPacketCodec, ITelegramTransport } from '@mtcute/core'
+import { IntermediatePacketCodec, MtcuteError, TransportState } from '@mtcute/core'
+import type { BasicDcOption, ICryptoProvider, Logger } from '@mtcute/core/utils.js'
 import { writeAll } from '@std/io/write-all'
 
 /**
@@ -42,7 +42,7 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
         return this._currentDc
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line unused-imports/no-unused-vars
     connect(dc: BasicDcOption, testMode: boolean): void {
         if (this._state !== TransportState.Idle) {
             throw new MtcuteError('Transport is not IDLE')
@@ -50,8 +50,8 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
 
         if (!this.packetCodecInitialized) {
             this._packetCodec.setup?.(this._crypto, this.log)
-            this._packetCodec.on('error', (err) => this.emit('error', err))
-            this._packetCodec.on('packet', (buf) => this.emit('message', buf))
+            this._packetCodec.on('error', err => this.emit('error', err))
+            this._packetCodec.on('packet', buf => this.emit('message', buf))
             this.packetCodecInitialized = true
         }
 

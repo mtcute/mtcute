@@ -1,4 +1,5 @@
 import { expect } from 'vitest'
+
 import { setPlatform } from '../../packages/core/src/platform.js'
 import { buffersEqual } from '../../packages/core/src/utils/buffer-utils.js'
 
@@ -15,5 +16,5 @@ expect.addEqualityTesters([
         if (a instanceof Uint8Array && b instanceof Uint8Array) {
             return buffersEqual(a, b)
         }
-    }
+    },
 ])

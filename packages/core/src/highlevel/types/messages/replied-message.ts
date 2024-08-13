@@ -1,14 +1,16 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Chat } from '../peers/chat.js'
-import { PeerSender } from '../peers/peer.js'
-import { PeersIndex } from '../peers/peers-index.js'
+import type { PeerSender } from '../peers/peer.js'
+import type { PeersIndex } from '../peers/peers-index.js'
 import { User } from '../peers/user.js'
+
 import { MessageEntity } from './message-entity.js'
-import { _messageMediaFromTl, MessageMedia } from './message-media.js'
+import type { MessageMedia } from './message-media.js'
+import { _messageMediaFromTl } from './message-media.js'
 
 /**
  * Origin of the replied-to message
@@ -178,7 +180,7 @@ export class RepliedMessageInfo {
 
     /** Message entities contained in the quote */
     get quoteEntities(): MessageEntity[] {
-        return this.raw.quoteEntities?.map((e) => new MessageEntity(e)) ?? []
+        return this.raw.quoteEntities?.map(e => new MessageEntity(e)) ?? []
     }
 
     /**

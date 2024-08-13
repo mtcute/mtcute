@@ -1,9 +1,9 @@
-import { createReadStream, ReadStream } from 'fs'
-import { stat } from 'fs/promises'
-import { basename } from 'path'
-import { Readable } from 'stream'
+import { ReadStream, createReadStream } from 'node:fs'
+import { stat } from 'node:fs/promises'
+import { basename } from 'node:path'
+import { Readable } from 'node:stream'
 
-import { UploadFileLike } from '@mtcute/core'
+import type { UploadFileLike } from '@mtcute/core'
 
 import { nodeStreamToWeb } from './stream-utils.js'
 
@@ -14,7 +14,7 @@ export async function normalizeFile(file: UploadFileLike) {
 
     if (file instanceof ReadStream) {
         const fileName = basename(file.path.toString())
-        const fileSize = await stat(file.path.toString()).then((stat) => stat.size)
+        const fileSize = await stat(file.path.toString()).then(stat => stat.size)
 
         return {
             file: nodeStreamToWeb(file),

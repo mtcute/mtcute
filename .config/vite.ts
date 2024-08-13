@@ -17,14 +17,14 @@ export default defineConfig({
             ],
             exclude: [
                 'packages/**/index.ts',
-            ]
+            ],
         },
         setupFiles: [
-            './.config/vite-utils/test-setup.ts'
-        ]
+            './.config/vite-utils/test-setup.ts',
+        ],
     },
     define: {
-        'import.meta.env.TEST_ENV': '"node"'
+        'import.meta.env.TEST_ENV': '"node"',
     },
     optimizeDeps: {
         esbuildOptions: {

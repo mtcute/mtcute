@@ -1,9 +1,10 @@
 import { gzipSync } from 'node:zlib'
-import { beforeAll, describe, expect, it } from 'vitest'
 
+import { beforeAll, describe, expect, it } from 'vitest'
 import { getPlatform } from '@mtcute/core/platform.js'
 
 import { __getWasm, gunzip } from '../src/index.js'
+
 import { initWasm } from './init.js'
 
 beforeAll(async () => {

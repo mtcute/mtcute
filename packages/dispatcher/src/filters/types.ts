@@ -1,10 +1,6 @@
-/* eslint-disable @typescript-eslint/ban-types */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// ^^ will be looked into in MTQ-29
+import type { MaybePromise } from '@mtcute/core'
 
-import { MaybePromise } from '@mtcute/core'
-
-import { UpdateState } from '../state/update-state.js'
+import type { UpdateState } from '../state/update-state.js'
 /**
  * Type describing a primitive filter, which is a function taking some `Base`
  * and a {@link TelegramClient}, checking it against some condition
@@ -74,7 +70,7 @@ import { UpdateState } from '../state/update-state.js'
  * > like `and`, `or`, etc. Those are meant to be inferred by the compiler!
  */
 // we need the second parameter because it carries meta information
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line unused-imports/no-unused-vars, ts/no-empty-object-type
 export type UpdateFilter<Base, Mod = {}, State extends object = never> = (
     update: Base,
     state?: UpdateState<State>,

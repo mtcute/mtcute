@@ -1,4 +1,4 @@
-import { IMtStorageProvider } from '@mtcute/core'
+import type { IMtStorageProvider } from '@mtcute/core'
 
 import { IdbStorageDriver } from './driver.js'
 import { IdbAuthKeysRepository } from './repository/auth-keys.js'

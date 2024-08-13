@@ -1,6 +1,7 @@
-import { BaseService, ServiceOptions } from '../../../storage/service/base.js'
+import type { ServiceOptions } from '../../../storage/service/base.js'
+import { BaseService } from '../../../storage/service/base.js'
 import { LruMap } from '../../../utils/lru-map.js'
-import { IReferenceMessagesRepository } from '../repository/ref-messages.js'
+import type { IReferenceMessagesRepository } from '../repository/ref-messages.js'
 
 export interface RefMessagesServiceOptions {
     cacheSize?: number

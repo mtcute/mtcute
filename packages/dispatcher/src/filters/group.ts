@@ -1,8 +1,9 @@
-import { MaybePromise, Message } from '@mtcute/core'
+import type { MaybePromise, Message } from '@mtcute/core'
 
-import { BusinessMessageContext } from '../context/business-message.js'
-import { MessageContext } from '../context/message.js'
-import { Modify, UpdateFilter } from './types.js'
+import type { BusinessMessageContext } from '../context/business-message.js'
+import type { MessageContext } from '../context/message.js'
+
+import type { Modify, UpdateFilter } from './types.js'
 
 /**
  * For message groups, apply a filter to every message in the group.
@@ -21,7 +22,7 @@ export function every<Mod, State extends object>(
         messages: Modify<MessageContext | BusinessMessageContext, Mod>[]
     },
     State
-> {
+    > {
     return (ctx, state) => {
         let i = 0
         const upds = ctx.messages
@@ -59,7 +60,6 @@ export function every<Mod, State extends object>(
  * @returns
  */
 export function some<State extends object>(
-    // eslint-disable-next-line
     filter: UpdateFilter<Message, any, State>,
     // eslint-disable-next-line
 ): UpdateFilter<MessageContext | BusinessMessageContext, {}, State> {

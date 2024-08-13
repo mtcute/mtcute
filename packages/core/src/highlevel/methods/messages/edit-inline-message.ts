@@ -1,7 +1,8 @@
 import { tl } from '@mtcute/tl'
 
-import { ITelegramClient } from '../../client.types.js'
-import { BotKeyboard, InputMediaLike, InputText, ReplyMarkup } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputMediaLike, InputText, ReplyMarkup } from '../../types/index.js'
+import { BotKeyboard } from '../../types/index.js'
 import { normalizeInlineId } from '../../utils/inline-utils.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
@@ -63,9 +64,9 @@ export async function editInlineMessage(
         progressCallback?: (uploaded: number, total: number) => void
     },
 ): Promise<void> {
-    let content: string | undefined = undefined
+    let content: string | undefined
     let entities: tl.TypeMessageEntity[] | undefined
-    let media: tl.TypeInputMedia | undefined = undefined
+    let media: tl.TypeInputMedia | undefined
 
     const id = normalizeInlineId(params.messageId)
 

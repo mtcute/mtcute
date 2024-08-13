@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-
 import { getPlatform } from '@mtcute/core/platform.js'
 
 import { __getWasm, sha1, sha256 } from '../src/index.js'
+
 import { initWasm } from './init.js'
 
 beforeAll(async () => {

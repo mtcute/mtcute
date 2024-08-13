@@ -1,12 +1,11 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
-
-import { Message } from '@mtcute/core'
+import type { Message } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
 
 import { getApiParams, waitFor } from '../utils.js'
 
-describe('4. handling updates', async function () {
+describe('4. handling updates', function () {
     this.timeout(300_000)
 
     const tg1 = new TelegramClient(getApiParams('dc1.session'))
@@ -27,7 +26,7 @@ describe('4. handling updates', async function () {
     it('should send and receive messages', async () => {
         const tg1Messages: Message[] = []
 
-        tg1.on('new_message', (msg) => tg1Messages.push(msg))
+        tg1.on('new_message', msg => tg1Messages.push(msg))
 
         const [tg1User] = await tg1.getUsers('self')
         let username = tg1User!.username
@@ -44,7 +43,8 @@ describe('4. handling updates', async function () {
         expect(sentMsg.chat.id).to.equal(tg1User!.id)
 
         await waitFor(() => {
-            expect(tg1Messages.find((msg) => msg.text === messageText)).to.exist
+            // eslint-disable-next-line ts/no-unused-expressions
+            expect(tg1Messages.find(msg => msg.text === messageText)).to.exist
         })
     })
 })

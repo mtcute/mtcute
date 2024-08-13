@@ -1,6 +1,7 @@
 import { bufferToReversed, concatBuffers, dataViewFromBuffer } from '../../utils/buffer-utils.js'
-import { IAesCtr } from '../../utils/index.js'
-import { IPacketCodec } from './abstract.js'
+import type { IAesCtr } from '../../utils/index.js'
+
+import type { IPacketCodec } from './abstract.js'
 import { WrappedCodec } from './wrapped.js'
 
 export interface MtProxyInfo {
@@ -27,19 +28,19 @@ export class ObfuscatedPacketCodec extends WrappedCodec implements IPacketCodec 
 
         for (;;) {
             random = this._crypto.randomBytes(64)
-            if (random[0] === 0xef) continue
+            if (random[0] === 0xEF) continue
 
             dv = dataViewFromBuffer(random)
             const firstInt = dv.getUint32(0, true)
 
             if (
-                firstInt === 0x44414548 || // HEAD
-                firstInt === 0x54534f50 || // POST
-                firstInt === 0x20544547 || // GET(space)
-                firstInt === 0x4954504f || // OPTI
-                firstInt === 0xdddddddd || // padded intermediate
-                firstInt === 0xeeeeeeee || // intermediate
-                firstInt === 0x02010316 // no idea, taken from tdlib
+                firstInt === 0x44414548 // HEAD
+                || firstInt === 0x54534F50 // POST
+                || firstInt === 0x20544547 // GET(space)
+                || firstInt === 0x4954504F // OPTI
+                || firstInt === 0xDDDDDDDD // padded intermediate
+                || firstInt === 0xEEEEEEEE // intermediate
+                || firstInt === 0x02010316 // no idea, taken from tdlib
             ) {
                 continue
             }

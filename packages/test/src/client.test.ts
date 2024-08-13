@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-
 import { getPlatform } from '@mtcute/core/platform.js'
 
 import { StubTelegramClient } from './client.js'

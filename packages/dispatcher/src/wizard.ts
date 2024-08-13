@@ -1,9 +1,10 @@
-import { MaybePromise } from '@mtcute/core'
+import type { MaybePromise } from '@mtcute/core'
 
-import { MessageContext } from './context/message.js'
-import { Dispatcher, DispatcherParams } from './dispatcher.js'
+import type { MessageContext } from './context/message.js'
+import type { DispatcherParams } from './dispatcher.js'
+import { Dispatcher } from './dispatcher.js'
 import { filters } from './filters/index.js'
-import { UpdateState } from './state/update-state.js'
+import type { UpdateState } from './state/update-state.js'
 
 /**
  * Action for the wizard scene.
@@ -82,7 +83,7 @@ export class WizardScene<State extends object> extends Dispatcher<State & Wizard
      * Filter that will only pass if the current step is `step`
      */
     static onNthStep(step: number) {
-        const filter = filters.state<WizardInternalState>((it) => it.$step === step)
+        const filter = filters.state<WizardInternalState>(it => it.$step === step)
 
         if (step === 0) return filters.or(filters.stateEmpty, filter)
 

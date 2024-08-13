@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { writeTlEntryToString } from './stringify.js'
-import { TlArgument, TlEntry } from './types.js'
+import type { TlArgument, TlEntry } from './types.js'
 
 describe('writeTlEntryToString', () => {
     const make = (name: string, type: string, ...args: string[]): TlEntry => ({
@@ -41,7 +41,7 @@ describe('writeTlEntryToString', () => {
 
     it('writes constructor id if available', () => {
         const entry = make('auth.logOut', 'Bool')
-        entry.id = 0xaef001df
+        entry.id = 0xAEF001DF
         test(entry, 'auth.logOut#aef001df = Bool;')
     })
 

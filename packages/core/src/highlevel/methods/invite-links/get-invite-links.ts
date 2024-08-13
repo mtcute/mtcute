@@ -1,5 +1,6 @@
-import { ITelegramClient } from '../../client.types.js'
-import { ArrayPaginated, ChatInviteLink, InputPeerLike, PeersIndex } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { ArrayPaginated, InputPeerLike } from '../../types/index.js'
+import { ChatInviteLink, PeersIndex } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/index.js'
 import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 
@@ -65,15 +66,15 @@ export async function getInviteLinks(
 
     const peers = PeersIndex.from(res)
 
-    const links = res.invites.map((it) => new ChatInviteLink(it, peers))
+    const links = res.invites.map(it => new ChatInviteLink(it, peers))
 
     const last = links[links.length - 1]
-    const nextOffset = last ?
-        {
+    const nextOffset = last
+        ? {
             date: last.raw.date,
             link: last.raw.link,
-        } :
-        undefined
+        }
+        : undefined
 
     return makeArrayPaginated(links, res.count, nextOffset)
 }

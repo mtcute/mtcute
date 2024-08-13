@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { getMarkedPeerId, toggleChannelIdMark } from '../../../utils/peer-utils.js'
 import { makeInspectable } from '../../utils/index.js'
@@ -6,12 +6,12 @@ import { makeInspectable } from '../../utils/index.js'
 export class HistoryReadUpdate {
     constructor(
         readonly raw:
-            | tl.RawUpdateReadHistoryInbox
-            | tl.RawUpdateReadHistoryOutbox
-            | tl.RawUpdateReadChannelInbox
-            | tl.RawUpdateReadChannelOutbox
-            | tl.RawUpdateReadChannelDiscussionInbox
-            | tl.RawUpdateReadChannelDiscussionOutbox,
+          | tl.RawUpdateReadHistoryInbox
+          | tl.RawUpdateReadHistoryOutbox
+          | tl.RawUpdateReadChannelInbox
+          | tl.RawUpdateReadChannelOutbox
+          | tl.RawUpdateReadChannelDiscussionInbox
+          | tl.RawUpdateReadChannelDiscussionOutbox,
     ) {}
 
     /**

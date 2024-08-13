@@ -1,6 +1,7 @@
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { ArrayPaginated, InputPeerLike, PeersIndex, Story } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { ArrayPaginated, InputPeerLike } from '../../types/index.js'
+import { PeersIndex, Story } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 

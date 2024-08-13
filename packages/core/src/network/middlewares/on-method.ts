@@ -1,7 +1,7 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { Middleware } from '../../utils/composer.js'
-import { RpcCallMiddleware, RpcCallMiddlewareContext } from '../network-manager.js'
+import type { Middleware } from '../../utils/composer.js'
+import type { RpcCallMiddleware, RpcCallMiddlewareContext } from '../network-manager.js'
 
 /**
  * Middleware that will call `handler` whenever `method` RPC method is called.
@@ -37,9 +37,9 @@ import { RpcCallMiddleware, RpcCallMiddlewareContext } from '../network-manager.
 export function onMethod<T extends tl.RpcMethod['_']>(
     method: T,
     middleware: Middleware<
-        Omit<RpcCallMiddlewareContext, 'request'> & {
-            request: Extract<tl.RpcMethod, { _: T }>
-        },
+      Omit<RpcCallMiddlewareContext, 'request'> & {
+          request: Extract<tl.RpcMethod, { _: T }>
+      },
         tl.RpcCallReturn[T]
     >,
 ): RpcCallMiddleware {

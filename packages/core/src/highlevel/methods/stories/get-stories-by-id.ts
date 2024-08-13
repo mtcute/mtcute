@@ -1,7 +1,8 @@
-import { MaybeArray } from '../../../types/utils.js'
+import type { MaybeArray } from '../../../types/utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, PeersIndex, Story } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { PeersIndex, Story } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**

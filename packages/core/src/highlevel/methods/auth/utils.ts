@@ -1,6 +1,6 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { User } from '../../types/peers/user.js'
 
 /** @internal */

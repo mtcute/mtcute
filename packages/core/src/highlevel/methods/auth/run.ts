@@ -1,5 +1,6 @@
-import { ITelegramClient } from '../../client.types.js'
-import { User } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { User } from '../../types/index.js'
+
 import { start } from './start.js'
 
 /**
@@ -21,5 +22,5 @@ export function run(
 ): void {
     start(client, params)
         .then(then)
-        .catch((err) => client.emitError(err))
+        .catch(err => client.emitError(err))
 }

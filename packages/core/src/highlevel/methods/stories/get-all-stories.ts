@@ -1,5 +1,5 @@
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { AllStories } from '../../types/index.js'
 
 /**

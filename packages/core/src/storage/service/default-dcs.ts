@@ -1,6 +1,9 @@
-import { DcOptions, parseBasicDcOption, serializeBasicDcOption } from '../../utils/dcs.js'
-import { IKeyValueRepository } from '../repository/key-value.js'
-import { BaseService, ServiceOptions } from './base.js'
+import type { DcOptions } from '../../utils/dcs.js'
+import { parseBasicDcOption, serializeBasicDcOption } from '../../utils/dcs.js'
+import type { IKeyValueRepository } from '../repository/key-value.js'
+
+import type { ServiceOptions } from './base.js'
+import { BaseService } from './base.js'
 
 const KV_MAIN = 'dc_main'
 const KV_MEDIA = 'dc_media'
@@ -18,9 +21,11 @@ export class DefaultDcsService extends BaseService {
     async store(dcs: DcOptions): Promise<void> {
         if (this._cached) {
             if (
-                this._cached.main === dcs.main &&
-                this._cached.media === dcs.media
-            ) return
+                this._cached.main === dcs.main
+                && this._cached.media === dcs.media
+            ) {
+                return
+            }
         }
 
         this._cached = dcs

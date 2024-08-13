@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest'
-
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { joinTextWithEntities } from './entities.js'
 
-const createEntity = (offset: number, length: number): tl.TypeMessageEntity => {
+function createEntity(offset: number, length: number): tl.TypeMessageEntity {
     return {
         _: 'messageEntityBold',
         offset,

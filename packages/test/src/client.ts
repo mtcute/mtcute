@@ -1,10 +1,12 @@
-import { MaybePromise, MustEqual, RpcCallOptions, tl } from '@mtcute/core'
-import { BaseTelegramClient, BaseTelegramClientOptions } from '@mtcute/core/client.js'
+import type { MaybePromise, MustEqual, RpcCallOptions } from '@mtcute/core'
+import { tl } from '@mtcute/core'
+import type { BaseTelegramClientOptions } from '@mtcute/core/client.js'
+import { BaseTelegramClient } from '@mtcute/core/client.js'
 
 import { defaultCryptoProvider } from './platform.js'
 import { StubMemoryTelegramStorage } from './storage.js'
 import { StubTelegramTransport } from './transport.js'
-import { InputResponder } from './types.js'
+import type { InputResponder } from './types.js'
 import { markedIdToPeer } from './utils.js'
 
 interface MessageBox {
@@ -77,7 +79,7 @@ export class StubTelegramClient extends BaseTelegramClient {
     static full() {
         const client = new StubTelegramClient()
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        // eslint-disable-next-line ts/no-unsafe-return
         return new Proxy(client, {
             get(target, prop) {
                 if (typeof prop === 'string' && !(prop in target)) {
@@ -86,7 +88,6 @@ export class StubTelegramClient extends BaseTelegramClient {
 
                 return target[prop as keyof typeof target]
             },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }) as any
         // i don't want to type this properly since it would require depending test utils on client
     }
@@ -155,7 +156,6 @@ export class StubTelegramClient extends BaseTelegramClient {
         this._onRawMessage = fn
     }
 
-    // eslint-disable-next-line func-call-spacing
     private _responders = new Map<string, (data: unknown) => unknown>()
 
     addResponder<T extends tl.RpcMethod['_']>(responders: InputResponder<T>): void {
@@ -178,7 +178,9 @@ export class StubTelegramClient extends BaseTelegramClient {
     respondWith<
         T extends tl.RpcMethod['_'],
         Fn extends(data: tl.FindByName<tl.RpcMethod, T>) => MaybePromise<tl.RpcCallReturn[T]>,
-    >(method: T, response: Fn): Fn {
+    >(method: T,
+        response: Fn,
+    ): Fn {
         // eslint-disable-next-line
         this._responders.set(method, response as any)
 
@@ -301,7 +303,6 @@ export class StubTelegramClient extends BaseTelegramClient {
         await this.close()
 
         if (error) {
-            // eslint-disable-next-line @typescript-eslint/no-throw-literal
             throw error
         }
     }

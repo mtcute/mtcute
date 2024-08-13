@@ -1,18 +1,21 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { ITelegramClient } from '../../client.types.js'
-import {
-    BotKeyboard,
+import type { ITelegramClient } from '../../client.types.js'
+import type {
     InputMediaLike,
     InputMessageId,
     InputText,
     Message,
-    normalizeInputMessageId,
     ReplyMarkup,
+} from '../../types/index.js'
+import {
+    BotKeyboard,
+    normalizeInputMessageId,
 } from '../../types/index.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 import { _findMessageInUpdate } from './find-in-update.js'
 
@@ -81,9 +84,9 @@ export async function editMessage(
     },
 ): Promise<Message> {
     const { chatId, message } = normalizeInputMessageId(params)
-    let content: string | undefined = undefined
+    let content: string | undefined
     let entities: tl.TypeMessageEntity[] | undefined
-    let media: tl.TypeInputMedia | undefined = undefined
+    let media: tl.TypeInputMedia | undefined
 
     if (params.media) {
         media = await _normalizeInputMedia(client, params.media, params)

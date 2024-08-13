@@ -1,7 +1,7 @@
-import { BaseSqliteStorage, BaseSqliteStorageDriver, ISqliteStatement, MaybePromise } from '@mtcute/core'
+import type { BaseSqliteStorage, BaseSqliteStorageDriver, ISqliteStatement, MaybePromise } from '@mtcute/core'
 
-import { IStateStorageProvider } from '../provider.js'
-import { IStateRepository } from '../repository.js'
+import type { IStateStorageProvider } from '../provider.js'
+import type { IStateRepository } from '../repository.js'
 
 interface StateDto {
     value: string

@@ -1,4 +1,5 @@
-import { parseMarkedPeerId, tl } from '@mtcute/core'
+import type { tl } from '@mtcute/core'
+import { parseMarkedPeerId } from '@mtcute/core'
 
 export function markedIdToPeer(id: number): tl.TypePeer {
     const [type, bareId] = parseMarkedPeerId(id)

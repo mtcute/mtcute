@@ -1,7 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { assertNever, MaybeArray } from '../../../../types/utils.js'
-import { ChatAction } from './actions.js'
+import type { MaybeArray } from '../../../../types/utils.js'
+import { assertNever } from '../../../../types/utils.js'
+
+import type { ChatAction } from './actions.js'
 
 export interface ChatEventFilters {
     serverFilter?: tl.TypeChannelAdminLogEventsFilter
@@ -9,10 +11,10 @@ export interface ChatEventFilters {
 }
 
 export type InputChatEventFilters =
-    | ChatEventFilters
-    | tl.TypeChannelAdminLogEventsFilter
-    | MaybeArray<Exclude<ChatAction, null>['type']>
-    | undefined
+  | ChatEventFilters
+  | tl.TypeChannelAdminLogEventsFilter
+  | MaybeArray<Exclude<ChatAction, null>['type']>
+  | undefined
 
 /** @internal */
 export function normalizeChatEventFilters(input: InputChatEventFilters): ChatEventFilters {

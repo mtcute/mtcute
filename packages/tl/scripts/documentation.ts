@@ -1,31 +1,34 @@
+import { readFile, writeFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+import { createInterface } from 'node:readline'
+
 import * as cheerio from 'cheerio'
 import { asyncPoolCallback } from 'eager-async-pool'
-import { readFile, writeFile } from 'fs/promises'
 import jsYaml from 'js-yaml'
-import { fileURLToPath } from 'node:url'
-import { createInterface } from 'readline'
-
-import {
-    camelToPascal,
-    jsComment,
-    PRIMITIVE_TO_TS,
-    snakeToCamel,
-    splitNameToNamespace,
+import type {
     TlEntry,
     TlFullSchema,
+} from '@mtcute/tl-utils'
+import {
+    PRIMITIVE_TO_TS,
+    camelToPascal,
+    jsComment,
+    snakeToCamel,
+    splitNameToNamespace,
 } from '@mtcute/tl-utils'
 
 import {
     API_SCHEMA_JSON_FILE,
     APP_CONFIG_JSON_FILE,
     BLOGFORK_DOMAIN,
-    CORE_DOMAIN,
     COREFORK_DOMAIN,
+    CORE_DOMAIN,
     DESCRIPTIONS_YAML_FILE,
     DOC_CACHE_FILE,
 } from './constants.js'
 import { applyDescriptionsYamlFile } from './process-descriptions-yaml.js'
-import { packTlSchema, TlPackedSchema, unpackTlSchema } from './schema.js'
+import type { TlPackedSchema } from './schema.js'
+import { packTlSchema, unpackTlSchema } from './schema.js'
 import { fetchRetry } from './utils.js'
 
 export interface CachedDocumentationEntry {
@@ -68,12 +71,12 @@ function normalizeLinks(url: string, el: cheerio.Cheerio<cheerio.Element>): void
             let q = camelToPascal(snakeToCamel(n))
 
             if (type === 'method' || type === 'constructor') {
-                q = 'Raw' + q + (type === 'method' ? 'Request' : '')
+                q = `Raw${q}${type === 'method' ? 'Request' : ''}`
             } else {
-                q = 'Type' + q
+                q = `Type${q}`
             }
 
-            const fullName = ns ? ns + '.' + q : q
+            const fullName = ns ? `${ns}.${q}` : q
 
             it.replaceWith(`{@link ${fullName}}`)
         }
@@ -94,7 +97,7 @@ function extractDescription($: cheerio.CheerioAPI) {
         .prevAll('p')
         .get()
         .reverse()
-        .map((el) => $(el).html()?.trim())
+        .map(el => $(el).html()?.trim())
         .filter(Boolean)
         .join('\n\n')
         .trim()
@@ -103,7 +106,7 @@ function extractDescription($: cheerio.CheerioAPI) {
 function htmlAll($: cheerio.CheerioAPI, search: cheerio.Cheerio<cheerio.Element>) {
     return search
         .get()
-        .map((el) => $(el).html() ?? '')
+        .map(el => $(el).html() ?? '')
         .join('')
 }
 
@@ -125,7 +128,7 @@ async function chooseDomainForDocs(headers: Record<string, string>): Promise<[nu
             throw new Error(`Failed to parse layer from ${domain}`)
         }
 
-        const actualLayer = parseInt(layerMatch[1])
+        const actualLayer = Number.parseInt(layerMatch[1])
 
         if (actualLayer > maxLayer) {
             maxLayer = actualLayer
@@ -162,8 +165,8 @@ function lastParensGroup(text: string): string | undefined {
 async function fetchAppConfigDocumentation() {
     const headers = {
         'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' +
-            'Chrome/87.0.4280.88 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+            + 'Chrome/87.0.4280.88 Safari/537.36',
     }
 
     const [, domain] = await chooseDomainForDocs(headers)
@@ -185,13 +188,13 @@ async function fetchAppConfigDocumentation() {
         if (value === null) return 'null'
 
         if (Array.isArray(value)) {
-            const types = new Set(value.map((v) => typeof v))
+            const types = new Set(value.map(v => typeof v))
 
             if (types.size === 1) {
-                return valueToTypescript(value[0]) + '[]'
+                return `${valueToTypescript(value[0])}[]`
             }
 
-            return `(${value.map((v) => valueToTypescript(v)).join(' | ')})[]`
+            return `(${value.map(v => valueToTypescript(v)).join(' | ')})[]`
         }
 
         if (typeof value === 'object') {
@@ -202,11 +205,11 @@ async function fetchAppConfigDocumentation() {
             }
 
             return (
-                '{\n' +
+                `{\n${
                 Object.entries(value)
                     .map(([k, v]) => `    ${k}: ${valueToTypescript(v)}`)
-                    .join('\n') +
-                '\n}'
+                    .join('\n')
+                }\n}`
             )
         }
 
@@ -220,8 +223,8 @@ async function fetchAppConfigDocumentation() {
             return docsTypeToTypescript(field, m[1])
         }
 
-        if ((m = type.match(/^(?:array of )(.+?)s?$/i))) {
-            return docsTypeToTypescript(field, m[1]) + '[]'
+        if ((m = type.match(/^array of (.+?)s?$/i))) {
+            return `${docsTypeToTypescript(field, m[1])}[]`
         }
 
         switch (type) {
@@ -249,7 +252,7 @@ async function fetchAppConfigDocumentation() {
             if (type.includes('or')) {
                 const options = type.slice(8).split(/, | or /)
 
-                return options.map((o) => (o[0] === '"' ? o : JSON.stringify(o))).join(' | ')
+                return options.map(o => (o[0] === '"' ? o : JSON.stringify(o))).join(' | ')
             }
 
             return 'string'
@@ -304,10 +307,10 @@ export async function fetchDocumentation(
     silent = !process.stdout.isTTY,
 ): Promise<CachedDocumentation> {
     const headers = {
-        cookie: `stel_dev_layer=${layer}`,
+        'cookie': `stel_dev_layer=${layer}`,
         'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' +
-            'Chrome/87.0.4280.88 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+            + 'Chrome/87.0.4280.88 Safari/537.36',
     }
 
     const [actualLayer, domain] = await chooseDomainForDocs(headers)
@@ -330,7 +333,7 @@ export async function fetchDocumentation(
         prevSize = str.length
         while (str.length < oldPrevSize) str += ' '
 
-        process.stdout.write('\r' + PROGRESS_CHARS[logPos] + ' ' + str)
+        process.stdout.write(`\r${PROGRESS_CHARS[logPos]} ${str}`)
 
         logPos = (logPos + 1) % PROGRESS_CHARS.length
     }
@@ -381,7 +384,7 @@ export async function fetchDocumentation(
                 const cols = el.find('td')
                 if (!cols.length) return // <thead>
 
-                const code = parseInt($(cols[0]).text())
+                const code = Number.parseInt($(cols[0]).text())
                 const name = $(cols[1]).text()
                 const comment = $(cols[2]).text()
 
@@ -392,8 +395,8 @@ export async function fetchDocumentation(
             })
 
             const botsCanUse = Boolean($('#bots-can-use-this-method').length)
-            const onlyBotsCanUse =
-                botsCanUse && (Boolean(description.match(/[,;]( for)? bots only$/)) || userBotRequired)
+            const onlyBotsCanUse
+                = botsCanUse && (Boolean(description.match(/[,;]( for)? bots only$/)) || userBotRequired)
 
             if (onlyBotsCanUse) {
                 retClass.available = 'bot'
@@ -529,7 +532,7 @@ async function main() {
         input: process.stdin,
         output: process.stdout,
     })
-    const input = (q: string): Promise<string> => new Promise((res) => rl.question(q, res))
+    const input = (q: string): Promise<string> => new Promise(res => rl.question(q, res))
 
     while (true) {
         console.log('Choose action:')
@@ -539,9 +542,9 @@ async function main() {
         console.log('3. Apply documentation to schema')
         console.log('4. Fetch app config documentation')
 
-        const act = parseInt(await input('[0-4] > '))
+        const act = Number.parseInt(await input('[0-4] > '))
 
-        if (isNaN(act) || act < 0 || act > 4) {
+        if (Number.isNaN(act) || act < 0 || act > 4) {
             console.log('Invalid action')
             continue
         }

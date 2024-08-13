@@ -1,7 +1,9 @@
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { MtInvalidPeerTypeError } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerChat, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { deleteHistory } from './delete-history.js'
 
 /**
@@ -38,5 +40,7 @@ export async function leaveChat(
         if (params?.clear) {
             await deleteHistory(client, chat)
         }
-    } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+    } else {
+        throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+    }
 }

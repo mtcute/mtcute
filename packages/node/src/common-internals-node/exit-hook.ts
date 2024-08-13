@@ -4,7 +4,7 @@ let installed = false
 let handled = false
 
 const callbacks = new Set<() => void>()
-// eslint-disable-next-line func-call-spacing
+
 const myHandlers = new Map<string, () => void>()
 
 function register(shouldManuallyExit: boolean, signal: number, event: string) {

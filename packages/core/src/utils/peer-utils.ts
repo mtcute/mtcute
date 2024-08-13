@@ -1,7 +1,7 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtArgumentError, MtUnsupportedError } from '../types/errors.js'
-import { BasicPeerType } from '../types/peers.js'
+import type { BasicPeerType } from '../types/peers.js'
 
 // src: https://github.com/tdlib/td/blob/master/td/telegram/DialogId.h
 const ZERO_CHANNEL_ID = -1000000000000
@@ -45,7 +45,7 @@ export function getBarePeerId(peer: tl.TypePeer): number {
 /**
  * Get the marked (non-bare) ID from a {@link tl.TypePeer}
  *
- * *Mark* is bot API compatible, which is:
+ * Mark* is bot API compatible, which is:
  * - ID stays the same for users
  * - ID is negated for chats
  * - ID is negated and `-1e12` is subtracted for channels
@@ -125,7 +125,7 @@ export function* getAllPeersFrom(obj: tl.TlObject | tl.TlObject[]): Iterable<tl.
 
     if (Array.isArray(obj)) {
         for (const it of obj) {
-            yield* getAllPeersFrom(it)
+            yield * getAllPeersFrom(it)
         }
 
         return

@@ -1,8 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import type { ConnectionKind, RpcCallOptions } from '../network/index.js'
 import type { MustEqual, PublicPart } from '../types/utils.js'
 import type { Logger } from '../utils/logger.js'
+
 import type { AppConfigManager } from './managers/app-config-manager.js'
 import type { TelegramStorageManager } from './storage/storage.js'
 import type { RawUpdateHandler } from './updates/types.js'
@@ -58,7 +59,7 @@ export interface ITelegramClient {
     onUpdate(handler: RawUpdateHandler): void
     onConnectionState(handler: (state: ConnectionState) => void): void
 
-    getApiCrenetials(): Promise<{ id: number; hash: string }>
+    getApiCrenetials(): Promise<{ id: number, hash: string }>
     // todo - this is only used for file dl/ul, which should probably be moved
     // to the client to allow moving the thing to worker
     // or at least load this once at startup (and then these methods can be made sync)

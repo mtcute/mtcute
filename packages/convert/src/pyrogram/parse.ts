@@ -4,7 +4,7 @@ import { Long } from '@mtcute/core'
 import { getPlatform } from '@mtcute/core/platform.js'
 import { dataViewFromBuffer, longFromBuffer } from '@mtcute/core/utils.js'
 
-import { PyrogramSession } from './types.js'
+import type { PyrogramSession } from './types.js'
 
 const SESSION_STRING_SIZE = 351
 const SESSION_STRING_SIZE_64 = 356

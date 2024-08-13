@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/index.js'
 
@@ -39,18 +39,18 @@ const nextCodeMap: Record<tl.auth.TypeCodeType['_'], NextCodeDeliveryType> = {
  * - `success`: Code is not needed, you're already logged in (only for future auth tokens)
  */
 export type SentCodeDeliveryType =
-    | 'app'
-    | 'sms'
-    | 'call'
-    | 'flash_call'
-    | 'missed_call'
-    | 'email'
-    | 'email_required'
-    | 'fragment'
-    | 'firebase'
-    | 'sms_word'
-    | 'sms_phrase'
-    | 'success'
+  | 'app'
+  | 'sms'
+  | 'call'
+  | 'flash_call'
+  | 'missed_call'
+  | 'email'
+  | 'email_required'
+  | 'fragment'
+  | 'firebase'
+  | 'sms_word'
+  | 'sms_phrase'
+  | 'success'
 
 /**
  * Type describing next code delivery type.

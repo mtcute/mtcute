@@ -1,15 +1,15 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
-
-import { tl, User } from '@mtcute/core'
+import { User, tl } from '@mtcute/core'
 import { BaseTelegramClient, TelegramClient } from '@mtcute/core/client.js'
 
 import { getApiParams } from '../utils.js'
 
-const getAccountId = () =>
-    Math.floor(Math.random() * 10000)
+function getAccountId() {
+    return Math.floor(Math.random() * 10000)
         .toString()
         .padStart(4, '0')
+}
 
 async function authorizeInDc(dc: number, base: BaseTelegramClient) {
     const tg = new TelegramClient({ client: base })
@@ -61,7 +61,7 @@ async function authorizeInDc(dc: number, base: BaseTelegramClient) {
 
         await tg.close()
 
-        expect(user.isSelf).to.be.true
+        expect(user.isSelf).to.eq(true)
         expect(user.phoneNumber).to.equal(phone)
         break
     }

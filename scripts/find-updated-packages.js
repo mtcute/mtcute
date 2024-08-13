@@ -1,8 +1,8 @@
-import { execSync } from 'child_process'
-import { appendFileSync, existsSync } from 'fs'
-import { EOL } from 'os'
-import { dirname, join } from 'path'
-import { fileURLToPath } from 'url'
+import { execSync } from 'node:child_process'
+import { appendFileSync, existsSync } from 'node:fs'
+import { EOL } from 'node:os'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import { findChangedFilesSince, getLatestTag } from './git-utils.js'
 import { listPackages } from './publish.js'
@@ -26,7 +26,7 @@ function getTsconfigFiles(pkg) {
 
     const json = JSON.parse(res)
 
-    return (getTsconfigFiles.cache[pkg] = json.files.map((it) => it.replace(/^\.\//, '')))
+    return (getTsconfigFiles.cache[pkg] = json.files.map(it => it.replace(/^\.\//, '')))
 }
 
 function isMeaningfulChange(pkg, path) {
@@ -34,7 +34,7 @@ function isMeaningfulChange(pkg, path) {
 
     if (path.match(/\.(md|test(?:-utils)?\.ts)$/i)) return false
 
-    if (getTsconfigFiles(pkg).indexOf(path) > -1) {
+    if (getTsconfigFiles(pkg).includes(path)) {
         console.log('[i] %s: %s is in tsconfig', pkg, path)
 
         return true

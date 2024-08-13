@@ -1,13 +1,13 @@
-import { parse } from 'csv-parse/sync'
-import { writeFile } from 'fs/promises'
+import { writeFile } from 'node:fs/promises'
 
-import { TlErrors } from '@mtcute/tl-utils'
+import { parse } from 'csv-parse/sync'
+import type { TlErrors } from '@mtcute/tl-utils'
 
 import { ERRORS_JSON_FILE } from './constants.js'
 
 const ERRORS_PAGE_TG = 'https://corefork.telegram.org/api/errors'
-const ERRORS_PAGE_TELETHON =
-    'https://raw.githubusercontent.com/LonamiWebs/Telethon/v1/telethon_generator/data/errors.csv'
+const ERRORS_PAGE_TELETHON
+    = 'https://raw.githubusercontent.com/LonamiWebs/Telethon/v1/telethon_generator/data/errors.csv'
 const baseErrors = {
     BAD_REQUEST: 400,
     UNAUTHORIZED: 401,
@@ -27,11 +27,11 @@ interface TelegramErrorsSpec {
 }
 
 async function fetchFromTelegram(errors: TlErrors) {
-    const page = await fetch(ERRORS_PAGE_TG).then((it) => it.text())
+    const page = await fetch(ERRORS_PAGE_TG).then(it => it.text())
     const jsonUrl = page.match(/can be found <a href="([^"]+)">here »<\/a>/i)?.[1]
     if (!jsonUrl) throw new Error('Cannot find JSON URL')
 
-    const json = (await fetch(new URL(jsonUrl, ERRORS_PAGE_TG)).then((it) => it.json())) as TelegramErrorsSpec
+    const json = (await fetch(new URL(jsonUrl, ERRORS_PAGE_TG)).then(it => it.json())) as TelegramErrorsSpec
 
     // since nobody fucking guarantees that .descriptions
     // will have description for each described here (or vice versa),
@@ -41,10 +41,10 @@ async function fetchFromTelegram(errors: TlErrors) {
         for (const name of Object.keys(json.errors[code])) {
             const thrownBy = json.errors[code][name]
 
-            const _code = parseInt(code)
+            const _code = Number.parseInt(code)
 
-            if (isNaN(_code)) {
-                throw new Error(`Invalid code: ${code}`)
+            if (Number.isNaN(_code)) {
+                throw new TypeError(`Invalid code: ${code}`)
             }
 
             if (!(name in errors.errors)) {
@@ -142,10 +142,10 @@ async function fetchFromTelethon(errors: TlErrors) {
         if (name_ === 'TIMEOUT') continue
 
         let name = name_
-        const code = parseInt(codes)
+        const code = Number.parseInt(codes)
 
-        if (isNaN(code)) {
-            throw new Error(`Invalid code: ${codes} (name: ${name})`)
+        if (Number.isNaN(code)) {
+            throw new TypeError(`Invalid code: ${codes} (name: ${name})`)
         }
 
         // telethon uses X for parameters instead of printf-like
@@ -171,7 +171,7 @@ async function fetchFromTelethon(errors: TlErrors) {
         // names for better code insights
         // we also prefer description from telegram, if it's available and doesn't use placeholders
         if (description) {
-            const desc = description.replace(/{([a-z0-9_]+)}/gi, (_, name: string) => {
+            const desc = description.replace(/\{(\w+)\}/g, (_, name: string) => {
                 if (!obj._paramNames) {
                     obj._paramNames = []
                 }

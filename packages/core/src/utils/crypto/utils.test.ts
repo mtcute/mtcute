@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { getPlatform } from '../../platform.js'
+
 import { xorBuffer, xorBufferInPlace } from './utils.js'
 
 const p = getPlatform()

@@ -1,25 +1,26 @@
-import * as glob from 'glob'
-import Handlebars from 'handlebars'
 import { promises as fs } from 'node:fs'
 import * as path from 'node:path'
 
+import * as glob from 'glob'
+import Handlebars from 'handlebars'
+
 import type { UserConfig } from './cli.js'
-import { MtcuteFeature } from './features/types.js'
+import type { MtcuteFeature } from './features/types.js'
 import { getPackageManagerVersion, packageManagerToRuntime } from './package-manager.js'
 
 const templater = Handlebars.create()
 
 const NOEMIT_HEADER = '/* DO NOT EMIT */'
 templater.registerHelper({
-    emit_if: (cond) => (cond ? '' : NOEMIT_HEADER),
-    emit_unless: (cond) => (cond ? NOEMIT_HEADER : ''),
+    emit_if: cond => (cond ? '' : NOEMIT_HEADER),
+    emit_unless: cond => (cond ? NOEMIT_HEADER : ''),
     eq: (v1, v2) => v1 === v2,
     ne: (v1, v2) => v1 !== v2,
     lt: (v1, v2) => v1 < v2,
     gt: (v1, v2) => v1 > v2,
     lte: (v1, v2) => v1 <= v2,
     gte: (v1, v2) => v1 >= v2,
-    not: (v) => !v,
+    not: v => !v,
     and(...args) {
         return Array.prototype.every.call(args, Boolean)
     },
@@ -46,7 +47,6 @@ export async function runTemplaterForFile(file: string, config: UserConfig): Pro
 
                 return acc
             },
-            // eslint-disable-next-line @typescript-eslint/prefer-reduce-type-parameter
             {} as Record<MtcuteFeature, boolean>,
         ),
     })

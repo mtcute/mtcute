@@ -1,8 +1,7 @@
-/* eslint-disable max-params,no-lonely-if */
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { Message } from '../../types/messages/index.js'
 import { PeersIndex } from '../../types/peers/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
@@ -60,10 +59,10 @@ export function _findMessageInUpdate(
             if (
                 !(
                     (
-                        u._ === 'updateEditMessage' ||
-                        u._ === 'updateEditChannelMessage' ||
-                        u._ === 'updateBotEditBusinessMessage' ||
-                        u._ === 'updateBotNewBusinessMessage'
+                        u._ === 'updateEditMessage'
+                        || u._ === 'updateEditChannelMessage'
+                        || u._ === 'updateBotEditBusinessMessage'
+                        || u._ === 'updateBotNewBusinessMessage'
                     ) // for whatever reason
                 )
             ) {
@@ -72,11 +71,11 @@ export function _findMessageInUpdate(
         } else {
             if (
                 !(
-                    u._ === 'updateNewMessage' ||
-                    u._ === 'updateNewChannelMessage' ||
-                    u._ === 'updateNewScheduledMessage' ||
-                    u._ === 'updateQuickReplyMessage' ||
-                    u._ === 'updateBotNewBusinessMessage'
+                    u._ === 'updateNewMessage'
+                    || u._ === 'updateNewChannelMessage'
+                    || u._ === 'updateNewScheduledMessage'
+                    || u._ === 'updateQuickReplyMessage'
+                    || u._ === 'updateBotNewBusinessMessage'
                 )
             ) {
                 continue

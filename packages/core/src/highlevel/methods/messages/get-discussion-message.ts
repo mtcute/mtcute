@@ -1,8 +1,10 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { ITelegramClient } from '../../client.types.js'
-import { InputMessageId, Message, normalizeInputMessageId } from '../../types/messages/index.js'
-import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputMessageId } from '../../types/messages/index.js'
+import { Message, normalizeInputMessageId } from '../../types/messages/index.js'
+import type { InputPeerLike } from '../../types/peers/index.js'
+import { PeersIndex } from '../../types/peers/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /** @internal */
@@ -25,7 +27,7 @@ export async function _getDiscussionMessage(
     }
 
     const msg = res.messages[0]
-    const chat = res.chats.find((it) => it.id === (msg.peerId as tl.RawPeerChannel).channelId)! as tl.RawChannel
+    const chat = res.chats.find(it => it.id === (msg.peerId as tl.RawPeerChannel).channelId)! as tl.RawChannel
 
     return [
         {

@@ -1,9 +1,9 @@
-import EventEmitter from 'events'
+import type EventEmitter from 'node:events'
 
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { MaybePromise } from '../../types/index.js'
-import { BasicDcOption, ICryptoProvider, Logger } from '../../utils/index.js'
+import type { MaybePromise } from '../../types/index.js'
+import type { BasicDcOption, ICryptoProvider, Logger } from '../../utils/index.js'
 
 /** Current state of the transport */
 export enum TransportState {
@@ -91,7 +91,6 @@ export interface IPacketCodec {
      * (Transport error)[https://core.telegram.org/mtproto/mtproto-transports#transport-errors] is encountered.
      */
     on(event: 'error', handler: (error: Error) => void): void
-    /** Emitted when a full packet has been processed. */
     on(event: 'packet', handler: (packet: Uint8Array) => void): void
 
     /**

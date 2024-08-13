@@ -27,9 +27,9 @@ module.exports = {
                 'packages/tl/*.json',
 
                 '*.d.ts',
-                '**/dist'
+                '**/dist',
             ],
             options: { requirePragma: true },
-        }
+        },
     ],
 }

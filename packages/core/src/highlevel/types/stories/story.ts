@@ -1,15 +1,18 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtUnsupportedError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { parseDocument } from '../media/document-utils.js'
 import { Photo } from '../media/photo.js'
-import { Video } from '../media/video.js'
+import type { Video } from '../media/video.js'
 import { MessageEntity } from '../messages/message-entity.js'
-import { PeersIndex } from '../peers/index.js'
-import { ReactionEmoji, toReactionEmoji } from '../reactions/index.js'
-import { _storyInteractiveElementFromTl, StoryInteractiveElement } from './interactive/index.js'
+import type { PeersIndex } from '../peers/index.js'
+import type { ReactionEmoji } from '../reactions/index.js'
+import { toReactionEmoji } from '../reactions/index.js'
+
+import type { StoryInteractiveElement } from './interactive/index.js'
+import { _storyInteractiveElementFromTl } from './interactive/index.js'
 import { StoryInteractions } from './story-interactions.js'
 
 /**
@@ -141,7 +144,7 @@ export class Story {
     get interactiveElements(): StoryInteractiveElement[] {
         if (!this.raw.mediaAreas) return []
 
-        return this.raw.mediaAreas.map((it) => _storyInteractiveElementFromTl(it, this._peers))
+        return this.raw.mediaAreas.map(it => _storyInteractiveElementFromTl(it, this._peers))
     }
 
     /**

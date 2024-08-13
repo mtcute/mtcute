@@ -19,7 +19,7 @@
 </p>
 
 > [!WARNING]
-> mtcute is currently in alpha stage: the api is not very stable yet, and there may be a lot of bugs  
+> mtcute is currently in alpha stage: the api is not very stable yet, and there may be a lot of bugs
 > feel free to try it out, though, any feedback is appreciated!
 >
 > releases may not follow semver just yet, so please pin the versions for now
@@ -29,7 +29,7 @@ import { TelegramClient } from '@mtcute/node'
 import { Dispatcher, filters } from '@mtcute/dispatcher'
 
 const tg = new TelegramClient({
-    apiId: parseInt(process.env.API_ID),
+    apiId: Number.parseInt(process.env.API_ID),
     apiHash: process.env.API_HASH,
     storage: 'my-account'
 })

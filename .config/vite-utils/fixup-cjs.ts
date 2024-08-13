@@ -1,4 +1,4 @@
-import { Plugin } from 'vite'
+import type { Plugin } from 'vite'
 import * as cjsLexer from 'cjs-module-lexer'
 import esbuild from 'esbuild'
 

@@ -1,32 +1,36 @@
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 
-import {
-    IntermediatePacketCodec,
+import type {
     IPacketCodec,
     ITelegramTransport,
-    MtcuteError,
+} from '@mtcute/core'
+import {
+    IntermediatePacketCodec,
     MtUnsupportedError,
+    MtcuteError,
     ObfuscatedPacketCodec,
     TransportState,
 } from '@mtcute/core'
-import {
+import type {
     BasicDcOption,
     ControllablePromise,
-    createControllablePromise,
     ICryptoProvider,
     Logger,
 } from '@mtcute/core/utils.js'
+import {
+    createControllablePromise,
+} from '@mtcute/core/utils.js'
 
-export type WebSocketConstructor = {
+export interface WebSocketConstructor {
     new (address: string, protocol?: string): WebSocket
 }
 
 const subdomainsMap: Record<string, string> = {
-    '1': 'pluto',
-    '2': 'venus',
-    '3': 'aurora',
-    '4': 'vesta',
-    '5': 'flora',
+    1: 'pluto',
+    2: 'venus',
+    3: 'aurora',
+    4: 'vesta',
+    5: 'flora',
 }
 
 /**
@@ -105,8 +109,8 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
 
         if (!this.packetCodecInitialized) {
             this._packetCodec.setup?.(this._crypto, this.log)
-            this._packetCodec.on('error', (err) => this.emit('error', err))
-            this._packetCodec.on('packet', (buf) => this.emit('message', buf))
+            this._packetCodec.on('error', err => this.emit('error', err))
+            this._packetCodec.on('packet', buf => this.emit('message', buf))
             this.packetCodecInitialized = true
         }
 
@@ -122,9 +126,8 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
 
         this._socket.binaryType = 'arraybuffer'
 
-        this._socket.addEventListener('message', (evt) =>
-            this._packetCodec.feed(new Uint8Array(evt.data as ArrayBuffer)),
-        )
+        this._socket.addEventListener('message', evt =>
+            this._packetCodec.feed(new Uint8Array(evt.data as ArrayBuffer)))
         this._socket.addEventListener('open', this.handleConnect.bind(this))
         this._socket.addEventListener('error', this.handleError.bind(this))
         this._socket.addEventListener('close', this.handleClosed.bind(this))
@@ -172,7 +175,7 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
                 this._state = TransportState.Ready
                 this.emit('ready')
             })
-            .catch((err) => this.emit('error', err))
+            .catch(err => this.emit('error', err))
     }
 
     async send(bytes: Uint8Array): Promise<void> {

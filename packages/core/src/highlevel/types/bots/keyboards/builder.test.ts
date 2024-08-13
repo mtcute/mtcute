@@ -70,7 +70,7 @@ describe('BotKeyboardBuilder', () => {
 
             builder.push({ _: 'keyboardButton', text: '1' })
             builder.push(() => ({ _: 'keyboardButton', text: '2' }))
-            builder.push(1 > 1 && { _: 'keyboardButton', text: '3' })
+            builder.push(0 > 1 && { _: 'keyboardButton', text: '3' })
 
             expect(builder.asInline()).toEqual({
                 type: 'inline',
@@ -106,7 +106,7 @@ describe('BotKeyboardBuilder', () => {
 
             builder.append({ _: 'keyboardButton', text: '1' })
             builder.append(() => ({ _: 'keyboardButton', text: '2' }))
-            builder.append(1 > 1 && { _: 'keyboardButton', text: '3' })
+            builder.append(0 > 1 && { _: 'keyboardButton', text: '3' })
 
             expect(builder.asInline()).toEqual({
                 type: 'inline',

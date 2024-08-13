@@ -1,10 +1,11 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
+
 import { FileLocation } from './file-location.js'
 
-const STUB_LOCATION = () => {
+function STUB_LOCATION(): never {
     throw new MtArgumentError('This web document is not downloadable through Telegram')
 }
 
@@ -21,13 +22,13 @@ const STUB_LOCATION = () => {
 export class WebDocument extends FileLocation {
     constructor(readonly raw: tl.TypeWebDocument) {
         super(
-            raw._ === 'webDocument' ?
-                {
+            raw._ === 'webDocument'
+                ? {
                     _: 'inputWebFileLocation',
                     url: raw.url,
                     accessHash: raw.accessHash,
-                } :
-                STUB_LOCATION,
+                }
+                : STUB_LOCATION,
             raw.size,
         )
         this.raw = raw

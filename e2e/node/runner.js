@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
+const cp = require('node:child_process')
+const path = require('node:path')
+
 const glob = require('glob')
-const cp = require('child_process')
-const path = require('path')
 
 const env = {}
 require('dotenv').config({ processEnv: env })
@@ -44,7 +45,7 @@ function runForFile(dir, file, single = true) {
 
     for (const c of cmds) {
         console.log('%s $ %s', dir, c)
-        cp.execSync('pnpm exec ' + c, options)
+        cp.execSync(`pnpm exec ${c}`, options)
     }
 }
 
@@ -69,7 +70,7 @@ function runForDir(dir) {
     if (beforeAll) {
         for (const c of beforeAll()) {
             console.log('%s $ %s', dir, c)
-            cp.execSync('pnpm exec ' + c, options)
+            cp.execSync(`pnpm exec ${c}`, options)
         }
     }
 
@@ -116,7 +117,7 @@ async function main() {
 
     if (file) {
         const files = glob.sync(config[dir].getFiles(), { cwd: path.join(__dirname, dir) })
-        const matchingFile = files.find((f) => f.endsWith(file))
+        const matchingFile = files.find(f => f.endsWith(file))
 
         if (!matchingFile) {
             console.log("Can't find file %s", file)

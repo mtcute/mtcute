@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { Reloadable } from '../utils/reloadable.js'
 
@@ -12,7 +12,7 @@ export class ConfigManager extends Reloadable<tl.RawConfig> {
     constructor(update: () => Promise<tl.RawConfig>) {
         super({
             reload: update,
-            getExpiresAt: (data) => data.expires * 1000,
+            getExpiresAt: data => data.expires * 1000,
         })
     }
 
@@ -36,17 +36,17 @@ export class ConfigManager extends Reloadable<tl.RawConfig> {
         })
 
         if (params.preferMedia && params.preferIpv6) {
-            const r = options.find((opt) => opt.mediaOnly && opt.ipv6)
+            const r = options.find(opt => opt.mediaOnly && opt.ipv6)
             if (r) return r
         }
 
         if (params.preferMedia) {
-            const r = options.find((opt) => opt.mediaOnly)
+            const r = options.find(opt => opt.mediaOnly)
             if (r) return r
         }
 
         if (params.preferIpv6) {
-            const r = options.find((opt) => opt.ipv6)
+            const r = options.find(opt => opt.ipv6)
             if (r) return r
         }
 

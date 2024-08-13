@@ -16,7 +16,6 @@ function assertFieldType<Field extends string, Type extends keyof TypeofToType>(
     field: Field,
     type: Type,
 ): asserts obj is { [K in Field]: TypeofToType[Type] } {
-    // eslint-disable-next-line
     const typeof_ = typeof (obj as any)[field]
 
     if (typeof_ !== type) {
@@ -41,7 +40,7 @@ function assertFieldParams(obj: object): asserts obj is { params: TlParamJson[] 
     assertFieldType(obj, 'params', 'object')
 
     if (!Array.isArray(obj.params)) {
-        throw new Error('Expected field params to be an array')
+        throw new TypeError('Expected field params to be an array')
     }
 
     obj.params.forEach(parseTlParamFromJson) // will throw if invalid
@@ -93,11 +92,11 @@ export function parseTlSchemaFromJson(obj: object): TlSchemaJson {
     assertFieldType(obj, 'methods', 'object')
 
     if (!Array.isArray(obj.constructors)) {
-        throw new Error('Expected field constructors to be an array')
+        throw new TypeError('Expected field constructors to be an array')
     }
 
     if (!Array.isArray(obj.methods)) {
-        throw new Error('Expected field methods to be an array')
+        throw new TypeError('Expected field methods to be an array')
     }
 
     obj.constructors.forEach(parseTlConstructorFromJson) // will throw if invalid

@@ -1,5 +1,5 @@
 import { Deque } from '../../utils/deque.js'
-import { ITelegramClient } from '../client.types.js'
+import type { ITelegramClient } from '../client.types.js'
 
 type Resolve<T> = (value: T | PromiseLike<T>) => void
 type Reject = (err?: unknown) => void
@@ -149,7 +149,7 @@ export function batchedQuery<T, U, K extends string | number>(params: {
 
         state.numRunning += 1
 
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        // eslint-disable-next-line ts/no-floating-promises
         fetch(client, request)
             .then((res) => {
                 const receivedKeys = new Set<K>()

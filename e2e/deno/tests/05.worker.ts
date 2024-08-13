@@ -1,9 +1,10 @@
 import { assertEquals, assertGreater, assertInstanceOf } from 'https://deno.land/std@0.223.0/assert/mod.ts'
-
 import { TelegramClient } from '@mtcute/core/client.js'
-import { Long, Message, TelegramWorkerPort, tl } from '@mtcute/deno'
+import type { Message } from '@mtcute/deno'
+import { Long, TelegramWorkerPort, tl } from '@mtcute/deno'
 
 import { getApiParams, waitFor } from '../utils.ts'
+
 import type { CustomMethods } from './_worker.ts'
 
 Deno.test('5. worker', { sanitizeResources: false }, async (t) => {
@@ -16,7 +17,7 @@ Deno.test('5. worker', { sanitizeResources: false }, async (t) => {
     })
     const portClient = new TelegramClient({ client: port })
 
-    await t.step('should make api calls', async function () {
+    await t.step('should make api calls', async () => {
         const res = await port.call({ _: 'help.getConfig' })
         assertEquals(res._, 'config')
 
@@ -25,7 +26,7 @@ Deno.test('5. worker', { sanitizeResources: false }, async (t) => {
         assertEquals(Long.isLong((premiumPromo.users[0] as tl.RawUser).accessHash), true)
     })
 
-    await t.step('should call custom methods', async function () {
+    await t.step('should call custom methods', async () => {
         const hello = await port.invokeCustom('hello')
         assertEquals(hello, 'world')
 
@@ -33,7 +34,7 @@ Deno.test('5. worker', { sanitizeResources: false }, async (t) => {
         assertEquals(sum, 5)
     })
 
-    await t.step('should throw errors', async function () {
+    await t.step('should throw errors', async () => {
         try {
             await port.call({ _: 'test.useConfigSimple' })
             throw new Error('should have thrown')
@@ -42,7 +43,7 @@ Deno.test('5. worker', { sanitizeResources: false }, async (t) => {
         }
     })
 
-    await t.step('should receive updates', async function () {
+    await t.step('should receive updates', async () => {
         const client2 = new TelegramClient(getApiParams('dc2.session'))
 
         try {

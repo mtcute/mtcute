@@ -1,6 +1,6 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { InputPeerLike } from '../../peers/peer.js'
+import type { InputPeerLike } from '../../peers/peer.js'
 
 export interface InputPrivacyRuleUsers {
     allow: boolean

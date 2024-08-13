@@ -1,4 +1,4 @@
-import { MtcuteWasmModule, SyncInitInput } from './types.js'
+import type { MtcuteWasmModule, SyncInitInput } from './types.js'
 
 export * from './types.js'
 

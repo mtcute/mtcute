@@ -1,10 +1,10 @@
-import { BunFile } from 'bun'
-import { ReadStream } from 'fs'
-import { stat } from 'fs/promises'
-import { basename } from 'path'
-import { Readable as NodeReadable } from 'stream'
+import { ReadStream } from 'node:fs'
+import { stat } from 'node:fs/promises'
+import { basename } from 'node:path'
+import { Readable as NodeReadable } from 'node:stream'
 
-import { UploadFileLike } from '@mtcute/core'
+import type { BunFile } from 'bun'
+import type { UploadFileLike } from '@mtcute/core'
 
 // https://github.com/oven-sh/bun/issues/10481
 function isBunFile(file: unknown): file is BunFile {
@@ -18,7 +18,7 @@ export async function normalizeFile(file: UploadFileLike) {
 
     if (isBunFile(file)) {
         return {
-            file: file,
+            file,
             fileName: file.name,
             fileSize: file.size,
         }
@@ -27,7 +27,7 @@ export async function normalizeFile(file: UploadFileLike) {
     // while these are not Bun-specific, they still may happen
     if (file instanceof ReadStream) {
         const fileName = basename(file.path.toString())
-        const fileSize = await stat(file.path.toString()).then((stat) => stat.size)
+        const fileSize = await stat(file.path.toString()).then(stat => stat.size)
 
         return {
             file: NodeReadable.toWeb(file) as unknown as ReadableStream<Uint8Array>,

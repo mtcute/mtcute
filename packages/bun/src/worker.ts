@@ -1,17 +1,19 @@
-import { parentPort, Worker } from 'worker_threads'
+import { Worker, parentPort } from 'node:worker_threads'
 
 import { setPlatform } from '@mtcute/core/platform.js'
-import {
+import type {
     ClientMessageHandler,
     RespondFn,
     SendFn,
     SomeWorker,
-    TelegramWorker as TelegramWorkerBase,
     TelegramWorkerOptions,
-    TelegramWorkerPort as TelegramWorkerPortBase,
     TelegramWorkerPortOptions,
     WorkerCustomMethods,
     WorkerMessageHandler,
+} from '@mtcute/core/worker.js'
+import {
+    TelegramWorker as TelegramWorkerBase,
+    TelegramWorkerPort as TelegramWorkerPortBase,
 } from '@mtcute/core/worker.js'
 
 import { BunPlatform } from './platform.js'
@@ -35,8 +37,8 @@ export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorke
 
         const respond: RespondFn = port.postMessage.bind(port)
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        parentPort.on('message', (message) => handler(message, respond))
+        // eslint-disable-next-line ts/no-unsafe-argument
+        parentPort.on('message', message => handler(message, respond))
 
         return respond
     }
@@ -50,7 +52,7 @@ export class TelegramWorkerPort<T extends WorkerCustomMethods> extends TelegramW
 
     connectToWorker(worker: SomeWorker, handler: ClientMessageHandler): [SendFn, () => void] {
         if (!(worker instanceof Worker)) {
-            throw new Error('Only worker_threads are supported')
+            throw new TypeError('Only worker_threads are supported')
         }
 
         const send: SendFn = worker.postMessage.bind(worker)

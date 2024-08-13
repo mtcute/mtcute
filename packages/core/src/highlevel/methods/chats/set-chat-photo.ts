@@ -2,8 +2,9 @@ import { tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputFileLike, InputPeerLike, isUploadedFile, MtInvalidPeerTypeError } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputFileLike, InputPeerLike } from '../../types/index.js'
+import { MtInvalidPeerTypeError, isUploadedFile } from '../../types/index.js'
 import { fileIdToInputPhoto } from '../../utils/convert-file-id.js'
 import { isInputPeerChannel, isInputPeerChat, toInputChannel } from '../../utils/peer-utils.js'
 import { uploadFile } from '../files/upload-file.js'
@@ -41,7 +42,7 @@ export async function setChatPhoto(
         throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
     }
 
-    let photo: tl.TypeInputChatPhoto | undefined = undefined
+    let photo: tl.TypeInputChatPhoto | undefined
 
     let inputFile: tl.TypeInputFile
 
@@ -67,7 +68,9 @@ export async function setChatPhoto(
                 _: 'inputChatPhoto',
                 id: media.id,
             }
-        } else throw new MtArgumentError("Chat photo can't be InputMedia")
+        } else {
+            throw new MtArgumentError("Chat photo can't be InputMedia")
+        }
     } else if (isUploadedFile(media)) {
         inputFile = media.inputFile
     } else if (typeof media === 'object' && tl.isAnyInputFile(media)) {

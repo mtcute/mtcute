@@ -1,20 +1,20 @@
 import Long from 'long'
-
 import { parseFileId, tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { getPlatform } from '../../../platform.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { isUploadedFile } from '../../types/files/uploaded-file.js'
-import { UploadFileLike } from '../../types/files/utils.js'
-import { InputMediaLike } from '../../types/media/input-media/types.js'
+import type { UploadFileLike } from '../../types/files/utils.js'
+import type { InputMediaLike } from '../../types/media/input-media/types.js'
 import { inputTextToTl } from '../../types/misc/entities.js'
 import { fileIdToInputDocument, fileIdToInputPhoto } from '../../utils/convert-file-id.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
 import { encodeWaveform } from '../../utils/voice-utils.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { _normalizeInputFile } from './normalize-input-file.js'
 import { uploadFile } from './upload-file.js'
 
@@ -112,13 +112,13 @@ export async function _normalizeInputMedia(
         return {
             _: 'inputMediaGame',
             id:
-                typeof media.game === 'string' ?
-                    {
+                typeof media.game === 'string'
+                    ? {
                         _: 'inputGameShortName',
                         botId: { _: 'inputUserSelf' },
                         shortName: media.game,
-                    } :
-                    media.game,
+                    }
+                    : media.game,
         }
     }
 
@@ -128,15 +128,15 @@ export async function _normalizeInputMedia(
             title: media.title,
             description: media.description,
             photo:
-                typeof media.photo === 'string' ?
-                    {
+                typeof media.photo === 'string'
+                    ? {
                         _: 'inputWebDocument',
                         url: media.photo,
                         mimeType: 'image/jpeg',
                         size: 0,
                         attributes: [],
-                    } :
-                    media.photo,
+                    }
+                    : media.photo,
             invoice: media.invoice,
             payload: media.payload,
             provider: media.token,
@@ -145,9 +145,9 @@ export async function _normalizeInputMedia(
                 data: JSON.stringify(media.providerData),
             },
             startParam: media.startParam,
-            extendedMedia: media.extendedMedia ?
-                await _normalizeInputMedia(client, media.extendedMedia, params) :
-                undefined,
+            extendedMedia: media.extendedMedia
+                ? await _normalizeInputMedia(client, media.extendedMedia, params)
+                : undefined,
         }
     }
 
@@ -163,9 +163,9 @@ export async function _normalizeInputMedia(
             }
         })
 
-        let correct: Uint8Array[] | undefined = undefined
-        let solution: string | undefined = undefined
-        let solutionEntities: tl.TypeMessageEntity[] | undefined = undefined
+        let correct: Uint8Array[] | undefined
+        let solution: string | undefined
+        let solutionEntities: tl.TypeMessageEntity[] | undefined
 
         if (media.type === 'quiz') {
             let input = media.correct
@@ -225,7 +225,7 @@ export async function _normalizeInputMedia(
         let medias: tl.TypeInputMedia[]
 
         if (Array.isArray(media.media)) {
-            medias = await Promise.all(media.media.map((m) => _normalizeInputMedia(client, m, params)))
+            medias = await Promise.all(media.media.map(m => _normalizeInputMedia(client, m, params)))
         } else {
             medias = [await _normalizeInputMedia(client, media.media, params)]
         }
@@ -237,8 +237,8 @@ export async function _normalizeInputMedia(
         }
     }
 
-    let inputFile: tl.TypeInputFile | undefined = undefined
-    let thumb: tl.TypeInputFile | undefined = undefined
+    let inputFile: tl.TypeInputFile | undefined
+    let thumb: tl.TypeInputFile | undefined
     let mime = 'application/octet-stream'
 
     const upload = async (file: UploadFileLike): Promise<void> => {
@@ -331,9 +331,9 @@ export async function _normalizeInputMedia(
                 return uploadMediaIfNeeded(
                     {
                         _:
-                            parsed.type === tdFileId.FileType.Photo ?
-                                'inputMediaPhotoExternal' :
-                                'inputMediaDocumentExternal',
+                            parsed.type === tdFileId.FileType.Photo
+                                ? 'inputMediaPhotoExternal'
+                                : 'inputMediaDocumentExternal',
                         url: parsed.location.url,
                     },
                     parsed.type === tdFileId.FileType.Photo,

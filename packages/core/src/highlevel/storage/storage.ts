@@ -1,10 +1,13 @@
-import { ServiceOptions } from '../../storage/service/base.js'
-import { StorageManager } from '../../storage/storage.js'
-import { PublicPart } from '../../types/utils.js'
-import { ITelegramStorageProvider } from './provider.js'
+import type { ServiceOptions } from '../../storage/service/base.js'
+import type { StorageManager } from '../../storage/storage.js'
+import type { PublicPart } from '../../types/utils.js'
+
+import type { ITelegramStorageProvider } from './provider.js'
 import { CurrentUserService } from './service/current-user.js'
-import { PeersService, PeersServiceOptions } from './service/peers.js'
-import { RefMessagesService, RefMessagesServiceOptions } from './service/ref-messages.js'
+import type { PeersServiceOptions } from './service/peers.js'
+import { PeersService } from './service/peers.js'
+import type { RefMessagesServiceOptions } from './service/ref-messages.js'
+import { RefMessagesService } from './service/ref-messages.js'
 import { UpdatesStateService } from './service/updates.js'
 
 interface TelegramStorageManagerOptions {
