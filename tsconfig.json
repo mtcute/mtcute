@@ -32,10 +32,6 @@
     "isolatedModules": true,
     "skipLibCheck": true
   },
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  },
   "exclude": [
     "**/node_modules",
     "**/__snapshots__"

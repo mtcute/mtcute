@@ -6,12 +6,12 @@
   "license": "MIT",
   "scripts": {
     "test": "tsc --noEmit --esModuleInterop tests/types.ts",
-    "fetch-mtp": "node --loader ts-node/esm scripts/fetch-mtp.ts",
-    "fetch-api": "node --loader ts-node/esm scripts/fetch-api.ts",
-    "fetch-errors": "node --loader ts-node/esm scripts/fetch-errors.ts",
-    "docs-cli": "node --loader ts-node/esm scripts/documentation.ts",
-    "gen-code": "node --loader ts-node/esm scripts/gen-code.ts",
-    "gen-rsa": "node --loader ts-node/esm scripts/gen-rsa-keys.ts",
+    "fetch-mtp": "tsx scripts/fetch-mtp.ts",
+    "fetch-api": "tsx scripts/fetch-api.ts",
+    "fetch-errors": "tsx scripts/fetch-errors.ts",
+    "docs-cli": "tsx scripts/documentation.ts",
+    "gen-code": "tsx scripts/gen-code.ts",
+    "gen-rsa": "tsx scripts/gen-rsa-keys.ts",
     "fetch-and-gen": "pnpm run fetch-api && pnpm run gen-code",
     "build": "pnpm run -w build-package tl"
   },

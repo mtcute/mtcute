@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "pnpm run -w build-package create-bot",
-    "run": "ts-node-esm src/main.ts",
+    "run": "tsx src/main.ts",
     "run:deno": "node scripts/generate-import-map.js && deno run --import-map=./scripts/import-map.json -A --unstable-sloppy-imports src/main.ts"
   },
   "dependencies": {
