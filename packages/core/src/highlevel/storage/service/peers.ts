@@ -1,14 +1,15 @@
 import Long from 'long'
+import type { tl } from '@mtcute/tl'
 
-import { tl } from '@mtcute/tl'
-
-import { BaseService, ServiceOptions } from '../../../storage/service/base.js'
+import type { ServiceOptions } from '../../../storage/service/base.js'
+import { BaseService } from '../../../storage/service/base.js'
 import { longFromFastString, longToFastString } from '../../../utils/long-utils.js'
 import { LruMap } from '../../../utils/lru-map.js'
 import { getAllPeersFrom, parseMarkedPeerId, toggleChannelIdMark } from '../../../utils/peer-utils.js'
 import { extractUsernames } from '../../utils/peer-utils.js'
-import { IPeersRepository } from '../repository/peers.js'
-import { RefMessagesService } from './ref-messages.js'
+import type { IPeersRepository } from '../repository/peers.js'
+
+import type { RefMessagesService } from './ref-messages.js'
 
 interface CacheItem {
     peer: tl.TypeInputPeer
@@ -61,7 +62,7 @@ export class PeersService extends BaseService {
         this._cache = new LruMap(options.cacheSize ?? 100)
     }
 
-    async updatePeersFrom(obj: tl.TlObject | tl.TlObject[]) {
+    async updatePeersFrom(obj: tl.TlObject | tl.TlObject[]): Promise<boolean> {
         let count = 0
 
         for (const peer of getAllPeersFrom(obj)) {

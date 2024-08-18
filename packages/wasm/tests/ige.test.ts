@@ -1,9 +1,8 @@
-/* eslint-disable no-restricted-globals */
 import { beforeAll, describe, expect, it } from 'vitest'
-
 import { getPlatform } from '@mtcute/core/platform.js'
 
 import { __getWasm, ige256Decrypt, ige256Encrypt } from '../src/index.js'
+
 import { initWasm } from './init.js'
 
 const p = getPlatform()

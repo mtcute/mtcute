@@ -7,7 +7,7 @@ import { getPlatform } from '../../platform.js'
  * In fact just strips begin/end tags and parses the rest as Base64
  */
 export function parsePemContents(pem: string): Uint8Array {
-    return getPlatform().base64Decode(pem.replace(/^-----(BEGIN|END)( RSA)? PUBLIC KEY-----$|\n/gm, ''))
+    return getPlatform().base64Decode(pem.replace(/^-----(?:BEGIN|END)(?: RSA)? PUBLIC KEY-----$|\n/gm, ''))
 }
 
 // based on https://git.coolaj86.com/coolaj86/asn1-parser.js/src/branch/master/asn1-parser.js
@@ -32,18 +32,18 @@ const EDEEP = `element nested over ${EDEEPN} layers deep (probably a malformed f
 // Bit String (0x03) and Octet String (0x04) may be values or containers
 // Sometimes Bit String is used as a container (RSA Pub Spki)
 const CTYPES: Record<number, true> = {
-    '48': true,
-    '49': true,
-    '160': true,
-    '161': true,
+    48: true,
+    49: true,
+    160: true,
+    161: true,
 }
 const VTYPES: Record<number, true> = {
-    '1': true,
-    '2': true,
-    '5': true,
-    '6': true,
-    '12': true,
-    '130': true,
+    1: true,
+    2: true,
+    5: true,
+    6: true,
+    12: true,
+    130: true,
 }
 
 /**
@@ -64,9 +64,9 @@ export function parseAsn1(data: Uint8Array): Asn1Object {
 
         // Determine how many bytes the length uses, and what it is
         if (0x80 & asn1.length) {
-            asn1.lengthSize = 0x7f & asn1.length
+            asn1.lengthSize = 0x7F & asn1.length
             // I think that buf->hex->int solves the problem of Endianness... not sure
-            asn1.length = parseInt(getPlatform().hexEncode(buf.subarray(index, index + asn1.lengthSize)), 16)
+            asn1.length = Number.parseInt(getPlatform().hexEncode(buf.subarray(index, index + asn1.lengthSize)), 16)
             index += asn1.lengthSize
         }
 
@@ -95,8 +95,8 @@ export function parseAsn1(data: Uint8Array): Asn1Object {
 
                 if (index > 2 + asn1.lengthSize + asn1.length) {
                     throw new Error(
-                        `Parse error: child value length (${child.length}) is ` +
-                            `greater than remaining parent length (${asn1.length - index} = ${asn1.length} - ${index})`,
+                        `Parse error: child value length (${child.length}) is `
+                        + `greater than remaining parent length (${asn1.length - index} = ${asn1.length} - ${index})`,
                     )
                 }
                 asn1.children.push(child)
@@ -129,7 +129,7 @@ export function parseAsn1(data: Uint8Array): Asn1Object {
         // (and return child array size to zero)
         try {
             return parseChildren(true)
-        } catch (e) {
+        } catch {
             if (asn1.children) asn1.children.length = 0
 
             return asn1

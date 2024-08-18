@@ -1,8 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
 
-import { IKeyValueRepository } from '../../../storage/repository/key-value.js'
-import { BaseService, ServiceOptions } from '../../../storage/service/base.js'
+import type { IKeyValueRepository } from '../../../storage/repository/key-value.js'
+import type { ServiceOptions } from '../../../storage/service/base.js'
+import { BaseService } from '../../../storage/service/base.js'
 import { MtArgumentError } from '../../../types/index.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { extractUsernames } from '../../utils/peer-utils.js'
@@ -143,7 +144,7 @@ export class CurrentUserService extends BaseService {
         return this._cached
     }
 
-    async update(params: { username?: string; usernames?: string[]; isPremium?: boolean }): Promise<void> {
+    async update(params: { username?: string, usernames?: string[], isPremium?: boolean }): Promise<void> {
         const info = await this.fetch()
         if (!info) return
 

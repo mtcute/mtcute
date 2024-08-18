@@ -1,8 +1,8 @@
 import Long from 'long'
 
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { StickerSet } from '../../types/misc/sticker-set.js'
-import { ArrayPaginated } from '../../types/utils.js'
+import type { ArrayPaginated } from '../../types/utils.js'
 import { makeArrayPaginated } from '../../utils/misc-utils.js'
 
 // @available=user
@@ -24,7 +24,7 @@ export async function getMyStickerSets(
         limit: params?.limit ?? 100,
     })
 
-    const items = res.sets.map((x) => new StickerSet(x))
+    const items = res.sets.map(x => new StickerSet(x))
 
     return makeArrayPaginated(items, res.count, items[items.length - 1]?.brief.id)
 }

@@ -1,11 +1,11 @@
-import { CachedDocumentation, CachedDocumentationEntry } from './documentation.js'
+import type { CachedDocumentation, CachedDocumentationEntry } from './documentation.js'
 
 type MaybeOverwrite =
-    | string
-    | {
-          text: string
-          overwrite: boolean
-      }
+  | string
+  | {
+      text: string
+      overwrite: boolean
+  }
 
 interface RegexRule {
     _cached?: RegExp
@@ -48,7 +48,7 @@ function unwrapMaybe(what: MaybeOverwrite, has: boolean): string | undefined {
     return undefined
 }
 
-export function applyDescriptionsYamlFile(input: CachedDocumentation, yaml: unknown) {
+export function applyDescriptionsYamlFile(input: CachedDocumentation, yaml: unknown): CachedDocumentation {
     const { objects: byObjects, arguments: byArguments, regex: byRegex } = yaml as DescriptionsYaml
 
     // first create an index of all classes and methods
@@ -65,7 +65,7 @@ export function applyDescriptionsYamlFile(input: CachedDocumentation, yaml: unkn
 
     // process byObjects
     for (const name in byObjects) {
-        const rules = byObjects[name]!
+        const rules = byObjects[name]
         const obj = objIndex[name]
 
         if (!obj) continue
@@ -77,7 +77,7 @@ export function applyDescriptionsYamlFile(input: CachedDocumentation, yaml: unkn
 
         if (rules.arguments) {
             for (const arg in rules.arguments) {
-                const repl = unwrapMaybe(rules.arguments[arg]!, obj.arguments !== undefined && arg in obj.arguments)
+                const repl = unwrapMaybe(rules.arguments[arg], obj.arguments !== undefined && arg in obj.arguments)
 
                 if (repl) {
                     if (!obj.arguments) obj.arguments = {}
@@ -89,12 +89,12 @@ export function applyDescriptionsYamlFile(input: CachedDocumentation, yaml: unkn
 
     // process byArguments
     for (const i in objIndex) {
-        const obj = objIndex[i]!
+        const obj = objIndex[i]
 
         for (const arg in byArguments) {
             if (obj.arguments && !(arg in obj.arguments)) continue
 
-            const repl = unwrapMaybe(byArguments[arg]!, Boolean(obj.arguments && arg in obj.arguments))
+            const repl = unwrapMaybe(byArguments[arg], Boolean(obj.arguments && arg in obj.arguments))
 
             if (repl) {
                 if (!obj.arguments) obj.arguments = {}
@@ -118,7 +118,7 @@ export function applyDescriptionsYamlFile(input: CachedDocumentation, yaml: unkn
     }
 
     for (const i in objIndex) {
-        const obj = objIndex[i]!
+        const obj = objIndex[i]
 
         byRegex.forEach((rule) => {
             obj.comment = applyRegex(obj.comment, rule)

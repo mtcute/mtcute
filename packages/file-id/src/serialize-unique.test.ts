@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-
 import { defaultPlatform } from '@mtcute/test'
 
 import { parseFileId } from './parse.js'

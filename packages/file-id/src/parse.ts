@@ -1,4 +1,5 @@
-import { ITlPlatform, TlBinaryReader } from '@mtcute/tl-runtime'
+import type { ITlPlatform } from '@mtcute/tl-runtime'
+import { TlBinaryReader } from '@mtcute/tl-runtime'
 
 import { tdFileId as td } from './types.js'
 import { telegramRleDecode } from './utils.js'
@@ -249,10 +250,10 @@ function fromPersistentIdV23(platform: ITlPlatform, binary: Uint8Array, version:
                 switch (location.source._) {
                     case 'thumbnail':
                         if (
-                            location.source.fileType !== fileType ||
-                            (fileType !== td.FileType.Photo &&
-                                fileType !== td.FileType.Thumbnail &&
-                                fileType !== td.FileType.EncryptedThumbnail)
+                            location.source.fileType !== fileType
+                            || (fileType !== td.FileType.Photo
+                            && fileType !== td.FileType.Thumbnail
+                            && fileType !== td.FileType.EncryptedThumbnail)
                         ) {
                             throw new td.InvalidFileIdError('Invalid FileType in PhotoRemoteFileLocation Thumbnail')
                         }

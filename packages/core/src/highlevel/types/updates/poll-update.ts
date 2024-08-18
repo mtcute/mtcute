@@ -1,9 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Poll } from '../media/poll.js'
-import { PeersIndex } from '../peers/peers-index.js'
+import type { PeersIndex } from '../peers/peers-index.js'
 
 /**
  * Poll state has changed (stopped, somebody
@@ -57,7 +57,7 @@ export class PollUpdate {
                 id: this.raw.pollId,
                 question: { _: 'textWithEntities', text: '', entities: [] },
                 answers:
-                    this.raw.results.results?.map((res) => ({
+                    this.raw.results.results?.map(res => ({
                         _: 'pollAnswer',
                         text: { _: 'textWithEntities', text: '', entities: [] },
                         option: res.option,

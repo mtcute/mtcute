@@ -1,6 +1,6 @@
-import { IPeersRepository } from '@mtcute/core'
+import type { IPeersRepository } from '@mtcute/core'
 
-import { IdbStorageDriver } from '../driver.js'
+import type { IdbStorageDriver } from '../driver.js'
 import { reqToPromise } from '../utils.js'
 
 const TABLE = 'peers'

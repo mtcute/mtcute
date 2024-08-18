@@ -6,17 +6,16 @@
  * that are used by mtcute.
  */
 export interface ISqliteDatabase {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    transaction<F extends (...args: any[]) => any>(fn: F): F
+    transaction: <F extends (...args: any[]) => any>(fn: F) => F
 
-    prepare<BindParameters extends unknown[]>(sql: string): ISqliteStatement<BindParameters>
+    prepare: <BindParameters extends unknown[]>(sql: string) => ISqliteStatement<BindParameters>
 
-    exec(sql: string): void
-    close(): void
+    exec: (sql: string) => void
+    close: () => void
 }
 
 export interface ISqliteStatement<BindParameters extends unknown[] = unknown[]> {
-    run(...params: BindParameters): void
-    get(...params: BindParameters): unknown
-    all(...params: BindParameters): unknown[]
+    run: (...params: BindParameters) => void
+    get: (...params: BindParameters) => unknown
+    all: (...params: BindParameters) => unknown[]
 }

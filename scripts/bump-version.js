@@ -1,14 +1,18 @@
-const fs = require('fs')
-const path = require('path')
-const semver = require('semver')
+import { appendFileSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { EOL } from 'node:os'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { inc, rcompare } from 'semver'
+
+const __dirname = dirname(new URL(import.meta.url).pathname)
 
 function collectPackageJsons() {
-    return fs
-        .readdirSync(path.join(__dirname, '../packages'))
-        .filter((s) => !s.startsWith('.'))
+    return readdirSync(join(__dirname, '../packages'))
+        .filter(s => !s.startsWith('.'))
         .map((name) => {
             try {
-                return JSON.parse(fs.readFileSync(path.join(__dirname, '../packages', name, 'package.json'), 'utf-8'))
+                return JSON.parse(readFileSync(join(__dirname, '../packages', name, 'package.json'), 'utf-8'))
             } catch (e) {
                 if (e.code !== 'ENOENT') throw e
 
@@ -21,16 +25,16 @@ function collectPackageJsons() {
 function bumpVersions(packages, kind) {
     const pkgJsons = collectPackageJsons()
     const maxVersion = pkgJsons
-        .filter((it) => it.name !== '@mtcute/tl')
-        .map((it) => it.version)
-        .sort(semver.rcompare)[0]
+        .filter(it => it.name !== '@mtcute/tl')
+        .map(it => it.version)
+        .sort(rcompare)[0]
 
-    const nextVersion = semver.inc(maxVersion, kind)
+    const nextVersion = inc(maxVersion, kind)
     console.log('[i] Bumping versions to %s', nextVersion)
 
     for (const pkg of packages) {
         if (pkg === 'tl') continue // own versioning
-        const pkgJson = pkgJsons.find((it) => it.name === `@mtcute/${pkg}`)
+        const pkgJson = pkgJsons.find(it => it.name === `@mtcute/${pkg}`)
 
         if (!pkgJson) {
             console.error(`Package ${pkg} not found!`)
@@ -38,20 +42,20 @@ function bumpVersions(packages, kind) {
         }
 
         pkgJson.version = nextVersion
-        fs.writeFileSync(
-            path.join(__dirname, '../packages', pkg, 'package.json'),
-            JSON.stringify(pkgJson, null, 4) + '\n',
+        writeFileSync(
+            join(__dirname, '../packages', pkg, 'package.json'),
+            `${JSON.stringify(pkgJson, null, 4)}\n`,
         )
     }
 
-    const rootPkgJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf-8'))
+    const rootPkgJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'))
     rootPkgJson.version = nextVersion
-    fs.writeFileSync(path.join(__dirname, '../package.json'), JSON.stringify(rootPkgJson, null, 4) + '\n')
+    writeFileSync(join(__dirname, '../package.json'), `${JSON.stringify(rootPkgJson, null, 4)}\n`)
 
     return nextVersion
 }
 
-if (require.main === module) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const kind = process.argv[2]
     const packages = process.argv[3]
 
@@ -75,8 +79,8 @@ if (require.main === module) {
     const ver = bumpVersions(packagesList, kind)
 
     if (process.env.GITHUB_OUTPUT) {
-        fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${ver}${require('os').EOL}`)
+        appendFileSync(process.env.GITHUB_OUTPUT, `version=${ver}${EOL}`)
     }
 }
 
-module.exports = { bumpVersions }
+export { bumpVersions }

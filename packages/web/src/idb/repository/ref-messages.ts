@@ -1,6 +1,6 @@
-import { IReferenceMessagesRepository } from '@mtcute/core'
+import type { IReferenceMessagesRepository } from '@mtcute/core'
 
-import { IdbStorageDriver } from '../driver.js'
+import type { IdbStorageDriver } from '../driver.js'
 import { reqToPromise, txToPromise } from '../utils.js'
 
 const TABLE = 'messageRefs'

@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-
-import { IPeersRepository, IStorageDriver } from '@mtcute/core'
+import type { IPeersRepository, IStorageDriver } from '@mtcute/core'
 import { TlBinaryWriter } from '@mtcute/core/utils.js'
 import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 
@@ -23,13 +22,13 @@ function fixPeerInfo(peer: IPeersRepository.PeerInfo | null): IPeersRepository.P
         ...peer,
         complete:
             // eslint-disable-next-line no-restricted-globals
-            typeof Buffer !== 'undefined' && peer.complete instanceof Buffer ?
-                new Uint8Array(peer.complete) :
-                peer.complete,
+            typeof Buffer !== 'undefined' && peer.complete instanceof Buffer
+                ? new Uint8Array(peer.complete)
+                : peer.complete,
     }
 }
 
-export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriver) {
+export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriver): void {
     const stubPeerUser: IPeersRepository.PeerInfo = {
         id: 123123,
         accessHash: '123|456',

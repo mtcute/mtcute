@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { generateTlEntriesDifference, generateTlSchemasDifference } from './diff.js'
 import { parseTlToEntries } from './parse.js'
 import { parseFullTlSchema } from './schema.js'
-import { TlEntryDiff, TlSchemaDiff } from './types.js'
+import type { TlEntryDiff, TlSchemaDiff } from './types.js'
 
 describe('generateTlEntriesDifference', () => {
     const test = (tl: string[], expected?: TlEntryDiff) => {
@@ -16,8 +16,8 @@ describe('generateTlEntriesDifference', () => {
         test(['test#deadbeef = Test;', 'test#baadf00d = Test;'], {
             name: 'test',
             id: {
-                old: 0xdeadbeef,
-                new: 0xbaadf00d,
+                old: 0xDEADBEEF,
+                new: 0xBAADF00D,
             },
         })
     })

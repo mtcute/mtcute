@@ -66,7 +66,7 @@ module.exports = ({ fs, path, outDir, packageDir, jsr, transformFile }) => ({
                 json.exports = {}
 
                 for (const f of files) {
-                    if (!f.match(/\.js(on)?$/)) continue
+                    if (!f.match(/\.js(?:on)?$/)) continue
 
                     if (f === 'index.js') {
                         json.exports['.'] = './index.js'

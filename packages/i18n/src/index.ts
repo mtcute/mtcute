@@ -1,4 +1,4 @@
-import { I18nStrings, I18nValue, MtcuteI18nAdapter, MtcuteI18nFunction, OtherLanguageWrap } from './types.js'
+import type { I18nStrings, I18nValue, MtcuteI18nAdapter, MtcuteI18nFunction, OtherLanguageWrap } from './types.js'
 import { createI18nStringsIndex, extractLanguageFromUpdate } from './utils.js'
 
 export * from './plurals/english.js'

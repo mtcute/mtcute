@@ -1,10 +1,10 @@
 {
-    "imports": {
-        "@mtcute/web": "jsr:@mtcute/web@*",
-        "@mtcute/wasm": "jsr:@mtcute/wasm@*",
-        "@mtcute/tl": "jsr:@mtcute/tl@*",
-        "@mtcute/tl-runtime": "jsr:@mtcute/tl-runtime@*",
-        "@mtcute/core": "jsr:@mtcute/core@*",
-        "@mtcute/deno": "jsr:@mtcute/deno@*"
-    }
+  "imports": {
+    "@mtcute/web": "jsr:@mtcute/web@*",
+    "@mtcute/wasm": "jsr:@mtcute/wasm@*",
+    "@mtcute/tl": "jsr:@mtcute/tl@*",
+    "@mtcute/tl-runtime": "jsr:@mtcute/tl-runtime@*",
+    "@mtcute/core": "jsr:@mtcute/core@*",
+    "@mtcute/deno": "jsr:@mtcute/deno@*"
+  }
 }

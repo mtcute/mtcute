@@ -1,11 +1,12 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { getPlatform } from '../../platform.js'
 import { MtSecurityError, MtUnsupportedError } from '../../types/errors.js'
 import { bigIntModPow, bigIntToBuffer, bufferToBigInt } from '../bigint-utils.js'
 import { concatBuffers } from '../buffer-utils.js'
 import { assertTypeIs } from '../type-assertions.js'
-import { ICryptoProvider } from './abstract.js'
+
+import type { ICryptoProvider } from './abstract.js'
 import { xorBuffer } from './utils.js'
 
 /**
@@ -72,8 +73,8 @@ export async function computeSrpParams(
 ): Promise<tl.RawInputCheckPasswordSRP> {
     // nice naming thx durov
     if (
-        !request.currentAlgo ||
-        request.currentAlgo._ !== 'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow'
+        !request.currentAlgo
+        || request.currentAlgo._ !== 'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow'
     ) {
         throw new MtUnsupportedError(`Unknown algo ${request.currentAlgo?._}`)
     }

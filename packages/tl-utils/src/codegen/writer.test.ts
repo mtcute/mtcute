@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { parseTlToEntries } from '../parse.js'
+
 import { generateWriterCodeForTlEntries, generateWriterCodeForTlEntry } from './writer.js'
 
 describe('generateWriterCodeForTlEntry', () => {
@@ -84,8 +85,8 @@ describe('generateWriterCodeForTlEntry', () => {
 describe('generateWriterCodeForTlEntries', () => {
     it('generates code for bare types', () => {
         const entries = parseTlToEntries(
-            'future_salt#0949d9dc salt:bytes = FutureSalt;\n' +
-                'future_salts#ae500895 salts:vector<future_salt> current:future_salt = FutureSalts;',
+            'future_salt#0949d9dc salt:bytes = FutureSalt;\n'
+            + 'future_salts#ae500895 salts:vector<future_salt> current:future_salt = FutureSalts;',
         )
 
         expect(generateWriterCodeForTlEntries(entries, { includePrelude: false })).toMatchSnapshot()
@@ -106,9 +107,9 @@ describe('generateWriterCodeForTlEntries', () => {
 
     it('should include static sizes calculations', () => {
         const entries = parseTlToEntries(
-            'test1 foo:int bar:int = Test;\n' +
-                'test2 foo:int bar:double = Test;\n' +
-                'test3 foo:int bar:bytes = Test;\n', // should not be included
+            'test1 foo:int bar:int = Test;\n'
+            + 'test2 foo:int bar:double = Test;\n'
+            + 'test3 foo:int bar:bytes = Test;\n', // should not be included
         )
         const code = generateWriterCodeForTlEntries(entries, { includeStaticSizes: true })
 

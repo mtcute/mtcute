@@ -1,5 +1,6 @@
-import { TlEntry, TlErrors, TlFullSchema, TlTypeModifiers } from '../types.js'
+import type { TlEntry, TlErrors, TlFullSchema, TlTypeModifiers } from '../types.js'
 import { groupTlEntriesByNamespace, splitNameToNamespace } from '../utils.js'
+
 import { generateCodeForErrors } from './errors.js'
 import { camelToPascal, indent, jsComment, snakeToCamel } from './utils.js'
 
@@ -55,7 +56,7 @@ function fullTypeName(
 
     const [ns, name] = splitNameToNamespace(type)
     let res = baseNamespace
-    if (namespace && ns) res += ns + '.'
+    if (namespace && ns) res += `${ns}.`
 
     if (name[0].match(/[A-Z]/)) {
         res += 'Type'
@@ -116,11 +117,11 @@ export function generateTypescriptDefinitionsForTlEntry(
             }
 
             if (errors.throws[entry.name]) {
-                comment += '\n\nThis method *may* throw one of these errors: ' + errors.throws[entry.name].join(', ')
+                comment += `\n\nThis method *may* throw one of these errors: ${errors.throws[entry.name].join(', ')}`
             }
         }
     }
-    if (comment) ret += jsComment(comment) + '\n'
+    if (comment) ret += `${jsComment(comment)}\n`
 
     let genericsString = ''
     const genericsIndex: Record<string, 1> = {}
@@ -159,7 +160,7 @@ export function generateTypescriptDefinitionsForTlEntry(
         }
 
         if (arg.comment) {
-            ret += indent(4, jsComment(arg.comment)) + '\n'
+            ret += `${indent(4, jsComment(arg.comment))}\n`
         }
 
         ret += `    ${snakeToCamel(arg.name)}`
@@ -268,7 +269,7 @@ export function generateTypescriptDefinitionsForTlSchema(
                 unions[entry.type] = 1
             }
 
-            ts += indent(indentSize, generateTypescriptDefinitionsForTlEntry(entry, namespace + '.')) + '\n'
+            ts += `${indent(indentSize, generateTypescriptDefinitionsForTlEntry(entry, `${namespace}.`))}\n`
         })
 
         ts += indent(indentSize, 'interface RpcCallReturn')
@@ -286,7 +287,7 @@ export function generateTypescriptDefinitionsForTlSchema(
                     ts += ', '
                 }
 
-                ts += ns + '.RpcCallReturn'
+                ts += `${ns}.RpcCallReturn`
             }
         }
         ts += ' {\n'
@@ -301,22 +302,22 @@ export function generateTypescriptDefinitionsForTlSchema(
                     const g = entry.generics[i]
 
                     if (g.name === entry.type) {
-                        type = g.type === 'Type' ? 'any' : fullTypeName(g.type, namespace + '.')
+                        type = g.type === 'Type' ? 'any' : fullTypeName(g.type, `${namespace}.`)
                         break
                     }
                 }
             }
 
             if (!type) {
-                type = fullTypeName(entry.type, namespace + '.', {
+                type = fullTypeName(entry.type, `${namespace}.`, {
                     typeModifiers: entry.typeModifiers,
                 })
             }
 
-            ts += indent(indentSize + 4, `'${entry.name}': ${type}`) + '\n'
+            ts += `${indent(indentSize + 4, `'${entry.name}': ${type}`)}\n`
         })
 
-        ts += indent(indentSize, '}') + '\n'
+        ts += `${indent(indentSize, '}')}\n`
 
         if (ns) {
             js += `ns.${ns} = {};\n(function(ns){\n`
@@ -326,7 +327,7 @@ export function generateTypescriptDefinitionsForTlSchema(
             const union = schema.unions[name]
 
             if (union.comment) {
-                ts += indent(indentSize, jsComment(union.comment)) + '\n'
+                ts += `${indent(indentSize, jsComment(union.comment))}\n`
             }
             const typeName = fullTypeName(name, '', { namespace: false })
             const typeWithoutNs = typeName.substring(4)
@@ -334,12 +335,12 @@ export function generateTypescriptDefinitionsForTlSchema(
 
             union.classes.forEach((entry, idx) => {
                 if (idx !== 0) ts += ' | '
-                ts += fullTypeName(entry.name, namespace + '.')
+                ts += fullTypeName(entry.name, `${namespace}.`)
             })
 
             ts += '\n'
 
-            ts += indent(indentSize, `function isAny${typeWithoutNs}(o: object): o is ${typeName}`) + '\n'
+            ts += `${indent(indentSize, `function isAny${typeWithoutNs}(o: object): o is ${typeName}`)}\n`
             js += `ns.isAny${typeWithoutNs} = _isAny('${name}');\n`
         }
 
@@ -356,15 +357,15 @@ export function generateTypescriptDefinitionsForTlSchema(
 
     for (const name in schema.methods) {
         if (first) {
-            ts += indent(4, 'type RpcMethod =') + '\n'
+            ts += `${indent(4, 'type RpcMethod =')}\n`
             first = false
         }
 
         const entry = schema.methods[name]
-        ts += indent(8, '| ' + fullTypeName(entry.name, namespace + '.', { method: true })) + '\n'
+        ts += `${indent(8, `| ${fullTypeName(entry.name, `${namespace}.`, { method: true })}`)}\n`
     }
 
-    ts += '\n' + indent(4, 'type TlObject =') + '\n'
+    ts += `\n${indent(4, 'type TlObject =')}\n`
 
     const _types: Record<string, string> = {}
 
@@ -373,14 +374,14 @@ export function generateTypescriptDefinitionsForTlSchema(
             _types[entry.name] = entry.type
         }
 
-        ts +=
-            indent(
+        ts
+            += `${indent(
                 8,
-                '| ' +
-                    fullTypeName(entry.name, namespace + '.', {
+                `| ${
+                    fullTypeName(entry.name, `${namespace}.`, {
                         method: entry.kind === 'method',
-                    }),
-            ) + '\n'
+                    })}`,
+            )}\n`
     })
 
     ts += '}'

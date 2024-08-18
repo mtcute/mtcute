@@ -1,4 +1,4 @@
-import {
+import type {
     BotReactionCountUpdate,
     BotReactionUpdate,
     BotStoppedUpdate,
@@ -14,14 +14,14 @@ import {
     PollUpdate,
     PollVoteUpdate,
     StoryUpdate,
-    tl,
     UserStatusUpdate,
     UserTypingUpdate,
+    tl,
 } from '@mtcute/core'
-import { TelegramClient } from '@mtcute/core/client.js'
+import type { TelegramClient } from '@mtcute/core/client.js'
 
-import { UpdateContext } from './context/base.js'
-import {
+import type { UpdateContext } from './context/base.js'
+import type {
     BusinessCallbackQueryContext,
     BusinessMessageContext,
     CallbackQueryContext,
@@ -32,7 +32,7 @@ import {
     MessageContext,
     PreCheckoutQueryContext,
 } from './context/index.js'
-import { PropagationAction } from './propagation.js'
+import type { PropagationAction } from './propagation.js'
 
 export interface BaseUpdateHandler<Name, Handler, Checker> {
     name: Name
@@ -123,34 +123,34 @@ export type DeleteBusinessMessageHandler<T = UpdateContext<DeleteBusinessMessage
 >
 
 export type UpdateHandler =
-    | RawUpdateHandler
-    | NewMessageHandler
-    | EditMessageHandler
-    | MessageGroupHandler
-    | DeleteMessageHandler
-    | ChatMemberUpdateHandler
-    | InlineQueryHandler
-    | ChosenInlineResultHandler
-    | CallbackQueryHandler
-    | InlineCallbackQueryHandler
-    | BusinessCallbackQueryHandler
-    | PollUpdateHandler
-    | PollVoteHandler
-    | UserStatusUpdateHandler
-    | UserTypingHandler
-    | HistoryReadHandler
-    | BotStoppedHandler
-    | BotChatJoinRequestHandler
-    | ChatJoinRequestHandler
-    | PreCheckoutQueryHandler
-    | StoryUpdateHandler
-    | DeleteStoryHandler
-    | BotReactionUpdateHandler
-    | BotReactionCountUpdateHandler
-    | BusinessConnectionUpdateHandler
-    | NewBusinessMessageHandler
-    | EditBusinessMessageHandler
-    | BusinessMessageGroupHandler
-    | DeleteBusinessMessageHandler
+  | RawUpdateHandler
+  | NewMessageHandler
+  | EditMessageHandler
+  | MessageGroupHandler
+  | DeleteMessageHandler
+  | ChatMemberUpdateHandler
+  | InlineQueryHandler
+  | ChosenInlineResultHandler
+  | CallbackQueryHandler
+  | InlineCallbackQueryHandler
+  | BusinessCallbackQueryHandler
+  | PollUpdateHandler
+  | PollVoteHandler
+  | UserStatusUpdateHandler
+  | UserTypingHandler
+  | HistoryReadHandler
+  | BotStoppedHandler
+  | BotChatJoinRequestHandler
+  | ChatJoinRequestHandler
+  | PreCheckoutQueryHandler
+  | StoryUpdateHandler
+  | DeleteStoryHandler
+  | BotReactionUpdateHandler
+  | BotReactionCountUpdateHandler
+  | BusinessConnectionUpdateHandler
+  | NewBusinessMessageHandler
+  | EditBusinessMessageHandler
+  | BusinessMessageGroupHandler
+  | DeleteBusinessMessageHandler
 
 // end-codegen

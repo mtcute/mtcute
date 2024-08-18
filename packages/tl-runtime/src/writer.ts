@@ -1,6 +1,6 @@
-import Long from 'long'
+import type Long from 'long'
 
-import { ITlPlatform } from './platform.js'
+import type { ITlPlatform } from './platform.js'
 
 const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
 
@@ -8,9 +8,7 @@ const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
  * Mapping of TL object names to writer functions.
  */
 // avoid unnecessary type complexity
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TlWriterMap = Record<string, (w: any, val: any) => void> & {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _bare?: Record<number, (w: any, val: any) => void>
     _staticSize: Record<string, number>
 }
@@ -128,7 +126,7 @@ export class TlSerializationCounter {
 
     vector(fn: (item: unknown) => void, items: unknown[]): void {
         this.count += 8
-        items.forEach((it) => fn.call(this, it))
+        items.forEach(it => fn.call(this, it))
     }
 }
 
@@ -202,8 +200,8 @@ export class TlBinaryWriter {
         knownSize = -1,
     ): Uint8Array {
         if (knownSize === -1) {
-            knownSize =
-                objectMap._staticSize[obj._] || TlSerializationCounter.countNeededBytes(objectMap, obj)
+            knownSize
+                = objectMap._staticSize[obj._] || TlSerializationCounter.countNeededBytes(objectMap, obj)
         }
 
         const writer = TlBinaryWriter.alloc(objectMap, knownSize)
@@ -237,7 +235,7 @@ export class TlBinaryWriter {
     }
 
     null(): void {
-        this.uint(0x56730bcc)
+        this.uint(0x56730BCC)
     }
 
     long(val: Long): void {
@@ -258,7 +256,7 @@ export class TlBinaryWriter {
     }
 
     boolean(val: boolean): void {
-        this.dataView.setInt32(this.pos, val ? 0x997275b5 : 0xbc799737, true)
+        this.dataView.setInt32(this.pos, val ? 0x997275B5 : 0xBC799737, true)
         this.pos += 4
     }
 
@@ -290,9 +288,9 @@ export class TlBinaryWriter {
             padding = (length + 1) % 4
         } else {
             this.uint8View[this.pos++] = 254
-            this.uint8View[this.pos++] = length & 0xff
-            this.uint8View[this.pos++] = (length >> 8) & 0xff
-            this.uint8View[this.pos++] = (length >> 16) & 0xff
+            this.uint8View[this.pos++] = length & 0xFF
+            this.uint8View[this.pos++] = (length >> 8) & 0xFF
+            this.uint8View[this.pos++] = (length >> 16) & 0xFF
             padding = length % 4
         }
 
@@ -311,7 +309,6 @@ export class TlBinaryWriter {
     }
 
     // hot path, avoid additional runtime checks
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     object(obj: any): void {
         const fn = this.objectMap![obj._]
         if (!fn) throw new Error(`Unknown object ${obj._}`)
@@ -319,10 +316,10 @@ export class TlBinaryWriter {
     }
 
     vector(fn: (item: unknown, bare?: boolean) => void, val: unknown[], bare?: boolean): void {
-        if (!bare) this.uint(0x1cb5c415)
+        if (!bare) this.uint(0x1CB5C415)
         this.uint(val.length)
 
-        val.forEach((it) => fn.call(this, it, bare))
+        val.forEach(it => fn.call(this, it, bare))
     }
 
     /**

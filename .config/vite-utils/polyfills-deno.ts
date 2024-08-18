@@ -1,12 +1,14 @@
 // @ts-expect-error  no typings
-import { describe as _describe, it, beforeEach, afterEach, beforeAll, afterAll } from 'jsr:@std/testing/bdd'
+import util from 'node:util'
+
+import { describe as _describe, afterAll, afterEach, beforeAll, beforeEach, it } from 'jsr:@std/testing/bdd'
 // @ts-expect-error  no typings
 import * as vitestSpy from 'npm:@vitest/spy@1.4.0'
 // @ts-expect-error  no typings
 import * as chai from 'npm:chai'
 // @ts-expect-error  no typings
 import * as vitestExpect from 'npm:@vitest/expect@1.4.0'
-import util from 'node:util'
+
 import { setupChai, stubGlobal, unstubAllGlobals, waitFor } from './polyfills'
 
 export { it, beforeEach, afterEach, beforeAll, afterAll }
@@ -15,6 +17,7 @@ setupChai(chai, vitestExpect)
 
 // https://github.com/denoland/deno_std/issues/2213
 Object.defineProperty(it, 'each', {
+    // eslint-disable-next-line ts/no-unsafe-function-type
     value: (items: any[][]) => (name: string, fn: Function) => {
         return items.map((item) => {
             return it(`${util.format(name, ...item)}`, () => fn(...item))
@@ -23,8 +26,8 @@ Object.defineProperty(it, 'each', {
 })
 
 // https://github.com/denoland/deno_std/issues/4634
-export const describe = (...args) => {
-    const fn = args.find((arg) => typeof arg === 'function')
+export function describe(...args) {
+    const fn = args.find(arg => typeof arg === 'function')
     if (fn.toString().startsWith('async')) {
         return
     }

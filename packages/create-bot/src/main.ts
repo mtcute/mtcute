@@ -1,13 +1,14 @@
 #!/usr/bin/env node
-import * as colors from 'colorette'
 import { basename, dirname, join } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
+import * as colors from 'colorette'
+
 import { askForConfig } from './cli.js'
 import { installDependencies } from './dependencies.js'
 import { MtcuteFeature } from './features/types.js'
-import { getExecCommand, getPackageManager, PackageManager } from './package-manager.js'
+import { PackageManager, getExecCommand, getPackageManager } from './package-manager.js'
 import { runTemplater } from './templater.js'
 import { exec } from './utils.js'
 
@@ -32,7 +33,7 @@ const config = await askForConfig(packageManager)
 config.name = basename(projectName)
 let outDir = process.env.TARGET_DIR || projectName
 
-if (!outDir.match(/^([A-Za-z]:)?[/\\]/)) {
+if (!outDir.match(/^(?:[A-Z]:)?[/\\]/i)) {
     // assume it's a relative path
     outDir = join(process.cwd(), outDir)
 }

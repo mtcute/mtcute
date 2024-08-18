@@ -35,10 +35,9 @@ export class AsyncLock {
 
         return this.acquire()
             .then(() => func())
-            .catch((e) => void (err = e))
+            .catch(e => void (err = e))
             .then(() => {
                 this.release()
-                // eslint-disable-next-line @typescript-eslint/no-throw-literal
                 if (err) throw err
             })
     }

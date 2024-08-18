@@ -1,8 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { MaybeArray } from '../../../types/utils.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
+import type { MaybeArray } from '../../../types/utils.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { MtInvalidPeerTypeError } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerChat, toInputChannel, toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'

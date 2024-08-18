@@ -1,7 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../../utils/index.js'
-import { ReactionEmoji, toReactionEmoji } from '../../reactions/index.js'
+import type { ReactionEmoji } from '../../reactions/index.js'
+import { toReactionEmoji } from '../../reactions/index.js'
+
 import { StoryInteractiveArea } from './base.js'
 
 /**

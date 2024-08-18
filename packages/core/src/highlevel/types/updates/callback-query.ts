@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { getPlatform } from '../../../platform.js'
 import { MtArgumentError } from '../../../types/errors.js'
@@ -7,16 +7,16 @@ import { encodeInlineMessageId } from '../../utils/inline-utils.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Message } from '../messages/message.js'
 import { Chat } from '../peers/chat.js'
-import { PeersIndex } from '../peers/peers-index.js'
+import type { PeersIndex } from '../peers/peers-index.js'
 import { User } from '../peers/user.js'
 
 /** Base class for callback queries */
 class BaseCallbackQuery {
     constructor(
         readonly raw:
-            | tl.RawUpdateBotCallbackQuery
-            | tl.RawUpdateInlineBotCallbackQuery
-            | tl.RawUpdateBusinessBotCallbackQuery,
+          | tl.RawUpdateBotCallbackQuery
+          | tl.RawUpdateInlineBotCallbackQuery
+          | tl.RawUpdateBusinessBotCallbackQuery,
         readonly _peers: PeersIndex,
     ) {}
 

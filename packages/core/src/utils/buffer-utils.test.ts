@@ -1,16 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { buffersEqual, bufferToReversed, cloneBuffer, concatBuffers } from './buffer-utils.js'
+import { bufferToReversed, buffersEqual, cloneBuffer, concatBuffers } from './buffer-utils.js'
 
 describe('buffersEqual', () => {
     it('should return true for equal buffers', () => {
-        expect(buffersEqual(new Uint8Array([]), new Uint8Array([]))).is.true
-        expect(buffersEqual(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3]))).is.true
+        expect(buffersEqual(new Uint8Array([]), new Uint8Array([]))).toEqual(true)
+        expect(buffersEqual(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3]))).toEqual(true)
     })
 
     it('should return false for non-equal buffers', () => {
-        expect(buffersEqual(new Uint8Array([1]), new Uint8Array([]))).is.false
-        expect(buffersEqual(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 4]))).is.false
+        expect(buffersEqual(new Uint8Array([1]), new Uint8Array([]))).toEqual(false)
+        expect(buffersEqual(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 4]))).toEqual(false)
     })
 })
 
@@ -20,8 +20,8 @@ describe('cloneBuffer', () => {
         const copy = cloneBuffer(orig)
 
         expect([...copy]).eql([1, 2, 3])
-        orig[0] = 0xff
-        expect(copy[0]).not.eql(0xff)
+        orig[0] = 0xFF
+        expect(copy[0]).not.eql(0xFF)
     })
 
     it('should clone buffer partially', () => {
@@ -29,8 +29,8 @@ describe('cloneBuffer', () => {
         const copy = cloneBuffer(orig, 1, 4)
 
         expect([...copy]).eql([2, 3, 4])
-        orig[0] = 0xff
-        expect(copy[0]).not.eql(0xff)
+        orig[0] = 0xFF
+        expect(copy[0]).not.eql(0xFF)
     })
 })
 
@@ -46,8 +46,8 @@ describe('concatBuffers', () => {
         const buf2 = new Uint8Array([4, 5, 6])
         const buf = concatBuffers([buf1, buf2])
 
-        buf[0] = 0xff
-        expect(buf1[0]).not.eql(0xff)
+        buf[0] = 0xFF
+        expect(buf1[0]).not.eql(0xFF)
     })
 
     it('should work without native Buffer', () => {
@@ -56,7 +56,7 @@ describe('concatBuffers', () => {
         const buf2 = new Uint8Array([4, 5, 6])
         const buf = concatBuffers([buf1, buf2])
 
-        buf1[0] = 0xff
+        buf1[0] = 0xFF
 
         expect([...buf]).eql([1, 2, 3, 4, 5, 6])
     })
@@ -81,7 +81,7 @@ describe('bufferToReversed', () => {
         const buf1 = new Uint8Array([1, 2, 3])
         const buf2 = bufferToReversed(buf1)
 
-        buf2[0] = 0xff
+        buf2[0] = 0xFF
         expect([...buf1]).eql([1, 2, 3])
     })
 })

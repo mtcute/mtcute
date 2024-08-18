@@ -1,7 +1,8 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { ITelegramClient } from '../../client.types.js'
-import { ArrayPaginated, ChatInviteLink, ChatInviteLinkMember, InputPeerLike, PeersIndex } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { ArrayPaginated, ChatInviteLink, InputPeerLike } from '../../types/index.js'
+import { ChatInviteLinkMember, PeersIndex } from '../../types/index.js'
 import { makeArrayPaginated, normalizeDate, toInputUser } from '../../utils/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -52,7 +53,7 @@ export async function getInviteLinkMembers(
          */
         requestedSearch?: string
     },
-): Promise<ArrayPaginated<ChatInviteLinkMember, { date: number; user: tl.TypeInputUser }>> {
+): Promise<ArrayPaginated<ChatInviteLinkMember, { date: number, user: tl.TypeInputUser }>> {
     const peer = await resolvePeer(client, chatId)
     if (!params) params = {}
 
@@ -75,15 +76,15 @@ export async function getInviteLinkMembers(
 
     const peers = PeersIndex.from(res)
 
-    const members = res.importers.map((it) => new ChatInviteLinkMember(it, peers))
+    const members = res.importers.map(it => new ChatInviteLinkMember(it, peers))
 
     const last = members[members.length - 1]
-    const nextOffset = last ?
-        {
+    const nextOffset = last
+        ? {
             date: last.raw.date,
             user: toInputUser(last.user.inputPeer),
-        } :
-        undefined
+        }
+        : undefined
 
     return makeArrayPaginated(members, res.count, nextOffset)
 }

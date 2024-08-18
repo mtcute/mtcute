@@ -1,6 +1,5 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
-
 import { MtPeerNotFoundError } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
 
@@ -16,14 +15,14 @@ describe('2. calling methods', function () {
     it('getUsers(@BotFather)', async () => {
         const [user] = await tg.getUsers('botfather')
 
-        expect(user?.isBot).to.be.true
+        expect(user?.isBot).to.eq(true)
         expect(user?.displayName).to.equal('BotFather')
     })
 
     it('getUsers(@BotFather) - cached', async () => {
         const [user] = await tg.getUsers('botfather')
 
-        expect(user?.isBot).to.be.true
+        expect(user?.isBot).to.eq(true)
         expect(user?.displayName).to.equal('BotFather')
     })
 
@@ -53,7 +52,7 @@ describe('2. calling methods', function () {
         const res = await tg.updateProfile({ bio })
         const newSelf = await tg.getFullChat('self')
 
-        expect(res.isSelf).to.be.true
+        expect(res.isSelf).to.eq(true)
         expect(oldSelf.bio).to.not.equal(newSelf.bio)
         expect(newSelf.bio).to.equal(bio)
     })

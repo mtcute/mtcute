@@ -1,6 +1,5 @@
-/* eslint-disable no-console */
-const { execSync } = require('child_process')
-const fs = require('fs')
+const { execSync } = require('node:child_process')
+const fs = require('node:fs')
 
 const VERSION = '2.19.20'
 const TMP_DIR = '/tmp/gramjs'
@@ -36,6 +35,7 @@ async function main() {
     const session = stringSession.save()
 
     fs.writeFileSync(
+        // eslint-disable-next-line node/no-path-concat
         `${__dirname}/session.ts`,
         `export const GRAMJS_SESSION = '${session}'\n`,
     )

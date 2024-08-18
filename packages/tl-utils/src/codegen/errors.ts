@@ -1,4 +1,5 @@
-import { TlErrors } from '../types.js'
+import type { TlErrors } from '../types.js'
+
 import { snakeToCamel } from './utils.js'
 
 const TEMPLATE_JS = `
@@ -66,8 +67,8 @@ export class RpcError extends Error {
 }
 `.trimStart()
 
-const template = (str: string, params: Record<string, string | number>): string => {
-    return str.replace(/{([a-z]+)}/gi, (_, name) => String(params[name] ?? ''))
+function template(str: string, params: Record<string, string | number>): string {
+    return str.replace(/\{([a-z]+)\}/gi, (_, name) => String(params[name] ?? ''))
 }
 
 function parseCode(err: string, placeholders_?: string[]): [string, string[]] {
@@ -138,8 +139,8 @@ export function generateCodeForErrors(errors: TlErrors, exports = 'exports.'): [
 
         if (placeholders.length) {
             const placeholderTypes = placeholders.map(placeholderType)
-            argMap +=
-                `    '${name}': { ` + placeholders.map((it, i) => `${it}: ${placeholderTypes[i]}`).join(', ') + ' },\n'
+            argMap
+                += `    '${name}': { ${placeholders.map((it, i) => `${it}: ${placeholderTypes[i]}`).join(', ')} },\n`
 
             const regex = name.replace('%d', '(\\d+)')
             const setters = placeholders.map((it, i) => `param = err.${it} = parseInt(match[${i + 1}])`).join('; ')

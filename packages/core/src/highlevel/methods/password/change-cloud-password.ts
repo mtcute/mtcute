@@ -1,5 +1,5 @@
 import { MtArgumentError } from '../../../types/errors.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 
 /**
  * Change your 2FA password

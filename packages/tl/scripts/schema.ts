@@ -1,4 +1,5 @@
-import { parseFullTlSchema, TlEntry, TlFullSchema } from '@mtcute/tl-utils'
+import type { TlEntry, TlFullSchema } from '@mtcute/tl-utils'
+import { parseFullTlSchema } from '@mtcute/tl-utils'
 
 // interface TlPackedUnion {
 //     // name

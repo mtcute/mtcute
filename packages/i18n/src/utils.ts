@@ -1,6 +1,6 @@
 import type * as dispatcherNs from '@mtcute/dispatcher'
 
-import { I18nStrings, I18nValue } from './types.js'
+import type { I18nStrings, I18nValue } from './types.js'
 
 /**
  * Create an index of i18n strings delimited by "."
@@ -15,7 +15,7 @@ export function createI18nStringsIndex(strings: I18nStrings): Record<string, I18
             const val = obj[key]
 
             if (typeof val === 'object' && !('text' in val)) {
-                add(val, prefix + key + '.')
+                add(val, `${prefix + key}.`)
             } else {
                 ret[prefix + key] = val as string
             }
@@ -36,8 +36,6 @@ export function createI18nStringsIndex(strings: I18nStrings): Record<string, I18
 export function extractLanguageFromUpdate(update: dispatcherNs.UpdateContextType): string | null | undefined {
     if (!('_name' in update)) return null
 
-    // for whatever reason eslint doesn't like this
-    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
     switch (update._name) {
         case 'new_message': {
             const { sender } = update
@@ -56,8 +54,7 @@ export function extractLanguageFromUpdate(update: dispatcherNs.UpdateContextType
         case 'bot_stopped':
         case 'bot_chat_join_request':
             return update.user.language
+        default:
+            return null
     }
-    /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
-
-    return null
 }

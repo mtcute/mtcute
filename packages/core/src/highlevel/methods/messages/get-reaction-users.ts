@@ -1,12 +1,14 @@
-import { ITelegramClient } from '../../client.types.js'
-import {
+import type { ITelegramClient } from '../../client.types.js'
+import type {
     ArrayPaginated,
     InputMessageId,
     InputReaction,
-    normalizeInputMessageId,
-    normalizeInputReaction,
+} from '../../types/index.js'
+import {
     PeerReaction,
     PeersIndex,
+    normalizeInputMessageId,
+    normalizeInputReaction,
 } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -59,7 +61,7 @@ export async function getReactionUsers(
     const peers = PeersIndex.from(res)
 
     return makeArrayPaginated(
-        res.reactions.map((it) => new PeerReaction(it, peers)),
+        res.reactions.map(it => new PeerReaction(it, peers)),
         res.count,
         res.nextOffset,
     )

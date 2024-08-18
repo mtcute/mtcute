@@ -1,4 +1,4 @@
-import { WorkerCustomMethods } from '@mtcute/core/worker.js'
+import type { WorkerCustomMethods } from '@mtcute/core/worker.js'
 import { BaseTelegramClient, TelegramWorker } from '@mtcute/node'
 
 import { getApiParams } from '../utils.js'

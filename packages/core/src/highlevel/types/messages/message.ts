@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
 import { assertNever } from '../../../types/utils.js'
@@ -6,17 +6,22 @@ import { getMarkedPeerId, toggleChannelIdMark } from '../../../utils/peer-utils.
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { BotKeyboard, ReplyMarkup } from '../bots/keyboards/index.js'
-import { TextWithEntities } from '../misc/index.js'
+import type { ReplyMarkup } from '../bots/keyboards/index.js'
+import { BotKeyboard } from '../bots/keyboards/index.js'
+import type { TextWithEntities } from '../misc/index.js'
 import { Chat } from '../peers/chat.js'
-import { parsePeer, Peer } from '../peers/peer.js'
-import { PeersIndex } from '../peers/peers-index.js'
+import type { Peer } from '../peers/peer.js'
+import { parsePeer } from '../peers/peer.js'
+import type { PeersIndex } from '../peers/peers-index.js'
 import { User } from '../peers/user.js'
+
 import { FactCheck } from './fact-check.js'
-import { _messageActionFromTl, MessageAction } from './message-action.js'
+import type { MessageAction } from './message-action.js'
+import { _messageActionFromTl } from './message-action.js'
 import { MessageEntity } from './message-entity.js'
 import { MessageForwardInfo } from './message-forward.js'
-import { _messageMediaFromTl, MessageMedia } from './message-media.js'
+import type { MessageMedia } from './message-media.js'
+import { _messageMediaFromTl } from './message-media.js'
 import { MessageReactions } from './message-reactions.js'
 import { MessageRepliesInfo } from './message-replies.js'
 import { RepliedMessageInfo } from './replied-message.js'
@@ -247,10 +252,10 @@ export class Message {
         const fwd = this.raw.fwdFrom
 
         return Boolean(
-            this.chat.chatType === 'supergroup' &&
-                fwd.savedFromMsgId &&
-                fwd.savedFromPeer?._ === 'peerChannel' &&
-                getMarkedPeerId(fwd.savedFromPeer) !== getMarkedPeerId(this.raw.peerId),
+            this.chat.chatType === 'supergroup'
+            && fwd.savedFromMsgId
+            && fwd.savedFromPeer?._ === 'peerChannel'
+            && getMarkedPeerId(fwd.savedFromPeer) !== getMarkedPeerId(this.raw.peerId),
         )
     }
 

@@ -1,27 +1,32 @@
-const cp = require('child_process')
-const fs = require('fs')
-const path = require('path')
-const { listPackages } = require('./publish')
-const { getLatestTag, findChangedFilesSince } = require('./git-utils')
+import { execSync } from 'node:child_process'
+import { appendFileSync, existsSync } from 'node:fs'
+import { EOL } from 'node:os'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { findChangedFilesSince, getLatestTag } from './git-utils.js'
+import { listPackages } from './publish.js'
 
 getTsconfigFiles.cache = {}
 
+const __dirname = dirname(new URL(import.meta.url).pathname)
+
 function getTsconfigFiles(pkg) {
-    if (!fs.existsSync(path.join(__dirname, `../packages/${pkg}/tsconfig.json`))) {
+    if (!existsSync(join(__dirname, `../packages/${pkg}/tsconfig.json`))) {
         throw new Error(`[!] ${pkg} does not have a tsconfig.json`)
     }
     if (pkg in getTsconfigFiles.cache) return getTsconfigFiles.cache[pkg]
 
     console.log('[i] Getting tsconfig files for %s', pkg)
-    const res = cp.execSync('pnpm exec tsc --showConfig', {
+    const res = execSync('pnpm exec tsc --showConfig', {
         encoding: 'utf8',
         stdio: 'pipe',
-        cwd: path.join(__dirname, `../packages/${pkg}`),
+        cwd: join(__dirname, `../packages/${pkg}`),
     })
 
     const json = JSON.parse(res)
 
-    return (getTsconfigFiles.cache[pkg] = json.files.map((it) => it.replace(/^\.\//, '')))
+    return (getTsconfigFiles.cache[pkg] = json.files.map(it => it.replace(/^\.\//, '')))
 }
 
 function isMeaningfulChange(pkg, path) {
@@ -29,7 +34,7 @@ function isMeaningfulChange(pkg, path) {
 
     if (path.match(/\.(md|test(?:-utils)?\.ts)$/i)) return false
 
-    if (getTsconfigFiles(pkg).indexOf(path) > -1) {
+    if (getTsconfigFiles(pkg).includes(path)) {
         console.log('[i] %s: %s is in tsconfig', pkg, path)
 
         return true
@@ -68,9 +73,9 @@ function findChangedPackagesSince(tag, until) {
     return Array.from(changedPackages)
 }
 
-module.exports = { findChangedPackagesSince, getLatestTag }
+export { findChangedPackagesSince, getLatestTag }
 
-if (require.main === module && process.env.CI && process.env.GITHUB_OUTPUT) {
+if (process.argv[1] === fileURLToPath(import.meta.url) && process.env.CI && process.env.GITHUB_OUTPUT) {
     const kind = process.argv[2]
     const input = process.argv[3]
 
@@ -102,5 +107,5 @@ if (require.main === module && process.env.CI && process.env.GITHUB_OUTPUT) {
     }
 
     console.log('[i] Will publish:', res)
-    fs.appendFileSync(process.env.GITHUB_OUTPUT, `modified=${res.join(',')}${require('os').EOL}`)
+    appendFileSync(process.env.GITHUB_OUTPUT, `modified=${res.join(',')}${EOL}`)
 }

@@ -1,10 +1,10 @@
 import Long from 'long'
+import type { tl } from '@mtcute/tl'
 
-import { tl } from '@mtcute/tl'
-
-import { ITelegramClient } from '../../client.types.js'
-import { BotInline, InputInlineResult } from '../../types/bots/index.js'
-import { InlineQuery } from '../../types/updates/inline-query.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputInlineResult } from '../../types/bots/index.js'
+import { BotInline } from '../../types/bots/index.js'
+import type { InlineQuery } from '../../types/updates/inline-query.js'
 
 /**
  * Answer an inline query.
@@ -114,19 +114,19 @@ export async function answerInlineQuery(
         gallery: gallery ?? defaultGallery,
         private: priv,
         nextOffset,
-        switchPm: switchPm ?
-            {
+        switchPm: switchPm
+            ? {
                 _: 'inlineBotSwitchPM',
                 text: switchPm.text,
                 startParam: switchPm.parameter,
-            } :
-            undefined,
-        switchWebview: switchWebview ?
-            {
+            }
+            : undefined,
+        switchWebview: switchWebview
+            ? {
                 _: 'inlineBotWebView',
                 text: switchWebview.text,
                 url: switchWebview.url,
-            } :
-            undefined,
+            }
+            : undefined,
     })
 }

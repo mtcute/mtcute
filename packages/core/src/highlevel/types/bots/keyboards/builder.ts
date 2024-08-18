@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import type { InlineKeyboardMarkup, ReplyKeyboardMarkup } from './types.js'
 
@@ -69,8 +69,8 @@ export class BotKeyboardBuilder {
         if (!btn) return this
 
         if (
-            this._buttons.length &&
-            (this.maxRowWidth === null || force || this._buttons[this._buttons.length - 1].length < this.maxRowWidth)
+            this._buttons.length
+            && (this.maxRowWidth === null || force || this._buttons[this._buttons.length - 1].length < this.maxRowWidth)
         ) {
             this._buttons[this._buttons.length - 1].push(btn)
         } else {

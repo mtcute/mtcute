@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import { computeConstructorIdFromEntry } from '../ctor-id.js'
-import { TlEntry } from '../types.js'
+import type { TlEntry } from '../types.js'
+
 import { parseTlEntriesFromJson } from './from-json.js'
 
 describe('parseTlEntriesFromJson', () => {

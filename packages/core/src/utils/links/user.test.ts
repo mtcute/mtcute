@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { describe, expect, it } from 'vitest'
 
 import { links } from './index.js'
 
-describe('Deep links', function () {
+describe('Deep links', () => {
     describe('Public username links', () => {
         it('should generate t.me/username links', () => {
             expect(links.publicUsername({ username: 'username' })).eq('https://t.me/username')

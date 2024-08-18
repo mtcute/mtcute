@@ -4,7 +4,7 @@ import { LogManager } from '@mtcute/core/utils.js'
 import { NodePlatform, TcpTransport } from '@mtcute/node'
 import { NodeCryptoProvider } from '@mtcute/node/utils.js'
 
-export const getApiParams = () => {
+export function getApiParams() {
     if (!process.env.API_ID || !process.env.API_HASH) {
         throw new Error('API_ID and API_HASH env variables must be set')
     }
@@ -12,7 +12,7 @@ export const getApiParams = () => {
     setPlatform(new NodePlatform())
 
     return {
-        apiId: parseInt(process.env.API_ID),
+        apiId: Number.parseInt(process.env.API_ID),
         apiHash: process.env.API_HASH,
         testMode: true,
         storage: new MemoryStorage(),

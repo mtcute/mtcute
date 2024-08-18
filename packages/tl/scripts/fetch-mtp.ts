@@ -1,8 +1,8 @@
 // Downloads latest MTProto .tl schema
 
-import * as cheerio from 'cheerio'
-import { writeFile } from 'fs/promises'
+import { writeFile } from 'node:fs/promises'
 
+import * as cheerio from 'cheerio'
 import { parseTlToEntries } from '@mtcute/tl-utils'
 
 import { CORE_DOMAIN, MTP_SCHEMA_JSON_FILE } from './constants.js'
@@ -25,7 +25,7 @@ async function main() {
 
     // remove manually parsed types
     entries = entries.filter(
-        (it) => !['mt_msg_container', 'mt_message', 'mt_msg_copy', 'mt_gzip_packed', 'mt_rpc_result'].includes(it.name),
+        it => !['mt_msg_container', 'mt_message', 'mt_msg_copy', 'mt_gzip_packed', 'mt_rpc_result'].includes(it.name),
     )
 
     // mtproto is handled internally, for simplicity we make them all classes

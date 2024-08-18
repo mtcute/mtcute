@@ -19,7 +19,7 @@ export class Reloadable<Data> {
         const data = await this.params.reload(this._data)
         this.setData(data)
 
-        this._listeners.forEach((cb) => cb(data))
+        this._listeners.forEach(cb => cb(data))
     })
 
     get isStale(): boolean {

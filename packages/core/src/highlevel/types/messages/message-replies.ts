@@ -1,10 +1,11 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { parsePeer, Peer } from '../peers/peer.js'
-import { PeersIndex } from '../peers/peers-index.js'
+import type { Peer } from '../peers/peer.js'
+import { parsePeer } from '../peers/peer.js'
+import type { PeersIndex } from '../peers/peers-index.js'
 
 /**
  * Information about replies to a message
@@ -66,7 +67,7 @@ export class MessageRepliesInfo {
      * Last few commenters to the post (usually 3)
      */
     get repliers(): Peer[] {
-        return this.raw.recentRepliers?.map((it) => parsePeer(it, this._peers)) ?? []
+        return this.raw.recentRepliers?.map(it => parsePeer(it, this._peers)) ?? []
     }
 }
 

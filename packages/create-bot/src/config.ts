@@ -8,7 +8,7 @@ export interface UserConfigPersisted {
     apiHash: string
 }
 
-export function getConfigFilePath() {
+export function getConfigFilePath(): string {
     switch (process.platform) {
         case 'linux':
             return path.join(homedir(), '.local', 'share', 'mtcute-create.json')
@@ -35,7 +35,7 @@ export async function readConfig(): Promise<UserConfigPersisted | null> {
     }
 }
 
-export async function writeConfig(config: UserConfigPersisted) {
+export async function writeConfig(config: UserConfigPersisted): Promise<void> {
     const filePath = getConfigFilePath()
 
     await fs.mkdir(path.dirname(filePath), { recursive: true })

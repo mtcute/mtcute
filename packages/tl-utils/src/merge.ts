@@ -1,5 +1,5 @@
 import { computeConstructorIdFromEntry } from './ctor-id.js'
-import { TlArgument, TlEntry, TlFullSchema } from './types.js'
+import type { TlArgument, TlEntry, TlFullSchema } from './types.js'
 
 /**
  * Merge multiple TL entries into a single entry.
@@ -18,8 +18,8 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
         typeModifiers: first.typeModifiers,
         id: first.id,
         comment: first.comment,
-        generics: first.generics?.map((it) => ({ ...it })),
-        arguments: first.arguments.map((it) => ({ ...it })),
+        generics: first.generics?.map(it => ({ ...it })),
+        arguments: first.arguments.map(it => ({ ...it })),
     }
 
     if (result.id === 0) {
@@ -162,7 +162,7 @@ export async function mergeTlSchemas(
             if (typeof merged === 'string') {
                 // merge conflict
                 // find all candidates from all schemas and let the user decide
-                const candidates = schemas.map((schema) => schema[kind][entry.name])
+                const candidates = schemas.map(schema => schema[kind][entry.name])
 
                 const chosen = await onConflict(candidates, merged)
 

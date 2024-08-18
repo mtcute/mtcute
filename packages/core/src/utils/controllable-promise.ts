@@ -2,8 +2,8 @@
  * A promise that can be resolved or rejected from outside.
  */
 export type ControllablePromise<T = unknown> = Promise<T> & {
-    resolve(val: T): void
-    reject(err?: unknown): void
+    resolve: (val: T) => void
+    reject: (err?: unknown) => void
 }
 
 /**

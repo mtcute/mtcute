@@ -1,8 +1,9 @@
 import { tl } from '@mtcute/tl'
 
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { ChatMember, MtInvalidPeerTypeError, PeersIndex } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerChat, isInputPeerUser, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -39,15 +40,15 @@ export async function getChatMember(
 
         assertTypeIs('getChatMember (@ messages.getFullChat)', res.fullChat, 'chatFull')
 
-        const members =
-            res.fullChat.participants._ === 'chatParticipantsForbidden' ? [] : res.fullChat.participants.participants
+        const members
+            = res.fullChat.participants._ === 'chatParticipantsForbidden' ? [] : res.fullChat.participants.participants
 
         const peers = PeersIndex.from(res)
 
         for (const m of members) {
             if (
-                (user._ === 'inputPeerSelf' && (peers.user(m.userId) as tl.RawUser).self) ||
-                (user._ === 'inputPeerUser' && m.userId === user.userId)
+                (user._ === 'inputPeerSelf' && (peers.user(m.userId) as tl.RawUser).self)
+                || (user._ === 'inputPeerUser' && m.userId === user.userId)
             ) {
                 return new ChatMember(m, peers)
             }
@@ -72,5 +73,7 @@ export async function getChatMember(
 
             throw e
         }
-    } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+    } else {
+        throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+    }
 }

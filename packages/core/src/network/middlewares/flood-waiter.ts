@@ -1,9 +1,9 @@
-import { mtp } from '@mtcute/tl'
+import type { mtp } from '@mtcute/tl'
 
 import { combineAbortSignals } from '../../utils/abort-signal.js'
 import { sleepWithAbort } from '../../utils/misc-utils.js'
 import { isTlRpcError } from '../../utils/type-assertions.js'
-import { RpcCallMiddleware } from '../network-manager.js'
+import type { RpcCallMiddleware } from '../network-manager.js'
 
 export interface FloodWaiterOptions {
     /**
@@ -87,9 +87,9 @@ export function floodWaiter(options: FloodWaiterOptions): RpcCallMiddleware {
             const err = res.errorMessage
 
             if (
-                err.startsWith('FLOOD_WAIT_') ||
-                err.startsWith('SLOWMODE_WAIT_') ||
-                err.startsWith('FLOOD_TEST_PHONE_WAIT_')
+                err.startsWith('FLOOD_WAIT_')
+                || err.startsWith('SLOWMODE_WAIT_')
+                || err.startsWith('FLOOD_TEST_PHONE_WAIT_')
             ) {
                 let seconds = Number(err.slice(err.lastIndexOf('_') + 1))
 

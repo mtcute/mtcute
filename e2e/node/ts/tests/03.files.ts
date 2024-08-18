@@ -1,9 +1,9 @@
-/* eslint-disable no-restricted-imports */
-import { expect } from 'chai'
-import { createHash } from 'crypto'
-import { describe, it } from 'mocha'
+import { createHash } from 'node:crypto'
 
-import { FileDownloadLocation, Thumbnail } from '@mtcute/core'
+import { expect } from 'chai'
+import { describe, it } from 'mocha'
+import type { FileDownloadLocation } from '@mtcute/core'
+import { Thumbnail } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
 import { sleep } from '@mtcute/core/utils.js'
 

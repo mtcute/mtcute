@@ -15,6 +15,7 @@ export function composeMiddlewares<Context, Result = void>(
         const fn = middlewares[i]
         if (!fn) return final(ctx)
 
+        // eslint-disable-next-line ts/no-use-before-define
         return fn(ctx, boundDispatches[i + 1])
     }
 

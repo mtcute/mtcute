@@ -1,9 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// ^^ will be looked into in MTQ-29
+import type { MaybePromise } from '@mtcute/core'
 
-import { MaybePromise } from '@mtcute/core'
-
-import { ExtractBaseMany, ExtractMod, Invert, UnionToIntersection, UpdateFilter } from './types.js'
+import type { ExtractBaseMany, ExtractMod, Invert, UnionToIntersection, UpdateFilter } from './types.js'
 
 /**
  * Filter that matches any update
@@ -30,7 +27,7 @@ export function not<Base, Mod, State extends object>(
 
         if (typeof res === 'boolean') return !res
 
-        return res.then((r) => !r)
+        return res.then(r => !r)
     }
 }
 

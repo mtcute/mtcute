@@ -1,7 +1,9 @@
-import { connect as connectTcp } from 'net'
-import { connect as connectTls, SecureContextOptions } from 'tls'
+import { connect as connectTcp } from 'node:net'
+import type { SecureContextOptions } from 'node:tls'
+import { connect as connectTls } from 'node:tls'
 
-import { BaseTcpTransport, IntermediatePacketCodec, MtcuteError, NodePlatform, tl, TransportState } from '@mtcute/node'
+import type { tl } from '@mtcute/node'
+import { BaseTcpTransport, IntermediatePacketCodec, MtcuteError, NodePlatform, TransportState } from '@mtcute/node'
 
 /**
  * An error has occurred while connecting to an HTTP(s) proxy
@@ -77,17 +79,17 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
         }
 
         if (!this.packetCodecInitialized) {
-            this._packetCodec.on('error', (err) => this.emit('error', err))
-            this._packetCodec.on('packet', (buf) => this.emit('message', buf))
+            this._packetCodec.on('error', err => this.emit('error', err))
+            this._packetCodec.on('packet', buf => this.emit('message', buf))
             this.packetCodecInitialized = true
         }
 
         this._state = TransportState.Connecting
         this._currentDc = dc
 
-        this._socket = this._proxy.tls ?
-            connectTls(this._proxy.port, this._proxy.host, this._proxy.tlsOptions, this._onProxyConnected.bind(this)) :
-            connectTcp(this._proxy.port, this._proxy.host, this._onProxyConnected.bind(this))
+        this._socket = this._proxy.tls
+            ? connectTls(this._proxy.port, this._proxy.host, this._proxy.tlsOptions, this._onProxyConnected.bind(this))
+            : connectTcp(this._proxy.port, this._proxy.host, this._onProxyConnected.bind(this))
 
         this._socket.on('error', this.handleError.bind(this))
         this._socket.on('close', this.close.bind(this))
@@ -108,14 +110,14 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
             let auth = this._proxy.user
 
             if (this._proxy.password) {
-                auth += ':' + this._proxy.password
+                auth += `:${this._proxy.password}`
             }
-            headers['Proxy-Authorization'] = 'Basic ' + this._platform.base64Encode(this._platform.utf8Encode(auth))
+            headers['Proxy-Authorization'] = `Basic ${this._platform.base64Encode(this._platform.utf8Encode(auth))}`
         }
         headers['Proxy-Connection'] = 'Keep-Alive'
 
         const headersStr = Object.keys(headers)
-            .map((k) => `\r\n${k}: ${headers[k]}`)
+            .map(k => `\r\n${k}: ${headers[k]}`)
             .join('')
         const packet = `CONNECT ${ip} HTTP/1.1${headersStr}\r\n\r\n`
 
@@ -145,7 +147,7 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
             }
 
             // all ok, connection established, can now call handleConnect
-            this._socket!.on('data', (data) => this._packetCodec.feed(data))
+            this._socket!.on('data', data => this._packetCodec.feed(data))
             this.handleConnect()
         })
     }
@@ -158,5 +160,5 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
  * (unless you want to use a custom codec).
  */
 export class HttpProxyTcpTransport extends BaseHttpProxyTcpTransport {
-    _packetCodec = new IntermediatePacketCodec()
+    _packetCodec: IntermediatePacketCodec = new IntermediatePacketCodec()
 }

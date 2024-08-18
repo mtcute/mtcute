@@ -1,4 +1,4 @@
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { CollectibleInfo } from '../../types/misc/collectible-info.js'
 import { normalizePhoneNumber } from '../../utils/misc-utils.js'
 
@@ -14,12 +14,12 @@ export async function getCollectibleInfo(
     const res = await client.call({
         _: 'fragment.getCollectibleInfo',
         collectible:
-            kind === 'phone' ?
-                {
+            kind === 'phone'
+                ? {
                     _: 'inputCollectiblePhone',
                     phone: normalizePhoneNumber(item),
-                } :
-                {
+                }
+                : {
                     _: 'inputCollectibleUsername',
                     username: item,
                 },

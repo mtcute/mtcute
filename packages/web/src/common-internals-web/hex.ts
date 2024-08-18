@@ -2,8 +2,7 @@
 
 const hexSliceLookupTable = (function () {
     const alphabet = '0123456789abcdef'
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const table: string[] = new Array(256)
+    const table: string[] = Array.from({ length: 256 })
 
     for (let i = 0; i < 16; ++i) {
         const i16 = i * 16
@@ -17,16 +16,16 @@ const hexSliceLookupTable = (function () {
 })()
 
 const hexCharValueTable: Record<string, number> = {
-    '0': 0,
-    '1': 1,
-    '2': 2,
-    '3': 3,
-    '4': 4,
-    '5': 5,
-    '6': 6,
-    '7': 7,
-    '8': 8,
-    '9': 9,
+    0: 0,
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 4,
+    5: 5,
+    6: 6,
+    7: 7,
+    8: 8,
+    9: 9,
     a: 10,
     b: 11,
     c: 12,
@@ -66,8 +65,6 @@ function hexDecodeInner(buf: Uint8Array, string: string): void {
         }
         buf[i] = (a << 4) | b
     }
-
-    return
 }
 
 export function hexDecode(string: string): Uint8Array {

@@ -1,11 +1,12 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../../types/errors.js'
-import { ITelegramClient } from '../../../client.types.js'
+import type { ITelegramClient } from '../../../client.types.js'
 import { fileIdToInputDocument, fileIdToInputPhoto } from '../../../utils/convert-file-id.js'
 import { extractFileName } from '../../../utils/file-utils.js'
 import { BotInlineMessage } from '../inline-message/index.js'
-import {
+
+import type {
     InputInlineResult,
     InputInlineResultArticle,
     InputInlineResultAudio,
@@ -291,7 +292,7 @@ export async function _convertToTl(
                     }
 
                     if (obj.description) {
-                        message += '\n' + obj.description
+                        message += `\n${obj.description}`
                     }
 
                     sendMessage = {
@@ -309,15 +310,15 @@ export async function _convertToTl(
                     description: obj.description,
                     url: obj.hideUrl ? undefined : obj.url,
                     content:
-                        obj.url && obj.hideUrl ?
-                            {
+                        obj.url && obj.hideUrl
+                            ? {
                                 _: 'inputWebDocument',
                                 url: obj.url,
                                 mimeType: 'text/html',
                                 size: 0,
                                 attributes: [],
-                            } :
-                            undefined,
+                            }
+                            : undefined,
                     thumb: typeof obj.thumb === 'string' ? normalizeThumb(obj) : obj.thumb,
                     sendMessage,
                 })
@@ -408,7 +409,7 @@ export async function _convertToTl(
             }
         }
 
-        let media: tl.TypeInputWebDocument | tl.TypeInputDocument | tl.TypeInputPhoto | undefined = undefined
+        let media: tl.TypeInputWebDocument | tl.TypeInputDocument | tl.TypeInputPhoto | undefined
 
         if (obj.type !== 'geo' && obj.type !== 'venue' && obj.type !== 'contact') {
             if (typeof obj.media === 'string') {
@@ -419,26 +420,30 @@ export async function _convertToTl(
                     }
 
                     let mime: string
-                    if (obj.type === 'video') mime = 'video/mp4'
-                    else if (obj.type === 'audio') {
+                    if (obj.type === 'video') {
+                        mime = 'video/mp4'
+                    } else if (obj.type === 'audio') {
                         mime = obj.mime ?? 'audio/mpeg'
                     } else if (obj.type === 'gif') {
                         mime = obj.mime ?? 'video/mp4'
-                    } else if (obj.type === 'voice') mime = 'audio/ogg'
-                    else if (obj.type === 'file') {
+                    } else if (obj.type === 'voice') {
+                        mime = 'audio/ogg'
+                    } else if (obj.type === 'file') {
                         if (!obj.mime) {
                             throw new MtArgumentError('MIME type must be specified for file inline result')
                         }
 
                         mime = obj.mime
-                    } else mime = 'image/jpeg'
+                    } else {
+                        mime = 'image/jpeg'
+                    }
 
                     const attributes: tl.TypeDocumentAttribute[] = []
 
                     if (
-                        (obj.type === 'video' || obj.type === 'gif' || obj.type === 'photo') &&
-                        obj.width &&
-                        obj.height
+                        (obj.type === 'video' || obj.type === 'gif' || obj.type === 'photo')
+                        && obj.width
+                        && obj.height
                     ) {
                         if (obj.type !== 'photo' && obj.duration) {
                             attributes.push({
@@ -486,8 +491,8 @@ export async function _convertToTl(
             }
         }
 
-        let title: string | undefined = undefined
-        let description: string | undefined = undefined
+        let title: string | undefined
+        let description: string | undefined
 
         // incredible hacks by durov team.
         // i honestly don't understand why didn't they just
@@ -526,7 +531,7 @@ export async function _convertToTl(
             continue
         }
 
-        if (media._ === 'inputPhoto') {
+        if (media._ === 'inputPhoto' || media._ === 'inputPhotoEmpty') {
             items.push({
                 _: 'inputBotInlineResultPhoto',
                 id: obj.id,

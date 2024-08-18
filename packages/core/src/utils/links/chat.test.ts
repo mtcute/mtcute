@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { describe, expect, it } from 'vitest'
 
 import { links } from './index.js'
 
-describe('Deep links', function () {
+describe('Deep links', () => {
     describe('Chat invite links', () => {
         it('should generate t.me/+hash links', () => {
             expect(links.chatInvite({ hash: 'hash' })).eq('https://t.me/+hash')

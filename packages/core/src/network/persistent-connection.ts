@@ -1,9 +1,11 @@
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 
 import { MtcuteError } from '../types/index.js'
-import { BasicDcOption, ICryptoProvider, Logger } from '../utils/index.js'
-import { ReconnectionStrategy } from './reconnection.js'
-import { ITelegramTransport, TransportFactory, TransportState } from './transports/index.js'
+import type { BasicDcOption, ICryptoProvider, Logger } from '../utils/index.js'
+
+import type { ReconnectionStrategy } from './reconnection.js'
+import type { ITelegramTransport, TransportFactory } from './transports/index.js'
+import { TransportState } from './transports/index.js'
 
 export interface PersistentConnectionParams {
     crypto: ICryptoProvider

@@ -1,7 +1,7 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { MaybeArray } from '../../../types/utils.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { MaybeArray } from '../../../types/utils.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { fileIdToInputPhoto } from '../../utils/convert-file-id.js'
 
 /**

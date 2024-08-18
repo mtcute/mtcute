@@ -1,5 +1,6 @@
 import { concatBuffers } from '../buffer-utils.js'
-import { ICryptoProvider, IEncryptionScheme } from './abstract.js'
+
+import type { ICryptoProvider, IEncryptionScheme } from './abstract.js'
 
 /**
  * Generate AES key and IV from nonces as defined by MTProto.

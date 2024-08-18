@@ -1,7 +1,7 @@
 import Long from 'long'
 
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { StickerSet } from '../../types/index.js'
 
 /**
@@ -19,5 +19,5 @@ export async function getInstalledStickers(client: ITelegramClient): Promise<Sti
 
     assertTypeIs('getInstalledStickers', res, 'messages.allStickers')
 
-    return res.sets.map((set) => new StickerSet(set))
+    return res.sets.map(set => new StickerSet(set))
 }

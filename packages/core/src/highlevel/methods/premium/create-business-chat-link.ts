@@ -1,5 +1,5 @@
-import { ITelegramClient } from '../../client.types.js'
-import { InputText } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputText } from '../../types/index.js'
 import { BusinessChatLink } from '../../types/premium/business-chat-link.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 

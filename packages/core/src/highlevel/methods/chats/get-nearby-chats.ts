@@ -1,8 +1,8 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { Chat } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 
@@ -29,10 +29,10 @@ export async function getNearbyChats(client: ITelegramClient, latitude: number, 
 
     assertTypeIs('contacts.getLocated (@ .updates[0])', res.updates[0], 'updatePeerLocated')
 
-    const chats = res.chats.map((it) => new Chat(it))
+    const chats = res.chats.map(it => new Chat(it))
 
     const index: Record<number, Chat> = {}
-    chats.forEach((c) => (index[c.id] = c))
+    chats.forEach(c => (index[c.id] = c))
 
     res.updates[0].peers.forEach((peer) => {
         if (peer._ === 'peerSelfLocated') return

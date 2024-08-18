@@ -1,5 +1,5 @@
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 
 const spec = require('@mtcute/tl/app-config.json')
 
@@ -12,11 +12,11 @@ out.write(`// This file is generated automatically, do not modify!
 export interface AppConfigSchema {
 `)
 
-const indent = (str) => str.split('\n').map((x) => '    ' + x).join('\n')
+const indent = str => str.split('\n').map(x => `    ${x}`).join('\n')
 
 for (const [key, { type, description }] of Object.entries(spec)) {
-    out.write(indent(description) + '\n')
-    out.write(indent(`${key}?: ${type}`) + '\n')
+    out.write(`${indent(description)}\n`)
+    out.write(`${indent(`${key}?: ${type}`)}\n`)
 }
 
 out.write('    [key: string]: unknown\n')

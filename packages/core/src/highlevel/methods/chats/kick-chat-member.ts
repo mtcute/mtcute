@@ -1,8 +1,9 @@
 import { sleepWithAbort } from '../../../utils/misc-utils.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, Message } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike, Message } from '../../types/index.js'
 import { isInputPeerChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { banChatMember } from './ban-chat-member.js'
 import { unbanChatMember } from './unban-chat-member.js'
 

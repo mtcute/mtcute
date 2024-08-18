@@ -1,5 +1,6 @@
-import { ITelegramClient } from '../../client.types.js'
-import { InputMessageId, normalizeInputMessageId, TextWithEntities } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputMessageId, TextWithEntities } from '../../types/index.js'
+import { normalizeInputMessageId } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**

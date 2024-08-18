@@ -1,17 +1,17 @@
 import Long from 'long'
-
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MessageEntity } from '../messages/message-entity.js'
-import { PeersIndex } from '../peers/peers-index.js'
+import type { PeersIndex } from '../peers/peers-index.js'
 
 export class PollAnswer {
     constructor(
         readonly raw: tl.TypePollAnswer,
-        readonly result?: tl.TypePollAnswerVoters,
+        readonly result?: tl.RawPollAnswerVoters | undefined,
     ) {}
+
     /**
      * Answer text
      */
@@ -23,7 +23,7 @@ export class PollAnswer {
      * Format entities for {@link text}, currently may only contain custom emojis
      */
     get textEntities(): ReadonlyArray<MessageEntity> {
-        return this.raw.text.entities.map((ent) => new MessageEntity(ent, this.raw.text.text))
+        return this.raw.text.entities.map(ent => new MessageEntity(ent, this.raw.text.text))
     }
 
     /**
@@ -38,7 +38,7 @@ export class PollAnswer {
      * Number of people who has chosen this result.
      * If not available (i.e. not voted yet)
      *
-     * @default  `0`
+     * @default
      */
     get voters(): number {
         return this.result?.voters ?? 0
@@ -55,7 +55,7 @@ export class PollAnswer {
      * Whether this answer is correct (for quizzes).
      * Not available before choosing an answer
      *
-     * @default  `false`
+     * @default
      */
     get correct(): boolean {
         return Boolean(this.result?.correct)
@@ -71,7 +71,7 @@ export class Poll {
     constructor(
         readonly raw: tl.TypePoll,
         readonly _peers: PeersIndex,
-        readonly results?: tl.TypePollResults,
+        readonly results?: tl.RawPollResults | undefined,
     ) {}
 
     /**
@@ -92,7 +92,7 @@ export class Poll {
      * Format entities for {@link question} (currently may only contain custom emojis)
      */
     get questionEntities(): ReadonlyArray<MessageEntity> {
-        return this.raw.question.entities.map((ent) => new MessageEntity(ent, this.raw.question.text))
+        return this.raw.question.entities.map(ent => new MessageEntity(ent, this.raw.question.text))
     }
 
     /**

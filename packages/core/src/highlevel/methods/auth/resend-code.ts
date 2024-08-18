@@ -1,5 +1,5 @@
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { SentCode } from '../../types/auth/sent-code.js'
 import { normalizePhoneNumber } from '../../utils/misc-utils.js'
 

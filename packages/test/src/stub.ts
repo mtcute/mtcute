@@ -1,6 +1,5 @@
 import Long from 'long'
-
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 import type { TlArgument } from '@mtcute/tl-utils'
 
 import { getEntriesMap } from './schema.js'
@@ -37,14 +36,13 @@ function getDefaultFor(arg: TlArgument): unknown {
             const union = getEntriesMap().unions.get(arg.type)
             if (!union) throw new Error(`Unknown type ${arg.type}`)
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return createStub<any>(union[0].name)
         }
     }
 }
 
-const snakeToCamel = (s: string): string => {
-    return s.replace(/(?<!^|_)(_[a-z0-9])/gi, ($1) => {
+function snakeToCamel(s: string): string {
+    return s.replace(/(?<!^|_)_[a-z0-9]/gi, ($1) => {
         return $1.substring(1).toUpperCase()
     })
 }

@@ -1,10 +1,12 @@
 import { tl } from '@mtcute/tl'
 
+import type { ICorePlatform } from '../platform.js'
 import { getPlatform } from '../platform.js'
+
 import { isTlRpcError } from './type-assertions.js'
 
 const DEFAULT_LOG_LEVEL = 2
-const FORMATTER_RE = /%[a-zA-Z]/g
+const FORMATTER_RE = /%[a-z]/gi
 
 /**
  * Logger created by {@link LogManager}
@@ -32,7 +34,7 @@ export class Logger {
     getPrefix(): string {
         let s = ''
 
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        // eslint-disable-next-line ts/no-this-alias
         let obj: Logger | undefined = this
 
         while (obj) {
@@ -45,18 +47,17 @@ export class Logger {
 
     log(level: number, fmt: string, ...args: unknown[]): void {
         if (level > this.mgr.level) return
-        // eslint-disable-next-line dot-notation
         if (!this.mgr['_filter'](this.tag)) return
 
         // custom formatters
         if (
-            fmt.includes('%h') ||
-            fmt.includes('%b') ||
-            fmt.includes('%j') ||
-            fmt.includes('%J') ||
-            fmt.includes('%l') ||
-            fmt.includes('%L') ||
-            fmt.includes('%e')
+            fmt.includes('%h')
+            || fmt.includes('%b')
+            || fmt.includes('%j')
+            || fmt.includes('%J')
+            || fmt.includes('%l')
+            || fmt.includes('%L')
+            || fmt.includes('%e')
         ) {
             let idx = 0
             fmt = fmt.replace(FORMATTER_RE, (m) => {
@@ -80,20 +81,20 @@ export class Logger {
 
                         return JSON.stringify(val, (k, v) => {
                             if (
-                                ArrayBuffer.isView(v) ||
-                                (typeof v === 'object' && v.type === 'Buffer' && Array.isArray(v.data)) // todo: how can we do this better?
+                                ArrayBuffer.isView(v)
+                                || (typeof v === 'object' && v.type === 'Buffer' && Array.isArray(v.data)) // todo: how can we do this better?
                             ) {
                                 // eslint-disable-next-line
                                 let str = v.data ? Buffer.from(v.data as number[]).toString('hex') : this.mgr.platform.hexEncode(v)
 
                                 if (str.length > 300) {
-                                    str = str.slice(0, 300) + '...'
+                                    str = `${str.slice(0, 300)}...`
                                 }
 
                                 return str
                             }
 
-                            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+                            // eslint-disable-next-line ts/no-unsafe-return
                             return v
                         })
                     }
@@ -127,11 +128,11 @@ export class Logger {
         this.mgr.handler(this.color, level, this.tag, this.getPrefix() + fmt, args)
     }
 
-    readonly error = this.log.bind(this, LogManager.ERROR)
-    readonly warn = this.log.bind(this, LogManager.WARN)
-    readonly info = this.log.bind(this, LogManager.INFO)
-    readonly debug = this.log.bind(this, LogManager.DEBUG)
-    readonly verbose = this.log.bind(this, LogManager.VERBOSE)
+    readonly error: (fmt: string, ...args: unknown[]) => void = this.log.bind(this, LogManager.ERROR)
+    readonly warn: (fmt: string, ...args: unknown[]) => void = this.log.bind(this, LogManager.WARN)
+    readonly info: (fmt: string, ...args: unknown[]) => void = this.log.bind(this, LogManager.INFO)
+    readonly debug: (fmt: string, ...args: unknown[]) => void = this.log.bind(this, LogManager.DEBUG)
+    readonly verbose: (fmt: string, ...args: unknown[]) => void = this.log.bind(this, LogManager.VERBOSE)
 
     /**
      * Create a {@link Logger} with the given tag
@@ -158,15 +159,14 @@ export class LogManager extends Logger {
     static DEBUG = 4
     static VERBOSE = 5
 
-    readonly platform
+    readonly platform: ICorePlatform
     level: number
-    handler
+    handler: (color: number, level: number, tag: string, fmt: string, args: unknown[]) => void
 
     constructor(tag = 'base') {
         // workaround because we cant pass this to super
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-argument
+        // eslint-disable-next-line ts/no-unsafe-argument
         super(null as any, tag)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(this as any).mgr = this
 
         this.platform = getPlatform()

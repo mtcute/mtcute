@@ -1,5 +1,5 @@
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { PeersIndex } from '../../types/peers/peers-index.js'
 import { BusinessConnection } from '../../types/premium/business-connection.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'

@@ -1,7 +1,8 @@
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike } from '../../types/index.js'
-import { Boost } from '../../types/premium/boost.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import type { Boost } from '../../types/premium/boost.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { getBoosts } from './get-boosts.js'
 
 /**

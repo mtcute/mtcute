@@ -1,6 +1,6 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { TextWithEntities } from '../types/misc/entities.js'
+import type { TextWithEntities } from '../types/misc/entities.js'
 
 /**
  * Join multiple text parts with entities into a single text with entities,

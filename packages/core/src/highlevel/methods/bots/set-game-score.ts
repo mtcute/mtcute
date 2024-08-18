@@ -1,8 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { assertTrue } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputMessageId, InputPeerLike, Message, normalizeInputMessageId } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputMessageId, InputPeerLike, Message } from '../../types/index.js'
+import { normalizeInputMessageId } from '../../types/index.js'
 import { normalizeInlineId } from '../../utils/inline-utils.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
 import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
@@ -101,7 +102,7 @@ export async function setInlineGameScore(
             userId: user,
             score,
             editMessage: !noEdit,
-            force: force,
+            force,
         },
         { dcId: id.dcId },
     )

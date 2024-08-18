@@ -1,13 +1,12 @@
 import Long from 'long'
-
 import { parseFileId, tdFileId as td } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { parseMarkedPeerId } from '../../utils/peer-utils.js'
-
-import FileType = td.FileType
 import { getPlatform } from '../../platform.js'
 import { assertNever } from '../../types/utils.js'
+
+import FileType = td.FileType
 
 const EMPTY_BUFFER = new Uint8Array(0)
 
@@ -104,9 +103,9 @@ export function fileIdToInputFileLocation(fileId: string | FileId): tl.TypeInput
 
                     return {
                         _:
-                            loc.source.fileType === FileType.Photo ?
-                                'inputPhotoFileLocation' :
-                                'inputDocumentFileLocation',
+                            loc.source.fileType === FileType.Photo
+                                ? 'inputPhotoFileLocation'
+                                : 'inputDocumentFileLocation',
                         fileReference: fileId.fileReference,
                         id: loc.id,
                         accessHash: loc.accessHash,
@@ -223,10 +222,10 @@ export function fileIdToInputDocument(fileId: string | FileId): tl.RawInputDocum
     if (typeof fileId === 'string') fileId = parseFileId(getPlatform(), fileId)
 
     if (
-        fileId.location._ !== 'common' ||
-        fileId.type === FileType.Secure ||
-        fileId.type === FileType.SecureRaw ||
-        fileId.type === FileType.Encrypted
+        fileId.location._ !== 'common'
+        || fileId.type === FileType.Secure
+        || fileId.type === FileType.SecureRaw
+        || fileId.type === FileType.Encrypted
     ) {
         throw new td.ConversionError('inputDocument')
     }

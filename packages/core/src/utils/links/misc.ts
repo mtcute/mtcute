@@ -1,3 +1,4 @@
+import type { Deeplink } from './common.js'
 import { deeplinkBuilder } from './common.js'
 
 /**
@@ -5,7 +6,7 @@ import { deeplinkBuilder } from './common.js'
  *
  * Used to share a prepared message and URL into a chosen chat's text field.
  */
-export const share = deeplinkBuilder<{ url: string; text?: string }>({
+export const share: Deeplink<{ url: string, text?: string }> = /* #__PURE__ */ deeplinkBuilder({
     internalBuild: ({ url, text }) => ['msg_url', { url, text }],
     internalParse: (path, query) => {
         if (path !== 'msg_url') return null
@@ -35,7 +36,7 @@ export const share = deeplinkBuilder<{ url: string; text?: string }>({
  *
  * Used by users to boost channels, granting them the ability to post stories.
  */
-export const boost = deeplinkBuilder<{ username: string } | { channelId: number }>({
+export const boost: Deeplink<{ username: string } | { channelId: number }> = /* #__PURE__ */ deeplinkBuilder({
     internalBuild: (params) => {
         if ('username' in params) {
             return ['boost', { domain: params.username }]
@@ -54,7 +55,7 @@ export const boost = deeplinkBuilder<{ username: string } | { channelId: number 
 
         const channelId = Number(query.get('channel'))
 
-        if (!isNaN(channelId)) {
+        if (!Number.isNaN(channelId)) {
             return { channelId: Number(channelId) }
         }
 
@@ -72,7 +73,7 @@ export const boost = deeplinkBuilder<{ username: string } | { channelId: number 
 
         if (path.startsWith('c/')) {
             const channelId = Number(path.slice(2))
-            if (isNaN(channelId)) return null
+            if (Number.isNaN(channelId)) return null
 
             return { channelId }
         }
@@ -86,7 +87,7 @@ export const boost = deeplinkBuilder<{ username: string } | { channelId: number 
 /**
  * Link to a shared folder (chat list)
  */
-export const folder = deeplinkBuilder<{ slug: string }>({
+export const folder: Deeplink<{ slug: string }> = /* #__PURE__ */ deeplinkBuilder({
     // tg://addlist?slug=XXX
     internalBuild: ({ slug }) => ['addlist', { slug }],
     internalParse: (path, query) => {

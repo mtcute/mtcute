@@ -1,16 +1,17 @@
-/* eslint-disable no-restricted-imports */
+import path from 'node:path'
+import { Worker } from 'node:worker_threads'
+
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
-import path from 'path'
-import { Worker } from 'worker_threads'
-
 import { TelegramClient } from '@mtcute/core/client.js'
-import { Long, Message, TelegramWorkerPort, tl } from '@mtcute/node'
+import type { Message } from '@mtcute/node'
+import { Long, TelegramWorkerPort, tl } from '@mtcute/node'
 
 import { getApiParams, waitFor } from '../utils.js'
+
 import type { CustomMethods } from './_worker.js'
 
-describe('5. worker', async function () {
+describe('5. worker', function () {
     this.timeout(300_000)
 
     const worker = new Worker(path.resolve(__dirname, '_worker.js'))
@@ -20,7 +21,7 @@ describe('5. worker', async function () {
     })
     const portClient = new TelegramClient({ client: port })
 
-    it('should make api calls', async function () {
+    it('should make api calls', async () => {
         const res = await port.call({ _: 'help.getConfig' })
         expect(res._).to.equal('config')
 
@@ -29,7 +30,7 @@ describe('5. worker', async function () {
         expect(Long.isLong((premiumPromo.users[0] as tl.RawUser).accessHash)).to.equal(true)
     })
 
-    it('should call custom methods', async function () {
+    it('should call custom methods', async () => {
         const hello = await port.invokeCustom('hello')
         expect(hello).to.equal('world')
 
@@ -37,7 +38,7 @@ describe('5. worker', async function () {
         expect(sum).to.equal(5)
     })
 
-    it('should throw errors', async function () {
+    it('should throw errors', async () => {
         try {
             await port.call({ _: 'test.useConfigSimple' })
             throw new Error('should have thrown')
@@ -46,7 +47,7 @@ describe('5. worker', async function () {
         }
     })
 
-    it('should receive updates', async function () {
+    it('should receive updates', async () => {
         const client2 = new TelegramClient(getApiParams('dc2.session'))
 
         try {
@@ -86,6 +87,6 @@ describe('5. worker', async function () {
 
     this.afterAll(async () => {
         await port.close()
-        worker.terminate()
+        void worker.terminate()
     })
 })

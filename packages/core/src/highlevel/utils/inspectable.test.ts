@@ -11,6 +11,7 @@ describe('makeInspectable', () => {
             get foo() {
                 return 1
             }
+
             get bar() {
                 return 2
             }
@@ -44,6 +45,7 @@ describe('makeInspectable', () => {
             get foo() {
                 return 1
             }
+
             bar = 2
         }
 
@@ -68,6 +70,7 @@ describe('makeInspectable', () => {
             get foo() {
                 return 1
             }
+
             get bar() {
                 return 2
             }
@@ -83,6 +86,7 @@ describe('makeInspectable', () => {
             get foo() {
                 return 1
             }
+
             get bar() {
                 throw new Error('whatever')
             }

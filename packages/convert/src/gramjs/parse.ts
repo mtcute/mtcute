@@ -2,7 +2,7 @@ import { MtArgumentError } from '@mtcute/core'
 import { getPlatform } from '@mtcute/core/platform.js'
 import { dataViewFromBuffer } from '@mtcute/core/utils.js'
 
-import { TelethonSession } from '../telethon/types.js'
+import type { TelethonSession } from '../telethon/types.js'
 
 export function parseGramjsSession(session: string): TelethonSession {
     if (session[0] !== '1') {

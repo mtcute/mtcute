@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable ts/no-unsafe-argument */
 // ^^ because of performance reasons
-import Long from 'long'
+import type Long from 'long'
 
 import { LongSet } from './long-utils.js'
 
@@ -34,18 +33,19 @@ export class LruSet<T extends string | number | Long> {
         this._set = forLong ? new LongSet() : new Set()
     }
 
-    clear() {
+    clear(): void {
         this._first = this._last = undefined
         this._set.clear()
     }
 
-    add(val: T) {
+    add(val: T): void {
         if (this._set.has(val as any)) return
 
         if (!this._first) this._first = { v: val }
 
-        if (!this._last) this._last = this._first
-        else {
+        if (!this._last) {
+            this._last = this._first
+        } else {
             this._last.n = { v: val }
             this._last = this._last.n
         }
@@ -59,7 +59,7 @@ export class LruSet<T extends string | number | Long> {
         }
     }
 
-    has(val: T) {
+    has(val: T): boolean {
         return this._set.has(val as any)
     }
 }

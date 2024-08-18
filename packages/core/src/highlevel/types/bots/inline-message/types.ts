@@ -1,12 +1,12 @@
-import {
+import type {
     InputMediaContact,
     InputMediaGeo,
     InputMediaGeoLive,
     InputMediaVenue,
     InputMediaWebpage,
 } from '../../media/index.js'
-import { InputText } from '../../misc/entities.js'
-import { ReplyMarkup } from '../index.js'
+import type { InputText } from '../../misc/entities.js'
+import type { ReplyMarkup } from '../index.js'
 
 /**
  * Inline message containing only text
@@ -137,11 +137,11 @@ export interface InputInlineMessageWebpage extends InputMediaWebpage {
 }
 
 export type InputInlineMessage =
-    | InputInlineMessageText
-    | InputInlineMessageMedia
-    | InputInlineMessageGeo
-    | InputInlineMessageGeoLive
-    | InputInlineMessageVenue
-    | InputInlineMessageGame
-    | InputInlineMessageContact
-    | InputInlineMessageWebpage
+  | InputInlineMessageText
+  | InputInlineMessageMedia
+  | InputInlineMessageGeo
+  | InputInlineMessageGeoLive
+  | InputInlineMessageVenue
+  | InputInlineMessageGame
+  | InputInlineMessageContact
+  | InputInlineMessageWebpage

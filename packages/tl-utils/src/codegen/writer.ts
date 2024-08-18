@@ -1,6 +1,8 @@
 import { calculateStaticSizes } from '../calculator.js'
 import { computeConstructorIdFromEntry } from '../ctor-id.js'
-import { TL_PRIMITIVES, TlArgument, TlEntry } from '../types.js'
+import type { TlArgument, TlEntry } from '../types.js'
+import { TL_PRIMITIVES } from '../types.js'
+
 import { snakeToCamel } from './utils.js'
 
 export interface WriterCodegenOptions {
@@ -40,12 +42,12 @@ const DEFAULT_OPTIONS: WriterCodegenOptions = {
     includeStaticSizes: false,
 }
 
-const TL_WRITER_PRELUDE =
-    'function h(o,p){' +
-    'var q=o[p];' +
-    'if(q===void 0)' +
-    "throw Error('Object '+o._+' is missing required property '+p);" +
-    'return q}\n'
+const TL_WRITER_PRELUDE
+    = 'function h(o,p){'
+    + 'var q=o[p];'
+    + 'if(q===void 0)'
+    + "throw Error('Object '+o._+' is missing required property '+p);"
+    + 'return q}\n'
 
 /**
  * Generate writer code for a single entry.
@@ -55,7 +57,7 @@ const TL_WRITER_PRELUDE =
  * @param params  Options
  * @returns  Code as a readers map entry
  */
-export function generateWriterCodeForTlEntry(entry: TlEntry, params = DEFAULT_OPTIONS): string {
+export function generateWriterCodeForTlEntry(entry: TlEntry, params: WriterCodegenOptions = DEFAULT_OPTIONS): string {
     const { bare, includeFlags, variableName } = {
         ...DEFAULT_OPTIONS,
         ...params,
@@ -76,7 +78,7 @@ export function generateWriterCodeForTlEntry(entry: TlEntry, params = DEFAULT_OP
         if (arg.type === '#') {
             ret += `var ${arg.name}=${includeFlags ? `v.${arg.name}` : '0'};`
 
-            const usedByArgs = entry.arguments.filter((a) => a.typeModifiers?.predicate?.startsWith(arg.name + '.'))
+            const usedByArgs = entry.arguments.filter(a => a.typeModifiers?.predicate?.startsWith(`${arg.name}.`))
             const indexUsage: Record<string, TlArgument[]> = {}
 
             usedByArgs.forEach((arg1) => {
@@ -86,9 +88,9 @@ export function generateWriterCodeForTlEntry(entry: TlEntry, params = DEFAULT_OP
             })
 
             Object.entries(indexUsage).forEach(([index, args]) => {
-                const bitIndex = parseInt(index)
+                const bitIndex = Number.parseInt(index)
 
-                if (isNaN(bitIndex) || bitIndex < 0 || bitIndex > 32) {
+                if (Number.isNaN(bitIndex) || bitIndex < 0 || bitIndex > 32) {
                     throw new Error(`Invalid predicate: ${arg.name}.${bitIndex} - invalid bit`)
                 }
 
@@ -170,7 +172,7 @@ export function generateWriterCodeForTlEntry(entry: TlEntry, params = DEFAULT_OP
         }
     })
 
-    return ret + '},'
+    return `${ret}},`
 }
 
 /**
@@ -179,7 +181,10 @@ export function generateWriterCodeForTlEntry(entry: TlEntry, params = DEFAULT_OP
  * @param entries  Entries to generate writers for
  * @param params  Codegen options
  */
-export function generateWriterCodeForTlEntries(entries: TlEntry[], params = DEFAULT_OPTIONS): string {
+export function generateWriterCodeForTlEntries(
+    entries: TlEntry[],
+    params: WriterCodegenOptions = DEFAULT_OPTIONS,
+): string {
     const { includePrelude, variableName, includeStaticSizes } = {
         ...DEFAULT_OPTIONS,
         ...params,
@@ -191,7 +196,7 @@ export function generateWriterCodeForTlEntries(entries: TlEntry[], params = DEFA
 
     const usedAsBareIds: Record<number, 1> = {}
     entries.forEach((entry) => {
-        ret += generateWriterCodeForTlEntry(entry, params) + '\n'
+        ret += `${generateWriterCodeForTlEntry(entry, params)}\n`
 
         entry.arguments.forEach((arg) => {
             if (arg.typeModifiers?.constructorId) {
@@ -204,13 +209,13 @@ export function generateWriterCodeForTlEntries(entries: TlEntry[], params = DEFA
         ret += '_bare:{\n'
 
         Object.keys(usedAsBareIds).forEach((id) => {
-            const entry = entries.find((e) => e.id === parseInt(id))!
+            const entry = entries.find(e => e.id === Number.parseInt(id))!
 
-            ret +=
-                generateWriterCodeForTlEntry(entry, {
+            ret
+                += `${generateWriterCodeForTlEntry(entry, {
                     ...params,
                     bare: true,
-                }) + '\n'
+                })}\n`
         })
         ret += '},\n'
     }
@@ -227,5 +232,5 @@ export function generateWriterCodeForTlEntries(entries: TlEntry[], params = DEFA
         ret += '},\n'
     }
 
-    return ret + '}'
+    return `${ret}}`
 }

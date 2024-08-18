@@ -1,5 +1,5 @@
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike } from '../../types/peers/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/peers/index.js'
 import { isInputPeerChannel } from '../../utils/peer-utils.js'
 import { getPeerDialogs } from '../dialogs/get-peer-dialogs.js'
 import { resolvePeer } from '../users/resolve-peer.js'

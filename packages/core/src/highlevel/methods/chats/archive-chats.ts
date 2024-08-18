@@ -1,7 +1,7 @@
-import { MaybeArray } from '../../../types/utils.js'
+import type { MaybeArray } from '../../../types/utils.js'
 import { isPresent } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 /**
@@ -16,7 +16,7 @@ export async function archiveChats(client: ITelegramClient, chats: MaybeArray<In
 
     const updates = await client.call({
         _: 'folders.editPeerFolders',
-        folderPeers: resolvedPeers.filter(isPresent).map((peer) => ({
+        folderPeers: resolvedPeers.filter(isPresent).map(peer => ({
             _: 'inputFolderPeer',
             peer,
             folderId: 1,

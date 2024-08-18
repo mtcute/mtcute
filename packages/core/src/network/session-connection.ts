@@ -1,27 +1,30 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// will be reworked in MTQ-32
 import Long from 'long'
-
-import { mtp, tl } from '@mtcute/tl'
-import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlSerializationCounter, TlWriterMap } from '@mtcute/tl-runtime'
+import type { mtp } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
+import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
 
 import { getPlatform } from '../platform.js'
-import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
+import { MtArgumentError, MtTimeoutError, MtcuteError } from '../types/index.js'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
-import {
-    concatBuffers,
+import type {
     ControllablePromise,
-    createControllablePromise,
-    EarlyTimer,
     ICryptoProvider,
+} from '../utils/index.js'
+import {
+    EarlyTimer,
+    concatBuffers,
+    createControllablePromise,
     longFromBuffer,
     randomLong,
     removeFromLongArray,
 } from '../utils/index.js'
+
 import { doAuthorization } from './authorization.js'
-import { MtprotoSession, PendingMessage, PendingRpc } from './mtproto-session.js'
-import { PersistentConnection, PersistentConnectionParams } from './persistent-connection.js'
-import { ServerSaltManager } from './server-salt.js'
+import type { MtprotoSession, PendingMessage, PendingRpc } from './mtproto-session.js'
+import type { PersistentConnectionParams } from './persistent-connection.js'
+import { PersistentConnection } from './persistent-connection.js'
+import type { ServerSaltManager } from './server-salt.js'
 import { TransportError } from './transports/abstract.js'
 
 export interface SessionConnectionParams extends PersistentConnectionParams {
@@ -48,15 +51,15 @@ const GET_STATE_INTERVAL = 1500 // 1.5 seconds
 // destroy_auth_key#d1435160 = DestroyAuthKeyRes;
 // const DESTROY_AUTH_KEY = Buffer.from('605134d1', 'hex')
 // gzip_packed#3072cfa1 packed_data:string = Object;
-const GZIP_PACKED_ID = 0x3072cfa1
+const GZIP_PACKED_ID = 0x3072CFA1
 // msg_container#73f1f8dc messages:vector<%Message> = MessageContainer;
-const MSG_CONTAINER_ID = 0x73f1f8dc
+const MSG_CONTAINER_ID = 0x73F1F8DC
 // rpc_result#f35c6d01 req_msg_id:long result:Object = RpcResult;
-const RPC_RESULT_ID = 0xf35c6d01
+const RPC_RESULT_ID = 0xF35C6D01
 // rpc_error#2144ca19 error_code:int error_message:string = RpcError;
-const RPC_ERROR_ID = 0x2144ca19
+const RPC_ERROR_ID = 0x2144CA19
 // invokeAfterMsg#cb9f372d {X:Type} msg_id:long query:!X = X;
-const INVOKE_AFTER_MSG_ID = 0xcb9f372d
+const INVOKE_AFTER_MSG_ID = 0xCB9F372D
 const INVOKE_AFTER_MSG_SIZE = 12 // 8 (invokeAfterMsg) + 4 (msg_id)
 
 /**
@@ -256,7 +259,7 @@ export class SessionConnection extends PersistentConnection {
         this.emit('error', error)
     }
 
-    protected onConnectionUsable() {
+    protected onConnectionUsable(): void {
         super.onConnectionUsable()
 
         if (this.params.withUpdates) {
@@ -498,7 +501,7 @@ export class SessionConnection extends PersistentConnection {
         const promise = createControllablePromise<Uint8Array>()
         const timeoutId = setTimeout(() => {
             promise.reject(new MtTimeoutError(timeout))
-            this._pendingWaitForUnencrypted = this._pendingWaitForUnencrypted.filter((it) => it[0] !== promise)
+            this._pendingWaitForUnencrypted = this._pendingWaitForUnencrypted.filter(it => it[0] !== promise)
         }, timeout)
         this._pendingWaitForUnencrypted.push([promise, timeoutId])
 
@@ -615,7 +618,7 @@ export class SessionConnection extends PersistentConnection {
                 this._onBadMsgNotification(messageId, message)
                 break
             case 'mt_msgs_ack':
-                message.msgIds.forEach((msgId) => this._onMessageAcked(msgId))
+                message.msgIds.forEach(msgId => this._onMessageAcked(msgId))
                 break
             case 'mt_new_session_created':
                 this._onNewSessionCreated(message)
@@ -680,7 +683,7 @@ export class SessionConnection extends PersistentConnection {
             try {
                 // eslint-disable-next-line
                 resultType = (message.object() as any)._
-            } catch (err) {
+            } catch {
                 resultType = message.peekUint()
             }
             this.log.warn('received rpc_result with %j with req_msg_id = 0', resultType)
@@ -694,9 +697,9 @@ export class SessionConnection extends PersistentConnection {
             let result
 
             try {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                // eslint-disable-next-line ts/no-unsafe-assignment
                 result = message.object() as any
-            } catch (err) {
+            } catch {
                 result = '[failed to parse]'
             }
 
@@ -716,7 +719,8 @@ export class SessionConnection extends PersistentConnection {
         if (msg._ !== 'rpc') {
             if (msg._ === 'bind') {
                 this._sendAck(messageId)
-                msg.promise.resolve(message.object())
+                // eslint-disable-next-line ts/no-unsafe-argument
+                msg.promise.resolve(message.object() as any)
 
                 return
             }
@@ -726,7 +730,7 @@ export class SessionConnection extends PersistentConnection {
 
                 try {
                     result = message.object() as mtp.TlObject
-                } catch (err) {
+                } catch {
                     this.log.debug('failed to parse rpc_result for cancel request %l, ignoring', reqMsgId)
 
                     return
@@ -762,7 +766,7 @@ export class SessionConnection extends PersistentConnection {
 
             if (objectId === GZIP_PACKED_ID) {
                 const inner = this._crypto.gunzip(message.bytes())
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                // eslint-disable-next-line ts/no-unsafe-assignment
                 result = TlBinaryReader.deserializeObject(this._readerMap, inner)
             } else {
                 result = message.object(objectId)
@@ -916,7 +920,7 @@ export class SessionConnection extends PersistentConnection {
             case 'container':
                 this.log.debug('received ack for container %l (size = %d)', msgId, msg.msgIds.length)
 
-                msg.msgIds.forEach((msgId) => this._onMessageAcked(msgId, true))
+                msg.msgIds.forEach(msgId => this._onMessageAcked(msgId, true))
 
                 // we no longer need info about the container
                 this._session.pendingMessages.delete(msgId)
@@ -991,7 +995,7 @@ export class SessionConnection extends PersistentConnection {
         switch (msgInfo._) {
             case 'container':
                 this.log.debug('container %l (size = %d) failed because of %s', msgId, msgInfo.msgIds.length, reason)
-                msgInfo.msgIds.forEach((msgId) => this._onMessageFailed(msgId, reason, true))
+                msgInfo.msgIds.forEach(msgId => this._onMessageFailed(msgId, reason, true))
                 break
             case 'ping':
                 this.log.debug('ping (msg_id = %l) failed because of %s', msgId, reason)
@@ -1045,7 +1049,7 @@ export class SessionConnection extends PersistentConnection {
                 break
             case 'bind':
                 this.log.debug('temp key binding request %l failed because of %s, retrying', msgId, reason)
-                msgInfo.promise.reject(Error(reason))
+                msgInfo.promise.reject(new Error(reason))
                 break
             case 'future_salts':
                 this.log.debug('future_salts request %l failed because of %s, will retry', msgId, reason)
@@ -1495,7 +1499,7 @@ export class SessionConnection extends PersistentConnection {
         }
     }
 
-    protected _onInactivityTimeout() {
+    protected _onInactivityTimeout(): void {
         // we should send all pending acks and other service messages
         // before dropping the connection
         // additionally, if we are still waiting for some rpc results,
@@ -1534,10 +1538,10 @@ export class SessionConnection extends PersistentConnection {
 
     private _flush(): void {
         if (
-            this._disconnectedManually ||
-            !this._session._authKey.ready ||
-            this._isPfsBindingPending ||
-            this._session.current429Timeout
+            this._disconnectedManually
+            || !this._session._authKey.ready
+            || this._isPfsBindingPending
+            || this._session.current429Timeout
         ) {
             this.log.debug(
                 'skipping flush, connection is not usable (offline = %b, auth key ready = %b, pfs binding pending = %b, 429 timeout = %b)',
@@ -1669,7 +1673,7 @@ export class SessionConnection extends PersistentConnection {
             if (idx > 0) {
                 const toGetState = this._session.getStateSchedule.raw.splice(0, idx)
                 if (!getStateMsgIds) getStateMsgIds = []
-                toGetState.forEach((it) => getStateMsgIds!.push(it.msgId!))
+                toGetState.forEach(it => getStateMsgIds!.push(it.msgId!))
             }
 
             if (getStateMsgIds) {
@@ -1734,9 +1738,10 @@ export class SessionConnection extends PersistentConnection {
         const rpcToSend: PendingRpc[] = []
 
         while (
-            this._session.queuedRpc.length &&
-            containerSize < 32768 && // 2^15
-            containerMessageCount < 1020
+            this._session.queuedRpc.length
+            && containerSize < 32768 // 2^15
+            // eslint-disable-next-line no-unmodified-loop-condition
+            && containerMessageCount < 1020
         ) {
             const msg = this._session.queuedRpc.popFront()!
             if (msg.cancelled) continue
@@ -1993,7 +1998,7 @@ export class SessionConnection extends PersistentConnection {
             resendMsgId,
             getFutureSaltsRequest,
             getFutureSaltsMsgId,
-            rpcToSend.map((it) => it.method),
+            rpcToSend.map(it => it.method),
             useContainer,
             rootMsgId,
         )

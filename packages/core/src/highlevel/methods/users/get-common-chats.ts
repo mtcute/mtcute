@@ -1,5 +1,7 @@
-import { ITelegramClient } from '../../client.types.js'
-import { Chat, InputPeerLike } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { Chat } from '../../types/index.js'
+
 import { resolveUser } from './resolve-peer.js'
 
 /**
@@ -16,5 +18,5 @@ export async function getCommonChats(client: ITelegramClient, userId: InputPeerL
             maxId: 0,
             limit: 100,
         })
-        .then((res) => res.chats.map((it) => new Chat(it)))
+        .then(res => res.chats.map(it => new Chat(it)))
 }

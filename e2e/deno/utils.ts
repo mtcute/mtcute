@@ -1,9 +1,10 @@
-import { MaybePromise, MemoryStorage } from '@mtcute/core'
+import type { MaybePromise } from '@mtcute/core'
+import { MemoryStorage } from '@mtcute/core'
 import { setPlatform } from '@mtcute/core/platform.js'
 import { LogManager, sleep } from '@mtcute/core/utils.js'
 import { DenoCryptoProvider, DenoPlatform, SqliteStorage, TcpTransport } from '@mtcute/deno'
 
-export const getApiParams = (storage?: string) => {
+export function getApiParams(storage?: string) {
     if (!Deno.env.has('API_ID') || !Deno.env.has('API_HASH')) {
         throw new Error('API_ID and API_HASH env variables must be set')
     }
@@ -13,7 +14,7 @@ export const getApiParams = (storage?: string) => {
     setPlatform(new DenoPlatform())
 
     return {
-        apiId: parseInt(Deno.env.get('API_ID')!),
+        apiId: Number.parseInt(Deno.env.get('API_ID')!),
         apiHash: Deno.env.get('API_HASH')!,
         testMode: true,
         storage: storage ? new SqliteStorage(`.sessions/${storage}`) : new MemoryStorage(),

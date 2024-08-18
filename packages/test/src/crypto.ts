@@ -1,8 +1,10 @@
 import { gzipSync, inflateSync } from 'node:zlib'
-import { afterEach, beforeAll, beforeEach, describe, expect, it, MockInstance, vi } from 'vitest'
 
+import type { MockInstance } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getPlatform } from '@mtcute/core/platform.js'
-import { dataViewFromBuffer, ICryptoProvider } from '@mtcute/core/utils.js'
+import type { ICryptoProvider } from '@mtcute/core/utils.js'
+import { dataViewFromBuffer } from '@mtcute/core/utils.js'
 
 import { defaultCryptoProvider } from './platform.js'
 
@@ -26,7 +28,7 @@ da91539fcc7b03d2b8b1381bd6023fff20278344ad944d364ba684842db3901c346335f0d455eda4
 fa3de8e50aac96c1275591a1221c32a60a1513370a33a228e00894341b10cf44a6ae6ac250d17a364e956ab1a17b068df3fb2d5b5a672d8a409eeb8b6ca1ade6
 `.replace(/\s/g, '')
 
-export function withFakeRandom(provider: ICryptoProvider, source = DEFAULT_ENTROPY): ICryptoProvider {
+export function withFakeRandom(provider: ICryptoProvider, source: string = DEFAULT_ENTROPY): ICryptoProvider {
     const sourceBytes = getPlatform().hexDecode(source)
     let offset = 0
 
@@ -43,23 +45,23 @@ export function withFakeRandom(provider: ICryptoProvider, source = DEFAULT_ENTRO
         get(target, prop, receiver) {
             if (prop === 'randomFill') return getRandomValues
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            // eslint-disable-next-line ts/no-unsafe-return
             return Reflect.get(target, prop, receiver)
         },
     })
 }
 
-export function useFakeMathRandom(source = DEFAULT_ENTROPY): void {
+export function useFakeMathRandom(source: string = DEFAULT_ENTROPY): void {
     const sourceBytes = getPlatform().hexDecode(source)
     const dv = dataViewFromBuffer(sourceBytes)
 
-    let spy: MockInstance<[], number>
+    let spy: MockInstance<() => number>
 
     beforeEach(() => {
         let offset = 0
 
         spy = vi.spyOn(globalThis.Math, 'random').mockImplementation(() => {
-            const ret = dv.getUint32(offset, true) / 0xffffffff
+            const ret = dv.getUint32(offset, true) / 0xFFFFFFFF
             offset += 4
 
             return ret
@@ -70,7 +72,7 @@ export function useFakeMathRandom(source = DEFAULT_ENTROPY): void {
     })
 }
 
-export async function defaultTestCryptoProvider(source = DEFAULT_ENTROPY): Promise<ICryptoProvider> {
+export async function defaultTestCryptoProvider(source: string = DEFAULT_ENTROPY): Promise<ICryptoProvider> {
     const prov = withFakeRandom(defaultCryptoProvider, source)
     await prov.initialize?.()
 
@@ -248,7 +250,7 @@ export function testCryptoProvider(c: ICryptoProvider): void {
     })
 }
 
-export function u8HexDecode(hex: string) {
+export function u8HexDecode(hex: string): Uint8Array {
     const buf = getPlatform().hexDecode(hex)
 
     // eslint-disable-next-line no-restricted-globals

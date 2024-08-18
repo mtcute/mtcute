@@ -1,9 +1,10 @@
 import { MtArgumentError } from '../../../types/errors.js'
 import { links } from '../../../utils/links/index.js'
 import { toggleChannelIdMark } from '../../../utils/peer-utils.js'
-import { ITelegramClient } from '../../client.types.js'
-import { Message } from '../../types/messages/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { Message } from '../../types/messages/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { _getDiscussionMessage } from './get-discussion-message.js'
 import { getMessages } from './get-messages.js'
 

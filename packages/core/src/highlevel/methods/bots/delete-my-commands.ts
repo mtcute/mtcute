@@ -1,7 +1,8 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { ITelegramClient } from '../../client.types.js'
-import { BotCommands } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { BotCommands } from '../../types/index.js'
+
 import { _normalizeCommandScope } from './normalize-command-scope.js'
 
 /**
@@ -27,9 +28,9 @@ export async function deleteMyCommands(
         langCode?: string
     },
 ): Promise<void> {
-    const scope: tl.TypeBotCommandScope = params?.scope ?
-        await _normalizeCommandScope(client, params.scope) :
-        {
+    const scope: tl.TypeBotCommandScope = params?.scope
+        ? await _normalizeCommandScope(client, params.scope)
+        : {
             _: 'botCommandScopeDefault',
         }
 

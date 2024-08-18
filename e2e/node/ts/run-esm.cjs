@@ -1,4 +1,4 @@
-const cp = require('child_process')
+const cp = require('node:child_process')
 
 const { fixForEsm } = require('./build-esm.cjs')
 

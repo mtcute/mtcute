@@ -3,10 +3,14 @@ import { stat } from 'node:fs/promises'
 import { basename } from 'node:path'
 import { Readable as NodeReadable } from 'node:stream'
 
-import { UploadFileLike } from '@mtcute/core'
+import type { UploadFileLike } from '@mtcute/core'
 import { extractFileName } from '@mtcute/core/utils.js'
 
-export async function normalizeFile(file: UploadFileLike) {
+export async function normalizeFile(file: UploadFileLike): Promise<{
+    file: UploadFileLike
+    fileName?: string | undefined
+    fileSize?: number
+} | null> {
     if (typeof file === 'string') {
         const fd = await Deno.open(file, { read: true })
 
@@ -31,7 +35,7 @@ export async function normalizeFile(file: UploadFileLike) {
     // while these are not Deno-specific, they still may happen
     if (file instanceof ReadStream) {
         const fileName = basename(file.path.toString())
-        const fileSize = await stat(file.path.toString()).then((stat) => stat.size)
+        const fileSize = await stat(file.path.toString()).then(stat => stat.size)
 
         return {
             file: NodeReadable.toWeb(file) as unknown as ReadableStream<Uint8Array>,

@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
-
 import { fakeKeyValueRepository } from '@mtcute/test'
 
 import { UpdatesStateService } from '../../highlevel/storage/service/updates.js'
+
 import { testServiceOptions } from './utils.test-utils.js'
 
 describe('updates state service', () => {

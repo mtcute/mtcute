@@ -1,7 +1,8 @@
-import { Plugin } from 'vite'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
-const setupFile = fileURLToPath(new URL('./test-setup.mts', import.meta.url))
+import type { Plugin } from 'vite'
+
+const setupFile = fileURLToPath(new URL('./test-setup.ts', import.meta.url))
 
 export function testSetup(params?: { additionalCode?: string }): Plugin {
     const { additionalCode = '' } = params || {}
@@ -12,7 +13,7 @@ export function testSetup(params?: { additionalCode?: string }): Plugin {
             if (!id.match(/\.test\.m?[tj]s/)) return
 
             return {
-                code: `import '${setupFile}'\n` + additionalCode + code,
+                code: `import '${setupFile}'\n${additionalCode}${code}`,
                 map: null,
             }
         },

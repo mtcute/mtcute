@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const { execSync } = require('child_process')
+import { execSync } from 'node:child_process'
 
 function getDockerContainerIp(name) {
     const containerId = execSync(`docker compose ps -q ${name}`).toString().trim()
@@ -41,27 +41,25 @@ async function createBucket(name) {
     }
 }
 
-(async () => {
-    for (const bucket of ['modules', 'docs', 'publishing', 'npm']) {
-        const ok = await createBucket(bucket)
-        console.log(`[i] Created bucket ${bucket}: ${ok}`)
-    }
+for (const bucket of ['modules', 'docs', 'publishing', 'npm']) {
+    const ok = await createBucket(bucket)
+    console.log(`[i] Created bucket ${bucket}: ${ok}`)
+}
 
-    // create @mtcute scope if it doesn't exist
-    const resp = await fetch(`${API_URL}api/scopes`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Cookie: 'token=token',
-        },
-        body: JSON.stringify({ scope: 'mtcute' }),
-    })
+// create @mtcute scope if it doesn't exist
+const resp = await fetch(`${API_URL}api/scopes`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Cookie': 'token=token',
+    },
+    body: JSON.stringify({ scope: 'mtcute' }),
+})
 
-    if (resp.status !== 200 && resp.status !== 409) {
-        throw new Error(`Failed to create scope: ${resp.statusText} ${await resp.text()}`)
-    }
+if (resp.status !== 200 && resp.status !== 409) {
+    throw new Error(`Failed to create scope: ${resp.statusText} ${await resp.text()}`)
+}
 
-    if (resp.status === 200) {
-        console.log('[i] Created scope mtcute')
-    }
-})()
+if (resp.status === 200) {
+    console.log('[i] Created scope mtcute')
+}

@@ -1,5 +1,6 @@
-import { IKeyValueRepository } from '../../../storage/repository/key-value.js'
-import { BaseService, ServiceOptions } from '../../../storage/service/base.js'
+import type { IKeyValueRepository } from '../../../storage/repository/key-value.js'
+import type { ServiceOptions } from '../../../storage/service/base.js'
+import { BaseService } from '../../../storage/service/base.js'
 import { dataViewFromBuffer } from '../../../utils/buffer-utils.js'
 
 const KV_PTS = 'updates_pts'

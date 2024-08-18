@@ -1,22 +1,24 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtArgumentError, MtTimeoutError } from '../../types/errors.js'
-import { MaybePromise } from '../../types/utils.js'
+import type { MaybePromise } from '../../types/utils.js'
 import { AsyncLock } from '../../utils/async-lock.js'
-import { ControllablePromise, createControllablePromise } from '../../utils/controllable-promise.js'
+import type { ControllablePromise } from '../../utils/controllable-promise.js'
+import { createControllablePromise } from '../../utils/controllable-promise.js'
 import { Deque } from '../../utils/deque.js'
 import { getMarkedPeerId } from '../../utils/peer-utils.js'
-import { ITelegramClient } from '../client.types.js'
+import type { ITelegramClient } from '../client.types.js'
 import { getPeerDialogs } from '../methods/dialogs/get-peer-dialogs.js'
 import { readHistory } from '../methods/messages/read-history.js'
 import { sendMedia } from '../methods/messages/send-media.js'
 import { sendMediaGroup } from '../methods/messages/send-media-group.js'
 import { sendText } from '../methods/messages/send-text.js'
 import { resolvePeer } from '../methods/users/resolve-peer.js'
+
 import type { Message } from './messages/message.js'
 import type { InputPeerLike } from './peers/index.js'
 import type { HistoryReadUpdate, ParsedUpdate } from './updates/index.js'
-import { ParametersSkip2 } from './utils.js'
+import type { ParametersSkip2 } from './utils.js'
 
 interface QueuedHandler<T> {
     promise: ControllablePromise<T>
@@ -64,7 +66,6 @@ export class Conversation {
         readonly chat: InputPeerLike,
     ) {
         if (!(CONVERSATION_SYMBOL in client)) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (client as any)[CONVERSATION_SYMBOL] = {
                 pendingConversations: new Map(),
                 hasConversations: false,
@@ -73,7 +74,6 @@ export class Conversation {
     }
 
     private static _getState(client: ITelegramClient): ConversationsState {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return (client as any)[CONVERSATION_SYMBOL] as ConversationsState
     }
 
@@ -279,7 +279,7 @@ export class Conversation {
     markRead({
         message,
         clearMentions = true,
-    }: { message?: number | null; clearMentions?: boolean } = {}): Promise<void> {
+    }: { message?: number | null, clearMentions?: boolean } = {}): Promise<void> {
         if (!this._started) {
             throw new MtArgumentError("Conversation hasn't started yet")
         }
@@ -319,7 +319,6 @@ export class Conversation {
 
         this.stop()
 
-        // eslint-disable-next-line @typescript-eslint/no-throw-literal
         if (err) throw err
 
         return res!
@@ -329,7 +328,7 @@ export class Conversation {
      * Wait for a new message in the conversation
      *
      * @param filter  Filter for the handler. You can use any filter you can use for dispatcher
-     * @param [timeout=15000]  Timeout for the handler in ms. Pass `null` to disable.
+     * @param [timeout]  Timeout for the handler in ms. Pass `null` to disable.
      *   When the timeout is reached, `MtTimeoutError` is thrown.
      */
     waitForNewMessage(
@@ -342,12 +341,12 @@ export class Conversation {
 
         const promise = createControllablePromise<Message>()
 
-        let timer: NodeJS.Timeout | undefined = undefined
+        let timer: NodeJS.Timeout | undefined
 
         if (timeout !== null) {
             timer = setTimeout(() => {
                 promise.reject(new MtTimeoutError(timeout))
-                this._queuedNewMessage.removeBy((it) => it.promise === promise)
+                this._queuedNewMessage.removeBy(it => it.promise === promise)
             }, timeout)
         }
 
@@ -394,9 +393,9 @@ export class Conversation {
     ): Promise<Message> {
         const msgId = params?.message ?? this._lastMessage ?? 0
 
-        const pred = filter ?
-            (msg: Message) => (msg.id > msgId ? filter(msg) : false) :
-            (msg: Message) => msg.id > msgId
+        const pred = filter
+            ? (msg: Message) => (msg.id > msgId ? filter(msg) : false)
+            : (msg: Message) => msg.id > msgId
 
         return this.waitForNewMessage(pred, params?.timeout)
     }
@@ -434,9 +433,9 @@ export class Conversation {
             throw new MtArgumentError('Provide message for which to wait for reply for')
         }
 
-        const pred = filter ?
-            (msg: Message) => (msg.replyToMessage?.id === msgId ? filter(msg) : false) :
-            (msg: Message) => msg.replyToMessage?.id === msgId
+        const pred = filter
+            ? (msg: Message) => (msg.replyToMessage?.id === msgId ? filter(msg) : false)
+            : (msg: Message) => msg.replyToMessage?.id === msgId
 
         return this.waitForNewMessage(pred, params?.timeout)
     }
@@ -483,7 +482,7 @@ export class Conversation {
 
         const promise = createControllablePromise<Message>()
 
-        let timer: NodeJS.Timeout | undefined = undefined
+        let timer: NodeJS.Timeout | undefined
         const timeout = params?.timeout
 
         if (timeout) {
@@ -531,7 +530,7 @@ export class Conversation {
 
         const promise = createControllablePromise<void>()
 
-        let timer: NodeJS.Timeout | undefined = undefined
+        let timer: NodeJS.Timeout | undefined
 
         if (timeout !== null) {
             timer = setTimeout(() => {

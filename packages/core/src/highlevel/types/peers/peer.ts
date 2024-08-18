@@ -1,7 +1,7 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { Chat } from './chat.js'
-import { PeersIndex } from './peers-index.js'
+import type { PeersIndex } from './peers-index.js'
 import { User } from './user.js'
 
 /**
@@ -23,13 +23,13 @@ export type PeerType = 'user' | 'bot' | 'group' | 'channel' | 'supergroup'
  * > that new IDs *will* still fit into int53, meaning JS integers are fine.
  */
 export type InputPeerLike =
-    | string
-    | number
-    | tl.TypePeer
-    | tl.TypeInputPeer
-    | tl.TypeInputUser
-    | tl.TypeInputChannel
-    | { inputPeer: tl.TypeInputPeer }
+  | string
+  | number
+  | tl.TypePeer
+  | tl.TypeInputPeer
+  | tl.TypeInputUser
+  | tl.TypeInputChannel
+  | { inputPeer: tl.TypeInputPeer }
 
 /**
  * Peer (a user or a chat)

@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/index.js'
 
@@ -21,10 +21,10 @@ export class FileLocation {
          * first time downloading the file.
          */
         readonly location:
-            | tl.TypeInputFileLocation
-            | tl.TypeInputWebFileLocation
-            | Uint8Array
-            | (() => tl.TypeInputFileLocation | tl.TypeInputWebFileLocation | Uint8Array),
+          | tl.TypeInputFileLocation
+          | tl.TypeInputWebFileLocation
+          | Uint8Array
+          | (() => tl.TypeInputFileLocation | tl.TypeInputWebFileLocation | Uint8Array),
         /**
          * File size in bytes, when available
          */

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
-
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { BotKeyboard } from './index.js'
 
@@ -20,7 +19,7 @@ describe('findButton', () => {
     })
 
     it('should find buttons by predicate', () => {
-        expect(BotKeyboard.findButton(kb, (s) => s._ === 'keyboardButton')).toEqual({
+        expect(BotKeyboard.findButton(kb, s => s._ === 'keyboardButton')).toEqual({
             _: 'keyboardButton',
             text: 'aaa',
         })

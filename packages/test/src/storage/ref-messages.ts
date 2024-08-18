@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-
-import { IReferenceMessagesRepository, IStorageDriver } from '@mtcute/core'
+import type { IReferenceMessagesRepository, IStorageDriver } from '@mtcute/core'
 
 export function fakeRefMessagesRepository(): IReferenceMessagesRepository {
     return {
@@ -12,7 +11,7 @@ export function fakeRefMessagesRepository(): IReferenceMessagesRepository {
     }
 }
 
-export function testRefMessagesRepository(repo: IReferenceMessagesRepository, driver: IStorageDriver) {
+export function testRefMessagesRepository(repo: IReferenceMessagesRepository, driver: IStorageDriver): void {
     describe('IReferenceMessagesRepository', () => {
         afterEach(() => repo.deleteAll())
 

@@ -1,4 +1,4 @@
-import { TlEntry, TlTypeModifiers } from './types.js'
+import type { TlEntry, TlTypeModifiers } from './types.js'
 
 /**
  * Split qualified TL entry name into namespace and name
@@ -59,7 +59,7 @@ export function groupTlEntriesByNamespace(entries: TlEntry[]): Record<string, Tl
     return ret
 }
 
-export function stringifyArgumentType(type: string, modifiers?: TlTypeModifiers) {
+export function stringifyArgumentType(type: string, modifiers?: TlTypeModifiers): string {
     if (!modifiers) return type
     let ret = type
 

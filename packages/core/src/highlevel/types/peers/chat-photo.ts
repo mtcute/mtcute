@@ -1,7 +1,6 @@
 import Long from 'long'
-
 import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { getPlatform } from '../../../platform.js'
 import { MtArgumentError } from '../../../types/errors.js'
@@ -74,7 +73,7 @@ export class ChatPhotoSize extends FileLocation {
                 source: {
                     _: 'dialogPhoto',
                     big: this.big,
-                    id: id,
+                    id,
                     accessHash: hash,
                 },
             },
@@ -88,12 +87,10 @@ export class ChatPhotoSize extends FileLocation {
         return toUniqueFileId(getPlatform(), tdFileId.FileType.ProfilePhoto, {
             _: 'photo',
             id: this.obj.photoId,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            // eslint-disable-next-line ts/no-unsafe-assignment
             source: {
                 _: 'dialogPhoto',
                 big: this.big,
-                // will be looked into in MTQ-37
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
         })
     }

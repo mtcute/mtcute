@@ -1,23 +1,26 @@
 import Long from 'long'
-
-import { mtp, tl } from '@mtcute/tl'
-import { TlBinaryWriter, TlReaderMap, TlSerializationCounter, TlWriterMap } from '@mtcute/tl-runtime'
+import type { mtp, tl } from '@mtcute/tl'
+import type { TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+import { TlSerializationCounter } from '@mtcute/tl-runtime'
 
 import { MtcuteError } from '../types/index.js'
-import {
-    compareLongs,
+import type {
     ControllablePromise,
-    Deque,
-    getRandomInt,
     ICryptoProvider,
     Logger,
+} from '../utils/index.js'
+import {
+    Deque,
     LongMap,
     LruSet,
-    randomLong,
     SortedArray,
+    compareLongs,
+    getRandomInt,
+    randomLong,
 } from '../utils/index.js'
+
 import { AuthKey } from './auth-key.js'
-import { ServerSaltManager } from './server-salt.js'
+import type { ServerSaltManager } from './server-salt.js'
 
 export interface PendingRpc {
     method: string
@@ -42,87 +45,87 @@ export interface PendingRpc {
 }
 
 export type PendingMessage =
-    | {
-          _: 'rpc'
-          rpc: PendingRpc
-      }
-    | {
-          _: 'container'
-          msgIds: Long[]
-      }
-    | {
-          _: 'state'
-          msgIds: Long[]
-          containerId: Long
-      }
-    | {
-          _: 'resend'
-          msgIds: Long[]
-          containerId: Long
-      }
-    | {
-          _: 'ping'
-          pingId: Long
-          containerId: Long
-      }
-    | {
-          _: 'destroy_session'
-          sessionId: Long
-          containerId: Long
-      }
-    | {
-          _: 'cancel'
-          msgId: Long
-          containerId: Long
-      }
-    | {
-          _: 'future_salts'
-          containerId: Long
-      }
-    | {
-          _: 'bind'
-          promise: ControllablePromise
-      }
+  | {
+      _: 'rpc'
+      rpc: PendingRpc
+  }
+  | {
+      _: 'container'
+      msgIds: Long[]
+  }
+  | {
+      _: 'state'
+      msgIds: Long[]
+      containerId: Long
+  }
+  | {
+      _: 'resend'
+      msgIds: Long[]
+      containerId: Long
+  }
+  | {
+      _: 'ping'
+      pingId: Long
+      containerId: Long
+  }
+  | {
+      _: 'destroy_session'
+      sessionId: Long
+      containerId: Long
+  }
+  | {
+      _: 'cancel'
+      msgId: Long
+      containerId: Long
+  }
+  | {
+      _: 'future_salts'
+      containerId: Long
+  }
+  | {
+      _: 'bind'
+      promise: ControllablePromise<boolean | mtp.RawMt_rpc_error>
+  }
 
 /**
  * Class encapsulating a single MTProto session and storing
  * all the relevant state
  */
 export class MtprotoSession {
-    _sessionId = randomLong()
+    _sessionId: Long = randomLong()
 
     _authKey: AuthKey
     _authKeyTemp: AuthKey
     _authKeyTempSecondary: AuthKey
 
     _timeOffset = 0
-    _lastMessageId = Long.ZERO
+    _lastMessageId: Long = Long.ZERO
     _seqNo = 0
 
     /// state ///
     // recent msg ids
-    recentOutgoingMsgIds = new LruSet<Long>(1000, true)
-    recentIncomingMsgIds = new LruSet<Long>(1000, true)
+    recentOutgoingMsgIds: LruSet<Long> = new LruSet(1000, true)
+    recentIncomingMsgIds: LruSet<Long> = new LruSet(1000, true)
 
     // queues
-    queuedRpc = new Deque<PendingRpc>()
+    queuedRpc: Deque<PendingRpc> = new Deque()
     queuedAcks: Long[] = []
     queuedStateReq: Long[] = []
     queuedResendReq: Long[] = []
     queuedCancelReq: Long[] = []
-    getStateSchedule = new SortedArray<PendingRpc>([], (a, b) => a.getState! - b.getState!)
+    getStateSchedule: SortedArray<PendingRpc> = new SortedArray<PendingRpc>([], (a, b) => a.getState! - b.getState!)
 
-    chains = new Map<string | number, Long>()
-    chainsPendingFails = new Map<string | number, SortedArray<PendingRpc>>()
+    chains: Map<string | number, Long> = new Map()
+    chainsPendingFails: Map<string | number, SortedArray<PendingRpc>> = new Map()
 
     // requests info
-    pendingMessages = new LongMap<PendingMessage>()
-    destroySessionIdToMsgId = new LongMap<Long>()
+    pendingMessages: LongMap<PendingMessage> = new LongMap()
+    destroySessionIdToMsgId: LongMap<Long> = new LongMap()
 
-    lastPingRtt = NaN
+    lastPingRtt: number = Number.NaN
     lastPingTime = 0
-    lastPingMsgId = Long.ZERO
-    lastSessionCreatedUid = Long.ZERO
+    lastPingMsgId: Long = Long.ZERO
+    lastSessionCreatedUid: Long = Long.ZERO
 
     initConnectionCalled = false
     authorizationPending = false
@@ -147,10 +150,10 @@ export class MtprotoSession {
 
     get hasPendingMessages(): boolean {
         return Boolean(
-            this.queuedRpc.length ||
-                this.queuedAcks.length ||
-                this.queuedStateReq.length ||
-                this.queuedResendReq.length,
+            this.queuedRpc.length
+            || this.queuedAcks.length
+            || this.queuedStateReq.length
+            || this.queuedResendReq.length,
         )
     }
 
@@ -173,7 +176,7 @@ export class MtprotoSession {
         this._authKeyTempSecondary.reset()
     }
 
-    updateTimeOffset(offset: number) {
+    updateTimeOffset(offset: number): void {
         this.log.debug('time offset updated: %d', offset)
         this._timeOffset = offset
         // lastMessageId was generated with (potentially) wrong time
@@ -246,7 +249,7 @@ export class MtprotoSession {
         const timeTicks = Date.now()
         const timeSec = Math.floor(timeTicks / 1000) - this._timeOffset
         const timeMSec = timeTicks % 1000
-        const random = getRandomInt(0xffff)
+        const random = getRandomInt(0xFFFF)
 
         let messageId = new Long((timeMSec << 21) | (random << 3) | 4, timeSec)
 
@@ -314,9 +317,9 @@ export class MtprotoSession {
         const messageId = this.getMessageId()
         const seqNo = this.getSeqNo(isContentRelated)
 
-        const length = ArrayBuffer.isView(content) ?
-            content.length :
-            TlSerializationCounter.countNeededBytes(writer.objectMap!, content)
+        const length = ArrayBuffer.isView(content)
+            ? content.length
+            : TlSerializationCounter.countNeededBytes(writer.objectMap!, content)
 
         writer.long(messageId)
         writer.int(seqNo)
@@ -327,7 +330,7 @@ export class MtprotoSession {
         return messageId
     }
 
-    onTransportFlood(callback: () => void) {
+    onTransportFlood(callback: () => void): number | undefined {
         if (this.current429Timeout) return // already waiting
 
         // all active queries must be resent after a timeout

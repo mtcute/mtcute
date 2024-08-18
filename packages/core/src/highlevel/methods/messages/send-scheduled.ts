@@ -1,8 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { MaybeArray } from '../../../types/utils.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, Message, PeersIndex } from '../../types/index.js'
+import type { MaybeArray } from '../../../types/utils.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { Message, PeersIndex } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -39,7 +40,7 @@ export async function sendScheduled(
             (u): u is Extract<typeof u, tl.RawUpdateNewMessage | tl.RawUpdateNewChannelMessage> =>
                 u._ === 'updateNewMessage' || u._ === 'updateNewChannelMessage',
         )
-        .map((u) => new Message(u.message, peers))
+        .map(u => new Message(u.message, peers))
 
     return msgs
 }

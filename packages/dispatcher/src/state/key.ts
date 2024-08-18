@@ -1,7 +1,8 @@
-import { assertNever, MaybePromise, Peer } from '@mtcute/core'
+import type { MaybePromise, Peer } from '@mtcute/core'
+import { assertNever } from '@mtcute/core'
 
-import { BusinessMessageContext } from '../context/business-message.js'
-import { CallbackQueryContext, MessageContext } from '../context/index.js'
+import type { BusinessMessageContext } from '../context/business-message.js'
+import type { CallbackQueryContext, MessageContext } from '../context/index.js'
 
 /**
  * Function that determines how the state key is derived.

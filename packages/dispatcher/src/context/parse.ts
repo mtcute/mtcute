@@ -1,7 +1,24 @@
-import { ParsedUpdate } from '@mtcute/core'
-import { TelegramClient } from '@mtcute/core/client.js'
+import type {
+    BotReactionCountUpdate,
+    BotReactionUpdate,
+    BotStoppedUpdate,
+    BusinessConnection,
+    ChatJoinRequestUpdate,
+    ChatMemberUpdate,
+    DeleteBusinessMessageUpdate,
+    DeleteMessageUpdate,
+    DeleteStoryUpdate,
+    HistoryReadUpdate,
+    ParsedUpdate,
+    PollUpdate,
+    PollVoteUpdate,
+    StoryUpdate,
+    UserStatusUpdate,
+    UserTypingUpdate,
+} from '@mtcute/core'
+import type { TelegramClient } from '@mtcute/core/client.js'
 
-import { UpdateContextDistributed } from './base.js'
+import type { UpdateContextDistributed } from './base.js'
 import { BusinessMessageContext } from './business-message.js'
 import { BusinessCallbackQueryContext, CallbackQueryContext, InlineCallbackQueryContext } from './callback-query.js'
 import { ChatJoinRequestUpdateContext } from './chat-join-request.js'
@@ -10,8 +27,36 @@ import { InlineQueryContext } from './inline-query.js'
 import { MessageContext } from './message.js'
 import { PreCheckoutQueryContext } from './pre-checkout-query.js'
 
+export type UpdateContextType =
+  | MessageContext
+  | InlineQueryContext
+  | ChosenInlineResultContext
+  | CallbackQueryContext
+  | InlineCallbackQueryContext
+  | BusinessCallbackQueryContext
+  | ChatJoinRequestUpdateContext
+  | PreCheckoutQueryContext
+  | BusinessMessageContext
+  | UpdateContextDistributed<
+    | DeleteMessageUpdate
+    | ChatMemberUpdate
+    | PollUpdate
+    | PollVoteUpdate
+    | UserStatusUpdate
+    | UserTypingUpdate
+    | HistoryReadUpdate
+    | BotStoppedUpdate
+    | ChatJoinRequestUpdate
+    | StoryUpdate
+    | DeleteStoryUpdate
+    | BotReactionUpdate
+    | BotReactionCountUpdate
+    | BusinessConnection
+    | DeleteBusinessMessageUpdate
+  >
+
 /** @internal */
-export function _parsedUpdateToContext(client: TelegramClient, update: ParsedUpdate) {
+export function _parsedUpdateToContext(client: TelegramClient, update: ParsedUpdate): UpdateContextType {
     switch (update.name) {
         case 'new_message':
         case 'edit_message':
@@ -43,5 +88,3 @@ export function _parsedUpdateToContext(client: TelegramClient, update: ParsedUpd
 
     return _update
 }
-
-export type UpdateContextType = ReturnType<typeof _parsedUpdateToContext>

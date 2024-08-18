@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { parseTlToEntries } from '../parse.js'
 import { parseFullTlSchema } from '../schema.js'
+
 import { generateTypescriptDefinitionsForTlEntry, generateTypescriptDefinitionsForTlSchema } from './types.js'
 
 describe('generateTypescriptDefinitionsForTlEntry', () => {
@@ -39,7 +40,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
 
         it('adds usage info comments', () => {
             const entries = parseTlToEntries('---functions---\ntest = Test;\ntestBot = Test;')
-            const [result, resultBot] = entries.map((it) =>
+            const [result, resultBot] = entries.map(it =>
                 generateTypescriptDefinitionsForTlEntry(it, 'tl.', {
                     base: {},
                     errors: {},

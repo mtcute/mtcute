@@ -1,10 +1,10 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { MaybeArray } from '../../../../types/utils.js'
-import { InputText } from '../../../types/misc/entities.js'
-import { InputFileLike } from '../../files/index.js'
-import { InputPeerLike } from '../../peers/index.js'
-import { VenueSource } from '../venue.js'
+import type { MaybeArray } from '../../../../types/utils.js'
+import type { InputText } from '../../../types/misc/entities.js'
+import type { InputFileLike } from '../../files/index.js'
+import type { InputPeerLike } from '../../peers/index.js'
+import type { VenueSource } from '../venue.js'
 
 export interface CaptionMixin {
     /**
@@ -602,23 +602,23 @@ export interface InputMediaPaidMedia extends CaptionMixin {
  * @link InputMedia
  */
 export type InputMediaLike =
-    | InputMediaAudio
-    | InputMediaVoice
-    | InputMediaDocument
-    | InputMediaPhoto
-    | InputMediaVideo
-    | InputMediaAuto
-    | InputMediaSticker
-    | InputMediaVenue
-    | InputMediaGeo
-    | InputMediaGeoLive
-    | InputMediaDice
-    | InputMediaContact
-    | InputMediaGame
-    | InputMediaInvoice
-    | InputMediaPoll
-    | InputMediaQuiz
-    | InputMediaStory
-    | InputMediaWebpage
-    | InputMediaPaidMedia
-    | tl.TypeInputMedia
+  | InputMediaAudio
+  | InputMediaVoice
+  | InputMediaDocument
+  | InputMediaPhoto
+  | InputMediaVideo
+  | InputMediaAuto
+  | InputMediaSticker
+  | InputMediaVenue
+  | InputMediaGeo
+  | InputMediaGeoLive
+  | InputMediaDice
+  | InputMediaContact
+  | InputMediaGame
+  | InputMediaInvoice
+  | InputMediaPoll
+  | InputMediaQuiz
+  | InputMediaStory
+  | InputMediaWebpage
+  | InputMediaPaidMedia
+  | tl.TypeInputMedia

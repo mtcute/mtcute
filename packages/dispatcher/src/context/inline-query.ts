@@ -1,7 +1,8 @@
-import { InlineQuery, ParametersSkip1 } from '@mtcute/core'
-import { TelegramClient } from '@mtcute/core/client.js'
+import type { ParametersSkip1 } from '@mtcute/core'
+import { InlineQuery } from '@mtcute/core'
+import type { TelegramClient } from '@mtcute/core/client.js'
 
-import { UpdateContext } from './base.js'
+import type { UpdateContext } from './base.js'
 
 /**
  * Context of an inline query update.
@@ -19,7 +20,7 @@ export class InlineQueryContext extends InlineQuery implements UpdateContext<Inl
     }
 
     /** Answer to this inline query */
-    answer(...params: ParametersSkip1<TelegramClient['answerInlineQuery']>) {
+    answer(...params: ParametersSkip1<TelegramClient['answerInlineQuery']>): Promise<void> {
         return this.client.answerInlineQuery(this.id, ...params)
     }
 }

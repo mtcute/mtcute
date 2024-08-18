@@ -1,5 +1,4 @@
 import { describe } from 'vitest'
-
 import { testCryptoProvider } from '@mtcute/test'
 
 if (import.meta.env.TEST_ENV === 'node') {

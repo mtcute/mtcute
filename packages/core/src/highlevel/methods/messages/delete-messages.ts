@@ -1,10 +1,11 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, Message } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike, Message } from '../../types/index.js'
 import { createDummyUpdate } from '../../updates/utils.js'
 import { isInputPeerChannel, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { deleteScheduledMessages } from './delete-scheduled-messages.js'
 
 // @exported

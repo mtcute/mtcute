@@ -1,4 +1,4 @@
-/* eslint-disable import/no-unresolved, no-undef, no-console */
+/* eslint-disable no-undef, no-console */
 
 import { Client, StorageMemory } from 'https://deno.land/x/mtkruto@0.1.157/mod.ts'
 

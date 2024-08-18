@@ -1,10 +1,10 @@
-// eslint-disable-next-line no-restricted-imports
-import { createCipheriv, createHash, createHmac, pbkdf2, randomFillSync } from 'crypto'
-import { readFile } from 'fs/promises'
-import { createRequire } from 'module'
-import { deflateSync, gunzipSync } from 'zlib'
+import { createCipheriv, createHash, createHmac, pbkdf2, randomFillSync } from 'node:crypto'
+import { readFile } from 'node:fs/promises'
+import { createRequire } from 'node:module'
+import { deflateSync, gunzipSync } from 'node:zlib'
 
-import { BaseCryptoProvider, IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
+import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
+import { BaseCryptoProvider } from '@mtcute/core/utils.js'
 import { ige256Decrypt, ige256Encrypt, initSync } from '@mtcute/wasm'
 
 export abstract class BaseNodeCryptoProvider extends BaseCryptoProvider {
@@ -27,8 +27,7 @@ export abstract class BaseNodeCryptoProvider extends BaseCryptoProvider {
     ): Promise<Uint8Array> {
         return new Promise((resolve, reject) =>
             pbkdf2(password, salt, iterations, keylen, algo, (err: Error | null, buf: Uint8Array) =>
-                err !== null ? reject(err) : resolve(buf),
-            ),
+                err !== null ? reject(err) : resolve(buf)),
         )
     }
 
@@ -51,7 +50,6 @@ export abstract class BaseNodeCryptoProvider extends BaseCryptoProvider {
                 maxOutputLength: maxSize,
             })
             // hot path, avoid additional runtime checks
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
             if (e.code === 'ERR_BUFFER_TOO_LARGE') {
                 return null
@@ -65,7 +63,7 @@ export abstract class BaseNodeCryptoProvider extends BaseCryptoProvider {
         return gunzipSync(data)
     }
 
-    randomFill(buf: Uint8Array) {
+    randomFill(buf: Uint8Array): void {
         randomFillSync(buf)
     }
 }

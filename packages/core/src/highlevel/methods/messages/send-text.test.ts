@@ -1,9 +1,9 @@
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
-
-import { createStub, StubTelegramClient } from '@mtcute/test'
+import { StubTelegramClient, createStub } from '@mtcute/test'
 
 import { toggleChannelIdMark } from '../../../utils/peer-utils.js'
+
 import { sendText } from './send-text.js'
 
 const stubUser = createStub('user', {
@@ -22,7 +22,7 @@ describe('sendText', () => {
 
         await client.registerPeers(stubUser)
 
-        client.respondWith('messages.sendMessage', (req) =>
+        client.respondWith('messages.sendMessage', req =>
             createStub('updates', {
                 users: [stubUser],
                 updates: [
@@ -45,8 +45,7 @@ describe('sendText', () => {
                         }),
                     },
                 ],
-            }),
-        )
+            }))
 
         await client.with(async () => {
             const msg = await sendText(client, stubUser.id, 'test')
@@ -64,7 +63,7 @@ describe('sendText', () => {
 
         await client.registerPeers(stubChannel, stubUser)
 
-        client.respondWith('messages.sendMessage', (req) =>
+        client.respondWith('messages.sendMessage', req =>
             createStub('updates', {
                 users: [stubUser],
                 chats: [stubChannel],
@@ -88,8 +87,7 @@ describe('sendText', () => {
                         }),
                     },
                 ],
-            }),
-        )
+            }))
 
         await client.with(async () => {
             const markedChannelId = toggleChannelIdMark(stubChannel.id)
@@ -119,8 +117,7 @@ describe('sendText', () => {
             createStub('updateShortSentMessage', {
                 id: 123,
                 out: true,
-            }),
-        )
+            }))
 
         await client.with(async () => {
             const msg = await sendText(client, stubUser.id, 'test')

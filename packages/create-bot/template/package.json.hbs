@@ -11,7 +11,6 @@
         {{#if features.linters}}
         "lint": "eslint .",
         "lint:fix": "eslint --fix .",
-        "format": "prettier --write \"src/**/*.ts\"",
         {{/if}}
         {{#if (eq runtime "bun")}}
         {{#if features.typescript}}

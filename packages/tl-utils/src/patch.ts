@@ -1,11 +1,11 @@
-import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { generateReaderCodeForTlEntries } from './codegen/reader.js'
 import { generateWriterCodeForTlEntries } from './codegen/writer.js'
 import { parseTlToEntries } from './parse.js'
 
 function evalForResult<T>(js: string): T {
-    // eslint-disable-next-line @typescript-eslint/no-implied-eval
+    // eslint-disable-next-line ts/no-implied-eval, no-new-func
     return new Function(js)() as T
 }
 
@@ -25,9 +25,9 @@ export function patchRuntimeTlSchema(
     readers: TlReaderMap,
     writers: TlWriterMap,
 ): {
-    readerMap: TlReaderMap
-    writerMap: TlWriterMap
-} {
+        readerMap: TlReaderMap
+        writerMap: TlWriterMap
+    } {
     const entries = parseTlToEntries(schema, { parseMethodTypes: true })
 
     const readersCode = generateReaderCodeForTlEntries(entries, {
@@ -52,9 +52,7 @@ export function patchRuntimeTlSchema(
                 ...newReaders._results,
             },
         },
-        // ts is not smart enough
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
+        // @ts-expect-error ts is not smart enough
         writerMap: {
             ...writers,
             ...newWriters,

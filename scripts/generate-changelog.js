@@ -1,5 +1,9 @@
-const fs = require('fs')
-const { getLatestTag, getCommitsSince, parseConventionalCommit, findChangedFilesSince } = require('./git-utils')
+import { randomUUID } from 'node:crypto'
+import { appendFileSync } from 'node:fs'
+import { EOL } from 'node:os'
+import { fileURLToPath } from 'node:url'
+
+import { findChangedFilesSince, getCommitsSince, getLatestTag, parseConventionalCommit } from './git-utils.js'
 
 function generateChangelog(onlyPackages) {
     const byPackage = {}
@@ -21,13 +25,13 @@ function generateChangelog(onlyPackages) {
         let line = `- ${commit.hash}: ${breaking ? '**❗ BREAKING** ' : ''}${commit.msg}`
 
         if (breaking && commit.description) {
-            line +=
-                '\n' +
-                commit.description
+            line
+                += `\n${
+                 commit.description
                     .trim()
                     .split('\n')
-                    .map((line) => `  ${line}`)
-                    .join('\n')
+                    .map(line => `  ${line}`)
+                    .join('\n')}`
         }
 
         for (const file of changed) {
@@ -52,7 +56,7 @@ function generateChangelog(onlyPackages) {
     return ret
 }
 
-if (require.main === module) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
     let onlyPackages = null
 
     if (process.argv[2]) {
@@ -62,8 +66,8 @@ if (require.main === module) {
     const res = generateChangelog(onlyPackages)
 
     if (process.env.CI && process.env.GITHUB_OUTPUT) {
-        const delim = `---${require('crypto').randomUUID()}---${require('os').EOL}`
-        fs.appendFileSync(process.env.GITHUB_OUTPUT, `changelog<<${delim}${res}${delim}`)
+        const delim = `---${randomUUID()}---${EOL}`
+        appendFileSync(process.env.GITHUB_OUTPUT, `changelog<<${delim}${res}${delim}`)
     } else {
         console.log(res)
     }

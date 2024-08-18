@@ -1,9 +1,9 @@
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
-
 import { createStub } from '@mtcute/test'
 
 import { MessageEntity } from '../messages/index.js'
+
 import { User } from './user.js'
 
 describe('User', () => {

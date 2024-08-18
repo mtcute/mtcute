@@ -14,10 +14,10 @@ describe('createChunkedReader', () => {
         const reader = createChunkedReader(stream, 4)
 
         expect(await reader.read()).to.deep.equal(new Uint8Array([1, 2, 3, 4]))
-        expect(reader.ended()).to.be.false
+        expect(reader.ended()).toEqual(false)
         expect(await reader.read()).to.deep.equal(new Uint8Array([5, 6]))
-        expect(reader.ended()).to.be.true
-        expect(await reader.read()).to.be.null
+        expect(reader.ended()).toEqual(true)
+        expect(await reader.read()).toEqual(null)
     })
 
     it('should correctly handle chunks larger than chunkSize', async () => {
@@ -31,14 +31,14 @@ describe('createChunkedReader', () => {
         const reader = createChunkedReader(stream, 2)
 
         expect(await reader.read()).to.deep.equal(new Uint8Array([1, 2]))
-        expect(reader.ended()).to.be.false
+        expect(reader.ended()).toEqual(false)
         expect(await reader.read()).to.deep.equal(new Uint8Array([3, 4]))
-        expect(reader.ended()).to.be.false
+        expect(reader.ended()).toEqual(false)
         expect(await reader.read()).to.deep.equal(new Uint8Array([5, 6]))
-        expect(reader.ended()).to.be.false
+        expect(reader.ended()).toEqual(false)
         expect(await reader.read()).to.deep.equal(new Uint8Array([7]))
-        expect(reader.ended()).to.be.true
-        expect(await reader.read()).to.be.null
+        expect(reader.ended()).toEqual(true)
+        expect(await reader.read()).toEqual(null)
     })
 
     it('should correctly handle chunks equal to chunkSize', async () => {
@@ -52,10 +52,10 @@ describe('createChunkedReader', () => {
         const reader = createChunkedReader(stream, 3)
 
         expect(await reader.read()).to.deep.equal(new Uint8Array([1, 2, 3]))
-        expect(reader.ended()).to.be.false
+        expect(reader.ended()).toEqual(false)
         expect(await reader.read()).to.deep.equal(new Uint8Array([4, 5, 6]))
-        expect(reader.ended()).to.be.true
-        expect(await reader.read()).to.be.null
+        expect(reader.ended()).toEqual(true)
+        expect(await reader.read()).toEqual(null)
     })
 
     it('should correctly handle mixed chunks', async () => {
@@ -71,13 +71,13 @@ describe('createChunkedReader', () => {
         const reader = createChunkedReader(stream, 4)
 
         expect(await reader.read()).to.deep.equal(new Uint8Array([1, 2, 3, 4]))
-        expect(reader.ended()).to.be.false
+        expect(reader.ended()).toEqual(false)
         expect(await reader.read()).to.deep.equal(new Uint8Array([5, 6, 7, 8]))
-        expect(reader.ended()).to.be.false
+        expect(reader.ended()).toEqual(false)
         expect(await reader.read()).to.deep.equal(new Uint8Array([9, 10, 11, 12]))
-        expect(reader.ended()).to.be.false
+        expect(reader.ended()).toEqual(false)
         expect(await reader.read()).to.deep.equal(new Uint8Array([13, 14]))
-        expect(reader.ended()).to.be.true
-        expect(await reader.read()).to.be.null
+        expect(reader.ended()).toEqual(true)
+        expect(await reader.read()).toEqual(null)
     })
 })

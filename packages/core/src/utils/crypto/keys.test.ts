@@ -1,5 +1,4 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-
 import { defaultCryptoProvider } from '@mtcute/test'
 
 import { findKeyByFingerprints, parsePublicKey } from '../index.js'

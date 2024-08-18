@@ -1,5 +1,6 @@
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, PeersIndex, PeerStories } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { PeerStories, PeersIndex } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**

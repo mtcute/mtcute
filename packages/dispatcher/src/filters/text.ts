@@ -1,4 +1,4 @@
-import {
+import type {
     BusinessCallbackQuery,
     BusinessMessage,
     CallbackQuery,
@@ -8,17 +8,18 @@ import {
     Message,
 } from '@mtcute/core'
 
-import { UpdateContextDistributed } from '../context/base.js'
-import { UpdateFilter } from './types.js'
+import type { UpdateContextDistributed } from '../context/base.js'
+
+import type { UpdateFilter } from './types.js'
 
 type UpdatesWithText = UpdateContextDistributed<
-    | Message
-    | BusinessMessage
-    | InlineQuery
-    | ChosenInlineResult
-    | CallbackQuery
-    | InlineCallbackQuery
-    | BusinessCallbackQuery
+  | Message
+  | BusinessMessage
+  | InlineQuery
+  | ChosenInlineResult
+  | CallbackQuery
+  | InlineCallbackQuery
+  | BusinessCallbackQuery
 >
 
 function extractText(obj: UpdatesWithText): string | null {
@@ -51,22 +52,22 @@ function extractText(obj: UpdatesWithText): string | null {
  *
  * @param regex  Regex to be matched
  */
-export const regex =
-    (regex: RegExp): UpdateFilter<UpdatesWithText, { match: RegExpMatchArray }> =>
-        (obj) => {
-            const txt = extractText(obj)
-            if (!txt) return false
+export function regex(regex: RegExp): UpdateFilter<UpdatesWithText, { match: RegExpMatchArray }> {
+    return (obj) => {
+        const txt = extractText(obj)
+        if (!txt) return false
 
-            const m = txt.match(regex)
+        const m = txt.match(regex)
 
-            if (m) {
-                (obj as typeof obj & { match: RegExpMatchArray }).match = m
+        if (m) {
+            (obj as typeof obj & { match: RegExpMatchArray }).match = m
 
-                return true
-            }
-
-            return false
+            return true
         }
+
+        return false
+    }
+}
 
 /**
  * Filter objects which contain the exact text given
@@ -78,14 +79,14 @@ export const regex =
  * @param str  String to be matched
  * @param ignoreCase  Whether string case should be ignored
  */
-export const equals = (str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> => {
+export function equals(str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> {
     if (ignoreCase) {
         str = str.toLowerCase()
 
-        return (obj) => extractText(obj)?.toLowerCase() === str
+        return obj => extractText(obj)?.toLowerCase() === str
     }
 
-    return (obj) => extractText(obj) === str
+    return obj => extractText(obj) === str
 }
 
 /**
@@ -98,7 +99,7 @@ export const equals = (str: string, ignoreCase = false): UpdateFilter<UpdatesWit
  * @param str  Substring to be matched
  * @param ignoreCase  Whether string case should be ignored
  */
-export const contains = (str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> => {
+export function contains(str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> {
     if (ignoreCase) {
         str = str.toLowerCase()
 
@@ -126,7 +127,7 @@ export const contains = (str: string, ignoreCase = false): UpdateFilter<UpdatesW
  * @param str  Substring to be matched
  * @param ignoreCase  Whether string case should be ignored
  */
-export const startsWith = (str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> => {
+export function startsWith(str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> {
     if (ignoreCase) {
         str = str.toLowerCase()
 
@@ -154,7 +155,7 @@ export const startsWith = (str: string, ignoreCase = false): UpdateFilter<Update
  * @param str  Substring to be matched
  * @param ignoreCase  Whether string case should be ignored
  */
-export const endsWith = (str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> => {
+export function endsWith(str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> {
     if (ignoreCase) {
         str = str.toLowerCase()
 

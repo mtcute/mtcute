@@ -1,6 +1,8 @@
-import { ITelegramClient } from '../../client.types.js'
-import { Message, SearchFilters } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { Message } from '../../types/index.js'
+import { SearchFilters } from '../../types/index.js'
 import { normalizeDate } from '../../utils/index.js'
+
 import { searchGlobal } from './search-global.js'
 
 /**

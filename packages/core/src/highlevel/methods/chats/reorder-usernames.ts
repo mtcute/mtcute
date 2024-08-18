@@ -1,6 +1,6 @@
 import { assertTrue } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerUser, toInputChannel, toInputUser } from '../../utils/index.js'
 import { isSelfPeer } from '../auth/utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'

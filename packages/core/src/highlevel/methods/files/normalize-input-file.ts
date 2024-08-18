@@ -2,8 +2,10 @@ import { tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputFileLike, isUploadedFile } from '../../types/files/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputFileLike } from '../../types/files/index.js'
+import { isUploadedFile } from '../../types/files/index.js'
+
 import { uploadFile } from './upload-file.js'
 
 /**

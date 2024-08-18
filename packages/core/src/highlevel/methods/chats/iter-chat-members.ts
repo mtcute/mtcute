@@ -1,7 +1,8 @@
-import { ITelegramClient } from '../../client.types.js'
-import { ChatMember, InputPeerLike } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { ChatMember, InputPeerLike } from '../../types/index.js'
 import { isInputPeerChat } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { getChatMembers } from './get-chat-members.js'
 
 /**

@@ -1,14 +1,16 @@
 import * as schema_ from '@mtcute/tl/api-schema.json' assert { type: 'json' }
+import type { TlEntry } from '@mtcute/tl-utils'
 
 const schema = ('default' in schema_ ? schema_.default : schema_) as { e: TlEntry[] }
-
-import type { TlEntry } from '@mtcute/tl-utils'
 
 let _cachedEntriesMap: Map<string, TlEntry> | null = null
 let _cachedUnionsMap: Map<string, TlEntry[]> | null = null
 
 /** @internal */
-export function getEntriesMap() {
+export function getEntriesMap(): {
+    entries: Map<string, TlEntry>
+    unions: Map<string, TlEntry[]>
+} {
     if (_cachedEntriesMap) {
         return {
             entries: _cachedEntriesMap,

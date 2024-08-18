@@ -1,9 +1,10 @@
-import type { Socket } from 'net'
-import { describe, expect, it, MockedObject, vi } from 'vitest'
+import type { Socket } from 'node:net'
 
+import type { MockedObject } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { TransportState } from '@mtcute/core'
 import { getPlatform } from '@mtcute/core/platform.js'
-import { defaultProductionDc, LogManager } from '@mtcute/core/utils.js'
+import { LogManager, defaultProductionDc } from '@mtcute/core/utils.js'
 
 if (import.meta.env.TEST_ENV === 'node') {
     vi.doMock('net', () => ({
@@ -22,7 +23,7 @@ if (import.meta.env.TEST_ENV === 'node') {
         }),
     }))
 
-    const net = await import('net')
+    const net = await import('node:net')
     const connect = vi.mocked(net.connect)
 
     const { TcpTransport } = await import('./tcp.js')
@@ -122,7 +123,7 @@ if (import.meta.env.TEST_ENV === 'node') {
 
             const socket = getLastSocket()
 
-            const onDataCall = socket.on.mock.calls.find((c) => (c as string[])[0] === 'data') as unknown as [
+            const onDataCall = socket.on.mock.calls.find(c => (c as string[])[0] === 'data') as unknown as [
                 string,
                 (data: Uint8Array) => void,
             ]
@@ -142,7 +143,7 @@ if (import.meta.env.TEST_ENV === 'node') {
 
             const socket = getLastSocket()
 
-            const onErrorCall = socket.on.mock.calls.find((c) => (c as string[])[0] === 'error') as unknown as [
+            const onErrorCall = socket.on.mock.calls.find(c => (c as string[])[0] === 'error') as unknown as [
                 string,
                 (error: Error) => void,
             ]

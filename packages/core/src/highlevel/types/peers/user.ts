@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
@@ -6,6 +6,7 @@ import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MessageEntity } from '../messages/message-entity.js'
 import { EmojiStatus } from '../reactions/emoji-status.js'
+
 import { ChatColors } from './chat-colors.js'
 import { ChatPhoto } from './chat-photo.js'
 
@@ -473,7 +474,7 @@ export class User {
     /**
      * Create a permanent mention for this user.
      *
-     * *Permanent* means that this mention will also
+     * Permanent* means that this mention will also
      * contain user's access hash, so even if the user
      * changes their username or the client forgets
      * about that user, it can still be mentioned.

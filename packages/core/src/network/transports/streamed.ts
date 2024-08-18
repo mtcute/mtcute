@@ -1,4 +1,4 @@
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 
 import { concatBuffers } from '../../utils/index.js'
 
@@ -9,7 +9,7 @@ import { concatBuffers } from '../../utils/index.js'
  * multiple transport packets.
  */
 export abstract class StreamedCodec extends EventEmitter {
-    protected _stream = new Uint8Array(0)
+    protected _stream: Uint8Array = new Uint8Array(0)
 
     /**
      * Should return whether a full packet is available

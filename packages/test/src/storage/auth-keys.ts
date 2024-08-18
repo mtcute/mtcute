@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-
-import { IAuthKeysRepository } from '@mtcute/core'
+import type { IAuthKeysRepository } from '@mtcute/core'
 
 export function fakeAuthKeysRepository(): IAuthKeysRepository {
     return {
@@ -20,7 +19,7 @@ function fixBuffer(buf: Uint8Array | null): Uint8Array | null {
     return typeof Buffer !== 'undefined' && buf instanceof Buffer ? new Uint8Array(buf) : buf
 }
 
-export function testAuthKeysRepository(repo: IAuthKeysRepository) {
+export function testAuthKeysRepository(repo: IAuthKeysRepository): void {
     const key2 = new Uint8Array(256).fill(0x42)
     const key3 = new Uint8Array(256).fill(0x43)
 

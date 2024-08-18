@@ -1,6 +1,6 @@
 import Long from 'long'
 
-import { ITlPlatform } from './platform.js'
+import type { ITlPlatform } from './platform.js'
 
 const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
 
@@ -17,9 +17,7 @@ const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
  * - `0x56730bcc` aka `null`
  */
 // avoid unnecessary type complexity
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TlReaderMap = Record<number, (r: any) => unknown> & {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _results?: Record<string, (r: any) => unknown>
 }
 
@@ -100,8 +98,8 @@ export class TlBinaryReader {
 
     int53(): number {
         // inlined toNumber from Long
-        const res =
-            (this.dataView.getInt32(this.pos, true) >>> 0) + TWO_PWR_32_DBL * this.dataView.getInt32(this.pos + 4, true)
+        const res = (this.dataView.getInt32(this.pos, true) >>> 0)
+          + TWO_PWR_32_DBL * this.dataView.getInt32(this.pos + 4, true)
         this.pos += 8
 
         return res
@@ -132,8 +130,8 @@ export class TlBinaryReader {
 
     boolean(): boolean {
         const val = this.uint()
-        if (val === 0xbc799737) return false
-        if (val === 0x997275b5) return true
+        if (val === 0xBC799737) return false
+        if (val === 0x997275B5) return true
         throw new Error(`Expected either boolTrue or boolFalse, got 0x${val.toString(16)}`)
     }
 
@@ -178,16 +176,16 @@ export class TlBinaryReader {
         return TlBinaryReader.platform.utf8Decode(this.bytes())
     }
 
-    object(id = this.uint()): unknown {
-        if (id === 0x1cb5c415 /* vector */) {
+    object(id: number = this.uint()): unknown {
+        if (id === 0x1CB5C415 /* vector */) {
             return this.vector(this.object, true)
         }
-        if (id === 0xbc799737 /* boolFalse */) return false
-        if (id === 0x997275b5 /* boolTrue */) return true
+        if (id === 0xBC799737 /* boolFalse */) return false
+        if (id === 0x997275B5 /* boolTrue */) return true
         // unsure if it is actually used in the wire, seems like it's only used for boolean flags
-        if (id === 0x3fedd339 /* true */) return true
+        if (id === 0x3FEDD339 /* true */) return true
         // never used in the actual schema, but whatever
-        if (id === 0x56730bcc /* null */) return null
+        if (id === 0x56730BCC /* null */) return null
 
         // hot path, avoid additional runtime checks
 
@@ -206,11 +204,11 @@ export class TlBinaryReader {
         return reader(this)
     }
 
-    vector(reader = this.object, bare = false): unknown[] {
+    vector(reader: (id?: number) => unknown = this.object, bare = false): unknown[] {
         if (!bare) {
             const uint = this.uint()
 
-            if (uint !== 0x1cb5c415) {
+            if (uint !== 0x1CB5C415) {
                 throw new Error(
                     `Invalid object code, expected 0x1cb5c415 (vector), got 0x${uint.toString(16)} at ${this.pos - 4}`,
                 )

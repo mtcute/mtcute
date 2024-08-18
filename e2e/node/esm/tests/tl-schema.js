@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import Long from 'long'
 import { describe, it } from 'mocha'
-
 import { NodePlatform } from '@mtcute/node'
 import { tl } from '@mtcute/tl'
 import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
@@ -35,6 +34,6 @@ describe('@mtcute/tl', () => {
     })
 
     it('correctly checks for combinator types', () => {
-        expect(tl.isAnyInputUser({ _: 'inputUserEmpty' })).to.be.true
+        expect(tl.isAnyInputUser({ _: 'inputUserEmpty' })).to.eq(true)
     })
 })

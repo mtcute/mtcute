@@ -1,5 +1,4 @@
 const Long = require('long')
-
 const { TlBinaryReader, TlBinaryWriter } = require('@mtcute/tl-runtime')
 const { tl } = require('@mtcute/tl')
 const { __tlReaderMap } = require('@mtcute/tl/binary/reader')
@@ -35,6 +34,6 @@ describe('@mtcute/tl', () => {
     })
 
     it('correctly checks for combinator types', () => {
-        expect(tl.isAnyInputUser({ _: 'inputUserEmpty' })).to.be.true
+        expect(tl.isAnyInputUser({ _: 'inputUserEmpty' })).to.eq(true)
     })
 })

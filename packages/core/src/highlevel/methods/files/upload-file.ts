@@ -1,11 +1,11 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { getPlatform } from '../../../platform.js'
 import { MtArgumentError } from '../../../types/errors.js'
 import { randomLong } from '../../../utils/long-utils.js'
-import { ITelegramClient } from '../../client.types.js'
-import { UploadedFile, UploadFileLike } from '../../types/index.js'
-import { guessFileMime, MIME_TO_EXTENSION } from '../../utils/file-type.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { UploadFileLike, UploadedFile } from '../../types/index.js'
+import { MIME_TO_EXTENSION, guessFileMime } from '../../utils/file-type.js'
 import { determinePartSize, isProbablyPlainText } from '../../utils/file-utils.js'
 import { bufferToStream, createChunkedReader, streamToBuffer } from '../../utils/stream-utils.js'
 
@@ -141,8 +141,8 @@ export async function uploadFile(
     }
 
     if (HAS_RESPONSE && file instanceof Response) {
-        const length = parseInt(file.headers.get('content-length') || '0')
-        if (!isNaN(length) && length) fileSize = length
+        const length = Number.parseInt(file.headers.get('content-length') || '0')
+        if (!Number.isNaN(length) && length) fileSize = length
 
         fileMime = file.headers.get('content-type')?.split(';')[0]
 
@@ -272,15 +272,15 @@ export async function uploadFile(
         }
 
         // why
-        const request = isBig ?
-            ({
+        const request = isBig
+            ? ({
                 _: 'upload.saveBigFilePart',
                 fileId,
                 filePart: thisIdx,
                 fileTotalParts: partCount,
                 bytes: part,
-            } satisfies tl.upload.RawSaveBigFilePartRequest) :
-            ({
+            } satisfies tl.upload.RawSaveBigFilePartRequest)
+            : ({
                 _: 'upload.saveFilePart',
                 fileId,
                 filePart: thisIdx,

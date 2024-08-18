@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-
-import { IKeyValueRepository, IStorageDriver } from '@mtcute/core'
+import type { IKeyValueRepository, IStorageDriver } from '@mtcute/core'
 
 export function fakeKeyValueRepository(): IKeyValueRepository {
     return {
@@ -18,7 +17,7 @@ function fixBuffer(buf: Uint8Array | null): Uint8Array | null {
     return typeof Buffer !== 'undefined' && buf instanceof Buffer ? new Uint8Array(buf) : buf
 }
 
-export function testKeyValueRepository(repo: IKeyValueRepository, driver: IStorageDriver) {
+export function testKeyValueRepository(repo: IKeyValueRepository, driver: IStorageDriver): void {
     describe('key-value', () => {
         afterEach(() => repo.deleteAll())
 

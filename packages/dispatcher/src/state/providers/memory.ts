@@ -1,7 +1,8 @@
-import { MaybePromise, MemoryStorageDriver } from '@mtcute/core'
+import type { MaybePromise } from '@mtcute/core'
+import { MemoryStorageDriver } from '@mtcute/core'
 
-import { IStateStorageProvider } from '../provider.js'
-import { IStateRepository } from '../repository.js'
+import type { IStateStorageProvider } from '../provider.js'
+import type { IStateRepository } from '../repository.js'
 
 interface StateDto {
     value: string
@@ -14,8 +15,8 @@ interface RateLimitDto {
 }
 
 class MemoryStateRepository implements IStateRepository {
-    readonly state
-    readonly rl
+    readonly state: Map<string, StateDto>
+    readonly rl: Map<string, RateLimitDto>
     constructor(readonly _driver: MemoryStorageDriver) {
         this.state = this._driver.getState<Map<string, StateDto>>('dispatcher_fsm', () => new Map())
         this.rl = this._driver.getState<Map<string, RateLimitDto>>('rl', () => new Map())
@@ -98,7 +99,7 @@ class MemoryStateRepository implements IStateRepository {
 }
 
 export class MemoryStateStorage implements IStateStorageProvider {
-    readonly state
+    readonly state: MemoryStateRepository
 
     constructor(readonly driver: MemoryStorageDriver = new MemoryStorageDriver()) {
         this.state = new MemoryStateRepository(this.driver)

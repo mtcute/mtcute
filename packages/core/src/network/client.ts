@@ -1,31 +1,36 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 
-import { mtp, tl } from '@mtcute/tl'
+import type { mtp } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 import { __tlReaderMap as defaultReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlWriterMap as defaultWriterMap } from '@mtcute/tl/binary/writer.js'
-import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
-import { IMtStorageProvider } from '../storage/provider.js'
-import { StorageManager, StorageManagerExtraOptions } from '../storage/storage.js'
-import { MustEqual } from '../types/index.js'
-import {
-    asyncResettable,
+import type { IMtStorageProvider } from '../storage/provider.js'
+import type { StorageManagerExtraOptions } from '../storage/storage.js'
+import { StorageManager } from '../storage/storage.js'
+import type { MustEqual } from '../types/index.js'
+import type {
     DcOptions,
+    ICryptoProvider,
+    Logger,
+} from '../utils/index.js'
+import {
+    LogManager,
+    asyncResettable,
     defaultProductionDc,
     defaultProductionIpv6Dc,
     defaultTestDc,
     defaultTestIpv6Dc,
-    ICryptoProvider,
     isTlRpcError,
-    Logger,
-    LogManager,
 } from '../utils/index.js'
+
 import { ConfigManager } from './config-manager.js'
-import { NetworkManager, NetworkManagerExtraParams, RpcCallOptions } from './network-manager.js'
-import { PersistentConnectionParams } from './persistent-connection.js'
-import { ReconnectionStrategy } from './reconnection.js'
-import { TransportFactory } from './transports/index.js'
+import type { NetworkManagerExtraParams, RpcCallOptions } from './network-manager.js'
+import { NetworkManager } from './network-manager.js'
+import type { PersistentConnectionParams } from './persistent-connection.js'
+import type { ReconnectionStrategy } from './reconnection.js'
+import type { TransportFactory } from './transports/index.js'
 
 /** Options for {@link MtClient} */
 export interface MtClientOptions {
@@ -199,7 +204,7 @@ export class MtClient extends EventEmitter {
     /** TL writers map used by the client */
     readonly _writerMap: TlWriterMap
 
-    readonly _config = new ConfigManager(async () => {
+    readonly _config: ConfigManager = new ConfigManager(async () => {
         const res = await this.call({ _: 'help.getConfig' })
 
         if (isTlRpcError(res)) throw new Error(`Failed to get config: ${res.errorMessage}`)
@@ -274,8 +279,8 @@ export class MtClient extends EventEmitter {
                 enableErrorReporting: params.enableErrorReporting ?? false,
                 onUsable: () => this.emit('usable'),
                 onConnecting: () => this.emit('connecting'),
-                onNetworkChanged: (connected) => this.emit('networkChanged', connected),
-                onUpdate: (upd) => this.emit('update', upd),
+                onNetworkChanged: connected => this.emit('networkChanged', connected),
+                onUpdate: upd => this.emit('update', upd),
                 stopSignal: this.stopSignal,
                 ...params.network,
             },
@@ -308,7 +313,7 @@ export class MtClient extends EventEmitter {
      *
      * Call {@link connect} to actually connect.
      */
-    prepare() {
+    prepare(): Promise<void> {
         return this._prepare.run()
     }
 
@@ -362,7 +367,6 @@ export class MtClient extends EventEmitter {
         message: MustEqual<T, tl.RpcMethod>,
         params?: RpcCallOptions,
     ): Promise<tl.RpcCallReturn[T['_']] | mtp.RawMt_rpc_error> {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this.network.call(message, params)
     }
 

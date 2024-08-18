@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { tl } from '@mtcute/core'
 
 type Values<T> = T[keyof T]
@@ -9,11 +7,11 @@ type SafeGet<T, K extends string> = T extends Record<K, unknown> ? T[K] : never
  * Literal translated value, represented by (optionally formatted) string
  */
 export type I18nValueLiteral =
-    | string
-    | {
-          readonly text: string
-          readonly entities?: tl.TypeMessageEntity[]
-      }
+  | string
+  | {
+      readonly text: string
+      readonly entities?: tl.TypeMessageEntity[]
+  }
 
 // ^ we're not using InputText from @mtcute/client because it's a type-only dependency
 // and may not be available at runtime, and we don't want it to be `any`
@@ -80,8 +78,8 @@ export type OtherLanguageWrap<Strings> = {
     [key in keyof Strings]?: Strings[key] extends I18nValue<infer A>
         ? I18nValue<A>
         : Strings[key] extends Record<string, unknown>
-        ? OtherLanguageWrap<Strings[key]>
-        : never
+            ? OtherLanguageWrap<Strings[key]>
+            : never
 }
 /**
  * Wrapper type for i18n object containing strings for a language
@@ -94,6 +92,6 @@ export type OtherLanguageWrapExhaustive<Strings> = {
     [key in keyof Strings]: Strings[key] extends I18nValue<infer A>
         ? I18nValue<A>
         : Strings[key] extends Record<string, unknown>
-        ? OtherLanguageWrapExhaustive<Strings[key]>
-        : never
+            ? OtherLanguageWrapExhaustive<Strings[key]>
+            : never
 }

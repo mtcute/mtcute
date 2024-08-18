@@ -1,15 +1,17 @@
 import { setPlatform } from '@mtcute/core/platform.js'
-import {
+import type {
     ClientMessageHandler,
     RespondFn,
     SendFn,
     SomeWorker,
-    TelegramWorker as TelegramWorkerBase,
     TelegramWorkerOptions,
-    TelegramWorkerPort as TelegramWorkerPortBase,
     TelegramWorkerPortOptions,
     WorkerCustomMethods,
     WorkerMessageHandler,
+} from '@mtcute/core/worker.js'
+import {
+    TelegramWorker as TelegramWorkerBase,
+    TelegramWorkerPort as TelegramWorkerPortBase,
 } from '@mtcute/core/worker.js'
 
 import { DenoPlatform } from './platform.js'
@@ -52,7 +54,7 @@ export class TelegramWorkerPort<T extends WorkerCustomMethods> extends TelegramW
             const send: SendFn = worker.postMessage.bind(worker)
 
             const messageHandler = (ev: MessageEvent) => {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                // eslint-disable-next-line ts/no-unsafe-argument
                 handler(ev.data)
             }
 

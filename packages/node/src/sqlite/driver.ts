@@ -1,6 +1,7 @@
-import sqlite3, { Options } from 'better-sqlite3'
-
-import { BaseSqliteStorageDriver, ISqliteDatabase } from '@mtcute/core'
+import type { Options } from 'better-sqlite3'
+import sqlite3 from 'better-sqlite3'
+import type { ISqliteDatabase } from '@mtcute/core'
+import { BaseSqliteStorageDriver } from '@mtcute/core'
 
 export interface SqliteStorageDriverOptions {
     /**
@@ -24,7 +25,7 @@ export interface SqliteStorageDriverOptions {
 export class SqliteStorageDriver extends BaseSqliteStorageDriver {
     constructor(
         readonly filename = ':memory:',
-        readonly params?: SqliteStorageDriverOptions,
+        readonly params?: SqliteStorageDriverOptions | undefined,
     ) {
         super()
     }

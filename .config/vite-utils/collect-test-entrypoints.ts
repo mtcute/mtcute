@@ -1,13 +1,15 @@
-import { join, resolve } from 'path'
-import * as fs from 'fs'
+import { join, resolve } from 'node:path'
+import * as fs from 'node:fs'
+
 import { globSync } from 'glob'
 
-export function collectTestEntrypoints(params: { skipPackages: string[]; skipTests: string[] }) {
+export function collectTestEntrypoints(params: { skipPackages: string[], skipTests: string[] }) {
     const files: string[] = []
 
+    // eslint-disable-next-line no-restricted-globals
     const packages = resolve(__dirname, '../../packages')
 
-    const skipTests = params.skipTests.map((path) => resolve(packages, path))
+    const skipTests = params.skipTests.map(path => resolve(packages, path))
 
     for (const dir of fs.readdirSync(packages)) {
         if (dir.startsWith('.') || params.skipPackages.includes(dir)) continue

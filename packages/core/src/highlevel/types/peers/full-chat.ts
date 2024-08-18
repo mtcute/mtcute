@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/inspectable.js'
@@ -6,6 +6,7 @@ import { memoizeGetters } from '../../utils/memoize.js'
 import { Photo } from '../media/photo.js'
 import { StickerSet } from '../misc/sticker-set.js'
 import { BusinessAccount } from '../premium/business-account.js'
+
 import { Chat } from './chat.js'
 import { ChatInviteLink } from './chat-invite-link.js'
 import { ChatLocation } from './chat-location.js'
@@ -74,7 +75,7 @@ export class FullChat extends Chat {
     get fullPhoto(): Photo | null {
         if (!this.fullPeer) return null
 
-        let photo: tl.TypePhoto | undefined = undefined
+        let photo: tl.TypePhoto | undefined
 
         switch (this.fullPeer._) {
             case 'userFull':

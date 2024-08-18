@@ -8,7 +8,7 @@ Highly optimized for size & speed WASM implementation of common algorithms used 
 - **Super lightweight**: Only 47 KB raw, 24 KB gzipped
 - **Blazingly fast**: Up to 10x faster than pure JS implementations
 - **Ready to use**: Implements almost all algos used in MTProto:
-  - AES IGE 
+  - AES IGE
   - Deflate (zlib compression + gunzip)
   - SHA-1, SHA-256
 

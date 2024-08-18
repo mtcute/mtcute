@@ -5,7 +5,7 @@ module.exports = ({ path, glob, transformFile, packageDir, outDir, jsr }) => ({
     esmImportDirectives: true,
     final() {
         const version = require(path.join(packageDir, 'package.json')).version
-        const replaceVersion = (content) => content.replace('%VERSION%', version)
+        const replaceVersion = content => content.replace('%VERSION%', version)
 
         if (jsr) {
             transformFile(path.join(outDir, 'network/network-manager.ts'), replaceVersion)
@@ -21,11 +21,11 @@ module.exports = ({ path, glob, transformFile, packageDir, outDir, jsr }) => ({
         // skip for jsr for now because types aren't resolved correctly and it breaks everything (TODO: fix this)
         const decoratorsRegex = new RegExp(
             `(${KNOWN_DECORATORS.join('|')})\\((.+?)\\)(?:;|$)`,
-            'gsm',
+            'gms',
         )
 
         const replaceDecorators = (content, file) => {
-            if (!KNOWN_DECORATORS.some((d) => content.includes(d))) return null
+            if (!KNOWN_DECORATORS.some(d => content.includes(d))) return null
 
             const countPerClass = new Map()
 
@@ -61,7 +61,7 @@ module.exports = ({ path, glob, transformFile, packageDir, outDir, jsr }) => ({
                 )
             }
 
-            return content + '\n' + customExports.join('\n') + '\n'
+            return `${content}\n${customExports.join('\n')}\n`
         }
 
         const globSrc = path.join(outDir, jsr ? 'highlevel/types/**/*.ts' : 'esm/highlevel/types/**/*.js')

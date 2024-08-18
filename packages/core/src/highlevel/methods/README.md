@@ -65,7 +65,7 @@ function _initializeAwesomeExtension(client: ITelegramClient) {
 
 ## `@exported`
 
-Used as a first statement inside an exported function's body to indicate that 
+Used as a first statement inside an exported function's body to indicate that
 this exported type should be imported from the client
 
 Example:

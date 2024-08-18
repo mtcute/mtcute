@@ -1,10 +1,11 @@
-import { PublicPart } from '../../types/utils.js'
-import { AppConfigManager } from '../managers/app-config-manager.js'
-import { WorkerInvoker } from './invoker.js'
+import type { PublicPart } from '../../types/utils.js'
+import type { AppConfigManager } from '../managers/app-config-manager.js'
+
+import type { WorkerInvoker } from './invoker.js'
 
 export class AppConfigManagerProxy implements PublicPart<AppConfigManager> {
     readonly get: AppConfigManager['get']
-    readonly getField
+    readonly getField: AppConfigManager['getField']
 
     constructor(readonly invoker: WorkerInvoker) {
         const bind = invoker.makeBinder<AppConfigManager>('app-config')

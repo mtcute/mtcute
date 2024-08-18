@@ -1,17 +1,18 @@
 import { Deque } from '../../utils/deque.js'
-import { ITelegramClient } from '../client.types.js'
+import type { ITelegramClient } from '../client.types.js'
 
 type Resolve<T> = (value: T | PromiseLike<T>) => void
 type Reject = (err?: unknown) => void
 
-type WaitersMap<K, U, T> = Map<K, [T, Resolve<U | null>, Reject][]>
-interface InternalState<K, U, T> {
-    waiters: WaitersMap<K, U, T>
-    fetchingKeys: Set<K>
+type WaitersMap<U, T> = Map<string | number, [T, Resolve<U | null>, Reject][]>
+interface InternalState<U, T> {
+    waiters: WaitersMap<U, T>
+    fetchingKeys: Set<string | number>
     retryQueue: Deque<T>
     numRunning: number
 }
 
+export type BatchedQuery<T, U> = (client: ITelegramClient, item: T) => Promise<U | null>
 // todo: should it be MtClient?
 
 /**
@@ -23,7 +24,7 @@ interface InternalState<K, U, T> {
  *   - "key" - unique identifier of the item, which should be deriveable from both input and output.
  *     used for matching input and output items and deduplicating them.
  */
-export function batchedQuery<T, U, K extends string | number>(params: {
+export function batchedQuery<T, U>(params: {
     /**
      * Fetcher function, taking an array of input items and returning an array of output items.
      *
@@ -33,9 +34,9 @@ export function batchedQuery<T, U, K extends string | number>(params: {
     fetch: (client: ITelegramClient, items: T[]) => Promise<U[]>
 
     /** Key derivation function for input items */
-    inputKey: (item: T, client: ITelegramClient) => K
+    inputKey: (item: T, client: ITelegramClient) => string | number
     /** Key derivation function for output items */
-    outputKey: (item: U, client: ITelegramClient) => K
+    outputKey: (item: U, client: ITelegramClient) => string | number
 
     /**
      * Maximum number of items to be passed to the `fetcher` function at once.
@@ -64,13 +65,13 @@ export function batchedQuery<T, U, K extends string | number>(params: {
      *   or an array of items for which the query should be retried (waiters for other items will throw `err`).
      */
     retrySingleOnError?: (items: T[], err: unknown) => boolean | T[]
-}): (client: ITelegramClient, item: T) => Promise<U | null> {
+}): BatchedQuery<T, U> {
     const { inputKey, outputKey, fetch, maxBatchSize = Infinity, maxConcurrent = 1, retrySingleOnError } = params
 
     const symbol = Symbol('batchedQueryState')
 
     function getState(client_: ITelegramClient) {
-        const client = client_ as { [symbol]?: InternalState<K, U, T> }
+        const client = client_ as { [symbol]?: InternalState<U, T> }
 
         if (!client[symbol]) {
             client[symbol] = {
@@ -84,7 +85,7 @@ export function batchedQuery<T, U, K extends string | number>(params: {
         return client[symbol]
     }
 
-    function addWaiter(client: ITelegramClient, waiters: WaitersMap<K, U, T>, item: T) {
+    function addWaiter(client: ITelegramClient, waiters: WaitersMap<U, T>, item: T) {
         const key = inputKey(item, client)
 
         let arr = waiters.get(key)
@@ -99,7 +100,7 @@ export function batchedQuery<T, U, K extends string | number>(params: {
         })
     }
 
-    function popWaiters(waiters: WaitersMap<K, U, T>, key: K) {
+    function popWaiters(waiters: WaitersMap<U, T>, key: string | number) {
         const arr = waiters.get(key)
         if (!arr) return []
 
@@ -108,19 +109,19 @@ export function batchedQuery<T, U, K extends string | number>(params: {
         return arr
     }
 
-    function startLoops(client: ITelegramClient, state: InternalState<K, U, T>) {
+    function startLoops(client: ITelegramClient, state: InternalState<U, T>) {
         for (let i = state.numRunning; i <= maxConcurrent; i++) {
             processPending(client, state)
         }
     }
 
-    function processPending(client: ITelegramClient, state: InternalState<K, U, T>) {
+    function processPending(client: ITelegramClient, state: InternalState<U, T>) {
         const { waiters, fetchingKeys, retryQueue } = state
 
         if (state.numRunning >= maxConcurrent) return
 
         const request: T[] = []
-        const requestKeys: K[] = []
+        const requestKeys: (string | number)[] = []
         let isRetryRequest = false
 
         if (retryQueue.length > 0) {
@@ -149,10 +150,10 @@ export function batchedQuery<T, U, K extends string | number>(params: {
 
         state.numRunning += 1
 
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        // eslint-disable-next-line ts/no-floating-promises
         fetch(client, request)
             .then((res) => {
-                const receivedKeys = new Set<K>()
+                const receivedKeys = new Set()
 
                 for (const it of res) {
                     const key = outputKey(it, client)

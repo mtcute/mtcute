@@ -1,6 +1,6 @@
 function load(app) {
     app.converter.addUnknownSymbolResolver((declaration) => {
-        const symbol = declaration.symbolReference?.path?.map((path) => path.path).join('.')
+        const symbol = declaration.symbolReference?.path?.map(path => path.path).join('.')
 
         if (symbol === 'Long' || symbol === 'tl.Long') {
             return {
@@ -40,7 +40,7 @@ function load(app) {
                 }
             }
 
-            name = (ns ? ns + '.' : '') + name
+            name = (ns ? `${ns}.` : '') + name
 
             let url
 

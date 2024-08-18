@@ -1,8 +1,10 @@
 import { MtArgumentError } from '../../../types/errors.js'
-import { ITelegramClient } from '../../client.types.js'
-import { Chat, InputPeerLike, MtPeerNotFoundError } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { Chat, MtPeerNotFoundError } from '../../types/index.js'
 import { INVITE_LINK_REGEX } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { _getRawPeerBatched } from './batched-queries.js'
 
 // @available=both

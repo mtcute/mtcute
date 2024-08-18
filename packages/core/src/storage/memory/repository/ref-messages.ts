@@ -1,14 +1,14 @@
-import { IReferenceMessagesRepository } from '../../../highlevel/storage/repository/ref-messages.js'
-import { MemoryStorageDriver } from '../driver.js'
+import type { IReferenceMessagesRepository } from '../../../highlevel/storage/repository/ref-messages.js'
+import type { MemoryStorageDriver } from '../driver.js'
 
 interface RefMessagesState {
     refs: Map<number, Set<string>>
 }
 
 export class MemoryRefMessagesRepository implements IReferenceMessagesRepository {
-    readonly state
+    readonly state: RefMessagesState
     constructor(readonly _driver: MemoryStorageDriver) {
-        this.state = this._driver.getState<RefMessagesState>('refMessages', () => ({
+        this.state = this._driver.getState('refMessages', () => ({
             refs: new Map(),
         }))
     }

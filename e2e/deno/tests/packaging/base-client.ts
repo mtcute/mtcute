@@ -1,5 +1,4 @@
 import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
-
 import { BaseTelegramClient } from '@mtcute/core/client.js'
 
 import { getApiParams } from '../../utils.ts'

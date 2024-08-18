@@ -1,10 +1,10 @@
 import { bufferToReversed } from './buffer-utils.js'
-import { ICryptoProvider } from './crypto/abstract.js'
+import type { ICryptoProvider } from './crypto/abstract.js'
 
 /**
  * Get the minimum number of bits required to represent a number
  */
-export function bigIntBitLength(n: bigint) {
+export function bigIntBitLength(n: bigint): number {
     // not the fastest way, but at least not .toString(2) and not too complex
     // taken from: https://stackoverflow.com/a/76616288/22656950
 
@@ -38,13 +38,13 @@ export function bigIntToBuffer(value: bigint, length = 0, le = false): Uint8Arra
 
     // it is faster to work with 64-bit words than with bytes directly
     for (let i = 0; i < dv.byteLength; i += 8) {
-        dv.setBigUint64(i, value & 0xffffffffffffffffn, true)
+        dv.setBigUint64(i, value & 0xFFFFFFFFFFFFFFFFn, true)
         value >>= 64n
     }
 
     if (unaligned > 0) {
         for (let i = length - unaligned; i < length; i++) {
-            u8[i] = Number(value & 0xffn)
+            u8[i] = Number(value & 0xFFn)
             value >>= 8n
         }
     }

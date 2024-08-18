@@ -1,6 +1,7 @@
-import { asyncResettable, LruMap } from '@mtcute/core/utils.js'
+import { LruMap, asyncResettable } from '@mtcute/core/utils.js'
+import type { MaybePromise } from '@mtcute/core'
 
-import { IStateStorageProvider } from './provider.js'
+import type { IStateStorageProvider } from './provider.js'
 
 const makeCurrentSceneKey = (key: string) => `$current_scene_${key}`
 
@@ -15,14 +16,15 @@ export class StateService {
         await this.provider.driver.load?.()
         this._loaded = true
     })
-    async load() {
+
+    async load(): Promise<void> {
         await this._load.run()
         this._vacuumTimer = setInterval(() => {
             Promise.resolve(this.provider.state.vacuum(Date.now())).catch(() => {})
         }, 300_000)
     }
 
-    async destroy() {
+    async destroy(): Promise<void> {
         await this.provider.driver.save?.()
         await this.provider.driver.destroy?.()
         clearInterval(this._vacuumTimer)
@@ -67,11 +69,11 @@ export class StateService {
         return this.deleteState(makeCurrentSceneKey(key))
     }
 
-    getRateLimit(key: string, limit: number, window: number) {
+    getRateLimit(key: string, limit: number, window: number): MaybePromise<[number, number]> {
         return this.provider.state.getRateLimit(key, Date.now(), limit, window)
     }
 
-    resetRateLimit(key: string) {
+    resetRateLimit(key: string): MaybePromise<void> {
         return this.provider.state.resetRateLimit(key)
     }
 }

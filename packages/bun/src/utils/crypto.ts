@@ -1,7 +1,7 @@
-// eslint-disable-next-line no-restricted-imports
-import { readFile } from 'fs/promises'
+import { readFile } from 'node:fs/promises'
 
-import { BaseCryptoProvider, IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
+import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
+import { BaseCryptoProvider } from '@mtcute/core/utils.js'
 import {
     createCtr256,
     ctr256,
@@ -28,7 +28,6 @@ const ALGO_TO_SUBTLE: Record<string, string> = {
 
 export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
     async initialize(): Promise<void> {
-        // eslint-disable-next-line no-restricted-globals
         const wasmFile = require.resolve('@mtcute/wasm/mtcute.wasm')
         const wasm = await readFile(wasmFile)
         initSync(wasm)
@@ -49,7 +48,7 @@ export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProv
         const ctx = createCtr256(key, iv)
 
         return {
-            process: (data) => ctr256(ctx, data),
+            process: data => ctr256(ctx, data),
             close: () => freeCtr256(ctx),
         }
     }
@@ -74,7 +73,7 @@ export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProv
                 keyMaterial,
                 (keylen || 64) * 8,
             )
-            .then((result) => new Uint8Array(result))
+            .then(result => new Uint8Array(result))
     }
 
     sha1(data: Uint8Array): Uint8Array {
@@ -113,7 +112,7 @@ export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProv
         return gunzip(data)
     }
 
-    randomFill(buf: Uint8Array) {
+    randomFill(buf: Uint8Array): void {
         crypto.getRandomValues(buf)
     }
 }

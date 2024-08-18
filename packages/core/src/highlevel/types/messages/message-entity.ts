@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
@@ -24,29 +24,29 @@ import { memoizeGetters } from '../../utils/memoize.js'
  *   - 'emoji': A custom emoji. `.emojiId` contains the emoji ID.
  */
 export type MessageEntityParams =
-    | {
-          kind:
-              | 'mention'
-              | 'hashtag'
-              | 'cashtag'
-              | 'bot_command'
-              | 'url'
-              | 'email'
-              | 'phone_number'
-              | 'bold'
-              | 'italic'
-              | 'underline'
-              | 'strikethrough'
-              | 'spoiler'
-              | 'code'
-              | 'bank_card'
-              | 'unknown'
-      }
-    | { kind: 'blockquote'; collapsible: boolean }
-    | { kind: 'pre'; language?: string }
-    | { kind: 'text_link'; url: string }
-    | { kind: 'text_mention'; userId: number }
-    | { kind: 'emoji'; emojiId: tl.Long }
+  | {
+      kind:
+        | 'mention'
+        | 'hashtag'
+        | 'cashtag'
+        | 'bot_command'
+        | 'url'
+        | 'email'
+        | 'phone_number'
+        | 'bold'
+        | 'italic'
+        | 'underline'
+        | 'strikethrough'
+        | 'spoiler'
+        | 'code'
+        | 'bank_card'
+        | 'unknown'
+  }
+  | { kind: 'blockquote', collapsible: boolean }
+  | { kind: 'pre', language?: string }
+  | { kind: 'text_link', url: string }
+  | { kind: 'text_mention', userId: number }
+  | { kind: 'emoji', emojiId: tl.Long }
 
 /**
  * Kind of the entity. For more information, see {@link MessageEntityParams}
@@ -67,7 +67,7 @@ export class MessageEntity {
      *
      * Since JS strings are UTF-16, you can use this as-is
      */
-    get offset() {
+    get offset(): number {
         return this.raw.offset
     }
 
@@ -76,7 +76,7 @@ export class MessageEntity {
      *
      * Since JS strings are UTF-16, you can use this as-is
      */
-    get length() {
+    get length(): number {
         return this.raw.length
     }
 
@@ -154,7 +154,7 @@ export class MessageEntity {
      */
     is<const T extends MessageEntityKind>(
         kind: T,
-    ): this is MessageEntity & { params: Extract<MessageEntityParams, { kind: T }>; kind: T } {
+    ): this is MessageEntity & { params: Extract<MessageEntityParams, { kind: T }>, kind: T } {
         return this.params.kind === kind
     }
 }

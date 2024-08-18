@@ -1,114 +1,129 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// ^^ will be looked into in MTQ-29
-import {
-    _RepliedMessageAssertionsByOrigin,
+import type {
+    Audio,
+    Contact,
+    Dice,
+    Document,
+    Game,
+    Invoice,
+    LiveLocation,
+    Location,
     MaybeArray,
     Message,
     MessageAction,
     MessageMediaType,
     Peer,
-    RawDocument,
-    RawLocation,
+    Photo,
+    Poll,
     RepliedMessageInfo,
     RepliedMessageOrigin,
     Sticker,
     StickerSourceType,
     StickerType,
     User,
+    Venue,
     Video,
+    Voice,
+    WebPage,
+    _RepliedMessageAssertionsByOrigin,
+} from '@mtcute/core'
+import {
+    RawDocument,
+    RawLocation,
 } from '@mtcute/core'
 
-import { BusinessMessageContext } from '../context/business-message.js'
-import { MessageContext } from '../index.js'
-import { Modify, UpdateFilter } from './types.js'
+import type { BusinessMessageContext } from '../context/business-message.js'
+import type { MessageContext } from '../index.js'
+
+import type { Modify, UpdateFilter } from './types.js'
 
 /**
  * Filter incoming messages.
  *
  * Messages sent to yourself (i.e. Saved Messages) are also "incoming"
  */
-export const incoming: UpdateFilter<Message, { isOutgoing: false }> = (msg) => !msg.isOutgoing
+export const incoming: UpdateFilter<Message, { isOutgoing: false }> = msg => !msg.isOutgoing
 
 /**
  * Filter outgoing messages.
  *
  * Messages sent to yourself (i.e. Saved Messages) are **not** "outgoing"
  */
-export const outgoing: UpdateFilter<Message, { isOutgoing: true }> = (msg) => msg.isOutgoing
+export const outgoing: UpdateFilter<Message, { isOutgoing: true }> = msg => msg.isOutgoing
 
 /**
  * Filter for scheduled messages
  */
-export const scheduled: UpdateFilter<Message, { isScheduled: true }> = (msg) => msg.isScheduled
+export const scheduled: UpdateFilter<Message, { isScheduled: true }> = msg => msg.isScheduled
 
 /**
  * Filter messages that are replies to some other message
  */
-export const reply: UpdateFilter<Message, { replyToMessage: RepliedMessageInfo }> = (msg) => msg.replyToMessage !== null
+export const reply: UpdateFilter<Message, { replyToMessage: RepliedMessageInfo }> = msg => msg.replyToMessage !== null
 
 /**
  * Filter messages that are replies with the given origin type
  */
-export const replyOrigin =
-    <T extends RepliedMessageOrigin>(
-        origin: T,
-    ): UpdateFilter<
-        Message,
-        {
-            replyToMessage: Modify<RepliedMessageInfo, _RepliedMessageAssertionsByOrigin[T] & { origin: T }>
-        }
-    > =>
-        (msg) =>
-            msg.replyToMessage?.originIs(origin) ?? false // originIs does additional checks
+export function replyOrigin<T extends RepliedMessageOrigin>(origin: T): UpdateFilter<
+    Message,
+    {
+        replyToMessage: Modify<RepliedMessageInfo, _RepliedMessageAssertionsByOrigin[T] & { origin: T }>
+    }
+> {
+    return msg =>
+        msg.replyToMessage?.originIs(origin) ?? false
+} // originIs does additional checks
 
 /**
  * Filter messages containing some media
  */
-export const media: UpdateFilter<Message, { media: Exclude<Message['media'], null> }> = (msg) => msg.media !== null
+export const media: UpdateFilter<Message, { media: Exclude<Message['media'], null> }> = msg => msg.media !== null
 
 /**
  * Filter messages containing media of given type
  */
-export const mediaOf =
-    <T extends MessageMediaType>(type: T): UpdateFilter<Message, { media: Extract<Message['media'], { type: T }> }> =>
-        (msg) =>
-            msg.media?.type === type
+export function mediaOf<T extends MessageMediaType>(type: T): UpdateFilter<
+    Message,
+    { media: Extract<Message['media'], { type: T }> }
+> {
+    return msg =>
+        msg.media?.type === type
+}
 
 /** Filter messages containing a photo */
-export const photo = mediaOf('photo')
+export const photo: UpdateFilter<Message, { media: Photo }> = mediaOf('photo')
 /** Filter messages containing a dice */
-export const dice = mediaOf('dice')
+export const dice: UpdateFilter<Message, { media: Dice }> = mediaOf('dice')
 /** Filter messages containing a contact */
-export const contact = mediaOf('contact')
+export const contact: UpdateFilter<Message, { media: Contact }> = mediaOf('contact')
 /** Filter messages containing an audio file */
-export const audio = mediaOf('audio')
+export const audio: UpdateFilter<Message, { media: Audio }> = mediaOf('audio')
 /** Filter messages containing a voice message (audio-only) */
-export const voice = mediaOf('voice')
+export const voice: UpdateFilter<Message, { media: Voice }> = mediaOf('voice')
 /** Filter messages containing a sticker */
-export const sticker = mediaOf('sticker')
+export const sticker: UpdateFilter<Message, { media: Sticker }> = mediaOf('sticker')
 /** Filter messages containing a document (a file) */
-export const document = mediaOf('document')
+export const document: UpdateFilter<Message, { media: Document }> = mediaOf('document')
 /** Filter messages containing any video (videos, round messages and animations) */
-export const anyVideo = mediaOf('video')
+export const anyVideo: UpdateFilter<Message, { media: Video }> = mediaOf('video')
 /** Filter messages containing a static location */
-export const location = mediaOf('location')
+export const location: UpdateFilter<Message, { media: Location }> = mediaOf('location')
 /** Filter messages containing a live location */
-export const liveLocation = mediaOf('live_location')
+export const liveLocation: UpdateFilter<Message, { media: LiveLocation }> = mediaOf('live_location')
 /** Filter messages containing a game */
-export const game = mediaOf('game')
+export const game: UpdateFilter<Message, { media: Game }> = mediaOf('game')
 /** Filter messages containing a web page */
-export const webpage = mediaOf('webpage')
+export const webpage: UpdateFilter<Message, { media: WebPage }> = mediaOf('webpage')
 /** Filter messages containing a venue */
-export const venue = mediaOf('venue')
+export const venue: UpdateFilter<Message, { media: Venue }> = mediaOf('venue')
 /** Filter messages containing a poll */
-export const poll = mediaOf('poll')
+export const poll: UpdateFilter<Message, { media: Poll }> = mediaOf('poll')
 /** Filter messages containing an invoice */
-export const invoice = mediaOf('invoice')
+export const invoice: UpdateFilter<Message, { media: Invoice }> = mediaOf('invoice')
 
 /**
  * Filter messages containing any location (live or static).
  */
-export const anyLocation: UpdateFilter<Message, { media: Location }> = (msg) => msg.media instanceof RawLocation
+export const anyLocation: UpdateFilter<Message, { media: Location }> = msg => msg.media instanceof RawLocation
 
 /**
  * Filter messages containing a document
@@ -116,7 +131,7 @@ export const anyLocation: UpdateFilter<Message, { media: Location }> = (msg) => 
  * This will also match media like audio, video, voice
  * that also use Documents
  */
-export const anyDocument: UpdateFilter<Message, { media: RawDocument }> = (msg) => msg.media instanceof RawDocument
+export const anyDocument: UpdateFilter<Message, { media: RawDocument }> = msg => msg.media instanceof RawDocument
 
 /**
  * Filter messages containing a simple video.
@@ -134,7 +149,7 @@ export const video: UpdateFilter<
             }
         >
     }
-> = (msg) => msg.media?.type === 'video' && !msg.media.isAnimation && !msg.media.isRound
+> = msg => msg.media?.type === 'video' && !msg.media.isAnimation && !msg.media.isRound
 
 /**
  * Filter messages containing an animation.
@@ -153,7 +168,7 @@ export const animation: UpdateFilter<
             }
         >
     }
-> = (msg) => msg.media?.type === 'video' && msg.media.isAnimation && !msg.media.isRound
+> = msg => msg.media?.type === 'video' && msg.media.isAnimation && !msg.media.isRound
 
 /**
  * Filter messages containing a round message (aka video note).
@@ -169,23 +184,23 @@ export const roundMessage: UpdateFilter<
             }
         >
     }
-> = (msg) => msg.media?.type === 'video' && !msg.media.isAnimation && msg.media.isRound
+> = msg => msg.media?.type === 'video' && !msg.media.isAnimation && msg.media.isRound
 
 /**
  * Filter messages containing a sticker by its type
  */
-export const stickerByType =
-    (type: StickerType): UpdateFilter<Message, { media: Sticker }> =>
-        (msg) =>
-            msg.media?.type === 'sticker' && msg.media.stickerType === type
+export function stickerByType(type: StickerType): UpdateFilter<Message, { media: Sticker }> {
+    return msg =>
+        msg.media?.type === 'sticker' && msg.media.stickerType === type
+}
 
 /**
  * Filter messages containing a sticker by its source file type
  */
-export const stickerBySourceType =
-    (type: StickerSourceType): UpdateFilter<Message, { media: Sticker }> =>
-        (msg) =>
-            msg.media?.type === 'sticker' && msg.media.sourceType === type
+export function stickerBySourceType(type: StickerSourceType): UpdateFilter<Message, { media: Sticker }> {
+    return msg =>
+        msg.media?.type === 'sticker' && msg.media.sourceType === type
+}
 
 /**
  * Filter text-only messages non-service messages
@@ -196,19 +211,17 @@ export const text: UpdateFilter<
         media: null
         isService: false
     }
-> = (msg) => msg.media === null && !msg.isService
+> = msg => msg.media === null && !msg.isService
 
 /**
  * Filter service messages
  */
-export const service: UpdateFilter<Message, { isService: true }> = (msg) => msg.isService
+export const service: UpdateFilter<Message, { isService: true }> = msg => msg.isService
 
 /**
  * Filter service messages by action type
  */
-export const action = <T extends Exclude<MessageAction, null>['type']>(
-    type: MaybeArray<T>,
-): UpdateFilter<
+export function action<T extends Exclude<MessageAction, null>['type']>(type: MaybeArray<T>): UpdateFilter<
     Message,
     {
         action: Extract<MessageAction, { type: T }>
@@ -216,23 +229,24 @@ export const action = <T extends Exclude<MessageAction, null>['type']>(
             ? User
             : Peer
     }
-> => {
+> {
     if (Array.isArray(type)) {
         const index: Partial<Record<T, true>> = {}
-        type.forEach((it) => (index[it] = true))
+        type.forEach(it => (index[it] = true))
 
-        return (msg) => (msg.action?.type as any) in index
+        return msg => (msg.action?.type as any) in index
     }
 
-    return (msg) => msg.action?.type === type
+    return msg => msg.action?.type === type
 }
 
-export const sender =
-    <T extends Message['sender']['type']>(
-        type: T,
-    ): UpdateFilter<Message, { sender: Extract<Message['sender'], { type: T }> }> =>
-        (msg) =>
-            msg.sender.type === type
+export function sender<T extends Message['sender']['type']>(type: T): UpdateFilter<
+    Message,
+    { sender: Extract<Message['sender'], { type: T }> }
+> {
+    return msg =>
+        msg.sender.type === type
+}
 
 /**
  * Filter that matches messages that are replies to some other message that can be fetched
@@ -240,41 +254,45 @@ export const sender =
  *
  * Optionally, you can pass a filter that will be applied to the replied message.
  */
-export const replyTo =
-    <Mod, State extends object>(
-        filter?: UpdateFilter<Message, Mod, State>,
-    ): UpdateFilter<MessageContext | BusinessMessageContext, { getReplyTo: () => Promise<Message & Mod> }, State> =>
-        async (msg, state) => {
-            if (!msg.replyToMessage?.id) return false
+export function replyTo<Mod, State extends object>(
+    filter?: UpdateFilter<Message, Mod, State>,
+): UpdateFilter<
+        MessageContext | BusinessMessageContext,
+        { getReplyTo: () => Promise<Message & Mod> },
+        State
+    > {
+    return async (msg, state) => {
+        if (!msg.replyToMessage?.id) return false
 
-            const reply = msg._name === 'new_message' ? await msg.getReplyTo() : msg.replyTo
-            if (!reply) return false
+        const reply = msg._name === 'new_message' ? await msg.getReplyTo() : msg.replyTo
+        if (!reply) return false
 
-            if (msg._name === 'new_message') {
-                msg.getReplyTo = () => Promise.resolve(reply)
-            }
-
-            if (!filter) return true
-
-            return filter(reply, state)
+        if (msg._name === 'new_message') {
+            msg.getReplyTo = () => Promise.resolve(reply)
         }
+
+        if (!filter) return true
+
+        return filter(reply, state)
+    }
+}
 
 /**
  * Middleware-like filter that will fetch the sender of the message
  * and make it available to further filters, as well as the handler itself.
  */
-export const withCompleteSender =
-    <Mod, State extends object>(
-        filter?: UpdateFilter<MessageContext, Mod, State>,
-    ): UpdateFilter<MessageContext, Mod, State> =>
-        async (msg, state) => {
-            try {
-                await msg.getCompleteSender()
-            } catch (e) {
-                return false
-            }
-
-            if (!filter) return true
-
-            return filter(msg, state)
+export function withCompleteSender<Mod, State extends object>(
+    filter?: UpdateFilter<MessageContext, Mod, State>,
+): UpdateFilter<MessageContext, Mod, State> {
+    return async (msg, state) => {
+        try {
+            await msg.getCompleteSender()
+        } catch {
+            return false
         }
+
+        if (!filter) return true
+
+        return filter(msg, state)
+    }
+}

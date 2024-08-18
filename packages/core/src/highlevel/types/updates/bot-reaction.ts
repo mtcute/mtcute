@@ -1,12 +1,14 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Chat } from '../peers/chat.js'
-import { parsePeer, Peer } from '../peers/peer.js'
-import { PeersIndex } from '../peers/peers-index.js'
+import type { Peer } from '../peers/peer.js'
+import { parsePeer } from '../peers/peer.js'
+import type { PeersIndex } from '../peers/peers-index.js'
 import { ReactionCount } from '../reactions/reaction-count.js'
-import { InputReaction, toReactionEmoji } from '../reactions/types.js'
+import type { InputReaction } from '../reactions/types.js'
+import { toReactionEmoji } from '../reactions/types.js'
 
 /**
  * A reaction to a message was changed by a user.
@@ -54,14 +56,14 @@ export class BotReactionUpdate {
      * List of reactions before the change
      */
     get before(): InputReaction[] {
-        return this.raw.oldReactions.map((it) => toReactionEmoji(it))
+        return this.raw.oldReactions.map(it => toReactionEmoji(it))
     }
 
     /**
      * List of reactions after the change
      */
     get after(): InputReaction[] {
-        return this.raw.newReactions.map((it) => toReactionEmoji(it))
+        return this.raw.newReactions.map(it => toReactionEmoji(it))
     }
 }
 
@@ -107,7 +109,7 @@ export class BotReactionCountUpdate {
      * The new list of reactions to the message
      */
     get reactions(): ReactionCount[] {
-        return this.raw.reactions.map((it) => new ReactionCount(it))
+        return this.raw.reactions.map(it => new ReactionCount(it))
     }
 }
 

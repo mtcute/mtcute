@@ -1,7 +1,7 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
 import { resolveUser } from '../users/resolve-peer.js'
 
 /**
@@ -28,6 +28,6 @@ export async function getBotInfo(
     return client.call({
         _: 'bots.getBotInfo',
         bot: bot ? await resolveUser(client, bot) : undefined,
-        langCode: langCode,
+        langCode,
     })
 }

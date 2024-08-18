@@ -1,5 +1,4 @@
 import Long from 'long'
-
 import type { InputText, MessageEntity, TextWithEntities, tl } from '@mtcute/core'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
@@ -22,7 +21,7 @@ const TO_BE_ESCAPED = /[*_\-~`[\\\]|]/g
  * > handles all `string`s passed to it automatically as plain text.
  */
 function escape(str: string): string {
-    return str.replace(TO_BE_ESCAPED, (s) => '\\' + s)
+    return str.replace(TO_BE_ESCAPED, s => `\\${s}`)
 }
 
 /**
@@ -39,7 +38,7 @@ function unparse(input: InputText): string {
     text = text.replace(TO_BE_ESCAPED, (s, pos: number) => {
         escaped.push(pos)
 
-        return '\\' + s
+        return `\\${s}`
     })
     const hasEscaped = escaped.length > 0
 
@@ -101,7 +100,7 @@ function unparse(input: InputText): string {
                 }
 
                 startTag += '\n'
-                endTag = '\n' + TAG_PRE
+                endTag = `\n${TAG_PRE}`
                 break
             case 'messageEntityTextUrl':
                 startTag = '['
@@ -255,7 +254,7 @@ function parse(
                 let m = url.match(MENTION_REGEX)
 
                 if (m) {
-                    const userId = parseInt(m[1])
+                    const userId = Number.parseInt(m[1])
                     const accessHash = m[2]
 
                     if (accessHash) {
@@ -273,7 +272,7 @@ function parse(
                     (ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>)._ = 'messageEntityCustomEmoji'
                     ;(ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>).documentId = Long.fromString(m[1])
                 } else {
-                    if (url.match(/^\/\//)) url = 'http:' + url
+                    if (url.match(/^\/\//)) url = `http:${url}`
                     ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>)._ = 'messageEntityTextUrl'
                     ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>).url = url
                 }
@@ -286,11 +285,10 @@ function parse(
                 pos += 1
                 insideLink = true
                 if (!('link' in stacks)) stacks.link = []
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                // eslint-disable-next-line ts/no-unsafe-argument
                 stacks.link.push({
                     offset: result.length,
                     length: 0,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any) // other fields are added after the second part
                 continue
             }

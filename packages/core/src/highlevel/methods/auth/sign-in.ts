@@ -1,6 +1,7 @@
-import { ITelegramClient } from '../../client.types.js'
-import { User } from '../../types/peers/user.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { User } from '../../types/peers/user.js'
 import { normalizePhoneNumber } from '../../utils/misc-utils.js'
+
 import { _onAuthorization } from './utils.js'
 
 /**

@@ -1,4 +1,4 @@
 import { WebCryptoProvider, WebPlatform } from '@mtcute/web'
 
-export const defaultPlatform = new WebPlatform()
-export const defaultCryptoProvider = new WebCryptoProvider()
+export const defaultPlatform: WebPlatform = new WebPlatform()
+export const defaultCryptoProvider: WebCryptoProvider = new WebCryptoProvider()

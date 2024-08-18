@@ -1,8 +1,8 @@
-import { MaybeArray } from '../../../types/utils.js'
+import type { MaybeArray } from '../../../types/utils.js'
 import { isPresent } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { Dialog } from '../../types/messages/dialog.js'
-import { InputPeerLike } from '../../types/peers/index.js'
+import type { InputPeerLike } from '../../types/peers/index.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 /**
@@ -15,8 +15,8 @@ export async function getPeerDialogs(client: ITelegramClient, peers: MaybeArray<
 
     const res = await client.call({
         _: 'messages.getPeerDialogs',
-        peers: await resolvePeerMany(client, peers).then((peers) =>
-            peers.filter(isPresent).map((it) => ({
+        peers: await resolvePeerMany(client, peers).then(peers =>
+            peers.filter(isPresent).map(it => ({
                 _: 'inputDialogPeer',
                 peer: it,
             })),

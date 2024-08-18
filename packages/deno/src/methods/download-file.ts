@@ -1,6 +1,6 @@
-import { FileDownloadLocation, FileDownloadParameters, FileLocation, ITelegramClient } from '@mtcute/core'
+import type { FileDownloadLocation, FileDownloadParameters, ITelegramClient } from '@mtcute/core'
+import { FileLocation } from '@mtcute/core'
 import { downloadAsIterable } from '@mtcute/core/methods.js'
-
 import { writeAll } from '@std/io/write-all'
 
 /**

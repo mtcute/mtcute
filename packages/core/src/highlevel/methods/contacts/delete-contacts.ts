@@ -1,6 +1,7 @@
-import { MaybeArray } from '../../../types/utils.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, MtInvalidPeerTypeError, User } from '../../types/index.js'
+import type { MaybeArray } from '../../../types/utils.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { MtInvalidPeerTypeError, User } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
@@ -31,5 +32,5 @@ export async function deleteContacts(client: ITelegramClient, userIds: MaybeArra
 
     client.handleClientUpdate(res)
 
-    return res.users.map((user) => new User(user))
+    return res.users.map(user => new User(user))
 }

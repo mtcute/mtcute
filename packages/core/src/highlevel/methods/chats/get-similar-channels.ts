@@ -1,5 +1,6 @@
-import { ITelegramClient } from '../../client.types.js'
-import { ArrayWithTotal, Chat, InputPeerLike } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { ArrayWithTotal, InputPeerLike } from '../../types/index.js'
+import { Chat } from '../../types/index.js'
 import { makeArrayWithTotal } from '../../utils/misc-utils.js'
 import { resolveChannel } from '../users/resolve-peer.js'
 
@@ -22,7 +23,7 @@ export async function getSimilarChannels(
         channel: await resolveChannel(client, channel),
     })
 
-    const parsed = res.chats.map((chat) => new Chat(chat))
+    const parsed = res.chats.map(chat => new Chat(chat))
 
     switch (res._) {
         case 'messages.chatsSlice':

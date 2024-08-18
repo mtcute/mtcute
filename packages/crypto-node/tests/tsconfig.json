@@ -1,9 +1,9 @@
 {
-    "extends": "../../../tsconfig.json",
-    "include": [
-        "."
-    ],
-    "references": [
-        { "path": "../" }
-    ]
+  "extends": "../../../tsconfig.json",
+  "references": [
+    { "path": "../" }
+  ],
+  "include": [
+    "."
+  ]
 }

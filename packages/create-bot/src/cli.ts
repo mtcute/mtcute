@@ -2,11 +2,12 @@ import * as colors from 'colorette'
 import inquirer from 'inquirer'
 import { open } from 'openurl'
 
-import { readConfig, UserConfigPersisted, writeConfig } from './config.js'
+import type { UserConfigPersisted } from './config.js'
+import { readConfig, writeConfig } from './config.js'
 import { TELEGRAM_APPS_PAGE } from './constants.js'
 import { getFeatureChoices } from './features/cli.js'
-import { MtcuteFeature } from './features/types.js'
-import { PackageManager } from './package-manager.js'
+import type { MtcuteFeature } from './features/types.js'
+import type { PackageManager } from './package-manager.js'
 
 interface UserConfigAnswers {
     reuse?: boolean
@@ -49,7 +50,7 @@ export async function askForConfigPersisted(): Promise<UserConfigPersisted> {
                     setTimeout(() => {
                         try {
                             open(TELEGRAM_APPS_PAGE)
-                        } catch (e) {}
+                        } catch {}
                     }, 1000)
 
                     return [
@@ -121,7 +122,7 @@ export async function askForConfig(packageManager: PackageManager): Promise<User
                         `   Press ${colors.bold('Enter')} again if you want to create a ${colors.magenta('userbot')}`,
                     ].join('\n')
                 }
-                if (!v.match(/^(\d+):[a-z0-9-_]{16,50}$/i)) return 'Invalid bot token'
+                if (!v.match(/^\d+:[\w-]{16,50}$/)) return 'Invalid bot token'
 
                 return true
             },

@@ -2,9 +2,9 @@
 // at this point, we should have all our packages installed in node_modules
 // so it should be safe to just cd into them and run `npm publish` on them
 
-const fs = require('fs')
-const path = require('path')
-const { execSync } = require('child_process')
+const fs = require('node:fs')
+const path = require('node:path')
+const { execSync } = require('node:child_process')
 
 // setup tokenw
 const { NPM_TOKEN, REGISTRY, CURRENT_COMMIT } = process.env
@@ -19,8 +19,8 @@ const commit = CURRENT_COMMIT.slice(0, 7)
 
 const myPkgJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'))
 const packages = Object.keys(myPkgJson.dependencies)
-    .filter((x) => x.startsWith('@mtcute/'))
-    .map((x) => x.slice('@mtcute/'.length))
+    .filter(x => x.startsWith('@mtcute/'))
+    .map(x => x.slice('@mtcute/'.length))
 
 const workDir = path.join(__dirname, 'temp')
 fs.mkdirSync(workDir, { recursive: true })
@@ -41,7 +41,7 @@ async function main() {
 
     // prepare working directory
     for (const pkg of packages) {
-        const data = await fetch(`http://localhost:4873/@mtcute/${pkg}`).then((x) => x.json())
+        const data = await fetch(`http://localhost:4873/@mtcute/${pkg}`).then(x => x.json())
         const version = data['dist-tags'].latest
         const tarball = data.versions[version].dist.tarball
 

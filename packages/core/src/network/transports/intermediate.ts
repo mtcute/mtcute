@@ -1,9 +1,12 @@
-import { dataViewFromBuffer, getRandomInt, ICryptoProvider } from '../../utils/index.js'
-import { IPacketCodec, TransportError } from './abstract.js'
+import type { ICryptoProvider } from '../../utils/index.js'
+import { dataViewFromBuffer, getRandomInt } from '../../utils/index.js'
+
+import type { IPacketCodec } from './abstract.js'
+import { TransportError } from './abstract.js'
 import { StreamedCodec } from './streamed.js'
 
-const TAG = new Uint8Array([0xee, 0xee, 0xee, 0xee])
-const PADDED_TAG = new Uint8Array([0xdd, 0xdd, 0xdd, 0xdd])
+const TAG = new Uint8Array([0xEE, 0xEE, 0xEE, 0xEE])
+const PADDED_TAG = new Uint8Array([0xDD, 0xDD, 0xDD, 0xDD])
 
 /**
  * Intermediate packet codec.
@@ -59,7 +62,7 @@ export class PaddedIntermediatePacketCodec extends IntermediatePacketCodec {
     }
 
     private _crypto!: ICryptoProvider
-    setup?(crypto: ICryptoProvider) {
+    setup?(crypto: ICryptoProvider): void {
         this._crypto = crypto
     }
 

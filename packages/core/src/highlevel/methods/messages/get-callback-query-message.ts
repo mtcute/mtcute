@@ -1,9 +1,10 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { Message } from '../../types/messages/message.js'
-import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
+import type { InputPeerLike } from '../../types/peers/index.js'
+import { PeersIndex } from '../../types/peers/index.js'
 import type { CallbackQuery } from '../../types/updates/callback-query.js'
 import { isInputPeerChannel, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -16,13 +17,13 @@ import { resolvePeer } from '../users/resolve-peer.js'
 export async function getCallbackQueryMessage(
     client: ITelegramClient,
     id:
-        | CallbackQuery
-        | tl.RawUpdateBotCallbackQuery
-        | {
-              messageId: number
-              queryId: tl.Long
-              peer: InputPeerLike
-          },
+      | CallbackQuery
+      | tl.RawUpdateBotCallbackQuery
+      | {
+          messageId: number
+          queryId: tl.Long
+          peer: InputPeerLike
+      },
 ): Promise<Message | null> {
     let msgId: number
     let queryId: tl.Long
@@ -51,13 +52,13 @@ export async function getCallbackQueryMessage(
     const isChannel = isInputPeerChannel(peer)
 
     const res = await client.call(
-        isChannel ?
-            {
+        isChannel
+            ? {
                 _: 'channels.getMessages',
                 id: [inputMessage],
                 channel: toInputChannel(peer),
-            } :
-            {
+            }
+            : {
                 _: 'messages.getMessages',
                 id: [inputMessage],
             },

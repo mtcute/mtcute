@@ -1,13 +1,15 @@
-import {
+import type {
     BusinessCallbackQuery,
     CallbackQuery,
     InlineCallbackQuery,
     MaybeArray,
     MaybePromise,
+} from '@mtcute/core'
+import {
     MtArgumentError,
 } from '@mtcute/core'
 
-import { UpdateFilter } from './filters/types.js'
+import type { UpdateFilter } from './filters/types.js'
 
 /**
  * Callback data builder, inspired by [aiogram](https://github.com/aiogram/aiogram).
@@ -38,10 +40,10 @@ export class CallbackDataBuilder<T extends string> {
      * @param obj  Object containing the data
      */
     build(obj: Record<T, string>): string {
-        const ret =
-            this.prefix +
-            this.sep +
-            this._fields
+        const ret
+            = this.prefix
+            + this.sep
+            + this._fields
                 .map((f) => {
                     const val = obj[f]
 
@@ -115,16 +117,16 @@ export class CallbackDataBuilder<T extends string> {
     filter<Update extends CallbackQuery | InlineCallbackQuery | BusinessCallbackQuery>(
         params:
             | ((
-                  upd: Update,
-                  parsed: Record<T, string>,
-              ) => MaybePromise<Partial<Record<T, MaybeArray<string | RegExp>>> | boolean>)
+                upd: Update,
+                parsed: Record<T, string>,
+            ) => MaybePromise<Partial<Record<T, MaybeArray<string | RegExp>>> | boolean>)
             | Partial<Record<T, MaybeArray<string | RegExp>>> = {},
     ): UpdateFilter<
-        Update,
-        {
-            match: Record<T, string>
-        }
-    > {
+            Update,
+            {
+                match: Record<T, string>
+            }
+        > {
         if (typeof params === 'function') {
             return async (query) => {
                 if (!query.dataStr) return false
@@ -155,7 +157,9 @@ export class CallbackDataBuilder<T extends string> {
                     for (const matcher of matchers) {
                         if (typeof matcher === 'string') {
                             if (value !== matcher) return false
-                        } else if (!matcher.test(value)) return false
+                        } else if (!matcher.test(value)) {
+                            return false
+                        }
                     }
                 }
 
@@ -181,7 +185,7 @@ export class CallbackDataBuilder<T extends string> {
             const value = params[field]
 
             if (Array.isArray(value)) {
-                parts.push(`(${value.map((i) => (typeof i === 'string' ? i : i.source)).join('|')})`)
+                parts.push(`(${value.map(i => (typeof i === 'string' ? i : i.source)).join('|')})`)
             } else {
                 // noinspection SuspiciousTypeOfGuard
                 parts.push(typeof value === 'string' ? value : (value as RegExp).source)
@@ -192,8 +196,9 @@ export class CallbackDataBuilder<T extends string> {
 
         return (query) => {
             const m = query.dataStr?.match(regex)
-            if (!m) return false
-            ;(
+            if (!m) {
+                return false
+            }(
                 query as Update & {
                     match: Record<T, string>
                 }

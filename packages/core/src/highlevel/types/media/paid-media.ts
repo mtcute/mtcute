@@ -1,8 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { MessageMedia } from '../messages/message-media.js'
+import type { MessageMedia } from '../messages/message-media.js'
+
 import { ExtendedMediaPreview } from './extended-media.js'
 
 export class PaidMedia {
@@ -64,7 +65,7 @@ export class PaidMedia {
         return {
             _: 'inputMediaPaidMedia',
             starsAmount: this.raw.starsAmount,
-            extendedMedia: this._extendedMedia.map((m) => m!.inputMedia),
+            extendedMedia: this._extendedMedia.map(m => m!.inputMedia),
         }
     }
 }

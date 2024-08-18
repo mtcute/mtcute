@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-
 import { StubTelegramClient } from '@mtcute/test'
 
 import { sleep } from '../../utils/misc-utils.js'
-import { ITelegramClient } from '../client.types.js'
+import type { ITelegramClient } from '../client.types.js'
+
 import { batchedQuery } from './query-batcher.js'
 
 describe('batchedQuery', () => {
@@ -20,13 +20,13 @@ describe('batchedQuery', () => {
 
             log.push(`[end] fetch() ${items.join(', ')}`)
 
-            return items.map((it) => it * 2)
+            return items.map(it => it * 2)
         }
 
         const batched = batchedQuery({
             fetch,
-            inputKey: (it) => it,
-            outputKey: (it) => it / 2,
+            inputKey: it => it,
+            outputKey: it => it / 2,
         })
 
         const batchedWrapped = async (item: number) => {
@@ -90,13 +90,13 @@ describe('batchedQuery', () => {
 
             log.push(`[end] fetch() ${items.join(', ')}`)
 
-            return items.map((it) => it * 2)
+            return items.map(it => it * 2)
         }
 
         const batched = batchedQuery({
             fetch,
-            inputKey: (it) => it,
-            outputKey: (it) => it / 2,
+            inputKey: it => it,
+            outputKey: it => it / 2,
             maxBatchSize: 2,
         })
 
@@ -171,13 +171,13 @@ describe('batchedQuery', () => {
 
             log.push(`[end] fetch() ${items.join(', ')}`)
 
-            return items.map((it) => it * 2)
+            return items.map(it => it * 2)
         }
 
         const batched = batchedQuery({
             fetch,
-            inputKey: (it) => it,
-            outputKey: (it) => it / 2,
+            inputKey: it => it,
+            outputKey: it => it / 2,
             maxBatchSize: 2,
             maxConcurrent: 2,
         })
@@ -260,13 +260,13 @@ describe('batchedQuery', () => {
 
             log.push(`[end] fetch() ${items.join(', ')}`)
 
-            return items.map((it) => it * 2)
+            return items.map(it => it * 2)
         }
 
         const batched = batchedQuery({
             fetch,
-            inputKey: (it) => it,
-            outputKey: (it) => it / 2,
+            inputKey: it => it,
+            outputKey: it => it / 2,
             maxBatchSize: 2,
         })
 
@@ -321,13 +321,13 @@ describe('batchedQuery', () => {
 
             log.push(`[end] ${client.log.prefix} fetch() ${items.join(', ')}`)
 
-            return items.map((it) => it * 2)
+            return items.map(it => it * 2)
         }
 
         const batched = batchedQuery({
             fetch,
-            inputKey: (it) => it,
-            outputKey: (it) => it / 2,
+            inputKey: it => it,
+            outputKey: it => it / 2,
         })
 
         const batchedWrapped = async (item: number, client_ = client) => {
@@ -404,13 +404,13 @@ describe('batchedQuery', () => {
 
             log.push(`[end] fetch() ${items.join(', ')}`)
 
-            return items.filter((it) => it !== 6).map((it) => it * 2)
+            return items.filter(it => it !== 6).map(it => it * 2)
         }
 
         const batched = batchedQuery({
             fetch,
-            inputKey: (it) => it,
-            outputKey: (it) => it / 2,
+            inputKey: it => it,
+            outputKey: it => it / 2,
         })
 
         const batchedWrapped = async (item: number) => {
@@ -485,13 +485,13 @@ describe('batchedQuery', () => {
 
             log.push(`[end] fetch() ${items.join(', ')}`)
 
-            return items.map((it) => it * 2)
+            return items.map(it => it * 2)
         }
 
         const batched = batchedQuery({
             fetch,
-            inputKey: (it) => it,
-            outputKey: (it) => it / 2,
+            inputKey: it => it,
+            outputKey: it => it / 2,
             maxBatchSize: 2,
             retrySingleOnError: () => true,
         })
@@ -552,13 +552,13 @@ describe('batchedQuery', () => {
 
             log.push(`[end] fetch() ${items.join(', ')}`)
 
-            return items.map((it) => it * 2)
+            return items.map(it => it * 2)
         }
 
         const batched = batchedQuery({
             fetch,
-            inputKey: (it) => it,
-            outputKey: (it) => it / 2,
+            inputKey: it => it,
+            outputKey: it => it / 2,
             retrySingleOnError: () => [3, 4],
         })
 

@@ -1,9 +1,10 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { RawDocument } from './document.js'
+
+import type { RawDocument } from './document.js'
 import { parseDocument } from './document-utils.js'
 import { Photo } from './photo.js'
 

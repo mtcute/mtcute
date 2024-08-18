@@ -1,7 +1,8 @@
-import { BusinessCallbackQuery, CallbackQuery, InlineCallbackQuery, MaybePromise, Message } from '@mtcute/core'
-import { TelegramClient } from '@mtcute/core/client.js'
+import type { MaybePromise, Message } from '@mtcute/core'
+import { BusinessCallbackQuery, CallbackQuery, InlineCallbackQuery } from '@mtcute/core'
+import type { TelegramClient } from '@mtcute/core/client.js'
 
-import { UpdateContext } from './base.js'
+import type { UpdateContext } from './base.js'
 
 /**
  * Context of a callback query update.
@@ -19,7 +20,7 @@ export class CallbackQueryContext extends CallbackQuery implements UpdateContext
     }
 
     /** Answer to this callback query */
-    answer(params: Parameters<TelegramClient['answerCallbackQuery']>[1]) {
+    answer(params: Parameters<TelegramClient['answerCallbackQuery']>[1]): Promise<void> {
         return this.client.answerCallbackQuery(this.id, params)
     }
 
@@ -36,7 +37,7 @@ export class CallbackQueryContext extends CallbackQuery implements UpdateContext
     /**
      * Edit the message that contained the callback button that was clicked.
      */
-    async editMessage(params: Omit<Parameters<TelegramClient['editInlineMessage']>[0], 'messageId'>) {
+    async editMessage(params: Omit<Parameters<TelegramClient['editInlineMessage']>[0], 'messageId'>): Promise<Message> {
         return this.client.editMessage({
             chatId: this.raw.peer,
             message: this.raw.msgId,
@@ -47,7 +48,9 @@ export class CallbackQueryContext extends CallbackQuery implements UpdateContext
     /**
      * Shortcut for getting the message and editing it.
      */
-    async editMessageWith(handler: (msg: Message) => MaybePromise<Parameters<CallbackQueryContext['editMessage']>[0]>) {
+    async editMessageWith(
+        handler: (msg: Message) => MaybePromise<Parameters<CallbackQueryContext['editMessage']>[0]>,
+    ): Promise<Message | undefined> {
         const msg = await this.getMessage()
         if (!msg) return
 
@@ -74,14 +77,14 @@ export class InlineCallbackQueryContext extends InlineCallbackQuery implements U
     }
 
     /** Answer to this callback query */
-    answer(params: Parameters<TelegramClient['answerCallbackQuery']>[1]) {
+    answer(params: Parameters<TelegramClient['answerCallbackQuery']>[1]): Promise<void> {
         return this.client.answerCallbackQuery(this.id, params)
     }
 
     /**
      * Edit the message that contained the callback button that was clicked.
      */
-    async editMessage(params: Omit<Parameters<TelegramClient['editInlineMessage']>[0], 'messageId'>) {
+    async editMessage(params: Omit<Parameters<TelegramClient['editInlineMessage']>[0], 'messageId'>): Promise<void> {
         return this.client.editInlineMessage({
             messageId: this.raw.msgId,
             ...params,
@@ -107,14 +110,14 @@ export class BusinessCallbackQueryContext
     }
 
     /** Answer to this callback query */
-    answer(params: Parameters<TelegramClient['answerCallbackQuery']>[1]) {
+    answer(params: Parameters<TelegramClient['answerCallbackQuery']>[1]): Promise<void> {
         return this.client.answerCallbackQuery(this.id, params)
     }
 
     /**
      * Edit the message that contained the callback button that was clicked.
      */
-    async editMessage(params: Omit<Parameters<TelegramClient['editInlineMessage']>[0], 'messageId'>) {
+    async editMessage(params: Omit<Parameters<TelegramClient['editInlineMessage']>[0], 'messageId'>): Promise<Message> {
         return this.client.editMessage({
             message: this.message,
             businessConnectionId: this.connectionId,

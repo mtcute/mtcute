@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
 
@@ -12,7 +12,7 @@ export class PeersIndex {
 
     hasMin = false
 
-    static from(obj: { users?: tl.TypeUser[]; chats?: tl.TypeChat[] }): PeersIndex {
+    static from(obj: { users?: tl.TypeUser[], chats?: tl.TypeChat[] }): PeersIndex {
         const index = new PeersIndex()
 
         obj.users?.forEach((user) => {

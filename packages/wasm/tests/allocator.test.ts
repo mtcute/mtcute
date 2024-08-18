@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { __getWasm } from '../src/index.js'
+
 import { initWasm } from './init.js'
 
 beforeAll(async () => {

@@ -3,7 +3,8 @@ import { getPlatform } from '@mtcute/core/platform.js'
 import { TlBinaryReader } from '@mtcute/core/utils.js'
 
 import { telegramRleDecode } from '../utils/rle.js'
-import { MtkrutoSession } from './types.js'
+
+import type { MtkrutoSession } from './types.js'
 
 export function parseMtkrutoSession(session: string): MtkrutoSession {
     const data = telegramRleDecode(getPlatform().base64Decode(session, true))
@@ -19,7 +20,7 @@ export function parseMtkrutoSession(session: string): MtkrutoSession {
     }
     const dcId = Number(dcIdStr)
 
-    if (isNaN(dcId)) {
+    if (Number.isNaN(dcId)) {
         throw new MtArgumentError(`Invalid DC ID: ${dcIdStr}`)
     }
 

@@ -1,5 +1,6 @@
-import { ITelegramClient } from '../../client.types.js'
-import { Chat, InputPeerLike } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { Chat } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { INVITE_LINK_REGEX } from '../../utils/peer-utils.js'
 import { resolveChannel } from '../users/resolve-peer.js'

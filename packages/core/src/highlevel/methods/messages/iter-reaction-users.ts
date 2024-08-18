@@ -1,6 +1,8 @@
-import { ITelegramClient } from '../../client.types.js'
-import { normalizeInputMessageId, normalizeInputReaction, PeerReaction } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { PeerReaction } from '../../types/index.js'
+import { normalizeInputMessageId, normalizeInputReaction } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { getReactionUsers } from './get-reaction-users.js'
 
 /**

@@ -1,4 +1,4 @@
-import { I18nValue, I18nValueDynamic } from '../types.js'
+import type { I18nValue, I18nValueDynamic } from '../types.js'
 
 /**
  * Get an English ordinal suffix (st/nd/rd/th) for a given number.
@@ -45,7 +45,7 @@ export function createPluralEnglish<Args extends unknown[] = []>(
     }
 
     if (typeof one === 'string' && typeof many === 'string') {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line unused-imports/no-unused-vars
         return (n, ...args) => (n === 1 ? one : many)
     }
 
@@ -57,5 +57,5 @@ export function createPluralEnglish<Args extends unknown[] = []>(
         return (n, ...args) => (n === 1 ? one(n, ...args) : many)
     }
 
-    throw new TypeError()
+    throw new TypeError('Invalid arg types')
 }

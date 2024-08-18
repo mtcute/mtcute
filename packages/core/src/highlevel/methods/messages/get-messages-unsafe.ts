@@ -1,8 +1,8 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { MaybeArray } from '../../../types/utils.js'
+import type { MaybeArray } from '../../../types/utils.js'
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { Message, PeersIndex } from '../../types/index.js'
 
 /**
@@ -16,7 +16,7 @@ import { Message, PeersIndex } from '../../types/index.js'
  * returned at that position.
  *
  * @param messageIds  Messages IDs
- * @param [fromReply=false]
+ * @param [fromReply]
  *     Whether the reply to a given message should be fetched
  *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
  */
@@ -28,7 +28,7 @@ export async function getMessagesUnsafe(
     if (!Array.isArray(messageIds)) messageIds = [messageIds]
 
     const type = fromReply ? 'inputMessageReplyTo' : 'inputMessageID'
-    const ids: tl.TypeInputMessage[] = messageIds.map((it) => ({
+    const ids: tl.TypeInputMessage[] = messageIds.map(it => ({
         _: type,
         id: it,
     }))

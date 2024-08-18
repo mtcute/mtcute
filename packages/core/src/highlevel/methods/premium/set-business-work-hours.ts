@@ -1,8 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { assertTrue } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { BusinessWorkHoursDay, businessWorkHoursDaysToRaw } from '../../types/premium/business-work-hours.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { BusinessWorkHoursDay } from '../../types/premium/business-work-hours.js'
+import { businessWorkHoursDaysToRaw } from '../../types/premium/business-work-hours.js'
 
 // @available=user
 /**
@@ -12,23 +13,23 @@ export async function setBusinessWorkHours(
     client: ITelegramClient,
     params:
         | ({
-              /** Timezone in which the hours are defined */
-              timezone: string
-          } & (
-              | {
-                    /**
-                     * Business work intervals, per-day (like available in {@link BusinessWorkHours.days})
-                     */
-                    hours: ReadonlyArray<BusinessWorkHoursDay>
-                }
-              | {
-                    /** Business work intervals, raw intervals */
-                    intervals: tl.TypeBusinessWeeklyOpen[]
-                }
+            /** Timezone in which the hours are defined */
+            timezone: string
+        } & (
+          | {
+              /**
+               * Business work intervals, per-day (like available in {@link BusinessWorkHours.days})
+               */
+              hours: ReadonlyArray<BusinessWorkHoursDay>
+          }
+          | {
+              /** Business work intervals, raw intervals */
+              intervals: tl.TypeBusinessWeeklyOpen[]
+          }
           ))
-        | null,
+          | null,
 ): Promise<void> {
-    let businessWorkHours: tl.TypeBusinessWorkHours | undefined = undefined
+    let businessWorkHours: tl.TypeBusinessWorkHours | undefined
 
     if (params) {
         let weeklyOpen: tl.TypeBusinessWeeklyOpen[]

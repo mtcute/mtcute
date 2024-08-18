@@ -21,7 +21,7 @@ export function buffersEqual(a: Uint8Array, b: Uint8Array): boolean {
  * @param start  Start offset
  * @param end  End offset
  */
-export function cloneBuffer(buf: Uint8Array, start = 0, end = buf.length): Uint8Array {
+export function cloneBuffer(buf: Uint8Array, start = 0, end: number = buf.length): Uint8Array {
     const ret = new Uint8Array(end - start)
     ret.set(buf.subarray(start, end))
 
@@ -67,7 +67,7 @@ export function dataViewFromBuffer(buf: Uint8Array): DataView {
 /**
  * Reverse a buffer (or a part of it) into a new buffer
  */
-export function bufferToReversed(buf: Uint8Array, start = 0, end = buf.length): Uint8Array {
+export function bufferToReversed(buf: Uint8Array, start = 0, end: number = buf.length): Uint8Array {
     const len = end - start
     const ret = new Uint8Array(len)
 

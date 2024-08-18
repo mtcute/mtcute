@@ -1,12 +1,11 @@
 import Long from 'long'
-
 import { tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { getMarkedPeerId, parseMarkedPeerId, toggleChannelIdMark } from '../../../utils/peer-utils.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { MtPeerNotFoundError } from '../../types/errors.js'
-import { InputPeerLike } from '../../types/peers/index.js'
+import type { InputPeerLike } from '../../types/peers/index.js'
 import { toInputChannel, toInputPeer, toInputUser } from '../../utils/peer-utils.js'
 
 // @available=both
@@ -72,7 +71,9 @@ export async function resolvePeer(
             } catch (e) {
                 if (tl.RpcError.is(e, 'PHONE_NOT_OCCUPIED')) {
                     throw new MtPeerNotFoundError(`Peer with phone number ${peerId} was not found`)
-                } else throw e
+                } else {
+                    throw e
+                }
             }
         } else {
             // username
@@ -89,14 +90,16 @@ export async function resolvePeer(
             } catch (e) {
                 if (tl.RpcError.is(e, 'USERNAME_NOT_OCCUPIED')) {
                     throw new MtPeerNotFoundError(`Peer with username ${peerId} was not found`)
-                } else throw e
+                } else {
+                    throw e
+                }
             }
         }
 
         if (res.peer._ === 'peerUser') {
             const id = res.peer.userId
 
-            const found = res.users.find((it) => it.id === id)
+            const found = res.users.find(it => it.id === id)
 
             if (found && found._ === 'user') {
                 if (!found.accessHash) {
@@ -116,7 +119,7 @@ export async function resolvePeer(
             }
         } else if (res.peer._ === 'peerChannel') {
             const id = res.peer.channelId
-            const found = res.chats.find((it) => it.id === id)
+            const found = res.chats.find(it => it.id === id)
 
             if (found) {
                 if (!(found._ === 'channel' || found._ === 'channelForbidden')) {

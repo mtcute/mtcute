@@ -1,8 +1,8 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { randomLong } from '../../../utils/long-utils.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, Message } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike, Message } from '../../types/index.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
 import { resolveChannel, resolvePeer } from '../users/resolve-peer.js'
 

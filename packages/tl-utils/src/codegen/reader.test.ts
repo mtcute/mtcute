@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { parseTlToEntries } from '../parse.js'
+
 import { generateReaderCodeForTlEntries, generateReaderCodeForTlEntry } from './reader.js'
 
 describe('generateReaderCodeForTlEntry', () => {

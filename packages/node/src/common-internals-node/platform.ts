@@ -1,8 +1,9 @@
-import * as os from 'os'
+import * as os from 'node:os'
 
-import { ICorePlatform } from '@mtcute/core/platform.js'
+import type { ICorePlatform } from '@mtcute/core/platform.js'
 
 import { normalizeFile } from '../utils/normalize-file.js'
+
 import { beforeExit } from './exit-hook.js'
 import { defaultLoggingHandler } from './logging.js'
 
@@ -21,9 +22,9 @@ export class NodePlatform implements ICorePlatform {
     }
 
     getDefaultLogLevel(): number | null {
-        const envLogLevel = parseInt(process.env.MTCUTE_LOG_LEVEL ?? '')
+        const envLogLevel = Number.parseInt(process.env.MTCUTE_LOG_LEVEL ?? '')
 
-        if (!isNaN(envLogLevel)) {
+        if (!Number.isNaN(envLogLevel)) {
             return envLogLevel
         }
 
@@ -34,9 +35,11 @@ export class NodePlatform implements ICorePlatform {
     utf8ByteLength(str: string): number {
         return Buffer.byteLength(str, 'utf8')
     }
+
     utf8Encode(str: string): Uint8Array {
         return Buffer.from(str, 'utf8')
     }
+
     utf8Decode(buf: Uint8Array): string {
         return toBuffer(buf).toString('utf8')
     }
@@ -44,6 +47,7 @@ export class NodePlatform implements ICorePlatform {
     hexEncode(buf: Uint8Array): string {
         return toBuffer(buf).toString('hex')
     }
+
     hexDecode(str: string): Uint8Array {
         return Buffer.from(str, 'hex')
     }
@@ -58,6 +62,7 @@ export class NodePlatform implements ICorePlatform {
 
         return str
     }
+
     base64Decode(string: string, url = false): Uint8Array {
         if (url && BUFFER_BASE64_URL_AVAILABLE) {
             return Buffer.from(string, 'base64url')

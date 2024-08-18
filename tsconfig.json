@@ -1,43 +1,39 @@
 {
-    "compilerOptions": {
-        "outDir": "./dist",
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
-        "target": "es2022",
-        "allowJs": true,
-        "sourceMap": true,
-        "inlineSources": true,
-        "declaration": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "strict": true,
-        "noImplicitAny": true,
-        "noImplicitThis": true,
-        "incremental": true,
-        "stripInternal": false,
-        "skipLibCheck": true,
-        "composite": true,
-        "types": [
-            "node",
-            "deno/ns",
-            "vite/client"
-        ],
-        "lib": [
-            "es2020",
-            "dom",
-            "dom.iterable",
-            "WebWorker",
-        ],
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "useDefineForClassFields": true,
-    },
-    "ts-node": {
-        "esm": true,
-        "experimentalSpecifierResolution": "node"
-    },
-    "exclude": [
-        "**/node_modules",
-        "**/__snapshots__",
-    ]
+  "compilerOptions": {
+    "incremental": true,
+    "composite": true,
+    "target": "es2022",
+    "lib": [
+      "es2020",
+      "dom",
+      "dom.iterable",
+      "WebWorker"
+    ],
+    "useDefineForClassFields": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true,
+    "types": [
+      "node",
+      "deno/ns",
+      "vite/client"
+    ],
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "declaration": true,
+    "inlineSources": true,
+    "outDir": "./dist",
+    "sourceMap": true,
+    "stripInternal": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedDeclarations": true,
+    "isolatedModules": true,
+    "skipLibCheck": true
+  },
+  "exclude": [
+    "**/node_modules",
+    "**/__snapshots__"
+  ]
 }

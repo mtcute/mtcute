@@ -1,7 +1,8 @@
-import { createWriteStream, rmSync } from 'fs'
-import { writeFile } from 'fs/promises'
+import { createWriteStream, rmSync } from 'node:fs'
+import { writeFile } from 'node:fs/promises'
 
-import { FileDownloadLocation, FileDownloadParameters, FileLocation, ITelegramClient } from '@mtcute/core'
+import type { FileDownloadLocation, FileDownloadParameters, ITelegramClient } from '@mtcute/core'
+import { FileLocation } from '@mtcute/core'
 import { downloadAsIterable } from '@mtcute/core/methods.js'
 
 /**

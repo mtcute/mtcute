@@ -1,10 +1,11 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { MaybeArray } from '../../../types/utils.js'
+import type { MaybeArray } from '../../../types/utils.js'
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { Message } from '../../types/messages/index.js'
-import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
+import type { InputPeerLike } from '../../types/peers/index.js'
+import { PeersIndex } from '../../types/peers/index.js'
 import { isInputPeerChannel, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -17,7 +18,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
  *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
  * @param messageIds  Messages IDs
- * @param [fromReply=false]
+ * @param [fromReply]
  *     Whether the reply to a given message should be fetched
  *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
  */
@@ -31,7 +32,7 @@ export async function getMessages(
     if (!Array.isArray(messageIds)) messageIds = [messageIds]
 
     const type = fromReply ? 'inputMessageReplyTo' : 'inputMessageID'
-    const ids: tl.TypeInputMessage[] = messageIds.map((it) => ({
+    const ids: tl.TypeInputMessage[] = messageIds.map(it => ({
         _: type,
         id: it,
     }))
@@ -39,13 +40,13 @@ export async function getMessages(
     const isChannel = isInputPeerChannel(peer)
 
     const res = await client.call(
-        isChannel ?
-            {
+        isChannel
+            ? {
                 _: 'channels.getMessages',
                 id: ids,
                 channel: toInputChannel(peer),
-            } :
-            {
+            }
+            : {
                 _: 'messages.getMessages',
                 id: ids,
             },
@@ -55,7 +56,7 @@ export async function getMessages(
 
     const peers = PeersIndex.from(res)
 
-    let selfId: number | null | undefined = undefined
+    let selfId: number | null | undefined
 
     return res.messages.map((msg) => {
         if (msg._ === 'messageEmpty') return null

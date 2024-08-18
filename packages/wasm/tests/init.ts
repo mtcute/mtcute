@@ -4,7 +4,7 @@ export async function initWasm() {
     const url = new URL('../mtcute.wasm', import.meta.url)
 
     if (import.meta.env.TEST_ENV === 'node') {
-        const fs = await import('fs/promises')
+        const fs = await import('node:fs/promises')
         const blob = await fs.readFile(url)
         initSync(blob)
 

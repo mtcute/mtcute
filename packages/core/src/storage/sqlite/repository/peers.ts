@@ -1,7 +1,7 @@
-import { IPeersRepository } from '../../../highlevel/storage/repository/peers.js'
+import type { IPeersRepository } from '../../../highlevel/storage/repository/peers.js'
 import { MtcuteError } from '../../../types/errors.js'
-import { BaseSqliteStorageDriver } from '../driver.js'
-import { ISqliteStatement } from '../types.js'
+import type { BaseSqliteStorageDriver } from '../driver.js'
+import type { ISqliteStatement } from '../types.js'
 
 interface PeerDto {
     id: number

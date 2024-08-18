@@ -1,6 +1,6 @@
 import { MtTypeAssertionError } from '../../../types/errors.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputText, TextWithEntities } from '../../types/misc/entities.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputText, TextWithEntities } from '../../types/misc/entities.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 
 /**

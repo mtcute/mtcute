@@ -1,5 +1,4 @@
 // This file is generated automatically, do not modify!
-/* eslint-disable */
 
 export interface AppConfigSchema {
     /**

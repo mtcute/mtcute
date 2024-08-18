@@ -1,5 +1,5 @@
 import { assertTrue } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 
 /**
  * Changes the current default value of the Time-To-Live setting,

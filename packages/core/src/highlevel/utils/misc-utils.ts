@@ -1,5 +1,5 @@
 import { MtArgumentError } from '../../types/errors.js'
-import { ArrayPaginated, ArrayWithTotal, MaybeDynamic, Message } from '../types/index.js'
+import type { ArrayPaginated, ArrayWithTotal, MaybeDynamic, Message } from '../types/index.js'
 
 /**
  * Normalize phone number by stripping formatting
@@ -13,6 +13,7 @@ export function normalizePhoneNumber(phone: string): string {
 }
 
 export async function resolveMaybeDynamic<T>(val: MaybeDynamic<T>): Promise<T> {
+    // eslint-disable-next-line ts/return-await
     return val instanceof Function ? await val() : await val
 }
 

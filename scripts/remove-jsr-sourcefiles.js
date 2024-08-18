@@ -1,7 +1,8 @@
-import * as fs from 'fs'
+import * as fs from 'node:fs'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import { globSync } from 'glob'
-import { join } from 'path'
-import { fileURLToPath } from 'url'
 
 // for whatever reason, jsr's npm compatibility jayer doesn't remove
 // original typescript source files, which results in type errors when

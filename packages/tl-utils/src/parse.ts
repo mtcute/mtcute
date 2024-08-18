@@ -1,8 +1,10 @@
 import { computeConstructorIdFromEntry } from './ctor-id.js'
-import { TL_PRIMITIVES, TlArgument, TlEntry } from './types.js'
+import type { TlArgument, TlEntry } from './types.js'
+import { TL_PRIMITIVES } from './types.js'
 import { parseArgumentType, parseTdlibStyleComment } from './utils.js'
 
-const SINGLE_REGEX = /^(.+?)(?:#([0-9a-f]{1,8}))?(?: \?)?(?: {(.+?:.+?)})? ((?:.+? )*)= (.+);$/
+// eslint-disable-next-line regexp/no-super-linear-backtracking
+const SINGLE_REGEX = /^(.+?)(?:#([0-9a-f]{1,8}))?(?: \?)?(?: \{(.+?:.+?)\})? ((?:.+? )*)= (.+);$/
 
 export function computeConstructorIdFromString(line: string): number {
     return computeConstructorIdFromEntry(parseTlToEntries(line, { forIdComputation: true })[0])
@@ -93,9 +95,9 @@ export function parseTlToEntries(
         if (line.match(/^\/\//)) {
             if (currentComment) {
                 if (line[2] === '-') {
-                    currentComment += '\n' + line.substring(3).trim()
+                    currentComment += `\n${line.substring(3).trim()}`
                 } else {
-                    currentComment += ' ' + line.substring(2).trim()
+                    currentComment += ` ${line.substring(2).trim()}`
                 }
             } else {
                 currentComment = line.substring(2).trim()
@@ -130,19 +132,19 @@ export function parseTlToEntries(
             return
         }
 
-        let typeIdNum = typeId ? parseInt(typeId, 16) : 0
+        let typeIdNum = typeId ? Number.parseInt(typeId, 16) : 0
 
         if (typeIdNum === 0 && !params.forIdComputation) {
             typeIdNum = computeConstructorIdFromString(line)
         }
 
-        const argsParsed =
-            args && !args.match(/\[ [a-z]+ ]/i) ?
-                args
+        const argsParsed
+            = args && !args.match(/\[ [a-z]+ \]/i)
+                ? args
                     .trim()
                     .split(' ')
-                    .map((j) => j.split(':')) :
-                []
+                    .map(j => j.split(':'))
+                : []
 
         const entry: TlEntry = {
             kind: currentKind,

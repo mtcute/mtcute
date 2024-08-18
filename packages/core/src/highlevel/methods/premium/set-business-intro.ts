@@ -1,13 +1,14 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { assertTrue, assertTypeIs } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputFileLike, InputMediaSticker } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputFileLike, InputMediaSticker } from '../../types/index.js'
 import { _normalizeFileToDocument } from '../files/normalize-file-to-document.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 
-const isInputMediaSticker = (media: unknown): media is InputMediaSticker =>
-    typeof media === 'object' && media !== null && 'type' in media && media.type === 'sticker'
+function isInputMediaSticker(media: unknown): media is InputMediaSticker {
+    return typeof media === 'object' && media !== null && 'type' in media && media.type === 'sticker'
+}
 
 // @available=user
 /**
@@ -34,7 +35,7 @@ export async function setBusinessIntro(
         sticker?: InputMediaSticker | InputFileLike | tl.TypeInputDocument
     } | null,
 ): Promise<void> {
-    let tlIntro: tl.TypeInputBusinessIntro | undefined = undefined
+    let tlIntro: tl.TypeInputBusinessIntro | undefined
 
     if (intro) {
         let sticker: tl.TypeInputDocument | undefined

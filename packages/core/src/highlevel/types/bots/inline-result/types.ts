@@ -1,6 +1,6 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
-import { InputInlineMessage } from '../inline-message/types.js'
+import type { InputInlineMessage } from '../inline-message/types.js'
 
 export interface BaseInputInlineResult {
     /**
@@ -487,15 +487,15 @@ export interface InputInlineResultContact extends BaseInputInlineResult {
 }
 
 export type InputInlineResult =
-    | InputInlineResultArticle
-    | InputInlineResultGif
-    | InputInlineResultVideo
-    | InputInlineResultAudio
-    | InputInlineResultVoice
-    | InputInlineResultPhoto
-    | InputInlineResultSticker
-    | InputInlineResultFile
-    | InputInlineResultGeo
-    | InputInlineResultVenue
-    | InputInlineResultGame
-    | InputInlineResultContact
+  | InputInlineResultArticle
+  | InputInlineResultGif
+  | InputInlineResultVideo
+  | InputInlineResultAudio
+  | InputInlineResultVoice
+  | InputInlineResultPhoto
+  | InputInlineResultSticker
+  | InputInlineResultFile
+  | InputInlineResultGeo
+  | InputInlineResultVenue
+  | InputInlineResultGame
+  | InputInlineResultContact

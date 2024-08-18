@@ -24,8 +24,8 @@ export class Deque<T> {
     protected _capacity: number
 
     constructor(
-        readonly maxLength = Infinity,
-        minCapacity = maxLength === Infinity ? MIN_INITIAL_CAPACITY : maxLength,
+        readonly maxLength: number = Infinity,
+        minCapacity: number = maxLength === Infinity ? MIN_INITIAL_CAPACITY : maxLength,
     ) {
         let capacity = minCapacity
 
@@ -51,7 +51,7 @@ export class Deque<T> {
         this._capacity = capacity
     }
 
-    protected _resize() {
+    protected _resize(): void {
         const p = this._head
         const n = this._capacity
         const r = n - p // number of elements to the right of the head

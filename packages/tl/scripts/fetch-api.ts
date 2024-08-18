@@ -4,40 +4,43 @@
 //
 // Conflicts merging is interactive, so we can't put this in CI
 
-import * as cheerio from 'cheerio'
-import { readFile, writeFile } from 'fs/promises'
-import { join } from 'path'
-import * as readline from 'readline'
+import { readFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import * as readline from 'node:readline'
 
+import * as cheerio from 'cheerio'
 import { hasPresentKey, isPresent } from '@mtcute/core/utils.js'
+import type {
+    TlEntry,
+    TlFullSchema,
+} from '@mtcute/tl-utils'
 import {
     generateTlSchemasDifference,
     mergeTlEntries,
     mergeTlSchemas,
     parseFullTlSchema,
     parseTlToEntries,
-    TlEntry,
-    TlFullSchema,
     writeTlEntryToString,
 } from '@mtcute/tl-utils'
 import { parseTlEntriesFromJson } from '@mtcute/tl-utils/json.js'
 
 import {
-    __dirname,
     API_SCHEMA_DIFF_JSON_FILE,
     API_SCHEMA_JSON_FILE,
     BLOGFORK_DOMAIN,
-    CORE_DOMAIN,
     COREFORK_DOMAIN,
+    CORE_DOMAIN,
     TDESKTOP_LAYER,
     TDESKTOP_SCHEMA,
     TDLIB_SCHEMA,
     WEBA_LAYER,
     WEBA_SCHEMA,
     WEBK_SCHEMA,
+    __dirname,
 } from './constants.js'
 import { applyDocumentation, fetchDocumentation, getCachedDocumentation } from './documentation.js'
-import { packTlSchema, TlPackedSchema, unpackTlSchema } from './schema.js'
+import type { TlPackedSchema } from './schema.js'
+import { packTlSchema, unpackTlSchema } from './schema.js'
 import { fetchRetry } from './utils.js'
 
 const README_MD_FILE = join(__dirname, '../README.md')
@@ -60,7 +63,7 @@ interface Schema {
 async function fetchTdlibSchema(): Promise<Schema> {
     const schema = await fetchRetry(TDLIB_SCHEMA)
     const versionHtml = await fetch('https://raw.githubusercontent.com/tdlib/td/master/td/telegram/Version.h').then(
-        (i) => i.text(),
+        i => i.text(),
     )
 
     const layer = versionHtml.match(/^constexpr int32 MTPROTO_LAYER = (\d+)/m)
@@ -68,7 +71,7 @@ async function fetchTdlibSchema(): Promise<Schema> {
 
     return {
         name: 'TDLib',
-        layer: parseInt(layer[1]),
+        layer: Number.parseInt(layer[1]),
         content: tlToFullSchema(schema),
     }
 }
@@ -81,7 +84,7 @@ async function fetchTdesktopSchema(): Promise<Schema> {
 
     return {
         name: 'TDesktop',
-        layer: parseInt(layer[1]),
+        layer: Number.parseInt(layer[1]),
         content: tlToFullSchema(schema),
     }
 }
@@ -100,7 +103,7 @@ async function fetchCoreSchema(domain = CORE_DOMAIN, name = 'Core'): Promise<Sch
 
     return {
         name,
-        layer: parseInt(layer[1]),
+        layer: Number.parseInt(layer[1]),
         content: tlToFullSchema(schema),
     }
 }
@@ -116,7 +119,7 @@ async function fetchWebkSchema(): Promise<Schema> {
     entries = entries.filter((it) => {
         if (it.kind === 'method') {
             // json schema doesn't provide info about generics, remove these
-            return !it.arguments.some((arg) => arg.type === '!X') && it.type !== 'X'
+            return !it.arguments.some(arg => arg.type === '!X') && it.type !== 'X'
         }
 
         return true
@@ -138,13 +141,13 @@ async function fetchWebaSchema(): Promise<Schema> {
 
     return {
         name: 'WebA',
-        layer: parseInt(version[1]),
+        layer: Number.parseInt(version[1]),
         content: tlToFullSchema(schema),
     }
 }
 
 function input(rl: readline.Interface, q: string): Promise<string> {
-    return new Promise((resolve) => rl.question(q, resolve))
+    return new Promise(resolve => rl.question(q, resolve))
 }
 
 interface ConflictOption {
@@ -167,7 +170,7 @@ async function updateReadme(currentLayer: number) {
 async function updatePackageVersion(rl: readline.Interface, currentLayer: number) {
     const packageJson = JSON.parse(await readFile(PACKAGE_JSON_FILE, 'utf8')) as { version: string }
     const version = packageJson.version
-    let [major, minor] = version.split('.').map((i) => parseInt(i))
+    let [major, minor] = version.split('.').map(i => Number.parseInt(i))
 
     if (major === currentLayer) {
         console.log('Current version: %s. Bump minor version?', version)
@@ -202,7 +205,7 @@ async function overrideInt53(schema: TlFullSchema): Promise<void> {
         if (!overrides) return
 
         overrides.forEach((argName) => {
-            const arg = entry.arguments.find((it) => it.name === argName)
+            const arg = entry.arguments.find(it => it.name === argName)
 
             if (!arg) {
                 console.log(`[warn] Cannot override ${entry.name}#${argName}: argument does not exist`)
@@ -232,7 +235,7 @@ async function main() {
         fetchCoreSchema(BLOGFORK_DOMAIN, 'Blogfork'),
         fetchWebkSchema(),
         fetchWebaSchema(),
-        readFile(join(__dirname, '../data/custom.tl'), 'utf8').then((tl) => ({
+        readFile(join(__dirname, '../data/custom.tl'), 'utf8').then(tl => ({
             name: 'Custom',
             layer: 0, // handled manually
             content: tlToFullSchema(tl),
@@ -240,11 +243,11 @@ async function main() {
     ])
 
     console.log('Available schemas:')
-    schemas.forEach((schema) =>
+    schemas.forEach(schema =>
         console.log(' - %s (layer %d): %d entries', schema.name, schema.layer, schema.content.entries.length),
     )
 
-    const resultLayer = Math.max(...schemas.map((it) => it.layer))
+    const resultLayer = Math.max(...schemas.map(it => it.layer))
     console.log(`Final schema will be on layer ${resultLayer}. Merging...`)
 
     const rl = readline.createInterface({
@@ -253,7 +256,7 @@ async function main() {
     })
 
     const resultSchema = await mergeTlSchemas(
-        schemas.map((it) => it.content),
+        schemas.map(it => it.content),
         async (_options) => {
             const options: ConflictOption[] = _options.map((it, idx) => ({
                 schema: schemas[idx],
@@ -270,7 +273,7 @@ async function main() {
                 chooseOptions = options
             } else {
                 // first of all, prefer entries from the latest layer
-                let fromLastSchema = options.filter((opt) => opt.entry && opt.schema.layer === resultLayer)
+                let fromLastSchema = options.filter(opt => opt.entry && opt.schema.layer === resultLayer)
 
                 // if there is only one schema on the latest layer, we can simply return it
                 if (fromLastSchema.length === 1) return fromLastSchema[0].entry
@@ -278,7 +281,7 @@ async function main() {
                 // the conflict was earlier, and now this entry is removed altogether.
                 // keep it just in case for now, as it may still be referenced somewhere
                 if (fromLastSchema.length === 0) {
-                    fromLastSchema = options.sort((a, b) => b.schema.layer - a.schema.layer).filter((opt) => opt.entry)
+                    fromLastSchema = options.sort((a, b) => b.schema.layer - a.schema.layer).filter(opt => opt.entry)
                     // only keep the latest item
                     fromLastSchema = [fromLastSchema[0]]
                 }
@@ -286,12 +289,14 @@ async function main() {
                 // there are multiple choices on the latest layer
                 // if they are all the same, it's just conflict between layers,
                 // and we can merge the ones from the latest layer
-                const mergedEntry = mergeTlEntries(fromLastSchema.map((opt) => opt.entry).filter(isPresent))
+                const mergedEntry = mergeTlEntries(fromLastSchema.map(opt => opt.entry).filter(isPresent))
                 if (typeof mergedEntry === 'string') {
                     // merge failed, so there is in fact some conflict
                     chooseOptions = fromLastSchema
                     mergeError = mergedEntry
-                } else return mergedEntry
+                } else {
+                    return mergedEntry
+                }
             }
 
             const nonEmptyOptions = chooseOptions.filter(hasPresentKey('entry'))
@@ -308,9 +313,9 @@ async function main() {
             })
 
             while (true) {
-                const res = parseInt(await input(rl, `[0-${nonEmptyOptions.length}] > `))
+                const res = Number.parseInt(await input(rl, `[0-${nonEmptyOptions.length}] > `))
 
-                if (isNaN(res) || res < 0 || res > nonEmptyOptions.length) {
+                if (Number.isNaN(res) || res < 0 || res > nonEmptyOptions.length) {
                     continue
                 }
 

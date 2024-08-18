@@ -1,16 +1,16 @@
-import { Readable } from 'stream'
+import { Readable } from 'node:stream'
+
 import { describe, expect, it } from 'vitest'
 
-import { nodeStreamToWeb, webStreamToNode } from './stream-utils.js'
-
 if (import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') {
+    const { nodeStreamToWeb, webStreamToNode } = await import('./stream-utils.js')
+
     describe('nodeStreamToWeb', () => {
         it('should correctly convert a readable stream', async () => {
             const stream = new Readable({
                 read() {
-                    // eslint-disable-next-line no-restricted-globals
                     this.push(Buffer.from([1, 2, 3]))
-                    // eslint-disable-next-line no-restricted-globals
+
                     this.push(Buffer.from([4, 5, 6]))
                     this.push(null)
                 },

@@ -1,6 +1,8 @@
-import { IAuthKeysRepository } from '../repository/auth-keys.js'
-import { BaseService, ServiceOptions } from './base.js'
-import { FutureSaltsService } from './future-salts.js'
+import type { IAuthKeysRepository } from '../repository/auth-keys.js'
+
+import type { ServiceOptions } from './base.js'
+import { BaseService } from './base.js'
+import type { FutureSaltsService } from './future-salts.js'
 
 export class AuthKeysService extends BaseService {
     constructor(

@@ -1,9 +1,9 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { Message, PeersIndex } from '../../types/index.js'
-import { ArrayPaginated } from '../../types/utils.js'
+import type { ArrayPaginated } from '../../types/utils.js'
 import { makeArrayPaginated } from '../../utils/misc-utils.js'
 
 // @exported
@@ -49,16 +49,16 @@ export async function searchHashtag(
     assertTypeIsNot('searchHashtag', res, 'messages.messagesNotModified')
 
     const peers = PeersIndex.from(res)
-    const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(msg, peers))
+    const msgs = res.messages.filter(msg => msg._ !== 'messageEmpty').map(msg => new Message(msg, peers))
     const last = msgs[msgs.length - 1]
 
-    const next = last ?
-        {
+    const next = last
+        ? {
             rate: (res as tl.messages.RawMessagesSlice).nextRate ?? last.raw.date,
             peer: last.chat.inputPeer,
             id: last.id,
-        } :
-        undefined
+        }
+        : undefined
 
     return makeArrayPaginated(msgs, (res as tl.messages.RawMessagesSlice).count ?? msgs.length, next)
 }

@@ -2,10 +2,10 @@ import { tl } from '@mtcute/tl'
 
 import { assertNever } from '../../types/utils.js'
 import { MtInvalidPeerTypeError } from '../types/errors.js'
-import { InputPeerLike } from '../types/peers/index.js'
+import type { InputPeerLike } from '../types/peers/index.js'
 
-export const INVITE_LINK_REGEX =
-    /^(?:https?:\/\/)?(?:www\.)?(?:t(?:elegram)?\.(?:org|me|dog)\/(?:joinchat\/|\+))([\w-]+)$/i
+export const INVITE_LINK_REGEX: RegExp
+    = /^(?:https?:\/\/)?(?:www\.)?t(?:elegram)?\.(?:org|me|dog)\/(?:joinchat\/|\+)([\w-]+)$/i
 
 // helpers to convert result of `resolvePeer` function
 
@@ -145,8 +145,8 @@ export function inputPeerToPeer(inp: tl.TypeInputPeer): tl.TypePeer {
     }
 }
 
-export function extractUsernames(obj: tl.RawUser | tl.RawChannel) {
-    if (obj.usernames?.length) return obj.usernames.map((x) => x.username.toLowerCase())
+export function extractUsernames(obj: tl.RawUser | tl.RawChannel): string[] {
+    if (obj.usernames?.length) return obj.usernames.map(x => x.username.toLowerCase())
     if (obj.username) return [obj.username.toLowerCase()]
 
     return []

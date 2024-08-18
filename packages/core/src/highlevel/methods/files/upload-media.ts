@@ -1,10 +1,12 @@
 import { MtArgumentError } from '../../../types/errors.js'
 import { assertNever } from '../../../types/utils.js'
 import { assertTypeIs, assertTypeIsNot } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputMediaLike, InputPeerLike, MessageMedia, Photo, RawDocument } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputMediaLike, InputPeerLike, MessageMedia, RawDocument } from '../../types/index.js'
+import { Photo } from '../../types/index.js'
 import { parseDocument } from '../../types/media/document-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { _normalizeInputMedia } from './normalize-input-media.js'
 
 /**
@@ -56,9 +58,9 @@ export async function uploadMedia(
 
     const res = await client.call({
         _: 'messages.uploadMedia',
-        peer: params.peer ?
-            await resolvePeer(client, params.peer) :
-            {
+        peer: params.peer
+            ? await resolvePeer(client, params.peer)
+            : {
                 _: 'inputPeerSelf',
             },
         media: normMedia,

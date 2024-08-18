@@ -1,9 +1,9 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error
-import { normalize } from 'ip6'
-import { connect } from 'net'
+import { connect } from 'node:net'
 
-import { assertNever, BaseTcpTransport, IntermediatePacketCodec, MtArgumentError, NodePlatform, tl, TransportState } from '@mtcute/node'
+// @ts-expect-error no typings
+import { normalize } from 'ip6'
+import type { tl } from '@mtcute/node'
+import { BaseTcpTransport, IntermediatePacketCodec, MtArgumentError, NodePlatform, TransportState, assertNever } from '@mtcute/node'
 import { dataViewFromBuffer } from '@mtcute/node/utils.js'
 
 const p = new NodePlatform()
@@ -59,9 +59,9 @@ function writeIpv4(ip: string, buf: Uint8Array, offset: number): void {
         throw new MtArgumentError('Invalid IPv4 address')
     }
     for (let i = 0; i < 4; i++) {
-        const n = parseInt(parts[i])
+        const n = Number.parseInt(parts[i])
 
-        if (isNaN(n) || n < 0 || n > 255) {
+        if (Number.isNaN(n) || n < 0 || n > 255) {
             throw new MtArgumentError('Invalid IPv4 address')
         }
 
@@ -122,7 +122,7 @@ function buildSocks5Auth(username: string, password: string) {
 }
 
 function writeIpv6(ip: string, buf: Uint8Array, offset: number): void {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    // eslint-disable-next-line ts/no-unsafe-call
     ip = normalize(ip) as string
     const parts = ip.split(':')
 
@@ -133,9 +133,9 @@ function writeIpv6(ip: string, buf: Uint8Array, offset: number): void {
     const dv = dataViewFromBuffer(buf)
 
     for (let i = 0, j = offset; i < 8; i++, j += 2) {
-        const n = parseInt(parts[i])
+        const n = Number.parseInt(parts[i])
 
-        if (isNaN(n) || n < 0 || n > 0xffff) {
+        if (Number.isNaN(n) || n < 0 || n > 0xFFFF) {
             throw new MtArgumentError('Invalid IPv6 address')
         }
 
@@ -165,20 +165,20 @@ function buildSocks5Connect(ip: string, port: number, ipv6 = false): Uint8Array 
 }
 
 const SOCKS4_ERRORS: Record<number, string> = {
-    '91': 'Request rejected or failed',
-    '92': 'Request failed because client is not running identd',
-    '93': "Request failed because client's identd could not confirm the user ID in the request",
+    91: 'Request rejected or failed',
+    92: 'Request failed because client is not running identd',
+    93: "Request failed because client's identd could not confirm the user ID in the request",
 }
 
 const SOCKS5_ERRORS: Record<number, string> = {
-    '1': 'General failure',
-    '2': 'Connection not allowed by ruleset',
-    '3': 'Network unreachable',
-    '4': 'Host unreachable',
-    '5': 'Connection refused by destination host',
-    '6': 'TTL expired',
-    '7': 'Command not supported / protocol error',
-    '8': 'Address type not supported',
+    1: 'General failure',
+    2: 'Connection not allowed by ruleset',
+    3: 'Network unreachable',
+    4: 'Host unreachable',
+    5: 'Connection refused by destination host',
+    6: 'TTL expired',
+    7: 'Command not supported / protocol error',
+    8: 'Address type not supported',
 }
 
 /**
@@ -193,7 +193,6 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
         if (proxy.version != null && proxy.version !== 4 && proxy.version !== 5) {
             throw new SocksProxyConnectionError(
                 proxy,
-
                 `Invalid SOCKS version: ${proxy.version}`,
             )
         }
@@ -207,8 +206,8 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
         }
 
         if (!this.packetCodecInitialized) {
-            this._packetCodec.on('error', (err) => this.emit('error', err))
-            this._packetCodec.on('packet', (buf) => this.emit('message', buf))
+            this._packetCodec.on('error', err => this.emit('error', err))
+            this._packetCodec.on('packet', buf => this.emit('message', buf))
             this.packetCodecInitialized = true
         }
 
@@ -239,13 +238,13 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
 
                 this.log.debug('[%s:%d] CONNECT returned code %d', this._proxy.host, this._proxy.port, code)
 
-                if (code === 0x5a) {
+                if (code === 0x5A) {
                     this._socket!.off('data', packetHandler)
-                    this._socket!.on('data', (data) => this._packetCodec.feed(data))
+                    this._socket!.on('data', data => this._packetCodec.feed(data))
                     this.handleConnect()
                 } else {
-                    const msg =
-                        code in SOCKS4_ERRORS ? SOCKS4_ERRORS[code] : `Unknown error code: 0x${code.toString(16)}`
+                    const msg
+                        = code in SOCKS4_ERRORS ? SOCKS4_ERRORS[code] : `Unknown error code: 0x${code.toString(16)}`
                     this._socket!.emit('error', new SocksProxyConnectionError(this._proxy, msg))
                 }
             }
@@ -323,7 +322,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                                     this._socket!.emit('error', e)
                                 }
                                 break
-                            case 0xff:
+                            case 0xFF:
                             default:
                                 // "no acceptable methods were offered"
                                 this._socket!.emit(
@@ -380,13 +379,13 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                         if (code === 0x00) {
                             // Request granted
                             this._socket!.off('data', packetHandler)
-                            this._socket!.on('data', (data) => this._packetCodec.feed(data))
+                            this._socket!.on('data', data => this._packetCodec.feed(data))
                             this.handleConnect()
                         } else {
-                            const msg =
-                                code in SOCKS5_ERRORS ?
-                                    SOCKS5_ERRORS[code] :
-                                    `Unknown error code: 0x${code.toString(16)}`
+                            const msg
+                                = code in SOCKS5_ERRORS
+                                    ? SOCKS5_ERRORS[code]
+                                    : `Unknown error code: 0x${code.toString(16)}`
                             this._socket!.emit('error', new SocksProxyConnectionError(this._proxy, msg))
                         }
                         break
@@ -416,5 +415,5 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
  * (unless you want to use a custom codec).
  */
 export class SocksTcpTransport extends BaseSocksTcpTransport {
-    _packetCodec = new IntermediatePacketCodec()
+    _packetCodec: IntermediatePacketCodec = new IntermediatePacketCodec()
 }

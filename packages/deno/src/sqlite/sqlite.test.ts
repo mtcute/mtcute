@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, describe } from 'vitest'
-
 import { LogManager } from '@mtcute/core/utils.js'
 import {
     testAuthKeysRepository,

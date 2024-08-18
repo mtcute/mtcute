@@ -13,7 +13,7 @@ so version `42.0.0` means that this version was generated from TL layer 42.
 
 - JSON schema, types, binary (de-)serialization and helper functions are generated directly from `.tl` files that are
   automatically fetched from multiple sources and are merged together.
-- Errors are generated from 
+- Errors are generated from
   [`errors.csv`](https://github.com/LonamiWebs/Telethon/blob/master/telethon_generator/data/errors.csv)
   and official Telegram errors JSON file.
 - RSA keys info is generated based on manually extracted PEMs from Telegram for Android source code.
@@ -29,7 +29,7 @@ really need to modify the objects, and modifying them will only lead to confusio
 use-cases for mutable TL objects, so you can use exported
 `tl.Mutable` helper type to make a given object type mutable.
 
-`tl` is exported as a namespace to allow better code insights, 
+`tl` is exported as a namespace to allow better code insights,
 as well as to avoid cluttering global namespace and very long import statements.
 
 MTProto schema is available in namespace `mtp`, also exported by this package.
@@ -39,7 +39,6 @@ import { tl } from '@mtcute/tl'
 const obj: tl.RawInputPeerChat = { _: 'inputPeerChat', chatId: 42 }
 console.log(tl.isAnyInputPeer(obj)) // true
 ```
-
 
 RPC errors are also exposed in this package in `tl.errors` namespace:
 

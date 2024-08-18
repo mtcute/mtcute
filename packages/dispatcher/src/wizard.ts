@@ -1,9 +1,11 @@
-import { MaybePromise } from '@mtcute/core'
+import type { MaybePromise } from '@mtcute/core'
 
-import { MessageContext } from './context/message.js'
-import { Dispatcher, DispatcherParams } from './dispatcher.js'
+import type { MessageContext } from './context/message.js'
+import type { DispatcherParams } from './dispatcher.js'
+import { Dispatcher } from './dispatcher.js'
+import type { UpdateFilter } from './filters/index.js'
 import { filters } from './filters/index.js'
-import { UpdateState } from './state/update-state.js'
+import type { UpdateState } from './state/update-state.js'
 
 /**
  * Action for the wizard scene.
@@ -60,7 +62,7 @@ export class WizardScene<State extends object> extends Dispatcher<State & Wizard
     /**
      * Go to the Nth step
      */
-    async goToStep(state: UpdateState<WizardInternalState>, step: number) {
+    async goToStep(state: UpdateState<WizardInternalState>, step: number): Promise<void> {
         if (step >= this._steps) {
             await state.exit()
         } else {
@@ -71,7 +73,7 @@ export class WizardScene<State extends object> extends Dispatcher<State & Wizard
     /**
      * Skip N steps
      */
-    async skip(state: UpdateState<WizardInternalState>, count = 1) {
+    async skip(state: UpdateState<WizardInternalState>, count = 1): Promise<void> {
         const { $step } = (await state.get()) || {}
         if ($step === undefined) throw new Error('Wizard state is not initialized')
 
@@ -81,8 +83,9 @@ export class WizardScene<State extends object> extends Dispatcher<State & Wizard
     /**
      * Filter that will only pass if the current step is `step`
      */
-    static onNthStep(step: number) {
-        const filter = filters.state<WizardInternalState>((it) => it.$step === step)
+    // eslint-disable-next-line ts/no-empty-object-type
+    static onNthStep(step: number): UpdateFilter<any, {}, WizardInternalState> {
+        const filter = filters.state<WizardInternalState>(it => it.$step === step)
 
         if (step === 0) return filters.or(filters.stateEmpty, filter)
 
@@ -92,7 +95,8 @@ export class WizardScene<State extends object> extends Dispatcher<State & Wizard
     /**
      * Filter that will only pass if the current step is the one after last one added
      */
-    onCurrentStep() {
+    // eslint-disable-next-line ts/no-empty-object-type
+    onCurrentStep(): UpdateFilter<any, {}, WizardInternalState> {
         return WizardScene.onNthStep(this._steps)
     }
 

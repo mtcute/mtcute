@@ -1,4 +1,4 @@
-import { TlArgument, TlArgumentDiff, TlEntry, TlEntryDiff, TlFullSchema, TlSchemaDiff } from './types.js'
+import type { TlArgument, TlArgumentDiff, TlEntry, TlEntryDiff, TlFullSchema, TlSchemaDiff } from './types.js'
 import { stringifyArgumentType } from './utils.js'
 
 /**
@@ -41,8 +41,8 @@ export function generateTlEntriesDifference(a: TlEntry, b: TlEntry): TlEntryDiff
     }
 
     if (
-        !a.generics !== !b.generics ||
-        (a.generics && b.generics && JSON.stringify(a.generics) !== JSON.stringify(b.generics))
+        !a.generics !== !b.generics
+        || (a.generics && b.generics && JSON.stringify(a.generics) !== JSON.stringify(b.generics))
     ) {
         diff.generics = {
             old: a.generics,
@@ -229,8 +229,6 @@ export function generateTlSchemasDifference(a: TlFullSchema, b: TlFullSchema): T
                 const unionDiff = unionDiffIndex[entry.type]
                 unionDiff[kind].added.push(entry)
             }
-
-            return
         }
     })
 

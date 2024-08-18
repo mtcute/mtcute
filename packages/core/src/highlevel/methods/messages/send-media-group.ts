@@ -1,17 +1,19 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { randomLong } from '../../../utils/long-utils.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputMediaLike } from '../../types/media/input-media/types.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputMediaLike } from '../../types/media/input-media/types.js'
 import { Message } from '../../types/messages/message.js'
-import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
+import type { InputPeerLike } from '../../types/peers/index.js'
+import { PeersIndex } from '../../types/peers/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
-import { _getDiscussionMessage } from './get-discussion-message.js'
-import { _processCommonSendParameters, CommonSendParams } from './send-common.js'
+import type { CommonSendParams } from './send-common.js'
+import { _processCommonSendParameters } from './send-common.js'
 
 /**
  * Send a group of media.
@@ -129,7 +131,7 @@ export async function sendMediaGroup(
             (u): u is tl.RawUpdateNewMessage | tl.RawUpdateNewChannelMessage | tl.RawUpdateNewScheduledMessage =>
                 u._ === 'updateNewMessage' || u._ === 'updateNewChannelMessage' || u._ === 'updateNewScheduledMessage',
         )
-        .map((u) => new Message(u.message, peers, u._ === 'updateNewScheduledMessage'))
+        .map(u => new Message(u.message, peers, u._ === 'updateNewScheduledMessage'))
 
     return msgs
 }

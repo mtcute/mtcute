@@ -44,35 +44,35 @@ function toByteArray(b64: string, arr: Uint8Array) {
     let i
 
     for (i = 0; i < len; i += 4) {
-        tmp =
-            (revLookup[b64.charCodeAt(i)] << 18) |
-            (revLookup[b64.charCodeAt(i + 1)] << 12) |
-            (revLookup[b64.charCodeAt(i + 2)] << 6) |
-            revLookup[b64.charCodeAt(i + 3)]
-        arr[curByte++] = (tmp >> 16) & 0xff
-        arr[curByte++] = (tmp >> 8) & 0xff
-        arr[curByte++] = tmp & 0xff
+        tmp
+            = (revLookup[b64.charCodeAt(i)] << 18)
+            | (revLookup[b64.charCodeAt(i + 1)] << 12)
+            | (revLookup[b64.charCodeAt(i + 2)] << 6)
+            | revLookup[b64.charCodeAt(i + 3)]
+        arr[curByte++] = (tmp >> 16) & 0xFF
+        arr[curByte++] = (tmp >> 8) & 0xFF
+        arr[curByte++] = tmp & 0xFF
     }
 
     if (placeHoldersLen === 2) {
         tmp = (revLookup[b64.charCodeAt(i)] << 2) | (revLookup[b64.charCodeAt(i + 1)] >> 4)
-        arr[curByte++] = tmp & 0xff
+        arr[curByte++] = tmp & 0xFF
     }
 
     if (placeHoldersLen === 1) {
-        tmp =
-            (revLookup[b64.charCodeAt(i)] << 10) |
-            (revLookup[b64.charCodeAt(i + 1)] << 4) |
-            (revLookup[b64.charCodeAt(i + 2)] >> 2)
-        arr[curByte++] = (tmp >> 8) & 0xff
-        arr[curByte++] = tmp & 0xff
+        tmp
+            = (revLookup[b64.charCodeAt(i)] << 10)
+            | (revLookup[b64.charCodeAt(i + 1)] << 4)
+            | (revLookup[b64.charCodeAt(i + 2)] >> 2)
+        arr[curByte++] = (tmp >> 8) & 0xFF
+        arr[curByte++] = tmp & 0xFF
     }
 
     return arr
 }
 
 function tripletToBase64(num: number) {
-    return lookup[(num >> 18) & 0x3f] + lookup[(num >> 12) & 0x3f] + lookup[(num >> 6) & 0x3f] + lookup[num & 0x3f]
+    return lookup[(num >> 18) & 0x3F] + lookup[(num >> 12) & 0x3F] + lookup[(num >> 6) & 0x3F] + lookup[num & 0x3F]
 }
 
 function encodeChunk(uint8: Uint8Array, start: number, end: number) {
@@ -80,7 +80,7 @@ function encodeChunk(uint8: Uint8Array, start: number, end: number) {
     const output = []
 
     for (let i = start; i < end; i += 3) {
-        tmp = ((uint8[i] << 16) & 0xff0000) + ((uint8[i + 1] << 8) & 0xff00) + (uint8[i + 2] & 0xff)
+        tmp = ((uint8[i] << 16) & 0xFF0000) + ((uint8[i + 1] << 8) & 0xFF00) + (uint8[i + 2] & 0xFF)
         output.push(tripletToBase64(tmp))
     }
 
@@ -102,10 +102,10 @@ function fromByteArray(uint8: Uint8Array) {
     // pad the end with zeros, but make sure to not forget the extra bytes
     if (extraBytes === 1) {
         tmp = uint8[len - 1]
-        parts.push(lookup[tmp >> 2] + lookup[(tmp << 4) & 0x3f] + '==')
+        parts.push(`${lookup[tmp >> 2] + lookup[(tmp << 4) & 0x3F]}==`)
     } else if (extraBytes === 2) {
         tmp = (uint8[len - 2] << 8) + uint8[len - 1]
-        parts.push(lookup[tmp >> 10] + lookup[(tmp >> 4) & 0x3f] + lookup[(tmp << 2) & 0x3f] + '=')
+        parts.push(`${lookup[tmp >> 10] + lookup[(tmp >> 4) & 0x3F] + lookup[(tmp << 2) & 0x3F]}=`)
     }
 
     return parts.join('')

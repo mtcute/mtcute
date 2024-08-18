@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, describe } from 'vitest'
-
 import {
     testAuthKeysRepository,
     testKeyValueRepository,
@@ -11,7 +10,7 @@ import { IdbStorage } from './index.js'
 
 if (import.meta.env.TEST_ENV === 'browser') {
     describe('idb storage', () => {
-        const idbName = 'mtcute_test_' + Math.random().toString(36).slice(2)
+        const idbName = `mtcute_test_${Math.random().toString(36).slice(2)}`
 
         const storage = new IdbStorage(idbName)
 

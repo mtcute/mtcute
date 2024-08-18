@@ -8,7 +8,7 @@ Currently only the libraries that support exporting sessions to strings are supp
 
 ## [Telethon](https://github.com/LonamiWebs/Telethon)
 
-> Telethon v2 seems to have removed the ability to export sessions, 
+> Telethon v2 seems to have removed the ability to export sessions,
 > so it's currently not supported
 
 ```ts

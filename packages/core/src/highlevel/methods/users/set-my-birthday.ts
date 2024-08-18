@@ -1,5 +1,5 @@
 import { assertTrue } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 
 // @available=user
 /**
@@ -18,12 +18,12 @@ export async function setMyBirthday(
 ): Promise<void> {
     const res = await client.call({
         _: 'account.updateBirthday',
-        birthday: birthday ?
-            {
+        birthday: birthday
+            ? {
                 _: 'birthday',
                 ...birthday,
-            } :
-            undefined,
+            }
+            : undefined,
     })
 
     assertTrue('account.updateBirthday', res)

@@ -1,4 +1,4 @@
-FROM denoland/deno:bin-1.43.1 as deno-bin
+FROM denoland/deno:bin-1.45.5 as deno-bin
 
 FROM node:20
 WORKDIR /app

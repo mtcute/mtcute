@@ -1,6 +1,6 @@
-import { IKeyValueRepository } from '@mtcute/core'
+import type { IKeyValueRepository } from '@mtcute/core'
 
-import { IdbStorageDriver } from '../driver.js'
+import type { IdbStorageDriver } from '../driver.js'
 import { reqToPromise } from '../utils.js'
 
 const KV_TABLE = 'kv'

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { writeTlEntriesToString } from './schema.js'
-import { TlEntry } from './types.js'
+import type { TlEntry } from './types.js'
 
 describe('writeTlEntriesToString', () => {
     const test = (entries: TlEntry[], params: Parameters<typeof writeTlEntriesToString>[1], ...expected: string[]) => {

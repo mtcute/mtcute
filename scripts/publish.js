@@ -1,12 +1,19 @@
-const fs = require('fs')
-const path = require('path')
-const cp = require('child_process')
-const stc = require('@teidesu/slow-types-compiler')
+import * as cp from 'node:child_process'
+import * as fs from 'node:fs'
+import { createRequire } from 'node:module'
+import * as path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import * as stc from '@teidesu/slow-types-compiler'
 
 const IS_JSR = process.env.JSR === '1'
 const MAIN_REGISTRY = IS_JSR ? 'https://jsr.io/' : 'https://registry.npmjs.org'
 let REGISTRY = process.env.REGISTRY || MAIN_REGISTRY
-exports.REGISTRY = REGISTRY
+const EXPORTED_REGISTRY = REGISTRY
+
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
+const require = createRequire(import.meta.url)
+
 if (!REGISTRY.endsWith('/')) REGISTRY += '/'
 
 if (process.env.E2E && IS_JSR) {
@@ -23,15 +30,15 @@ if (IS_JSR) {
 }
 
 const JSR_EXCEPTIONS = {
-    bun: 'never',
+    'bun': 'never',
     'create-bot': 'never',
     'crypto-node': 'never',
-    deno: 'only',
-    node: 'never',
+    'deno': 'only',
+    'node': 'never',
     'http-proxy': 'never',
     'socks-proxy': 'never',
-    mtproxy: 'never',
-    test: 'never',
+    'mtproxy': 'never',
+    'test': 'never',
 }
 
 function fetchRetry(url, init, retry = 0) {
@@ -43,20 +50,20 @@ function fetchRetry(url, init, retry = 0) {
         console.log('[i] Error fetching %s:', url)
         console.log(err)
 
-        return new Promise((resolve) => setTimeout(resolve, 1000)).then(() => fetchRetry(url, init, retry + 1))
+        return new Promise(resolve => setTimeout(resolve, 1000)).then(() => fetchRetry(url, init, retry + 1))
     })
 }
 
 async function checkVersion(name, version) {
-    let registry = REGISTRY
+    const registry = REGISTRY
 
     const url = IS_JSR ? `${registry}@mtcute/${name}/${version}_meta.json` : `${registry}@mtcute/${name}/${version}`
 
-    return fetchRetry(url).then((r) => r.status === 200)
+    return fetchRetry(url).then(r => r.status === 200)
 }
 
 async function publishSinglePackage(name) {
-    let packageDir = path.join(__dirname, '../packages', name)
+    const packageDir = path.join(__dirname, '../packages', name)
 
     console.log('[i] Building %s', name)
 
@@ -68,9 +75,9 @@ async function publishSinglePackage(name) {
 
     console.log('[i] Publishing %s', name)
 
-    const version = IS_JSR ?
-        require(path.join(packageDir, 'dist/jsr/deno.json')).version :
-        require(path.join(packageDir, 'dist/package.json')).version
+    const version = IS_JSR
+        ? require(path.join(packageDir, 'dist/jsr/deno.json')).version
+        : require(path.join(packageDir, 'dist/package.json')).version
 
     const exists = await checkVersion(name, version)
 
@@ -137,8 +144,8 @@ function listPackages(all = false) {
         for (const pkg of packages) {
             const deps = require(`../packages/${pkg}/package.json`).dependencies || {}
             map[pkg] = Object.keys(deps)
-                .filter((d) => d.startsWith('@mtcute/'))
-                .map((d) => d.slice(8))
+                .filter(d => d.startsWith('@mtcute/'))
+                .map(d => d.slice(8))
         }
 
         packages = stc.determinePublishOrder(map)
@@ -147,8 +154,6 @@ function listPackages(all = false) {
 
     return packages
 }
-
-exports.listPackages = listPackages
 
 async function main(arg = process.argv[2]) {
     if (!arg) {
@@ -183,7 +188,7 @@ async function main(arg = process.argv[2]) {
         }
     } else {
         let pkgs = arg.split(',')
-        let filteredPkgs = []
+        const filteredPkgs = []
 
         const deps = {}
         // determine the order of packages to publish
@@ -197,8 +202,8 @@ async function main(arg = process.argv[2]) {
             if (IS_JSR) {
                 const pkgDeps = require(`../packages/${pkg}/package.json`).dependencies || {}
                 deps[pkg] = Object.keys(pkgDeps)
-                    .filter((d) => d.startsWith('@mtcute/'))
-                    .map((d) => d.slice(8))
+                    .filter(d => d.startsWith('@mtcute/'))
+                    .map(d => d.slice(8))
             }
         }
 
@@ -248,11 +253,8 @@ async function main(arg = process.argv[2]) {
     process.exit(0) // idk why but it sometimes hangs indefinitely
 }
 
-exports.main = main
+export { listPackages, main, EXPORTED_REGISTRY as REGISTRY }
 
-if (require.main === module) {
-    main().catch((e) => {
-        console.error(e)
-        process.exit(1)
-    })
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    await main()
 }

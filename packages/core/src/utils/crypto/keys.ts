@@ -1,11 +1,12 @@
-import Long from 'long'
-
-import { __publicKeyIndex as keysIndex, TlPublicKey } from '@mtcute/tl/binary/rsa-keys.js'
+import type Long from 'long'
+import type { TlPublicKey } from '@mtcute/tl/binary/rsa-keys.js'
+import { __publicKeyIndex as keysIndex } from '@mtcute/tl/binary/rsa-keys.js'
 import { TlBinaryWriter } from '@mtcute/tl-runtime'
 
 import { getPlatform } from '../../platform.js'
 import { parseAsn1, parsePemContents } from '../binary/asn1-parser.js'
-import { ICryptoProvider } from './abstract.js'
+
+import type { ICryptoProvider } from './abstract.js'
 
 /**
  * Parse PEM-encoded RSA public key information into modulus and exponent

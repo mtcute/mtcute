@@ -1,6 +1,7 @@
-import { ITelegramClient } from '../../client.types.js'
-import { InputPeerLike, StoryViewer } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike, StoryViewer } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { getStoryViewers } from './get-story-viewers.js'
 
 /**

@@ -1,4 +1,4 @@
-import { MtcuteWasmModule, SyncInitInput } from './types.js'
+import type { MtcuteWasmModule, SyncInitInput } from './types.js'
 
 export * from './types.js'
 
@@ -171,7 +171,7 @@ export function ige256Decrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array)
  *
  * > **Note**: `freeCtr256` must be called on the returned context when it's no longer needed
  */
-export function createCtr256(key: Uint8Array, iv: Uint8Array) {
+export function createCtr256(key: Uint8Array, iv: Uint8Array): number {
     getUint8Memory().set(key, sharedKeyPtr)
     getUint8Memory().set(iv, sharedIvPtr)
 
@@ -181,7 +181,7 @@ export function createCtr256(key: Uint8Array, iv: Uint8Array) {
 /**
  * Release a context for AES-CTR-256 en/decryption
  */
-export function freeCtr256(ctx: number) {
+export function freeCtr256(ctx: number): void {
     wasm.ctr256_free(ctx)
 }
 

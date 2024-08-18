@@ -1,12 +1,15 @@
-import { createInterface, Interface as RlInterface } from 'node:readline'
+import type { Interface as RlInterface } from 'node:readline'
+import { createInterface } from 'node:readline'
 import { Readable, Writable } from 'node:stream'
 
-import { FileDownloadLocation, FileDownloadParameters, ITelegramStorageProvider, PartialOnly, User } from '@mtcute/core'
+import type { FileDownloadLocation, FileDownloadParameters, ITelegramStorageProvider, PartialOnly, User } from '@mtcute/core'
+import type {
+    BaseTelegramClientOptions as BaseTelegramClientOptionsBase,
+    TelegramClientOptions,
+} from '@mtcute/core/client.js'
 import {
     BaseTelegramClient as BaseTelegramClientBase,
-    BaseTelegramClientOptions as BaseTelegramClientOptionsBase,
     TelegramClient as TelegramClientBase,
-    TelegramClientOptions,
 } from '@mtcute/core/client.js'
 import { setPlatform } from '@mtcute/core/platform.js'
 
@@ -48,9 +51,9 @@ export class BaseTelegramClient extends BaseTelegramClientBase {
             transport: () => new TcpTransport(),
             ...opts,
             storage:
-                typeof opts.storage === 'string' ?
-                    new SqliteStorage(opts.storage) :
-                    opts.storage ?? new SqliteStorage('client.session'),
+                typeof opts.storage === 'string'
+                    ? new SqliteStorage(opts.storage)
+                    : opts.storage ?? new SqliteStorage('client.session'),
         })
     }
 }
@@ -93,7 +96,7 @@ export class TelegramClient extends TelegramClientBase {
             })
         }
 
-        return new Promise((res) => this._rl?.question(text, res))
+        return new Promise(res => this._rl?.question(text, res))
     }
 
     close(): Promise<void> {
@@ -133,7 +136,7 @@ export class TelegramClient extends TelegramClientBase {
 
         this.start(params)
             .then(then)
-            .catch((err) => this.emitError(err))
+            .catch(err => this.emitError(err))
     }
 
     downloadToFile(

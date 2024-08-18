@@ -2,8 +2,9 @@ import Long from 'long'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputMessageId, normalizeInputMessageId, PeersIndex, Poll } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputMessageId } from '../../types/index.js'
+import { PeersIndex, Poll, normalizeInputMessageId } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 

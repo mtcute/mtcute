@@ -134,7 +134,7 @@ export class IdbStorageDriver extends BaseStorageDriver {
         })
     }
 
-    async _save() {
+    async _save(): Promise<void> {
         if (this._pendingWritesOses.size === 0) return
 
         const writes = this._pendingWrites

@@ -1,22 +1,25 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { randomLong } from '../../../utils/long-utils.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
-import { ITelegramClient } from '../../client.types.js'
-import { BotKeyboard, ReplyMarkup } from '../../types/bots/keyboards/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { ReplyMarkup } from '../../types/bots/keyboards/index.js'
+import { BotKeyboard } from '../../types/bots/keyboards/index.js'
 import { Message } from '../../types/messages/message.js'
-import { InputText } from '../../types/misc/entities.js'
-import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
+import type { InputText } from '../../types/misc/entities.js'
+import type { InputPeerLike } from '../../types/peers/index.js'
+import { PeersIndex } from '../../types/peers/index.js'
 import { createDummyUpdate } from '../../updates/utils.js'
 import { inputPeerToPeer } from '../../utils/peer-utils.js'
 import { _getRawPeerBatched } from '../chats/batched-queries.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 import { _findMessageInUpdate } from './find-in-update.js'
-import { _getDiscussionMessage } from './get-discussion-message.js'
-import { _processCommonSendParameters, CommonSendParams } from './send-common.js'
+import type { CommonSendParams } from './send-common.js'
+import { _processCommonSendParameters } from './send-common.js'
 
 /**
  * Send a text message

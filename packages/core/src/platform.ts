@@ -1,21 +1,22 @@
-import { ITlPlatform, TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
+import type { ITlPlatform } from '@mtcute/tl-runtime'
+import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
 
-import { UploadFileLike } from './highlevel/types/files/utils.js'
+import type { UploadFileLike } from './highlevel/types/files/utils.js'
 import { MtUnsupportedError } from './types/errors.js'
-import { MaybePromise } from './types/index.js'
+import type { MaybePromise } from './types/index.js'
 
 export interface ICorePlatform extends ITlPlatform {
-    beforeExit(fn: () => void): () => void
-    log(color: number, level: number, tag: string, fmt: string, args: unknown[]): void
-    getDefaultLogLevel(): number | null
-    getDeviceModel(): string
-    normalizeFile?(file: UploadFileLike): MaybePromise<{
+    beforeExit: (fn: () => void) => () => void
+    log: (color: number, level: number, tag: string, fmt: string, args: unknown[]) => void
+    getDefaultLogLevel: () => number | null
+    getDeviceModel: () => string
+    normalizeFile?: (file: UploadFileLike) => MaybePromise<{
         file?: UploadFileLike
         fileSize?: number
         fileName?: string
     } | null>
-    onNetworkChanged?(fn: (connected: boolean) => void): () => void
-    isOnline?(): boolean
+    onNetworkChanged?: (fn: (connected: boolean) => void) => () => void
+    isOnline?: () => boolean
 }
 
 // NB: when using with some bundlers (e.g. vite) re-importing this module will not return the same object
@@ -39,7 +40,6 @@ export function setPlatform(platform: ICorePlatform): void {
     TlBinaryReader.platform = platform
     TlBinaryWriter.platform = platform
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(globalThis as any)[platformKey] = platform
 }
 

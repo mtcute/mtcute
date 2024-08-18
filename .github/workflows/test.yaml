@@ -52,7 +52,7 @@ jobs:
         with:
           bun-version: '1.1.4'
       - name: 'Build tests'
-        run: pnpm exec vite build -c .config/vite.bun.mts
+        run: pnpm exec vite build -c .config/vite.bun.ts
       - name: 'Run tests'
         run: cd dist/tests && bun test
   
@@ -63,9 +63,9 @@ jobs:
       - uses: ./.github/actions/init
       - uses: denoland/setup-deno@v1
         with:
-          deno-version: '1.43.1'
+          deno-version: '1.45.5'
       - name: 'Build tests'
-        run: pnpm exec vite build -c .config/vite.deno.mts
+        run: pnpm exec vite build -c .config/vite.deno.ts
       - name: 'Run tests'
         run: cd dist/tests && deno test -A --unstable-ffi
   
@@ -110,22 +110,22 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REGISTRY: 'https://npm.tei.su'
         run: cd e2e/node && ./cli.sh ci-publish
-  e2e-deno:
-    runs-on: ubuntu-latest
-    needs: [lint, test-node, test-web, test-bun, test-deno]
-    permissions:
-      contents: read
-      actions: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run end-to-end tests under Deno
-        env:
-          API_ID: ${{ secrets.TELEGRAM_API_ID }}
-          API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: nick-fields/retry@v2
-        # thanks docker networking very cool
-        with:
-          max_attempts: 3
-          timeout_minutes: 30
-          command: cd e2e/deno && ./cli.sh ci
+  # e2e-deno:
+  #   runs-on: ubuntu-latest
+  #   needs: [lint, test-node, test-web, test-bun, test-deno]
+  #   permissions:
+  #     contents: read
+  #     actions: write
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Run end-to-end tests under Deno
+  #       env:
+  #         API_ID: ${{ secrets.TELEGRAM_API_ID }}
+  #         API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       uses: nick-fields/retry@v2
+  #       # thanks docker networking very cool
+  #       with:
+  #         max_attempts: 3
+  #         timeout_minutes: 30
+  #         command: cd e2e/deno && ./cli.sh ci

@@ -6,7 +6,7 @@ They are made for 2 purposes:
  - Ensure published packages work as expected and can properly be imported
  - Ensure that the library works with the actual Telegram API
 
-To achieve the first goal, we use a local JSR instance container where we publish the package, 
+To achieve the first goal, we use a local JSR instance container where we publish the package,
 and then install it from there in another container
 
 ## Setting up

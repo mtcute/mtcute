@@ -3,7 +3,8 @@ import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 
 import { LogManager } from '../../utils/logger.js'
 import { MemoryStorageDriver } from '../memory/driver.js'
-import { ServiceOptions } from './base.js'
+
+import type { ServiceOptions } from './base.js'
 
 export function testServiceOptions(): ServiceOptions {
     const logger = new LogManager()

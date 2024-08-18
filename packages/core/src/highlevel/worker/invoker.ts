@@ -1,6 +1,9 @@
-import { ControllablePromise, createControllablePromise } from '../../utils/controllable-promise.js'
+import type { ControllablePromise } from '../../utils/controllable-promise.js'
+import { createControllablePromise } from '../../utils/controllable-promise.js'
+
 import { deserializeError } from './errors.js'
-import { deserializeResult, SendFn, serializeResult, WorkerInboundMessage, WorkerOutboundMessage } from './protocol.js'
+import type { SendFn, WorkerInboundMessage, WorkerOutboundMessage } from './protocol.js'
+import { deserializeResult, serializeResult } from './protocol.js'
 
 export type InvokeTarget = Extract<WorkerInboundMessage, { type: 'invoke' }>['target']
 
@@ -44,7 +47,7 @@ export class WorkerInvoker {
     }
 
     invokeVoid(target: InvokeTarget, method: string, args: unknown[]): void {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        // eslint-disable-next-line ts/no-floating-promises
         this._invoke(target, method, args, true)
     }
 
@@ -54,7 +57,7 @@ export class WorkerInvoker {
         return this._invoke(target, method, args, false, abortSignal) as Promise<unknown>
     }
 
-    handleResult(msg: Extract<WorkerOutboundMessage, { type: 'result' }>) {
+    handleResult(msg: Extract<WorkerOutboundMessage, { type: 'result' }>): void {
         const promise = this._pending.get(msg.id)
         if (!promise) return
 

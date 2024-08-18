@@ -1,12 +1,13 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { randomLong } from '../../../utils/long-utils.js'
-import { ITelegramClient } from '../../client.types.js'
-import { InputMediaLike, InputPeerLike, InputPrivacyRule, InputText, Story } from '../../types/index.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputMediaLike, InputPeerLike, InputPrivacyRule, InputText, Story } from '../../types/index.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizePrivacyRules } from '../misc/normalize-privacy-rules.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+
 import { _findStoryInUpdate } from './find-in-update.js'
 
 /**
@@ -78,9 +79,9 @@ export async function sendStory(
     }
 
     const inputMedia = await _normalizeInputMedia(client, media)
-    const privacyRules = params.privacyRules ?
-        await _normalizePrivacyRules(client, params.privacyRules) :
-        [{ _: 'inputPrivacyValueAllowAll' } as const]
+    const privacyRules = params.privacyRules
+        ? await _normalizePrivacyRules(client, params.privacyRules)
+        : [{ _: 'inputPrivacyValueAllowAll' } as const]
 
     const [caption, entities] = await _normalizeInputText(
         client,

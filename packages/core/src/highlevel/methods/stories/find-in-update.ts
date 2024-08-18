@@ -1,8 +1,8 @@
-import { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { assertTypeIs, hasValueAtKey } from '../../../utils/type-assertions.js'
-import { ITelegramClient } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import { PeersIndex, Story } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 

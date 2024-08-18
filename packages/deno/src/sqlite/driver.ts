@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { BaseSqliteStorageDriver, ISqliteDatabase, ISqliteStatement } from '@mtcute/core'
-
-import { Logger } from '../utils.js'
-
+import type { ISqliteDatabase, ISqliteStatement } from '@mtcute/core'
+import { BaseSqliteStorageDriver } from '@mtcute/core'
 import type { BindParameters, Database as TDatabase, Statement as TStatement } from '@db/sqlite'
+
+import type { Logger } from '../utils.js'
 
 let Database: typeof import('@db/sqlite').Database
 
@@ -84,7 +83,7 @@ class WrappedDatabase implements ISqliteDatabase {
 export class SqliteStorageDriver extends BaseSqliteStorageDriver {
     constructor(
         readonly filename = ':memory:',
-        readonly params?: SqliteStorageDriverOptions,
+        readonly params?: SqliteStorageDriverOptions | undefined,
     ) {
         super()
     }
@@ -95,7 +94,7 @@ export class SqliteStorageDriver extends BaseSqliteStorageDriver {
             // in case the user doesn't use sqlite storage
             Database = (await import('@db/sqlite')).Database
         }
-        super._load()
+        await super._load()
     }
 
     _createDatabase(): ISqliteDatabase {
