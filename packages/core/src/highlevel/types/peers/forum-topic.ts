@@ -21,7 +21,7 @@ export class ForumTopic {
     constructor(
         readonly raw: tl.RawForumTopic,
         readonly _peers: PeersIndex,
-        readonly _messages?: Map<number, tl.TypeMessage>,
+        readonly _messages?: Map<number, tl.TypeMessage> | undefined,
     ) {}
 
     static parseTlForumTopics(topics: tl.messages.TypeForumTopics): ForumTopic[] {

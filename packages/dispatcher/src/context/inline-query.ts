@@ -20,7 +20,7 @@ export class InlineQueryContext extends InlineQuery implements UpdateContext<Inl
     }
 
     /** Answer to this inline query */
-    answer(...params: ParametersSkip1<TelegramClient['answerInlineQuery']>) {
+    answer(...params: ParametersSkip1<TelegramClient['answerInlineQuery']>): Promise<void> {
         return this.client.answerInlineQuery(this.id, ...params)
     }
 }

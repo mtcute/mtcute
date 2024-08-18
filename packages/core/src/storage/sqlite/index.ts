@@ -11,10 +11,10 @@ export { BaseSqliteStorageDriver }
 export * from './types.js'
 
 export class BaseSqliteStorage implements IMtStorageProvider, ITelegramStorageProvider {
-    readonly authKeys
-    readonly kv
-    readonly refMessages
-    readonly peers
+    readonly authKeys: SqliteAuthKeysRepository
+    readonly kv: SqliteKeyValueRepository
+    readonly refMessages: SqliteRefMessagesRepository
+    readonly peers: SqlitePeersRepository
 
     constructor(readonly driver: BaseSqliteStorageDriver) {
         this.authKeys = new SqliteAuthKeysRepository(this.driver)

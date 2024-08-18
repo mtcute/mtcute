@@ -7,7 +7,11 @@ import type { UploadFileLike } from '@mtcute/core'
 
 import { nodeStreamToWeb } from './stream-utils.js'
 
-export async function normalizeFile(file: UploadFileLike) {
+export async function normalizeFile(file: UploadFileLike): Promise<{
+    file: UploadFileLike
+    fileName?: string | undefined
+    fileSize?: number
+} | null> {
     if (typeof file === 'string') {
         file = createReadStream(file)
     }

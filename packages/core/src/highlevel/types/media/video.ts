@@ -24,7 +24,7 @@ export class Video extends RawDocument {
     constructor(
         doc: tl.RawDocument,
         readonly attr: tl.RawDocumentAttributeVideo | tl.RawDocumentAttributeImageSize,
-        readonly media?: tl.RawMessageMediaDocument,
+        readonly media?: tl.RawMessageMediaDocument | undefined,
     ) {
         super(doc)
     }

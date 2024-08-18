@@ -9,10 +9,11 @@ import {
     toInputChannel,
     toInputUser,
 } from '../../utils/peer-utils.js'
+import type { BatchedQuery } from '../../utils/query-batcher.js'
 import { batchedQuery } from '../../utils/query-batcher.js'
 
 /** @internal */
-export const _getUsersBatched = batchedQuery<tl.TypeInputUser, tl.TypeUser, number>({
+export const _getUsersBatched: BatchedQuery<tl.TypeInputUser, tl.TypeUser> = batchedQuery({
     fetch: (client, items) =>
         client
             .call({
@@ -63,7 +64,7 @@ export const _getUsersBatched = batchedQuery<tl.TypeInputUser, tl.TypeUser, numb
 })
 
 /** @internal */
-export const _getChatsBatched = batchedQuery<number, tl.RawChat, number>({
+export const _getChatsBatched: BatchedQuery<number, tl.RawChat> = batchedQuery({
     fetch: (client, items) =>
         client
             .call({
@@ -78,7 +79,10 @@ export const _getChatsBatched = batchedQuery<number, tl.RawChat, number>({
 })
 
 /** @internal */
-export const _getChannelsBatched = batchedQuery<tl.TypeInputChannel, tl.RawChannel | tl.RawChannelForbidden, number>({
+export const _getChannelsBatched: BatchedQuery<
+    tl.TypeInputChannel,
+    tl.RawChannel | tl.RawChannelForbidden
+> = batchedQuery({
     fetch: (client, items) =>
         client
             .call({

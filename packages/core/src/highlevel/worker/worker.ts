@@ -24,7 +24,7 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
 
     abstract registerWorker(handler: WorkerMessageHandler): RespondFn
 
-    readonly pendingAborts = new Map<number, AbortController>()
+    readonly pendingAborts: Map<number, AbortController> = new Map()
 
     constructor(readonly params: TelegramWorkerOptions<T>) {
         this.broadcast = this.registerWorker((message, respond) => {

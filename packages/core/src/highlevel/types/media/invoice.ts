@@ -24,7 +24,7 @@ export class Invoice {
 
     constructor(
         readonly raw: tl.RawMessageMediaInvoice,
-        private readonly _extendedMedia?: MessageMedia,
+        private readonly _extendedMedia?: MessageMedia | undefined,
     ) {}
 
     /**

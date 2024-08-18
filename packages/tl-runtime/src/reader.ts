@@ -98,8 +98,8 @@ export class TlBinaryReader {
 
     int53(): number {
         // inlined toNumber from Long
-        const res
-            = (this.dataView.getInt32(this.pos, true) >>> 0) + TWO_PWR_32_DBL * this.dataView.getInt32(this.pos + 4, true)
+        const res = (this.dataView.getInt32(this.pos, true) >>> 0)
+          + TWO_PWR_32_DBL * this.dataView.getInt32(this.pos + 4, true)
         this.pos += 8
 
         return res
@@ -176,7 +176,7 @@ export class TlBinaryReader {
         return TlBinaryReader.platform.utf8Decode(this.bytes())
     }
 
-    object(id = this.uint()): unknown {
+    object(id: number = this.uint()): unknown {
         if (id === 0x1CB5C415 /* vector */) {
             return this.vector(this.object, true)
         }
@@ -204,7 +204,7 @@ export class TlBinaryReader {
         return reader(this)
     }
 
-    vector(reader = this.object, bare = false): unknown[] {
+    vector(reader: (id?: number) => unknown = this.object, bare = false): unknown[] {
         if (!bare) {
             const uint = this.uint()
 

@@ -3,8 +3,8 @@ import type Long from 'long'
 export const PERSISTENT_ID_VERSION_OLD = 2
 export const PERSISTENT_ID_VERSION = 4
 
-export const WEB_LOCATION_FLAG = 1 << 24
-export const FILE_REFERENCE_FLAG = 1 << 25
+export const WEB_LOCATION_FLAG: number = 1 << 24
+export const FILE_REFERENCE_FLAG: number = 1 << 25
 
 export const CURRENT_VERSION = 48
 

@@ -6,7 +6,11 @@ import { Readable as NodeReadable } from 'node:stream'
 import type { UploadFileLike } from '@mtcute/core'
 import { extractFileName } from '@mtcute/core/utils.js'
 
-export async function normalizeFile(file: UploadFileLike) {
+export async function normalizeFile(file: UploadFileLike): Promise<{
+    file: UploadFileLike
+    fileName?: string | undefined
+    fileSize?: number
+} | null> {
     if (typeof file === 'string') {
         const fd = await Deno.open(file, { read: true })
 

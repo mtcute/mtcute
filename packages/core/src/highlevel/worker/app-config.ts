@@ -5,7 +5,7 @@ import type { WorkerInvoker } from './invoker.js'
 
 export class AppConfigManagerProxy implements PublicPart<AppConfigManager> {
     readonly get: AppConfigManager['get']
-    readonly getField
+    readonly getField: AppConfigManager['getField']
 
     constructor(readonly invoker: WorkerInvoker) {
         const bind = invoker.makeBinder<AppConfigManager>('app-config')

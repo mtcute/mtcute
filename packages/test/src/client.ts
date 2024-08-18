@@ -61,7 +61,7 @@ export class StubTelegramClient extends BaseTelegramClient {
      *
      * Useful for testing "offline" methods
      */
-    static offline() {
+    static offline(): StubTelegramClient {
         const client = new StubTelegramClient()
 
         client.call = (obj) => {
@@ -94,8 +94,8 @@ export class StubTelegramClient extends BaseTelegramClient {
 
     // some fake peers handling //
 
-    readonly _knownChats = new Map<number, tl.TypeChat>()
-    readonly _knownUsers = new Map<number, tl.TypeUser>()
+    readonly _knownChats: Map<number, tl.TypeChat> = new Map()
+    readonly _knownUsers: Map<number, tl.TypeUser> = new Map()
     _selfId = 0
 
     async registerPeers(...peers: (tl.TypeUser | tl.TypeChat)[]): Promise<void> {
@@ -110,7 +110,7 @@ export class StubTelegramClient extends BaseTelegramClient {
         }
     }
 
-    getPeers(ids: InputPeerId[]) {
+    getPeers(ids: InputPeerId[]): { users: tl.TypeUser[], chats: tl.TypeChat[] } {
         const users: tl.TypeUser[] = []
         const chats: tl.TypeChat[] = []
 
@@ -219,7 +219,7 @@ export class StubTelegramClient extends BaseTelegramClient {
         return state
     }
 
-    getNextMessageId(chatId = 0) {
+    getNextMessageId(chatId = 0): number {
         const state = this.getMessageBox(chatId)
 
         const nextId = state.lastMessageId + 1
@@ -228,7 +228,7 @@ export class StubTelegramClient extends BaseTelegramClient {
         return nextId
     }
 
-    getNextPts(chatId = 0, count = 1) {
+    getNextPts(chatId = 0, count = 1): number {
         const state = this.getMessageBox(chatId)
 
         const nextPts = state.pts + count
@@ -237,11 +237,11 @@ export class StubTelegramClient extends BaseTelegramClient {
         return nextPts
     }
 
-    getNextQts() {
+    getNextQts(): number {
         return this._lastQts++
     }
 
-    getNextDate() {
+    getNextDate(): number {
         return (this._lastDate = Math.floor(Date.now() / 1000))
     }
 

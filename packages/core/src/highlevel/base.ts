@@ -94,7 +94,7 @@ export class BaseTelegramClient implements ITelegramClient {
         })
     }
 
-    readonly appConfig = new AppConfigManager(this)
+    readonly appConfig: AppConfigManager = new AppConfigManager(this)
 
     private _prepare = asyncResettable(async () => {
         await this.mt.prepare()
@@ -115,7 +115,7 @@ export class BaseTelegramClient implements ITelegramClient {
      *
      * Call {@link connect} to actually connect.
      */
-    prepare() {
+    prepare(): Promise<void> {
         return this._prepare.run()
     }
 
@@ -327,7 +327,10 @@ export class BaseTelegramClient implements ITelegramClient {
         this._connectionStateHandler = handler
     }
 
-    async getApiCrenetials() {
+    async getApiCrenetials(): Promise<{
+        id: number
+        hash: string
+    }> {
         return {
             id: this.params.apiId,
             hash: this.params.apiHash,

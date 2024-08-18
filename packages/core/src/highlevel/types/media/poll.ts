@@ -9,7 +9,7 @@ import type { PeersIndex } from '../peers/peers-index.js'
 export class PollAnswer {
     constructor(
         readonly raw: tl.TypePollAnswer,
-        readonly result?: tl.TypePollAnswerVoters,
+        readonly result?: tl.RawPollAnswerVoters | undefined,
     ) {}
 
     /**
@@ -71,7 +71,7 @@ export class Poll {
     constructor(
         readonly raw: tl.TypePoll,
         readonly _peers: PeersIndex,
-        readonly results?: tl.TypePollResults,
+        readonly results?: tl.RawPollResults | undefined,
     ) {}
 
     /**

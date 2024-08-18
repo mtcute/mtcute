@@ -1,4 +1,4 @@
-import type { OmitInputMessageId, ParametersSkip1 } from '@mtcute/core'
+import type { Message, OmitInputMessageId, ParametersSkip1, Sticker } from '@mtcute/core'
 import { BusinessMessage } from '@mtcute/core'
 import type { TelegramClient } from '@mtcute/core/client.js'
 import type {
@@ -45,12 +45,12 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     }
 
     /** Get all custom emojis contained in this message (message group), if any */
-    getCustomEmojis() {
+    getCustomEmojis(): Promise<Sticker[]> {
         return this.client.getCustomEmojisFromMessages(this.messages)
     }
 
     /** Send a text message to the same chat (and topic, if applicable) as a given message */
-    answerText(...params: ParametersSkip1<TelegramClient['answerText']>) {
+    answerText(...params: ParametersSkip1<TelegramClient['answerText']>): Promise<Message> {
         const [send, params_ = {}] = params
         params_.businessConnectionId = this.update.connectionId
 
@@ -58,7 +58,7 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     }
 
     /** Send a media to the same chat (and topic, if applicable) as a given message */
-    answerMedia(...params: ParametersSkip1<TelegramClient['answerMedia']>) {
+    answerMedia(...params: ParametersSkip1<TelegramClient['answerMedia']>): Promise<Message> {
         const [send, params_ = {}] = params
         params_.businessConnectionId = this.update.connectionId
 
@@ -66,7 +66,7 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     }
 
     /** Send a media group to the same chat (and topic, if applicable) as a given message */
-    answerMediaGroup(...params: ParametersSkip1<TelegramClient['answerMediaGroup']>) {
+    answerMediaGroup(...params: ParametersSkip1<TelegramClient['answerMediaGroup']>): Promise<Message[]> {
         const [send, params_ = {}] = params
         params_.businessConnectionId = this.update.connectionId
 
@@ -74,7 +74,7 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     }
 
     /** Send a text message in reply to this message */
-    replyText(...params: ParametersSkip1<TelegramClient['replyText']>) {
+    replyText(...params: ParametersSkip1<TelegramClient['replyText']>): Promise<Message> {
         const [send, params_ = {}] = params
         params_.businessConnectionId = this.update.connectionId
 
@@ -82,7 +82,7 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     }
 
     /** Send a media in reply to this message */
-    replyMedia(...params: ParametersSkip1<TelegramClient['replyMedia']>) {
+    replyMedia(...params: ParametersSkip1<TelegramClient['replyMedia']>): Promise<Message> {
         const [send, params_ = {}] = params
         params_.businessConnectionId = this.update.connectionId
 
@@ -90,7 +90,7 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     }
 
     /** Send a media group in reply to this message */
-    replyMediaGroup(...params: ParametersSkip1<TelegramClient['replyMediaGroup']>) {
+    replyMediaGroup(...params: ParametersSkip1<TelegramClient['replyMediaGroup']>): Promise<Message[]> {
         const [send, params_ = {}] = params
         params_.businessConnectionId = this.update.connectionId
 
@@ -98,28 +98,28 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     }
 
     /** Send a text message in reply to this message */
-    quoteWithText(params: Parameters<TelegramClient['quoteWithText']>[1]) {
+    quoteWithText(params: Parameters<TelegramClient['quoteWithText']>[1]): Promise<Message> {
         params.businessConnectionId = this.update.connectionId
 
         return this.client.quoteWithText(this, params)
     }
 
     /** Send a media in reply to this message */
-    quoteWithMedia(params: Parameters<TelegramClient['quoteWithMedia']>[1]) {
+    quoteWithMedia(params: Parameters<TelegramClient['quoteWithMedia']>[1]): Promise<Message> {
         params.businessConnectionId = this.update.connectionId
 
         return this.client.quoteWithMedia(this, params)
     }
 
     /** Send a media group in reply to this message */
-    quoteWithMediaGroup(params: Parameters<TelegramClient['quoteWithMediaGroup']>[1]) {
+    quoteWithMediaGroup(params: Parameters<TelegramClient['quoteWithMediaGroup']>[1]): Promise<Message[]> {
         params.businessConnectionId = this.update.connectionId
 
         return this.client.quoteWithMediaGroup(this, params)
     }
 
     /** Delete this message (message group) */
-    delete(params?: DeleteMessagesParams) {
+    delete(params?: DeleteMessagesParams): Promise<void> {
         return this.client.deleteMessagesById(
             this.chat.inputPeer,
             this.messages.map(it => it.id),
@@ -128,7 +128,7 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     }
 
     /** Pin this message */
-    pin(params?: OmitInputMessageId<Parameters<TelegramClient['pinMessage']>[0]>) {
+    pin(params?: OmitInputMessageId<Parameters<TelegramClient['pinMessage']>[0]>): Promise<Message | null> {
         return this.client.pinMessage({
             chatId: this.chat.inputPeer,
             message: this.id,
@@ -137,7 +137,7 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     }
 
     /** Unpin this message */
-    unpin() {
+    unpin(): Promise<void> {
         return this.client.unpinMessage({
             chatId: this.chat.inputPeer,
             message: this.id,
@@ -145,7 +145,7 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     }
 
     /** Edit this message */
-    edit(params: OmitInputMessageId<Parameters<TelegramClient['editMessage']>[0]>) {
+    edit(params: OmitInputMessageId<Parameters<TelegramClient['editMessage']>[0]>): Promise<Message> {
         return this.client.editMessage({
             chatId: this.chat.inputPeer,
             message: this.id,
@@ -154,7 +154,7 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     }
 
     /** Forward this message (message group) */
-    forwardTo(params: ForwardMessageOptions) {
+    forwardTo(params: ForwardMessageOptions): Promise<Message[]> {
         return this.client.forwardMessagesById({
             fromChatId: this.chat.inputPeer,
             messages: this.messages.map(it => it.id),
@@ -163,7 +163,7 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     }
 
     /** Send a copy of this message (message group) */
-    copy(params: SendCopyParams & SendCopyGroupParams) {
+    copy(params: SendCopyParams & SendCopyGroupParams): Promise<Message | Message[]> {
         if (this.isMessageGroup) {
             return this.client.sendCopyGroup({
                 messages: this.messages,
@@ -178,7 +178,7 @@ export class BusinessMessageContext extends BusinessMessage implements UpdateCon
     }
 
     /** React to this message */
-    react(params: OmitInputMessageId<Parameters<TelegramClient['sendReaction']>[0]>) {
+    react(params: OmitInputMessageId<Parameters<TelegramClient['sendReaction']>[0]>): Promise<Message | null> {
         return this.client.sendReaction({
             chatId: this.chat.inputPeer,
             message: this.id,

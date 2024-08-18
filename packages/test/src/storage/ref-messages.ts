@@ -11,7 +11,7 @@ export function fakeRefMessagesRepository(): IReferenceMessagesRepository {
     }
 }
 
-export function testRefMessagesRepository(repo: IReferenceMessagesRepository, driver: IStorageDriver) {
+export function testRefMessagesRepository(repo: IReferenceMessagesRepository, driver: IStorageDriver): void {
     describe('IReferenceMessagesRepository', () => {
         afterEach(() => repo.deleteAll())
 

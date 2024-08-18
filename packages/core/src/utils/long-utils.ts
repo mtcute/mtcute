@@ -159,23 +159,23 @@ export class LongSet {
         return this._set.size
     }
 
-    add(val: Long) {
+    add(val: Long): void {
         this._set.add(longToFastString(val))
     }
 
-    delete(val: Long) {
+    delete(val: Long): void {
         this._set.delete(longToFastString(val))
     }
 
-    has(val: Long) {
+    has(val: Long): boolean {
         return this._set.has(longToFastString(val))
     }
 
-    clear() {
+    clear(): void {
         this._set.clear()
     }
 
-    toArray() {
+    toArray(): Long[] {
         const arr: Long[] = []
 
         for (const v of this._set) {

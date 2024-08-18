@@ -8,9 +8,9 @@ interface PeersState {
 }
 
 export class MemoryPeersRepository implements IPeersRepository {
-    readonly state
+    readonly state: PeersState
     constructor(readonly _driver: MemoryStorageDriver) {
-        this.state = this._driver.getState<PeersState>('peers', () => ({
+        this.state = this._driver.getState('peers', () => ({
             entities: new Map(),
             usernameIndex: new Map(),
             phoneIndex: new Map(),

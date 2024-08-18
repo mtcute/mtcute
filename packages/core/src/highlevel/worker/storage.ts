@@ -60,12 +60,12 @@ class CurrentUserServiceProxy implements PublicPart<CurrentUserService> {
 }
 
 class PeersServiceProxy implements PublicPart<PeersService> {
-    readonly updatePeersFrom
-    readonly store
-    readonly getById
-    readonly getByPhone
-    readonly getByUsername
-    readonly getCompleteById
+    readonly updatePeersFrom: PeersService['updatePeersFrom']
+    readonly store: PeersService['store']
+    readonly getById: PeersService['getById']
+    readonly getByPhone: PeersService['getByPhone']
+    readonly getByUsername: PeersService['getByUsername']
+    readonly getCompleteById: PeersService['getCompleteById']
 
     constructor(private _invoker: WorkerInvoker) {
         const bind = this._invoker.makeBinder<PeersService>('storage-peers')
@@ -80,10 +80,10 @@ class PeersServiceProxy implements PublicPart<PeersService> {
 }
 
 export class TelegramStorageProxy implements PublicPart<TelegramStorageManager> {
-    readonly self
-    readonly peers
+    readonly self: CurrentUserServiceProxy
+    readonly peers: PeersServiceProxy
 
-    readonly clear
+    readonly clear: TelegramStorageManager['clear']
 
     constructor(private _invoker: WorkerInvoker) {
         const bind = this._invoker.makeBinder<TelegramStorageManager>('storage')

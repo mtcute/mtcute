@@ -17,7 +17,7 @@ function fixBuffer(buf: Uint8Array | null): Uint8Array | null {
     return typeof Buffer !== 'undefined' && buf instanceof Buffer ? new Uint8Array(buf) : buf
 }
 
-export function testKeyValueRepository(repo: IKeyValueRepository, driver: IStorageDriver) {
+export function testKeyValueRepository(repo: IKeyValueRepository, driver: IStorageDriver): void {
     describe('key-value', () => {
         afterEach(() => repo.deleteAll())
 

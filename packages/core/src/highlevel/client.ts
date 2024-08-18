@@ -519,7 +519,6 @@ export interface TelegramClient extends ITelegramClient {
      */
     on(name: 'delete_business_message', handler: ((upd: DeleteBusinessMessageUpdate) => void)): this
 
-    // eslint-disable-next-line ts/no-explicit-any
     on(name: string, handler: (...args: any[]) => void): this
 
     /**

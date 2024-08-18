@@ -18,7 +18,6 @@
       "deno/ns",
       "vite/client"
     ],
-    "allowJs": true,
     "strict": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
@@ -29,6 +28,7 @@
     "stripInternal": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "isolatedDeclarations": true,
     "isolatedModules": true,
     "skipLibCheck": true
   },

@@ -89,7 +89,7 @@ export class DenoCryptoProvider extends BaseCryptoProvider implements ICryptoPro
         return toUint8Array(gunzipSync(data))
     }
 
-    randomFill(buf: Uint8Array) {
+    randomFill(buf: Uint8Array): void {
         crypto.getRandomValues(buf)
     }
 }

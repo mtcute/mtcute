@@ -32,7 +32,7 @@ export class MultiSessionConnection extends EventEmitter {
 
     protected _connections: SessionConnection[] = []
 
-    setCount(count: number, connect = this.params.isMainConnection): void {
+    setCount(count: number, connect: boolean = this.params.isMainConnection): void {
         this._count = count
 
         this._updateConnections(connect)

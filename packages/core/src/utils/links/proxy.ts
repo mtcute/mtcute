@@ -1,13 +1,14 @@
+import type { Deeplink } from './common.js'
 import { deeplinkBuilder } from './common.js'
 
 /**
  * MTProxy links
  */
-export const mtproxy = deeplinkBuilder<{
+export const mtproxy: Deeplink<{
     server: string
     port: number
     secret: string
-}>({
+}> = /* #__PURE__ */ deeplinkBuilder({
     internalBuild: params => ['proxy', params],
     externalBuild: params => ['proxy', params],
     internalParse: (path, query) => {
@@ -37,12 +38,12 @@ export const mtproxy = deeplinkBuilder<{
 /**
  * Socks5 proxy links
  */
-export const socks5 = deeplinkBuilder<{
+export const socks5: Deeplink<{
     server: string
     port: number
     user?: string
     pass?: string
-}>({
+}> = /* #__PURE__ */ deeplinkBuilder({
     internalBuild: params => ['socks', params],
     externalBuild: params => ['socks', params],
     internalParse: (path, query) => {

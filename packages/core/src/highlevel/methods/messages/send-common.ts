@@ -156,7 +156,13 @@ export async function _processCommonSendParameters(
     client: ITelegramClient,
     chatId: InputPeerLike,
     params: CommonSendParams,
-) {
+): Promise<{
+        peer: tl.TypeInputPeer
+        replyTo: tl.TypeInputReplyTo | undefined
+        scheduleDate: number | undefined
+        quickReplyShortcut: tl.TypeInputQuickReplyShortcut | undefined
+        chainId: string
+    }> {
     let peer = await resolvePeer(client, chatId)
 
     let replyTo = normalizeMessageId(params.replyTo)

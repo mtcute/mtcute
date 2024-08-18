@@ -23,9 +23,9 @@ export interface TelegramStorageManagerExtraOptions {
 export class TelegramStorageManager {
     private provider
 
-    readonly updates
+    readonly updates: UpdatesStateService
     readonly self: PublicPart<CurrentUserService>
-    readonly refMsgs
+    readonly refMsgs: RefMessagesService
     readonly peers: PublicPart<PeersService>
 
     constructor(
@@ -56,7 +56,7 @@ export class TelegramStorageManager {
         )
     }
 
-    async clear(withAuthKeys = false) {
+    async clear(withAuthKeys = false): Promise<void> {
         await this.provider.peers.deleteAll()
         await this.provider.refMessages.deleteAll()
         await this.mt.clear(withAuthKeys)

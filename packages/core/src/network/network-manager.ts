@@ -456,7 +456,7 @@ export class DcConnectionManager {
         this.main.setCount(count)
     }
 
-    async destroy() {
+    async destroy(): Promise<void> {
         await this.main.destroy()
         await this.upload.destroy()
         await this.download.destroy()
@@ -469,15 +469,15 @@ export class DcConnectionManager {
  * Class that manages all connections to Telegram servers.
  */
 export class NetworkManager {
-    readonly _log
-    readonly _storage
+    readonly _log: Logger
+    readonly _storage: StorageManager
 
     readonly _initConnectionParams: tl.RawInitConnectionRequest
     readonly _transportFactory: TransportFactory
     readonly _reconnectionStrategy: ReconnectionStrategy<PersistentConnectionParams>
     readonly _connectionCount: ConnectionCountDelegate
 
-    protected readonly _dcConnections = new Map<number, DcConnectionManager>()
+    protected readonly _dcConnections: Map<number, DcConnectionManager> = new Map()
     protected _primaryDc?: DcConnectionManager
 
     private _updateHandler: (upd: tl.TypeUpdates, fromClient: boolean) => void
@@ -866,7 +866,7 @@ export class NetworkManager {
         }
     }
 
-    getPoolSize(kind: ConnectionKind, dcId?: number) {
+    getPoolSize(kind: ConnectionKind, dcId?: number): number {
         const dc = dcId ? this._dcConnections.get(dcId) : this._primaryDc
 
         if (!dc) {
@@ -882,7 +882,7 @@ export class NetworkManager {
         return dc[kind].getPoolSize()
     }
 
-    getPrimaryDcId() {
+    getPrimaryDcId(): number {
         if (!this._primaryDc) throw new MtcuteError('Not connected to any DC')
 
         return this._primaryDc.dcId

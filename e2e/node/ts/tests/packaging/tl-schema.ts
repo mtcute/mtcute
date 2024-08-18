@@ -28,12 +28,10 @@ describe('@mtcute/tl', () => {
 
     it('readers map works with TlBinaryReader', () => {
         const buf = p.hexDecode('4ca5e8dd7b00000000000000c801000000000000')
-        // eslint-disable-next-line
         const obj = TlBinaryReader.deserializeObject<any>(__tlReaderMap, buf)
 
         expect(obj._).equal('inputPeerUser')
         expect(obj.userId).equal(123)
-        // eslint-disable-next-line
         expect(obj.accessHash.toString()).equal('456')
     })
 

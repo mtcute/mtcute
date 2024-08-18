@@ -1,7 +1,12 @@
-import type { OmitInputMessageId, ParametersSkip1, Peer } from '@mtcute/core'
+import type { OmitInputMessageId, ParametersSkip1, Peer, Sticker } from '@mtcute/core'
 import { Message, MtPeerNotFoundError } from '@mtcute/core'
 import type { TelegramClient } from '@mtcute/core/client.js'
-import type { DeleteMessagesParams, ForwardMessageOptions, SendCopyGroupParams, SendCopyParams } from '@mtcute/core/methods.js'
+import type {
+    DeleteMessagesParams,
+    ForwardMessageOptions,
+    SendCopyGroupParams,
+    SendCopyParams,
+} from '@mtcute/core/methods.js'
 
 import type { UpdateContext } from './base.js'
 
@@ -63,82 +68,82 @@ export class MessageContext extends Message implements UpdateContext<Message> {
     }
 
     /** Get a message that this message is a reply to */
-    getReplyTo() {
+    getReplyTo(): Promise<Message | null> {
         return this.client.getReplyTo(this)
     }
 
     /** If this is a channel post, get its automatic forward in the discussion group */
-    getDiscussionMessage() {
+    getDiscussionMessage(): Promise<Message | null> {
         return this.client.getDiscussionMessage({ chatId: this.chat.inputPeer, message: this.id })
     }
 
     /** Get all custom emojis contained in this message (message group), if any */
-    getCustomEmojis() {
+    getCustomEmojis(): Promise<Sticker[]> {
         return this.client.getCustomEmojisFromMessages(this.messages)
     }
 
     /** Send a text message to the same chat (and topic, if applicable) as a given message */
-    answerText(...params: ParametersSkip1<TelegramClient['answerText']>) {
+    answerText(...params: ParametersSkip1<TelegramClient['answerText']>): Promise<Message> {
         return this.client.answerText(this, ...params)
     }
 
     /** Send a media to the same chat (and topic, if applicable) as a given message */
-    answerMedia(...params: ParametersSkip1<TelegramClient['answerMedia']>) {
+    answerMedia(...params: ParametersSkip1<TelegramClient['answerMedia']>): Promise<Message> {
         return this.client.answerMedia(this, ...params)
     }
 
     /** Send a media group to the same chat (and topic, if applicable) as a given message */
-    answerMediaGroup(...params: ParametersSkip1<TelegramClient['answerMediaGroup']>) {
+    answerMediaGroup(...params: ParametersSkip1<TelegramClient['answerMediaGroup']>): Promise<Message[]> {
         return this.client.answerMediaGroup(this, ...params)
     }
 
     /** Send a text message in reply to this message */
-    replyText(...params: ParametersSkip1<TelegramClient['replyText']>) {
+    replyText(...params: ParametersSkip1<TelegramClient['replyText']>): Promise<Message> {
         return this.client.replyText(this, ...params)
     }
 
     /** Send a media in reply to this message */
-    replyMedia(...params: ParametersSkip1<TelegramClient['replyMedia']>) {
+    replyMedia(...params: ParametersSkip1<TelegramClient['replyMedia']>): Promise<Message> {
         return this.client.replyMedia(this, ...params)
     }
 
     /** Send a media group in reply to this message */
-    replyMediaGroup(...params: ParametersSkip1<TelegramClient['replyMediaGroup']>) {
+    replyMediaGroup(...params: ParametersSkip1<TelegramClient['replyMediaGroup']>): Promise<Message[]> {
         return this.client.replyMediaGroup(this, ...params)
     }
 
     /** Send a text message in reply to this message */
-    quoteWithText(params: Parameters<TelegramClient['quoteWithText']>[1]) {
+    quoteWithText(params: Parameters<TelegramClient['quoteWithText']>[1]): Promise<Message> {
         return this.client.quoteWithText(this, params)
     }
 
     /** Send a media in reply to this message */
-    quoteWithMedia(params: Parameters<TelegramClient['quoteWithMedia']>[1]) {
+    quoteWithMedia(params: Parameters<TelegramClient['quoteWithMedia']>[1]): Promise<Message> {
         return this.client.quoteWithMedia(this, params)
     }
 
     /** Send a media group in reply to this message */
-    quoteWithMediaGroup(params: Parameters<TelegramClient['quoteWithMediaGroup']>[1]) {
+    quoteWithMediaGroup(params: Parameters<TelegramClient['quoteWithMediaGroup']>[1]): Promise<Message[]> {
         return this.client.quoteWithMediaGroup(this, params)
     }
 
     /** Send a text as a comment to this message */
-    commentText(...params: ParametersSkip1<TelegramClient['commentText']>) {
+    commentText(...params: ParametersSkip1<TelegramClient['commentText']>): Promise<Message> {
         return this.client.commentText(this, ...params)
     }
 
     /** Send a media as a comment to this message */
-    commentMedia(...params: ParametersSkip1<TelegramClient['commentMedia']>) {
+    commentMedia(...params: ParametersSkip1<TelegramClient['commentMedia']>): Promise<Message> {
         return this.client.commentMedia(this, ...params)
     }
 
     /** Send a media group as a comment to this message */
-    commentMediaGroup(...params: ParametersSkip1<TelegramClient['commentMediaGroup']>) {
+    commentMediaGroup(...params: ParametersSkip1<TelegramClient['commentMediaGroup']>): Promise<Message[]> {
         return this.client.commentMediaGroup(this, ...params)
     }
 
     /** Delete this message (message group) */
-    delete(params?: DeleteMessagesParams) {
+    delete(params?: DeleteMessagesParams): Promise<void> {
         return this.client.deleteMessagesById(
             this.chat.inputPeer,
             this.messages.map(it => it.id),
@@ -147,7 +152,7 @@ export class MessageContext extends Message implements UpdateContext<Message> {
     }
 
     /** Pin this message */
-    pin(params?: OmitInputMessageId<Parameters<TelegramClient['pinMessage']>[0]>) {
+    pin(params?: OmitInputMessageId<Parameters<TelegramClient['pinMessage']>[0]>): Promise<Message | null> {
         return this.client.pinMessage({
             chatId: this.chat.inputPeer,
             message: this.id,
@@ -156,7 +161,7 @@ export class MessageContext extends Message implements UpdateContext<Message> {
     }
 
     /** Unpin this message */
-    unpin() {
+    unpin(): Promise<void> {
         return this.client.unpinMessage({
             chatId: this.chat.inputPeer,
             message: this.id,
@@ -164,7 +169,7 @@ export class MessageContext extends Message implements UpdateContext<Message> {
     }
 
     /** Edit this message */
-    edit(params: OmitInputMessageId<Parameters<TelegramClient['editMessage']>[0]>) {
+    edit(params: OmitInputMessageId<Parameters<TelegramClient['editMessage']>[0]>): Promise<Message> {
         return this.client.editMessage({
             chatId: this.chat.inputPeer,
             message: this.id,
@@ -173,7 +178,7 @@ export class MessageContext extends Message implements UpdateContext<Message> {
     }
 
     /** Forward this message (message group) */
-    forwardTo(params: ForwardMessageOptions) {
+    forwardTo(params: ForwardMessageOptions): Promise<Message[]> {
         return this.client.forwardMessagesById({
             fromChatId: this.chat.inputPeer,
             messages: this.messages.map(it => it.id),
@@ -182,7 +187,7 @@ export class MessageContext extends Message implements UpdateContext<Message> {
     }
 
     /** Send a copy of this message (message group) */
-    copy(params: SendCopyParams & SendCopyGroupParams) {
+    copy(params: SendCopyParams & SendCopyGroupParams): Promise<Message> | Promise<Message[]> {
         if (this.isMessageGroup) {
             return this.client.sendCopyGroup({
                 messages: this.messages,
@@ -197,7 +202,9 @@ export class MessageContext extends Message implements UpdateContext<Message> {
     }
 
     /** React to this message */
-    react(params: OmitInputMessageId<Parameters<TelegramClient['sendReaction']>[0]>) {
+    react(
+        params: OmitInputMessageId<Parameters<TelegramClient['sendReaction']>[0]>,
+    ): Promise<Message | null> {
         return this.client.sendReaction({
             chatId: this.chat.inputPeer,
             message: this.id,

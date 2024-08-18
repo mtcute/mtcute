@@ -1,5 +1,6 @@
 import { tl } from '@mtcute/tl'
 
+import type { ICorePlatform } from '../platform.js'
 import { getPlatform } from '../platform.js'
 
 import { isTlRpcError } from './type-assertions.js'
@@ -127,11 +128,11 @@ export class Logger {
         this.mgr.handler(this.color, level, this.tag, this.getPrefix() + fmt, args)
     }
 
-    readonly error = this.log.bind(this, LogManager.ERROR)
-    readonly warn = this.log.bind(this, LogManager.WARN)
-    readonly info = this.log.bind(this, LogManager.INFO)
-    readonly debug = this.log.bind(this, LogManager.DEBUG)
-    readonly verbose = this.log.bind(this, LogManager.VERBOSE)
+    readonly error: (fmt: string, ...args: unknown[]) => void = this.log.bind(this, LogManager.ERROR)
+    readonly warn: (fmt: string, ...args: unknown[]) => void = this.log.bind(this, LogManager.WARN)
+    readonly info: (fmt: string, ...args: unknown[]) => void = this.log.bind(this, LogManager.INFO)
+    readonly debug: (fmt: string, ...args: unknown[]) => void = this.log.bind(this, LogManager.DEBUG)
+    readonly verbose: (fmt: string, ...args: unknown[]) => void = this.log.bind(this, LogManager.VERBOSE)
 
     /**
      * Create a {@link Logger} with the given tag
@@ -158,9 +159,9 @@ export class LogManager extends Logger {
     static DEBUG = 4
     static VERBOSE = 5
 
-    readonly platform
+    readonly platform: ICorePlatform
     level: number
-    handler
+    handler: (color: number, level: number, tag: string, fmt: string, args: unknown[]) => void
 
     constructor(tag = 'base') {
         // workaround because we cant pass this to super

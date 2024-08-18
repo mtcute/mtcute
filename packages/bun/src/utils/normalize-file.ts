@@ -11,7 +11,11 @@ function isBunFile(file: unknown): file is BunFile {
     return file instanceof Blob && 'name' in file && file.name.length > 0
 }
 
-export async function normalizeFile(file: UploadFileLike) {
+export async function normalizeFile(file: UploadFileLike): Promise<{
+    file: UploadFileLike
+    fileName?: string | undefined
+    fileSize?: number
+} | null> {
     if (typeof file === 'string') {
         file = Bun.file(file)
     }

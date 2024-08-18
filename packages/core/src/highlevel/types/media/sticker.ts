@@ -72,7 +72,7 @@ export class Sticker extends RawDocument {
     constructor(
         doc: tl.RawDocument,
         readonly attr: tl.RawDocumentAttributeSticker | tl.RawDocumentAttributeCustomEmoji,
-        readonly attr2?: tl.RawDocumentAttributeImageSize | tl.RawDocumentAttributeVideo,
+        readonly attr2?: tl.RawDocumentAttributeImageSize | tl.RawDocumentAttributeVideo | undefined,
     ) {
         super(doc)
     }

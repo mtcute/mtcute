@@ -259,7 +259,7 @@ export class SessionConnection extends PersistentConnection {
         this.emit('error', error)
     }
 
-    protected onConnectionUsable() {
+    protected onConnectionUsable(): void {
         super.onConnectionUsable()
 
         if (this.params.withUpdates) {
@@ -1499,7 +1499,7 @@ export class SessionConnection extends PersistentConnection {
         }
     }
 
-    protected _onInactivityTimeout() {
+    protected _onInactivityTimeout(): void {
         // we should send all pending acks and other service messages
         // before dropping the connection
         // additionally, if we are still waiting for some rpc results,

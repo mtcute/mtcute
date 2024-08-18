@@ -45,11 +45,11 @@ export interface ICryptoProvider {
 export abstract class BaseCryptoProvider {
     abstract randomFill(buf: Uint8Array): void
 
-    factorizePQ(pq: Uint8Array) {
+    factorizePQ(pq: Uint8Array): [Uint8Array, Uint8Array] {
         return factorizePQSync(this as unknown as ICryptoProvider, pq)
     }
 
-    randomBytes(size: number) {
+    randomBytes(size: number): Uint8Array {
         const buf = new Uint8Array(size)
         this.randomFill(buf)
 

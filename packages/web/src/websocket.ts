@@ -190,5 +190,5 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
 }
 
 export class WebSocketTransport extends BaseWebSocketTransport {
-    _packetCodec = new ObfuscatedPacketCodec(new IntermediatePacketCodec())
+    _packetCodec: ObfuscatedPacketCodec = new ObfuscatedPacketCodec(new IntermediatePacketCodec())
 }

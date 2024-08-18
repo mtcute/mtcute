@@ -29,7 +29,7 @@ export class WebPlatform implements ICorePlatform {
         return null
     }
 
-    onNetworkChanged(fn: (connected: boolean) => void) {
+    onNetworkChanged(fn: (connected: boolean) => void): () => void {
         if (!('onLine' in navigator)) return () => {}
 
         const onlineHandler = () => fn(navigator.onLine)

@@ -304,7 +304,7 @@ async function fetchAppConfigDocumentation() {
 export async function fetchDocumentation(
     schema: TlFullSchema,
     layer: number,
-    silent = !process.stdout.isTTY,
+    silent: boolean = !process.stdout.isTTY,
 ): Promise<CachedDocumentation> {
     const headers = {
         'cookie': `stel_dev_layer=${layer}`,
@@ -473,7 +473,7 @@ export async function fetchDocumentation(
     return ret
 }
 
-export function applyDocumentation(schema: TlFullSchema, docs: CachedDocumentation) {
+export function applyDocumentation(schema: TlFullSchema, docs: CachedDocumentation): void {
     for (let i = 0; i < 2; i++) {
         const kind = i === 0 ? 'classes' : 'methods'
 

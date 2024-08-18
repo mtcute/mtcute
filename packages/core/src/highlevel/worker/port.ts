@@ -18,36 +18,36 @@ export interface TelegramWorkerPortOptions {
 }
 
 export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> implements ITelegramClient {
-    readonly log
+    readonly log: LogManager
 
     private _connection
     private _invoker
 
-    readonly storage
-    readonly appConfig
+    readonly storage: TelegramStorageProxy
+    readonly appConfig: AppConfigManagerProxy
 
     // bound methods
-    readonly prepare
+    readonly prepare: ITelegramClient['prepare']
     private _connect
-    readonly close
-    readonly notifyLoggedIn
-    readonly notifyLoggedOut
-    readonly notifyChannelOpened
-    readonly notifyChannelClosed
-    readonly importSession
-    readonly exportSession
-    readonly handleClientUpdate
-    readonly getApiCrenetials
-    readonly getPoolSize
-    readonly getPrimaryDcId
-    readonly changePrimaryDc
-    readonly computeSrpParams
-    readonly computeNewPasswordHash
-    readonly startUpdatesLoop
-    readonly stopUpdatesLoop
+    readonly close: ITelegramClient['close']
+    readonly notifyLoggedIn: ITelegramClient['notifyLoggedIn']
+    readonly notifyLoggedOut: ITelegramClient['notifyLoggedOut']
+    readonly notifyChannelOpened: ITelegramClient['notifyChannelOpened']
+    readonly notifyChannelClosed: ITelegramClient['notifyChannelClosed']
+    readonly importSession: ITelegramClient['importSession']
+    readonly exportSession: ITelegramClient['exportSession']
+    readonly handleClientUpdate: ITelegramClient['handleClientUpdate']
+    readonly getApiCrenetials: ITelegramClient['getApiCrenetials']
+    readonly getPoolSize: ITelegramClient['getPoolSize']
+    readonly getPrimaryDcId: ITelegramClient['getPrimaryDcId']
+    readonly changePrimaryDc: ITelegramClient['changePrimaryDc']
+    readonly computeSrpParams: ITelegramClient['computeSrpParams']
+    readonly computeNewPasswordHash: ITelegramClient['computeNewPasswordHash']
+    readonly startUpdatesLoop: ITelegramClient['startUpdatesLoop']
+    readonly stopUpdatesLoop: ITelegramClient['stopUpdatesLoop']
 
     private _abortController = new AbortController()
-    readonly stopSignal = this._abortController.signal
+    readonly stopSignal: AbortSignal = this._abortController.signal
 
     constructor(readonly options: TelegramWorkerPortOptions) {
         this.log = new LogManager('worker')

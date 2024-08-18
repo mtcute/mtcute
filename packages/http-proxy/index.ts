@@ -160,5 +160,5 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
  * (unless you want to use a custom codec).
  */
 export class HttpProxyTcpTransport extends BaseHttpProxyTcpTransport {
-    _packetCodec = new IntermediatePacketCodec()
+    _packetCodec: IntermediatePacketCodec = new IntermediatePacketCodec()
 }

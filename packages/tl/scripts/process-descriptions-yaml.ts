@@ -48,7 +48,7 @@ function unwrapMaybe(what: MaybeOverwrite, has: boolean): string | undefined {
     return undefined
 }
 
-export function applyDescriptionsYamlFile(input: CachedDocumentation, yaml: unknown) {
+export function applyDescriptionsYamlFile(input: CachedDocumentation, yaml: unknown): CachedDocumentation {
     const { objects: byObjects, arguments: byArguments, regex: byRegex } = yaml as DescriptionsYaml
 
     // first create an index of all classes and methods

@@ -44,6 +44,12 @@ export default antfu({
             SwitchCase: 1,
             VariableDeclarator: 1,
         }],
+        'style/max-len': ['error', {
+            code: 120,
+            ignoreComments: true,
+            ignoreStrings: true,
+            ignoreTemplateLiterals: true,
+        }],
         'curly': ['error', 'multi-line'],
         'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
         'node/prefer-global/process': ['error', 'always'],
@@ -60,7 +66,7 @@ export default antfu({
         'ts/no-redeclare': 'off',
         'eslint-comments/no-unlimited-disable': 'off',
         'no-cond-assign': 'off',
-        'ts/explicit-function-return-type': 'off', // todo: enable once we move to isolatedDeclarations
+        'ts/explicit-function-return-type': 'off',
         'no-labels': 'off',
         'no-restricted-syntax': 'off',
         'unicorn/no-new-array': 'off',

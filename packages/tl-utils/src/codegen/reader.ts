@@ -47,7 +47,7 @@ const DEFAULT_OPTIONS: ReaderCodegenOptions = {
  * @param params  Options
  * @returns  Code as a writers map entry
  */
-export function generateReaderCodeForTlEntry(entry: TlEntry, params = DEFAULT_OPTIONS): string {
+export function generateReaderCodeForTlEntry(entry: TlEntry, params: ReaderCodegenOptions = DEFAULT_OPTIONS): string {
     const { variableName, includeFlags } = { ...DEFAULT_OPTIONS, ...params }
 
     if (entry.id === 0) entry.id = computeConstructorIdFromEntry(entry)
@@ -169,7 +169,10 @@ export function generateReaderCodeForTlEntry(entry: TlEntry, params = DEFAULT_OP
  * @param entries  Entries to generate reader for
  * @param params  Codegen options
  */
-export function generateReaderCodeForTlEntries(entries: TlEntry[], params = DEFAULT_OPTIONS): string {
+export function generateReaderCodeForTlEntries(
+    entries: TlEntry[],
+    params: ReaderCodegenOptions = DEFAULT_OPTIONS,
+): string {
     const { variableName, includeMethods } = { ...DEFAULT_OPTIONS, ...params }
     let ret = `var ${variableName}={\n`
 

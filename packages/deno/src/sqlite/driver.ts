@@ -83,7 +83,7 @@ class WrappedDatabase implements ISqliteDatabase {
 export class SqliteStorageDriver extends BaseSqliteStorageDriver {
     constructor(
         readonly filename = ':memory:',
-        readonly params?: SqliteStorageDriverOptions,
+        readonly params?: SqliteStorageDriverOptions | undefined,
     ) {
         super()
     }

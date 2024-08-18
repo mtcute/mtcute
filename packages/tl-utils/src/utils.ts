@@ -59,7 +59,7 @@ export function groupTlEntriesByNamespace(entries: TlEntry[]): Record<string, Tl
     return ret
 }
 
-export function stringifyArgumentType(type: string, modifiers?: TlTypeModifiers) {
+export function stringifyArgumentType(type: string, modifiers?: TlTypeModifiers): string {
     if (!modifiers) return type
     let ret = type
 

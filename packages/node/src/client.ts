@@ -1,5 +1,6 @@
 import type { Interface as RlInterface } from 'node:readline'
 import { createInterface } from 'node:readline'
+import type { Readable } from 'node:stream'
 
 import type { FileDownloadLocation, FileDownloadParameters, ITelegramStorageProvider, PartialOnly, User } from '@mtcute/core'
 import type {
@@ -157,7 +158,7 @@ export class TelegramClient extends TelegramClientBase {
         return downloadToFile(this, filename, location, params)
     }
 
-    downloadAsNodeStream(location: FileDownloadLocation, params?: FileDownloadParameters | undefined) {
+    downloadAsNodeStream(location: FileDownloadLocation, params?: FileDownloadParameters | undefined): Readable {
         return downloadAsNodeStream(this, location, params)
     }
 }

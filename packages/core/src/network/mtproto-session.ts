@@ -92,40 +92,40 @@ export type PendingMessage =
  * all the relevant state
  */
 export class MtprotoSession {
-    _sessionId = randomLong()
+    _sessionId: Long = randomLong()
 
     _authKey: AuthKey
     _authKeyTemp: AuthKey
     _authKeyTempSecondary: AuthKey
 
     _timeOffset = 0
-    _lastMessageId = Long.ZERO
+    _lastMessageId: Long = Long.ZERO
     _seqNo = 0
 
     /// state ///
     // recent msg ids
-    recentOutgoingMsgIds = new LruSet<Long>(1000, true)
-    recentIncomingMsgIds = new LruSet<Long>(1000, true)
+    recentOutgoingMsgIds: LruSet<Long> = new LruSet(1000, true)
+    recentIncomingMsgIds: LruSet<Long> = new LruSet(1000, true)
 
     // queues
-    queuedRpc = new Deque<PendingRpc>()
+    queuedRpc: Deque<PendingRpc> = new Deque()
     queuedAcks: Long[] = []
     queuedStateReq: Long[] = []
     queuedResendReq: Long[] = []
     queuedCancelReq: Long[] = []
-    getStateSchedule = new SortedArray<PendingRpc>([], (a, b) => a.getState! - b.getState!)
+    getStateSchedule: SortedArray<PendingRpc> = new SortedArray<PendingRpc>([], (a, b) => a.getState! - b.getState!)
 
-    chains = new Map<string | number, Long>()
-    chainsPendingFails = new Map<string | number, SortedArray<PendingRpc>>()
+    chains: Map<string | number, Long> = new Map()
+    chainsPendingFails: Map<string | number, SortedArray<PendingRpc>> = new Map()
 
     // requests info
-    pendingMessages = new LongMap<PendingMessage>()
-    destroySessionIdToMsgId = new LongMap<Long>()
+    pendingMessages: LongMap<PendingMessage> = new LongMap()
+    destroySessionIdToMsgId: LongMap<Long> = new LongMap()
 
-    lastPingRtt = Number.NaN
+    lastPingRtt: number = Number.NaN
     lastPingTime = 0
-    lastPingMsgId = Long.ZERO
-    lastSessionCreatedUid = Long.ZERO
+    lastPingMsgId: Long = Long.ZERO
+    lastSessionCreatedUid: Long = Long.ZERO
 
     initConnectionCalled = false
     authorizationPending = false
@@ -176,7 +176,7 @@ export class MtprotoSession {
         this._authKeyTempSecondary.reset()
     }
 
-    updateTimeOffset(offset: number) {
+    updateTimeOffset(offset: number): void {
         this.log.debug('time offset updated: %d', offset)
         this._timeOffset = offset
         // lastMessageId was generated with (potentially) wrong time
@@ -330,7 +330,7 @@ export class MtprotoSession {
         return messageId
     }
 
-    onTransportFlood(callback: () => void) {
+    onTransportFlood(callback: () => void): number | undefined {
         if (this.current429Timeout) return // already waiting
 
         // all active queries must be resent after a timeout

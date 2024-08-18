@@ -11,7 +11,7 @@ export interface DependenciesList {
     devDepdenencies: string[]
 }
 
-export function buildDependenciesList(config: UserConfig) {
+export function buildDependenciesList(config: UserConfig): DependenciesList {
     const dependencies = []
     const devDepdenencies = []
 
@@ -57,7 +57,7 @@ export function buildDependenciesList(config: UserConfig) {
     }
 }
 
-export async function installDependencies(cwd: string, config: UserConfig) {
+export async function installDependencies(cwd: string, config: UserConfig): Promise<void> {
     const { dependencies, devDepdenencies } = buildDependenciesList(config)
 
     if (config.packageManager === PackageManager.Deno) {

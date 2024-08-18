@@ -17,9 +17,9 @@ export { MemoryStorageDriver } from './driver.js'
  * or if you know exactly what you're doing.
  */
 export class MemoryStorage implements IMtStorageProvider, ITelegramStorageProvider {
-    readonly driver = new MemoryStorageDriver()
-    readonly kv = new MemoryKeyValueRepository(this.driver)
-    readonly authKeys = new MemoryAuthKeysRepository(this.driver)
-    readonly peers = new MemoryPeersRepository(this.driver)
-    readonly refMessages = new MemoryRefMessagesRepository(this.driver)
+    readonly driver: MemoryStorageDriver = new MemoryStorageDriver()
+    readonly kv: MemoryKeyValueRepository = new MemoryKeyValueRepository(this.driver)
+    readonly authKeys: MemoryAuthKeysRepository = new MemoryAuthKeysRepository(this.driver)
+    readonly peers: MemoryPeersRepository = new MemoryPeersRepository(this.driver)
+    readonly refMessages: MemoryRefMessagesRepository = new MemoryRefMessagesRepository(this.driver)
 }

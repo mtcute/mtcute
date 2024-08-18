@@ -1,11 +1,11 @@
-import type { MaybeArray, MaybePromise, Message } from '@mtcute/core'
+import type { Chat, MaybeArray, MaybePromise, Message } from '@mtcute/core'
 
 import type { BusinessMessageContext } from '../context/business-message.js'
 import type { MessageContext } from '../context/message.js'
 
 import { chat } from './chat.js'
 import { and, or } from './logic.js'
-import type { UpdateFilter } from './types.js'
+import type { Modify, UpdateFilter } from './types.js'
 
 /**
  * Filter messages that call the given command(s)..
@@ -97,13 +97,30 @@ export function command(commands: MaybeArray<string | RegExp>, {
  * Shorthand filter that matches /start commands sent to bot's
  * private messages.
  */
-export const start = and(chat('private'), command('start'))
+export const start: UpdateFilter<
+    MessageContext | BusinessMessageContext,
+    {
+        chat: Modify<Chat, {
+            chatType: 'private'
+        }>
+        command: string[]
+    }
+> = and(chat('private'), command('start'))
 
 /**
  * Shorthand filter that matches /start commands
  * sent in groups (i.e. using `?startgroup` parameter).
  */
-export const startGroup = and(or(chat('supergroup'), chat('group')), command('start'))
+export const startGroup: UpdateFilter<
+  MessageContext | BusinessMessageContext,
+    {
+        chat: Modify<Chat, {
+            chatType: 'group' | 'supergroup'
+        }>
+        command: string[]
+    },
+    never
+> = and(or(chat('supergroup'), chat('group')), command('start'))
 
 function deeplinkBase(base: UpdateFilter<MessageContext | BusinessMessageContext, { command: string[] }>) {
     return (
@@ -156,7 +173,10 @@ function deeplinkBase(base: UpdateFilter<MessageContext | BusinessMessageContext
  * If the parameter is a regex, groups are added to `msg.command`,
  * meaning that the first group is available in `msg.command[2]`.
  */
-export const deeplink = deeplinkBase(start)
+export const deeplink: (params: MaybeArray<string | RegExp>) => UpdateFilter<
+    MessageContext | BusinessMessageContext,
+    { command: string[] }
+> = deeplinkBase(start)
 
 /**
  * Filter for group deep links (i.e. `/start <deeplink_parameter>`).
@@ -164,4 +184,7 @@ export const deeplink = deeplinkBase(start)
  * If the parameter is a regex, groups are added to `msg.command`,
  * meaning that the first group is available in `msg.command[2]`.
  */
-export const deeplinkGroup = deeplinkBase(startGroup)
+export const deeplinkGroup: (params: MaybeArray<string | RegExp>) => UpdateFilter<
+    MessageContext | BusinessMessageContext,
+    { command: string[] }
+> = deeplinkBase(startGroup)

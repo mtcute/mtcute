@@ -62,7 +62,7 @@ export class PaddedIntermediatePacketCodec extends IntermediatePacketCodec {
     }
 
     private _crypto!: ICryptoProvider
-    setup?(crypto: ICryptoProvider) {
+    setup?(crypto: ICryptoProvider): void {
         this._crypto = crypto
     }
 

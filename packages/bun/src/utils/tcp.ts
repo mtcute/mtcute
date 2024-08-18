@@ -149,5 +149,5 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
 }
 
 export class TcpTransport extends BaseTcpTransport {
-    _packetCodec = new IntermediatePacketCodec()
+    _packetCodec: IntermediatePacketCodec = new IntermediatePacketCodec()
 }

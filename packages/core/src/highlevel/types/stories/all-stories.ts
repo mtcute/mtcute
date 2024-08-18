@@ -14,7 +14,7 @@ import { StoriesStealthMode } from './stealth-mode.js'
  */
 export class AllStories {
     /** Peers index */
-    readonly _peers
+    readonly _peers: PeersIndex
     constructor(
         /** Raw TL object */
         readonly raw: tl.stories.RawAllStories,

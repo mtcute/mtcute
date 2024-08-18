@@ -3,6 +3,9 @@ import { tl } from '@mtcute/tl'
 import { MtArgumentError } from '../../types/errors.js'
 import type { MaybePromise } from '../../types/utils.js'
 import { assertNever } from '../../types/utils.js'
+import type {
+    Logger,
+} from '../../utils/index.js'
 import {
     AsyncLock,
     ConditionVariable,
@@ -89,26 +92,32 @@ const UPDATES_TOO_LONG = { _: 'updatesTooLong' } as const
 // todo: fix docs
 export class UpdatesManager {
     updatesLoopActive = false
-    updatesLoopCv = new ConditionVariable()
+    updatesLoopCv: ConditionVariable = new ConditionVariable()
 
-    postponedTimer = new EarlyTimer()
+    postponedTimer: EarlyTimer = new EarlyTimer()
     hasTimedoutPostponed = false
 
-    pendingUpdateContainers = new SortedLinkedList<PendingUpdateContainer>((a, b) => a.seqStart - b.seqStart)
-    pendingPtsUpdates = new SortedLinkedList<PendingUpdate>((a, b) => a.ptsBefore! - b.ptsBefore!)
-    pendingPtsUpdatesPostponed = new SortedLinkedList<PendingUpdate>((a, b) => a.ptsBefore! - b.ptsBefore!)
-    pendingQtsUpdates = new SortedLinkedList<PendingUpdate>((a, b) => a.qtsBefore! - b.qtsBefore!)
-    pendingQtsUpdatesPostponed = new SortedLinkedList<PendingUpdate>((a, b) => a.qtsBefore! - b.qtsBefore!)
-    pendingUnorderedUpdates = new Deque<PendingUpdate>()
+    pendingUpdateContainers: SortedLinkedList<PendingUpdateContainer>
+        = new SortedLinkedList((a, b) => a.seqStart - b.seqStart)
 
-    noDispatchEnabled
+    pendingPtsUpdates: SortedLinkedList<PendingUpdate> = new SortedLinkedList((a, b) => a.ptsBefore! - b.ptsBefore!)
+    pendingPtsUpdatesPostponed: SortedLinkedList<PendingUpdate>
+        = new SortedLinkedList((a, b) => a.ptsBefore! - b.ptsBefore!)
+
+    pendingQtsUpdates: SortedLinkedList<PendingUpdate> = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
+    pendingQtsUpdatesPostponed: SortedLinkedList<PendingUpdate>
+        = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
+
+    pendingUnorderedUpdates: Deque<PendingUpdate> = new Deque()
+
+    noDispatchEnabled: boolean
     // channel id or 0 => msg id
-    noDispatchMsg = new Map<number, Set<number>>()
+    noDispatchMsg: Map<number, Set<number>> = new Map()
     // channel id or 0 => pts
-    noDispatchPts = new Map<number, Set<number>>()
-    noDispatchQts = new Set<number>()
+    noDispatchPts: Map<number, Set<number>> = new Map()
+    noDispatchQts: Set<number> = new Set()
 
-    lock = new AsyncLock()
+    lock: AsyncLock = new AsyncLock()
     // rpsIncoming?: RpsMeter
     // rpsProcessing?: RpsMeter
 
@@ -129,14 +138,14 @@ export class UpdatesManager {
 
     // whether to catch up channels from the locally stored pts
     catchingUp = false
-    catchUpOnStart
+    catchUpOnStart: boolean
 
-    cpts = new Map<number, number>()
-    cptsMod = new Map<number, number>()
-    channelDiffTimeouts = new Map<number, NodeJS.Timeout>()
-    channelsOpened = new Map<number, number>()
+    cpts: Map<number, number> = new Map()
+    cptsMod: Map<number, number> = new Map()
+    channelDiffTimeouts: Map<number, NodeJS.Timeout> = new Map()
+    channelsOpened: Map<number, number> = new Map()
 
-    log
+    log: Logger
     private _handler: RawUpdateHandler = () => {}
 
     private _onCatchingUp: (catchingUp: boolean) => void = () => {}
@@ -189,7 +198,7 @@ export class UpdatesManager {
         this._onCatchingUp = handler
     }
 
-    destroy() {
+    destroy(): void {
         this.stopLoop()
     }
 

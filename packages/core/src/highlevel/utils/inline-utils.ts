@@ -60,7 +60,7 @@ export function encodeInlineMessageId(id: tl.TypeInputBotInlineMessageID): strin
     return getPlatform().base64Encode(writer.result(), true)
 }
 
-export function normalizeInlineId(id: string | tl.TypeInputBotInlineMessageID) {
+export function normalizeInlineId(id: string | tl.TypeInputBotInlineMessageID): tl.TypeInputBotInlineMessageID {
     if (typeof id === 'string') {
         return parseInlineMessageId(id)
     }

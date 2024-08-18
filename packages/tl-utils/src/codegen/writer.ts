@@ -57,7 +57,7 @@ const TL_WRITER_PRELUDE
  * @param params  Options
  * @returns  Code as a readers map entry
  */
-export function generateWriterCodeForTlEntry(entry: TlEntry, params = DEFAULT_OPTIONS): string {
+export function generateWriterCodeForTlEntry(entry: TlEntry, params: WriterCodegenOptions = DEFAULT_OPTIONS): string {
     const { bare, includeFlags, variableName } = {
         ...DEFAULT_OPTIONS,
         ...params,
@@ -181,7 +181,10 @@ export function generateWriterCodeForTlEntry(entry: TlEntry, params = DEFAULT_OP
  * @param entries  Entries to generate writers for
  * @param params  Codegen options
  */
-export function generateWriterCodeForTlEntries(entries: TlEntry[], params = DEFAULT_OPTIONS): string {
+export function generateWriterCodeForTlEntries(
+    entries: TlEntry[],
+    params: WriterCodegenOptions = DEFAULT_OPTIONS,
+): string {
     const { includePrelude, variableName, includeStaticSizes } = {
         ...DEFAULT_OPTIONS,
         ...params,

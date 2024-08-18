@@ -8,7 +8,7 @@ import { makeInspectable } from '../../utils/inspectable.js'
 export class ChatColors {
     constructor(
         private readonly _peerId: number,
-        readonly raw?: tl.RawPeerColor,
+        readonly raw?: tl.RawPeerColor | undefined,
     ) {}
 
     /**

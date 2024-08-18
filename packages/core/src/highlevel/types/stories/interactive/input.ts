@@ -18,7 +18,7 @@ import { normalizeInputReaction } from '../../reactions/index.js'
 export class StoryElement {
     private constructor(private _position: tl.RawMediaAreaCoordinates) {}
 
-    static at(params: { x: number, y: number, width: number, height: number, rotation?: number }) {
+    static at(params: { x: number, y: number, width: number, height: number, rotation?: number }): StoryElement {
         return new StoryElement({
             _: 'mediaAreaCoordinates',
             x: params.x,

@@ -1,16 +1,29 @@
 import type {
+    Audio,
+    Contact,
+    Dice,
+    Document,
+    Game,
+    Invoice,
+    LiveLocation,
+    Location,
     MaybeArray,
     Message,
     MessageAction,
     MessageMediaType,
     Peer,
+    Photo,
+    Poll,
     RepliedMessageInfo,
     RepliedMessageOrigin,
     Sticker,
     StickerSourceType,
     StickerType,
     User,
+    Venue,
     Video,
+    Voice,
+    WebPage,
     _RepliedMessageAssertionsByOrigin,
 } from '@mtcute/core'
 import {
@@ -68,41 +81,44 @@ export const media: UpdateFilter<Message, { media: Exclude<Message['media'], nul
 /**
  * Filter messages containing media of given type
  */
-export function mediaOf<T extends MessageMediaType>(type: T): UpdateFilter<Message, { media: Extract<Message['media'], { type: T }> }> {
+export function mediaOf<T extends MessageMediaType>(type: T): UpdateFilter<
+    Message,
+    { media: Extract<Message['media'], { type: T }> }
+> {
     return msg =>
         msg.media?.type === type
 }
 
 /** Filter messages containing a photo */
-export const photo = mediaOf('photo')
+export const photo: UpdateFilter<Message, { media: Photo }> = mediaOf('photo')
 /** Filter messages containing a dice */
-export const dice = mediaOf('dice')
+export const dice: UpdateFilter<Message, { media: Dice }> = mediaOf('dice')
 /** Filter messages containing a contact */
-export const contact = mediaOf('contact')
+export const contact: UpdateFilter<Message, { media: Contact }> = mediaOf('contact')
 /** Filter messages containing an audio file */
-export const audio = mediaOf('audio')
+export const audio: UpdateFilter<Message, { media: Audio }> = mediaOf('audio')
 /** Filter messages containing a voice message (audio-only) */
-export const voice = mediaOf('voice')
+export const voice: UpdateFilter<Message, { media: Voice }> = mediaOf('voice')
 /** Filter messages containing a sticker */
-export const sticker = mediaOf('sticker')
+export const sticker: UpdateFilter<Message, { media: Sticker }> = mediaOf('sticker')
 /** Filter messages containing a document (a file) */
-export const document = mediaOf('document')
+export const document: UpdateFilter<Message, { media: Document }> = mediaOf('document')
 /** Filter messages containing any video (videos, round messages and animations) */
-export const anyVideo = mediaOf('video')
+export const anyVideo: UpdateFilter<Message, { media: Video }> = mediaOf('video')
 /** Filter messages containing a static location */
-export const location = mediaOf('location')
+export const location: UpdateFilter<Message, { media: Location }> = mediaOf('location')
 /** Filter messages containing a live location */
-export const liveLocation = mediaOf('live_location')
+export const liveLocation: UpdateFilter<Message, { media: LiveLocation }> = mediaOf('live_location')
 /** Filter messages containing a game */
-export const game = mediaOf('game')
+export const game: UpdateFilter<Message, { media: Game }> = mediaOf('game')
 /** Filter messages containing a web page */
-export const webpage = mediaOf('webpage')
+export const webpage: UpdateFilter<Message, { media: WebPage }> = mediaOf('webpage')
 /** Filter messages containing a venue */
-export const venue = mediaOf('venue')
+export const venue: UpdateFilter<Message, { media: Venue }> = mediaOf('venue')
 /** Filter messages containing a poll */
-export const poll = mediaOf('poll')
+export const poll: UpdateFilter<Message, { media: Poll }> = mediaOf('poll')
 /** Filter messages containing an invoice */
-export const invoice = mediaOf('invoice')
+export const invoice: UpdateFilter<Message, { media: Invoice }> = mediaOf('invoice')
 
 /**
  * Filter messages containing any location (live or static).
@@ -224,7 +240,10 @@ export function action<T extends Exclude<MessageAction, null>['type']>(type: May
     return msg => msg.action?.type === type
 }
 
-export function sender<T extends Message['sender']['type']>(type: T): UpdateFilter<Message, { sender: Extract<Message['sender'], { type: T }> }> {
+export function sender<T extends Message['sender']['type']>(type: T): UpdateFilter<
+    Message,
+    { sender: Extract<Message['sender'], { type: T }> }
+> {
     return msg =>
         msg.sender.type === type
 }
@@ -235,7 +254,13 @@ export function sender<T extends Message['sender']['type']>(type: T): UpdateFilt
  *
  * Optionally, you can pass a filter that will be applied to the replied message.
  */
-export function replyTo<Mod, State extends object>(filter?: UpdateFilter<Message, Mod, State>): UpdateFilter<MessageContext | BusinessMessageContext, { getReplyTo: () => Promise<Message & Mod> }, State> {
+export function replyTo<Mod, State extends object>(
+    filter?: UpdateFilter<Message, Mod, State>,
+): UpdateFilter<
+        MessageContext | BusinessMessageContext,
+        { getReplyTo: () => Promise<Message & Mod> },
+        State
+    > {
     return async (msg, state) => {
         if (!msg.replyToMessage?.id) return false
 
@@ -256,7 +281,9 @@ export function replyTo<Mod, State extends object>(filter?: UpdateFilter<Message
  * Middleware-like filter that will fetch the sender of the message
  * and make it available to further filters, as well as the handler itself.
  */
-export function withCompleteSender<Mod, State extends object>(filter?: UpdateFilter<MessageContext, Mod, State>): UpdateFilter<MessageContext, Mod, State> {
+export function withCompleteSender<Mod, State extends object>(
+    filter?: UpdateFilter<MessageContext, Mod, State>,
+): UpdateFilter<MessageContext, Mod, State> {
     return async (msg, state) => {
         try {
             await msg.getCompleteSender()

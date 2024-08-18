@@ -204,7 +204,7 @@ export class MtClient extends EventEmitter {
     /** TL writers map used by the client */
     readonly _writerMap: TlWriterMap
 
-    readonly _config = new ConfigManager(async () => {
+    readonly _config: ConfigManager = new ConfigManager(async () => {
         const res = await this.call({ _: 'help.getConfig' })
 
         if (isTlRpcError(res)) throw new Error(`Failed to get config: ${res.errorMessage}`)
@@ -313,7 +313,7 @@ export class MtClient extends EventEmitter {
      *
      * Call {@link connect} to actually connect.
      */
-    prepare() {
+    prepare(): Promise<void> {
         return this._prepare.run()
     }
 

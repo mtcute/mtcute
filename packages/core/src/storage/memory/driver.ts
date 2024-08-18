@@ -11,5 +11,5 @@ export class MemoryStorageDriver implements IStorageDriver {
         return this.states.get(repo) as T
     }
 
-    load() {}
+    load(): void {}
 }

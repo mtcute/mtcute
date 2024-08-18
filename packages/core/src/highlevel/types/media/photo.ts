@@ -23,7 +23,7 @@ export class Photo extends FileLocation {
 
     constructor(
         readonly raw: tl.RawPhoto,
-        readonly media?: tl.RawMessageMediaPhoto,
+        readonly media?: tl.RawMessageMediaPhoto | undefined,
     ) {
         const location = {
             _: 'inputPhotoFileLocation',

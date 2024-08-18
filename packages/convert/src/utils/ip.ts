@@ -20,7 +20,7 @@ export function parseIpFromBytes(data: Uint8Array): string {
     throw new MtArgumentError('Invalid IP address length')
 }
 
-export function serializeIpv4ToBytes(ip: string, buf: Uint8Array) {
+export function serializeIpv4ToBytes(ip: string, buf: Uint8Array): void {
     const parts = ip.split('.')
 
     if (parts.length !== 4) {
@@ -33,7 +33,7 @@ export function serializeIpv4ToBytes(ip: string, buf: Uint8Array) {
     buf[3] = Number(parts[3])
 }
 
-export function serializeIpv6ToBytes(ip: string, buf: Uint8Array) {
+export function serializeIpv6ToBytes(ip: string, buf: Uint8Array): void {
     const parts = ip.split(':')
 
     if (parts.length !== 8) {

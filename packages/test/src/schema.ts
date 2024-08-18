@@ -7,7 +7,10 @@ let _cachedEntriesMap: Map<string, TlEntry> | null = null
 let _cachedUnionsMap: Map<string, TlEntry[]> | null = null
 
 /** @internal */
-export function getEntriesMap() {
+export function getEntriesMap(): {
+    entries: Map<string, TlEntry>
+    unions: Map<string, TlEntry[]>
+} {
     if (_cachedEntriesMap) {
         return {
             entries: _cachedEntriesMap,

@@ -415,5 +415,5 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
  * (unless you want to use a custom codec).
  */
 export class SocksTcpTransport extends BaseSocksTcpTransport {
-    _packetCodec = new IntermediatePacketCodec()
+    _packetCodec: IntermediatePacketCodec = new IntermediatePacketCodec()
 }

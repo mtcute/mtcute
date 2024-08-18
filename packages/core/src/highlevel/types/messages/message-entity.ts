@@ -67,7 +67,7 @@ export class MessageEntity {
      *
      * Since JS strings are UTF-16, you can use this as-is
      */
-    get offset() {
+    get offset(): number {
         return this.raw.offset
     }
 
@@ -76,7 +76,7 @@ export class MessageEntity {
      *
      * Since JS strings are UTF-16, you can use this as-is
      */
-    get length() {
+    get length(): number {
         return this.raw.length
     }
 

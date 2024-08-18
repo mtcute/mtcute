@@ -25,7 +25,7 @@ export interface SqliteStorageDriverOptions {
 export class SqliteStorageDriver extends BaseSqliteStorageDriver {
     constructor(
         readonly filename = ':memory:',
-        readonly params?: SqliteStorageDriverOptions,
+        readonly params?: SqliteStorageDriverOptions | undefined,
     ) {
         super()
     }

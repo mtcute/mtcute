@@ -21,7 +21,7 @@ export class StubTelegramTransport extends EventEmitter implements ITelegramTran
         }
     }
 
-    _state = TransportState.Idle
+    _state: TransportState = TransportState.Idle
     _currentDc: tl.RawDcOption | null = null
     _crypto!: ICryptoProvider
     _log!: Logger

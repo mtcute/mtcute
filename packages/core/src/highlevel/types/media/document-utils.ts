@@ -9,7 +9,7 @@ import { Voice } from './voice.js'
 export type ParsedDocument = Sticker | Voice | Audio | Video | Document
 
 /** @internal */
-export function parseSticker(doc: tl.RawDocument) {
+export function parseSticker(doc: tl.RawDocument): Sticker | undefined {
     const stickerAttr = doc.attributes.find(
         a => a._ === 'documentAttributeSticker' || a._ === 'documentAttributeCustomEmoji',
     )

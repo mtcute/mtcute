@@ -62,7 +62,7 @@ export class PeersService extends BaseService {
         this._cache = new LruMap(options.cacheSize ?? 100)
     }
 
-    async updatePeersFrom(obj: tl.TlObject | tl.TlObject[]) {
+    async updatePeersFrom(obj: tl.TlObject | tl.TlObject[]): Promise<boolean> {
         let count = 0
 
         for (const peer of getAllPeersFrom(obj)) {

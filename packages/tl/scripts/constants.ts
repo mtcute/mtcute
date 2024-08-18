@@ -1,15 +1,15 @@
 import { join } from 'node:path'
 import * as url from 'node:url'
 
-export const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
+export const __dirname: string = url.fileURLToPath(new URL('.', import.meta.url))
 
-export const DOC_CACHE_FILE = join(__dirname, '../data/documentation.cache.json')
-export const DESCRIPTIONS_YAML_FILE = join(__dirname, '../data/descriptions.yaml')
-export const API_SCHEMA_JSON_FILE = join(__dirname, '../api-schema.json')
-export const API_SCHEMA_DIFF_JSON_FILE = join(__dirname, '../diff.json')
-export const MTP_SCHEMA_JSON_FILE = join(__dirname, '../mtp-schema.json')
-export const ERRORS_JSON_FILE = join(__dirname, '../raw-errors.json')
-export const APP_CONFIG_JSON_FILE = join(__dirname, '../app-config.json')
+export const DOC_CACHE_FILE: string = join(__dirname, '../data/documentation.cache.json')
+export const DESCRIPTIONS_YAML_FILE: string = join(__dirname, '../data/descriptions.yaml')
+export const API_SCHEMA_JSON_FILE: string = join(__dirname, '../api-schema.json')
+export const API_SCHEMA_DIFF_JSON_FILE: string = join(__dirname, '../diff.json')
+export const MTP_SCHEMA_JSON_FILE: string = join(__dirname, '../mtp-schema.json')
+export const ERRORS_JSON_FILE: string = join(__dirname, '../raw-errors.json')
+export const APP_CONFIG_JSON_FILE: string = join(__dirname, '../app-config.json')
 
 export const CORE_DOMAIN = 'https://core.telegram.org'
 export const COREFORK_DOMAIN = 'https://corefork.telegram.org'

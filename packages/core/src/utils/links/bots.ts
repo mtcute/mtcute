@@ -3,6 +3,7 @@ import type { tl } from '@mtcute/tl'
 import { isPresent } from '../type-assertions.js'
 import { assertNever } from '../../types/utils.js'
 
+import type { Deeplink } from './common.js'
 import { deeplinkBuilder } from './common.js'
 
 /**
@@ -10,12 +11,12 @@ import { deeplinkBuilder } from './common.js'
  *
  * Used to link to bots with a start parameter
  */
-export const botStart = deeplinkBuilder<{
+export const botStart: Deeplink<{
     /** Bot username */
     username: string
     /** Start parameter */
     parameter: string
-}>({
+}> = /* #__PURE__ */ deeplinkBuilder({
     internalBuild: ({ username, parameter }) => ['resolve', { domain: username, start: parameter }],
     internalParse: (path, query) => {
         if (path !== 'resolve') return null
@@ -137,14 +138,14 @@ function parseBotAdmin(rights: string | null): BotAdminRight[] | undefined {
  * Note that the user is still free to choose which rights to grant, and
  * whether to grant them at all.
  */
-export const botAddToGroup = deeplinkBuilder<{
+export const botAddToGroup: Deeplink<{
     /** Bot username */
     bot: string
     /** If specified, the client will call `/start parameter` on the bot once the bot has been added */
     parameter?: string
     /** Admin rights to request */
     admin?: BotAdminRight[]
-}>({
+}> = /* #__PURE__ */ deeplinkBuilder({
     internalBuild: ({ bot, parameter, admin }) => [
         'resolve',
         { domain: bot, startgroup: parameter ?? true, admin: normalizeBotAdmin(admin) },
@@ -193,12 +194,12 @@ export const botAddToGroup = deeplinkBuilder<{
  * Note that the user is still free to choose which rights to grant, and
  * whether to grant them at all.
  */
-export const botAddToChannel = deeplinkBuilder<{
+export const botAddToChannel: Deeplink<{
     /** Bot username */
     bot: string
     /** Admin rights to request */
     admin?: BotAdminRight[]
-}>({
+}> = /* #__PURE__ */ deeplinkBuilder({
     internalBuild: ({ bot, admin }) => [
         'resolve',
         { domain: bot, startchannel: true, admin: normalizeBotAdmin(admin) },
@@ -240,12 +241,12 @@ export const botAddToChannel = deeplinkBuilder<{
  *
  * Used to share games.
  */
-export const botGame = deeplinkBuilder<{
+export const botGame: Deeplink<{
     /** Bot username */
     bot: string
     /** Game short name */
     game: string
-}>({
+}> = /* #__PURE__ */ deeplinkBuilder({
     internalBuild: ({ bot, game }) => ['resolve', { domain: bot, game }],
     internalParse: (path, query) => {
         if (path !== 'resolve') return null
@@ -280,14 +281,14 @@ export const botGame = deeplinkBuilder<{
  * and a single bot can offer multiple named web apps, distinguished by
  * their `short_name`.
  */
-export const botWebApp = deeplinkBuilder<{
+export const botWebApp: Deeplink<{
     /** Bot username */
     bot: string
     /** App short name */
     app: string
     /** Parameter to be passed by the client to messages.requestAppWebView as `start_param` */
     parameter?: string
-}>({
+}> = /* #__PURE__ */ deeplinkBuilder({
     internalBuild: ({ bot, app, parameter }) => ['resolve', { domain: bot, appname: app, startapp: parameter }],
     internalParse: (path, query) => {
         if (path !== 'resolve') return null

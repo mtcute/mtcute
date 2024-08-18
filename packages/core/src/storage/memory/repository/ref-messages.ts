@@ -6,9 +6,9 @@ interface RefMessagesState {
 }
 
 export class MemoryRefMessagesRepository implements IReferenceMessagesRepository {
-    readonly state
+    readonly state: RefMessagesState
     constructor(readonly _driver: MemoryStorageDriver) {
-        this.state = this._driver.getState<RefMessagesState>('refMessages', () => ({
+        this.state = this._driver.getState('refMessages', () => ({
             refs: new Map(),
         }))
     }

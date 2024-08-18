@@ -85,7 +85,7 @@ export function getInstallCommand(params: { mgr: PackageManager, packages: strin
     return exec
 }
 
-export function getExecCommand(mgr: PackageManager, ...cmd: string[]) {
+export function getExecCommand(mgr: PackageManager, ...cmd: string[]): string[] {
     switch (mgr) {
         case PackageManager.Npm:
             return ['npx', ...cmd]
@@ -100,7 +100,7 @@ export function getExecCommand(mgr: PackageManager, ...cmd: string[]) {
     }
 }
 
-export function packageManagerToRuntime(mgr: PackageManager) {
+export function packageManagerToRuntime(mgr: PackageManager): 'node' | 'bun' | 'deno' {
     switch (mgr) {
         case PackageManager.Npm:
         case PackageManager.Yarn:

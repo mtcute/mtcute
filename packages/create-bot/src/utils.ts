@@ -1,7 +1,7 @@
 import * as colors from 'colorette'
 import { spawn } from 'cross-spawn'
 
-export function exec(cwd: string, ...cmd: string[]) {
+export function exec(cwd: string, ...cmd: string[]): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         console.log(`${colors.blue('$')} ${cmd.map(it => (it.includes(' ') ? JSON.stringify(it) : it)).join(' ')}`)
 

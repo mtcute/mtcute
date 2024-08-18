@@ -4,7 +4,7 @@ import type { ICryptoProvider } from './crypto/abstract.js'
 /**
  * Get the minimum number of bits required to represent a number
  */
-export function bigIntBitLength(n: bigint) {
+export function bigIntBitLength(n: bigint): number {
     // not the fastest way, but at least not .toString(2) and not too complex
     // taken from: https://stackoverflow.com/a/76616288/22656950
 

@@ -33,12 +33,12 @@ export class LruSet<T extends string | number | Long> {
         this._set = forLong ? new LongSet() : new Set()
     }
 
-    clear() {
+    clear(): void {
         this._first = this._last = undefined
         this._set.clear()
     }
 
-    add(val: T) {
+    add(val: T): void {
         if (this._set.has(val as any)) return
 
         if (!this._first) this._first = { v: val }
@@ -59,7 +59,7 @@ export class LruSet<T extends string | number | Long> {
         }
     }
 
-    has(val: T) {
+    has(val: T): boolean {
         return this._set.has(val as any)
     }
 }

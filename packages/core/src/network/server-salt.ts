@@ -4,7 +4,7 @@ import type { mtp } from '@mtcute/tl'
 export class ServerSaltManager {
     private _futureSalts: mtp.RawMt_future_salt[] = []
 
-    currentSalt = Long.ZERO
+    currentSalt: Long = Long.ZERO
 
     isFetching = false
 

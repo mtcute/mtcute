@@ -9,6 +9,7 @@ import { AuthKeysService } from './service/auth-keys.js'
 import type { ServiceOptions } from './service/base.js'
 import { DefaultDcsService } from './service/default-dcs.js'
 import { FutureSaltsService } from './service/future-salts.js'
+import type { IStorageDriver } from './driver.js'
 
 interface StorageManagerOptions {
     provider: IMtStorageProvider
@@ -41,12 +42,12 @@ export interface StorageManagerExtraOptions {
 }
 
 export class StorageManager {
-    readonly provider
-    readonly driver
-    readonly log
-    readonly dcs
-    readonly salts
-    readonly keys
+    readonly provider: IMtStorageProvider
+    readonly driver: IStorageDriver
+    readonly log: Logger
+    readonly dcs: DefaultDcsService
+    readonly salts: FutureSaltsService
+    readonly keys: AuthKeysService
 
     constructor(readonly options: StorageManagerOptions & StorageManagerExtraOptions) {
         this.provider = this.options.provider
@@ -87,7 +88,7 @@ export class StorageManager {
         await this.driver.save?.()
     }
 
-    async clear(withAuthKeys = false) {
+    async clear(withAuthKeys = false): Promise<void> {
         if (withAuthKeys) {
             await this.provider.authKeys.deleteAll()
         }

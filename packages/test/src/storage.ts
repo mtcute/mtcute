@@ -52,7 +52,12 @@ export class StubMemoryTelegramStorage extends MemoryStorage {
         }
     }
 
-    decryptOutgoingMessage(crypto: ICryptoProvider, data: Uint8Array, dcId: number, tempIndex?: number | undefined) {
+    decryptOutgoingMessage(
+        crypto: ICryptoProvider,
+        data: Uint8Array,
+        dcId: number,
+        tempIndex?: number | undefined,
+    ): Uint8Array {
         const key = tempIndex ? this.authKeys.getTemp(dcId, tempIndex, Date.now()) : this.authKeys.get(dcId)
 
         if (!key) {

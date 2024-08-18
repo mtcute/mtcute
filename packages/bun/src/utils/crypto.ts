@@ -112,7 +112,7 @@ export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProv
         return gunzip(data)
     }
 
-    randomFill(buf: Uint8Array) {
+    randomFill(buf: Uint8Array): void {
         crypto.getRandomValues(buf)
     }
 }

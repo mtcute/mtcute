@@ -28,7 +28,7 @@ function fixPeerInfo(peer: IPeersRepository.PeerInfo | null): IPeersRepository.P
     }
 }
 
-export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriver) {
+export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriver): void {
     const stubPeerUser: IPeersRepository.PeerInfo = {
         id: 123123,
         accessHash: '123|456',

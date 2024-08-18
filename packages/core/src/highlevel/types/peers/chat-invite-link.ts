@@ -16,7 +16,7 @@ export class ChatInviteLink {
 
     constructor(
         raw: tl.TypeExportedChatInvite,
-        readonly _peers?: PeersIndex,
+        readonly _peers?: PeersIndex | undefined,
     ) {
         assertTypeIsNot('ChatInviteLink', raw, 'chatInvitePublicJoinRequests')
 

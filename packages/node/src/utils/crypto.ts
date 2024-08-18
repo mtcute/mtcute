@@ -63,7 +63,7 @@ export abstract class BaseNodeCryptoProvider extends BaseCryptoProvider {
         return gunzipSync(data)
     }
 
-    randomFill(buf: Uint8Array) {
+    randomFill(buf: Uint8Array): void {
         randomFillSync(buf)
     }
 }
