@@ -1,4 +1,4 @@
-FROM denoland/deno:1.43.1
+FROM denoland/deno:1.45.5
 WORKDIR /app
 
 RUN apt update && apt install -y socat

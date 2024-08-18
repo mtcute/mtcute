@@ -47,7 +47,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "2.26.0",
     "@teidesu/slow-types-compiler": "1.1.0",
-    "@types/deno": "npm:@teidesu/deno-types@1.43.1",
+    "@types/deno": "npm:@teidesu/deno-types@1.45.5",
     "@types/node": "20.10.0",
     "@types/ws": "8.5.4",
     "@vitest/browser": "2.0.5",

@@ -63,7 +63,7 @@ jobs:
       - uses: ./.github/actions/init
       - uses: denoland/setup-deno@v1
         with:
-          deno-version: '1.43.1'
+          deno-version: '1.45.5'
       - name: 'Build tests'
         run: pnpm exec vite build -c .config/vite.deno.ts
       - name: 'Run tests'

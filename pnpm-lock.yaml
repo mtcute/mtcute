@@ -15,8 +15,8 @@ importers:
         specifier: 1.1.0
         version: 1.1.0(typescript@5.5.4)
       '@types/deno':
-        specifier: npm:@teidesu/deno-types@1.43.1
-        version: '@teidesu/deno-types@1.43.1'
+        specifier: npm:@teidesu/deno-types@1.45.5
+        version: '@teidesu/deno-types@1.45.5'
       '@types/node':
         specifier: 20.10.0
         version: 20.10.0
@@ -1136,8 +1136,8 @@ packages:
     peerDependencies:
       eslint: '>=8.40.0'
 
-  '@teidesu/deno-types@1.43.1':
-    resolution: {integrity: sha512-jzXpp07pu4035n3XJMkuBR1NAKquH0hA8dVwL7pMxoi8mWo7ki4uMz8KRpgGx78YYfyPuB91SKS5pnt2omKotQ==}
+  '@teidesu/deno-types@1.45.5':
+    resolution: {integrity: sha512-TDfzm5SfH1rEhWphkq8yDpW9VXzK2olrL8vyqk59epjZCwixBlwk4whAYdWuTnHLDw9U08RVIt+k7Z+xbKDZJw==}
 
   '@teidesu/slow-types-compiler@1.1.0':
     resolution: {integrity: sha512-+WUHSKh56B32Jk5aJgXf07E2EOkMX1yilvgKLKBCJPFAJZ4xeo1U5aDu3wwHX3lrFl7AiVGXUP+FfuHy8X43BA==}
@@ -4428,7 +4428,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@teidesu/deno-types@1.43.1': {}
+  '@teidesu/deno-types@1.45.5': {}
 
   '@teidesu/slow-types-compiler@1.1.0(typescript@5.5.4)':
     dependencies:
