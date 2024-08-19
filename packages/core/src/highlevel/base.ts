@@ -1,5 +1,6 @@
 import type { mtp } from '@mtcute/tl'
 import { tl } from '@mtcute/tl'
+import type Long from 'long'
 
 import type { MtClientOptions } from '../network/client.js'
 import { MtClient } from '../network/client.js'
@@ -367,5 +368,9 @@ export class BaseTelegramClient implements ITelegramClient {
 
     changePrimaryDc(dcId: number): Promise<void> {
         return this.mt.network.changePrimaryDc(dcId)
+    }
+
+    async getMtprotoMessageId(): Promise<Long> {
+        return this.mt.network.getMtprotoMessageId()
     }
 }

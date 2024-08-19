@@ -186,6 +186,7 @@ import type { SendCopyParams } from './methods/messages/send-copy.js'
 import { sendCopy } from './methods/messages/send-copy.js'
 import { sendMediaGroup } from './methods/messages/send-media-group.js'
 import { sendMedia } from './methods/messages/send-media.js'
+import { sendPaidReaction } from './methods/messages/send-paid-reaction.js'
 import type { QuoteParamsFrom } from './methods/messages/send-quote.js'
 import { quoteWithMedia, quoteWithMediaGroup, quoteWithText } from './methods/messages/send-quote.js'
 import { sendReaction } from './methods/messages/send-reaction.js'
@@ -519,6 +520,7 @@ export interface TelegramClient extends ITelegramClient {
      */
     on(name: 'delete_business_message', handler: ((upd: DeleteBusinessMessageUpdate) => void)): this
 
+    // eslint-disable-next-line ts/no-explicit-any
     on(name: string, handler: (...args: any[]) => void): this
 
     /**
@@ -4153,6 +4155,34 @@ export interface TelegramClient extends ITelegramClient {
              */
             progressCallback?: (uploaded: number, total: number) => void
         }): Promise<Message>
+
+    /**
+     * Send a paid reaction using Telegram Stars.
+     *
+     * **Available**: 👤 users only
+     *
+     * @returns
+     *   Message to which the reaction was sent, if available.
+     *   The message is normally available for users, but may not be available for bots in PMs.
+     */
+    sendPaidReaction(
+        params: InputMessageId & {
+        /** Whether to send the reaction anonymously */
+            anonymous?: boolean
+
+            /**
+             * Number of reactions to send
+             *
+             * @default  1
+             */
+            count?: number
+
+            /**
+             * Whether to dispatch the returned edit message event
+             * to the client's update handler.
+             */
+            shouldDispatch?: true
+        }): Promise<MessageReactions>
     /** Send a text in reply to a given quote */
     quoteWithText(
         message: Message,
@@ -6179,6 +6209,9 @@ TelegramClient.prototype.sendMediaGroup = function (...args) {
 TelegramClient.prototype.sendMedia = function (...args) {
     return sendMedia(this._client, ...args)
 }
+TelegramClient.prototype.sendPaidReaction = function (...args) {
+    return sendPaidReaction(this._client, ...args)
+}
 TelegramClient.prototype.quoteWithText = function (...args) {
     return quoteWithText(this._client, ...args)
 }
@@ -6531,6 +6564,9 @@ TelegramClient.prototype.getServerUpdateHandler = function (...args) {
 }
 TelegramClient.prototype.changePrimaryDc = function (...args) {
     return this._client.changePrimaryDc(...args)
+}
+TelegramClient.prototype.getMtprotoMessageId = function (...args) {
+    return this._client.getMtprotoMessageId(...args)
 }
 TelegramClient.prototype.onServerUpdate = function () {
     throw new Error('onServerUpdate is not available for TelegramClient, use .on() methods instead')

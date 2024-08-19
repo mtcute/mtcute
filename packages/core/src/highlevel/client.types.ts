@@ -1,4 +1,5 @@
 import type { tl } from '@mtcute/tl'
+import type Long from 'long'
 
 import type { ConnectionKind, RpcCallOptions } from '../network/index.js'
 import type { MustEqual, PublicPart } from '../types/utils.js'
@@ -69,4 +70,5 @@ export interface ITelegramClient {
 
     computeSrpParams(request: tl.account.RawPassword, password: string): Promise<tl.RawInputCheckPasswordSRP>
     computeNewPasswordHash(algo: tl.TypePasswordKdfAlgo, password: string): Promise<Uint8Array>
+    getMtprotoMessageId(): Promise<Long>
 }

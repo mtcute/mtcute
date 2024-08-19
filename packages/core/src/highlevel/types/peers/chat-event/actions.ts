@@ -354,6 +354,14 @@ export interface ChatActionTopicDeleted {
     topic: ForumTopic
 }
 
+/** Profile signatures were toggled in a channel ("Super Channel" mode) */
+export interface ChatActionSignatureProfilesToggled {
+    type: 'signature_profiles_toggled'
+
+    /** Whether signatures are enabled as of this action */
+    new: boolean
+}
+
 /** Chat event action (`null` if unsupported) */
 export type ChatAction =
   | ChatActionUserJoined
@@ -392,6 +400,7 @@ export type ChatAction =
   | ChatActionTopicCreated
   | ChatActionTopicEdited
   | ChatActionTopicDeleted
+  | ChatActionSignatureProfilesToggled
   | null
 
 /** @internal */
@@ -613,6 +622,11 @@ export function _actionFromTl(e: tl.TypeChannelAdminLogEventAction, peers: Peers
             }
         // case 'channelAdminLogEventActionPinTopic'
         // ^ looks like it is not used, and pinned topics are not at all presented in the event log
+        case 'channelAdminLogEventActionToggleSignatureProfiles':
+            return {
+                type: 'signature_profiles_toggled',
+                new: e.newValue,
+            }
         default:
             return null
     }

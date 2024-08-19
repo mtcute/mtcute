@@ -63,6 +63,7 @@ export function normalizeChatEventFilters(input: InputChatEventFilters): ChatEve
                 case 'def_perms_changed':
                 case 'forum_toggled':
                 case 'no_forwards_toggled':
+                case 'signature_profiles_toggled':
                     serverFilter.settings = true
                     break
                 case 'msg_pinned':

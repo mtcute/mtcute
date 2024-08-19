@@ -18,6 +18,11 @@ export class ReactionCount {
         return toReactionEmoji(this.raw.reaction)
     }
 
+    /** Whether this is a paid reaction */
+    get isPaid(): boolean {
+        return this.raw.reaction._ === 'reactionPaid'
+    }
+
     /**
      * Number of users who reacted with this emoji
      */

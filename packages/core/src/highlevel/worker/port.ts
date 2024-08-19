@@ -45,6 +45,7 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     readonly computeNewPasswordHash: ITelegramClient['computeNewPasswordHash']
     readonly startUpdatesLoop: ITelegramClient['startUpdatesLoop']
     readonly stopUpdatesLoop: ITelegramClient['stopUpdatesLoop']
+    readonly getMtprotoMessageId: ITelegramClient['getMtprotoMessageId']
 
     private _abortController = new AbortController()
     readonly stopSignal: AbortSignal = this._abortController.signal
@@ -79,6 +80,7 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
         this.computeNewPasswordHash = bind('computeNewPasswordHash')
         this.startUpdatesLoop = bind('startUpdatesLoop')
         this.stopUpdatesLoop = bind('stopUpdatesLoop')
+        this.getMtprotoMessageId = bind('getMtprotoMessageId')
     }
 
     call<T extends tl.RpcMethod>(

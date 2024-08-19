@@ -284,6 +284,11 @@ export class Chat {
         return (this.peer._ === 'channel' || this.peer._ === 'chat') && this.peer.noforwards!
     }
 
+    /** Whether this channel has profile signatures (i.e. "Super Channel") */
+    get hasProfileSignatures(): boolean {
+        return this.peer._ === 'channel' && this.peer.signatureProfiles!
+    }
+
     /**
      * Title, for supergroups, channels and groups
      */
@@ -485,6 +490,16 @@ export class Chat {
         if (this.peer._ !== 'user') return null
 
         return new User(this.peer)
+    }
+
+    /**
+     * If a subscription to this channel was bought using Telegram Stars,
+     * this field will contain the date when the subscription will expire.
+     */
+    get subscriptionUntilDate(): Date | null {
+        if (this.peer._ !== 'channel' || !this.peer.subscriptionUntilDate) return null
+
+        return new Date(this.peer.subscriptionUntilDate * 1000)
     }
 
     /** @internal */

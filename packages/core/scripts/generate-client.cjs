@@ -736,6 +736,7 @@ withParams(params: RpcCallOptions): this\n`)
         'onConnectionState',
         'getServerUpdateHandler',
         'changePrimaryDc',
+        'getMtprotoMessageId',
     ].forEach((name) => {
         output.write(
             `TelegramClient.prototype.${name} = function(...args) {\n`

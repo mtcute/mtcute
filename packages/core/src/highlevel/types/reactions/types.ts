@@ -12,11 +12,19 @@ export type InputReaction = string | tl.Long | tl.TypeReaction
  * Emoji describing a reaction.
  *
  * Either a `string` with a unicode emoji, or a `tl.Long` for a custom emoji
+ *
+ * For paid reactions, will always contain `⭐` emoji
  */
 export type ReactionEmoji = string | tl.Long
 
 export function normalizeInputReaction(reaction?: InputReaction | null): tl.TypeReaction {
     if (typeof reaction === 'string') {
+        if (reaction === 'paid') {
+            return {
+                _: 'reactionPaid',
+            }
+        }
+
         return {
             _: 'reactionEmoji',
             emoticon: reaction,
@@ -44,6 +52,8 @@ export function toReactionEmoji(reaction: tl.TypeReaction, allowEmpty?: boolean)
             return reaction.emoticon
         case 'reactionCustomEmoji':
             return reaction.documentId
+        case 'reactionPaid':
+            return '⭐'
         case 'reactionEmpty':
             if (!allowEmpty) {
                 throw new MtTypeAssertionError('toReactionEmoji', 'not reactionEmpty', reaction._)

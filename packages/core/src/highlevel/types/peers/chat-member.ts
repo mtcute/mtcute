@@ -175,6 +175,22 @@ export class ChatMember {
                 return null
         }
     }
+
+    /**
+     * If this member subscribed to a channel using Telegram Stars,
+     * this field will contain the date when the subscription will expire
+     */
+    get subscriptionUntilDate(): Date | null {
+        switch (this.raw._) {
+            case 'channelParticipant':
+            case 'channelParticipantSelf':
+                if (!this.raw.subscriptionUntilDate) return null
+
+                return new Date(this.raw.subscriptionUntilDate * 1000)
+        }
+
+        return null
+    }
 }
 
 memoizeGetters(ChatMember, ['user', 'invitedBy', 'promotedBy', 'restrictedBy', 'restrictions'])

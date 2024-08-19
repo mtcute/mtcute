@@ -3,7 +3,7 @@ import type { tl } from '@mtcute/tl'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import type { PeersIndex } from '../peers/index.js'
-import { PeerReaction } from '../reactions/peer-reaction.js'
+import { PaidPeerReaction, PeerReaction } from '../reactions/peer-reaction.js'
 import { ReactionCount } from '../reactions/reaction-count.js'
 
 /**
@@ -39,6 +39,11 @@ export class MessageReactions {
      */
     get recentReactions(): PeerReaction[] {
         return this.raw.recentReactions?.map(reaction => new PeerReaction(reaction, this._peers)) ?? []
+    }
+
+    /** Leaderboard of paid reactions to the message */
+    get paidReactions(): PaidPeerReaction[] {
+        return this.raw.topReactors?.map(reaction => new PaidPeerReaction(reaction, this._peers)) ?? []
     }
 }
 

@@ -1,5 +1,6 @@
 import type { mtp, tl } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+import type Long from 'long'
 
 import { getPlatform } from '../platform.js'
 import type { StorageManager } from '../storage/storage.js'
@@ -895,5 +896,9 @@ export class NetworkManager {
         this._dcConnections.clear()
         this.config.offReload(this._onConfigChanged)
         this._resetOnNetworkChange?.()
+    }
+
+    getMtprotoMessageId(): Long {
+        return this._primaryDc!.main._sessions[0].getMessageId()
     }
 }

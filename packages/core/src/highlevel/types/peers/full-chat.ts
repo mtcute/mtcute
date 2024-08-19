@@ -62,6 +62,11 @@ export class FullChat extends Chat {
         return this.fullPeer?._ === 'userFull' && this.fullPeer.voiceMessagesForbidden!
     }
 
+    /** Whether paid reactions are enabled for this channel */
+    get hasPaidReactions(): boolean {
+        return this.fullPeer?._ === 'channelFull' && this.fullPeer.paidReactionsAvailable!
+    }
+
     /**
      * Full information about this chat's photo, if any.
      *
