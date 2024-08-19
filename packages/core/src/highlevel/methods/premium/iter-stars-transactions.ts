@@ -1,19 +1,24 @@
 import type { ITelegramClient } from '../../client.types.js'
-import type { InputPeerLike } from '../../types/index.js'
-import type { Boost } from '../../types/premium/boost.js'
+import type { InputPeerLike, StarsTransaction } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
-import { getBoosts } from './get-boosts.js'
+import { getStarsTransactions } from './get-stars-transactions.js'
 
 /**
- * Iterate over boosters of a channel.
+ * Iterate over Telegram Stars transactions for a given peer.
  *
- * Wrapper over {@link getBoosters}
+ * You can either pass `self` to get your own transactions,
+ * or a chat/bot ID to get transactions of that peer.
+ *
+ * Wrapper over {@link getStarsTransactions}
+ *
+ * @param peerId  Peer ID
+ * @param params  Additional parameters
  */
-export async function* iterBoosters(
+export async function* iterStarsTransactions(
     client: ITelegramClient,
     peerId: InputPeerLike,
-    params?: Parameters<typeof getBoosts>[2] & {
+    params?: Parameters<typeof getStarsTransactions>[2] & {
         /**
          * Total number of boosters to fetch
          *
@@ -29,7 +34,7 @@ export async function* iterBoosters(
          */
         chunkSize?: number
     },
-): AsyncIterableIterator<Boost> {
+): AsyncIterableIterator<StarsTransaction> {
     if (!params) params = {}
     const { limit = Infinity, chunkSize = 100 } = params
 
@@ -39,18 +44,18 @@ export async function* iterBoosters(
     const peer = await resolvePeer(client, peerId)
 
     for (;;) {
-        const res = await getBoosts(client, peer, {
+        const res = await getStarsTransactions(client, peer, {
             offset,
             limit: Math.min(limit - current, chunkSize),
         })
 
-        for (const booster of res) {
-            yield booster
+        for (const transaction of res.transactions) {
+            yield transaction
 
             if (++current >= limit) return
         }
 
-        if (!res.next) return
-        offset = res.next
+        if (!res.transactionsNextOffset) return
+        offset = res.transactionsNextOffset
     }
 }

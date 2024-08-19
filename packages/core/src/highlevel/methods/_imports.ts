@@ -87,6 +87,8 @@ import {
     RawDocument,
     ReplyMarkup,
     SentCode,
+    StarsStatus,
+    StarsTransaction,
     Sticker,
     StickerSet,
     StickerSourceType,
