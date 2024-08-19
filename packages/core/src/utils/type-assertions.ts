@@ -10,25 +10,6 @@ export function isPresent<T>(t: T | undefined | null | void): t is T {
 
 /**
  * Returns a function that can be used to filter down objects
- * to the ones that have a defined non-null value under the key `k`.
- *
- * @example
- * ```ts
- * const filesWithUrl = files.filter(file => file.url);
- * files[0].url // In this case, TS might still treat this as undefined/null
- *
- * const filesWithUrl = files.filter(hasPresentKey("url"));
- * files[0].url // TS will know that this is present
- * ```
- */
-export function hasPresentKey<K extends string | number | symbol>(k: K) {
-    return function <T, V> (a: T & { [k in K]?: V | null }): a is T & { [k in K]: V } {
-        return a[k] !== undefined && a[k] !== null
-    }
-}
-
-/**
- * Returns a function that can be used to filter down objects
  * to the ones that have a specific value V under a key `k`.
  *
  * @example
@@ -44,7 +25,8 @@ export function hasPresentKey<K extends string | number | symbol>(k: K) {
  * files[0].imageUrl // TS will know this is present, because already it excluded the other union members.
  * ```
  */
-export function hasValueAtKey<const K extends string | number | symbol, const V>(k: K, v: V) {
+export function hasValueAtKey<const K extends string | number | symbol, const V>(k: K, v: V):
+<T>(a: T & { [k in K]: unknown }) => a is T & { [k in K]: V } {
     return function <T> (a: T & { [k in K]: unknown }): a is T & { [k in K]: V } {
         return a[k] === v
     }

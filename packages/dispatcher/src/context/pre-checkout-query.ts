@@ -9,7 +9,7 @@ import type { UpdateContext } from './base.js'
  * This is a subclass of {@link PreCheckoutQuery}, so all its fields are also available.
  */
 export class PreCheckoutQueryContext extends PreCheckoutQuery implements UpdateContext<PreCheckoutQuery> {
-    readonly _name = 'pre_checkout_query'
+    readonly _name = 'pre_checkout_query' as const
 
     constructor(
         readonly client: TelegramClient,

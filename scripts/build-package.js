@@ -5,7 +5,6 @@ import * as path from 'node:path'
 
 import * as glob from 'glob'
 import ts from 'typescript'
-import * as stc from '@teidesu/slow-types-compiler'
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 
@@ -569,16 +568,6 @@ if (IS_JSR) {
                 },
             )
         }
-    }
-
-    console.log('[i] Processing with slow-types-compiler...')
-    const project = stc.createProject()
-    stc.processPackage(project, denoJson)
-    const unsavedSourceFiles = project.getSourceFiles().filter(s => !s.isSaved())
-
-    if (unsavedSourceFiles.length > 0) {
-        console.log('[v] Changed %d files', unsavedSourceFiles.length)
-        project.saveSync()
     }
 } else {
     // make shims for esnext resolution (that doesn't respect package.json `exports` field)

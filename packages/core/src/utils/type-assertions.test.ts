@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest'
 import {
     assertTypeIs,
     assertTypeIsNot,
-    hasPresentKey,
     hasValueAtKey,
     isPresent,
     mtpAssertTypeIs,
@@ -20,24 +19,6 @@ describe('isPresent', () => {
     it('should return false for null/undefined', () => {
         expect(isPresent(null)).toBe(false)
         expect(isPresent(undefined)).toBe(false)
-    })
-})
-
-describe('hasPresentKey', () => {
-    it('should return true for objects with present keys', () => {
-        expect(hasPresentKey('a')({ a: 1 })).toBe(true)
-        expect(hasPresentKey('a')({ a: 1, b: 2 })).toBe(true)
-    })
-
-    it('should return false for objects with undefined/null keys', () => {
-        expect(hasPresentKey('a')({ a: undefined })).toBe(false)
-        expect(hasPresentKey('a')({ a: null })).toBe(false)
-        expect(hasPresentKey('a')({ a: undefined, b: 2 })).toBe(false)
-        expect(hasPresentKey('a')({ a: null, b: 2 })).toBe(false)
-    })
-
-    it('should return false for objects without the key', () => {
-        expect(hasPresentKey('a')({ b: 2 })).toBe(false)
     })
 })
 
