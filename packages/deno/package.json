@@ -18,7 +18,7 @@
     "build": "pnpm run -w build-package deno"
   },
   "dependencies": {
-    "@db/sqlite": "npm:@jsr/db__sqlite@0.11.1",
+    "@db/sqlite": "npm:@jsr/db__sqlite@0.12.0",
     "@mtcute/core": "workspace:^",
     "@mtcute/html-parser": "workspace:^",
     "@mtcute/markdown-parser": "workspace:^",
