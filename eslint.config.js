@@ -50,6 +50,7 @@ export default antfu({
             ignoreStrings: true,
             ignoreTemplateLiterals: true,
         }],
+        'unused-imports/no-unused-imports': 'error',
         'curly': ['error', 'multi-line'],
         'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
         'node/prefer-global/process': ['error', 'always'],
