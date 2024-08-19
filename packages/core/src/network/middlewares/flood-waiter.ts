@@ -121,6 +121,8 @@ export function floodWaiter(options: FloodWaiterOptions): RpcCallMiddleware {
                     continue
                 }
             }
+
+            return res
         }
 
         return lastError
