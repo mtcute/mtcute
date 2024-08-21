@@ -16,6 +16,7 @@ export default antfu({
         : true,
     yaml: false,
     markdown: false,
+    jsonc: false,
     linterOptions: {
         reportUnusedDisableDirectives: Boolean(process.env.CI),
     },
