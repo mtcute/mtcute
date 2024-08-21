@@ -13,11 +13,13 @@ import type {
 } from '../utils/index.js'
 import {
     EarlyTimer,
+
     concatBuffers,
     createControllablePromise,
     longFromBuffer,
     randomLong,
     removeFromLongArray,
+    timers,
 } from '../utils/index.js'
 
 import { doAuthorization } from './authorization.js'
@@ -72,12 +74,12 @@ export class SessionConnection extends PersistentConnection {
     private _queuedDestroySession: Long[] = []
 
     // waitForMessage
-    private _pendingWaitForUnencrypted: [ControllablePromise<Uint8Array>, NodeJS.Timeout][] = []
+    private _pendingWaitForUnencrypted: [ControllablePromise<Uint8Array>, timers.Timer][] = []
 
     private _usePfs
     private _isPfsBindingPending = false
     private _isPfsBindingPendingInBackground = false
-    private _pfsUpdateTimeout?: NodeJS.Timeout
+    private _pfsUpdateTimeout?: timers.Timer
 
     private _inactivityPendingFlush = false
 
@@ -123,7 +125,7 @@ export class SessionConnection extends PersistentConnection {
             this._isPfsBindingPending = false
             this._isPfsBindingPendingInBackground = false
             this._session._authKeyTemp.reset()
-            clearTimeout(this._pfsUpdateTimeout)
+            timers.clearTimeout(this._pfsUpdateTimeout)
         }
 
         this._resetSession()
@@ -134,7 +136,7 @@ export class SessionConnection extends PersistentConnection {
 
         Object.values(this._pendingWaitForUnencrypted).forEach(([prom, timeout]) => {
             prom.reject(new MtcuteError('Connection closed'))
-            clearTimeout(timeout)
+            timers.clearTimeout(timeout)
         })
 
         // resend pending state_req-s
@@ -162,7 +164,7 @@ export class SessionConnection extends PersistentConnection {
         this._salts.isFetching = false
 
         if (forever) {
-            clearTimeout(this._pfsUpdateTimeout)
+            timers.clearTimeout(this._pfsUpdateTimeout)
             this.removeAllListeners()
             this.on('error', (err) => {
                 this.log.warn('caught error after destroying: %s', err)
@@ -321,7 +323,7 @@ export class SessionConnection extends PersistentConnection {
         if (this._isPfsBindingPending) return
 
         if (this._pfsUpdateTimeout) {
-            clearTimeout(this._pfsUpdateTimeout)
+            timers.clearTimeout(this._pfsUpdateTimeout)
             this._pfsUpdateTimeout = undefined
         }
 
@@ -468,7 +470,7 @@ export class SessionConnection extends PersistentConnection {
                 this.onConnectionUsable()
 
                 // set a timeout to update temp auth key in advance to avoid interruption
-                this._pfsUpdateTimeout = setTimeout(
+                this._pfsUpdateTimeout = timers.setTimeout(
                     () => {
                         this._pfsUpdateTimeout = undefined
                         this.log.debug('temp key is expiring soon')
@@ -499,7 +501,7 @@ export class SessionConnection extends PersistentConnection {
             return Promise.reject(new MtcuteError('Connection destroyed'))
         }
         const promise = createControllablePromise<Uint8Array>()
-        const timeoutId = setTimeout(() => {
+        const timeoutId = timers.setTimeout(() => {
             promise.reject(new MtTimeoutError(timeout))
             this._pendingWaitForUnencrypted = this._pendingWaitForUnencrypted.filter(it => it[0] !== promise)
         }, timeout)
@@ -516,7 +518,7 @@ export class SessionConnection extends PersistentConnection {
                 // auth_key_id = 0, meaning it's an unencrypted message used for authorization
 
                 const [promise, timeout] = this._pendingWaitForUnencrypted.shift()!
-                clearTimeout(timeout)
+                timers.clearTimeout(timeout)
                 promise.resolve(data)
 
                 return
@@ -1441,7 +1443,7 @@ export class SessionConnection extends PersistentConnection {
         }
 
         if (timeout) {
-            pending.timeout = setTimeout(() => this._cancelRpc(pending, true), timeout)
+            pending.timeout = timers.setTimeout(() => this._cancelRpc(pending, true), timeout)
         }
 
         if (abortSignal) {
@@ -1473,7 +1475,7 @@ export class SessionConnection extends PersistentConnection {
         }
 
         if (!onTimeout && rpc.timeout) {
-            clearTimeout(rpc.timeout)
+            timers.clearTimeout(rpc.timeout)
         }
 
         if (onTimeout) {

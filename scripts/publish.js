@@ -47,8 +47,10 @@ function fetchRetry(url, init, retry = 0) {
 
         // for whatever reason this request sometimes fails with ECONNRESET
         // no idea why, probably some issue in docker networking
-        console.log('[i] Error fetching %s:', url)
-        console.log(err)
+        if (err.cause?.code !== 'UND_ERR_SOCKET') {
+            console.log('[i] Error fetching %s:', url)
+            console.log(err)
+        }
 
         return new Promise(resolve => setTimeout(resolve, 1000)).then(() => fetchRetry(url, init, retry + 1))
     })
@@ -68,8 +70,7 @@ async function publishSinglePackage(name) {
     console.log('[i] Building %s', name)
 
     // run build script
-    cp.execSync('pnpm run build', {
-        cwd: packageDir,
+    cp.execSync(`pnpm run build-package ${name}`, {
         stdio: 'inherit',
     })
 

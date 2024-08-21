@@ -28,7 +28,6 @@ try {
     /* eslint-disable ts/ban-ts-comment,ts/no-unsafe-assignment */
 
     // @ts-ignore  not in deps
-    // @esm-replace-import
     nativeCrypto = (await import('@mtcute/crypto-node')).NodeNativeCryptoProvider
     /* eslint-enable ts/ban-ts-comment,ts/no-unsafe-assignment */
 } catch {}

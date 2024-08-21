@@ -8,10 +8,7 @@ export function getWasmUrl(): URL {
     // making it not work. probably related to https://github.com/vitejs/vite/issues/8427,
     // but asking the user to deoptimize the entire @mtcute/web is definitely not a good idea
     // so we'll just use this hack for now
-    // @only-if-esm
-    return new URL('../mtcute.wasm', import.meta.url)
-    // @/only-if-esm
-    throw new Error('ESM-only')
+    return new URL('./mtcute.wasm', import.meta.url)
 }
 
 let wasm!: MtcuteWasmModule
@@ -54,7 +51,7 @@ export function initSync(module: SyncInitInput): void {
         module = new WebAssembly.Instance(module)
     }
 
-    wasm = (module as WebAssembly.Instance).exports as unknown as MtcuteWasmModule
+    wasm = module.exports as unknown as MtcuteWasmModule
     initCommon()
 }
 

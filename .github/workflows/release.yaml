@@ -59,14 +59,14 @@ jobs:
           GH_RELEASE: 1
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/publish.js ${{ steps.find.outputs.modified }}
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: '1.45.5'
-      - name: Build packages and publish to JSR
-        env:
-          JSR: 1
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/publish.js ${{ steps.find.outputs.modified }}
+      # - uses: denoland/setup-deno@v1
+      #   with:
+      #     deno-version: '1.45.5'
+      # - name: Build packages and publish to JSR
+      #   env:
+      #     JSR: 1
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: node scripts/publish.js ${{ steps.find.outputs.modified }}
       - name: Commit version bumps
         run: |
           git commit -am "v${{ steps.bump.outputs.version }}"

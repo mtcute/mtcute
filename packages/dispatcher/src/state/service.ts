@@ -1,4 +1,4 @@
-import { LruMap, asyncResettable } from '@mtcute/core/utils.js'
+import { LruMap, asyncResettable, timers } from '@mtcute/core/utils.js'
 import type { MaybePromise } from '@mtcute/core'
 
 import type { IStateStorageProvider } from './provider.js'
@@ -9,7 +9,7 @@ export class StateService {
     constructor(readonly provider: IStateStorageProvider) {}
 
     private _cache: LruMap<string, unknown> = new LruMap(100)
-    private _vacuumTimer?: NodeJS.Timeout
+    private _vacuumTimer?: timers.Interval
 
     private _loaded = false
     private _load = asyncResettable(async () => {
@@ -19,7 +19,7 @@ export class StateService {
 
     async load(): Promise<void> {
         await this._load.run()
-        this._vacuumTimer = setInterval(() => {
+        this._vacuumTimer = timers.setInterval(() => {
             Promise.resolve(this.provider.state.vacuum(Date.now())).catch(() => {})
         }, 300_000)
     }
@@ -27,7 +27,7 @@ export class StateService {
     async destroy(): Promise<void> {
         await this.provider.driver.save?.()
         await this.provider.driver.destroy?.()
-        clearInterval(this._vacuumTimer)
+        timers.clearInterval(this._vacuumTimer)
         this._loaded = false
     }
 

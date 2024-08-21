@@ -1,7 +1,5 @@
 {
   "compilerOptions": {
-    "incremental": true,
-    "composite": true,
     "target": "es2022",
     "lib": [
       "es2020",
@@ -10,10 +8,11 @@
       "WebWorker"
     ],
     "useDefineForClassFields": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "types": [
+      "bun-types",
       "node",
       "deno/ns",
       "vite/client"
@@ -23,7 +22,7 @@
     "noImplicitThis": true,
     "declaration": true,
     "inlineSources": true,
-    "outDir": "./dist",
+    "noEmit": true,
     "sourceMap": true,
     "stripInternal": false,
     "allowSyntheticDefaultImports": true,
@@ -33,7 +32,9 @@
     "skipLibCheck": true
   },
   "exclude": [
+    "e2e/",
     "**/node_modules",
+    "**/private",
     "**/__snapshots__"
   ]
 }

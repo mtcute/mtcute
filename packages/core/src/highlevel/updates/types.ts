@@ -1,6 +1,6 @@
 import type { tl } from '@mtcute/tl'
 
-import type { AsyncLock, ConditionVariable, Deque, EarlyTimer, Logger, SortedLinkedList } from '../../utils/index.js'
+import type { AsyncLock, ConditionVariable, Deque, EarlyTimer, Logger, SortedLinkedList, timers } from '../../utils/index.js'
 import type { CurrentUserInfo } from '../storage/service/current-user.js'
 import type { PeersIndex } from '../types/peers/peers-index.js'
 
@@ -161,7 +161,7 @@ export interface UpdatesState {
 
     cpts: Map<number, number>
     cptsMod: Map<number, number>
-    channelDiffTimeouts: Map<number, NodeJS.Timeout>
+    channelDiffTimeouts: Map<number, timers.Timer>
     channelsOpened: Map<number, number>
 
     log: Logger

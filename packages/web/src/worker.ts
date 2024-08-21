@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 import { setPlatform } from '@mtcute/core/platform.js'
 import type {
     ClientMessageHandler,

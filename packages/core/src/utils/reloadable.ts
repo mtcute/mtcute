@@ -1,4 +1,5 @@
 import { asyncResettable } from './function-utils.js'
+import * as timers from './timers.js'
 
 export interface ReloadableParams<Data> {
     reload: (old?: Data) => Promise<Data>
@@ -13,7 +14,7 @@ export class Reloadable<Data> {
     protected _data?: Data
     protected _expiresAt = 0
     protected _listeners: ((data: Data) => void)[] = []
-    protected _timeout?: NodeJS.Timeout
+    protected _timeout?: timers.Timer
 
     private _reload = asyncResettable(async () => {
         const data = await this.params.reload(this._data)
@@ -32,10 +33,10 @@ export class Reloadable<Data> {
         this._data = data
         this._expiresAt = expiresAt
 
-        if (this._timeout) clearTimeout(this._timeout)
+        if (this._timeout) timers.clearTimeout(this._timeout)
 
         if (!this.params.disableAutoReload) {
-            this._timeout = setTimeout(() => {
+            this._timeout = timers.setTimeout(() => {
                 this._reload.reset()
                 this.update().catch((err: unknown) => {
                     this.params.onError?.(err)
@@ -70,7 +71,7 @@ export class Reloadable<Data> {
     }
 
     destroy(): void {
-        if (this._timeout) clearTimeout(this._timeout)
+        if (this._timeout) timers.clearTimeout(this._timeout)
         this._listeners.length = 0
         this._reload.reset()
     }
