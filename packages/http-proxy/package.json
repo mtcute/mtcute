@@ -1,18 +1,18 @@
 {
-  "name": "@mtcute/http-proxy",
-  "type": "module",
-  "version": "0.16.0",
-  "private": true,
-  "description": "HTTP(S) proxy support for mtcute",
-  "author": "alina sireneva <alina@tei.su>",
-  "license": "MIT",
-  "sideEffects": false,
-  "exports": "./index.ts",
-  "scripts": {
-    "docs": "typedoc",
-    "build": "pnpm run -w build-package http-proxy"
-  },
-  "dependencies": {
-    "@mtcute/node": "workspace:^"
-  }
+    "name": "@mtcute/http-proxy",
+    "type": "module",
+    "version": "0.16.7",
+    "private": true,
+    "description": "HTTP(S) proxy support for mtcute",
+    "author": "alina sireneva <alina@tei.su>",
+    "license": "MIT",
+    "sideEffects": false,
+    "exports": "./index.ts",
+    "scripts": {
+        "docs": "typedoc",
+        "build": "pnpm run -w build-package http-proxy"
+    },
+    "dependencies": {
+        "@mtcute/node": "workspace:^"
+    }
 }

@@ -1,30 +1,30 @@
 {
-  "name": "@mtcute/create-bot",
-  "type": "module",
-  "version": "0.16.4",
-  "private": true,
-  "description": "Bot starter kit for mtcute",
-  "author": "alina sireneva <alina@tei.su>",
-  "license": "MIT",
-  "bin": {
-    "create-bot": "./src/main.js"
-  },
-  "scripts": {
-    "build": "pnpm run -w build-package create-bot",
-    "run": "tsx src/main.ts",
-    "run:deno": "node scripts/generate-import-map.js && deno run --import-map=./scripts/import-map.json -A --unstable-sloppy-imports src/main.ts"
-  },
-  "dependencies": {
-    "colorette": "2.0.20",
-    "cross-spawn": "7.0.3",
-    "glob": "11.0.0",
-    "handlebars": "4.7.8",
-    "inquirer": "9.2.11",
-    "openurl": "1.1.1"
-  },
-  "devDependencies": {
-    "@types/cross-spawn": "^6.0.6",
-    "@types/inquirer": "^9.0.6",
-    "@types/openurl": "^1.0.3"
-  }
+    "name": "@mtcute/create-bot",
+    "type": "module",
+    "version": "0.16.7",
+    "private": true,
+    "description": "Bot starter kit for mtcute",
+    "author": "alina sireneva <alina@tei.su>",
+    "license": "MIT",
+    "bin": {
+        "create-bot": "./src/main.js"
+    },
+    "scripts": {
+        "build": "pnpm run -w build-package create-bot",
+        "run": "tsx src/main.ts",
+        "run:deno": "node scripts/generate-import-map.js && deno run --import-map=./scripts/import-map.json -A --unstable-sloppy-imports src/main.ts"
+    },
+    "dependencies": {
+        "colorette": "2.0.20",
+        "cross-spawn": "7.0.3",
+        "glob": "11.0.0",
+        "handlebars": "4.7.8",
+        "inquirer": "9.2.11",
+        "openurl": "1.1.1"
+    },
+    "devDependencies": {
+        "@types/cross-spawn": "^6.0.6",
+        "@types/inquirer": "^9.0.6",
+        "@types/openurl": "^1.0.3"
+    }
 }

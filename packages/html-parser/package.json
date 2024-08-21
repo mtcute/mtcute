@@ -1,19 +1,19 @@
 {
-  "name": "@mtcute/html-parser",
-  "type": "module",
-  "version": "0.16.0",
-  "private": true,
-  "description": "HTML entities parser for mtcute",
-  "author": "alina sireneva <alina@tei.su>",
-  "license": "MIT",
-  "sideEffects": false,
-  "exports": "./src/index.ts",
-  "scripts": {
-    "build": "pnpm run -w build-package html-parser"
-  },
-  "dependencies": {
-    "@mtcute/core": "workspace:^",
-    "htmlparser2": "^6.0.1",
-    "long": "5.2.3"
-  }
+    "name": "@mtcute/html-parser",
+    "type": "module",
+    "version": "0.16.7",
+    "private": true,
+    "description": "HTML entities parser for mtcute",
+    "author": "alina sireneva <alina@tei.su>",
+    "license": "MIT",
+    "sideEffects": false,
+    "exports": "./src/index.ts",
+    "scripts": {
+        "build": "pnpm run -w build-package html-parser"
+    },
+    "dependencies": {
+        "@mtcute/core": "workspace:^",
+        "htmlparser2": "^6.0.1",
+        "long": "5.2.3"
+    }
 }

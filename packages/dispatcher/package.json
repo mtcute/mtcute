@@ -1,22 +1,22 @@
 {
-  "name": "@mtcute/dispatcher",
-  "type": "module",
-  "version": "0.16.0",
-  "private": true,
-  "description": "Updates dispatcher and bot framework for @mtcute/client",
-  "author": "alina sireneva <alina@tei.su>",
-  "license": "MIT",
-  "sideEffects": false,
-  "exports": "./src/index.ts",
-  "scripts": {
-    "build": "pnpm run -w build-package dispatcher",
-    "gen-updates": "node ./scripts/generate.cjs"
-  },
-  "dependencies": {
-    "@mtcute/core": "workspace:^",
-    "events": "3.2.0"
-  },
-  "devDependencies": {
-    "@mtcute/test": "workspace:^"
-  }
+    "name": "@mtcute/dispatcher",
+    "type": "module",
+    "version": "0.16.7",
+    "private": true,
+    "description": "Updates dispatcher and bot framework for @mtcute/client",
+    "author": "alina sireneva <alina@tei.su>",
+    "license": "MIT",
+    "sideEffects": false,
+    "exports": "./src/index.ts",
+    "scripts": {
+        "build": "pnpm run -w build-package dispatcher",
+        "gen-updates": "node ./scripts/generate.cjs"
+    },
+    "dependencies": {
+        "@mtcute/core": "workspace:^",
+        "events": "3.2.0"
+    },
+    "devDependencies": {
+        "@mtcute/test": "workspace:^"
+    }
 }
