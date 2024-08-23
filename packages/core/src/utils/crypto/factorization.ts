@@ -1,4 +1,9 @@
+import JSBI from 'jsbi'
+
 import {
+    ONE,
+    TWO,
+    ZERO,
     bigIntAbs,
     bigIntGcd,
     bigIntMin,
@@ -17,12 +22,12 @@ export function factorizePQSync(crypto: ICryptoProvider, pq: Uint8Array): [Uint8
     const pq_ = bufferToBigInt(pq)
 
     const n = PollardRhoBrent(crypto, pq_)
-    const m = pq_ / n
+    const m = JSBI.divide(pq_, n)
 
     let p
     let q
 
-    if (n < m) {
+    if (JSBI.lessThan(n, m)) {
         p = n
         q = m
     } else {
@@ -33,46 +38,46 @@ export function factorizePQSync(crypto: ICryptoProvider, pq: Uint8Array): [Uint8
     return [bigIntToBuffer(p), bigIntToBuffer(q)]
 }
 
-function PollardRhoBrent(crypto: ICryptoProvider, n: bigint): bigint {
-    if (n % 2n === 0n) return 2n
+function PollardRhoBrent(crypto: ICryptoProvider, n: JSBI): JSBI {
+    if (JSBI.equal(JSBI.remainder(n, TWO), ZERO)) return TWO
 
-    let y = randomBigIntInRange(crypto, n - 1n)
-    const c = randomBigIntInRange(crypto, n - 1n)
-    const m = randomBigIntInRange(crypto, n - 1n)
-    let g = 1n
-    let r = 1n
-    let q = 1n
+    let y = randomBigIntInRange(crypto, JSBI.subtract(n, ONE))
+    const c = randomBigIntInRange(crypto, JSBI.subtract(n, ONE))
+    const m = randomBigIntInRange(crypto, JSBI.subtract(n, ONE))
+    let g = ONE
+    let r = ONE
+    let q = ONE
 
-    let ys: bigint
-    let x: bigint
+    let ys: JSBI
+    let x: JSBI
 
-    while (g === 1n) {
+    while (JSBI.equal(g, ONE)) {
         x = y
-        for (let i = 0; r >= i; i++) y = (((y * y) % n) + c) % n
+        for (let i = 0; JSBI.GE(r, i); i++) y = JSBI.remainder(JSBI.add(JSBI.remainder(JSBI.multiply(y, y), n), c), n)
 
-        let k = 0n
+        let k = ZERO
 
-        while (k < r && g === 1n) {
+        while (JSBI.lessThan(k, r) && JSBI.equal(g, ONE)) {
             ys = y
 
-            for (let i = 0n; i < bigIntMin(m, r - k); i++) {
-                y = (((y * y) % n) + c) % n
-                q = (q * bigIntAbs(x - y)) % n
+            for (let i = ZERO; JSBI.lessThan(i, bigIntMin(m, JSBI.subtract(r, k))); i = JSBI.add(i, ONE)) {
+                y = JSBI.remainder(JSBI.add(JSBI.remainder(JSBI.multiply(y, y), n), c), n)
+                q = JSBI.remainder(JSBI.multiply(q, bigIntAbs(JSBI.subtract(x, y))), n)
             }
 
             g = bigIntGcd(q, n)
-            k = k + m
+            k = JSBI.add(k, m)
         }
 
-        r <<= 1n
+        r = JSBI.leftShift(r, ONE)
     }
 
-    if (g === n) {
+    if (JSBI.equal(g, n)) {
         do {
-            ys = (((ys! * ys!) % n) + c) % n
+            ys = JSBI.remainder(JSBI.add(JSBI.remainder(JSBI.multiply(ys!, ys!), n), c), n)
 
-            g = bigIntGcd(x! - ys!, n)
-        } while (g <= 1n)
+            g = bigIntGcd(JSBI.subtract(x!, ys!), n)
+        } while (JSBI.lessThanOrEqual(g, ONE))
     }
 
     return g

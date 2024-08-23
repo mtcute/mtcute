@@ -2,48 +2,52 @@
 import type { IPacketCodec } from '@mtcute/node'
 import { WrappedCodec } from '@mtcute/node'
 import type { ICryptoProvider } from '@mtcute/node/utils.js'
-import { bigIntModInv, bigIntModPow, bigIntToBuffer, bufferToBigInt } from '@mtcute/node/utils.js'
+import { ONE, bigIntModInv, bigIntModPow, bigIntToBuffer, bufferToBigInt } from '@mtcute/node/utils.js'
+import JSBI from 'jsbi'
 
 const MAX_TLS_PACKET_LENGTH = 2878
 const TLS_FIRST_PREFIX = Buffer.from('140303000101', 'hex')
 
 // ref: https://github.com/tdlib/td/blob/master/td/mtproto/TlsInit.cpp
-const KEY_MOD = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEDn
+const KEY_MOD = JSBI.BigInt('0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFED')
 // 2^255 - 19
-const QUAD_RES_MOD = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEDn
+const QUAD_RES_MOD = JSBI.BigInt('0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFED')
 // (mod - 1) / 2 = 2^254 - 10
-const QUAD_RES_POW = 0x3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6n
+const QUAD_RES_POW = JSBI.BigInt('0x3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6')
 
-function _getY2(x: bigint, mod: bigint): bigint {
+const BigInt_486662 = JSBI.BigInt(486662)
+const FOUR = JSBI.BigInt(4)
+
+function _getY2(x: JSBI, mod: JSBI): JSBI {
     // returns y = x^3 + x^2 * 486662 + x
     let y = x
-    y = (y + 486662n) % mod
-    y = (y * x) % mod
-    y = (y + 1n) % mod
-    y = (y * x) % mod
+    y = JSBI.remainder((JSBI.add(y, BigInt_486662)), mod)
+    y = JSBI.remainder(JSBI.multiply(y, x), mod)
+    y = JSBI.remainder(JSBI.add(y, ONE), mod)
+    y = JSBI.remainder(JSBI.multiply(y, x), mod)
 
     return y
 }
 
-function _getDoubleX(x: bigint, mod: bigint): bigint {
+function _getDoubleX(x: JSBI, mod: JSBI): JSBI {
     // returns x_2 = (x^2 - 1)^2/(4*y^2)
     let denominator = _getY2(x, mod)
-    denominator = (denominator * 4n) % mod
+    denominator = JSBI.remainder(JSBI.multiply(denominator, FOUR), mod)
 
-    let numerator = (x * x) % mod
-    numerator = (numerator - 1n) % mod
-    numerator = (numerator * numerator) % mod
+    let numerator = JSBI.remainder(JSBI.multiply(x, x), mod)
+    numerator = JSBI.remainder(JSBI.subtract(numerator, ONE), mod)
+    numerator = JSBI.remainder(JSBI.multiply(numerator, numerator), mod)
 
     denominator = bigIntModInv(denominator, mod)
-    numerator = (numerator * denominator) % mod
+    numerator = JSBI.remainder(JSBI.multiply(numerator, denominator), mod)
 
     return numerator
 }
 
-function _isQuadraticResidue(a: bigint): boolean {
+function _isQuadraticResidue(a: JSBI): boolean {
     const r = bigIntModPow(a, QUAD_RES_POW, QUAD_RES_MOD)
 
-    return r === 1n
+    return JSBI.equal(r, ONE)
 }
 
 interface TlsOperationHandler {

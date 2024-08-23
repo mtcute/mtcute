@@ -1,16 +1,22 @@
+import JSBI from 'jsbi'
+
 import { bufferToReversed } from './buffer-utils.js'
 import type { ICryptoProvider } from './crypto/abstract.js'
+
+export const ZERO: JSBI = JSBI.BigInt(0)
+export const ONE: JSBI = JSBI.BigInt(1)
+export const TWO: JSBI = JSBI.BigInt(2)
 
 /**
  * Get the minimum number of bits required to represent a number
  */
-export function bigIntBitLength(n: bigint): number {
+export function bigIntBitLength(n: JSBI): number {
     // not the fastest way, but at least not .toString(2) and not too complex
     // taken from: https://stackoverflow.com/a/76616288/22656950
 
     const i = (n.toString(16).length - 1) * 4
 
-    return i + 32 - Math.clz32(Number(n >> BigInt(i)))
+    return i + 32 - Math.clz32(JSBI.toNumber(JSBI.signedRightShift(n, JSBI.BigInt(i))))
 }
 
 /**
@@ -20,7 +26,7 @@ export function bigIntBitLength(n: bigint): number {
  * @param length  Length of the resulting buffer (by default it's the minimum required)
  * @param le  Whether to use little-endian encoding
  */
-export function bigIntToBuffer(value: bigint, length = 0, le = false): Uint8Array {
+export function bigIntToBuffer(value: JSBI, length = 0, le = false): Uint8Array {
     const bits = bigIntBitLength(value)
     const bytes = Math.ceil(bits / 8)
 
@@ -38,14 +44,14 @@ export function bigIntToBuffer(value: bigint, length = 0, le = false): Uint8Arra
 
     // it is faster to work with 64-bit words than with bytes directly
     for (let i = 0; i < dv.byteLength; i += 8) {
-        dv.setBigUint64(i, value & 0xFFFFFFFFFFFFFFFFn, true)
-        value >>= 64n
+        JSBI.DataViewSetBigUint64(dv, i, JSBI.bitwiseAnd(value, JSBI.BigInt('0xFFFFFFFFFFFFFFFF')), true)
+        value = JSBI.signedRightShift(value, JSBI.BigInt(64))
     }
 
     if (unaligned > 0) {
         for (let i = length - unaligned; i < length; i++) {
-            u8[i] = Number(value & 0xFFn)
-            value >>= 8n
+            u8[i] = JSBI.toNumber(JSBI.bitwiseAnd(value, JSBI.BigInt('0xFF')))
+            value = JSBI.signedRightShift(value, JSBI.BigInt(8))
         }
     }
 
@@ -60,22 +66,22 @@ export function bigIntToBuffer(value: bigint, length = 0, le = false): Uint8Arra
  * @param buffer  Buffer to convert
  * @param le  Whether to use little-endian encoding
  */
-export function bufferToBigInt(buffer: Uint8Array, le = false): bigint {
+export function bufferToBigInt(buffer: Uint8Array, le = false): JSBI {
     if (le) buffer = bufferToReversed(buffer)
 
     const unaligned = buffer.length % 8
     const dv = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength - unaligned)
 
-    let res = 0n
+    let res = ZERO
 
     // it is faster to work with 64-bit words than with bytes directly
     for (let i = 0; i < dv.byteLength; i += 8) {
-        res = (res << 64n) | BigInt(dv.getBigUint64(i, false))
+        res = JSBI.bitwiseOr(JSBI.leftShift(res, JSBI.BigInt(64)), JSBI.DataViewGetBigUint64(dv, i, false))
     }
 
     if (unaligned > 0) {
         for (let i = buffer.length - unaligned; i < buffer.length; i++) {
-            res = (res << 8n) | BigInt(buffer[i])
+            res = JSBI.bitwiseOr(JSBI.leftShift(res, JSBI.BigInt(8)), JSBI.BigInt(buffer[i]))
         }
     }
 
@@ -86,7 +92,7 @@ export function bufferToBigInt(buffer: Uint8Array, le = false): bigint {
  * Generate a cryptographically safe random big integer of the given size (in bytes)
  * @param size  Size in bytes
  */
-export function randomBigInt(crypto: ICryptoProvider, size: number): bigint {
+export function randomBigInt(crypto: ICryptoProvider, size: number): JSBI {
     return bufferToBigInt(crypto.randomBytes(size))
 }
 
@@ -94,14 +100,14 @@ export function randomBigInt(crypto: ICryptoProvider, size: number): bigint {
  * Generate a random big integer of the given size (in bits)
  * @param bits
  */
-export function randomBigIntBits(crypto: ICryptoProvider, bits: number): bigint {
+export function randomBigIntBits(crypto: ICryptoProvider, bits: number): JSBI {
     let num = randomBigInt(crypto, Math.ceil(bits / 8))
 
     const bitLength = bigIntBitLength(num)
 
     if (bitLength > bits) {
         const toTrim = bitLength - bits
-        num >>= BigInt(toTrim)
+        num = JSBI.signedRightShift(num, JSBI.BigInt(toTrim))
     }
 
     return num
@@ -113,71 +119,71 @@ export function randomBigIntBits(crypto: ICryptoProvider, bits: number): bigint 
  * @param max  Maximum value (exclusive)
  * @param min  Minimum value (inclusive)
  */
-export function randomBigIntInRange(crypto: ICryptoProvider, max: bigint, min = 1n): bigint {
-    const interval = max - min
-    if (interval < 0n) throw new Error('expected min < max')
+export function randomBigIntInRange(crypto: ICryptoProvider, max: JSBI, min: JSBI = JSBI.BigInt(1)): JSBI {
+    const interval = JSBI.subtract(max, min)
+    if (JSBI.lessThan(interval, ZERO)) throw new Error('expected min < max')
 
     const byteSize = Math.ceil(bigIntBitLength(interval) / 8)
 
     let result = randomBigInt(crypto, byteSize)
-    while (result > interval) result -= interval
+    while (JSBI.greaterThan(result, interval)) result = JSBI.subtract(result, interval)
 
-    return min + result
+    return JSBI.add(min, result)
 }
 
 /**
  * Compute the multiplicity of 2 in the prime factorization of n
  * @param n
  */
-export function twoMultiplicity(n: bigint): bigint {
-    if (n === 0n) return 0n
+export function twoMultiplicity(n: JSBI): JSBI {
+    if (JSBI.equal(n, ZERO)) return ZERO
 
-    let m = 0n
-    let pow = 1n
+    let m = ZERO
+    let pow = ONE
 
     while (true) {
-        if ((n & pow) !== 0n) return m
-        m += 1n
-        pow <<= 1n
+        if (JSBI.notEqual(JSBI.bitwiseAnd(n, pow), ZERO)) return m
+        m = JSBI.add(m, ONE)
+        pow = JSBI.leftShift(pow, ONE)
     }
 }
 
-export function bigIntMin(a: bigint, b: bigint): bigint {
-    return a < b ? a : b
+export function bigIntMin(a: JSBI, b: JSBI): JSBI {
+    return JSBI.lessThan(a, b) ? a : b
 }
 
-export function bigIntAbs(a: bigint): bigint {
-    return a < 0n ? -a : a
+export function bigIntAbs(a: JSBI): JSBI {
+    return JSBI.lessThan(a, ZERO) ? JSBI.unaryMinus(a) : a
 }
 
-export function bigIntGcd(a: bigint, b: bigint): bigint {
+export function bigIntGcd(a: JSBI, b: JSBI): JSBI {
     // using euclidean algorithm is fast enough on smaller numbers
     // https://en.wikipedia.org/wiki/Euclidean_algorithm#Implementations
 
-    while (b !== 0n) {
+    while (JSBI.notEqual(b, ZERO)) {
         const t = b
-        b = a % b
+        b = JSBI.remainder(a, b)
         a = t
     }
 
     return a
 }
 
-export function bigIntModPow(base: bigint, exp: bigint, mod: bigint): bigint {
+export function bigIntModPow(base: JSBI, exp: JSBI, mod: JSBI): JSBI {
     // using the binary method is good enough for our use case
     // https://en.wikipedia.org/wiki/Modular_exponentiation#Right-to-left_binary_method
 
-    base %= mod
+    base = JSBI.remainder(base, mod)
 
-    let result = 1n
+    let result = ONE
 
-    while (exp > 0n) {
-        if (exp % 2n === 1n) {
-            result = (result * base) % mod
+    while (JSBI.greaterThan(exp, ONE)) {
+        if (JSBI.equal(JSBI.remainder(exp, TWO), ONE)) {
+            result = JSBI.remainder(JSBI.multiply(result, base), mod)
         }
 
-        exp >>= 1n
-        base = base ** 2n % mod
+        exp = JSBI.signedRightShift(exp, ONE)
+        base = JSBI.remainder(JSBI.exponentiate(base, TWO), mod)
     }
 
     return result
@@ -185,17 +191,17 @@ export function bigIntModPow(base: bigint, exp: bigint, mod: bigint): bigint {
 
 // below code is based on https://github.com/juanelas/bigint-mod-arith, MIT license
 
-function eGcd(a: bigint, b: bigint): [bigint, bigint, bigint] {
-    let x = 0n
-    let y = 1n
-    let u = 1n
-    let v = 0n
+function eGcd(a: JSBI, b: JSBI): [JSBI, JSBI, JSBI] {
+    let x = ZERO
+    let y = ONE
+    let u = ONE
+    let v = ZERO
 
-    while (a !== 0n) {
-        const q = b / a
-        const r: bigint = b % a
-        const m = x - u * q
-        const n = y - v * q
+    while (JSBI.notEqual(a, ZERO)) {
+        const q = JSBI.divide(b, a)
+        const r: JSBI = JSBI.remainder(b, a)
+        const m = JSBI.subtract(x, JSBI.multiply(u, q))
+        const n = JSBI.subtract(y, JSBI.multiply(v, q))
         b = a
         a = r
         x = u
@@ -207,23 +213,23 @@ function eGcd(a: bigint, b: bigint): [bigint, bigint, bigint] {
     return [b, x, y]
 }
 
-function toZn(a: number | bigint, n: number | bigint): bigint {
-    if (typeof a === 'number') a = BigInt(a)
-    if (typeof n === 'number') n = BigInt(n)
+function toZn(a: number | JSBI, n: number | JSBI): JSBI {
+    if (typeof a === 'number') a = JSBI.BigInt(a)
+    if (typeof n === 'number') n = JSBI.BigInt(n)
 
-    if (n <= 0n) {
+    if (JSBI.lessThanOrEqual(n, ZERO)) {
         throw new RangeError('n must be > 0')
     }
 
-    const aZn = a % n
+    const aZn = JSBI.remainder(a, n)
 
-    return aZn < 0n ? aZn + n : aZn
+    return JSBI.lessThan(aZn, ZERO) ? JSBI.add(aZn, n) : aZn
 }
 
-export function bigIntModInv(a: bigint, n: bigint): bigint {
+export function bigIntModInv(a: JSBI, n: JSBI): JSBI {
     const [g, x] = eGcd(toZn(a, n), n)
 
-    if (g !== 1n) {
+    if (JSBI.notEqual(g, ONE)) {
         throw new RangeError(`${a.toString()} does not have inverse modulo ${n.toString()}`) // modular inverse does not exist
     } else {
         return toZn(x, n)

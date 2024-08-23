@@ -1,36 +1,37 @@
 {
-    "name": "@mtcute/core",
-    "type": "module",
-    "version": "0.16.7",
-    "private": true,
-    "description": "Type-safe library for MTProto (Telegram API)",
-    "author": "alina sireneva <alina@tei.su>",
-    "license": "MIT",
-    "sideEffects": false,
-    "exports": {
-        ".": "./src/index.ts",
-        "./utils.js": "./src/utils/index.ts",
-        "./client.js": "./src/highlevel/client.ts",
-        "./worker.js": "./src/highlevel/worker/index.ts",
-        "./methods.js": "./src/highlevel/methods.ts",
-        "./platform.js": "./src/platform.ts"
-    },
-    "scripts": {
-        "build": "pnpm run -w build-package core",
-        "gen-client": "node ./scripts/generate-client.cjs",
-        "gen-updates": "node ./scripts/generate-updates.cjs"
-    },
-    "dependencies": {
-        "@mtcute/file-id": "workspace:^",
-        "@mtcute/tl": "workspace:^",
-        "@mtcute/tl-runtime": "workspace:^",
-        "@types/events": "3.0.0",
-        "events": "3.2.0",
-        "long": "5.2.3"
-    },
-    "devDependencies": {
-        "@mtcute/test": "workspace:^",
-        "@types/ws": "8.5.4",
-        "ws": "8.13.0"
-    }
+  "name": "@mtcute/core",
+  "type": "module",
+  "version": "0.16.7",
+  "private": true,
+  "description": "Type-safe library for MTProto (Telegram API)",
+  "author": "alina sireneva <alina@tei.su>",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./utils.js": "./src/utils/index.ts",
+    "./client.js": "./src/highlevel/client.ts",
+    "./worker.js": "./src/highlevel/worker/index.ts",
+    "./methods.js": "./src/highlevel/methods.ts",
+    "./platform.js": "./src/platform.ts"
+  },
+  "scripts": {
+    "build": "pnpm run -w build-package core",
+    "gen-client": "node ./scripts/generate-client.cjs",
+    "gen-updates": "node ./scripts/generate-updates.cjs"
+  },
+  "dependencies": {
+    "@mtcute/file-id": "workspace:^",
+    "@mtcute/tl": "workspace:^",
+    "@mtcute/tl-runtime": "workspace:^",
+    "@types/events": "3.0.0",
+    "events": "3.2.0",
+    "jsbi": "^4.3.0",
+    "long": "5.2.3"
+  },
+  "devDependencies": {
+    "@mtcute/test": "workspace:^",
+    "@types/ws": "8.5.4",
+    "ws": "8.13.0"
+  }
 }
