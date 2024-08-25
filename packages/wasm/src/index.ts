@@ -51,7 +51,8 @@ export function initSync(module: SyncInitInput): void {
         module = new WebAssembly.Instance(module)
     }
 
-    wasm = module.exports as unknown as MtcuteWasmModule
+    // eslint-disable-next-line
+    wasm = (module as unknown as WebAssembly.Instance).exports as unknown as MtcuteWasmModule
     initCommon()
 }
 

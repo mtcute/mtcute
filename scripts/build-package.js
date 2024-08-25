@@ -4,6 +4,7 @@ import { resolve } from 'node:path'
 
 import { processPackageJson } from '../.config/vite-utils/package-json.js'
 
+import { packageJsonToDeno, runJsrBuildSync } from './build-package-jsr.js'
 import { runViteBuildSync } from './build-package-vite.js'
 
 if (process.argv.length < 3) {
@@ -13,16 +14,20 @@ if (process.argv.length < 3) {
 
 const IS_JSR = process.env.JSR === '1'
 
-if (IS_JSR) {
-    throw new Error('JSR build is temporarily disabled')
-}
-
 const packageName = process.argv[2]
+
+function transformFile(file, transform) {
+    const content = fs.readFileSync(file, 'utf8')
+    const res = transform(content, file)
+    if (res != null) fs.writeFileSync(file, res)
+}
 
 if (packageName === 'tl') {
     // create package by copying all the needed files
     const packageDir = fileURLToPath(new URL('../packages/tl', import.meta.url))
-    const outDir = fileURLToPath(new URL('../packages/tl/dist', import.meta.url))
+    let outDir = fileURLToPath(new URL('../packages/tl/dist', import.meta.url))
+    if (IS_JSR) outDir = resolve(outDir, 'jsr')
+
     fs.rmSync(outDir, { recursive: true, force: true })
 
     const files = [
@@ -48,65 +53,65 @@ if (packageName === 'tl') {
     }
 
     fs.cpSync(new URL('../LICENSE', import.meta.url), resolve(outDir, 'LICENSE'), { recursive: true })
-    const { packageJson } = processPackageJson(packageDir)
-    fs.writeFileSync(resolve(outDir, 'package.json'), JSON.stringify(packageJson, null, 4))
+    const { packageJson, packageJsonOrig } = processPackageJson(packageDir)
 
-    // todo
-    // if (jsr) {
-    //     // jsr doesn't support cjs, so we'll need to add some shims
-    //     // todo: remove this god awfulness when tl esm rewrite
-    //     transformFile(path.join(outDir, 'index.js'), (content) => {
-    //         return [
-    //             '/// <reference types="./index.d.ts" />',
-    //             'const exports = {};',
-    //             content,
-    //             'export const tl = exports.tl;',
-    //             'export const mtp = exports.mtp;',
-    //         ].join('\n')
-    //     })
-    //     transformFile(path.join(outDir, 'binary/reader.js'), (content) => {
-    //         return [
-    //             '/// <reference types="./reader.d.ts" />',
-    //             'const exports = {};',
-    //             content,
-    //             'export const __tlReaderMap = exports.__tlReaderMap;',
-    //         ].join('\n')
-    //     })
-    //     transformFile(path.join(outDir, 'binary/writer.js'), (content) => {
-    //         return [
-    //             '/// <reference types="./writer.d.ts" />',
-    //             'const exports = {};',
-    //             content,
-    //             'export const __tlWriterMap = exports.__tlWriterMap;',
-    //         ].join('\n')
-    //     })
-    //     transformFile(path.join(outDir, 'binary/rsa-keys.js'), (content) => {
-    //         return [
-    //             '/// <reference types="./rsa-keys.d.ts" />',
-    //             'const exports = {};',
-    //             content,
-    //             'export const __publicKeyIndex = exports.__publicKeyIndex;',
-    //         ].join('\n')
-    //     })
+    if (IS_JSR) {
+        // jsr doesn't support cjs, so we'll need to add some shims
+        // todo: remove this god awfulness when tl esm rewrite
+        transformFile(resolve(outDir, 'index.js'), (content) => {
+            return [
+                '/// <reference types="./index.d.ts" />',
+                'const exports = {};',
+                content,
+                'export const tl = exports.tl;',
+                'export const mtp = exports.mtp;',
+            ].join('\n')
+        })
+        transformFile(resolve(outDir, 'binary/reader.js'), (content) => {
+            return [
+                '/// <reference types="./reader.d.ts" />',
+                'const exports = {};',
+                content,
+                'export const __tlReaderMap = exports.__tlReaderMap;',
+            ].join('\n')
+        })
+        transformFile(resolve(outDir, 'binary/writer.js'), (content) => {
+            return [
+                '/// <reference types="./writer.d.ts" />',
+                'const exports = {};',
+                content,
+                'export const __tlWriterMap = exports.__tlWriterMap;',
+            ].join('\n')
+        })
+        transformFile(resolve(outDir, 'binary/rsa-keys.js'), (content) => {
+            return [
+                '/// <reference types="./rsa-keys.d.ts" />',
+                'const exports = {};',
+                content,
+                'export const __publicKeyIndex = exports.__publicKeyIndex;',
+            ].join('\n')
+        })
 
-    //     // patch deno.json to add some export maps
-    //     transformFile(path.join(outDir, 'deno.json'), (content) => {
-    //         const json = JSON.parse(content)
-    //         json.exports = {}
+        // patch deno.json to add some export maps
+        const denoJson = packageJsonToDeno({ packageJson, packageJsonOrig })
+        denoJson.exports = {}
 
-    //         for (const f of files) {
-    //             if (!f.match(/\.js(?:on)?$/)) continue
-
-    //             if (f === 'index.js') {
-    //                 json.exports['.'] = './index.js'
-    //             } else {
-    //                 json.exports[`./${f}`] = `./${f}`
-    //             }
-    //         }
-
-    //         return JSON.stringify(json, null, 2)
-    //     })
-    // }
+        for (const f of files) {
+            if (!f.match(/\.js(?:on)?$/)) continue
+            if (f === 'index.js') {
+                denoJson.exports['.'] = './index.js'
+            } else {
+                denoJson.exports[`./${f}`] = `./${f}`
+            }
+        }
+        fs.writeFileSync(resolve(outDir, 'deno.json'), JSON.stringify(denoJson, null, 2))
+    } else {
+        fs.writeFileSync(resolve(outDir, 'package.json'), JSON.stringify(packageJson, null, 2))
+    }
 } else {
-    runViteBuildSync(packageName)
+    if (IS_JSR) {
+        await runJsrBuildSync(packageName)
+    } else {
+        runViteBuildSync(packageName)
+    }
 }

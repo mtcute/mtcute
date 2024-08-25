@@ -1,5 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
+import { resolve } from 'node:path'
+import * as fs from 'node:fs'
 
 const KNOWN_DECORATORS = ['memoizeGetters', 'makeInspectable']
 
@@ -68,5 +70,13 @@ export default () => {
                 },
             },
         ],
+        finalJsr({ outDir }) {
+            const networkMgrFile = resolve(outDir, 'network/network-manager.ts')
+            const code = fs.readFileSync(networkMgrFile, 'utf8')
+
+            const require = createRequire(import.meta.url)
+            const version = require(fileURLToPath(new URL('./package.json', import.meta.url))).version
+            fs.writeFileSync(networkMgrFile, code.replace('%VERSION%', version))
+        },
     }
 }

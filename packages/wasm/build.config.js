@@ -2,7 +2,6 @@ import { resolve } from 'node:path'
 import * as fs from 'node:fs'
 
 export default () => ({
-    // esmOnlyDirectives: true,
     finalPackageJson(pkg) {
         pkg.exports['./mtcute.wasm'] = './mtcute.wasm'
     },
