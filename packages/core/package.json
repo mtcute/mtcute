@@ -27,10 +27,12 @@
     "@types/events": "3.0.0",
     "events": "3.2.0",
     "jsbi": "^4.3.0",
+    "jsbn": "^1.1.0",
     "long": "5.2.3"
   },
   "devDependencies": {
     "@mtcute/test": "workspace:^",
+    "@types/jsbn": "^1.2.33",
     "@types/ws": "8.5.4",
     "ws": "8.13.0"
   }
