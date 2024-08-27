@@ -1,3 +1,5 @@
+import * as timers from './timers.js'
+
 export type ThrottledFunction = (() => void) & {
     reset: () => void
 }
@@ -15,7 +17,7 @@ export type ThrottledFunction = (() => void) & {
  * @param delay  Throttle delay
  */
 export function throttle(func: () => void, delay: number): ThrottledFunction {
-    let timeout: NodeJS.Timeout | null
+    let timeout: timers.Timer | null
 
     const res: ThrottledFunction = function () {
         if (timeout) {
@@ -26,12 +28,12 @@ export function throttle(func: () => void, delay: number): ThrottledFunction {
             timeout = null
             func()
         }
-        timeout = setTimeout(later, delay)
+        timeout = timers.setTimeout(later, delay)
     }
 
     res.reset = () => {
         if (timeout) {
-            clearTimeout(timeout)
+            timers.clearTimeout(timeout)
             timeout = null
         }
     }

@@ -44,13 +44,13 @@ function bumpVersions(packages, kind) {
         pkgJson.version = nextVersion
         writeFileSync(
             join(__dirname, '../packages', pkg, 'package.json'),
-            `${JSON.stringify(pkgJson, null, 4)}\n`,
+            `${JSON.stringify(pkgJson, null, 2)}\n`,
         )
     }
 
     const rootPkgJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'))
     rootPkgJson.version = nextVersion
-    writeFileSync(join(__dirname, '../package.json'), `${JSON.stringify(rootPkgJson, null, 4)}\n`)
+    writeFileSync(join(__dirname, '../package.json'), `${JSON.stringify(rootPkgJson, null, 2)}\n`)
 
     return nextVersion
 }

@@ -11,12 +11,14 @@ import type {
 } from '../utils/index.js'
 import {
     Deque,
+
     LongMap,
     LruSet,
     SortedArray,
     compareLongs,
     getRandomInt,
     randomLong,
+    timers,
 } from '../utils/index.js'
 
 import { AuthKey } from './auth-key.js'
@@ -41,7 +43,7 @@ export interface PendingRpc {
     initConn?: boolean
     getState?: number
     cancelled?: boolean
-    timeout?: NodeJS.Timeout
+    timeout?: timers.Timer
 }
 
 export type PendingMessage =
@@ -131,8 +133,8 @@ export class MtprotoSession {
     authorizationPending = false
 
     next429Timeout = 1000
-    current429Timeout?: NodeJS.Timeout
-    next429ResetTimeout?: NodeJS.Timeout
+    current429Timeout?: timers.Timer
+    next429ResetTimeout?: timers.Timer
 
     constructor(
         readonly _crypto: ICryptoProvider,
@@ -165,7 +167,7 @@ export class MtprotoSession {
             this.resetAuthKey()
         }
 
-        clearTimeout(this.current429Timeout)
+        timers.clearTimeout(this.current429Timeout)
         this.resetState(withAuthKey)
         this.resetLastPing(true)
     }
@@ -339,14 +341,14 @@ export class MtprotoSession {
         const timeout = this.next429Timeout
 
         this.next429Timeout = Math.min(this.next429Timeout * 2, 32000)
-        clearTimeout(this.current429Timeout)
-        clearTimeout(this.next429ResetTimeout)
+        timers.clearTimeout(this.current429Timeout)
+        timers.clearTimeout(this.next429ResetTimeout)
 
-        this.current429Timeout = setTimeout(() => {
+        this.current429Timeout = timers.setTimeout(() => {
             this.current429Timeout = undefined
             callback()
         }, timeout)
-        this.next429ResetTimeout = setTimeout(() => {
+        this.next429ResetTimeout = timers.setTimeout(() => {
             this.next429ResetTimeout = undefined
             this.next429Timeout = 1000
         }, 60000)

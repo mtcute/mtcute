@@ -10,7 +10,7 @@ import type { UpdateContext } from './base.js'
  * This is a subclass of {@link InlineQuery}, so all its fields are also available.
  */
 export class InlineQueryContext extends InlineQuery implements UpdateContext<InlineQuery> {
-    readonly _name = 'inline_query'
+    readonly _name = 'inline_query' as const
 
     constructor(
         readonly client: TelegramClient,

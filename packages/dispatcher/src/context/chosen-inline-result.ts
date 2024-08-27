@@ -12,7 +12,7 @@ import type { UpdateContext } from './base.js'
  * > Inline feedback in [@BotFather](//t.me/botfather)
  */
 export class ChosenInlineResultContext extends ChosenInlineResult implements UpdateContext<ChosenInlineResult> {
-    readonly _name = 'chosen_inline_result'
+    readonly _name = 'chosen_inline_result' as const
 
     constructor(
         readonly client: TelegramClient,

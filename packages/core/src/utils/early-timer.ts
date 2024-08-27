@@ -1,10 +1,12 @@
+import * as timers from './timers.js'
+
 /**
  * Wrapper over JS timers that allows re-scheduling them
  * to earlier time
  */
 export class EarlyTimer {
-    private _timeout?: NodeJS.Timeout
-    private _immediate?: NodeJS.Immediate
+    private _timeout?: timers.Timer
+    private _immediate?: timers.Immediate
     private _timeoutTs?: number
 
     private _handler: () => void = () => {}
@@ -20,13 +22,13 @@ export class EarlyTimer {
     emitWhenIdle(): void {
         if (this._immediate) return
 
-        clearTimeout(this._timeout)
+        timers.clearTimeout(this._timeout)
         this._timeoutTs = Date.now()
 
-        if (typeof setImmediate !== 'undefined') {
-            this._immediate = setImmediate(this.emitNow)
+        if (typeof timers.setImmediate !== 'undefined') {
+            this._immediate = timers.setImmediate(this.emitNow)
         } else {
-            this._timeout = setTimeout(this.emitNow, 0)
+            this._timeout = timers.setTimeout(this.emitNow, 0)
         }
     }
 
@@ -49,7 +51,7 @@ export class EarlyTimer {
     emitBefore(ts: number): void {
         if (!this._timeoutTs || ts < this._timeoutTs) {
             this.reset()
-            this._timeout = setTimeout(this.emitNow, ts - Date.now())
+            this._timeout = timers.setTimeout(this.emitNow, ts - Date.now())
             this._timeoutTs = ts
         }
     }
@@ -67,10 +69,10 @@ export class EarlyTimer {
      */
     reset(): void {
         if (this._immediate) {
-            clearImmediate(this._immediate)
+            timers.clearImmediate(this._immediate)
             this._immediate = undefined
         } else {
-            clearTimeout(this._timeout)
+            timers.clearTimeout(this._timeout)
         }
         this._timeoutTs = undefined
     }

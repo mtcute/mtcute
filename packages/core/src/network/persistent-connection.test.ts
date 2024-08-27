@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { StubTelegramTransport, createStub, defaultTestCryptoProvider } from '@mtcute/test'
 
-import { LogManager } from '../utils/index.js'
+import { LogManager, timers } from '../utils/index.js'
 
 import type { PersistentConnectionParams } from './persistent-connection.js'
 import { PersistentConnection } from './persistent-connection.js'
@@ -78,7 +78,7 @@ describe('PersistentConnection', () => {
 
             const transportConnect = transport.connect
             vi.spyOn(transport, 'connect').mockImplementation((dc, test) => {
-                setTimeout(() => {
+                timers.setTimeout(() => {
                     transportConnect.call(transport, dc, test)
                 }, 100)
             })

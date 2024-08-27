@@ -56,7 +56,7 @@ export default antfu({
         'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
         'node/prefer-global/process': ['error', 'always'],
         'node/prefer-global/buffer': ['error', 'always'],
-        'no-restricted-globals': ['error', 'Buffer', '__dirname', 'require'],
+        'no-restricted-globals': ['error', 'Buffer', '__dirname', 'require', 'NodeJS', 'setTimeout', 'clearTimeout'],
         'style/quotes': ['error', 'single', { avoidEscape: true }],
         'test/consistent-test-it': 'off',
         'test/prefer-lowercase-title': 'off',
@@ -112,7 +112,7 @@ export default antfu({
         'import/no-relative-packages': 'off', // common-internals is symlinked from node
     },
 }, {
-    files: ['**/scripts/**', '**/*.cjs'],
+    files: ['**/scripts/**', '**/*.cjs', '.config/**/*'],
     rules: {
         'no-restricted-imports': 'off',
         'no-restricted-globals': 'off',

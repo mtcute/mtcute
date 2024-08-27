@@ -21,7 +21,7 @@ import type { UpdateContext } from './base.js'
  */
 export class BusinessMessageContext extends BusinessMessage implements UpdateContext<BusinessMessage> {
     // this is primarily for proper types in filters, so don't bother much with actual value
-    readonly _name = 'new_business_message'
+    readonly _name = 'new_business_message' as const
 
     /**
      * List of messages in the message group.

@@ -70,9 +70,7 @@ export abstract class BaseNodeCryptoProvider extends BaseCryptoProvider {
 
 export class NodeCryptoProvider extends BaseNodeCryptoProvider implements ICryptoProvider {
     async initialize(): Promise<void> {
-        // @only-if-esm
         const require = createRequire(import.meta.url)
-        // @/only-if-esm
         const wasmFile = require.resolve('@mtcute/wasm/mtcute.wasm')
         const wasm = await readFile(wasmFile)
         initSync(wasm)

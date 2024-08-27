@@ -21,6 +21,7 @@ import {
 import type { BaseTelegramClient } from '../base.js'
 import type { CurrentUserInfo } from '../storage/service/current-user.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
+import * as timers from '../../utils/timers.js'
 
 import type { PendingUpdate, PendingUpdateContainer, RawUpdateHandler, UpdatesManagerParams } from './types.js'
 import {
@@ -142,7 +143,7 @@ export class UpdatesManager {
 
     cpts: Map<number, number> = new Map()
     cptsMod: Map<number, number> = new Map()
-    channelDiffTimeouts: Map<number, NodeJS.Timeout> = new Map()
+    channelDiffTimeouts: Map<number, timers.Timer> = new Map()
     channelsOpened: Map<number, number> = new Map()
 
     log: Logger
@@ -154,7 +155,7 @@ export class UpdatesManager {
     private _channelPtsLimit: Extract<UpdatesManagerParams['channelPtsLimit'], Function>
 
     auth?: CurrentUserInfo | null // todo: do we need a local copy?
-    keepAliveInterval?: NodeJS.Timeout
+    keepAliveInterval?: timers.Interval
 
     constructor(
         readonly client: BaseTelegramClient,
@@ -245,8 +246,8 @@ export class UpdatesManager {
 
         // start updates loop in background
         this.updatesLoopActive = true
-        clearInterval(this.keepAliveInterval)
-        this.keepAliveInterval = setInterval(this._onKeepAlive, KEEP_ALIVE_INTERVAL)
+        timers.clearInterval(this.keepAliveInterval)
+        this.keepAliveInterval = timers.setInterval(this._onKeepAlive, KEEP_ALIVE_INTERVAL)
         this._loop().catch(err => this.client.emitError(err))
 
         if (this.catchUpOnStart) {
@@ -263,10 +264,10 @@ export class UpdatesManager {
     stopLoop(): void {
         if (!this.updatesLoopActive) return
 
-        clearInterval(this.keepAliveInterval)
+        timers.clearInterval(this.keepAliveInterval)
 
         for (const timer of this.channelDiffTimeouts.values()) {
-            clearTimeout(timer)
+            timers.clearTimeout(timer)
         }
         this.channelDiffTimeouts.clear()
 
@@ -814,7 +815,7 @@ export class UpdatesManager {
 
         // clear timeout if any
         if (channelDiffTimeouts.has(channelId)) {
-            clearTimeout(channelDiffTimeouts.get(channelId))
+            timers.clearTimeout(channelDiffTimeouts.get(channelId))
             channelDiffTimeouts.delete(channelId)
         }
 
@@ -952,7 +953,7 @@ export class UpdatesManager {
             log.debug('scheduling next fetch for channel %d in %d seconds', channelId, lastTimeout)
             channelDiffTimeouts.set(
                 channelId,
-                setTimeout(() => this._fetchChannelDifferenceViaUpdate(channelId), lastTimeout * 1000),
+                timers.setTimeout(() => this._fetchChannelDifferenceViaUpdate(channelId), lastTimeout * 1000),
             )
         }
 

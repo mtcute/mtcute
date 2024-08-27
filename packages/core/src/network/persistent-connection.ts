@@ -2,6 +2,7 @@ import EventEmitter from 'node:events'
 
 import { MtcuteError } from '../types/index.js'
 import type { BasicDcOption, ICryptoProvider, Logger } from '../utils/index.js'
+import { timers } from '../utils/index.js'
 
 import type { ReconnectionStrategy } from './reconnection.js'
 import type { ITelegramTransport, TransportFactory } from './transports/index.js'
@@ -35,12 +36,12 @@ export abstract class PersistentConnection extends EventEmitter {
     private _lastError: Error | null = null
     private _consequentFails = 0
     private _previousWait: number | null = null
-    private _reconnectionTimeout: NodeJS.Timeout | null = null
+    private _reconnectionTimeout: timers.Timer | null = null
     private _shouldReconnectImmediately = false
     protected _disconnectedManually = false
 
     // inactivity timeout
-    private _inactivityTimeout: NodeJS.Timeout | null = null
+    private _inactivityTimeout: timers.Timer | null = null
     private _inactive = true
 
     _destroyed = false
@@ -165,9 +166,9 @@ export abstract class PersistentConnection extends EventEmitter {
         this._previousWait = wait
 
         if (this._reconnectionTimeout != null) {
-            clearTimeout(this._reconnectionTimeout)
+            timers.clearTimeout(this._reconnectionTimeout)
         }
-        this._reconnectionTimeout = setTimeout(() => {
+        this._reconnectionTimeout = timers.setTimeout(() => {
             if (this._destroyed) return
             this._reconnectionTimeout = null
             this.connect()
@@ -183,7 +184,7 @@ export abstract class PersistentConnection extends EventEmitter {
         }
 
         if (this._reconnectionTimeout != null) {
-            clearTimeout(this._reconnectionTimeout)
+            timers.clearTimeout(this._reconnectionTimeout)
             this._reconnectionTimeout = null
         }
 
@@ -215,11 +216,12 @@ export abstract class PersistentConnection extends EventEmitter {
     }
 
     async destroy(): Promise<void> {
+        this._disconnectedManually = true
         if (this._reconnectionTimeout != null) {
-            clearTimeout(this._reconnectionTimeout)
+            timers.clearTimeout(this._reconnectionTimeout)
         }
         if (this._inactivityTimeout != null) {
-            clearTimeout(this._inactivityTimeout)
+            timers.clearTimeout(this._inactivityTimeout)
         }
 
         await this._transport.close()
@@ -229,8 +231,8 @@ export abstract class PersistentConnection extends EventEmitter {
 
     protected _rescheduleInactivity(): void {
         if (!this.params.inactivityTimeout) return
-        if (this._inactivityTimeout) clearTimeout(this._inactivityTimeout)
-        this._inactivityTimeout = setTimeout(this._onInactivityTimeout, this.params.inactivityTimeout)
+        if (this._inactivityTimeout) timers.clearTimeout(this._inactivityTimeout)
+        this._inactivityTimeout = timers.setTimeout(this._onInactivityTimeout, this.params.inactivityTimeout)
     }
 
     protected _onInactivityTimeout(): void {
@@ -246,7 +248,7 @@ export abstract class PersistentConnection extends EventEmitter {
         this.params.inactivityTimeout = timeout
 
         if (this._inactivityTimeout) {
-            clearTimeout(this._inactivityTimeout)
+            timers.clearTimeout(this._inactivityTimeout)
         }
 
         if (timeout) {

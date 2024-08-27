@@ -26,12 +26,4 @@ export default defineConfig({
     define: {
         'import.meta.env.TEST_ENV': '"node"',
     },
-    optimizeDeps: {
-        esbuildOptions: {
-            // for WHATEVER REASON browserify-zlib uses `global` and it dies in browser lol
-            define: {
-                global: 'globalThis',
-            },
-        },
-    },
 })

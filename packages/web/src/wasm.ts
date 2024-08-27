@@ -40,5 +40,5 @@ export async function loadWasmBinary(input?: WasmInitInput): Promise<WebAssembly
         return instance
     }
 
-    return WebAssembly.instantiate(input)
+    return WebAssembly.instantiate(input as WebAssembly.Module)
 }

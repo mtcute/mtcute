@@ -6,6 +6,7 @@ describe('ConditionVariable', () => {
     it('should correctly unlock execution', async () => {
         const cv = new ConditionVariable()
 
+        // eslint-disable-next-line no-restricted-globals
         setTimeout(() => cv.notify(), 10)
 
         await cv.wait()
@@ -24,6 +25,7 @@ describe('ConditionVariable', () => {
     it('should only unlock once', async () => {
         const cv = new ConditionVariable()
 
+        // eslint-disable-next-line no-restricted-globals
         setTimeout(() => {
             cv.notify()
             cv.notify()
