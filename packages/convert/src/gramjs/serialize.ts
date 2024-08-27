@@ -4,7 +4,7 @@ import { dataViewFromBuffer } from '@mtcute/core/utils.js'
 
 import type { TelethonSession } from '../telethon/types.js'
 
-export function serializeGramjsSession(session: TelethonSession) {
+export function serializeGramjsSession(session: TelethonSession): string {
     if (session.authKey.length !== 256) {
         throw new MtArgumentError('authKey must be 256 bytes long')
     }

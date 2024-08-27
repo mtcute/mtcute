@@ -14,6 +14,7 @@ import { sendMedia } from '../methods/messages/send-media.js'
 import { sendMediaGroup } from '../methods/messages/send-media-group.js'
 import { sendText } from '../methods/messages/send-text.js'
 import { resolvePeer } from '../methods/users/resolve-peer.js'
+import { timers } from '../../utils/index.js'
 
 import type { Message } from './messages/message.js'
 import type { InputPeerLike } from './peers/index.js'
@@ -23,7 +24,7 @@ import type { ParametersSkip2 } from './utils.js'
 interface QueuedHandler<T> {
     promise: ControllablePromise<T>
     check?: (update: T) => MaybePromise<boolean>
-    timeout?: NodeJS.Timeout
+    timeout?: timers.Timer
 }
 
 const CONVERSATION_SYMBOL = Symbol('conversation')
@@ -341,10 +342,10 @@ export class Conversation {
 
         const promise = createControllablePromise<Message>()
 
-        let timer: NodeJS.Timeout | undefined
+        let timer: timers.Timer | undefined
 
         if (timeout !== null) {
-            timer = setTimeout(() => {
+            timer = timers.setTimeout(() => {
                 promise.reject(new MtTimeoutError(timeout))
                 this._queuedNewMessage.removeBy(it => it.promise === promise)
             }, timeout)
@@ -482,11 +483,11 @@ export class Conversation {
 
         const promise = createControllablePromise<Message>()
 
-        let timer: NodeJS.Timeout | undefined
+        let timer: timers.Timer | undefined
         const timeout = params?.timeout
 
         if (timeout) {
-            timer = setTimeout(() => {
+            timer = timers.setTimeout(() => {
                 promise.reject(new MtTimeoutError(timeout))
                 this._pendingEditMessage.delete(msgId)
             }, timeout)
@@ -530,10 +531,10 @@ export class Conversation {
 
         const promise = createControllablePromise<void>()
 
-        let timer: NodeJS.Timeout | undefined
+        let timer: timers.Timer | undefined
 
         if (timeout !== null) {
-            timer = setTimeout(() => {
+            timer = timers.setTimeout(() => {
                 promise.reject(new MtTimeoutError(timeout))
                 this._pendingRead.delete(msgId)
             }, timeout)
@@ -562,7 +563,7 @@ export class Conversation {
         void this._lock.acquire().then(async () => {
             try {
                 if (!it.check || (await it.check(msg))) {
-                    if (it.timeout) clearTimeout(it.timeout)
+                    if (it.timeout) timers.clearTimeout(it.timeout)
                     it.promise.resolve(msg)
                     this._queuedNewMessage.popFront()
                 }
@@ -592,7 +593,7 @@ export class Conversation {
 
         (async () => {
             if (!it.check || (await it.check(msg))) {
-                if (it.timeout) clearTimeout(it.timeout)
+                if (it.timeout) timers.clearTimeout(it.timeout)
                 it.promise.resolve(msg)
                 this._pendingEditMessage.delete(msg.id)
             }
@@ -609,7 +610,7 @@ export class Conversation {
         for (const msgId of this._pendingRead.keys()) {
             if (msgId <= lastRead) {
                 const it = this._pendingRead.get(msgId)!
-                if (it.timeout) clearTimeout(it.timeout)
+                if (it.timeout) timers.clearTimeout(it.timeout)
                 it.promise.resolve()
                 this._pendingRead.delete(msgId)
             }

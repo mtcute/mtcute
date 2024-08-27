@@ -1,14 +1,5 @@
 {
   "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "./dist/esm"
-  },
-  "references": [
-    { "path": "../tl" },
-    { "path": "../tl-runtime" },
-    { "path": "../test" }
-  ],
   "include": [
     "./src"
   ]

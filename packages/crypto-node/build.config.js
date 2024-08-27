@@ -1,10 +1,16 @@
-const crypto = require('node:crypto')
-const path = require('node:path')
-const fs = require('node:fs')
-const cp = require('node:child_process')
-const { Readable } = require('node:stream')
+/* eslint-disable import/no-relative-packages, no-console, no-restricted-globals */
+import { createHash } from 'node:crypto'
+import path from 'node:path'
+import * as fs from 'node:fs'
+import { spawn } from 'node:child_process'
+import { Readable } from 'node:stream'
+import { fileURLToPath } from 'node:url'
 
-let git
+import * as glob from 'glob'
+
+import { getCurrentBranch, getCurrentCommit } from '../../scripts/git-utils.js'
+
+const __dirname = path.dirname(fileURLToPath(new URL(import.meta.url)))
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
 let SKIP_PREBUILT = process.env.BUILD_FOR_DOCS === '1'
@@ -52,7 +58,7 @@ async function runWorkflow(commit, hash) {
         method: 'POST',
         headers: GITHUB_HEADERS,
         body: JSON.stringify({
-            ref: git.getCurrentBranch(),
+            ref: getCurrentBranch(),
             inputs: { commit, hash },
         }),
     })
@@ -132,7 +138,7 @@ async function extractArtifacts(artifacts) {
 
             // extract the zip
             await new Promise((resolve, reject) => {
-                const child = cp.spawn('unzip', [outFile, '-d', path.join(__dirname, 'dist/prebuilds')], {
+                const child = spawn('unzip', [outFile, '-d', path.join(__dirname, 'dist/prebuilds')], {
                     stdio: 'inherit',
                 })
 
@@ -149,23 +155,21 @@ async function extractArtifacts(artifacts) {
     )
 }
 
-module.exports = ({ fs, glob, path, packageDir, outDir }) => ({
-    async final() {
-        // eslint-disable-next-line import/no-relative-packages
-        git = await import('../../scripts/git-utils.js')
-        const libDir = path.join(packageDir, 'lib')
+export default () => ({
+    async final({ packageDir, outDir }) {
+        const libDir = path.resolve(packageDir, 'lib')
 
         if (!SKIP_PREBUILT) {
             // generate sources hash
             const hashes = []
 
             for (const file of glob.sync(path.join(libDir, '**/*'))) {
-                const hash = crypto.createHash('sha256')
+                const hash = createHash('sha256')
                 hash.update(fs.readFileSync(file))
                 hashes.push(hash.digest('hex'))
             }
 
-            const hash = crypto.createHash('sha256')
+            const hash = createHash('sha256')
                 .update(hashes.join('\n'))
                 .digest('hex')
             console.log(hash)
@@ -175,7 +179,7 @@ module.exports = ({ fs, glob, path, packageDir, outDir }) => ({
 
             if (!artifacts) {
                 console.log('[i] No artifacts found, running workflow')
-                artifacts = await runWorkflow(git.getCurrentCommit(), hash)
+                artifacts = await runWorkflow(getCurrentCommit(), hash)
             }
 
             console.log('[i] Extracting artifacts')
@@ -195,7 +199,6 @@ module.exports = ({ fs, glob, path, packageDir, outDir }) => ({
         )
 
         // for some unknown fucking reason ts doesn't do this
-        fs.copyFileSync(path.join(packageDir, 'src/native.cjs'), path.join(outDir, 'cjs/native.cjs'))
-        fs.copyFileSync(path.join(packageDir, 'src/native.cjs'), path.join(outDir, 'esm/native.cjs'))
+        fs.copyFileSync(path.join(packageDir, 'src/native.cjs'), path.join(outDir, 'native.cjs'))
     },
 })

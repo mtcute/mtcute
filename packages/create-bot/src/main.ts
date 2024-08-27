@@ -40,7 +40,7 @@ if (!outDir.match(/^(?:[A-Z]:)?[/\\]/i)) {
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-await runTemplater(join(__dirname, '../template'), outDir, config)
+await runTemplater(join(__dirname, 'template'), outDir, config)
 
 await installDependencies(outDir, config)
 

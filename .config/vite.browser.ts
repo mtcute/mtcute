@@ -38,10 +38,18 @@ export default mergeConfig(baseConfig, {
     ],
     build: {
         rollupOptions: {
-            external: ['bun:sqlite'],
+            external: ['bun:sqlite', '@jsr/db__sqlite'],
         },
     },
     define: {
         'import.meta.env.TEST_ENV': '"browser"',
+    },
+    optimizeDeps: {
+        esbuildOptions: {
+            // for WHATEVER REASON browserify-zlib uses `global` and it dies in browser lol
+            define: {
+                global: 'globalThis',
+            },
+        },
     },
 })

@@ -10,7 +10,7 @@ import type { UpdateContext } from './base.js'
  * This is a subclass of {@link CallbackQuery}, so all its fields are also available.
  */
 export class CallbackQueryContext extends CallbackQuery implements UpdateContext<CallbackQuery> {
-    readonly _name = 'callback_query'
+    readonly _name = 'callback_query' as const
 
     constructor(
         readonly client: TelegramClient,
@@ -67,7 +67,7 @@ export class CallbackQueryContext extends CallbackQuery implements UpdateContext
  * This is a subclass of {@link InlineCallbackQuery}, so all its fields are also available.
  */
 export class InlineCallbackQueryContext extends InlineCallbackQuery implements UpdateContext<InlineCallbackQuery> {
-    readonly _name = 'inline_callback_query'
+    readonly _name = 'inline_callback_query' as const
 
     constructor(
         readonly client: TelegramClient,
@@ -100,7 +100,7 @@ export class InlineCallbackQueryContext extends InlineCallbackQuery implements U
 export class BusinessCallbackQueryContext
     extends BusinessCallbackQuery
     implements UpdateContext<BusinessCallbackQuery> {
-    readonly _name = 'business_callback_query'
+    readonly _name = 'business_callback_query' as const
 
     constructor(
         readonly client: TelegramClient,

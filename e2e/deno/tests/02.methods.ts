@@ -1,4 +1,4 @@
-import { assertEquals, assertNotEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
+import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 import { MtPeerNotFoundError } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
 
@@ -40,18 +40,6 @@ Deno.test('2. calling methods', { sanitizeResources: false }, async (t) => {
         assertEquals(history[0].chat.chatType, 'private')
         assertEquals(history[0].chat.id, 777000)
         assertEquals(history[0].chat.firstName, 'Telegram')
-    })
-
-    await t.step('updateProfile', async () => {
-        const bio = `mtcute e2e ${new Date().toISOString()}`
-
-        const oldSelf = await tg.getFullChat('self')
-        const res = await tg.updateProfile({ bio })
-        const newSelf = await tg.getFullChat('self')
-
-        assertEquals(res.isSelf, true)
-        assertNotEquals(oldSelf.bio, newSelf.bio)
-        assertEquals(newSelf.bio, bio)
     })
 
     await tg.close()

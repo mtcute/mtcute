@@ -47,6 +47,7 @@ export async function askForConfigPersisted(): Promise<UserConfigPersisted> {
             message: 'API ID (press Enter to obtain one):',
             validate: (v: string) => {
                 if (!v) {
+                    // eslint-disable-next-line no-restricted-globals
                     setTimeout(() => {
                         try {
                             open(TELEGRAM_APPS_PAGE)

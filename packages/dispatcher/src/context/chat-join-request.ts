@@ -11,7 +11,7 @@ import type { UpdateContext } from './base.js'
 export class ChatJoinRequestUpdateContext
     extends BotChatJoinRequestUpdate
     implements UpdateContext<BotChatJoinRequestUpdate> {
-    readonly _name = 'bot_chat_join_request'
+    readonly _name = 'bot_chat_join_request' as const
 
     constructor(
         readonly client: TelegramClient,

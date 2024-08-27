@@ -1,6 +1,8 @@
 import Long from 'long'
 import type { mtp } from '@mtcute/tl'
 
+import { timers } from '../utils/index.js'
+
 export class ServerSaltManager {
     private _futureSalts: mtp.RawMt_future_salt[] = []
 
@@ -26,15 +28,15 @@ export class ServerSaltManager {
         else this._scheduleNext()
     }
 
-    private _timer?: NodeJS.Timeout
+    private _timer?: timers.Timer
 
     private _scheduleNext(): void {
-        if (this._timer) clearTimeout(this._timer)
+        if (this._timer) timers.clearTimeout(this._timer)
         if (this._futureSalts.length === 0) return
 
         const next = this._futureSalts.shift()!
 
-        this._timer = setTimeout(
+        this._timer = timers.setTimeout(
             () => {
                 this.currentSalt = next.salt
                 this._scheduleNext()
@@ -44,6 +46,6 @@ export class ServerSaltManager {
     }
 
     destroy(): void {
-        clearTimeout(this._timer)
+        timers.clearTimeout(this._timer)
     }
 }
