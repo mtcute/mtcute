@@ -43,7 +43,7 @@ export class BaseTelegramClient extends BaseTelegramClientBase {
 
         super({
             crypto: new WebCryptoProvider(),
-            transport: () => new WebSocketTransport(),
+            transport: new WebSocketTransport(),
             ...opts,
             storage:
                 typeof opts.storage === 'string'

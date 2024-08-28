@@ -1,9 +1,11 @@
+import type { Bytes, ISyncWritable } from '@fuman/io'
+import { read, write } from '@fuman/io'
+
 import type { ICryptoProvider } from '../../utils/index.js'
 import { dataViewFromBuffer, getRandomInt } from '../../utils/index.js'
 
 import type { IPacketCodec } from './abstract.js'
 import { TransportError } from './abstract.js'
-import { StreamedCodec } from './streamed.js'
 
 const TAG = new Uint8Array([0xEE, 0xEE, 0xEE, 0xEE])
 const PADDED_TAG = new Uint8Array([0xDD, 0xDD, 0xDD, 0xDD])
@@ -12,51 +14,46 @@ const PADDED_TAG = new Uint8Array([0xDD, 0xDD, 0xDD, 0xDD])
  * Intermediate packet codec.
  * See https://core.telegram.org/mtproto/mtproto-transports#intermediate
  */
-export class IntermediatePacketCodec extends StreamedCodec implements IPacketCodec {
+export class IntermediatePacketCodec implements IPacketCodec {
     tag(): Uint8Array {
         return TAG
     }
 
-    encode(packet: Uint8Array): Uint8Array {
-        const ret = new Uint8Array(packet.length + 4)
-        const dv = dataViewFromBuffer(ret)
-        dv.setUint32(0, packet.length, true)
-        ret.set(packet, 4)
+    decode(reader: Bytes, eof: boolean): Uint8Array | null {
+        if (eof) return null
 
-        return ret
-    }
+        if (reader.available < 8) return null
 
-    protected _packetAvailable(): boolean {
-        return this._stream.length >= 8
-    }
+        const length = read.uint32le(reader)
 
-    protected _handlePacket(): boolean {
-        const dv = dataViewFromBuffer(this._stream)
-        const payloadLength = dv.getUint32(0, true)
-
-        if (payloadLength <= this._stream.length - 4) {
-            if (payloadLength === 4) {
-                const code = dv.getInt32(4, true) * -1
-                this.emit('error', new TransportError(code))
-            } else {
-                const payload = this._stream.subarray(4, payloadLength + 4)
-                this.emit('packet', payload)
-            }
-
-            this._stream = this._stream.subarray(payloadLength + 4)
-
-            return true
+        if (length === 4) {
+            // error
+            const code = read.uint32le(reader)
+            throw new TransportError(code)
         }
 
-        return false
+        if (reader.available < length) {
+            reader.unread(4)
+
+            return null
+        }
+
+        return read.exactly(reader, length)
     }
+
+    encode(frame: Uint8Array, into: ISyncWritable): void {
+        write.uint32le(into, frame.length)
+        write.bytes(into, frame)
+    }
+
+    reset(): void {}
 }
 
 /**
  * Padded intermediate packet codec.
  * See https://core.telegram.org/mtproto/mtproto-transports#padded-intermediate
  */
-export class PaddedIntermediatePacketCodec extends IntermediatePacketCodec {
+export class PaddedIntermediatePacketCodec extends IntermediatePacketCodec implements IPacketCodec {
     tag(): Uint8Array {
         return PADDED_TAG
     }
@@ -66,16 +63,15 @@ export class PaddedIntermediatePacketCodec extends IntermediatePacketCodec {
         this._crypto = crypto
     }
 
-    encode(packet: Uint8Array): Uint8Array {
+    encode(frame: Uint8Array, into: ISyncWritable): void {
         // padding size, 0-15
         const padSize = getRandomInt(16)
 
-        const ret = new Uint8Array(packet.length + 4 + padSize)
+        const ret = into.writeSync(frame.length + 4 + padSize)
         const dv = dataViewFromBuffer(ret)
-        dv.setUint32(0, packet.length + padSize, true)
-        ret.set(packet, 4)
-        this._crypto.randomFill(ret.subarray(4 + packet.length))
-
-        return ret
+        dv.setUint32(0, frame.length + padSize, true)
+        ret.set(frame, 4)
+        this._crypto.randomFill(ret.subarray(4 + frame.length))
+        into.disposeWriteSync()
     }
 }

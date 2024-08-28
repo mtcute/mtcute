@@ -130,6 +130,15 @@ importers:
 
   packages/core:
     dependencies:
+      '@fuman/io':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/io
+      '@fuman/net':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/net
+      '@fuman/utils':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/utils
       '@mtcute/file-id':
         specifier: workspace:^
         version: link:../file-id
@@ -298,6 +307,9 @@ importers:
 
   packages/node:
     dependencies:
+      '@fuman/node-net':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/node-net
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -415,6 +427,9 @@ importers:
 
   packages/web:
     dependencies:
+      '@fuman/net':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/net
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -6808,7 +6823,7 @@ snapshots:
       acorn: 8.12.1
       eslint-visitor-keys: 3.4.3
       espree: 9.6.1
-      semver: 7.5.1
+      semver: 7.6.3
 
   jsonfile@4.0.0:
     optionalDependencies:
@@ -6897,7 +6912,7 @@ snapshots:
 
   make-dir@4.0.0:
     dependencies:
-      semver: 7.6.0
+      semver: 7.6.3
 
   markdown-it@14.1.0:
     dependencies:
@@ -7036,7 +7051,7 @@ snapshots:
 
   node-abi@3.15.0:
     dependencies:
-      semver: 7.5.1
+      semver: 7.6.3
 
   node-gyp-build@4.8.1: {}
 
@@ -8031,7 +8046,7 @@ snapshots:
       espree: 9.6.1
       esquery: 1.6.0
       lodash: 4.17.21
-      semver: 7.5.1
+      semver: 7.6.3
     transitivePeerDependencies:
       - supports-color
 

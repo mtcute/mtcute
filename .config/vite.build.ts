@@ -43,7 +43,9 @@ if (typeof globalThis !== 'undefined' && !globalThis._MTCUTE_CJS_DEPRECATION_WAR
             rollupOptions: {
                 plugins: [
                     ...(customConfig?.rollupPluginsPre ?? []),
-                    nodeExternals(),
+                    nodeExternals({
+                        exclude: /^@fuman\//,
+                    }),
                     {
                         name: 'mtcute-finalize',
                         renderChunk(code, chunk, options) {

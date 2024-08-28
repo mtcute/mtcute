@@ -53,6 +53,11 @@ export function processPackageJson(packageDir) {
         const dependencies = packageJson[field]
 
         for (const name of Object.keys(dependencies)) {
+            if (name.startsWith('@fuman/')) {
+                delete dependencies[name] // fuman is bundled with vite for now
+                continue
+            }
+
             const value = dependencies[name]
 
             if (value.startsWith('workspace:')) {

@@ -130,6 +130,11 @@ function listPackages(all = false) {
     for (const f of fs.readdirSync(path.join(__dirname, '../packages'))) {
         if (f[0] === '.') continue
 
+        if (f === 'mtproxy' || f === 'socks-proxy' || f === 'http-proxy' || f === 'bun') {
+            // todo: return once we figure out fuman
+            continue
+        }
+
         if (!all) {
             if (IS_JSR && JSR_EXCEPTIONS[f] === 'never') continue
             if (!IS_JSR && JSR_EXCEPTIONS[f] === 'only') continue

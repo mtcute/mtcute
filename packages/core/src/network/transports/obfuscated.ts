@@ -1,8 +1,10 @@
+import type { ISyncWritable } from '@fuman/io'
+import { Bytes, write } from '@fuman/io'
+
 import { bufferToReversed, concatBuffers, dataViewFromBuffer } from '../../utils/buffer-utils.js'
-import type { IAesCtr } from '../../utils/index.js'
+import type { IAesCtr, ICryptoProvider, Logger } from '../../utils/index.js'
 
 import type { IPacketCodec } from './abstract.js'
-import { WrappedCodec } from './wrapped.js'
 
 export interface MtProxyInfo {
     dcId: number
@@ -11,14 +13,22 @@ export interface MtProxyInfo {
     media: boolean
 }
 
-export class ObfuscatedPacketCodec extends WrappedCodec implements IPacketCodec {
+export class ObfuscatedPacketCodec implements IPacketCodec {
     private _encryptor?: IAesCtr
     private _decryptor?: IAesCtr
 
+    private _crypto!: ICryptoProvider
+    private _inner: IPacketCodec
     private _proxy?: MtProxyInfo
 
+    setup(crypto: ICryptoProvider, log: Logger): void {
+        this._crypto = crypto
+        this._inner.setup?.(crypto, log)
+    }
+
     constructor(inner: IPacketCodec, proxy?: MtProxyInfo) {
-        super(inner)
+        // super(inner)
+        this._inner = inner
         this._proxy = proxy
     }
 
@@ -87,14 +97,17 @@ export class ObfuscatedPacketCodec extends WrappedCodec implements IPacketCodec 
         return random
     }
 
-    async encode(packet: Uint8Array): Promise<Uint8Array> {
-        return this._encryptor!.process(await this._inner.encode(packet))
+    async encode(packet: Uint8Array, into: ISyncWritable): Promise<void> {
+        const temp = Bytes.alloc(packet.length)
+        await this._inner.encode(packet, into)
+        write.bytes(into, this._encryptor!.process(temp.result()))
     }
 
-    feed(data: Uint8Array): void {
-        const dec = this._decryptor!.process(data)
+    async decode(reader: Bytes, eof: boolean): Promise<Uint8Array | null> {
+        const inner = await this._inner.decode(reader, eof)
+        if (!inner) return null
 
-        this._inner.feed(dec)
+        return this._decryptor!.process(inner)
     }
 
     reset(): void {

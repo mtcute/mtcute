@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { defaultTestCryptoProvider, u8HexDecode } from '@mtcute/test'
+import { Bytes } from '@fuman/io'
 
 import { getPlatform } from '../../platform.js'
 import { LogManager } from '../../utils/index.js'
@@ -7,6 +8,7 @@ import { LogManager } from '../../utils/index.js'
 import { IntermediatePacketCodec } from './intermediate.js'
 import type { MtProxyInfo } from './obfuscated.js'
 import { ObfuscatedPacketCodec } from './obfuscated.js'
+import { TransportError } from './abstract'
 
 const p = getPlatform()
 
@@ -162,8 +164,13 @@ describe('ObfuscatedPacketCodec', () => {
 
         await codec.tag()
 
-        expect(p.hexEncode(await codec.encode(data))).toEqual(msg1)
-        expect(p.hexEncode(await codec.encode(data))).toEqual(msg2)
+        const buf = Bytes.alloc()
+        await codec.encode(data, buf)
+        expect(p.hexEncode(buf.result())).toEqual(msg1)
+
+        buf.reset()
+        await codec.encode(data, buf)
+        expect(p.hexEncode(buf.result())).toEqual(msg2)
     })
 
     it('should correctly decrypt the underlying codec', async () => {
@@ -174,16 +181,8 @@ describe('ObfuscatedPacketCodec', () => {
 
         await codec.tag()
 
-        const log: string[] = []
-
-        codec.on('error', (e: Error) => {
-            log.push(e.toString())
-        })
-
-        codec.feed(p.hexDecode(msg1))
-        codec.feed(p.hexDecode(msg2))
-
-        await vi.waitFor(() => expect(log).toEqual(['Error: Transport error: 404', 'Error: Transport error: 404']))
+        expect(codec.decode(Bytes.from(p.hexDecode(msg1)), false)).rejects.toThrow(TransportError)
+        expect(codec.decode(Bytes.from(p.hexDecode(msg2)), false)).rejects.toThrow(TransportError)
     })
 
     it('should correctly reset', async () => {
