@@ -19,6 +19,7 @@ import { downloadAsNodeStream } from './methods/download-node-stream.js'
 import { SqliteStorage } from './sqlite/index.js'
 import { NodeCryptoProvider } from './utils/crypto.js'
 import { TcpTransport } from './utils/tcp.js'
+// import { TcpTransport } from './utils/tcp.js'
 
 export type { TelegramClientOptions }
 
@@ -60,7 +61,7 @@ export class BaseTelegramClient extends BaseTelegramClientBase {
         super({
             // eslint-disable-next-line
             crypto: nativeCrypto ? new nativeCrypto() : new NodeCryptoProvider(),
-            transport: () => new TcpTransport(),
+            transport: TcpTransport,
             ...opts,
             storage:
                 typeof opts.storage === 'string'

@@ -131,9 +131,7 @@ export class SessionConnection extends PersistentConnection {
         this._resetSession()
     }
 
-    onTransportClose(): void {
-        super.onTransportClose()
-
+    onClosed(): void {
         Object.values(this._pendingWaitForUnencrypted).forEach(([prom, timeout]) => {
             prom.reject(new MtcuteError('Connection closed'))
             timers.clearTimeout(timeout)
@@ -262,8 +260,6 @@ export class SessionConnection extends PersistentConnection {
     }
 
     protected onConnectionUsable(): void {
-        super.onConnectionUsable()
-
         if (this.params.withUpdates) {
             // we must send some user-related rpc to the server to make sure that
             // it will send us updates
@@ -1363,13 +1359,13 @@ export class SessionConnection extends PersistentConnection {
             // either acked or returns rpc_result
 
             this.log.debug('wrapping %s with initConnection, layer: %d', method, this.params.layer)
-            const proxy = this._transport.getMtproxyInfo?.()
+            // const proxy = this._transport.getMtproxyInfo?.()
             obj = {
                 _: 'invokeWithLayer',
                 layer: this.params.layer,
                 query: {
                     ...this.params.initConnection,
-                    proxy,
+                    // proxy,
                     query: obj,
                 },
             }

@@ -1,11 +1,11 @@
 import type { MaybePromise, MustEqual, RpcCallOptions } from '@mtcute/core'
-import { tl } from '@mtcute/core'
+import { IntermediatePacketCodec, tl } from '@mtcute/core'
 import type { BaseTelegramClientOptions } from '@mtcute/core/client.js'
 import { BaseTelegramClient } from '@mtcute/core/client.js'
 
 import { defaultCryptoProvider } from './platform.js'
 import { StubMemoryTelegramStorage } from './storage.js'
-import { StubTelegramTransport } from './transport.js'
+// import { StubTelegramTransport } from './transport.js'
 import type { InputResponder } from './types.js'
 import { markedIdToPeer } from './utils.js'
 
@@ -29,27 +29,32 @@ export class StubTelegramClient extends BaseTelegramClient {
             logLevel: 5,
             storage,
             disableUpdates: true,
-            transport: () => {
-                const transport = new StubTelegramTransport({
-                    onMessage: (data) => {
-                        if (!this._onRawMessage) {
-                            if (this._responders.size) {
-                                this.emitError(new Error('Unexpected outgoing message'))
-                            }
+            transport: {
+                connect: () => {
+                    // const transport = new StubTelegramTransport({
+                    //     onMessage: (data) => {
+                    //         if (!this._onRawMessage) {
+                    //             if (this._responders.size) {
+                    //                 this.emitError(new Error('Unexpected outgoing message'))
+                    //             }
 
-                            return
-                        }
+                    //             return
+                    //         }
 
-                        const dcId = transport._currentDc!.id
-                        const key = storage.authKeys.get(dcId)
+                    //         const dcId = transport._currentDc!.id
+                    //         const key = storage.authKeys.get(dcId)
 
-                        if (key) {
-                            this._onRawMessage(storage.decryptOutgoingMessage(transport._crypto, data, dcId))
-                        }
-                    },
-                })
+                    //         if (key) {
+                    //             this._onRawMessage(storage.decryptOutgoingMessage(transport._crypto, data, dcId))
+                    //         }
+                    //     },
+                    // })
 
-                return transport
+                    // return transport
+                    // todo: fuman
+                    throw new Error('not implemented')
+                },
+                packetCodec: () => new IntermediatePacketCodec(),
             },
             crypto: defaultCryptoProvider,
             ...params,

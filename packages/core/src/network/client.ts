@@ -6,6 +6,7 @@ import { tl } from '@mtcute/tl'
 import { __tlReaderMap as defaultReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlWriterMap as defaultWriterMap } from '@mtcute/tl/binary/writer.js'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+import type { ReconnectionStrategy } from '@fuman/net'
 
 import type { IMtStorageProvider } from '../storage/provider.js'
 import type { StorageManagerExtraOptions } from '../storage/storage.js'
@@ -29,9 +30,7 @@ import {
 import { ConfigManager } from './config-manager.js'
 import type { NetworkManagerExtraParams, RpcCallOptions } from './network-manager.js'
 import { NetworkManager } from './network-manager.js'
-import type { PersistentConnectionParams } from './persistent-connection.js'
-import type { ReconnectionStrategy } from './reconnection.js'
-import type { TransportFactory } from './transports/index.js'
+import type { TelegramTransport } from './transports'
 
 /** Options for {@link MtClient} */
 export interface MtClientOptions {
@@ -96,18 +95,18 @@ export interface MtClientOptions {
     initConnectionOptions?: Partial<Omit<tl.RawInitConnectionRequest, 'apiId' | 'query'>>
 
     /**
-     * Transport factory to use in the client.
+     * Transport to use in the client.
      *
      * @default  platform-specific transport: WebSocket on the web, TCP in node
      */
-    transport: TransportFactory
+    transport: TelegramTransport
 
     /**
      * Reconnection strategy.
      *
      * @default  simple reconnection strategy: first 0ms, then up to 5s (increasing by 1s)
      */
-    reconnectionStrategy?: ReconnectionStrategy<PersistentConnectionParams>
+    reconnectionStrategy?: ReconnectionStrategy
 
     /**
      * If true, all API calls will be wrapped with `tl.invokeWithoutUpdates`,

@@ -9,7 +9,7 @@ import { createControllablePromise } from '../utils/index.js'
 import { MtprotoSession } from './mtproto-session.js'
 import type { SessionConnectionParams } from './session-connection.js'
 import { SessionConnection } from './session-connection.js'
-import type { TransportFactory } from './transports/index.js'
+import type { TelegramTransport } from './transports'
 
 export class MultiSessionConnection extends EventEmitter {
     private _log: Logger
@@ -323,7 +323,7 @@ export class MultiSessionConnection extends EventEmitter {
         }
     }
 
-    changeTransport(factory: TransportFactory): void {
+    changeTransport(factory: TelegramTransport): void {
         this._connections.forEach(conn => conn.changeTransport(factory))
     }
 

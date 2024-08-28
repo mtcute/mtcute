@@ -1,6 +1,7 @@
 import type { mtp, tl } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import type Long from 'long'
+import { type ReconnectionStrategy, defaultReconnectionStrategy } from '@fuman/net'
 
 import { getPlatform } from '../platform.js'
 import type { StorageManager } from '../storage/storage.js'
@@ -14,12 +15,9 @@ import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
 import type { ConfigManager } from './config-manager.js'
 import { basic as defaultMiddlewares } from './middlewares/default.js'
 import { MultiSessionConnection } from './multi-session-connection.js'
-import type { PersistentConnectionParams } from './persistent-connection.js'
-import type { ReconnectionStrategy } from './reconnection.js'
-import { defaultReconnectionStrategy } from './reconnection.js'
 import { ServerSaltManager } from './server-salt.js'
 import type { SessionConnection, SessionConnectionParams } from './session-connection.js'
-import type { TransportFactory } from './transports/index.js'
+import type { TelegramTransport } from './transports/abstract.js'
 
 export type ConnectionKind = 'main' | 'upload' | 'download' | 'downloadSmall'
 
@@ -35,8 +33,8 @@ export interface NetworkManagerParams {
     enableErrorReporting: boolean
     apiId: number
     initConnectionOptions?: Partial<Omit<tl.RawInitConnectionRequest, 'apiId' | 'query'>>
-    transport: TransportFactory
-    reconnectionStrategy?: ReconnectionStrategy<PersistentConnectionParams>
+    transport: TelegramTransport
+    reconnectionStrategy?: ReconnectionStrategy
     disableUpdates?: boolean
     testMode: boolean
     layer: number
@@ -241,7 +239,7 @@ export class DcConnectionManager {
         const baseConnectionParams = (): SessionConnectionParams => ({
             crypto: this.manager.params.crypto,
             initConnection: this.manager._initConnectionParams,
-            transportFactory: this.manager._transportFactory,
+            transport: this.manager._transport,
             dc: this._dcs.media,
             testMode: this.manager.params.testMode,
             reconnectionStrategy: this.manager._reconnectionStrategy,
@@ -474,8 +472,8 @@ export class NetworkManager {
     readonly _storage: StorageManager
 
     readonly _initConnectionParams: tl.RawInitConnectionRequest
-    readonly _transportFactory: TransportFactory
-    readonly _reconnectionStrategy: ReconnectionStrategy<PersistentConnectionParams>
+    readonly _transport: TelegramTransport
+    readonly _reconnectionStrategy: ReconnectionStrategy
     readonly _connectionCount: ConnectionCountDelegate
 
     protected readonly _dcConnections: Map<number, DcConnectionManager> = new Map()
@@ -503,7 +501,7 @@ export class NetworkManager {
             query: null as any,
         }
 
-        this._transportFactory = params.transport
+        this._transport = params.transport
         this._reconnectionStrategy = params.reconnectionStrategy ?? defaultReconnectionStrategy
         this._connectionCount = params.connectionCount ?? defaultConnectionCountDelegate
         this._updateHandler = params.onUpdate
@@ -858,12 +856,12 @@ export class NetworkManager {
         return res
     }
 
-    changeTransport(factory: TransportFactory): void {
+    changeTransport(transport: TelegramTransport): void {
         for (const dc of this._dcConnections.values()) {
-            dc.main.changeTransport(factory)
-            dc.upload.changeTransport(factory)
-            dc.download.changeTransport(factory)
-            dc.downloadSmall.changeTransport(factory)
+            dc.main.changeTransport(transport)
+            dc.upload.changeTransport(transport)
+            dc.download.changeTransport(transport)
+            dc.downloadSmall.changeTransport(transport)
         }
     }
 

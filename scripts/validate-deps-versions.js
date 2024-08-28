@@ -16,7 +16,8 @@ export async function validateDepsVersions() {
             if (!deps) return
 
             Object.entries(deps).forEach(([depName, depVersions]) => {
-                if (depName.startsWith('@mtcute/')) return
+                // todo: remove this when fuman/net is published
+                if (depName.startsWith('@mtcute/') || depName.startsWith('@fuman/')) return
 
                 if (!versions[depName]) {
                     versions[depName] = {}

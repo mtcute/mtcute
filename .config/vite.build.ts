@@ -45,6 +45,7 @@ if (typeof globalThis !== 'undefined' && !globalThis._MTCUTE_CJS_DEPRECATION_WAR
                     ...(customConfig?.rollupPluginsPre ?? []),
                     nodeExternals({
                         builtinsPrefix: 'ignore',
+                        exclude: /^@fuman\//,
                     }),
                     {
                         name: 'mtcute-finalize',

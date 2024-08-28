@@ -17,7 +17,6 @@ import { downloadToFile } from './methods/download-file.js'
 import { DenoPlatform } from './platform.js'
 import { SqliteStorage } from './sqlite/index.js'
 import { DenoCryptoProvider } from './utils/crypto.js'
-import { TcpTransport } from './utils/tcp.js'
 
 export type { TelegramClientOptions }
 
@@ -48,7 +47,7 @@ export class BaseTelegramClient extends BaseTelegramClientBase {
 
         super({
             crypto: new DenoCryptoProvider(),
-            transport: () => new TcpTransport(),
+            transport: {} as any, // todo
             ...opts,
             storage:
                 typeof opts.storage === 'string'

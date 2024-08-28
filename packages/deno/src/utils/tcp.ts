@@ -1,146 +1,146 @@
-import EventEmitter from 'node:events'
+// import EventEmitter from 'node:events'
 
-import type { IPacketCodec, ITelegramTransport } from '@mtcute/core'
-import { IntermediatePacketCodec, MtcuteError, TransportState } from '@mtcute/core'
-import type { BasicDcOption, ICryptoProvider, Logger } from '@mtcute/core/utils.js'
-import { writeAll } from '@std/io/write-all'
+// import { IntermediatePacketCodec, IPacketCodec, ITelegramTransport, MtcuteError, TransportState } from '@mtcute/core'
+// import { BasicDcOption, ICryptoProvider, Logger } from '@mtcute/core/utils.js'
 
-/**
- * Base for TCP transports.
- * Subclasses must provide packet codec in `_packetCodec` property
- */
-export abstract class BaseTcpTransport extends EventEmitter implements ITelegramTransport {
-    protected _currentDc: BasicDcOption | null = null
-    protected _state: TransportState = TransportState.Idle
-    protected _socket: Deno.TcpConn | null = null
+// import { writeAll } from '@std/io/write-all'
 
-    abstract _packetCodec: IPacketCodec
-    protected _crypto!: ICryptoProvider
-    protected log!: Logger
+// /**
+//  * Base for TCP transports.
+//  * Subclasses must provide packet codec in `_packetCodec` property
+//  */
+// export abstract class BaseTcpTransport extends EventEmitter implements ITelegramConnection {
+//     protected _currentDc: BasicDcOption | null = null
+//     protected _state: TransportState = TransportState.Idle
+//     protected _socket: Deno.TcpConn | null = null
 
-    packetCodecInitialized = false
+//     abstract _packetCodec: IPacketCodec
+//     protected _crypto!: ICryptoProvider
+//     protected log!: Logger
 
-    private _updateLogPrefix() {
-        if (this._currentDc) {
-            this.log.prefix = `[TCP:${this._currentDc.ipAddress}:${this._currentDc.port}] `
-        } else {
-            this.log.prefix = '[TCP:disconnected] '
-        }
-    }
+//     packetCodecInitialized = false
 
-    setup(crypto: ICryptoProvider, log: Logger): void {
-        this._crypto = crypto
-        this.log = log.create('tcp')
-        this._updateLogPrefix()
-    }
+//     private _updateLogPrefix() {
+//         if (this._currentDc) {
+//             this.log.prefix = `[TCP:${this._currentDc.ipAddress}:${this._currentDc.port}] `
+//         } else {
+//             this.log.prefix = '[TCP:disconnected] '
+//         }
+//     }
 
-    state(): TransportState {
-        return this._state
-    }
+//     setup(crypto: ICryptoProvider, log: Logger): void {
+//         this._crypto = crypto
+//         this.log = log.create('tcp')
+//         this._updateLogPrefix()
+//     }
 
-    currentDc(): BasicDcOption | null {
-        return this._currentDc
-    }
+//     state(): TransportState {
+//         return this._state
+//     }
 
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    connect(dc: BasicDcOption, testMode: boolean): void {
-        if (this._state !== TransportState.Idle) {
-            throw new MtcuteError('Transport is not IDLE')
-        }
+//     currentDc(): BasicDcOption | null {
+//         return this._currentDc
+//     }
 
-        if (!this.packetCodecInitialized) {
-            this._packetCodec.setup?.(this._crypto, this.log)
-            this._packetCodec.on('error', err => this.emit('error', err))
-            this._packetCodec.on('packet', buf => this.emit('message', buf))
-            this.packetCodecInitialized = true
-        }
+//     // eslint-disable-next-line unused-imports/no-unused-vars
+//     connect(dc: BasicDcOption, testMode: boolean): void {
+//         if (this._state !== TransportState.Idle) {
+//             throw new MtcuteError('Transport is not IDLE')
+//         }
 
-        this._state = TransportState.Connecting
-        this._currentDc = dc
-        this._updateLogPrefix()
+//         if (!this.packetCodecInitialized) {
+//             this._packetCodec.setup?.(this._crypto, this.log)
+//             this._packetCodec.on('error', err => this.emit('error', err))
+//             this._packetCodec.on('packet', buf => this.emit('message', buf))
+//             this.packetCodecInitialized = true
+//         }
 
-        this.log.debug('connecting to %j', dc)
+//         this._state = TransportState.Connecting
+//         this._currentDc = dc
+//         this._updateLogPrefix()
 
-        Deno.connect({
-            hostname: dc.ipAddress,
-            port: dc.port,
-            transport: 'tcp',
-        })
-            .then(this.handleConnect.bind(this))
-            .catch((err) => {
-                this.handleError(err)
-                this.close()
-            })
-    }
+//         this.log.debug('connecting to %j', dc)
 
-    close(): void {
-        if (this._state === TransportState.Idle) return
-        this.log.info('connection closed')
+//         Deno.connect({
+//             hostname: dc.ipAddress,
+//             port: dc.port,
+//             transport: 'tcp',
+//         })
+//             .then(this.handleConnect.bind(this))
+//             .catch((err) => {
+//                 this.handleError(err)
+//                 this.close()
+//             })
+//     }
 
-        this._state = TransportState.Idle
+//     close(): void {
+//         if (this._state === TransportState.Idle) return
+//         this.log.info('connection closed')
 
-        try {
-            this._socket?.close()
-        } catch (e) {
-            if (!(e instanceof Deno.errors.BadResource)) {
-                this.handleError(e)
-            }
-        }
+//         this._state = TransportState.Idle
 
-        this._socket = null
-        this._currentDc = null
-        this._packetCodec.reset()
-        this.emit('close')
-    }
+//         try {
+//             this._socket?.close()
+//         } catch (e) {
+//             if (!(e instanceof Deno.errors.BadResource)) {
+//                 this.handleError(e)
+//             }
+//         }
 
-    handleError(error: unknown): void {
-        this.log.error('error: %s', error)
+//         this._socket = null
+//         this._currentDc = null
+//         this._packetCodec.reset()
+//         this.emit('close')
+//     }
 
-        if (this.listenerCount('error') > 0) {
-            this.emit('error', error)
-        }
-    }
+//     handleError(error: unknown): void {
+//         this.log.error('error: %s', error)
 
-    async handleConnect(socket: Deno.TcpConn): Promise<void> {
-        this._socket = socket
-        this.log.info('connected')
+//         if (this.listenerCount('error') > 0) {
+//             this.emit('error', error)
+//         }
+//     }
 
-        try {
-            const packet = await this._packetCodec.tag()
+//     async handleConnect(socket: Deno.TcpConn): Promise<void> {
+//         this._socket = socket
+//         this.log.info('connected')
 
-            if (packet.length) {
-                await writeAll(this._socket, packet)
-            }
+//         try {
+//             const packet = await this._packetCodec.tag()
 
-            this._state = TransportState.Ready
-            this.emit('ready')
+//             if (packet.length) {
+//                 await writeAll(this._socket, packet)
+//             }
 
-            const reader = this._socket.readable.getReader()
+//             this._state = TransportState.Ready
+//             this.emit('ready')
 
-            while (true) {
-                const { done, value } = await reader.read()
-                if (done) break
+//             const reader = this._socket.readable.getReader()
 
-                this._packetCodec.feed(value)
-            }
-        } catch (e) {
-            this.handleError(e)
-        }
+//             while (true) {
+//                 const { done, value } = await reader.read()
+//                 if (done) break
 
-        this.close()
-    }
+//                 this._packetCodec.feed(value)
+//             }
+//         } catch (e) {
+//             this.handleError(e)
+//         }
 
-    async send(bytes: Uint8Array): Promise<void> {
-        const framed = await this._packetCodec.encode(bytes)
+//         this.close()
+//     }
 
-        if (this._state !== TransportState.Ready) {
-            throw new MtcuteError('Transport is not READY')
-        }
+//     async send(bytes: Uint8Array): Promise<void> {
+//         const framed = await this._packetCodec.encode(bytes)
 
-        await writeAll(this._socket!, framed)
-    }
-}
+//         if (this._state !== TransportState.Ready) {
+//             throw new MtcuteError('Transport is not READY')
+//         }
 
-export class TcpTransport extends BaseTcpTransport {
-    _packetCodec: IntermediatePacketCodec = new IntermediatePacketCodec()
-}
+//         await writeAll(this._socket!, framed)
+//     }
+// }
+
+// export class TcpTransport extends BaseTcpTransport {
+//     _packetCodec: IntermediatePacketCodec = new IntermediatePacketCodec()
+// }
