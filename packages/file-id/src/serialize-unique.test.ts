@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { defaultPlatform } from '@mtcute/test'
 
 import { parseFileId } from './parse.js'
 import { toUniqueFileId } from './serialize-unique.js'
@@ -8,7 +7,7 @@ import { toUniqueFileId } from './serialize-unique.js'
 
 describe('serializing unique file ids', () => {
     const test = (id: string, expected: string) => {
-        expect(toUniqueFileId(defaultPlatform, parseFileId(defaultPlatform, id))).eql(expected)
+        expect(toUniqueFileId(parseFileId(id))).eql(expected)
     }
 
     it('serializes unique ids for old file ids', () => {

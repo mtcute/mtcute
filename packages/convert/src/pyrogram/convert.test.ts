@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getPlatform } from '@mtcute/core/platform.js'
+import { hex } from '@fuman/utils'
 
 import { PYROGRAM_TEST_SESSION_OLD } from './__fixtures__/session_old.js'
 import { convertFromPyrogramSession, convertToPyrogramSession } from './convert.js'
@@ -7,7 +7,7 @@ import { convertFromPyrogramSession, convertToPyrogramSession } from './convert.
 describe('pyrogram/convert', () => {
     it('should correctly convert from pyrogram sessions', () => {
         expect(convertFromPyrogramSession(PYROGRAM_TEST_SESSION_OLD)).toEqual({
-            authKey: getPlatform().hexDecode(
+            authKey: hex.decode(
                 '1674732db80d690b4d5890d887a4bd5b0b4c810b7c331990b049158a940fdaeb'
                 + 'd46178f50ddcce753699f0497ad6de9655f454bc5a3030524036dee4ffe3db7c'
                 + '73b526c378a184a0fafa14e9679c170b632e0b412c174f99e96b216214f78263'
@@ -43,7 +43,7 @@ describe('pyrogram/convert', () => {
     it('should correctly convert to pyrogram sessions', () => {
         expect(
             convertToPyrogramSession({
-                authKey: getPlatform().hexDecode(
+                authKey: hex.decode(
                     '1674732db80d690b4d5890d887a4bd5b0b4c810b7c331990b049158a940fdaeb'
                     + 'd46178f50ddcce753699f0497ad6de9655f454bc5a3030524036dee4ffe3db7c'
                     + '73b526c378a184a0fafa14e9679c170b632e0b412c174f99e96b216214f78263'
@@ -58,11 +58,13 @@ describe('pyrogram/convert', () => {
                         id: 2,
                         ipAddress: '149.154.167.40',
                         port: 443,
+                        testMode: true,
                     },
                     media: {
                         id: 2,
                         ipAddress: '149.154.167.40',
                         port: 443,
+                        testMode: true,
                     },
                 },
                 self: {
@@ -71,7 +73,6 @@ describe('pyrogram/convert', () => {
                     userId: 5000801609,
                     usernames: [],
                 },
-                testMode: true,
                 version: 3,
             }),
         ).toEqual(PYROGRAM_TEST_SESSION_OLD)

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import { CallbackQuery, MtArgumentError, PeersIndex } from '@mtcute/core'
-import { getPlatform } from '@mtcute/core/platform.js'
 import { createStub } from '@mtcute/test'
 
 import { CallbackDataBuilder } from './callback-data-builder.js'
@@ -52,7 +51,7 @@ describe('CallbackDataBuilder', () => {
         const createCb = (data: string) =>
             new CallbackQuery(
                 createStub('updateBotCallbackQuery', {
-                    data: getPlatform().utf8Encode(data),
+                    data: new TextEncoder().encode(data),
                 }),
                 new PeersIndex(),
             )

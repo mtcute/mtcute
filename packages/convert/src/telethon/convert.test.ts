@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getPlatform } from '@mtcute/core/platform.js'
+import { hex } from '@fuman/utils'
 
 import { TELETHON_TEST_SESSION } from './__fixtures__/session.js'
 import { convertFromTelethonSession, convertToTelethonSession } from './convert.js'
@@ -7,7 +7,7 @@ import { convertFromTelethonSession, convertToTelethonSession } from './convert.
 describe('telethon/convert', () => {
     it('should correctly convert from telethon sessions', () => {
         expect(convertFromTelethonSession(TELETHON_TEST_SESSION)).toEqual({
-            authKey: getPlatform().hexDecode(
+            authKey: hex.decode(
                 '28494b5ff1c142b4d48b3870ebd06b524a4e7d4f39a6dd31409f2e65cd605532'
                 + 'bc6deff59fea6c5345a77cd83fefb7695a53608d83a41d886f8ea9fdbc120b48'
                 + 'f54048ef750c498f6e9c563f0d7ec96b0a462b755de094e85d7334aad3c929df'
@@ -39,7 +39,7 @@ describe('telethon/convert', () => {
     it('should correctly convert to telethon sessions', () => {
         expect(
             convertToTelethonSession({
-                authKey: getPlatform().hexDecode(
+                authKey: hex.decode(
                     '28494b5ff1c142b4d48b3870ebd06b524a4e7d4f39a6dd31409f2e65cd605532'
                     + 'bc6deff59fea6c5345a77cd83fefb7695a53608d83a41d886f8ea9fdbc120b48'
                     + 'f54048ef750c498f6e9c563f0d7ec96b0a462b755de094e85d7334aad3c929df'
@@ -55,15 +55,16 @@ describe('telethon/convert', () => {
                         ipAddress: '149.154.167.40',
                         ipv6: false,
                         port: 80,
+                        testMode: true,
                     },
                     media: {
                         id: 2,
                         ipAddress: '149.154.167.40',
                         ipv6: false,
                         port: 80,
+                        testMode: true,
                     },
                 },
-                testMode: true,
                 version: 3,
             }),
         ).toEqual(TELETHON_TEST_SESSION)

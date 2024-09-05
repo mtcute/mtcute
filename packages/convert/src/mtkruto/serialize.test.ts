@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { u8HexDecode } from '@mtcute/test'
+import { hex } from '@fuman/utils'
 
 import { MTKRUTO_SESSION } from './__fixtures__/session.js'
 import { serializeMtkrutoSession } from './serialize.js'
@@ -10,7 +10,7 @@ describe('mtkruto/serialize', () => {
             serializeMtkrutoSession({
                 dcId: 2,
                 isTest: true,
-                authKey: u8HexDecode(
+                authKey: hex.decode(
                     '58420a6b4ec287ef73a00d36e260cea6cbf6d135b8630ba845144ea928b8d584'
                     + '026c3ddce272a7cfb05c148bb599f9fa7fa5e6dce4d5aa84f4ce26f8a7f02e64'
                     + '3f47fadf23e406a079c460fa84a94259a3a2251acca412c67c56a2d1967f598f'

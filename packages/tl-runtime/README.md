@@ -12,5 +12,4 @@ are patching the schema (which is a rare case anyways).
 
 ## Features
 - Supports all TL features used by the public schema
-- Uint8Array utilities like `hexDecode`
 - Supports browsers out of the box

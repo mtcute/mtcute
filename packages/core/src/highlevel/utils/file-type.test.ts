@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vitest'
-
-import { getPlatform } from '../../platform.js'
+import { hex } from '@fuman/utils'
 
 import { MIME_TO_EXTENSION, guessFileMime } from './file-type.js'
-
-const p = getPlatform()
 
 describe('guessFileMime', () => {
     it.each([
@@ -62,7 +59,7 @@ describe('guessFileMime', () => {
     ])('should detect %s as %s with %s extension', (header, mime, ext) => {
         header += '00'.repeat(16)
 
-        expect(guessFileMime(p.hexDecode(header))).toEqual(mime)
+        expect(guessFileMime(hex.decode(header))).toEqual(mime)
         expect(MIME_TO_EXTENSION[mime]).toEqual(ext)
     })
 })

@@ -1,6 +1,6 @@
 import { MtArgumentError } from '@mtcute/core'
-import { getPlatform } from '@mtcute/core/platform.js'
 import { dataViewFromBuffer } from '@mtcute/core/utils.js'
+import { base64 } from '@fuman/utils'
 
 import { parseIpFromBytes } from '../utils/ip.js'
 
@@ -14,7 +14,7 @@ export function parseTelethonSession(session: string): TelethonSession {
 
     session = session.slice(1)
 
-    const data = getPlatform().base64Decode(session, true)
+    const data = base64.decode(session, true)
     const dv = dataViewFromBuffer(data)
 
     const dcId = dv.getUint8(0)

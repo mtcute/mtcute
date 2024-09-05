@@ -17,13 +17,13 @@ export function convertFromTelethonSession(session: TelethonSession | string): S
         ipAddress: session.ipAddress,
         port: session.port,
         ipv6: session.ipv6,
+        // we don't exactly have that information. try to deduce it from DC_MAPPING_TEST
+        // todo: we should maybe check this at connect?
+        testMode: isTestDc(session.ipAddress),
     }
 
     return {
         version: 3,
-        // we don't exactly have that information. try to deduce it from DC_MAPPING_TEST
-        // todo: we should maybe check this at connect?
-        testMode: isTestDc(session.ipAddress),
         primaryDcs: {
             main: dc,
             media: dc,

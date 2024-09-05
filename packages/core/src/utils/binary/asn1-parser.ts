@@ -1,5 +1,7 @@
 // all available libraries either suck or are extremely large for the use case, so i made my own~
 
+import { hex } from '@fuman/utils'
+
 import { getPlatform } from '../../platform.js'
 
 /**
@@ -66,7 +68,7 @@ export function parseAsn1(data: Uint8Array): Asn1Object {
         if (0x80 & asn1.length) {
             asn1.lengthSize = 0x7F & asn1.length
             // I think that buf->hex->int solves the problem of Endianness... not sure
-            asn1.length = Number.parseInt(getPlatform().hexEncode(buf.subarray(index, index + asn1.lengthSize)), 16)
+            asn1.length = Number.parseInt(hex.encode(buf.subarray(index, index + asn1.lengthSize)), 16)
             index += asn1.lengthSize
         }
 

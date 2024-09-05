@@ -3,13 +3,10 @@
 // import Long from 'long'
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
+import { hex } from '@fuman/utils'
 
 import type { TlReaderMap } from './reader.js'
 import { TlBinaryReader } from './reader.js'
-
-// todo: replace with platform-specific packages
-const hexEncode = (buf: Uint8Array) => buf.reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '')
-const hexDecodeToBuffer = (hex: string) => new Uint8Array(hex.match(/.{1,2}/g)!.map(byte => Number.parseInt(byte, 16)))
 
 let randomBytes: (n: number) => Uint8Array
 
@@ -287,22 +284,22 @@ describe('TlBinaryReader', () => {
             }
 
             const expected = {
-                nonce: hexDecodeToBuffer('3E0549828CCA27E966B301A48FECE2FC'),
-                serverNonce: hexDecodeToBuffer('A5CF4D33F4A11EA877BA4AA573907330'),
-                pq: hexDecodeToBuffer('17ED48941A08F981'),
+                nonce: hex.decode('3E0549828CCA27E966B301A48FECE2FC'),
+                serverNonce: hex.decode('A5CF4D33F4A11EA877BA4AA573907330'),
+                pq: hex.decode('17ED48941A08F981'),
                 serverPublicKeyFingerprints: [Long.fromString('c3b42b026ce86b21', false, 16)],
             }
 
-            const r = new TlBinaryReader(map, hexDecodeToBuffer(input))
+            const r = new TlBinaryReader(map, hex.decode(input))
             expect(r.long().toString()).toEqual('0') // authKeyId
             expect(r.long().toString(16)).toEqual('51E57AC91E83C801'.toLowerCase()) // messageId
             expect(r.uint()).toEqual(64) // messageLength
 
             const obj = r.object() as any
             expect(obj._).toEqual('mt_resPQ')
-            expect(hexEncode(obj.nonce)).toEqual(hexEncode(expected.nonce))
-            expect(hexEncode(obj.serverNonce)).toEqual(hexEncode(expected.serverNonce))
-            expect(hexEncode(obj.pq)).toEqual(hexEncode(expected.pq))
+            expect(hex.encode(obj.nonce)).toEqual(hex.encode(expected.nonce))
+            expect(hex.encode(obj.serverNonce)).toEqual(hex.encode(expected.serverNonce))
+            expect(hex.encode(obj.pq)).toEqual(hex.encode(expected.pq))
             expect(obj.serverPublicKeyFingerprints.length).toEqual(1)
             expect(obj.serverPublicKeyFingerprints[0].toString(16)).toEqual(
                 expected.serverPublicKeyFingerprints[0].toString(16),

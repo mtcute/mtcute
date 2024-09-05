@@ -1,6 +1,5 @@
+import { utf8 } from '@fuman/utils'
 import Long from 'long'
-
-import type { ITlPlatform } from './platform.js'
 
 const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
 
@@ -25,8 +24,6 @@ export type TlReaderMap = Record<number, (r: any) => unknown> & {
  * Reader for TL objects.
  */
 export class TlBinaryReader {
-    static platform: ITlPlatform
-
     readonly dataView: DataView
     readonly uint8View: Uint8Array
 
@@ -173,7 +170,7 @@ export class TlBinaryReader {
     }
 
     string(): string {
-        return TlBinaryReader.platform.utf8Decode(this.bytes())
+        return utf8.decoder.decode(this.bytes())
     }
 
     object(id: number = this.uint()): unknown {

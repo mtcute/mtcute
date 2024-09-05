@@ -12,7 +12,8 @@
         "build": "pnpm run -w build-package convert"
     },
     "dependencies": {
-        "@mtcute/core": "workspace:^"
+        "@mtcute/core": "workspace:^",
+        "@fuman/utils": "workspace:^"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^"

@@ -14,7 +14,6 @@ export function convertFromPyrogramSession(session: PyrogramSession | string): S
 
     return {
         version: 3,
-        testMode: session.isTest,
         primaryDcs: (session.isTest ? DC_MAPPING_TEST : DC_MAPPING_PROD)[session.dcId],
         authKey: session.authKey,
         self: {
@@ -39,7 +38,7 @@ export function convertToPyrogramSession(
     return serializePyrogramSession({
         apiId: params?.apiId,
         isBot: session.self?.isBot ?? false,
-        isTest: session.testMode,
+        isTest: session.primaryDcs.main.testMode ?? false,
         userId: session.self?.userId ?? 0,
         dcId: session.primaryDcs.main.id,
         authKey: session.authKey,

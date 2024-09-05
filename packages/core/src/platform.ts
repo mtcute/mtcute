@@ -1,11 +1,10 @@
-import type { ITlPlatform } from '@mtcute/tl-runtime'
-import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
-
 import type { UploadFileLike } from './highlevel/types/files/utils.js'
 import { MtUnsupportedError } from './types/errors.js'
 import type { MaybePromise } from './types/index.js'
 
-export interface ICorePlatform extends ITlPlatform {
+// todo: can we make this non-global?
+
+export interface ICorePlatform {
     beforeExit: (fn: () => void) => () => void
     log: (color: number, level: number, tag: string, fmt: string, args: unknown[]) => void
     getDefaultLogLevel: () => number | null
@@ -37,8 +36,6 @@ export function setPlatform(platform: ICorePlatform): void {
     }
 
     _platform = platform
-    TlBinaryReader.platform = platform
-    TlBinaryWriter.platform = platform
 
     ;(globalThis as any)[platformKey] = platform
 }

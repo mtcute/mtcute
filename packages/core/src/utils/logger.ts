@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+import { hex } from '@fuman/utils'
 
 import type { ICorePlatform } from '../platform.js'
 import { getPlatform } from '../platform.js'
@@ -67,7 +68,7 @@ export class Logger {
                     args.splice(idx, 1)
 
                     if (m === '%h') {
-                        if (ArrayBuffer.isView(val)) return this.mgr.platform.hexEncode(val as Uint8Array)
+                        if (ArrayBuffer.isView(val)) return hex.encode(val as Uint8Array)
                         if (typeof val === 'number' || typeof val === 'bigint') return val.toString(16)
 
                         return String(val)
@@ -85,7 +86,7 @@ export class Logger {
                                 || (typeof v === 'object' && v.type === 'Buffer' && Array.isArray(v.data)) // todo: how can we do this better?
                             ) {
                                 // eslint-disable-next-line
-                                let str = v.data ? Buffer.from(v.data as number[]).toString('hex') : this.mgr.platform.hexEncode(v)
+                                let str = v.data ? Buffer.from(v.data as number[]).toString('hex') : hex.encode(v)
 
                                 if (str.length > 300) {
                                     str = `${str.slice(0, 300)}...`

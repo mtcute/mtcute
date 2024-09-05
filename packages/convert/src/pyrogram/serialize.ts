@@ -1,6 +1,6 @@
 import { Long, MtArgumentError } from '@mtcute/core'
-import { getPlatform } from '@mtcute/core/platform.js'
 import { dataViewFromBuffer } from '@mtcute/core/utils.js'
+import { base64 } from '@fuman/utils'
 
 import type { PyrogramSession } from './types.js'
 
@@ -41,5 +41,5 @@ export function serializePyrogramSession(session: PyrogramSession): string {
         dv.setUint8(270, session.isBot ? 1 : 0)
     }
 
-    return getPlatform().base64Encode(u8, true)
+    return base64.encode(u8, true)
 }

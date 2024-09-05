@@ -1,13 +1,13 @@
 import { MtArgumentError } from '@mtcute/core'
-import { getPlatform } from '@mtcute/core/platform.js'
 import { TlBinaryReader } from '@mtcute/core/utils.js'
+import { base64 } from '@fuman/utils'
 
 import { telegramRleDecode } from '../utils/rle.js'
 
 import type { MtkrutoSession } from './types.js'
 
 export function parseMtkrutoSession(session: string): MtkrutoSession {
-    const data = telegramRleDecode(getPlatform().base64Decode(session, true))
+    const data = telegramRleDecode(base64.decode(session, true))
     const reader = TlBinaryReader.manual(data)
 
     let dcIdStr = reader.string()

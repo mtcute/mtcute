@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getPlatform } from '@mtcute/core/platform.js'
+import { hex } from '@fuman/utils'
 
 import { PYROGRAM_TEST_SESSION } from './__fixtures__/session.js'
 import { PYROGRAM_TEST_SESSION_OLD } from './__fixtures__/session_old.js'
@@ -13,7 +13,7 @@ describe('pyrogram/serialize', () => {
                 isTest: true,
                 userId: 5000801609,
                 dcId: 2,
-                authKey: getPlatform().hexDecode(
+                authKey: hex.decode(
                     '1674732db80d690b4d5890d887a4bd5b0b4c810b7c331990b049158a940fdaeb'
                     + 'd46178f50ddcce753699f0497ad6de9655f454bc5a3030524036dee4ffe3db7c'
                     + '73b526c378a184a0fafa14e9679c170b632e0b412c174f99e96b216214f78263'
@@ -35,7 +35,7 @@ describe('pyrogram/serialize', () => {
                 isTest: true,
                 userId: 5000801609,
                 dcId: 2,
-                authKey: getPlatform().hexDecode(
+                authKey: hex.decode(
                     '4e4e8ab2caa290a3f1121c5f5c9a64a0522043fa3c5690a4ff8834b5c1ded2b5'
                     + '425f1df801a0cabda34e95b909399e23037008f220d8908da8a6e89f6ccffb4b'
                     + '6bbd30c767ae37e0e63a5f9177c8f7ec05f032bf5011887b5ce4fc86e7d081cb'

@@ -1,6 +1,5 @@
+import { utf8 } from '@fuman/utils'
 import type Long from 'long'
-
-import type { ITlPlatform } from './platform.js'
 
 const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
 
@@ -115,7 +114,7 @@ export class TlSerializationCounter {
     }
 
     string(val: string): void {
-        const length = TlBinaryWriter.platform.utf8ByteLength(val)
+        const length = utf8.encodedLength(val)
         this.count += TlSerializationCounter.countBytesOverhead(length) + length
     }
 
@@ -134,8 +133,6 @@ export class TlSerializationCounter {
  * Writer for TL objects.
  */
 export class TlBinaryWriter {
-    static platform: ITlPlatform
-
     readonly dataView: DataView
     readonly uint8View: Uint8Array
 
@@ -305,7 +302,7 @@ export class TlBinaryWriter {
     }
 
     string(val: string): void {
-        this.bytes(TlBinaryWriter.platform.utf8Encode(val))
+        this.bytes(utf8.encoder.encode(val))
     }
 
     // hot path, avoid additional runtime checks

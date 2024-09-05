@@ -15,9 +15,7 @@
     },
     "dependencies": {
         "@mtcute/tl-runtime": "workspace:^",
+        "@fuman/utils": "workspace:^",
         "long": "5.2.3"
-    },
-    "devDependencies": {
-        "@mtcute/test": "workspace:^"
     }
 }

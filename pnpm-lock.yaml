@@ -129,6 +129,9 @@ importers:
 
   packages/convert:
     dependencies:
+      '@fuman/utils':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/utils
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -270,16 +273,15 @@ importers:
 
   packages/file-id:
     dependencies:
+      '@fuman/utils':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/utils
       '@mtcute/tl-runtime':
         specifier: workspace:^
         version: link:../tl-runtime
       long:
         specifier: 5.2.3
         version: 5.2.3
-    devDependencies:
-      '@mtcute/test':
-        specifier: workspace:^
-        version: link:../test
 
   packages/html-parser:
     dependencies:
@@ -344,6 +346,9 @@ importers:
 
   packages/test:
     dependencies:
+      '@fuman/utils':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/utils
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -400,6 +405,9 @@ importers:
 
   packages/tl-runtime:
     dependencies:
+      '@fuman/utils':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/utils
       long:
         specifier: 5.2.3
         version: 5.2.3
@@ -415,6 +423,9 @@ importers:
 
   packages/wasm:
     devDependencies:
+      '@fuman/utils':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/utils
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core

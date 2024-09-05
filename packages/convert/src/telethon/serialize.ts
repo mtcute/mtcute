@@ -1,6 +1,6 @@
 import { MtArgumentError } from '@mtcute/core'
-import { getPlatform } from '@mtcute/core/platform.js'
 import { dataViewFromBuffer } from '@mtcute/core/utils.js'
+import { base64 } from '@fuman/utils'
 
 import { serializeIpv4ToBytes, serializeIpv6ToBytes } from '../utils/ip.js'
 
@@ -31,7 +31,7 @@ export function serializeTelethonSession(session: TelethonSession): string {
     pos += 2
     u8.set(session.authKey, pos)
 
-    let b64 = getPlatform().base64Encode(u8, true)
+    let b64 = base64.encode(u8, true)
     while (b64.length % 4 !== 0) b64 += '=' // for some reason telethon uses padding
 
     return `1${b64}`

@@ -1,6 +1,6 @@
 import { MtArgumentError } from '@mtcute/core'
-import { getPlatform } from '@mtcute/core/platform.js'
 import { dataViewFromBuffer } from '@mtcute/core/utils.js'
+import { base64, utf8 } from '@fuman/utils'
 
 import type { TelethonSession } from '../telethon/types.js'
 
@@ -9,7 +9,7 @@ export function serializeGramjsSession(session: TelethonSession): string {
         throw new MtArgumentError('authKey must be 256 bytes long')
     }
 
-    const ipEncoded = getPlatform().utf8Encode(session.ipAddress)
+    const ipEncoded = utf8.encoder.encode(session.ipAddress)
 
     const u8 = new Uint8Array(261 + ipEncoded.length)
     const dv = dataViewFromBuffer(u8)
@@ -24,5 +24,5 @@ export function serializeGramjsSession(session: TelethonSession): string {
     pos += 2
     u8.set(session.authKey, pos)
 
-    return `1${getPlatform().base64Encode(u8)}`
+    return `1${base64.encode(u8)}`
 }

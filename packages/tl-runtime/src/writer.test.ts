@@ -1,13 +1,10 @@
 /* eslint-disable ts/no-unsafe-call */
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
+import { hex } from '@fuman/utils'
 
 import type { TlWriterMap } from './writer.js'
 import { TlBinaryWriter, TlSerializationCounter } from './writer.js'
-
-// todo: replace with platform-specific packages
-const hexEncode = (buf: Uint8Array) => buf.reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '')
-const hexDecodeToBuffer = (hex: string) => new Uint8Array(hex.match(/.{1,2}/g)!.map(byte => Number.parseInt(byte, 16)))
 
 let randomBytes: (n: number) => Uint8Array
 
@@ -28,7 +25,7 @@ describe('TlBinaryWriter', () => {
         fn(w)
         expect(w.pos).toEqual(size)
 
-        return hexEncode(w.uint8View)
+        return hex.encode(w.uint8View)
     }
 
     it('should write int32', () => {
@@ -85,14 +82,14 @@ describe('TlBinaryWriter', () => {
         expect(testSingleMethod(8, w => w.bytes(new Uint8Array([1, 2, 3, 4])))).toEqual('0401020304000000')
 
         const random250bytes = randomBytes(250)
-        expect(testSingleMethod(252, w => w.bytes(random250bytes))).toEqual(`fa${hexEncode(random250bytes)}00`)
+        expect(testSingleMethod(252, w => w.bytes(random250bytes))).toEqual(`fa${hex.encode(random250bytes)}00`)
 
         const random1000bytes = randomBytes(1000)
         const buffer = new Uint8Array(1004)
         buffer[0] = 254
         new DataView(buffer.buffer).setUint32(1, 1000, true)
         buffer.set(random1000bytes, 4)
-        expect(testSingleMethod(1004, w => w.bytes(random1000bytes))).toEqual(hexEncode(buffer))
+        expect(testSingleMethod(1004, w => w.bytes(random1000bytes))).toEqual(hex.encode(buffer))
     })
 
     it('should write tg-encoded string', () => {
@@ -189,9 +186,9 @@ describe('TlBinaryWriter', () => {
 
             const resPq = {
                 _: 'mt_resPQ',
-                nonce: hexDecodeToBuffer('3E0549828CCA27E966B301A48FECE2FC'),
-                serverNonce: hexDecodeToBuffer('A5CF4D33F4A11EA877BA4AA573907330'),
-                pq: hexDecodeToBuffer('17ED48941A08F981'),
+                nonce: hex.decode('3E0549828CCA27E966B301A48FECE2FC'),
+                serverNonce: hex.decode('A5CF4D33F4A11EA877BA4AA573907330'),
+                pq: hex.decode('17ED48941A08F981'),
                 serverPublicKeyFingerprints: [Long.fromString('c3b42b026ce86b21', 16)],
             }
 

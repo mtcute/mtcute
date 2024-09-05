@@ -1,6 +1,6 @@
 import type { tl } from '@mtcute/tl'
+import { hex, utf8 } from '@fuman/utils'
 
-import { getPlatform } from '../../platform.js'
 import { MtArgumentError } from '../../types/errors.js'
 import { concatBuffers } from '../../utils/buffer-utils.js'
 
@@ -35,7 +35,7 @@ export function isProbablyPlainText(buf: Uint8Array): boolean {
 
 // from https://github.com/telegramdesktop/tdesktop/blob/bec39d89e19670eb436dc794a8f20b657cb87c71/Telegram/SourceFiles/ui/image/image.cpp#L225
 function JPEG_HEADER() {
-    return getPlatform().hexDecode(
+    return hex.decode(
         'ffd8ffe000104a46494600010100000100010000ffdb004300281c1e231e1928'
         + '2321232d2b28303c64413c37373c7b585d4964918099968f808c8aa0b4e6c3a0aad'
         + 'aad8a8cc8ffcbdaeef5ffffff9bc1fffffffaffe6fdfff8ffdb0043012b2d2d3c35'
@@ -117,7 +117,7 @@ export function inflateSvgPath(encoded: Uint8Array): string {
  * @param size  Size attribute of the document, if available
  */
 export function svgPathToFile(path: string, size?: tl.RawDocumentAttributeImageSize): Uint8Array {
-    return getPlatform().utf8Encode(
+    return utf8.encoder.encode(
         '<?xml version="1.0" encoding="utf-8"?>'
         + '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"'
         + `viewBox="0 0 ${size?.w ?? 512} ${size?.h ?? 512}" xml:space="preserve">`

@@ -2,8 +2,8 @@ import type Long from 'long'
 import type { TlPublicKey } from '@mtcute/tl/binary/rsa-keys.js'
 import { __publicKeyIndex as keysIndex } from '@mtcute/tl/binary/rsa-keys.js'
 import { TlBinaryWriter } from '@mtcute/tl-runtime'
+import { hex } from '@fuman/utils'
 
-import { getPlatform } from '../../platform.js'
 import { parseAsn1, parsePemContents } from '../binary/asn1-parser.js'
 
 import type { ICryptoProvider } from './abstract.js'
@@ -27,15 +27,13 @@ export function parsePublicKey(crypto: ICryptoProvider, key: string, old = false
     writer.bytes(modulus)
     writer.bytes(exponent)
 
-    const platform = getPlatform()
-
     const data = writer.result()
     const sha = crypto.sha1(data)
-    const fp = platform.hexEncode(sha.slice(-8).reverse())
+    const fp = hex.encode(sha.slice(-8).reverse())
 
     return {
-        modulus: platform.hexEncode(modulus),
-        exponent: platform.hexEncode(exponent),
+        modulus: hex.encode(modulus),
+        exponent: hex.encode(exponent),
         fingerprint: fp,
         old,
     }

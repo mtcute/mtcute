@@ -1,5 +1,5 @@
-import type { ITlPlatform } from '@mtcute/tl-runtime'
 import { TlBinaryWriter } from '@mtcute/tl-runtime'
+import { base64, utf8 } from '@fuman/utils'
 
 import { tdFileId as td } from './types.js'
 import { assertNever, telegramRleEncode } from './utils.js'
@@ -21,11 +21,10 @@ export type InputUniqueLocation =
  *
  * @param location  Information about file location
  */
-export function toUniqueFileId(platform: ITlPlatform, location: Omit<td.RawFullRemoteFileLocation, '_'>): string
-export function toUniqueFileId(platform: ITlPlatform, type: td.FileType, location: InputUniqueLocation): string
+export function toUniqueFileId(location: Omit<td.RawFullRemoteFileLocation, '_'>): string
+export function toUniqueFileId(type: td.FileType, location: InputUniqueLocation): string
 
 export function toUniqueFileId(
-    platform: ITlPlatform,
     first: td.FileType | Omit<td.RawFullRemoteFileLocation, '_'>,
     second?: InputUniqueLocation,
 ): string {
@@ -142,7 +141,7 @@ export function toUniqueFileId(
             break
         }
         case 'web':
-            writer = TlBinaryWriter.manual(platform.utf8ByteLength(inputLocation.url) + 8)
+            writer = TlBinaryWriter.manual(utf8.encodedLength(inputLocation.url) + 8)
             writer.int(type)
             writer.string(inputLocation.url)
             break
@@ -155,5 +154,5 @@ export function toUniqueFileId(
             assertNever(inputLocation)
     }
 
-    return platform.base64Encode(telegramRleEncode(writer.result()), true)
+    return base64.encode(telegramRleEncode(writer.result()), true)
 }

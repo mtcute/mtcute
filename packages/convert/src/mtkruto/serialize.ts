@@ -1,5 +1,5 @@
-import { getPlatform } from '@mtcute/core/platform.js'
 import { TlBinaryWriter } from '@mtcute/core/utils.js'
+import { base64 } from '@fuman/utils'
 
 import { telegramRleEncode } from '../utils/rle.js'
 
@@ -13,5 +13,5 @@ export function serializeMtkrutoSession(session: MtkrutoSession): string {
     writer.string(dcIdStr)
     writer.bytes(session.authKey)
 
-    return getPlatform().base64Encode(telegramRleEncode(writer.result()), true)
+    return base64.encode(telegramRleEncode(writer.result()), true)
 }

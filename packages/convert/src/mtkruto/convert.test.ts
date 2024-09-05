@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { u8HexDecode } from '@mtcute/test'
+import { hex } from '@fuman/utils'
 
 import { MTKRUTO_SESSION } from './__fixtures__/session.js'
 import { convertFromMtkrutoSession, convertToMtkrutoSession } from './convert.js'
@@ -7,7 +7,7 @@ import { convertFromMtkrutoSession, convertToMtkrutoSession } from './convert.js
 describe('mtkruto/convert', () => {
     it('should correctly convert from mtkruto sessions', () => {
         expect(convertFromMtkrutoSession(MTKRUTO_SESSION)).toEqual({
-            authKey: u8HexDecode(
+            authKey: hex.decode(
                 '58420a6b4ec287ef73a00d36e260cea6cbf6d135b8630ba845144ea928b8d584'
                 + '026c3ddce272a7cfb05c148bb599f9fa7fa5e6dce4d5aa84f4ce26f8a7f02e64'
                 + '3f47fadf23e406a079c460fa84a94259a3a2251acca412c67c56a2d1967f598f'
@@ -37,7 +37,7 @@ describe('mtkruto/convert', () => {
     it('should correctly convert to mtkruto sessions', () => {
         expect(
             convertToMtkrutoSession({
-                authKey: u8HexDecode(
+                authKey: hex.decode(
                     '58420a6b4ec287ef73a00d36e260cea6cbf6d135b8630ba845144ea928b8d584'
                     + '026c3ddce272a7cfb05c148bb599f9fa7fa5e6dce4d5aa84f4ce26f8a7f02e64'
                     + '3f47fadf23e406a079c460fa84a94259a3a2251acca412c67c56a2d1967f598f'
@@ -53,15 +53,16 @@ describe('mtkruto/convert', () => {
                         ipAddress: '149.154.167.40',
                         ipv6: false,
                         port: 443,
+                        testMode: true,
                     },
                     media: {
                         id: 2,
                         ipAddress: '149.154.167.40',
                         ipv6: false,
                         port: 443,
+                        testMode: true,
                     },
                 },
-                testMode: true,
                 version: 3,
             }),
         ).toEqual(MTKRUTO_SESSION)

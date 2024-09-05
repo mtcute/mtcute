@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getPlatform } from '@mtcute/core/platform.js'
+import { hex } from '@fuman/utils'
 
 import { TELETHON_TEST_SESSION } from './__fixtures__/session.js'
 import { TELETHON_TEST_SESSION_V6 } from './__fixtures__/session_v6.js'
@@ -13,7 +13,7 @@ describe('telethon/serialize', () => {
                 ipAddress: '149.154.167.40',
                 port: 80,
                 ipv6: false,
-                authKey: getPlatform().hexDecode(
+                authKey: hex.decode(
                     '28494b5ff1c142b4d48b3870ebd06b524a4e7d4f39a6dd31409f2e65cd605532'
                     + 'bc6deff59fea6c5345a77cd83fefb7695a53608d83a41d886f8ea9fdbc120b48'
                     + 'f54048ef750c498f6e9c563f0d7ec96b0a462b755de094e85d7334aad3c929df'
@@ -34,7 +34,7 @@ describe('telethon/serialize', () => {
                 ipAddress: '2001:0b28:f23d:f001:0000:0000:0000:000e',
                 port: 443,
                 ipv6: true,
-                authKey: getPlatform().hexDecode(
+                authKey: hex.decode(
                     '8a6f780156484e75fedacab2b45078cbc65cc97c7c8e8db06696a9dad75deab2'
                     + '6979def6a36d86a9eb0661f9ea41df3a115408f4a857334dac682742bebb0184'
                     + '1b921a4ffd89a5d840ddf1ea5d73a1b2c21e2ad8d0606325ba5414fc50a83cf7'

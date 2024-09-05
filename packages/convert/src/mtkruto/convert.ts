@@ -14,7 +14,6 @@ export function convertFromMtkrutoSession(session: MtkrutoSession | string): Str
 
     return {
         version: 3,
-        testMode: session.isTest,
         primaryDcs: (session.isTest ? DC_MAPPING_TEST : DC_MAPPING_PROD)[session.dcId],
         authKey: session.authKey,
     }
@@ -27,7 +26,7 @@ export function convertToMtkrutoSession(session: StringSessionData | string): st
 
     return serializeMtkrutoSession({
         dcId: session.primaryDcs.main.id,
-        isTest: session.testMode,
+        isTest: session.primaryDcs.main.testMode ?? false,
         authKey: session.authKey,
     })
 }

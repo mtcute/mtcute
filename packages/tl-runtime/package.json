@@ -15,6 +15,7 @@
         "build": "pnpm run -w build-package tl-runtime"
     },
     "dependencies": {
-        "long": "5.2.3"
+        "long": "5.2.3",
+        "@fuman/utils": "workspace:^"
     }
 }

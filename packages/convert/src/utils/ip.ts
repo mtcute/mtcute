@@ -1,5 +1,6 @@
 import { MtArgumentError } from '@mtcute/core'
 
+// todo: use @fuman/ip
 export function parseIpFromBytes(data: Uint8Array): string {
     if (data.length === 4) {
         return `${data[0]}.${data[1]}.${data[2]}.${data[3]}`

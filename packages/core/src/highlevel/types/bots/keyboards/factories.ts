@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/tl'
+import { utf8 } from '@fuman/utils'
 
-import { getPlatform } from '../../../../platform.js'
 import { assertNever } from '../../../../types/utils.js'
 import { toInputUser } from '../../../utils/peer-utils.js'
 
@@ -169,7 +169,7 @@ export function callback(
         _: 'keyboardButtonCallback',
         text,
         requiresPassword,
-        data: typeof data === 'string' ? getPlatform().utf8Encode(data) : data,
+        data: typeof data === 'string' ? utf8.encoder.encode(data) : data,
     }
 }
 

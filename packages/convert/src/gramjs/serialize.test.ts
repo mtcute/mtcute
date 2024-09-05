@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getPlatform } from '@mtcute/core/platform.js'
+import { hex } from '@fuman/utils'
 
 import { GRAMJS_SESSION } from './__fixtures__/session.js'
 import { serializeGramjsSession } from './serialize.js'
@@ -12,7 +12,7 @@ describe('gramjs/serialize', () => {
                 ipAddress: '149.154.167.40',
                 port: 443,
                 ipv6: false,
-                authKey: getPlatform().hexDecode(
+                authKey: hex.decode(
                     'ad286dc1184bc61bfc8ed8942c1a2ef5bce1d5c25f6a069c1606fb3b8c722261'
                     + '1cff7d73c649bf0c49807f3253542ba88f8687490ad0902e42e708a437eafe32'
                     + '552d9d594629aae72cb55db784b3ae60b59035f925306515da861f8dcc66cf98'

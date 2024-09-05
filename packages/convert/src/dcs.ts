@@ -75,11 +75,13 @@ export const DC_MAPPING_TEST: Record<number, DcOptions> = {
             id: 1,
             ipAddress: '149.154.175.10',
             port: 80,
+            testMode: true,
         },
         media: {
             id: 1,
             ipAddress: '149.154.175.10',
             port: 80,
+            testMode: true,
         },
     },
     2: {
@@ -87,11 +89,13 @@ export const DC_MAPPING_TEST: Record<number, DcOptions> = {
             id: 2,
             ipAddress: '149.154.167.40',
             port: 443,
+            testMode: true,
         },
         media: {
             id: 2,
             ipAddress: '149.154.167.40',
             port: 443,
+            testMode: true,
         },
     },
     3: {
@@ -99,11 +103,13 @@ export const DC_MAPPING_TEST: Record<number, DcOptions> = {
             id: 3,
             ipAddress: '149.154.175.117',
             port: 443,
+            testMode: true,
         },
         media: {
             id: 3,
             ipAddress: '149.154.175.117',
             port: 443,
+            testMode: true,
         },
     },
 }

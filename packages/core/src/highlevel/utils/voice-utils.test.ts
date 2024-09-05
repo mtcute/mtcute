@@ -1,16 +1,13 @@
 import { describe, expect, it } from 'vitest'
-
-import { getPlatform } from '../../platform.js'
+import { hex } from '@fuman/utils'
 
 import { decodeWaveform, encodeWaveform } from './voice-utils.js'
-
-const p = getPlatform()
 
 describe('decodeWaveform', () => {
     it('should correctly decode telegram-encoded waveform', () => {
         expect(
             decodeWaveform(
-                p.hexDecode(
+                hex.decode(
                     '0000104210428c310821a51463cc39072184524a4aa9b51663acb5e69c7bef41'
                     + '08618c514a39e7a494d65aadb5f75e8c31ce396badf7de9cf3debbf7feff0f',
                 ),
@@ -123,7 +120,7 @@ describe('decodeWaveform', () => {
 describe('encodeWaveform', () => {
     it('should correctly decode telegram-encoded waveform', () => {
         expect(
-            p.hexEncode(
+            hex.encode(
                 encodeWaveform([
                     0,
                     0,
