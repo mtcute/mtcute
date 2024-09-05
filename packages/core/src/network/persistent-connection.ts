@@ -30,18 +30,12 @@ export abstract class PersistentConnection extends EventEmitter {
     private _uid = nextConnectionUid++
 
     readonly params: PersistentConnectionParams
-    // protected _transport!: ITelegramConnection
 
     private _sendOnceConnected: Uint8Array[] = []
     private _codec: IPacketCodec
     private _fuman: FumanPersistentConnection<BasicDcOption, ITelegramConnection>
 
     // reconnection
-    private _lastError: Error | null = null
-    private _consequentFails = 0
-    private _previousWait: number | null = null
-    private _reconnectionTimeout: timers.Timer | null = null
-    private _shouldReconnectImmediately = false
     protected _disconnectedManually = false
 
     // inactivity timeout
@@ -64,19 +58,41 @@ export abstract class PersistentConnection extends EventEmitter {
     ) {
         super()
         this.params = params
-        this.log.prefix = `[UID ${this._uid}] `
 
-        this._codec = this.params.transport.packetCodec()
+        this.params.transport.setup?.(this.params.crypto, log)
+        this._codec = this.params.transport.packetCodec(params.dc)
         this._codec.setup?.(this.params.crypto, this.log)
 
         this._onInactivityTimeout = this._onInactivityTimeout.bind(this)
         this._fuman = new FumanPersistentConnection({
-            connect: dc => params.transport.connect(dc, params.testMode),
+            connect: (dc) => {
+                this._updateLogPrefix()
+                this.log.debug('connecting to %j', dc)
+                return params.transport.connect(dc, params.testMode)
+            },
             onOpen: this._onOpen.bind(this),
             onClose: this._onClose.bind(this),
             onError: this._onError.bind(this),
-            onWait: wait => this.emit('wait', wait),
+            onWait: (wait) => {
+                this._updateLogPrefix()
+                this.log.debug('waiting for %d ms before reconnecting', wait)
+                this.emit('wait', wait)
+            },
         })
+
+        this._updateLogPrefix()
+    }
+
+    private _updateLogPrefix() {
+        const uidPrefix = `[UID ${this._uid}] `
+        if (this._fuman.isConnected) {
+            const dc = this.params.dc
+            this.log.prefix = `${uidPrefix}[DC ${dc.id}:${dc.ipAddress}:${dc.port}] `
+        } else if (this._fuman.isConnecting) {
+            this.log.prefix = `${uidPrefix}[connecting] `
+        } else {
+            this.log.prefix = `${uidPrefix}[disconnected] `
+        }
     }
 
     get isConnected(): boolean {
@@ -86,7 +102,13 @@ export abstract class PersistentConnection extends EventEmitter {
     private _writer?: FramedWriter
 
     private async _onOpen(conn: ITelegramConnection) {
-        await conn.write(await this._codec.tag())
+        this._updateLogPrefix()
+        this.log.debug('connected')
+
+        const tag = await this._codec.tag()
+        if (tag) {
+            await conn.write(tag)
+        }
 
         const reader = new FramedReader(conn, this._codec)
         this._writer = new FramedWriter(conn, this._codec)
@@ -116,181 +138,45 @@ export abstract class PersistentConnection extends EventEmitter {
     }
 
     private async _onClose() {
+        this.log.debug('connection closed')
+        this._updateLogPrefix()
+
         this._writer = undefined
         this._codec.reset()
         this.onClosed()
     }
 
     private async _onError(err: Error) {
-        this._lastError = err
+        this._updateLogPrefix()
         this.onError(err)
     }
 
     async changeTransport(transport: TelegramTransport): Promise<void> {
         await this._fuman.close()
 
-        this._codec = transport.packetCodec()
+        this._codec = transport.packetCodec(this.params.dc)
         this._codec.setup?.(this.params.crypto, this.log)
 
-        await this._fuman.changeTransport(() => transport.connect(this.params.dc, this.params.testMode))
+        await this._fuman.changeTransport(dc => transport.connect(dc, this.params.testMode))
         this._fuman.connect(this.params.dc)
-        // if (this._transport) {
-        //     Promise.resolve(this._transport.close()).catch((err) => {
-        //         this.log.warn('error closing previous transport: %e', err)
-        //     })
-        // }
-
-        // this._transport = conn()
-        // this._transport.setup?.(this.params.crypto, this.log)
-
-        // this._transport.on('ready', this.onTransportReady.bind(this))
-        // this._transport.on('message', this.onMessage.bind(this))
-        // this._transport.on('error', this.onTransportError.bind(this))
-        // this._transport.on('close', this.onTransportClose.bind(this))
     }
-
-    // onTransportReady(): void {
-    //     // transport ready does not mean actual mtproto is ready
-    //     if (this._sendOnceConnected.length) {
-    //         const sendNext = () => {
-    //             if (!this._sendOnceConnected.length) {
-    //                 this.onConnected()
-
-    //                 return
-    //             }
-
-    //             const data = this._sendOnceConnected.shift()!
-    //             this._transport
-    //                 .send(data)
-    //                 .then(sendNext)
-    //                 .catch((err) => {
-    //                     this.log.error('error sending queued data: %e', err)
-    //                     this._sendOnceConnected.unshift(data)
-    //                 })
-    //         }
-
-    //         sendNext()
-
-    //         return
-    //     }
-
-    //     this.onConnected()
-    // }
-
-    // protected onConnectionUsable(): void {
-    //     const isReconnection = this._consequentFails > 0
-
-    //     // reset reconnection related state
-    //     this._lastError = null
-    //     this._consequentFails = 0
-    //     this._previousWait = null
-    //     this._usable = true
-    //     this.emit('usable', isReconnection)
-    //     this._rescheduleInactivity()
-    // }
-
-    // onTransportError(err: Error): void {
-
-    //     // transport is expected to emit `close` after `error`
-    // }
-
-    // onTransportClose(): void {
-    //     // transport closed because of inactivity
-    //     // obviously we dont want to reconnect then
-    //     if (this._inactive || this._disconnectedManually) return
-
-    //     if (this._shouldReconnectImmediately) {
-    //         this._shouldReconnectImmediately = false
-    //         this.connect()
-
-    //         return
-    //     }
-
-    //     this._consequentFails += 1
-
-    //     const wait = this.params.reconnectionStrategy(
-    //         this.params,
-    //         this._lastError,
-    //         this._consequentFails,
-    //         this._previousWait,
-    //     )
-
-    //     if (wait === false) {
-    //         this.destroy().catch((err) => {
-    //             this.log.warn('error destroying connection: %e', err)
-    //         })
-
-    //         return
-    //     }
-
-    //     this._previousWait = wait
-
-    //     if (this._reconnectionTimeout != null) {
-    //         timers.clearTimeout(this._reconnectionTimeout)
-    //     }
-    //     this._reconnectionTimeout = timers.setTimeout(() => {
-    //         if (this._destroyed) return
-    //         this._reconnectionTimeout = null
-    //         this.connect()
-    //     }, wait)
-    // }
 
     connect(): void {
         this._fuman.connect(this.params.dc)
 
         this._inactive = false
-        // if (this.isConnected) {
-        //     throw new MtcuteError('Connection is already opened!')
-        // }
-        // if (this._destroyed) {
-        //     throw new MtcuteError('Connection is already destroyed!')
-        // }
-
-        // if (this._reconnectionTimeout != null) {
-        //     clearTimeout(this._reconnectionTimeout)
-        //     this._reconnectionTimeout = null
-        // }
-
-        // this._inactive = false
-        // this._disconnectedManually = false
-        // this._transport.connect(this.params.dc, this.params.testMode)
     }
 
     reconnect(): void {
-        // if (this._inactive) return
-
-        // // if we are already connected
-        // if (this.isConnected) {
-        //     this._shouldReconnectImmediately = true
-        //     Promise.resolve(this._transport.close()).catch((err) => {
-        //         this.log.error('error closing transport: %e', err)
-        //     })
-
-        //     return
-        // }
-
-        // // if reconnection timeout is pending, it will be cancelled in connect()
-        // this.connect()
         this._fuman.reconnect(true)
     }
 
     async disconnectManual(): Promise<void> {
-        // this._disconnectedManually = true
-        // await this._transport.close()
         await this._fuman.close()
     }
 
     async destroy(): Promise<void> {
-        // if (this._reconnectionTimeout != null) {
-        //     clearTimeout(this._reconnectionTimeout)
-        // }
-        // if (this._inactivityTimeout != null) {
-        //     clearTimeout(this._inactivityTimeout)
-        // }
-
         await this._fuman.close()
-        // this._transport.removeAllListeners()
-        // this._destroyed = true
     }
 
     protected _rescheduleInactivity(): void {

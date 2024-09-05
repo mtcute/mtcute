@@ -1,7 +1,7 @@
 {
   "name": "@mtcute/bun",
   "type": "module",
-  "version": "0.16.9",
+  "version": "0.17.0-fuman-alpha",
   "private": true,
   "description": "Meta-package for Bun",
   "author": "alina sireneva <alina@tei.su>",
@@ -20,7 +20,10 @@
     "@mtcute/core": "workspace:^",
     "@mtcute/html-parser": "workspace:^",
     "@mtcute/markdown-parser": "workspace:^",
-    "@mtcute/wasm": "workspace:^"
+    "@mtcute/wasm": "workspace:^",
+    "@fuman/bun-net": "workspace:^",
+    "@fuman/net": "workspace:^",
+    "@fuman/io": "workspace:^"
   },
   "devDependencies": {
     "@mtcute/test": "workspace:^"

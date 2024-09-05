@@ -101,6 +101,15 @@ importers:
 
   packages/bun:
     dependencies:
+      '@fuman/bun-net':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/bun-net
+      '@fuman/io':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/io
+      '@fuman/net':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/net
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -217,6 +226,15 @@ importers:
       '@db/sqlite':
         specifier: npm:@jsr/db__sqlite@0.12.0
         version: '@jsr/db__sqlite@0.12.0'
+      '@fuman/deno-net':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/deno-net
+      '@fuman/io':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/io
+      '@fuman/net':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/net
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -275,12 +293,6 @@ importers:
         specifier: 5.2.3
         version: 5.2.3
 
-  packages/http-proxy:
-    dependencies:
-      '@mtcute/node':
-        specifier: workspace:^
-        version: link:../node
-
   packages/i18n:
     devDependencies:
       '@mtcute/core':
@@ -299,14 +311,11 @@ importers:
         specifier: 5.2.3
         version: 5.2.3
 
-  packages/mtproxy:
-    dependencies:
-      '@mtcute/node':
-        specifier: workspace:^
-        version: link:../node
-
   packages/node:
     dependencies:
+      '@fuman/net':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/net
       '@fuman/node-net':
         specifier: workspace:^
         version: link:../../private/fuman/packages/node-net
@@ -332,15 +341,6 @@ importers:
       '@types/better-sqlite3':
         specifier: 7.6.4
         version: 7.6.4
-
-  packages/socks-proxy:
-    dependencies:
-      '@mtcute/node':
-        specifier: workspace:^
-        version: link:../node
-      ip6:
-        specifier: 0.2.7
-        version: 0.2.7
 
   packages/test:
     dependencies:
@@ -2777,10 +2777,6 @@ packages:
   inquirer@9.2.11:
     resolution: {integrity: sha512-B2LafrnnhbRzCWfAdOXisUzL89Kg8cVJlYmhqoi3flSiV/TveO+nsXwgKr9h9PIo+J1hz7nBSk6gegRIMBBf7g==}
     engines: {node: '>=14.18.0'}
-
-  ip6@0.2.7:
-    resolution: {integrity: sha512-zEzGsxn4Uw33TByv0DdX/RRh+VsGfEctOp7CvJq/b4JEjY9OvPB58dsMYiEwIVLsIWHZSJPn3XG8mP9Qv3TG3g==}
-    hasBin: true
 
   is-alphabetical@1.0.4:
     resolution: {integrity: sha512-DwzsA04LQ10FHTZuL0/grVDk4rFoVH1pjAToYwBrHSxcrBIGQuXrQMtD5U1b0U2XVgKZCTLLP8u2Qxqhy3l2Vg==}
@@ -6679,8 +6675,6 @@ snapshots:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 6.2.0
-
-  ip6@0.2.7: {}
 
   is-alphabetical@1.0.4: {}
 

@@ -6,15 +6,18 @@ export interface BasicDcOption {
     id: number
     ipv6?: boolean
     mediaOnly?: boolean
+    testMode?: boolean
 }
 
 export function serializeBasicDcOption(dc: BasicDcOption): Uint8Array {
     const writer = TlBinaryWriter.manual(64)
 
-    const flags = (dc.ipv6 ? 1 : 0) | (dc.mediaOnly ? 2 : 0)
+    const flags = (dc.ipv6 ? 1 : 0)
+      | (dc.mediaOnly ? 2 : 0)
+      | (dc.testMode ? 4 : 0)
     writer.raw(
         new Uint8Array([
-            1, // version
+            2, // version
             dc.id,
             flags,
         ]),
@@ -30,7 +33,7 @@ export function parseBasicDcOption(data: Uint8Array): BasicDcOption | null {
     const reader = TlBinaryReader.manual(data)
 
     const [version, id, flags] = reader.raw(3)
-    if (version !== 1) return null
+    if (version !== 1 && version !== 2) return null
 
     const ipAddress = reader.string()
     const port = reader.int()
@@ -41,6 +44,7 @@ export function parseBasicDcOption(data: Uint8Array): BasicDcOption | null {
         port,
         ipv6: (flags & 1) !== 0,
         mediaOnly: (flags & 2) !== 0,
+        testMode: version === 2 && (flags & 4) !== 0,
     }
 }
 
@@ -84,12 +88,14 @@ export const defaultTestDc: DcOptions = {
         ipAddress: '149.154.167.40',
         port: 443,
         id: 2,
+        testMode: true,
     },
     media: {
         ipAddress: '149.154.167.40',
         port: 443,
         id: 2,
         mediaOnly: true,
+        testMode: true,
     },
 }
 
@@ -99,6 +105,7 @@ export const defaultTestIpv6Dc: DcOptions = {
         port: 443,
         ipv6: true,
         id: 2,
+        testMode: true,
     },
     media: {
         ipAddress: '2001:67c:4e8:f002::e',
@@ -106,5 +113,6 @@ export const defaultTestIpv6Dc: DcOptions = {
         ipv6: true,
         id: 2,
         mediaOnly: true,
+        testMode: true,
     },
 }

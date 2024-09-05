@@ -1,23 +1,23 @@
 {
-  "name": "@mtcute/file-id",
-  "type": "module",
-  "version": "0.16.12",
-  "private": true,
-  "description": "Support for TDLib and Bot API file ID for mtcute",
-  "author": "alina sireneva <alina@tei.su>",
-  "license": "MIT",
-  "sideEffects": false,
-  "exports": {
-    ".": "./src/index.ts"
-  },
-  "scripts": {
-    "build": "pnpm run -w build-package file-id"
-  },
-  "dependencies": {
-    "@mtcute/tl-runtime": "workspace:^",
-    "long": "5.2.3"
-  },
-  "devDependencies": {
-    "@mtcute/test": "workspace:^"
-  }
+    "name": "@mtcute/file-id",
+    "type": "module",
+    "version": "0.17.0-fuman-alpha",
+    "private": true,
+    "description": "Support for TDLib and Bot API file ID for mtcute",
+    "author": "alina sireneva <alina@tei.su>",
+    "license": "MIT",
+    "sideEffects": false,
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "scripts": {
+        "build": "pnpm run -w build-package file-id"
+    },
+    "dependencies": {
+        "@mtcute/tl-runtime": "workspace:^",
+        "long": "5.2.3"
+    },
+    "devDependencies": {
+        "@mtcute/test": "workspace:^"
+    }
 }

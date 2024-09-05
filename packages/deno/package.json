@@ -1,31 +1,34 @@
 {
-  "name": "@mtcute/deno",
-  "type": "module",
-  "version": "0.16.9",
-  "private": true,
-  "description": "Meta-package for Deno",
-  "author": "alina sireneva <alina@tei.su>",
-  "license": "MIT",
-  "sideEffects": false,
-  "exports": {
-    ".": "./src/index.ts",
-    "./utils.js": "./src/utils.ts",
-    "./methods.js": "./src/methods.ts"
-  },
-  "main": "src/index.ts",
-  "scripts": {
-    "docs": "typedoc",
-    "build": "pnpm run -w build-package deno"
-  },
-  "dependencies": {
-    "@db/sqlite": "npm:@jsr/db__sqlite@0.12.0",
-    "@mtcute/core": "workspace:^",
-    "@mtcute/html-parser": "workspace:^",
-    "@mtcute/markdown-parser": "workspace:^",
-    "@mtcute/wasm": "workspace:^",
-    "@std/io": "npm:@jsr/std__io@0.223.0"
-  },
-  "devDependencies": {
-    "@mtcute/test": "workspace:^"
-  }
+    "name": "@mtcute/deno",
+    "type": "module",
+    "version": "0.17.0-fuman-alpha",
+    "private": true,
+    "description": "Meta-package for Deno",
+    "author": "alina sireneva <alina@tei.su>",
+    "license": "MIT",
+    "sideEffects": false,
+    "exports": {
+        ".": "./src/index.ts",
+        "./utils.js": "./src/utils.ts",
+        "./methods.js": "./src/methods.ts"
+    },
+    "main": "src/index.ts",
+    "scripts": {
+        "docs": "typedoc",
+        "build": "pnpm run -w build-package deno"
+    },
+    "dependencies": {
+        "@db/sqlite": "npm:@jsr/db__sqlite@0.12.0",
+        "@fuman/deno-net": "workspace:^",
+        "@fuman/net": "workspace:^",
+        "@fuman/io": "workspace:^",
+        "@mtcute/core": "workspace:^",
+        "@mtcute/html-parser": "workspace:^",
+        "@mtcute/markdown-parser": "workspace:^",
+        "@mtcute/wasm": "workspace:^",
+        "@std/io": "npm:@jsr/std__io@0.223.0"
+    },
+    "devDependencies": {
+        "@mtcute/test": "workspace:^"
+    }
 }

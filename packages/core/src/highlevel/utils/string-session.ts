@@ -8,7 +8,6 @@ import type { CurrentUserInfo } from '../storage/service/current-user.js'
 
 export interface StringSessionData {
     version: number
-    testMode: boolean
     primaryDcs: DcOptions
     self?: CurrentUserInfo | null
     authKey: Uint8Array
@@ -52,10 +51,6 @@ export function writeStringSession(data: StringSessionData): string {
 
     if (data.self) {
         flags |= 1
-    }
-
-    if (data.testMode) {
-        flags |= 2
     }
 
     writer.uint8View[0] = version
@@ -104,7 +99,7 @@ export function readStringSession(data: string): StringSessionData {
 
     const flags = reader.int()
     const hasSelf = flags & 1
-    const testMode = Boolean(flags & 2)
+    const testModeOld = Boolean(flags & 2)
     const hasMedia = version >= 2 && Boolean(flags & 4)
 
     let primaryDc: BasicDcOption
@@ -135,6 +130,13 @@ export function readStringSession(data: string): StringSessionData {
         throw new Error('unreachable')
     }
 
+    if (testModeOld) {
+        primaryDc.testMode = true
+        primaryMediaDc.testMode = true
+    } else if (primaryDc.testMode !== primaryMediaDc.testMode) {
+        throw new MtArgumentError('Primary DC and primary media DC must have the same test mode flag')
+    }
+
     let self: CurrentUserInfo | null = null
 
     if (hasSelf) {
@@ -154,7 +156,6 @@ export function readStringSession(data: string): StringSessionData {
 
     return {
         version,
-        testMode,
         primaryDcs: {
             main: primaryDc,
             media: primaryMediaDc,

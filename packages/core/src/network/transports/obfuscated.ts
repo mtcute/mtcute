@@ -27,7 +27,6 @@ export class ObfuscatedPacketCodec implements IPacketCodec {
     }
 
     constructor(inner: IPacketCodec, proxy?: MtProxyInfo) {
-        // super(inner)
         this._inner = inner
         this._proxy = proxy
     }
@@ -99,19 +98,25 @@ export class ObfuscatedPacketCodec implements IPacketCodec {
 
     async encode(packet: Uint8Array, into: ISyncWritable): Promise<void> {
         const temp = Bytes.alloc(packet.length)
-        await this._inner.encode(packet, into)
+        await this._inner.encode(packet, temp)
         write.bytes(into, this._encryptor!.process(temp.result()))
     }
 
+    private _decodeBuf = Bytes.alloc()
     async decode(reader: Bytes, eof: boolean): Promise<Uint8Array | null> {
-        const inner = await this._inner.decode(reader, eof)
-        if (!inner) return null
+        if (eof) return null
 
-        return this._decryptor!.process(inner)
+        if (reader.available > 0) {
+            const into = this._decodeBuf.writeSync(reader.available)
+            into.set(this._decryptor!.process(reader.readSync(reader.available)))
+        }
+
+        return this._inner.decode(this._decodeBuf, eof)
     }
 
     reset(): void {
         this._inner.reset()
+        this._decodeBuf.reset()
         this._encryptor?.close?.()
         this._decryptor?.close?.()
 

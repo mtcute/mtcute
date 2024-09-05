@@ -18,7 +18,7 @@ import { downloadAsNodeStream } from './methods/download-node-stream.js'
 import { BunPlatform } from './platform.js'
 import { SqliteStorage } from './sqlite/index.js'
 import { BunCryptoProvider } from './utils/crypto.js'
-// import { TcpTransport } from './utils/tcp.js'
+import { TcpTransport } from './utils/tcp.js'
 
 export type { TelegramClientOptions }
 
@@ -49,7 +49,7 @@ export class BaseTelegramClient extends BaseTelegramClientBase {
 
         super({
             crypto: new BunCryptoProvider(),
-            transport: {} as any, // todo
+            transport: TcpTransport,
             ...opts,
             storage:
                 typeof opts.storage === 'string'

@@ -33,7 +33,7 @@ export class IntermediatePacketCodec implements IPacketCodec {
         }
 
         if (reader.available < length) {
-            reader.unread(4)
+            reader.rewind(4)
 
             return null
         }

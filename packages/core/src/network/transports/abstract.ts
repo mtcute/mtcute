@@ -21,8 +21,9 @@ export interface ITelegramConnection extends IConnection<any, any> {
 }
 
 export interface TelegramTransport {
+    setup?(crypto: ICryptoProvider, log: Logger): void
     connect: (dc: BasicDcOption, testMode: boolean) => Promise<ITelegramConnection>
-    packetCodec: () => IPacketCodec
+    packetCodec: (dc: BasicDcOption) => IPacketCodec
 }
 
 /**
