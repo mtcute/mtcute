@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import { ConditionVariable } from '@fuman/utils'
 
-import { ConditionVariable } from './condition-variable.js'
 import { throttle } from './function-utils.js'
 
 describe('throttle', () => {

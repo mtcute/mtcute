@@ -1,13 +1,10 @@
 import type { tl } from '@mtcute/tl'
-import { utf8 } from '@fuman/utils'
+import { bigint, u8, utf8 } from '@fuman/utils'
 
 import { MtSecurityError, MtUnsupportedError } from '../../types/errors.js'
-import { bigIntModPow, bigIntToBuffer, bufferToBigInt } from '../bigint-utils.js'
-import { concatBuffers } from '../buffer-utils.js'
 import { assertTypeIs } from '../type-assertions.js'
 
 import type { ICryptoProvider } from './abstract.js'
-import { xorBuffer } from './utils.js'
 
 /**
  * Compute password hash as defined by MTProto.
@@ -25,7 +22,7 @@ export async function computePasswordHash(
     salt1: Uint8Array,
     salt2: Uint8Array,
 ): Promise<Uint8Array> {
-    const SH = (data: Uint8Array, salt: Uint8Array) => crypto.sha256(concatBuffers([salt, data, salt]))
+    const SH = (data: Uint8Array, salt: Uint8Array) => crypto.sha256(u8.concat3(salt, data, salt))
     const PH1 = (pwd: Uint8Array, salt1: Uint8Array, salt2: Uint8Array) => SH(SH(pwd, salt1), salt2)
 
     return SH(await crypto.pbkdf2(PH1(password, salt1, salt2), salt1, 100000), salt2)
@@ -53,10 +50,10 @@ export async function computeNewPasswordHash(
     const _x = await computePasswordHash(crypto, utf8.encoder.encode(password), algo.salt1, algo.salt2)
 
     const g = BigInt(algo.g)
-    const p = bufferToBigInt(algo.p)
-    const x = bufferToBigInt(_x)
+    const p = bigint.fromBytes(algo.p)
+    const x = bigint.fromBytes(_x)
 
-    return bigIntToBuffer(bigIntModPow(g, x, p), 256)
+    return bigint.toBytes(bigint.modPowBinary(g, x, p), 256)
 }
 
 /**
@@ -92,32 +89,39 @@ export async function computeSrpParams(
     }
 
     const g = BigInt(algo.g)
-    const _g = bigIntToBuffer(g, 256)
-    const p = bufferToBigInt(algo.p)
-    const gB = bufferToBigInt(request.srpB)
+    const _g = bigint.toBytes(g, 256)
+    const p = bigint.fromBytes(algo.p)
+    const gB = bigint.fromBytes(request.srpB)
 
-    const a = bufferToBigInt(crypto.randomBytes(256))
-    const gA = bigIntModPow(g, a, p)
-    const _gA = bigIntToBuffer(gA, 256)
+    const a = bigint.fromBytes(crypto.randomBytes(256))
+    const gA = bigint.modPowBinary(g, a, p)
+    const _gA = bigint.toBytes(gA, 256)
 
     const H = (data: Uint8Array) => crypto.sha256(data)
 
-    const _k = crypto.sha256(concatBuffers([algo.p, _g]))
-    const _u = crypto.sha256(concatBuffers([_gA, request.srpB]))
+    const _k = crypto.sha256(u8.concat2(algo.p, _g))
+    const _u = crypto.sha256(u8.concat2(_gA, request.srpB))
     const _x = await computePasswordHash(crypto, utf8.encoder.encode(password), algo.salt1, algo.salt2)
-    const k = bufferToBigInt(_k)
-    const u = bufferToBigInt(_u)
-    const x = bufferToBigInt(_x)
+    const k = bigint.fromBytes(_k)
+    const u = bigint.fromBytes(_u)
+    const x = bigint.fromBytes(_x)
 
-    const v = bigIntModPow(g, x, p)
+    const v = bigint.modPowBinary(g, x, p)
     const kV = (k * v) % p
 
     let t = gB - kV
     if (t < 0n) t += p
-    const sA = bigIntModPow(t, a + u * x, p)
-    const _kA = H(bigIntToBuffer(sA, 256))
+    const sA = bigint.modPowBinary(t, a + u * x, p)
+    const _kA = H(bigint.toBytes(sA, 256))
 
-    const _M1 = H(concatBuffers([xorBuffer(H(algo.p), H(_g)), H(algo.salt1), H(algo.salt2), _gA, request.srpB, _kA]))
+    const _M1 = H(u8.concat([
+        u8.xor(H(algo.p), H(_g)),
+        H(algo.salt1),
+        H(algo.salt2),
+        _gA,
+        request.srpB,
+        _kA,
+    ]))
 
     return {
         _: 'inputCheckPasswordSRP',

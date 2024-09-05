@@ -2,15 +2,13 @@ import Long from 'long'
 import { mtp } from '@mtcute/tl'
 import type { TlPublicKey } from '@mtcute/tl/binary/rsa-keys.js'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
+import { bigint, typed, u8 } from '@fuman/utils'
 
 import { MtArgumentError, MtSecurityError, MtTypeAssertionError } from '../types/index.js'
-import { buffersEqual, concatBuffers, dataViewFromBuffer } from '../utils/buffer-utils.js'
 import { findKeyByFingerprints } from '../utils/crypto/keys.js'
 import { millerRabin } from '../utils/crypto/miller-rabin.js'
 import { generateKeyAndIvFromNonce } from '../utils/crypto/mtproto.js'
-import { xorBuffer, xorBufferInPlace } from '../utils/crypto/utils.js'
 import type { ICryptoProvider, Logger } from '../utils/index.js'
-import { bigIntModPow, bigIntToBuffer, bufferToBigInt } from '../utils/index.js'
 import { mtpAssertTypeIs } from '../utils/type-assertions.js'
 
 import type { SessionConnection } from './session-connection.js'
@@ -140,7 +138,7 @@ function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey): Ui
 
         const aesKey = crypto.randomBytes(32)
 
-        const dataWithHash = concatBuffers([data, crypto.sha256(concatBuffers([aesKey, data]))])
+        const dataWithHash = u8.concat2(data, crypto.sha256(u8.concat2(aesKey, data)))
         // we only need to reverse the data
         dataWithHash.subarray(0, 192).reverse()
 
@@ -148,36 +146,36 @@ function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey): Ui
         const encrypted = aes.encrypt(dataWithHash)
         const encryptedHash = crypto.sha256(encrypted)
 
-        xorBufferInPlace(aesKey, encryptedHash)
-        const decryptedData = concatBuffers([aesKey, encrypted])
+        u8.xorInPlace(aesKey, encryptedHash)
+        const decryptedData = u8.concat2(aesKey, encrypted)
 
-        const decryptedDataBigint = bufferToBigInt(decryptedData)
+        const decryptedDataBigint = bigint.fromBytes(decryptedData)
 
         if (decryptedDataBigint >= keyModulus) {
             continue
         }
 
-        const encryptedBigint = bigIntModPow(decryptedDataBigint, keyExponent, keyModulus)
+        const encryptedBigint = bigint.modPowBinary(decryptedDataBigint, keyExponent, keyModulus)
 
-        return bigIntToBuffer(encryptedBigint, 256)
+        return bigint.toBytes(encryptedBigint, 256)
     }
 }
 
 function rsaEncrypt(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey): Uint8Array {
-    const toEncrypt = concatBuffers([
+    const toEncrypt = u8.concat3(
         crypto.sha1(data),
         data,
         // sha1 is always 20 bytes, so we're left with 255 - 20 - x padding
         crypto.randomBytes(235 - data.length),
-    ])
+    )
 
-    const encryptedBigInt = bigIntModPow(
-        bufferToBigInt(toEncrypt),
+    const encryptedBigInt = bigint.modPowBinary(
+        bigint.fromBytes(toEncrypt),
         BigInt(`0x${key.exponent}`),
         BigInt(`0x${key.modulus}`),
     )
 
-    return bigIntToBuffer(encryptedBigInt)
+    return bigint.toBytes(encryptedBigInt)
 }
 
 /**
@@ -233,7 +231,7 @@ export async function doAuthorization(
 
     mtpAssertTypeIs('auth step 1', resPq, 'mt_resPQ')
 
-    if (!buffersEqual(resPq.nonce, nonce)) {
+    if (!typed.equal(resPq.nonce, nonce)) {
         throw new MtSecurityError('Step 1: invalid nonce from server')
     }
 
@@ -250,7 +248,7 @@ export async function doAuthorization(
     }
     log.debug('found server key, fp = %s, old = %s', publicKey.fingerprint, publicKey.old)
 
-    if (millerRabin(crypto, bufferToBigInt(resPq.pq))) {
+    if (millerRabin(crypto, bigint.fromBytes(resPq.pq))) {
         throw new MtSecurityError('Step 2: pq is prime')
     }
 
@@ -295,10 +293,10 @@ export async function doAuthorization(
 
     mtpAssertTypeIs('auth step 2', serverDhParams, 'mt_server_DH_params_ok')
 
-    if (!buffersEqual(serverDhParams.nonce, nonce)) {
+    if (!typed.equal(serverDhParams.nonce, nonce)) {
         throw new MtSecurityError('Step 2: invalid nonce from server')
     }
-    if (!buffersEqual(serverDhParams.serverNonce, resPq.serverNonce)) {
+    if (!typed.equal(serverDhParams.serverNonce, resPq.serverNonce)) {
         throw new MtSecurityError('Step 2: invalid server nonce from server')
     }
 
@@ -317,36 +315,36 @@ export async function doAuthorization(
     const serverDhInnerReader = new TlBinaryReader(readerMap, plainTextAnswer, 20)
     const serverDhInner = serverDhInnerReader.object() as mtp.TlObject
 
-    if (!buffersEqual(innerDataHash, crypto.sha1(plainTextAnswer.subarray(20, serverDhInnerReader.pos)))) {
+    if (!typed.equal(innerDataHash, crypto.sha1(plainTextAnswer.subarray(20, serverDhInnerReader.pos)))) {
         throw new MtSecurityError('Step 3: invalid inner data hash')
     }
 
     mtpAssertTypeIs('auth step 3', serverDhInner, 'mt_server_DH_inner_data')
 
-    if (!buffersEqual(serverDhInner.nonce, nonce)) {
+    if (!typed.equal(serverDhInner.nonce, nonce)) {
         throw new Error('Step 3: invalid nonce from server')
     }
-    if (!buffersEqual(serverDhInner.serverNonce, resPq.serverNonce)) {
+    if (!typed.equal(serverDhInner.serverNonce, resPq.serverNonce)) {
         throw new Error('Step 3: invalid server nonce from server')
     }
 
-    const dhPrime = bufferToBigInt(serverDhInner.dhPrime)
+    const dhPrime = bigint.fromBytes(serverDhInner.dhPrime)
     const timeOffset = Math.floor(Date.now() / 1000) - serverDhInner.serverTime
     session.updateTimeOffset(timeOffset)
 
     const g = BigInt(serverDhInner.g)
-    const gA = bufferToBigInt(serverDhInner.gA)
+    const gA = bigint.fromBytes(serverDhInner.gA)
 
     checkDhPrime(crypto, log, dhPrime, serverDhInner.g)
 
     let retryId = Long.ZERO
-    const serverSalt = xorBuffer(newNonce.subarray(0, 8), resPq.serverNonce.subarray(0, 8))
+    const serverSalt = u8.xor(newNonce.subarray(0, 8), resPq.serverNonce.subarray(0, 8))
 
     for (;;) {
-        const b = bufferToBigInt(crypto.randomBytes(256))
-        const gB = bigIntModPow(g, b, dhPrime)
+        const b = bigint.fromBytes(crypto.randomBytes(256))
+        const gB = bigint.modPowBinary(g, b, dhPrime)
 
-        const authKey = bigIntToBuffer(bigIntModPow(gA, b, dhPrime))
+        const authKey = bigint.toBytes(bigint.modPowBinary(gA, b, dhPrime))
         const authKeyAuxHash = crypto.sha1(authKey).subarray(0, 8)
 
         // validate DH params
@@ -367,7 +365,7 @@ export async function doAuthorization(
             throw new MtSecurityError('g_b is not within (2^{2048-64}, dh_prime - 2^{2048-64})')
         }
 
-        const gB_ = bigIntToBuffer(gB, 0, false)
+        const gB_ = bigint.toBytes(gB, 0)
 
         // Step 4: send client DH
         const clientDhInner: mtp.RawMt_client_DH_inner_data = {
@@ -404,10 +402,10 @@ export async function doAuthorization(
             throw new MtTypeAssertionError('auth step 4', 'set_client_DH_params_answer', dhGen._)
         }
 
-        if (!buffersEqual(dhGen.nonce, nonce)) {
+        if (!typed.equal(dhGen.nonce, nonce)) {
             throw new MtSecurityError('Step 4: invalid nonce from server')
         }
-        if (!buffersEqual(dhGen.serverNonce, resPq.serverNonce)) {
+        if (!typed.equal(dhGen.serverNonce, resPq.serverNonce)) {
             throw new MtSecurityError('Step 4: invalid server nonce from server')
         }
 
@@ -419,9 +417,9 @@ export async function doAuthorization(
         }
 
         if (dhGen._ === 'mt_dh_gen_retry') {
-            const expectedHash = crypto.sha1(concatBuffers([newNonce, new Uint8Array([2]), authKeyAuxHash]))
+            const expectedHash = crypto.sha1(u8.concat3(newNonce, new Uint8Array([2]), authKeyAuxHash))
 
-            if (!buffersEqual(expectedHash.subarray(4, 20), dhGen.newNonceHash2)) {
+            if (!typed.equal(expectedHash.subarray(4, 20), dhGen.newNonceHash2)) {
                 throw new MtSecurityError('Step 4: invalid retry nonce hash from server')
             }
             retryId = Long.fromBytesLE(authKeyAuxHash as unknown as number[])
@@ -430,15 +428,15 @@ export async function doAuthorization(
 
         if (dhGen._ !== 'mt_dh_gen_ok') throw new Error('unreachable')
 
-        const expectedHash = crypto.sha1(concatBuffers([newNonce, new Uint8Array([1]), authKeyAuxHash]))
+        const expectedHash = crypto.sha1(u8.concat3(newNonce, [1], authKeyAuxHash))
 
-        if (!buffersEqual(expectedHash.subarray(4, 20), dhGen.newNonceHash1)) {
+        if (!typed.equal(expectedHash.subarray(4, 20), dhGen.newNonceHash1)) {
             throw new MtSecurityError('Step 4: invalid nonce hash from server')
         }
 
         log.info('authorization successful')
 
-        const dv = dataViewFromBuffer(serverSalt)
+        const dv = typed.toDataView(serverSalt)
 
         return [authKey, new Long(dv.getInt32(0, true), dv.getInt32(4, true)), timeOffset]
     }

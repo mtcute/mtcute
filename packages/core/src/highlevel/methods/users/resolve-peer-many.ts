@@ -1,6 +1,6 @@
 import type { tl } from '@mtcute/tl'
+import { ConditionVariable } from '@fuman/utils'
 
-import { ConditionVariable } from '../../../utils/condition-variable.js'
 import type { ITelegramClient } from '../../client.types.js'
 import { MtPeerNotFoundError } from '../../types/errors.js'
 import type { InputPeerLike } from '../../types/peers/index.js'

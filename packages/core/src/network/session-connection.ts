@@ -3,19 +3,14 @@ import type { mtp } from '@mtcute/tl'
 import { tl } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
+import { Deferred, u8 } from '@fuman/utils'
 
 import { getPlatform } from '../platform.js'
 import { MtArgumentError, MtTimeoutError, MtcuteError } from '../types/index.js'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
-import type {
-    ControllablePromise,
-    ICryptoProvider,
-} from '../utils/index.js'
+import type { ICryptoProvider } from '../utils/index.js'
 import {
     EarlyTimer,
-
-    concatBuffers,
-    createControllablePromise,
     longFromBuffer,
     randomLong,
     removeFromLongArray,
@@ -74,7 +69,7 @@ export class SessionConnection extends PersistentConnection {
     private _queuedDestroySession: Long[] = []
 
     // waitForMessage
-    private _pendingWaitForUnencrypted: [ControllablePromise<Uint8Array>, timers.Timer][] = []
+    private _pendingWaitForUnencrypted: [Deferred<Uint8Array>, timers.Timer][] = []
 
     private _usePfs
     private _isPfsBindingPending = false
@@ -389,9 +384,9 @@ export class SessionConnection extends PersistentConnection {
 
                 const ige = createAesIgeForMessageOld(this._crypto, this._session._authKey.key, msgKey, true)
                 const encryptedData = ige.encrypt(msgWithPadding)
-                const encryptedMessage = concatBuffers([this._session._authKey.id, msgKey, encryptedData])
+                const encryptedMessage = u8.concat3(this._session._authKey.id, msgKey, encryptedData)
 
-                const promise = createControllablePromise<mtp.RawMt_rpc_error | boolean>()
+                const promise = new Deferred<mtp.RawMt_rpc_error | boolean>()
 
                 // encrypt the message using temp key and same msg id
                 // this is a bit of a hack, but it works
@@ -432,7 +427,7 @@ export class SessionConnection extends PersistentConnection {
                 )
                 await this.send(requestEncrypted)
 
-                const res = await promise
+                const res = await promise.promise
 
                 this._session.pendingMessages.delete(msgId)
 
@@ -496,14 +491,14 @@ export class SessionConnection extends PersistentConnection {
         if (this._destroyed) {
             return Promise.reject(new MtcuteError('Connection destroyed'))
         }
-        const promise = createControllablePromise<Uint8Array>()
+        const promise = new Deferred<Uint8Array>()
         const timeoutId = timers.setTimeout(() => {
             promise.reject(new MtTimeoutError(timeout))
             this._pendingWaitForUnencrypted = this._pendingWaitForUnencrypted.filter(it => it[0] !== promise)
         }, timeout)
         this._pendingWaitForUnencrypted.push([promise, timeoutId])
 
-        return promise
+        return promise.promise
     }
 
     protected onMessage(data: Uint8Array): void {
@@ -1412,7 +1407,7 @@ export class SessionConnection extends PersistentConnection {
 
         const pending: PendingRpc = {
             method,
-            promise: createControllablePromise(),
+            promise: new Deferred<unknown>(),
             data: content,
             // we will need to know size of gzip_packed overhead in _flush()
             gzipOverhead: shouldGzip ? 4 + TlSerializationCounter.countBytesOverhead(content.length) : 0,
@@ -1435,7 +1430,7 @@ export class SessionConnection extends PersistentConnection {
         if (abortSignal?.aborted) {
             pending.promise.reject(abortSignal.reason)
 
-            return pending.promise
+            return pending.promise.promise
         }
 
         if (timeout) {
@@ -1448,7 +1443,7 @@ export class SessionConnection extends PersistentConnection {
 
         this._enqueueRpc(pending, true)
 
-        return pending.promise
+        return pending.promise.promise
     }
 
     notifyNetworkChanged(online: boolean): void {

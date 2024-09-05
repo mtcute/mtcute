@@ -2,9 +2,9 @@
 import EventEmitter from 'events'
 
 import type { mtp, tl } from '@mtcute/tl'
+import { Deferred } from '@fuman/utils'
 
 import type { Logger } from '../utils/index.js'
-import { createControllablePromise } from '../utils/index.js'
 
 import { MtprotoSession } from './mtproto-session.js'
 import type { SessionConnectionParams } from './session-connection.js'
@@ -132,10 +132,10 @@ export class MultiSessionConnection extends EventEmitter {
 
         if (enforcePfsChanged) {
             // we need to fetch new auth keys first
-            const promise = createControllablePromise<void>()
+            const promise = new Deferred<void>()
             this.emit('request-keys', promise)
 
-            promise
+            promise.promise
                 .then(() => {
                     this._connections.forEach((conn) => {
                         conn.setUsePfs(this.params.usePfs || this._enforcePfs)

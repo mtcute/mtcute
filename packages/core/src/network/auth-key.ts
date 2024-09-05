@@ -2,11 +2,11 @@ import type Long from 'long'
 import type { tl } from '@mtcute/tl'
 import type { TlReaderMap } from '@mtcute/tl-runtime'
 import { TlBinaryReader } from '@mtcute/tl-runtime'
+import { typed, u8 } from '@fuman/utils'
 
 import { MtcuteError } from '../types/errors.js'
 import { createAesIgeForMessage } from '../utils/crypto/mtproto.js'
 import type { ICryptoProvider, Logger } from '../utils/index.js'
-import { buffersEqual, concatBuffers, dataViewFromBuffer } from '../utils/index.js'
 
 export class AuthKey {
     ready = false
@@ -23,7 +23,7 @@ export class AuthKey {
     ) {}
 
     match(keyId: Uint8Array): boolean {
-        return this.ready && buffersEqual(keyId, this.id)
+        return this.ready && typed.equal(keyId, this.id)
     }
 
     setup(authKey?: Uint8Array | null): void {
@@ -45,7 +45,7 @@ export class AuthKey {
         padding = 12 + (padding ? 16 - padding : 0)
 
         const buf = new Uint8Array(16 + message.length + padding)
-        const dv = dataViewFromBuffer(buf)
+        const dv = typed.toDataView(buf)
 
         dv.setInt32(0, serverSalt.low, true)
         dv.setInt32(4, serverSalt.high, true)
@@ -54,11 +54,11 @@ export class AuthKey {
         buf.set(message, 16)
         this._crypto.randomFill(buf.subarray(16 + message.length, 16 + message.length + padding))
 
-        const messageKey = this._crypto.sha256(concatBuffers([this.clientSalt, buf])).subarray(8, 24)
+        const messageKey = this._crypto.sha256(u8.concat2(this.clientSalt, buf)).subarray(8, 24)
         const ige = createAesIgeForMessage(this._crypto, this.key, messageKey, true)
         const encryptedData = ige.encrypt(buf)
 
-        return concatBuffers([this.id, messageKey, encryptedData])
+        return u8.concat3(this.id, messageKey, encryptedData)
     }
 
     decryptMessage(
@@ -81,10 +81,10 @@ export class AuthKey {
         const ige = createAesIgeForMessage(this._crypto, this.key, messageKey, false)
         const innerData = ige.decrypt(encryptedData)
 
-        const msgKeySource = this._crypto.sha256(concatBuffers([this.serverSalt, innerData]))
+        const msgKeySource = this._crypto.sha256(u8.concat2(this.serverSalt, innerData))
         const expectedMessageKey = msgKeySource.subarray(8, 24)
 
-        if (!buffersEqual(messageKey, expectedMessageKey)) {
+        if (!typed.equal(messageKey, expectedMessageKey)) {
             this.log.warn('received message with invalid messageKey = %h (expected %h)', messageKey, expectedMessageKey)
 
             return

@@ -1,5 +1,5 @@
 import { MtArgumentError, MtcuteError } from '@mtcute/core'
-import { sleep } from '@mtcute/core/utils.js'
+import { sleep } from '@fuman/utils'
 
 import type { Dispatcher } from '../dispatcher.js'
 

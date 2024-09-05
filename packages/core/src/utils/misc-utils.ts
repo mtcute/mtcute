@@ -1,11 +1,4 @@
-import * as timers from './timers.js'
-
-/**
- * Sleep for the given number of ms
- *
- * @param ms  Number of ms to sleep
- */
-export const sleep = (ms: number): Promise<void> => new Promise(resolve => timers.setTimeout(resolve, ms))
+import { timers } from '@fuman/utils'
 
 export function sleepWithAbort(ms: number, signal: AbortSignal): Promise<void> {
     return new Promise((resolve, reject) => {

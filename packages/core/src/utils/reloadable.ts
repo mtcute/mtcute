@@ -1,5 +1,6 @@
+import { timers } from '@fuman/utils'
+
 import { asyncResettable } from './function-utils.js'
-import * as timers from './timers.js'
 
 export interface ReloadableParams<Data> {
     reload: (old?: Data) => Promise<Data>

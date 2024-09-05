@@ -3,8 +3,7 @@ import { gzipSync, inflateSync } from 'node:zlib'
 import type { MockInstance } from 'vitest'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ICryptoProvider } from '@mtcute/core/utils.js'
-import { dataViewFromBuffer } from '@mtcute/core/utils.js'
-import { hex, utf8 } from '@fuman/utils'
+import { hex, typed, utf8 } from '@fuman/utils'
 
 import { defaultCryptoProvider } from './platform.js'
 
@@ -53,7 +52,7 @@ export function withFakeRandom(provider: ICryptoProvider, source: string = DEFAU
 
 export function useFakeMathRandom(source: string = DEFAULT_ENTROPY): void {
     const sourceBytes = hex.decode(source)
-    const dv = dataViewFromBuffer(sourceBytes)
+    const dv = typed.toDataView(sourceBytes)
 
     let spy: MockInstance<() => number>
 

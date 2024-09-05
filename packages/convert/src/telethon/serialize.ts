@@ -1,6 +1,5 @@
 import { MtArgumentError } from '@mtcute/core'
-import { dataViewFromBuffer } from '@mtcute/core/utils.js'
-import { base64 } from '@fuman/utils'
+import { base64, typed } from '@fuman/utils'
 
 import { serializeIpv4ToBytes, serializeIpv6ToBytes } from '../utils/ip.js'
 
@@ -13,7 +12,7 @@ export function serializeTelethonSession(session: TelethonSession): string {
 
     const ipSize = session.ipv6 ? 16 : 4
     const u8 = new Uint8Array(259 + ipSize)
-    const dv = dataViewFromBuffer(u8)
+    const dv = typed.toDataView(u8)
 
     dv.setUint8(0, session.dcId)
 

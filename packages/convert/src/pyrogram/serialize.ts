@@ -1,6 +1,5 @@
 import { Long, MtArgumentError } from '@mtcute/core'
-import { dataViewFromBuffer } from '@mtcute/core/utils.js'
-import { base64 } from '@fuman/utils'
+import { base64, typed } from '@fuman/utils'
 
 import type { PyrogramSession } from './types.js'
 
@@ -19,7 +18,7 @@ export function serializePyrogramSession(session: PyrogramSession): string {
     if (session.apiId === undefined) {
         // old format
         u8 = new Uint8Array(SESSION_STRING_SIZE_OLD)
-        const dv = dataViewFromBuffer(u8)
+        const dv = typed.toDataView(u8)
 
         dv.setUint8(0, session.dcId)
         dv.setUint8(1, session.isTest ? 1 : 0)
@@ -29,7 +28,7 @@ export function serializePyrogramSession(session: PyrogramSession): string {
         dv.setUint8(266, session.isBot ? 1 : 0)
     } else {
         u8 = new Uint8Array(SESSION_STRING_SIZE)
-        const dv = dataViewFromBuffer(u8)
+        const dv = typed.toDataView(u8)
 
         dv.setUint8(0, session.dcId)
         dv.setUint32(1, session.apiId)

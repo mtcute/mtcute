@@ -1,7 +1,7 @@
 import type { ISyncWritable } from '@fuman/io'
 import { Bytes, write } from '@fuman/io'
+import { typed, u8 } from '@fuman/utils'
 
-import { bufferToReversed, concatBuffers, dataViewFromBuffer } from '../../utils/buffer-utils.js'
 import type { IAesCtr, ICryptoProvider, Logger } from '../../utils/index.js'
 
 import type { IPacketCodec } from './abstract.js'
@@ -39,7 +39,7 @@ export class ObfuscatedPacketCodec implements IPacketCodec {
             random = this._crypto.randomBytes(64)
             if (random[0] === 0xEF) continue
 
-            dv = dataViewFromBuffer(random)
+            dv = typed.toDataView(random)
             const firstInt = dv.getUint32(0, true)
 
             if (
@@ -74,7 +74,7 @@ export class ObfuscatedPacketCodec implements IPacketCodec {
             dv.setInt16(60, dcId, true)
         }
 
-        const randomRev = bufferToReversed(random, 8, 56)
+        const randomRev = u8.toReversed(random.subarray(8, 56))
 
         let encryptKey = random.subarray(8, 40)
         const encryptIv = random.subarray(40, 56)
@@ -83,8 +83,8 @@ export class ObfuscatedPacketCodec implements IPacketCodec {
         const decryptIv = randomRev.subarray(32, 48)
 
         if (this._proxy) {
-            encryptKey = this._crypto.sha256(concatBuffers([encryptKey, this._proxy.secret]))
-            decryptKey = this._crypto.sha256(concatBuffers([decryptKey, this._proxy.secret]))
+            encryptKey = this._crypto.sha256(u8.concat2(encryptKey, this._proxy.secret))
+            decryptKey = this._crypto.sha256(u8.concat2(decryptKey, this._proxy.secret))
         }
 
         this._encryptor = this._crypto.createAesCtr(encryptKey, encryptIv, true)

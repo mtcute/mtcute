@@ -1,8 +1,8 @@
 // source: https://github.com/pyrogram/pyrogram/blob/master/pyrogram/storage/storage.py
 
 import { Long } from '@mtcute/core'
-import { dataViewFromBuffer, longFromBuffer } from '@mtcute/core/utils.js'
-import { base64 } from '@fuman/utils'
+import { longFromBuffer } from '@mtcute/core/utils.js'
+import { base64, typed } from '@fuman/utils'
 
 import type { PyrogramSession } from './types.js'
 
@@ -11,7 +11,7 @@ const SESSION_STRING_SIZE_64 = 356
 
 export function parsePyrogramSession(session: string): PyrogramSession {
     const data = base64.decode(session, true)
-    const dv = dataViewFromBuffer(data)
+    const dv = typed.toDataView(data)
 
     if (session.length === SESSION_STRING_SIZE || session.length === SESSION_STRING_SIZE_64) {
         // old format

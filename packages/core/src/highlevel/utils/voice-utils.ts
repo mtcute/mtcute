@@ -1,4 +1,4 @@
-import { dataViewFromBuffer } from '../../utils/buffer-utils.js'
+import { typed } from '@fuman/utils'
 
 /**
  * Decode 5-bit encoded voice message waveform into
@@ -24,7 +24,7 @@ export function decodeWaveform(wf: Uint8Array): number[] {
     // So we read in a general way all the entries except the last one.
 
     const result: number[] = []
-    const dv = dataViewFromBuffer(wf)
+    const dv = typed.toDataView(wf)
 
     for (let i = 0, j = 0; i < lastIdx; i++, j += 5) {
         const byteIdx = ~~(j / 8)
@@ -50,7 +50,7 @@ export function encodeWaveform(wf: number[]): Uint8Array {
     const bitsCount = wf.length * 5
     const bytesCount = ~~((bitsCount + 7) / 8)
     const result = new Uint8Array(bytesCount + 1)
-    const dv = dataViewFromBuffer(result)
+    const dv = typed.toDataView(result)
 
     // Write each 0-31 unsigned char as 5 bit to result.
     // We reserve one extra byte to be able to dereference any of required bytes

@@ -1,4 +1,4 @@
-import * as timers from './timers.js'
+import { timers } from '@fuman/utils'
 
 export type ThrottledFunction = (() => void) & {
     reset: () => void

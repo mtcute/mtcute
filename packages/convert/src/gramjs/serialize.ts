@@ -1,6 +1,5 @@
 import { MtArgumentError } from '@mtcute/core'
-import { dataViewFromBuffer } from '@mtcute/core/utils.js'
-import { base64, utf8 } from '@fuman/utils'
+import { base64, typed, utf8 } from '@fuman/utils'
 
 import type { TelethonSession } from '../telethon/types.js'
 
@@ -12,7 +11,7 @@ export function serializeGramjsSession(session: TelethonSession): string {
     const ipEncoded = utf8.encoder.encode(session.ipAddress)
 
     const u8 = new Uint8Array(261 + ipEncoded.length)
-    const dv = dataViewFromBuffer(u8)
+    const dv = typed.toDataView(u8)
 
     dv.setUint8(0, session.dcId)
     dv.setUint16(1, ipEncoded.length)

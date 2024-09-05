@@ -1,5 +1,4 @@
-import { AsyncLock } from '../../utils/async-lock.js'
-import { concatBuffers } from '../../utils/buffer-utils.js'
+import { AsyncLock, u8 } from '@fuman/utils'
 
 export function bufferToStream(buf: Uint8Array): ReadableStream<Uint8Array> {
     return new ReadableStream({
@@ -21,7 +20,7 @@ export async function streamToBuffer(stream: ReadableStream<Uint8Array>): Promis
         chunks.push(value)
     }
 
-    return concatBuffers(chunks)
+    return u8.concat(chunks)
 }
 
 export function createChunkedReader(stream: ReadableStream<Uint8Array>, chunkSize: number): {
@@ -77,12 +76,12 @@ export function createChunkedReader(stream: ReadableStream<Uint8Array>, chunkSiz
             if (length === chunkSize) {
                 bufferLength -= chunkSize
 
-                return concatBuffers(chunks)
+                return u8.concat(chunks)
             }
         } else if (next === undefined && bufferLength > 0) {
             bufferLength = 0
 
-            return concatBuffers(buffer)
+            return u8.concat(buffer)
         }
 
         const value = await readInner()

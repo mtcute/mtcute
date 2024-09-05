@@ -1,10 +1,8 @@
 import type { tl } from '@mtcute/tl'
+import { AsyncLock, Deferred, timers } from '@fuman/utils'
 
 import { MtArgumentError, MtTimeoutError } from '../../types/errors.js'
 import type { MaybePromise } from '../../types/utils.js'
-import { AsyncLock } from '../../utils/async-lock.js'
-import type { ControllablePromise } from '../../utils/controllable-promise.js'
-import { createControllablePromise } from '../../utils/controllable-promise.js'
 import { Deque } from '../../utils/deque.js'
 import { getMarkedPeerId } from '../../utils/peer-utils.js'
 import type { ITelegramClient } from '../client.types.js'
@@ -14,7 +12,6 @@ import { sendMedia } from '../methods/messages/send-media.js'
 import { sendMediaGroup } from '../methods/messages/send-media-group.js'
 import { sendText } from '../methods/messages/send-text.js'
 import { resolvePeer } from '../methods/users/resolve-peer.js'
-import { timers } from '../../utils/index.js'
 
 import type { Message } from './messages/message.js'
 import type { InputPeerLike } from './peers/index.js'
@@ -22,7 +19,7 @@ import type { HistoryReadUpdate, ParsedUpdate } from './updates/index.js'
 import type { ParametersSkip2 } from './utils.js'
 
 interface QueuedHandler<T> {
-    promise: ControllablePromise<T>
+    promise: Deferred<T>
     check?: (update: T) => MaybePromise<boolean>
     timeout?: timers.Timer
 }
@@ -340,7 +337,7 @@ export class Conversation {
             throw new MtArgumentError("Conversation hasn't started yet")
         }
 
-        const promise = createControllablePromise<Message>()
+        const promise = new Deferred<Message>()
 
         let timer: timers.Timer | undefined
 
@@ -359,7 +356,7 @@ export class Conversation {
 
         this._processPendingNewMessages()
 
-        return promise
+        return promise.promise
     }
 
     /**
@@ -481,7 +478,7 @@ export class Conversation {
             throw new MtArgumentError('Provide message for which to wait for edit for')
         }
 
-        const promise = createControllablePromise<Message>()
+        const promise = new Deferred<Message>()
 
         let timer: timers.Timer | undefined
         const timeout = params?.timeout
@@ -501,7 +498,7 @@ export class Conversation {
 
         this._processRecentEdits()
 
-        return promise
+        return promise.promise
     }
 
     /**
@@ -529,7 +526,7 @@ export class Conversation {
         const [dialog] = await getPeerDialogs(this.client, this._inputPeer)
         if (dialog.lastRead >= msgId) return
 
-        const promise = createControllablePromise<void>()
+        const promise = new Deferred<void>()
 
         let timer: timers.Timer | undefined
 
@@ -545,7 +542,7 @@ export class Conversation {
             timeout: timer,
         })
 
-        return promise
+        return promise.promise
     }
 
     private _onNewMessage(msg: Message) {

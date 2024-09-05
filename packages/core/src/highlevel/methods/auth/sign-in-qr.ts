@@ -1,9 +1,7 @@
 import { tl } from '@mtcute/tl'
+import { Deferred, base64 } from '@fuman/utils'
 
-import { getPlatform } from '../../../platform.js'
 import type { MaybePromise } from '../../../types/utils.js'
-import type { ControllablePromise } from '../../../utils/controllable-promise.js'
-import { createControllablePromise } from '../../../utils/controllable-promise.js'
 import { sleepWithAbort } from '../../../utils/misc-utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import type { ITelegramClient, ServerUpdateHandler } from '../../client.types.js'
@@ -53,7 +51,7 @@ export async function signInQr(
 ): Promise<User> {
     const { onUrlUpdated, abortSignal, onQrScanned } = params
 
-    let waiter: ControllablePromise<void> | undefined
+    let waiter: Deferred<void> | undefined
 
     // crutch – we need to wait for the updateLoginToken update.
     // we replace the server update handler temporarily because:
@@ -108,7 +106,6 @@ export async function signInQr(
 
     try {
         const { id, hash } = await client.getApiCrenetials()
-        const platform = getPlatform()
 
         loop: while (true) {
             let res: tl.auth.TypeLoginToken
@@ -134,11 +131,11 @@ export async function signInQr(
             switch (res._) {
                 case 'auth.loginToken':
                     onUrlUpdated(
-                        `tg://login?token=${platform.base64Encode(res.token, true)}`,
+                        `tg://login?token=${base64.encode(res.token, true)}`,
                         new Date(res.expires * 1000),
                     )
 
-                    waiter = createControllablePromise()
+                    waiter = new Deferred()
                     await Promise.race([waiter, sleepWithAbort(res.expires * 1000 - Date.now(), client.stopSignal)])
                     break
                 case 'auth.loginTokenMigrateTo': {

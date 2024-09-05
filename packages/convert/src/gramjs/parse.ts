@@ -1,6 +1,5 @@
 import { MtArgumentError } from '@mtcute/core'
-import { dataViewFromBuffer } from '@mtcute/core/utils.js'
-import { base64, utf8 } from '@fuman/utils'
+import { base64, typed, utf8 } from '@fuman/utils'
 
 import type { TelethonSession } from '../telethon/types.js'
 
@@ -13,7 +12,7 @@ export function parseGramjsSession(session: string): TelethonSession {
     session = session.slice(1)
 
     const data = base64.decode(session)
-    const dv = dataViewFromBuffer(data)
+    const dv = typed.toDataView(data)
 
     const dcId = dv.getUint8(0)
 

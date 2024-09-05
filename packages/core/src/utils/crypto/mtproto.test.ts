@@ -1,13 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { defaultTestCryptoProvider } from '@mtcute/test'
-import { hex } from '@fuman/utils'
-
-import { concatBuffers } from '../index.js'
+import { hex, u8 } from '@fuman/utils'
 
 import { createAesIgeForMessage, createAesIgeForMessageOld, generateKeyAndIvFromNonce } from './mtproto.js'
 
 const authKeyChunk = hex.decode('98cb29c6ffa89e79da695a54f572e6cb101e81c688b63a4bf73c3622dec230e0')
-const authKey = concatBuffers(Array.from({ length: 8 }, () => authKeyChunk))
+const authKey = u8.concat(Array.from({ length: 8 }, () => authKeyChunk))
 const messageKey = hex.decode('25d701f2a29205526757825a99eb2d32')
 
 describe('mtproto 2.0', async () => {

@@ -1,5 +1,4 @@
-import type { ControllablePromise } from '../../utils/controllable-promise.js'
-import { createControllablePromise } from '../../utils/controllable-promise.js'
+import { Deferred } from '@fuman/utils'
 
 import { deserializeError } from './errors.js'
 import type { SendFn, WorkerInboundMessage, WorkerOutboundMessage } from './protocol.js'
@@ -11,7 +10,7 @@ export class WorkerInvoker {
     constructor(private send: SendFn) {}
 
     private _nextId = 0
-    private _pending = new Map<number, ControllablePromise>()
+    private _pending = new Map<number, Deferred<unknown>>()
 
     private _invoke(target: InvokeTarget, method: string, args: unknown[], isVoid: boolean, abortSignal?: AbortSignal) {
         const id = this._nextId++
@@ -34,11 +33,11 @@ export class WorkerInvoker {
         })
 
         if (!isVoid) {
-            const promise = createControllablePromise()
+            const promise = new Deferred<unknown>()
 
             this._pending.set(id, promise)
 
-            return promise
+            return promise.promise
         }
     }
 

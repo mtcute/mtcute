@@ -1,7 +1,8 @@
+import { typed } from '@fuman/utils'
+
 import type { IKeyValueRepository } from '../../../storage/repository/key-value.js'
 import type { ServiceOptions } from '../../../storage/service/base.js'
 import { BaseService } from '../../../storage/service/base.js'
-import { dataViewFromBuffer } from '../../../utils/buffer-utils.js'
 
 const KV_PTS = 'updates_pts'
 const KV_QTS = 'updates_qts'
@@ -23,12 +24,12 @@ export class UpdatesStateService extends BaseService {
         const val = await this._kv.get(key)
         if (!val) return null
 
-        return dataViewFromBuffer(val).getInt32(0, true)
+        return typed.toDataView(val).getInt32(0, true)
     }
 
     private async _setInt(key: string, val: number): Promise<void> {
         const buf = new Uint8Array(4)
-        dataViewFromBuffer(buf).setInt32(0, val, true)
+        typed.toDataView(buf).setInt32(0, val, true)
 
         await this._kv.set(key, buf)
     }
@@ -68,12 +69,12 @@ export class UpdatesStateService extends BaseService {
         const val = await this._kv.get(KV_CHANNEL_PREFIX + channelId)
         if (!val) return null
 
-        return dataViewFromBuffer(val).getUint32(0, true)
+        return typed.toDataView(val).getUint32(0, true)
     }
 
     async setChannelPts(channelId: number, pts: number): Promise<void> {
         const buf = new Uint8Array(4)
-        dataViewFromBuffer(buf).setUint32(0, pts, true)
+        typed.toDataView(buf).setUint32(0, pts, true)
 
         await this._kv.set(KV_CHANNEL_PREFIX + channelId, buf)
     }

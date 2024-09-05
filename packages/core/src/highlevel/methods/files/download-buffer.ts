@@ -1,4 +1,5 @@
-import { concatBuffers } from '../../../utils/buffer-utils.js'
+import { u8 } from '@fuman/utils'
+
 import type { ITelegramClient } from '../../client.types.js'
 import type { FileDownloadLocation, FileDownloadParameters } from '../../types/index.js'
 import { FileLocation } from '../../types/index.js'
@@ -28,5 +29,5 @@ export async function downloadAsBuffer(
         chunks.push(chunk)
     }
 
-    return concatBuffers(chunks)
+    return u8.concat(chunks)
 }

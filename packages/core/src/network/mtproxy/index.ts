@@ -1,11 +1,11 @@
 import type { tl } from '@mtcute/tl'
 import type { ITcpConnection, TcpEndpoint } from '@fuman/net'
 import { Bytes, read, write } from '@fuman/io'
-import { base64, hex } from '@fuman/utils'
+import { base64, hex, typed, u8 } from '@fuman/utils'
 
 import type { IPacketCodec, ITelegramConnection, MtProxyInfo, TelegramTransport } from '../transports/index.js'
 import { IntermediatePacketCodec, ObfuscatedPacketCodec, PaddedIntermediatePacketCodec } from '../transports/index.js'
-import { type BasicDcOption, type ICryptoProvider, type Logger, buffersEqual, concatBuffers, dataViewFromBuffer } from '../../utils/index.js'
+import type { BasicDcOption, ICryptoProvider, Logger } from '../../utils/index.js'
 import { MtSecurityError, MtUnsupportedError } from '../../types/errors.js'
 
 import { FakeTlsPacketCodec, generateFakeTlsHeader } from './_fake-tls.js'
@@ -152,11 +152,11 @@ export abstract class BaseMtProxyTransport implements TelegramTransport {
             const buf = await read.async.exactly(conn, first.length + 2)
             write.bytes(resp, buf)
 
-            if (!buffersEqual(buf.slice(0, first.length), first)) {
+            if (!typed.equal(buf.slice(0, first.length), first)) {
                 throw new MtSecurityError('Server hello is invalid')
             }
 
-            const skipSize = dataViewFromBuffer(buf).getUint16(first.length)
+            const skipSize = typed.toDataView(buf).getUint16(first.length)
 
             write.bytes(resp, await read.async.exactly(conn, skipSize))
         }
@@ -164,7 +164,7 @@ export abstract class BaseMtProxyTransport implements TelegramTransport {
         const respBuf = resp.result()
         const respRand = respBuf.slice(11, 11 + 32)
         const hash = await this._crypto.hmacSha256(
-            concatBuffers([
+            u8.concat([
                 helloRand,
                 respBuf.slice(0, 11),
                 new Uint8Array(32),
@@ -173,7 +173,7 @@ export abstract class BaseMtProxyTransport implements TelegramTransport {
             this._rawSecret,
         )
 
-        if (!buffersEqual(hash, respRand)) {
+        if (!typed.equal(hash, respRand)) {
             throw new MtSecurityError('Response hash is invalid')
         }
 

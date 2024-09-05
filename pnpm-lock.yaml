@@ -14,6 +14,9 @@ importers:
       '@antfu/eslint-config':
         specifier: 2.26.0
         version: 2.26.0(@typescript-eslint/utils@8.1.0(eslint@9.9.0)(typescript@5.5.4))(@vue/compiler-sfc@3.4.37)(eslint@9.9.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@20.10.0)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5))
+      '@fuman/utils':
+        specifier: workspace:^
+        version: link:private/fuman/packages/utils
       '@teidesu/slow-types-compiler':
         specifier: 1.1.0
         version: 1.1.0(typescript@5.5.4)
@@ -260,6 +263,9 @@ importers:
 
   packages/dispatcher:
     dependencies:
+      '@fuman/utils':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/utils
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core

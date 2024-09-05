@@ -1,8 +1,7 @@
 import type { tl } from '@mtcute/tl'
-import { hex, utf8 } from '@fuman/utils'
+import { hex, u8, utf8 } from '@fuman/utils'
 
 import { MtArgumentError } from '../../types/errors.js'
-import { concatBuffers } from '../../utils/buffer-utils.js'
 
 /**
  * Given file size, determine the appropriate chunk size (in KB)
@@ -72,7 +71,7 @@ export function strippedPhotoToJpg(stripped: Uint8Array): Uint8Array {
         JPEG_HEADER_BYTES = JPEG_HEADER()
     }
 
-    const result = concatBuffers([JPEG_HEADER_BYTES, stripped.slice(3), JPEG_FOOTER])
+    const result = u8.concat3(JPEG_HEADER_BYTES, stripped.slice(3), JPEG_FOOTER)
     result[164] = stripped[1]
     result[166] = stripped[2]
 

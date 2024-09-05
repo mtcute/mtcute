@@ -1,4 +1,4 @@
-import * as timers from './timers.js'
+import { timers } from '@fuman/utils'
 
 /**
  * Wrapper over JS timers that allows re-scheduling them

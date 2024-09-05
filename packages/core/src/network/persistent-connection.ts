@@ -4,9 +4,9 @@ import EventEmitter from 'events'
 import type { ReconnectionStrategy } from '@fuman/net'
 import { PersistentConnection as FumanPersistentConnection } from '@fuman/net'
 import { FramedReader, FramedWriter } from '@fuman/io'
+import { timers } from '@fuman/utils'
 
 import type { BasicDcOption, ICryptoProvider, Logger } from '../utils/index.js'
-import { timers } from '../utils/index.js'
 
 import type { IPacketCodec, ITelegramConnection, TelegramTransport } from './transports/abstract.js'
 

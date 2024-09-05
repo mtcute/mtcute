@@ -1,8 +1,7 @@
 import { Bytes, type ISyncWritable, read } from '@fuman/io'
+import { bigint, typed, u8 } from '@fuman/utils'
 
 import type { Logger } from '../../utils'
-import { concatBuffers, dataViewFromBuffer } from '../../utils'
-import { bigIntModInv, bigIntModPow, bigIntToBuffer, bufferToBigInt } from '../../utils/bigint-utils'
 import type { ICryptoProvider } from '../../utils/crypto/abstract'
 import type { IPacketCodec } from '../transports'
 
@@ -35,14 +34,14 @@ function _getDoubleX(x: bigint, mod: bigint): bigint {
     numerator = (numerator - 1n) % mod
     numerator = (numerator * numerator) % mod
 
-    denominator = bigIntModInv(denominator, mod)
+    denominator = bigint.modInv(denominator, mod)
     numerator = (numerator * denominator) % mod
 
     return numerator
 }
 
 function _isQuadraticResidue(a: bigint): boolean {
-    const r = bigIntModPow(a, QUAD_RES_POW, QUAD_RES_MOD)
+    const r = bigint.modPowBinary(a, QUAD_RES_POW, QUAD_RES_MOD)
 
     return r === 1n
 }
@@ -126,7 +125,7 @@ class TlsHelloWriter {
     ) {
         this._domain = domain
         this.buf = new Uint8Array(size)
-        this.dv = dataViewFromBuffer(this.buf)
+        this.dv = typed.toDataView(this.buf)
         this._grease = initGrease(this.crypto, 7)
     }
 
@@ -158,7 +157,7 @@ class TlsHelloWriter {
             const key = this.crypto.randomBytes(32)
             key[31] &= 127
 
-            let x = bufferToBigInt(key)
+            let x = bigint.fromBytes(key)
             const y = _getY2(x, KEY_MOD)
 
             if (_isQuadraticResidue(y)) {
@@ -166,7 +165,7 @@ class TlsHelloWriter {
                     x = _getDoubleX(x, KEY_MOD)
                 }
 
-                const key = bigIntToBuffer(x, 32, true)
+                const key = bigint.toBytes(x, 32, true)
                 this.string(key)
 
                 return
@@ -201,7 +200,7 @@ class TlsHelloWriter {
         this.endScope()
 
         const hash = await this.crypto.hmacSha256(this.buf, secret)
-        const dv = dataViewFromBuffer(hash)
+        const dv = typed.toDataView(hash)
 
         const old = dv.getInt32(28, true)
         dv.setInt32(28, old ^ unixTime, true)
@@ -255,12 +254,12 @@ export class FakeTlsPacketCodec implements IPacketCodec {
             let packet
             if (this._isFirstTls) {
                 this._isFirstTls = false
-                packet = concatBuffers([this._tag, tmp.readSync(MAX_TLS_PACKET_LENGTH - this._tag.length)])
+                packet = u8.concat2(this._tag, tmp.readSync(MAX_TLS_PACKET_LENGTH - this._tag.length))
             } else {
                 packet = tmp.readSync(MAX_TLS_PACKET_LENGTH)
             }
 
-            dataViewFromBuffer(header).setUint16(3, packet.length)
+            typed.toDataView(header).setUint16(3, packet.length)
 
             into.writeSync(header.length).set(header)
             into.writeSync(packet.length).set(packet)

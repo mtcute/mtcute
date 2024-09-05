@@ -1,6 +1,7 @@
 import type { tl } from '@mtcute/tl'
+import type { AsyncLock, ConditionVariable, timers } from '@fuman/utils'
 
-import type { AsyncLock, ConditionVariable, Deque, EarlyTimer, Logger, SortedLinkedList, timers } from '../../utils/index.js'
+import type { Deque, EarlyTimer, Logger, SortedLinkedList } from '../../utils/index.js'
 import type { CurrentUserInfo } from '../storage/service/current-user.js'
 import type { PeersIndex } from '../types/peers/peers-index.js'
 

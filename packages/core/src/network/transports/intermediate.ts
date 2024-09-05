@@ -1,8 +1,9 @@
 import type { Bytes, ISyncWritable } from '@fuman/io'
 import { read, write } from '@fuman/io'
+import { typed } from '@fuman/utils'
 
 import type { ICryptoProvider } from '../../utils/index.js'
-import { dataViewFromBuffer, getRandomInt } from '../../utils/index.js'
+import { getRandomInt } from '../../utils/index.js'
 
 import type { IPacketCodec } from './abstract.js'
 import { TransportError } from './abstract.js'
@@ -68,7 +69,7 @@ export class PaddedIntermediatePacketCodec extends IntermediatePacketCodec imple
         const padSize = getRandomInt(16)
 
         const ret = into.writeSync(frame.length + 4 + padSize)
-        const dv = dataViewFromBuffer(ret)
+        const dv = typed.toDataView(ret)
         dv.setUint32(0, frame.length + padSize, true)
         ret.set(frame, 4)
         this._crypto.randomFill(ret.subarray(4 + frame.length))

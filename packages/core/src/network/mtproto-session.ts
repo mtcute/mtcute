@@ -2,10 +2,10 @@ import Long from 'long'
 import type { mtp, tl } from '@mtcute/tl'
 import type { TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import { TlSerializationCounter } from '@mtcute/tl-runtime'
+import type { Deferred } from '@fuman/utils'
 
 import { MtcuteError } from '../types/index.js'
 import type {
-    ControllablePromise,
     ICryptoProvider,
     Logger,
 } from '../utils/index.js'
@@ -27,7 +27,7 @@ import type { ServerSaltManager } from './server-salt.js'
 export interface PendingRpc {
     method: string
     data: Uint8Array
-    promise: ControllablePromise
+    promise: Deferred<unknown>
     stack?: string
     gzipOverhead?: number
 
@@ -86,7 +86,7 @@ export type PendingMessage =
   }
   | {
       _: 'bind'
-      promise: ControllablePromise<boolean | mtp.RawMt_rpc_error>
+      promise: Deferred<boolean | mtp.RawMt_rpc_error>
   }
 
 /**

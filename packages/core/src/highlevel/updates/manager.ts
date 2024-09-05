@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+import { AsyncLock, ConditionVariable, timers } from '@fuman/utils'
 import Long from 'long'
 
 import { MtArgumentError } from '../../types/errors.js'
@@ -8,8 +9,6 @@ import type {
     Logger,
 } from '../../utils/index.js'
 import {
-    AsyncLock,
-    ConditionVariable,
     Deque,
     EarlyTimer,
     SortedLinkedList,
@@ -22,7 +21,6 @@ import {
 import type { BaseTelegramClient } from '../base.js'
 import type { CurrentUserInfo } from '../storage/service/current-user.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
-import * as timers from '../../utils/timers.js'
 import { _getChannelsBatched } from '../methods/chats/batched-queries.js'
 
 import type { PendingUpdate, PendingUpdateContainer, RawUpdateHandler, UpdatesManagerParams } from './types.js'

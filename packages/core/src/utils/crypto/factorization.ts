@@ -1,11 +1,6 @@
-import {
-    bigIntAbs,
-    bigIntGcd,
-    bigIntMin,
-    bigIntToBuffer,
-    bufferToBigInt,
-    randomBigIntInRange,
-} from '../bigint-utils.js'
+import { bigint } from '@fuman/utils'
+
+import { randomBigIntInRange } from '../bigint-utils.js'
 
 import type { ICryptoProvider } from './abstract.js'
 
@@ -14,7 +9,7 @@ import type { ICryptoProvider } from './abstract.js'
  * @param pq
  */
 export function factorizePQSync(crypto: ICryptoProvider, pq: Uint8Array): [Uint8Array, Uint8Array] {
-    const pq_ = bufferToBigInt(pq)
+    const pq_ = bigint.fromBytes(pq)
 
     const n = PollardRhoBrent(crypto, pq_)
     const m = pq_ / n
@@ -30,7 +25,7 @@ export function factorizePQSync(crypto: ICryptoProvider, pq: Uint8Array): [Uint8
         q = n
     }
 
-    return [bigIntToBuffer(p), bigIntToBuffer(q)]
+    return [bigint.toBytes(p), bigint.toBytes(q)]
 }
 
 function PollardRhoBrent(crypto: ICryptoProvider, n: bigint): bigint {
@@ -55,12 +50,12 @@ function PollardRhoBrent(crypto: ICryptoProvider, n: bigint): bigint {
         while (k < r && g === 1n) {
             ys = y
 
-            for (let i = 0n; i < bigIntMin(m, r - k); i++) {
+            for (let i = 0n; i < bigint.min2(m, r - k); i++) {
                 y = (((y * y) % n) + c) % n
-                q = (q * bigIntAbs(x - y)) % n
+                q = (q * bigint.abs(x - y)) % n
             }
 
-            g = bigIntGcd(q, n)
+            g = bigint.euclideanGcd(q, n)
             k = k + m
         }
 
@@ -71,7 +66,7 @@ function PollardRhoBrent(crypto: ICryptoProvider, n: bigint): bigint {
         do {
             ys = (((ys! * ys!) % n) + c) % n
 
-            g = bigIntGcd(x! - ys!, n)
+            g = bigint.euclideanGcd(x! - ys!, n)
         } while (g <= 1n)
     }
 

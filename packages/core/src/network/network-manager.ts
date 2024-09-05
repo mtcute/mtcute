@@ -2,14 +2,14 @@ import type { mtp, tl } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import type Long from 'long'
 import { type ReconnectionStrategy, defaultReconnectionStrategy } from '@fuman/net'
+import { Deferred } from '@fuman/utils'
 
 import { getPlatform } from '../platform.js'
 import type { StorageManager } from '../storage/storage.js'
 import { MtArgumentError, MtUnsupportedError, MtcuteError } from '../types/index.js'
 import type { ComposedMiddleware, Middleware } from '../utils/composer.js'
 import { composeMiddlewares } from '../utils/composer.js'
-import type { ControllablePromise, DcOptions, ICryptoProvider, Logger } from '../utils/index.js'
-import { createControllablePromise } from '../utils/index.js'
+import type { DcOptions, ICryptoProvider, Logger } from '../utils/index.js'
 import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
 
 import type { ConfigManager } from './config-manager.js'
@@ -382,7 +382,7 @@ export class DcConnectionManager {
         })
 
         // fucking awesome architecture, but whatever
-        connection.on('request-keys', (promise: ControllablePromise<void>) => {
+        connection.on('request-keys', (promise: Deferred<void>) => {
             this.loadKeys(true)
                 .then(() => promise.resolve())
                 .catch((e: Error) => promise.reject(e))
@@ -577,8 +577,8 @@ export class NetworkManager {
                 return this._dcConnections.get(dcId)!
             }
 
-            const promise = createControllablePromise<void>()
-            this._dcCreationPromise.set(dcId, promise)
+            const promise = new Deferred<void>()
+            this._dcCreationPromise.set(dcId, promise.promise)
 
             this._log.debug('creating new DC %d', dcId)
 
@@ -632,8 +632,8 @@ export class NetworkManager {
         }
 
         this._log.debug('exporting auth to dc %d', manager.dcId)
-        const promise = createControllablePromise<void>()
-        this._pendingExports[manager.dcId] = promise
+        const promise = new Deferred<void>()
+        this._pendingExports[manager.dcId] = promise.promise
 
         try {
             const auth = await this.call({
