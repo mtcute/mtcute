@@ -1,4 +1,7 @@
 import type { tl } from '@mtcute/tl'
+import type { IReadable } from '@fuman/io'
+import { read } from '@fuman/io'
+import { AsyncLock } from '@fuman/utils'
 
 import { getPlatform } from '../../../platform.js'
 import { MtArgumentError } from '../../../types/errors.js'
@@ -7,7 +10,7 @@ import type { ITelegramClient } from '../../client.types.js'
 import type { UploadFileLike, UploadedFile } from '../../types/index.js'
 import { MIME_TO_EXTENSION, guessFileMime } from '../../utils/file-type.js'
 import { determinePartSize, isProbablyPlainText } from '../../utils/file-utils.js'
-import { bufferToStream, createChunkedReader, streamToBuffer } from '../../utils/stream-utils.js'
+import { bufferToStream } from '../../utils/stream-utils.js'
 
 const OVERRIDE_MIME: Record<string, string> = {
     // tg doesn't interpret `audio/opus` files as voice messages for some reason
@@ -174,16 +177,20 @@ export async function uploadFile(
         file = file.body
     }
 
-    if (!(file instanceof ReadableStream)) {
+    if (file instanceof ReadableStream) {
+        file = read.async.fromWeb(file)
+    } else if (!(typeof file === 'object' && 'read' in file)) { // IReadable
         throw new MtArgumentError('Could not convert input `file` to stream!')
     }
+
+    const readable = file as IReadable
 
     // set file size if not automatically inferred
     if (fileSize === -1 && params.fileSize) fileSize = params.fileSize
 
     if (fileSize === -1 && params.requireFileSize) {
         // buffer the entire stream in memory, then convert it back to stream (bruh)
-        const buffer = await streamToBuffer(file)
+        const buffer = await read.async.untilEnd(readable)
         fileSize = buffer.length
         file = bufferToStream(buffer)
     }
@@ -227,33 +234,32 @@ export async function uploadFile(
     )
 
     const fileId = randomLong()
-    const stream = file
+    const lock = new AsyncLock()
 
     let pos = 0
     let idx = 0
-    const reader = createChunkedReader(stream, partSize)
 
     const uploadNextPart = async (): Promise<void> => {
         const thisIdx = idx++
 
-        let part = await reader.read()
-
-        if (!part && fileSize !== -1) {
-            throw new MtArgumentError(`Unexpected EOS (there were only ${idx - 1} parts, but expected ${partCount})`)
+        await lock.acquire()
+        let part
+        try {
+            part = await read.async.exactly(readable, partSize, 'truncate')
+        } finally {
+            lock.release()
         }
 
-        if (fileSize === -1 && (reader.ended() || !part)) {
-            fileSize = pos + (part?.length ?? 0)
+        const ended = part.length < partSize
+
+        if (ended && fileSize !== -1 && thisIdx !== partCount - 1) {
+            throw new MtArgumentError(`Unexpected EOS (there were only ${idx} parts, but expected ${partCount})`)
+        }
+
+        if (ended && fileSize === -1) {
+            fileSize = pos + part.length
             partCount = ~~((fileSize + partSize - 1) / partSize)
-            if (!part) part = new Uint8Array(0)
             client.log.debug('readable ended, file size = %d, part count = %d', fileSize, partCount)
-        }
-
-        if (!ArrayBuffer.isView(part)) {
-            throw new MtArgumentError(`Part ${thisIdx} was not a Uint8Array!`)
-        }
-        if (part.length > partSize) {
-            throw new MtArgumentError(`Part ${thisIdx} had invalid size (expected ${partSize}, got ${part.length})`)
         }
 
         if (thisIdx === 0 && fileMime === undefined) {

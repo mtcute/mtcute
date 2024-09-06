@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-globals */
 import type { tdFileId } from '@mtcute/file-id'
 import type { tl } from '@mtcute/tl'
+import type { IReadable } from '@fuman/io'
 
 import type { AnyToNever } from '../../../types/utils.js'
 
@@ -27,6 +28,7 @@ export type UploadFileLike =
   | File
   | Blob
   | string
+  | IReadable
   | AnyToNever<import('node:fs').ReadStream>
   | AnyToNever<ReadableStream<Uint8Array>>
   | AnyToNever<NodeJS.ReadableStream>
