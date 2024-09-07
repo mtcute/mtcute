@@ -47,8 +47,7 @@ export function makeInspectable<T>(
     }
 
     // dirty hack to set name for inspect result
-    // eslint-disable-next-line ts/no-implied-eval, no-new-func
-    const proto = new Function(`return function ${obj.name}(){}`)().prototype
+    const proto = ({ [obj.name]: class {} })[obj.name].prototype
 
     obj.prototype.toJSON = function () {
         const ret: any = Object.create(proto)
