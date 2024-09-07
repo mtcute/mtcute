@@ -1,30 +1,21 @@
 import { readFile } from 'node:fs/promises'
+import { deflateSync, gunzipSync } from 'node:zlib'
+import { pbkdf2 } from 'node:crypto'
 
 import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
 import { BaseCryptoProvider } from '@mtcute/core/utils.js'
 import {
     createCtr256,
     ctr256,
-    deflateMaxSize,
     freeCtr256,
-    gunzip,
     ige256Decrypt,
     ige256Encrypt,
     initSync,
 } from '@mtcute/wasm'
 
-// we currently prefer subtle crypto and wasm for ctr because bun uses browserify polyfills for node:crypto
+// we currently prefer wasm for ctr because bun mostly uses browserify polyfills for node:crypto
 // which are slow AND semi-broken
-// we currently prefer wasm for gzip because bun uses browserify polyfills for node:zlib too
 // native node-api addon is broken on macos so we don't support it either
-//
-// largely just copy-pasting from @mtcute/web, todo: maybe refactor this into common-internals-web?
-
-const ALGO_TO_SUBTLE: Record<string, string> = {
-    sha256: 'SHA-256',
-    sha1: 'SHA-1',
-    sha512: 'SHA-512',
-}
 
 export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
     async initialize(): Promise<void> {
@@ -53,27 +44,17 @@ export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProv
         }
     }
 
-    async pbkdf2(
+    pbkdf2(
         password: Uint8Array,
         salt: Uint8Array,
         iterations: number,
         keylen = 64,
         algo = 'sha512',
     ): Promise<Uint8Array> {
-        const keyMaterial = await crypto.subtle.importKey('raw', password, 'PBKDF2', false, ['deriveBits'])
-
-        return crypto.subtle
-            .deriveBits(
-                {
-                    name: 'PBKDF2',
-                    salt,
-                    iterations,
-                    hash: algo ? ALGO_TO_SUBTLE[algo] : 'SHA-512',
-                },
-                keyMaterial,
-                (keylen || 64) * 8,
-            )
-            .then(result => new Uint8Array(result))
+        return new Promise((resolve, reject) =>
+            pbkdf2(password, salt, iterations, keylen, algo, (err: Error | null, buf: Uint8Array) =>
+                err !== null ? reject(err) : resolve(buf)),
+        )
     }
 
     sha1(data: Uint8Array): Uint8Array {
@@ -105,11 +86,23 @@ export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProv
     }
 
     gzip(data: Uint8Array, maxSize: number): Uint8Array | null {
-        return deflateMaxSize(data, maxSize)
+        try {
+            // telegram accepts both zlib and gzip, but zlib is faster and has less overhead, so we use it here
+            return deflateSync(data, {
+                maxOutputLength: maxSize,
+            })
+            // hot path, avoid additional runtime checks
+        } catch (e: any) {
+            if (e.code === 'ERR_BUFFER_TOO_LARGE') {
+                return null
+            }
+
+            throw e
+        }
     }
 
     gunzip(data: Uint8Array): Uint8Array {
-        return gunzip(data)
+        return gunzipSync(data)
     }
 
     randomFill(buf: Uint8Array): void {
