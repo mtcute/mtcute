@@ -113,6 +113,7 @@
     "updateBotInlineSend": ["user_id"],
     "updateBotMenuButton": ["bot_id"],
     "updateBotPrecheckoutQuery": ["user_id"],
+    "updateBotPurchasedPaidMedia": ["user_id"],
     "updateBotShippingQuery": ["user_id"],
     "updateBotStopped": ["user_id"],
     "updateBotChatInviteRequester": ["user_id"],
