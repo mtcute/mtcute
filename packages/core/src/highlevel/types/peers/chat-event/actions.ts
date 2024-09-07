@@ -362,6 +362,16 @@ export interface ChatActionSignatureProfilesToggled {
     new: boolean
 }
 
+export interface ChatActionSubscriptionExtended {
+    type: 'sub_extend'
+
+    /** Previous participant information */
+    prev: ChatMember
+
+    /** New participant information */
+    new: ChatMember
+}
+
 /** Chat event action (`null` if unsupported) */
 export type ChatAction =
   | ChatActionUserJoined
@@ -401,6 +411,7 @@ export type ChatAction =
   | ChatActionTopicEdited
   | ChatActionTopicDeleted
   | ChatActionSignatureProfilesToggled
+  | ChatActionSubscriptionExtended
   | null
 
 /** @internal */
@@ -626,6 +637,12 @@ export function _actionFromTl(e: tl.TypeChannelAdminLogEventAction, peers: Peers
             return {
                 type: 'signature_profiles_toggled',
                 new: e.newValue,
+            }
+        case 'channelAdminLogEventActionParticipantSubExtend':
+            return {
+                type: 'sub_extend',
+                prev: new ChatMember(e.prevParticipant, peers),
+                new: new ChatMember(e.newParticipant, peers),
             }
         default:
             return null

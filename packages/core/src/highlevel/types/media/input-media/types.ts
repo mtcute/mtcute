@@ -590,6 +590,11 @@ export interface InputMediaPaidMedia extends CaptionMixin {
      * Amount of stars that should be paid for the media
      */
     starsAmount: number | tl.Long
+
+    /**
+     * Custom payload (for bots only)
+     */
+    payload?: string
 }
 
 /**

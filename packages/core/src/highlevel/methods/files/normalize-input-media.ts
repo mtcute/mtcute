@@ -234,6 +234,7 @@ export async function _normalizeInputMedia(
             _: 'inputMediaPaidMedia',
             starsAmount: Long.isLong(media.starsAmount) ? media.starsAmount : Long.fromNumber(media.starsAmount),
             extendedMedia: medias,
+            payload: media.payload,
         }
     }
 

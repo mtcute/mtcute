@@ -106,6 +106,13 @@ export type StarsTransactionType =
       /** Period of the subscription, in seconds */
       period: number
   }
+  | {
+      type: 'giveaway'
+      /** Related peer */
+      peer: Peer
+      /** ID of the message containing the giveaway where the stars were given */
+      messageId: number
+  }
 
 export class StarsTransaction {
     constructor(
@@ -185,6 +192,14 @@ export class StarsTransaction {
                 return { type: 'ads' }
             case 'starsTransactionPeer': {
                 const peer = parsePeer(this.raw.peer.peer, this.peers)
+
+                if (this.raw.giveawayPostId) {
+                    return {
+                        type: 'giveaway',
+                        peer,
+                        messageId: this.raw.giveawayPostId,
+                    }
+                }
 
                 if (this.raw.msgId) {
                     if (this.raw.reaction) {

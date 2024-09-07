@@ -106,6 +106,14 @@ export function normalizeChatEventFilters(input: InputChatEventFilters): ChatEve
                 case 'topic_deleted':
                     serverFilter.forums = true
                     break
+                case 'sub_extend':
+                    // not documented so idk, enable all
+                    serverFilter.invite = true
+                    serverFilter.invites = true
+                    serverFilter.join = true
+                    serverFilter.info = true
+                    serverFilter.settings = true
+                    break
                 default:
                     assertNever(type)
             }
