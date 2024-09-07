@@ -64,6 +64,7 @@ export default antfu({
         'import/order': ['error', { 'newlines-between': 'always' }],
         'antfu/if-newline': 'off',
         'import/no-relative-packages': 'error',
+        'import/extensions': ['error', 'ignorePackages'],
         'style/max-statements-per-line': ['error', { max: 2 }],
         'ts/no-redeclare': 'off',
         'eslint-comments/no-unlimited-disable': 'off',
@@ -124,5 +125,10 @@ export default antfu({
         'node/prefer-global/process': ['error', 'never'],
         'node/prefer-global/buffer': ['error', 'never'],
         'no-console': 'off',
+    },
+}, {
+    files: ['e2e/**', '.config/**'],
+    rules: {
+        'import/extensions': 'off',
     },
 })
