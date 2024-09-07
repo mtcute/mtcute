@@ -21,9 +21,15 @@ export async function openChat(client: ITelegramClient, chat: InputPeerLike): Pr
     const peer = await resolvePeer(client, chat)
 
     if (isInputPeerChannel(peer)) {
-        const [dialog] = await getPeerDialogs(client, peer)
+        let pts: number | undefined
+        if (!client.storage.self.getCached()?.isBot) {
+            const [dialog] = await getPeerDialogs(client, peer)
+            pts = dialog.raw.pts
+        } else {
+            pts = await client.storage.updates.getChannelPts(peer.channelId) ?? undefined
+        }
 
-        await client.notifyChannelOpened(peer.channelId, dialog.raw.pts)
+        await client.notifyChannelOpened(peer.channelId, pts)
     }
 
     // todo: once we have proper dialogs/peers db, we should also
