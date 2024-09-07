@@ -13,7 +13,8 @@
     },
     "dependencies": {
         "@mtcute/core": "workspace:^",
-        "@fuman/utils": "workspace:^"
+        "@fuman/utils": "workspace:^",
+        "@fuman/ip": "workspace:^"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^"

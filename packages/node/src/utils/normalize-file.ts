@@ -4,8 +4,7 @@ import { basename } from 'node:path'
 import { Readable } from 'node:stream'
 
 import type { UploadFileLike } from '@mtcute/core'
-
-import { nodeStreamToWeb } from './stream-utils.js'
+import { nodeStreamToWeb } from '@fuman/node'
 
 export async function normalizeFile(file: UploadFileLike): Promise<{
     file: UploadFileLike

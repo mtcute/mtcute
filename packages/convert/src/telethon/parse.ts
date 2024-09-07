@@ -1,7 +1,6 @@
 import { MtArgumentError } from '@mtcute/core'
 import { base64, typed } from '@fuman/utils'
-
-import { parseIpFromBytes } from '../utils/ip.js'
+import { ip } from '@fuman/ip'
 
 import type { TelethonSession } from './types.js'
 
@@ -26,11 +25,16 @@ export function parseTelethonSession(session: string): TelethonSession {
     pos += 2
     const authKey = data.subarray(pos, pos + 256)
 
-    const ip = parseIpFromBytes(ipBytes)
+    let parsedIp
+    if (ipSize === 16) {
+        parsedIp = ip.stringifyV6(ip.fromBytesV6(ipBytes))
+    } else {
+        parsedIp = ip.stringifyV4({ type: 'ipv4', parts: ipBytes })
+    }
 
     return {
         dcId,
-        ipAddress: ip,
+        ipAddress: parsedIp,
         ipv6: ipSize === 16,
         port,
         authKey,

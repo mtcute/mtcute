@@ -22,7 +22,7 @@
         "@mtcute/markdown-parser": "workspace:^",
         "@mtcute/wasm": "workspace:^",
         "@fuman/net": "workspace:^",
-        "@fuman/node-net": "workspace:^",
+        "@fuman/node": "workspace:^",
         "better-sqlite3": "11.3.0"
     },
     "devDependencies": {

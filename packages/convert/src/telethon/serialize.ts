@@ -1,7 +1,6 @@
 import { MtArgumentError } from '@mtcute/core'
 import { base64, typed } from '@fuman/utils'
-
-import { serializeIpv4ToBytes, serializeIpv6ToBytes } from '../utils/ip.js'
+import { ip } from '@fuman/ip'
 
 import type { TelethonSession } from './types.js'
 
@@ -19,10 +18,10 @@ export function serializeTelethonSession(session: TelethonSession): string {
     let pos
 
     if (session.ipv6) {
-        serializeIpv6ToBytes(session.ipAddress, u8.subarray(1, 17))
+        u8.subarray(1, 17).set(ip.toBytesV6(ip.parseV6(session.ipAddress)))
         pos = 17
     } else {
-        serializeIpv4ToBytes(session.ipAddress, u8.subarray(1, 5))
+        u8.subarray(1, 5).set(ip.parseV4(session.ipAddress).parts)
         pos = 5
     }
 

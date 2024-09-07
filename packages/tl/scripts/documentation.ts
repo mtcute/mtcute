@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { createInterface } from 'node:readline'
 
 import * as cheerio from 'cheerio'
-import { asyncPoolCallback } from 'eager-async-pool'
+import { asyncPool } from '@fuman/utils'
 import jsYaml from 'js-yaml'
 import type {
     TlEntry,
@@ -408,6 +408,8 @@ export async function fetchDocumentation(
         }
 
         ret[entry.kind === 'class' ? 'classes' : 'methods'][entry.name] = retClass
+
+        log(`📥 ${entry.kind} ${entry.name}`)
     }
 
     async function fetchDocsForUnion(name: string) {
@@ -427,36 +429,32 @@ export async function fetchDocumentation(
 
         const description = extractDescription($)
         if (description) ret.unions[name] = description
+
+        log(`📥 union ${name}`)
     }
 
-    await asyncPoolCallback(
-        fetchDocsForEntry,
+    await asyncPool(
         schema.entries,
-        ({ item, error }) => {
-            if (error) {
-                console.log(`❌ ${item.kind} ${item.name} (${error.message})`)
-
-                return
-            }
-
-            log(`📥 ${item.kind} ${item.name}`)
+        fetchDocsForEntry,
+        {
+            limit: 16,
+            onError: (item, error) => {
+                console.log(`❌ ${item.kind} ${item.name} (${error})`)
+                return 'throw'
+            },
         },
-        { limit: 16 },
     )
 
-    await asyncPoolCallback(
-        fetchDocsForUnion,
+    await asyncPool(
         Object.keys(schema.unions),
-        ({ item, error }) => {
-            if (error) {
-                console.log(`❌ union ${item} (${error.message})`)
-
-                return
-            }
-
-            log(`📥 union ${item}`)
+        fetchDocsForUnion,
+        {
+            limit: 16,
+            onError: (item, error) => {
+                console.log(`❌ union ${item} (${error})`)
+                return 'throw'
+            },
         },
-        { limit: 16 },
     )
 
     log('✨ Patching descriptions')

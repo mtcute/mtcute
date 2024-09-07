@@ -132,6 +132,9 @@ importers:
 
   packages/convert:
     dependencies:
+      '@fuman/ip':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/ip
       '@fuman/utils':
         specifier: workspace:^
         version: link:../../private/fuman/packages/utils
@@ -324,9 +327,9 @@ importers:
       '@fuman/net':
         specifier: workspace:^
         version: link:../../private/fuman/packages/net
-      '@fuman/node-net':
+      '@fuman/node':
         specifier: workspace:^
-        version: link:../../private/fuman/packages/node-net
+        version: link:../../private/fuman/packages/node
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -384,6 +387,9 @@ importers:
         specifier: 5.2.3
         version: 5.2.3
     devDependencies:
+      '@fuman/utils':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/utils
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -402,9 +408,6 @@ importers:
       csv-parse:
         specifier: ^5.5.0
         version: 5.5.0
-      eager-async-pool:
-        specifier: ^1.0.0
-        version: 1.0.0
       js-yaml:
         specifier: 4.1.0
         version: 4.1.0

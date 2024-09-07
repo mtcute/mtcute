@@ -1,4 +1,4 @@
-import { connectTcp } from '@fuman/node-net'
+import { connectTcp } from '@fuman/node'
 import type { TelegramTransport } from '@mtcute/core'
 import { IntermediatePacketCodec } from '@mtcute/core'
 
