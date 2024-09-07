@@ -29,8 +29,8 @@ export class IntermediatePacketCodec implements IPacketCodec {
 
         if (length === 4) {
             // error
-            const code = read.uint32le(reader)
-            throw new TransportError(code)
+            const code = read.int32le(reader)
+            throw new TransportError(-code)
         }
 
         if (reader.available < length) {

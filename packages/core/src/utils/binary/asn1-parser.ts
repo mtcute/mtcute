@@ -1,15 +1,13 @@
 // all available libraries either suck or are extremely large for the use case, so i made my own~
 
-import { hex } from '@fuman/utils'
-
-import { getPlatform } from '../../platform.js'
+import { base64, hex } from '@fuman/utils'
 
 /**
  * Parses a single PEM block to buffer.
  * In fact just strips begin/end tags and parses the rest as Base64
  */
 export function parsePemContents(pem: string): Uint8Array {
-    return getPlatform().base64Decode(pem.replace(/^-----(?:BEGIN|END)(?: RSA)? PUBLIC KEY-----$|\n/gm, ''))
+    return base64.decode(pem.replace(/^-----(?:BEGIN|END)(?: RSA)? PUBLIC KEY-----$|\n/gm, ''))
 }
 
 // based on https://git.coolaj86.com/coolaj86/asn1-parser.js/src/branch/master/asn1-parser.js

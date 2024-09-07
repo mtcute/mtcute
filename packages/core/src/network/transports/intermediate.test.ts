@@ -1,109 +1,87 @@
 // todo: fix test
-// import { describe, expect, it } from 'vitest'
-// import { defaultTestCryptoProvider, useFakeMathRandom } from '@mtcute/test'
+import { describe, expect, it } from 'vitest'
+import { defaultTestCryptoProvider, useFakeMathRandom } from '@mtcute/test'
+import { hex } from '@fuman/utils'
+import { Bytes, write } from '@fuman/io'
 
-// import { IntermediatePacketCodec, PaddedIntermediatePacketCodec, TransportError } from '../../index.js'
-// import { getPlatform } from '../../platform.js'
+import { IntermediatePacketCodec, PaddedIntermediatePacketCodec } from './intermediate'
+import { TransportError } from './abstract'
 
-// const p = getPlatform()
+describe('IntermediatePacketCodec', () => {
+    it('should return correct tag', () => {
+        expect(hex.encode(new IntermediatePacketCodec().tag())).eq('eeeeeeee')
+    })
 
-// describe('IntermediatePacketCodec', () => {
-//     it('should return correct tag', () => {
-//         expect(p.hexEncode(new IntermediatePacketCodec().tag())).eq('eeeeeeee')
-//     })
+    it('should correctly parse immediate framing', async () => {
+        const codec = new IntermediatePacketCodec()
+        expect(codec.decode(Bytes.from(hex.decode('050000000501020304')), false)).eql(new Uint8Array([5, 1, 2, 3, 4]))
+    })
 
-//     it('should correctly parse immediate framing', () =>
-//         new Promise<void>((done) => {
-//             const codec = new IntermediatePacketCodec()
-//             codec.on('packet', (data: Uint8Array) => {
-//                 expect([...data]).eql([5, 1, 2, 3, 4])
-//                 done()
-//             })
-//             codec.feed(p.hexDecode('050000000501020304'))
-//         }))
+    it('should correctly parse incomplete framing', () => {
+        const codec = new IntermediatePacketCodec()
+        const buf = Bytes.alloc()
 
-//     it('should correctly parse incomplete framing', () =>
-//         new Promise<void>((done) => {
-//             const codec = new IntermediatePacketCodec()
-//             codec.on('packet', (data: Uint8Array) => {
-//                 expect([...data]).eql([5, 1, 2, 3, 4])
-//                 done()
-//             })
-//             codec.feed(p.hexDecode('050000000501'))
-//             codec.feed(p.hexDecode('020304'))
-//         }))
+        write.bytes(buf, hex.decode('050000000501'))
+        expect(codec.decode(buf, false)).toEqual(null)
 
-//     it('should correctly parse multiple streamed packets', () =>
-//         new Promise<void>((done) => {
-//             const codec = new IntermediatePacketCodec()
+        write.bytes(buf, hex.decode('020304'))
+        expect(codec.decode(buf, false)).eql(new Uint8Array([5, 1, 2, 3, 4]))
+        expect(codec.decode(buf, false)).toEqual(null)
+    })
 
-//             let number = 0
+    it('should correctly parse multiple streamed packets', () => {
+        const codec = new IntermediatePacketCodec()
+        const buf = Bytes.alloc()
 
-//             codec.on('packet', (data: Uint8Array) => {
-//                 if (number === 0) {
-//                     expect([...data]).eql([5, 1, 2, 3, 4])
-//                     number = 1
-//                 } else {
-//                     expect([...data]).eql([3, 1, 2, 3, 1])
-//                     done()
-//                 }
-//             })
-//             codec.feed(p.hexDecode('050000000501'))
-//             codec.feed(p.hexDecode('020304050000'))
-//             codec.feed(p.hexDecode('000301020301'))
-//         }))
+        write.bytes(buf, hex.decode('050000000501'))
+        expect(codec.decode(buf, false)).toEqual(null)
+        write.bytes(buf, hex.decode('020304050000'))
+        expect(codec.decode(buf, false)).eql(new Uint8Array([5, 1, 2, 3, 4]))
+        expect(codec.decode(buf, false)).eql(null)
 
-//     it('should correctly parse transport errors', () =>
-//         new Promise<void>((done) => {
-//             const codec = new IntermediatePacketCodec()
+        write.bytes(buf, hex.decode('000301020301'))
+        expect(codec.decode(buf, false)).eql(new Uint8Array([3, 1, 2, 3, 1]))
+        expect(codec.decode(buf, false)).toEqual(null)
+    })
 
-//             codec.on('error', (err: TransportError) => {
-//                 expect(err).to.have.instanceOf(TransportError)
-//                 expect(err.code).eq(404)
-//                 done()
-//             })
+    it('should correctly parse transport errors', () => {
+        const codec = new IntermediatePacketCodec()
+        const buf = Bytes.alloc()
 
-//             codec.feed(p.hexDecode('040000006cfeffff'))
-//         }))
+        write.bytes(buf, hex.decode('040000006cfeffff'))
+        expect(() => codec.decode(buf, false)).toThrow(new TransportError(404))
+    })
 
-//     it('should reset when called reset()', () =>
-//         new Promise<void>((done) => {
-//             const codec = new IntermediatePacketCodec()
+    it('should correctly frame packets', () => {
+        const data = hex.decode('6cfeffff')
+        const buf = Bytes.alloc()
 
-//             codec.on('packet', (data: Uint8Array) => {
-//                 expect([...data]).eql([1, 2, 3, 4, 5])
-//                 done()
-//             })
+        new IntermediatePacketCodec().encode(data, buf)
 
-//             codec.feed(p.hexDecode('ff0000001234567812345678'))
-//             codec.reset()
-//             codec.feed(p.hexDecode('050000000102030405'))
-//         }))
+        expect(hex.encode(buf.result())).toEqual('040000006cfeffff')
+    })
+})
 
-//     it('should correctly frame packets', () => {
-//         const data = p.hexDecode('6cfeffff')
+describe('PaddedIntermediatePacketCodec', () => {
+    useFakeMathRandom()
 
-//         expect(p.hexEncode(new IntermediatePacketCodec().encode(data))).toEqual('040000006cfeffff')
-//     })
-// })
+    const create = async () => {
+        const codec = new PaddedIntermediatePacketCodec()
+        codec.setup!(await defaultTestCryptoProvider())
 
-// describe('PaddedIntermediatePacketCodec', () => {
-//     useFakeMathRandom()
+        return codec
+    }
 
-//     const create = async () => {
-//         const codec = new PaddedIntermediatePacketCodec()
-//         codec.setup!(await defaultTestCryptoProvider())
+    it('should return correct tag', async () => {
+        expect(hex.encode((await create()).tag())).eq('dddddddd')
+    })
 
-//         return codec
-//     }
+    it('should correctly frame packets', async () => {
+        const data = hex.decode('6cfeffff')
+        const buf = Bytes.alloc()
 
-//     it('should return correct tag', async () => {
-//         expect(p.hexEncode((await create()).tag())).eq('dddddddd')
-//     })
+        ;(await create()).encode(data, buf)
 
-//     it('should correctly frame packets', async () => {
-//         const data = p.hexDecode('6cfeffff')
-
-//         expect(p.hexEncode((await create()).encode(data))).toEqual('0a0000006cfeffff29afd26df40f')
-//     })
-// })
+        expect(hex.encode(buf.result())).toEqual('0a0000006cfeffff29afd26df40f')
+    })
+})

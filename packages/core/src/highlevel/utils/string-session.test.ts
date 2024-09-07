@@ -17,6 +17,16 @@ const stubDcs = {
         mediaOnly: true,
     },
 }
+const stubDcsTest = {
+    main: {
+        ...stubDcs.main,
+        testMode: true,
+    },
+    media: {
+        ...stubDcs.media,
+        testMode: true,
+    },
+}
 const stubDcsBasic = {
     main: {
         id: 2,
@@ -24,6 +34,7 @@ const stubDcsBasic = {
         ipv6: false,
         mediaOnly: false,
         port: 443,
+        testMode: false,
     },
     media: {
         id: 2,
@@ -31,6 +42,17 @@ const stubDcsBasic = {
         ipv6: false,
         mediaOnly: true,
         port: 443,
+        testMode: false,
+    },
+}
+const stubDcsBasicTest = {
+    main: {
+        ...stubDcsBasic.main,
+        testMode: true,
+    },
+    media: {
+        ...stubDcsBasic.media,
+        testMode: true,
     },
 }
 const stubDcsSameMedia = {
@@ -47,24 +69,22 @@ describe('writeStringSession', () => {
         expect(
             writeStringSession({
                 version: 3,
-                testMode: false,
                 primaryDcs: stubDcsBasic,
                 authKey: stubAuthKey,
             }),
         ).toMatchInlineSnapshot(
-            '"AwQAAAAXAQIADjE0OS4xNTQuMTY3LjUwALsBAAAXAQICDzE0OS4xNTQuMTY3LjIyMrsBAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
+            '"AwQAAAAXAgIADjE0OS4xNTQuMTY3LjUwALsBAAAXAgICDzE0OS4xNTQuMTY3LjIyMrsBAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
         )
     })
     it('should write production string session without user with same dc for media', () => {
         expect(
             writeStringSession({
                 version: 3,
-                testMode: false,
                 primaryDcs: stubDcsBasicSameMedia,
                 authKey: stubAuthKey,
             }),
         ).toMatchInlineSnapshot(
-            '"AwAAAAAXAQIADjE0OS4xNTQuMTY3LjUwALsBAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
+            '"AwAAAAAXAgIADjE0OS4xNTQuMTY3LjUwALsBAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
         )
     })
 
@@ -72,7 +92,6 @@ describe('writeStringSession', () => {
         expect(
             writeStringSession({
                 version: 3,
-                testMode: false,
                 primaryDcs: stubDcsBasic,
                 authKey: stubAuthKey,
                 self: {
@@ -83,7 +102,7 @@ describe('writeStringSession', () => {
                 },
             }),
         ).toMatchInlineSnapshot(
-            '"AwUAAAAXAQIADjE0OS4xNTQuMTY3LjUwALsBAAAXAQICDzE0OS4xNTQuMTY3LjIyMrsBAAA5MAAAAAAAADeXebwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
+            '"AwUAAAAXAgIADjE0OS4xNTQuMTY3LjUwALsBAAAXAgICDzE0OS4xNTQuMTY3LjIyMrsBAAA5MAAAAAAAADeXebwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
         )
     })
 
@@ -91,8 +110,7 @@ describe('writeStringSession', () => {
         expect(
             writeStringSession({
                 version: 3,
-                testMode: true,
-                primaryDcs: stubDcsBasic,
+                primaryDcs: stubDcsBasicTest,
                 authKey: stubAuthKey,
                 self: {
                     userId: 12345,
@@ -102,7 +120,7 @@ describe('writeStringSession', () => {
                 },
             }),
         ).toMatchInlineSnapshot(
-            '"AwcAAAAXAQIADjE0OS4xNTQuMTY3LjUwALsBAAAXAQICDzE0OS4xNTQuMTY3LjIyMrsBAAA5MAAAAAAAADeXebwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
+            '"AwUAAAAXAgIEDjE0OS4xNTQuMTY3LjUwALsBAAAXAgIGDzE0OS4xNTQuMTY3LjIyMrsBAAA5MAAAAAAAADeXebwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
         )
     })
 })
@@ -116,7 +134,6 @@ describe('readStringSession', () => {
                 ),
             ).toEqual({
                 version: 3,
-                testMode: false,
                 primaryDcs: stubDcsBasic,
                 authKey: stubAuthKey,
                 self: null,
@@ -130,7 +147,6 @@ describe('readStringSession', () => {
                 ),
             ).toEqual({
                 version: 3,
-                testMode: false,
                 primaryDcs: stubDcsBasicSameMedia,
                 authKey: stubAuthKey,
                 self: null,
@@ -144,7 +160,6 @@ describe('readStringSession', () => {
                 ),
             ).toEqual({
                 version: 3,
-                testMode: false,
                 primaryDcs: stubDcsBasic,
                 authKey: stubAuthKey,
                 self: {
@@ -163,8 +178,7 @@ describe('readStringSession', () => {
                 ),
             ).toEqual({
                 version: 3,
-                testMode: true,
-                primaryDcs: stubDcsBasic,
+                primaryDcs: stubDcsBasicTest,
                 authKey: stubAuthKey,
                 self: {
                     userId: 12345,
@@ -184,7 +198,6 @@ describe('readStringSession', () => {
                 ),
             ).toEqual({
                 version: 2,
-                testMode: false,
                 primaryDcs: stubDcs,
                 authKey: stubAuthKey,
                 self: null,
@@ -198,7 +211,6 @@ describe('readStringSession', () => {
                 ),
             ).toEqual({
                 version: 2,
-                testMode: false,
                 primaryDcs: stubDcsSameMedia,
                 authKey: stubAuthKey,
                 self: null,
@@ -212,7 +224,6 @@ describe('readStringSession', () => {
                 ),
             ).toEqual({
                 version: 2,
-                testMode: false,
                 primaryDcs: stubDcs,
                 authKey: stubAuthKey,
                 self: {
@@ -231,8 +242,7 @@ describe('readStringSession', () => {
                 ),
             ).toEqual({
                 version: 2,
-                testMode: true,
-                primaryDcs: stubDcs,
+                primaryDcs: stubDcsTest,
                 authKey: stubAuthKey,
                 self: {
                     userId: 12345,
@@ -252,7 +262,6 @@ describe('readStringSession', () => {
                 ),
             ).toEqual({
                 version: 1,
-                testMode: false,
                 // v1 didn't have separate media dc
                 primaryDcs: stubDcsSameMedia,
                 authKey: stubAuthKey,

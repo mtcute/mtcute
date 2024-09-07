@@ -1,6 +1,6 @@
 import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
+import { base64 } from '@fuman/utils'
 
-import { getPlatform } from '../../platform.js'
 import { MtArgumentError } from '../../types/index.js'
 import type { BasicDcOption, DcOptions } from '../../utils/dcs.js'
 import { parseBasicDcOption, serializeBasicDcOption } from '../../utils/dcs.js'
@@ -74,11 +74,11 @@ export function writeStringSession(data: StringSessionData): string {
 
     writer.bytes(data.authKey)
 
-    return getPlatform().base64Encode(writer.result(), true)
+    return base64.encode(writer.result(), true)
 }
 
 export function readStringSession(data: string): StringSessionData {
-    const buf = getPlatform().base64Decode(data, true)
+    const buf = base64.decode(data, true)
 
     const version = buf[0]
 

@@ -22,14 +22,15 @@ describe('mtkruto/convert', () => {
                     id: 2,
                     ipAddress: '149.154.167.40',
                     port: 443,
+                    testMode: true,
                 },
                 media: {
                     id: 2,
                     ipAddress: '149.154.167.40',
                     port: 443,
+                    testMode: true,
                 },
             },
-            testMode: true,
             version: 3,
         })
     })

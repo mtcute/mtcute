@@ -28,7 +28,7 @@ describe('telethon/parse', () => {
     it('should correctly parse ipv6 sessions', () => {
         expect(parseTelethonSession(TELETHON_TEST_SESSION_V6)).toEqual({
             dcId: 1,
-            ipAddress: '2001:0b28:f23d:f001:0000:0000:0000:000e',
+            ipAddress: '2001:b28:f23d:f001::e',
             port: 443,
             ipv6: true,
             authKey: hex.decode(

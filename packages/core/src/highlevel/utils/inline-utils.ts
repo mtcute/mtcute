@@ -1,7 +1,7 @@
 import type { tl } from '@mtcute/tl'
 import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
+import { base64 } from '@fuman/utils'
 
-import { getPlatform } from '../../platform.js'
 import { assertNever } from '../../types/utils.js'
 
 /**
@@ -10,7 +10,7 @@ import { assertNever } from '../../types/utils.js'
  * @param id  Inline message ID
  */
 export function parseInlineMessageId(id: string): tl.TypeInputBotInlineMessageID {
-    const buf = getPlatform().base64Decode(id, true)
+    const buf = base64.decode(id, true)
     const reader = TlBinaryReader.manual(buf)
 
     if (buf.length === 20) {
@@ -57,7 +57,7 @@ export function encodeInlineMessageId(id: tl.TypeInputBotInlineMessageID): strin
             assertNever(id)
     }
 
-    return getPlatform().base64Encode(writer.result(), true)
+    return base64.encode(writer.result(), true)
 }
 
 export function normalizeInlineId(id: string | tl.TypeInputBotInlineMessageID): tl.TypeInputBotInlineMessageID {

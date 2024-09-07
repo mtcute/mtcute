@@ -2,8 +2,7 @@
 /* eslint-disable ts/no-unsafe-call,ts/no-unsafe-argument */
 
 import Long from 'long'
-
-import { getPlatform } from '../../platform.js'
+import { base64 } from '@fuman/utils'
 
 const customInspectSymbol = Symbol.for('nodejs.util.inspect.custom')
 
@@ -57,7 +56,7 @@ export function makeInspectable<T>(
 
                 if (val && typeof val === 'object') {
                     if (val instanceof Uint8Array) {
-                        val = getPlatform().base64Encode(val)
+                        val = base64.encode(val)
                     } else if (Long.isLong(val)) {
                         val = val.toString()
                     } else if (typeof val.toJSON === 'function') {
