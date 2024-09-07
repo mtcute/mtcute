@@ -1,38 +1,38 @@
 {
-    "name": "@mtcute/test",
-    "type": "module",
-    "version": "0.16.7",
-    "private": true,
-    "description": "Test utilities for mtcute",
-    "author": "alina sireneva <alina@tei.su>",
-    "license": "MIT",
-    "sideEffects": false,
-    "exports": "./src/index.ts",
-    "scripts": {
-        "build": "pnpm run -w build-package test"
+  "name": "@mtcute/test",
+  "type": "module",
+  "version": "0.16.9",
+  "private": true,
+  "description": "Test utilities for mtcute",
+  "author": "alina sireneva <alina@tei.su>",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": "./src/index.ts",
+  "scripts": {
+    "build": "pnpm run -w build-package test"
+  },
+  "peerDependencies": {
+    "@mtcute/core": "workspace:^",
+    "@mtcute/node": "workspace:^",
+    "@mtcute/tl": "workspace:*",
+    "@mtcute/web": "workspace:^",
+    "vitest": "*"
+  },
+  "peerDependenciesMeta": {
+    "@mtcute/node": {
+      "optional": true
     },
-    "peerDependencies": {
-        "@mtcute/core": "workspace:^",
-        "@mtcute/node": "workspace:^",
-        "@mtcute/tl": "workspace:*",
-        "@mtcute/web": "workspace:^",
-        "vitest": "*"
-    },
-    "peerDependenciesMeta": {
-        "@mtcute/node": {
-            "optional": true
-        },
-        "@mtcute/web": {
-            "optional": true
-        }
-    },
-    "dependencies": {
-        "long": "5.2.3"
-    },
-    "devDependencies": {
-        "@mtcute/tl-utils": "workspace:^"
-    },
-    "browser": {
-        "./src/platform.js": "./src/platform.web.js"
+    "@mtcute/web": {
+      "optional": true
     }
+  },
+  "dependencies": {
+    "long": "5.2.3"
+  },
+  "devDependencies": {
+    "@mtcute/tl-utils": "workspace:^"
+  },
+  "browser": {
+    "./src/platform.js": "./src/platform.web.js"
+  }
 }

@@ -1,20 +1,20 @@
 {
-    "name": "@mtcute/tl-runtime",
-    "type": "module",
-    "version": "0.16.7",
-    "private": true,
-    "description": "Runtime for TL",
-    "author": "alina sireneva <alina@tei.su>",
-    "license": "MIT",
-    "sideEffects": false,
-    "exports": {
-        ".": "./src/index.ts"
-    },
-    "scripts": {
-        "docs": "typedoc",
-        "build": "pnpm run -w build-package tl-runtime"
-    },
-    "dependencies": {
-        "long": "5.2.3"
-    }
+  "name": "@mtcute/tl-runtime",
+  "type": "module",
+  "version": "0.16.9",
+  "private": true,
+  "description": "Runtime for TL",
+  "author": "alina sireneva <alina@tei.su>",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "docs": "typedoc",
+    "build": "pnpm run -w build-package tl-runtime"
+  },
+  "dependencies": {
+    "long": "5.2.3"
+  }
 }
