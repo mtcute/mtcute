@@ -1,20 +1,20 @@
 {
-    "name": "@mtcute/convert",
-    "type": "module",
-    "version": "0.16.7",
-    "private": true,
-    "description": "Cross-library session conversion utilities",
-    "author": "alina sireneva <alina@tei.su>",
-    "license": "MIT",
-    "sideEffects": false,
-    "exports": "./src/index.ts",
-    "scripts": {
-        "build": "pnpm run -w build-package convert"
-    },
-    "dependencies": {
-        "@mtcute/core": "workspace:^"
-    },
-    "devDependencies": {
-        "@mtcute/test": "workspace:^"
-    }
+  "name": "@mtcute/convert",
+  "type": "module",
+  "version": "0.16.9",
+  "private": true,
+  "description": "Cross-library session conversion utilities",
+  "author": "alina sireneva <alina@tei.su>",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": "./src/index.ts",
+  "scripts": {
+    "build": "pnpm run -w build-package convert"
+  },
+  "dependencies": {
+    "@mtcute/core": "workspace:^"
+  },
+  "devDependencies": {
+    "@mtcute/test": "workspace:^"
+  }
 }

@@ -26,7 +26,7 @@ export class StubTelegramClient extends BaseTelegramClient {
         super({
             apiId: 0,
             apiHash: '',
-            logLevel: 0,
+            logLevel: 5,
             storage,
             disableUpdates: true,
             transport: () => {

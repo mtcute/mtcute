@@ -1,22 +1,24 @@
+import * as timers from './timers.js'
+
 /**
  * Sleep for the given number of ms
  *
  * @param ms  Number of ms to sleep
  */
-export const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms))
+export const sleep = (ms: number): Promise<void> => new Promise(resolve => timers.setTimeout(resolve, ms))
 
 export function sleepWithAbort(ms: number, signal: AbortSignal): Promise<void> {
     return new Promise((resolve, reject) => {
-        let timeout: NodeJS.Timeout
+        let timeout: timers.Timer
 
         const onAbort = () => {
-            clearTimeout(timeout)
+            timers.clearTimeout(timeout)
             reject(signal.reason)
         }
 
         signal.addEventListener('abort', onAbort)
 
-        timeout = setTimeout(() => {
+        timeout = timers.setTimeout(() => {
             signal.removeEventListener('abort', onAbort)
             resolve()
         }, ms)

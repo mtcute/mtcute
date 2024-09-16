@@ -6,7 +6,7 @@ import { serializeIpv4ToBytes, serializeIpv6ToBytes } from '../utils/ip.js'
 
 import type { TelethonSession } from './types.js'
 
-export function serializeTelethonSession(session: TelethonSession) {
+export function serializeTelethonSession(session: TelethonSession): string {
     if (session.authKey.length !== 256) {
         throw new MtArgumentError('authKey must be 256 bytes long')
     }

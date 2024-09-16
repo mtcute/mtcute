@@ -68,7 +68,7 @@ export class WorkerInvoker {
         }
     }
 
-    makeBinder<T>(target: InvokeTarget) {
+    makeBinder<T>(target: InvokeTarget): <K extends keyof T>(method: K, isVoid?: boolean) => T[K] {
         return <K extends keyof T>(method: K, isVoid = false) => {
             let fn
 

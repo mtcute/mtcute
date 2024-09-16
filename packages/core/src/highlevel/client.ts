@@ -1322,6 +1322,8 @@ export interface TelegramClient extends ITelegramClient {
             /** ID of the user/channel to ban */
             participantId: InputPeerLike
 
+            untilDate?: number | Date
+
             /**
              * Whether to dispatch the returned service message (if any)
              * to the client's update handler.

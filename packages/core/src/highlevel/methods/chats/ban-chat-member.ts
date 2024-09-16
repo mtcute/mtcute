@@ -1,6 +1,7 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike, Message } from '../../types/index.js'
 import { MtInvalidPeerTypeError } from '../../types/index.js'
+import { normalizeDate } from '../../utils/index.js'
 import { isInputPeerChannel, isInputPeerChat, toInputChannel, toInputUser } from '../../utils/peer-utils.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -24,6 +25,8 @@ export async function banChatMember(
         /** ID of the user/channel to ban */
         participantId: InputPeerLike
 
+        untilDate?: number | Date
+
         /**
          * Whether to dispatch the returned service message (if any)
          * to the client's update handler.
@@ -43,8 +46,7 @@ export async function banChatMember(
             participant: peer,
             bannedRights: {
                 _: 'chatBannedRights',
-                // bans can't be temporary.
-                untilDate: 0,
+                untilDate: normalizeDate(params?.untilDate) ?? 0,
                 viewMessages: true,
             },
         })

@@ -70,17 +70,16 @@ export default defineConfig({
                 })
             },
         },
-        // todo
-        // {
-        //     name: 'fix-wasm-load',
-        //     async transform(code, id) {
-        //         if (code.includes('@mtcute/wasm/mtcute.wasm')) {
-        //             return code.replace('@mtcute/wasm/mtcute.wasm', resolve(__dirname, '../packages/wasm/mtcute.wasm'))
-        //         }
+        {
+            name: 'fix-wasm-load',
+            async transform(code) {
+                if (code.includes('./mtcute.wasm')) {
+                    return code.replace(/\.?\.\/mtcute\.wasm/, resolve(__dirname, '../packages/wasm/src/mtcute.wasm'))
+                }
 
-        //         return code
-        //     }
-        // },
+                return code
+            },
+        },
         testSetup(),
     ],
     define: {

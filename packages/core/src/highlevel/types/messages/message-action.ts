@@ -497,6 +497,27 @@ export interface ActionStarsGifted {
     transactionId?: string
 }
 
+/**
+ * Telegram Stars were awarded in a giveaway
+ */
+export interface ActionStarsPrize {
+    readonly type: 'stars_prize'
+
+    /** Whether this prize was claimed yet */
+    claimed: boolean
+
+    /** Stars prize */
+    stars: tl.Long
+
+    /** Transaction ID */
+    transactionId: string
+
+    boostPeer: Peer
+
+    /** Message ID containing the giveaway */
+    giveawayMessageId: number
+}
+
 export type MessageAction =
   | ActionChatCreated
   | ActionChannelCreated
@@ -542,6 +563,7 @@ export type MessageAction =
   | ActionBoostApply
   | ActionPaymentRefunded
   | ActionStarsGifted
+  | ActionStarsPrize
   | null
 
 /** @internal */
@@ -816,6 +838,15 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 amount: act.cryptoAmount ?? act.amount,
                 stars: act.stars,
                 transactionId: act.transactionId,
+            }
+        case 'messageActionPrizeStars':
+            return {
+                type: 'stars_prize',
+                claimed: !act.unclaimed,
+                stars: act.stars,
+                transactionId: act.transactionId,
+                boostPeer: parsePeer(act.boostPeer, this._peers),
+                giveawayMessageId: act.giveawayMsgId,
             }
         default:
             return null

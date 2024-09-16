@@ -1,3 +1,4 @@
+import { timers } from '../../utils/index.js'
 import type { Message } from '../types/messages/index.js'
 import type { BusinessMessage, ParsedUpdate } from '../types/updates/index.js'
 import { _parseUpdate } from '../types/updates/parse-update.js'
@@ -47,7 +48,7 @@ export function makeParsedUpdateHandler(params: ParsedUpdateHandlerParams): RawU
         }
     }
 
-    const pending = new Map<string, [Message[], NodeJS.Timeout]>()
+    const pending = new Map<string, [Message[], timers.Timer]>()
 
     return (update, peers) => {
         const parsed = _parseUpdate(update, peers)
@@ -66,7 +67,7 @@ export function makeParsedUpdateHandler(params: ParsedUpdateHandlerParams): RawU
                         pendingGroup[0].push(parsed.data)
                     } else {
                         const messages = [parsed.data]
-                        const timeout = setTimeout(() => {
+                        const timeout = timers.setTimeout(() => {
                             pending.delete(group)
 
                             if (isBusiness) {

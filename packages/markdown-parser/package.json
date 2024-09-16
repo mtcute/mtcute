@@ -1,18 +1,18 @@
 {
-    "name": "@mtcute/markdown-parser",
-    "type": "module",
-    "version": "0.16.7",
-    "private": true,
-    "description": "Markdown entities parser for mtcute",
-    "author": "alina sireneva <alina@tei.su>",
-    "license": "MIT",
-    "sideEffects": false,
-    "exports": "./src/index.ts",
-    "scripts": {
-        "build": "pnpm run -w build-package markdown-parser"
-    },
-    "dependencies": {
-        "@mtcute/core": "workspace:^",
-        "long": "5.2.3"
-    }
+  "name": "@mtcute/markdown-parser",
+  "type": "module",
+  "version": "0.16.9",
+  "private": true,
+  "description": "Markdown entities parser for mtcute",
+  "author": "alina sireneva <alina@tei.su>",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": "./src/index.ts",
+  "scripts": {
+    "build": "pnpm run -w build-package markdown-parser"
+  },
+  "dependencies": {
+    "@mtcute/core": "workspace:^",
+    "long": "5.2.3"
+  }
 }

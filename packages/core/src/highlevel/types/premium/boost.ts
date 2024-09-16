@@ -41,6 +41,11 @@ export class Boost {
         return new Date(this.raw.date * 1000)
     }
 
+    /** Amount of Telegram Stars that were awarded along with this boost */
+    get stars(): tl.Long | null {
+        return this.raw.stars ?? null
+    }
+
     /**
      * Date when this boost will automatically expire.
      *

@@ -56,7 +56,7 @@ export default antfu({
         'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
         'node/prefer-global/process': ['error', 'always'],
         'node/prefer-global/buffer': ['error', 'always'],
-        'no-restricted-globals': ['error', 'Buffer', '__dirname', 'require'],
+        'no-restricted-globals': ['error', 'Buffer', '__dirname', 'require', 'NodeJS', 'setTimeout', 'clearTimeout'],
         'style/quotes': ['error', 'single', { avoidEscape: true }],
         'test/consistent-test-it': 'off',
         'test/prefer-lowercase-title': 'off',
@@ -64,6 +64,7 @@ export default antfu({
         'import/order': ['error', { 'newlines-between': 'always' }],
         'antfu/if-newline': 'off',
         'import/no-relative-packages': 'error',
+        'import/extensions': ['error', 'ignorePackages'],
         'style/max-statements-per-line': ['error', { max: 2 }],
         'ts/no-redeclare': 'off',
         'eslint-comments/no-unlimited-disable': 'off',
@@ -112,7 +113,7 @@ export default antfu({
         'import/no-relative-packages': 'off', // common-internals is symlinked from node
     },
 }, {
-    files: ['**/scripts/**', '**/*.cjs'],
+    files: ['**/scripts/**', '**/*.cjs', '.config/**/*'],
     rules: {
         'no-restricted-imports': 'off',
         'no-restricted-globals': 'off',
@@ -124,5 +125,10 @@ export default antfu({
         'node/prefer-global/process': ['error', 'never'],
         'node/prefer-global/buffer': ['error', 'never'],
         'no-console': 'off',
+    },
+}, {
+    files: ['e2e/**', '.config/**'],
+    rules: {
+        'import/extensions': 'off',
     },
 })

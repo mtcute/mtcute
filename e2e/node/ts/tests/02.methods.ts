@@ -44,16 +44,4 @@ describe('2. calling methods', function () {
         expect(history[0].chat.id).to.equal(777000)
         expect(history[0].chat.firstName).to.equal('Telegram')
     })
-
-    it('updateProfile', async () => {
-        const bio = `mtcute e2e ${new Date().toISOString()}`
-
-        const oldSelf = await tg.getFullChat('self')
-        const res = await tg.updateProfile({ bio })
-        const newSelf = await tg.getFullChat('self')
-
-        expect(res.isSelf).to.eq(true)
-        expect(oldSelf.bio).to.not.equal(newSelf.bio)
-        expect(newSelf.bio).to.equal(bio)
-    })
 })

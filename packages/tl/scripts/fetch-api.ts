@@ -9,7 +9,7 @@ import { join } from 'node:path'
 import * as readline from 'node:readline'
 
 import * as cheerio from 'cheerio'
-import { hasPresentKey, isPresent } from '@mtcute/core/utils.js'
+import { isPresent } from '@mtcute/core/utils.js'
 import type {
     TlEntry,
     TlFullSchema,
@@ -299,17 +299,17 @@ async function main() {
                 }
             }
 
-            const nonEmptyOptions = chooseOptions.filter(hasPresentKey('entry'))
+            const nonEmptyOptions = chooseOptions.filter(it => it.entry !== undefined)
 
             console.log(
                 'Conflict detected (%s) at %s %s:',
                 mergeError,
-                nonEmptyOptions[0].entry.kind,
-                nonEmptyOptions[0].entry.name,
+                nonEmptyOptions[0].entry!.kind,
+                nonEmptyOptions[0].entry!.name,
             )
             console.log('0. Remove')
             nonEmptyOptions.forEach((opt, idx) => {
-                console.log(`${idx + 1}. ${opt.schema.name}: (${opt.entry.kind}) ${writeTlEntryToString(opt.entry)}`)
+                console.log(`${idx + 1}. ${opt.schema.name}: (${opt.entry!.kind}) ${writeTlEntryToString(opt.entry!)}`)
             })
 
             while (true) {
