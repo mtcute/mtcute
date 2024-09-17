@@ -5,7 +5,6 @@ import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
 import { Deferred, u8 } from '@fuman/utils'
 
-import { getPlatform } from '../platform.js'
 import { MtArgumentError, MtTimeoutError, MtcuteError } from '../types/index.js'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
 import type { ICryptoProvider } from '../utils/index.js'
@@ -16,6 +15,7 @@ import {
     removeFromLongArray,
     timers,
 } from '../utils/index.js'
+import type { ICorePlatform } from '../types/platform'
 
 import { doAuthorization } from './authorization.js'
 import type { MtprotoSession, PendingMessage, PendingRpc } from './mtproto-session.js'
@@ -39,6 +39,7 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
 
     readerMap: TlReaderMap
     writerMap: TlWriterMap
+    platform: ICorePlatform
 }
 
 const TEMP_AUTH_KEY_EXPIRY = 86400 // 24 hours
@@ -97,7 +98,7 @@ export class SessionConnection extends PersistentConnection {
         this._handleRawMessage = this._handleRawMessage.bind(this)
 
         this._usePfs = this.params.usePfs ?? false
-        this._online = getPlatform().isOnline?.() ?? true
+        this._online = params.platform.isOnline?.() ?? true
     }
 
     private _online

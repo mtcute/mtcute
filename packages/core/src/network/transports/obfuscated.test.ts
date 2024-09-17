@@ -1,23 +1,20 @@
 import { describe, expect, it, vi } from 'vitest'
-import { defaultTestCryptoProvider } from '@mtcute/test'
+import { defaultPlatform, defaultTestCryptoProvider } from '@mtcute/test'
 import { Bytes } from '@fuman/io'
 import { hex } from '@fuman/utils'
 
-import { getPlatform } from '../../platform.js'
 import { LogManager } from '../../utils/index.js'
 
 import { IntermediatePacketCodec } from './intermediate.js'
 import type { MtProxyInfo } from './obfuscated.js'
 import { ObfuscatedPacketCodec } from './obfuscated.js'
-import { TransportError } from './abstract'
-
-const p = getPlatform()
+import { TransportError } from './abstract.js'
 
 describe('ObfuscatedPacketCodec', () => {
     const create = async (randomSource?: string, proxy?: MtProxyInfo) => {
         const codec = new ObfuscatedPacketCodec(new IntermediatePacketCodec(), proxy)
         const crypto = await defaultTestCryptoProvider(randomSource)
-        codec.setup(crypto, new LogManager())
+        codec.setup(crypto, new LogManager(undefined, defaultPlatform))
 
         return [codec, crypto] as const
     }
@@ -191,7 +188,7 @@ describe('ObfuscatedPacketCodec', () => {
         const spyInnerReset = vi.spyOn(inner, 'reset')
 
         const codec = new ObfuscatedPacketCodec(inner)
-        codec.setup(await defaultTestCryptoProvider(), new LogManager())
+        codec.setup(await defaultTestCryptoProvider(), new LogManager(undefined, defaultPlatform))
 
         await codec.tag()
 

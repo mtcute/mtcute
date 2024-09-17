@@ -26,6 +26,7 @@ import {
     defaultTestIpv6Dc,
     isTlRpcError,
 } from '../utils/index.js'
+import type { ICorePlatform } from '../types/platform.js'
 
 import { ConfigManager } from './config-manager.js'
 import type { NetworkManagerExtraParams, RpcCallOptions } from './network-manager.js'
@@ -56,6 +57,8 @@ export interface MtClientOptions {
      * crypto to native addon, worker, etc.
      */
     crypto: ICryptoProvider
+
+    platform: ICorePlatform
 
     /**
      * Whether to use IPv6 datacenters
@@ -223,7 +226,7 @@ export class MtClient extends EventEmitter {
     constructor(readonly params: MtClientOptions) {
         super()
 
-        this.log = params.logger ?? new LogManager()
+        this.log = params.logger ?? new LogManager(undefined, params.platform)
 
         if (params.logLevel !== undefined) {
             this.log.mgr.level = params.logLevel
@@ -256,6 +259,7 @@ export class MtClient extends EventEmitter {
             log: this.log,
             readerMap: this._readerMap,
             writerMap: this._writerMap,
+            platform: params.platform,
             ...params.storageOptions,
         })
 
@@ -282,6 +286,7 @@ export class MtClient extends EventEmitter {
                 onNetworkChanged: connected => this.emit('networkChanged', connected),
                 onUpdate: upd => this.emit('update', upd),
                 stopSignal: this.stopSignal,
+                platform: params.platform,
                 ...params.network,
             },
             this._config,

@@ -3,7 +3,6 @@ import type { IReadable } from '@fuman/io'
 import { read } from '@fuman/io'
 import { AsyncLock } from '@fuman/utils'
 
-import { getPlatform } from '../../../platform.js'
 import { MtArgumentError } from '../../../types/errors.js'
 import { randomLong } from '../../../utils/long-utils.js'
 import type { ITelegramClient } from '../../client.types.js'
@@ -111,10 +110,8 @@ export async function uploadFile(
     let fileName = params.fileName
     let fileMime = params.fileMime
 
-    const platform = getPlatform()
-
-    if (platform.normalizeFile) {
-        const res = await platform.normalizeFile(file)
+    if (client.platform.normalizeFile) {
+        const res = await client.platform.normalizeFile(file)
 
         if (res?.file) {
             file = res.file

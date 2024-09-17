@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getPlatform } from '@mtcute/core/platform.js'
+import { hex } from '@fuman/utils'
 
 import { StubTelegramClient } from './client.js'
 import { createStub } from './stub.js'
@@ -25,7 +25,7 @@ describe('client stub', () => {
             const client = new StubTelegramClient()
 
             client.onRawMessage((msg) => {
-                log.push(`message ctor=${getPlatform().hexEncode(msg.subarray(0, 4))}`)
+                log.push(`message ctor=${hex.encode(msg.subarray(0, 4))}`)
                 client.close().catch(() => {})
             })
 

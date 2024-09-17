@@ -1,6 +1,6 @@
 import Long from 'long'
 import { describe, expect, it, vi } from 'vitest'
-import { defaultTestCryptoProvider } from '@mtcute/test'
+import { defaultPlatform, defaultTestCryptoProvider } from '@mtcute/test'
 import type { TlBinaryReader, TlReaderMap } from '@mtcute/tl-runtime'
 import { hex, utf8 } from '@fuman/utils'
 
@@ -16,7 +16,7 @@ for (let i = 0; i < 256; i += 32) {
 
 describe('AuthKey', () => {
     async function create() {
-        const logger = new LogManager()
+        const logger = new LogManager(undefined, defaultPlatform)
         const readerMap: TlReaderMap = {}
         const crypto = await defaultTestCryptoProvider()
 

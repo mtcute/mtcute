@@ -1,12 +1,13 @@
 import Long from 'long'
 import { describe, expect, it, vi } from 'vitest'
 import { tl } from '@mtcute/tl'
+import { defaultPlatform } from '@mtcute/test'
 
 import { LogManager } from './logger.js'
 
 describe('logger', () => {
     const createManager = () => {
-        const mgr = new LogManager()
+        const mgr = new LogManager(undefined, defaultPlatform)
         mgr.level = LogManager.INFO
 
         const spy = vi.fn<typeof mgr.handler>()

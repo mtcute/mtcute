@@ -12,8 +12,7 @@
         "./utils.js": "./src/utils/index.ts",
         "./client.js": "./src/highlevel/client.ts",
         "./worker.js": "./src/highlevel/worker/index.ts",
-        "./methods.js": "./src/highlevel/methods.ts",
-        "./platform.js": "./src/platform.ts"
+        "./methods.js": "./src/highlevel/methods.ts"
     },
     "scripts": {
         "build": "pnpm run -w build-package core",

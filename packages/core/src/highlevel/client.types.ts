@@ -4,6 +4,7 @@ import type Long from 'long'
 import type { ConnectionKind, RpcCallOptions } from '../network/index.js'
 import type { MustEqual, PublicPart } from '../types/utils.js'
 import type { Logger } from '../utils/logger.js'
+import type { ICorePlatform } from '../types/platform'
 
 import type { AppConfigManager } from './managers/app-config-manager.js'
 import type { TelegramStorageManager } from './storage/storage.js'
@@ -35,6 +36,7 @@ export interface ITelegramClient {
     readonly storage: PublicPart<TelegramStorageManager>
     readonly appConfig: PublicPart<AppConfigManager>
     readonly stopSignal: AbortSignal
+    readonly platform: ICorePlatform
 
     prepare(): Promise<void>
     connect(): Promise<void>

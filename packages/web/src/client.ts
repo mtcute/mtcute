@@ -7,17 +7,16 @@ import {
     BaseTelegramClient as BaseTelegramClientBase,
     TelegramClient as TelegramClientBase,
 } from '@mtcute/core/client.js'
-import { setPlatform } from '@mtcute/core/platform.js'
 
 import { WebCryptoProvider } from './crypto.js'
 import { IdbStorage } from './idb/index.js'
-import { WebPlatform } from './platform.js'
 import { WebSocketTransport } from './websocket.js'
+import { WebPlatform } from './platform.js'
 
 export type { TelegramClientOptions }
 
 export interface BaseTelegramClientOptions
-    extends PartialOnly<Omit<BaseTelegramClientOptionsBase, 'storage'>, 'transport' | 'crypto'> {
+    extends PartialOnly<Omit<BaseTelegramClientOptionsBase, 'storage'>, 'transport' | 'crypto' | 'platform'> {
     /**
      * Storage to use for this client.
      *
@@ -27,23 +26,14 @@ export interface BaseTelegramClientOptions
      * @default `"client.session"`
      */
     storage?: string | ITelegramStorageProvider
-
-    /**
-     * **ADVANCED USE ONLY**
-     *
-     * Whether to not set up the platform.
-     * This is useful if you call `setPlatform` yourself.
-     */
-    platformless?: boolean
 }
 
 export class BaseTelegramClient extends BaseTelegramClientBase {
     constructor(opts: BaseTelegramClientOptions) {
-        if (!opts.platformless) setPlatform(new WebPlatform())
-
         super({
             crypto: new WebCryptoProvider(),
             transport: new WebSocketTransport(),
+            platform: new WebPlatform(),
             ...opts,
             storage:
                 typeof opts.storage === 'string'

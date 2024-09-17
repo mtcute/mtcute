@@ -1,8 +1,7 @@
 import { tl } from '@mtcute/tl'
 import { hex } from '@fuman/utils'
 
-import type { ICorePlatform } from '../platform.js'
-import { getPlatform } from '../platform.js'
+import type { ICorePlatform } from '../types/platform.js'
 
 import { isTlRpcError } from './type-assertions.js'
 
@@ -160,19 +159,17 @@ export class LogManager extends Logger {
     static DEBUG = 4
     static VERBOSE = 5
 
-    readonly platform: ICorePlatform
     level: number
     handler: (color: number, level: number, tag: string, fmt: string, args: unknown[]) => void
 
-    constructor(tag = 'base') {
+    constructor(tag = 'base', platform: ICorePlatform) {
         // workaround because we cant pass this to super
         // eslint-disable-next-line ts/no-unsafe-argument
         super(null as any, tag)
         ;(this as any).mgr = this
 
-        this.platform = getPlatform()
-        this.level = this.platform.getDefaultLogLevel() ?? DEFAULT_LOG_LEVEL
-        this.handler = this.platform.log.bind(this.platform)
+        this.level = platform.getDefaultLogLevel() ?? DEFAULT_LOG_LEVEL
+        this.handler = platform.log.bind(platform)
     }
 
     private _filter: (tag: string) => boolean = defaultFilter

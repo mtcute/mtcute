@@ -132,9 +132,9 @@ importers:
 
   packages/convert:
     dependencies:
-      '@fuman/ip':
+      '@fuman/net':
         specifier: workspace:^
-        version: link:../../private/fuman/packages/ip
+        version: link:../../private/fuman/packages/net
       '@fuman/utils':
         specifier: workspace:^
         version: link:../../private/fuman/packages/utils

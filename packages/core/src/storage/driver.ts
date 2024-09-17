@@ -1,3 +1,4 @@
+import type { ICorePlatform } from '../types/platform'
 import type { MaybePromise } from '../types/utils.js'
 import type { Logger } from '../utils/logger.js'
 
@@ -37,7 +38,7 @@ export interface IStorageDriver {
      * Setup the driver, passing the logger instance,
      * in case your driver needs it
      */
-    setup?: (log: Logger) => void
+    setup?: (log: Logger, platform: ICorePlatform) => void
 }
 
 /**
@@ -53,9 +54,11 @@ export abstract class BaseStorageDriver implements IStorageDriver {
     private _destroyed = false
 
     protected _log!: Logger
+    protected _platform!: ICorePlatform
 
-    setup(log: Logger): void {
+    setup(log: Logger, platform: ICorePlatform): void {
         this._log = log.create('sqlite')
+        this._platform = platform
     }
 
     protected get loaded(): boolean {

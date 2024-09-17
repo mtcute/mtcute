@@ -11,15 +11,13 @@ import {
     BaseTelegramClient as BaseTelegramClientBase,
     TelegramClient as TelegramClientBase,
 } from '@mtcute/core/client.js'
-import { setPlatform } from '@mtcute/core/platform.js'
 
-import { NodePlatform } from './common-internals-node/platform.js'
 import { downloadToFile } from './methods/download-file.js'
 import { downloadAsNodeStream } from './methods/download-node-stream.js'
 import { SqliteStorage } from './sqlite/index.js'
 import { NodeCryptoProvider } from './utils/crypto.js'
 import { TcpTransport } from './utils/tcp.js'
-// import { TcpTransport } from './utils/tcp.js'
+import { NodePlatform } from './common-internals-node/platform.js'
 
 export type { TelegramClientOptions }
 
@@ -34,7 +32,7 @@ try {
 } catch {}
 
 export interface BaseTelegramClientOptions
-    extends PartialOnly<Omit<BaseTelegramClientOptionsBase, 'storage'>, 'transport' | 'crypto'> {
+    extends PartialOnly<Omit<BaseTelegramClientOptionsBase, 'storage'>, 'transport' | 'crypto' | 'platform'> {
     /**
      * Storage to use for this client.
      *
@@ -45,23 +43,15 @@ export interface BaseTelegramClientOptions
      */
     storage?: string | ITelegramStorageProvider
 
-    /**
-     * **ADVANCED USE ONLY**
-     *
-     * Whether to not set up the platform.
-     * This is useful if you call `setPlatform` yourself.
-     */
-    platformless?: boolean
 }
 
 export class BaseTelegramClient extends BaseTelegramClientBase {
     constructor(opts: BaseTelegramClientOptions) {
-        if (!opts.platformless) setPlatform(new NodePlatform())
-
         super({
             // eslint-disable-next-line
             crypto: nativeCrypto ? new nativeCrypto() : new NodeCryptoProvider(),
             transport: TcpTransport,
+            platform: new NodePlatform(),
             ...opts,
             storage:
                 typeof opts.storage === 'string'

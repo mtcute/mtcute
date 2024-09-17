@@ -6,6 +6,7 @@ import { LogManager } from '../../utils/logger.js'
 import type { ConnectionState, ITelegramClient, ServerUpdateHandler } from '../client.types.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
 import type { RawUpdateHandler } from '../updates/types.js'
+import type { ICorePlatform } from '../../types/platform'
 
 import { AppConfigManagerProxy } from './app-config.js'
 import { WorkerInvoker } from './invoker.js'
@@ -15,10 +16,12 @@ import { TelegramStorageProxy } from './storage.js'
 
 export interface TelegramWorkerPortOptions {
     worker: SomeWorker
+    platform: ICorePlatform
 }
 
 export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> implements ITelegramClient {
     readonly log: LogManager
+    readonly platform: ICorePlatform
 
     private _connection
     private _invoker
@@ -51,7 +54,8 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     readonly stopSignal: AbortSignal = this._abortController.signal
 
     constructor(readonly options: TelegramWorkerPortOptions) {
-        this.log = new LogManager('worker')
+        this.log = new LogManager('worker', options.platform)
+        this.platform = options.platform
 
         this._connection = this.connectToWorker(this.options.worker, this._onMessage)
         this._invoker = new WorkerInvoker(this._connection[0])

@@ -15,7 +15,7 @@ import { makeParsedUpdateHandler } from '../updates/parsed.js'
 
 // @copy
 type TelegramClientOptions = (
-    | (PartialOnly<Omit<BaseTelegramClientOptions, 'storage'>, 'transport' | 'crypto'> & {
+    | (PartialOnly<Omit<BaseTelegramClientOptions, 'storage'>, 'transport' | 'crypto' | 'platform'> & {
         /**
          * Storage to use for this client.
          *

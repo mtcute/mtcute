@@ -3,7 +3,7 @@ import { IntermediatePacketCodec, tl } from '@mtcute/core'
 import type { BaseTelegramClientOptions } from '@mtcute/core/client.js'
 import { BaseTelegramClient } from '@mtcute/core/client.js'
 
-import { defaultCryptoProvider } from './platform.js'
+import { defaultCryptoProvider, defaultPlatform } from './platform.js'
 import { StubMemoryTelegramStorage } from './storage.js'
 // import { StubTelegramTransport } from './transport.js'
 import type { InputResponder } from './types.js'
@@ -57,6 +57,7 @@ export class StubTelegramClient extends BaseTelegramClient {
                 packetCodec: () => new IntermediatePacketCodec(),
             },
             crypto: defaultCryptoProvider,
+            platform: defaultPlatform,
             ...params,
         })
     }

@@ -2,7 +2,6 @@ import Long from 'long'
 import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
 import type { tl } from '@mtcute/tl'
 
-import { getPlatform } from '../../../platform.js'
 import { MtArgumentError } from '../../../types/errors.js'
 import { toggleChannelIdMark } from '../../../utils/peer-utils.js'
 import { strippedPhotoToJpg } from '../../utils/file-utils.js'
@@ -62,7 +61,7 @@ export class ChatPhotoSize extends FileLocation {
                 throw new MtArgumentError('Input peer was invalid')
         }
 
-        return toFileId(getPlatform(), {
+        return toFileId({
             dcId: this.obj.dcId,
             type: tdFileId.FileType.ProfilePhoto,
             fileReference: null,
@@ -84,7 +83,7 @@ export class ChatPhotoSize extends FileLocation {
      * TDLib and Bot API compatible unique File ID representing this size
      */
     get uniqueFileId(): string {
-        return toUniqueFileId(getPlatform(), tdFileId.FileType.ProfilePhoto, {
+        return toUniqueFileId(tdFileId.FileType.ProfilePhoto, {
             _: 'photo',
             id: this.obj.photoId,
             // eslint-disable-next-line ts/no-unsafe-assignment

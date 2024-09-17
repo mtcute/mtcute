@@ -1,4 +1,3 @@
-import { getPlatform } from '../../platform.js'
 import { BaseStorageDriver } from '../driver.js'
 
 import type { ISqliteDatabase, ISqliteStatement } from './types.js'
@@ -136,7 +135,7 @@ export abstract class BaseSqliteStorageDriver extends BaseStorageDriver {
 
         this.db.transaction(() => this._initialize())()
 
-        this._cleanup = getPlatform().beforeExit(() => {
+        this._cleanup = this._platform.beforeExit(() => {
             this._save()
             this._destroy()
         })

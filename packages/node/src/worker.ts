@@ -1,13 +1,11 @@
 import { Worker, parentPort } from 'node:worker_threads'
 
-import { setPlatform } from '@mtcute/core/platform.js'
 import type {
     ClientMessageHandler,
     RespondFn,
     SendFn,
     SomeWorker,
     TelegramWorkerOptions,
-    TelegramWorkerPortOptions,
     WorkerCustomMethods,
     WorkerMessageHandler,
 } from '@mtcute/core/worker.js'
@@ -18,7 +16,11 @@ import {
 
 import { NodePlatform } from './common-internals-node/platform.js'
 
-export type { TelegramWorkerOptions, TelegramWorkerPortOptions, WorkerCustomMethods }
+export type { TelegramWorkerOptions, WorkerCustomMethods }
+
+export interface TelegramWorkerPortOptions {
+    worker: SomeWorker
+}
 
 let _registered = false
 
@@ -45,9 +47,11 @@ export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorke
 }
 
 export class TelegramWorkerPort<T extends WorkerCustomMethods> extends TelegramWorkerPortBase<T> {
-    constructor(readonly options: TelegramWorkerPortOptions) {
-        setPlatform(new NodePlatform())
-        super(options)
+    constructor(options: TelegramWorkerPortOptions) {
+        super({
+            worker: options.worker,
+            platform: new NodePlatform(),
+        })
     }
 
     connectToWorker(worker: SomeWorker, handler: ClientMessageHandler): [SendFn, () => void] {

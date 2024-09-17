@@ -1,13 +1,11 @@
 import * as os from 'node:os'
 
-import type { ICorePlatform } from '@mtcute/core/platform.js'
+import type { ICorePlatform } from '@mtcute/core'
 
 import { normalizeFile } from '../utils/normalize-file.js'
 
 import { beforeExit } from './exit-hook.js'
 import { defaultLoggingHandler } from './logging.js'
-
-const toBuffer = (buf: Uint8Array): Buffer => Buffer.from(buf.buffer, buf.byteOffset, buf.byteLength)
 
 export class NodePlatform implements ICorePlatform {
     // ICorePlatform

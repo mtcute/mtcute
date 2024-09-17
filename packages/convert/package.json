@@ -14,7 +14,7 @@
     "dependencies": {
         "@mtcute/core": "workspace:^",
         "@fuman/utils": "workspace:^",
-        "@fuman/ip": "workspace:^"
+        "@fuman/net": "workspace:^"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^"

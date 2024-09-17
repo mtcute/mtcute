@@ -23,6 +23,7 @@ import {
     writeStringSession,
 } from '../utils/index.js'
 import { LogManager } from '../utils/logger.js'
+import type { ICorePlatform } from '../types/platform'
 
 import type { ConnectionState, ITelegramClient, ServerUpdateHandler } from './client.types.js'
 import { AppConfigManager } from './managers/app-config-manager.js'
@@ -57,9 +58,11 @@ export class BaseTelegramClient implements ITelegramClient {
     readonly mt: MtClient
     readonly crypto: ICryptoProvider
     readonly storage: TelegramStorageManager
+    readonly platform: ICorePlatform
 
     constructor(readonly params: BaseTelegramClientOptions) {
-        this.log = this.params.logger ?? new LogManager('client')
+        this.log = this.params.logger ?? new LogManager('client', params.platform)
+        this.platform = this.params.platform
         this.mt = new MtClient({
             ...this.params,
             logger: this.log.create('mtproto'),
@@ -238,11 +241,12 @@ export class BaseTelegramClient implements ITelegramClient {
         if (defaultDcAuthKey && !force) return
 
         const data = typeof session === 'string' ? readStringSession(session) : session
+        const testMode = data.primaryDcs.main.testMode
 
-        if (data.testMode && !this.params.testMode) {
+        if (testMode && !this.params.testMode) {
             throw new Error(
                 'This session string is not for the current backend. '
-                + `Session is ${data.testMode ? 'test' : 'prod'}, `
+                + `Session is ${testMode ? 'test' : 'prod'}, `
                 + `but the client is ${this.params.testMode ? 'test' : 'prod'}`,
             )
         }
@@ -285,7 +289,6 @@ export class BaseTelegramClient implements ITelegramClient {
         return writeStringSession({
             version: 3,
             self: await this.storage.self.fetch(),
-            testMode: Boolean(this.params.testMode),
             primaryDcs,
             authKey,
         })

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { StubTelegramClient } from '@mtcute/test'
+import { sleep } from '@fuman/utils'
 
-import { sleep } from '../../utils/misc-utils.js'
 import type { ITelegramClient } from '../client.types.js'
 
 import { batchedQuery } from './query-batcher.js'

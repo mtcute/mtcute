@@ -281,7 +281,7 @@ import { withParams } from './methods/misc/with-params.js'
 // from methods/_init.ts
 // @copy
 type TelegramClientOptions = (
-    | (PartialOnly<Omit<BaseTelegramClientOptions, 'storage'>, 'transport' | 'crypto'> & {
+    | (PartialOnly<Omit<BaseTelegramClientOptions, 'storage'>, 'transport' | 'crypto' | 'platform'> & {
         /**
          * Storage to use for this client.
          *

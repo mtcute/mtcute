@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe } from 'vitest'
 import { LogManager } from '@mtcute/core/utils.js'
 import {
+    defaultPlatform,
     testAuthKeysRepository,
     testKeyValueRepository,
     testPeersRepository,
@@ -17,7 +18,7 @@ if (import.meta.env.TEST_ENV === 'deno') {
         const storage = new SqliteStorage(':memory:')
 
         beforeAll(async () => {
-            storage.driver.setup(new LogManager())
+            storage.driver.setup(new LogManager(undefined, defaultPlatform), defaultPlatform)
             await storage.driver.load()
         })
 

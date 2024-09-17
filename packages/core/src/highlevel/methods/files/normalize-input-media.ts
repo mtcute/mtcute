@@ -2,7 +2,6 @@ import Long from 'long'
 import { parseFileId, tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
-import { getPlatform } from '../../../platform.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
 import { isUploadedFile } from '../../types/files/uploaded-file.js'
@@ -321,7 +320,7 @@ export async function _normalizeInputMedia(
         } else if (typeof input === 'string' && input.match(/^file:/)) {
             await upload(input.substring(5))
         } else {
-            const parsed = typeof input === 'string' ? parseFileId(getPlatform(), input) : input
+            const parsed = typeof input === 'string' ? parseFileId(input) : input
 
             if (parsed.location._ === 'photo') {
                 return {

@@ -1,4 +1,4 @@
-import type { ICorePlatform } from '@mtcute/core/platform.js'
+import type { ICorePlatform } from '@mtcute/core'
 
 import { defaultLoggingHandler } from './common-internals-web/logging.js'
 import { beforeExit } from './exit-hook.js'

@@ -1,8 +1,8 @@
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
-import { getPlatform } from '../platform.js'
 import { asyncResettable } from '../utils/index.js'
 import type { Logger } from '../utils/logger.js'
+import type { ICorePlatform } from '../types/platform'
 
 import type { IMtStorageProvider } from './provider.js'
 import { AuthKeysService } from './service/auth-keys.js'
@@ -13,6 +13,7 @@ import type { IStorageDriver } from './driver.js'
 
 interface StorageManagerOptions {
     provider: IMtStorageProvider
+    platform: ICorePlatform
     log: Logger
     readerMap: TlReaderMap
     writerMap: TlWriterMap
@@ -44,6 +45,7 @@ export interface StorageManagerExtraOptions {
 export class StorageManager {
     readonly provider: IMtStorageProvider
     readonly driver: IStorageDriver
+    readonly platform: ICorePlatform
     readonly log: Logger
     readonly dcs: DefaultDcsService
     readonly salts: FutureSaltsService
@@ -51,6 +53,7 @@ export class StorageManager {
 
     constructor(readonly options: StorageManagerOptions & StorageManagerExtraOptions) {
         this.provider = this.options.provider
+        this.platform = this.options.platform
         this.driver = this.provider.driver
         this.log = this.options.log.create('storage')
 
@@ -69,10 +72,10 @@ export class StorageManager {
     private _cleanupRestore?: () => void
 
     private _load = asyncResettable(async () => {
-        this.driver.setup?.(this.log)
+        this.driver.setup?.(this.log, this.platform)
 
         if (this.options.cleanup ?? true) {
-            this._cleanupRestore = getPlatform().beforeExit(() => {
+            this._cleanupRestore = this.platform.beforeExit(() => {
                 this._destroy().catch(err => this.log.error('cleanup error: %e', err))
             })
         }

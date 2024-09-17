@@ -4,13 +4,13 @@ import type Long from 'long'
 import { type ReconnectionStrategy, defaultReconnectionStrategy } from '@fuman/net'
 import { Deferred } from '@fuman/utils'
 
-import { getPlatform } from '../platform.js'
 import type { StorageManager } from '../storage/storage.js'
 import { MtArgumentError, MtUnsupportedError, MtcuteError } from '../types/index.js'
 import type { ComposedMiddleware, Middleware } from '../utils/composer.js'
 import { composeMiddlewares } from '../utils/composer.js'
 import type { DcOptions, ICryptoProvider, Logger } from '../utils/index.js'
 import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
+import type { ICorePlatform } from '../types/platform'
 
 import type { ConfigManager } from './config-manager.js'
 import { basic as defaultMiddlewares } from './middlewares/default.js'
@@ -29,6 +29,7 @@ export interface NetworkManagerParams {
     storage: StorageManager
     crypto: ICryptoProvider
     log: Logger
+    platform: ICorePlatform
 
     enableErrorReporting: boolean
     apiId: number
@@ -253,6 +254,7 @@ export class DcConnectionManager {
             inactivityTimeout: this.manager.params.inactivityTimeout ?? 60_000,
             enableErrorReporting: this.manager.params.enableErrorReporting,
             salts: this._salts,
+            platform: this.manager.params.platform,
         })
 
         const mainParams = baseConnectionParams()
@@ -485,7 +487,7 @@ export class NetworkManager {
         readonly params: NetworkManagerParams & NetworkManagerExtraParams,
         readonly config: ConfigManager,
     ) {
-        const deviceModel = `mtcute on ${getPlatform().getDeviceModel()}`
+        const deviceModel = `mtcute on ${params.platform.getDeviceModel()}`
 
         this._initConnectionParams = {
             _: 'initConnection',
@@ -616,7 +618,7 @@ export class NetworkManager {
             throw new MtArgumentError('DC manager already exists')
         }
 
-        this._resetOnNetworkChange = getPlatform().onNetworkChanged?.(this.notifyNetworkChanged.bind(this))
+        this._resetOnNetworkChange = this.params.platform.onNetworkChanged?.(this.notifyNetworkChanged.bind(this))
 
         const dc = new DcConnectionManager(this, defaultDcs.main.id, defaultDcs, true)
         this._dcConnections.set(defaultDcs.main.id, dc)

@@ -11,17 +11,17 @@ import {
     BaseTelegramClient as BaseTelegramClientBase,
     TelegramClient as TelegramClientBase,
 } from '@mtcute/core/client.js'
-import { setPlatform } from '@mtcute/core/platform.js'
 
 import { downloadToFile } from './methods/download-file.js'
 import { DenoPlatform } from './platform.js'
 import { SqliteStorage } from './sqlite/index.js'
 import { DenoCryptoProvider } from './utils/crypto.js'
+import { TcpTransport } from './utils/tcp.js'
 
 export type { TelegramClientOptions }
 
 export interface BaseTelegramClientOptions
-    extends PartialOnly<Omit<BaseTelegramClientOptionsBase, 'storage'>, 'transport' | 'crypto'> {
+    extends PartialOnly<Omit<BaseTelegramClientOptionsBase, 'storage'>, 'transport' | 'crypto' | 'platform'> {
     /**
      * Storage to use for this client.
      *
@@ -31,23 +31,14 @@ export interface BaseTelegramClientOptions
      * @default `"client.session"`
      */
     storage?: string | ITelegramStorageProvider
-
-    /**
-     * **ADVANCED USE ONLY**
-     *
-     * Whether to not set up the platform.
-     * This is useful if you call `setPlatform` yourself.
-     */
-    platformless?: boolean
 }
 
 export class BaseTelegramClient extends BaseTelegramClientBase {
     constructor(opts: BaseTelegramClientOptions) {
-        if (!opts.platformless) setPlatform(new DenoPlatform())
-
         super({
             crypto: new DenoCryptoProvider(),
-            transport: {} as any, // todo
+            transport: TcpTransport,
+            platform: new DenoPlatform(),
             ...opts,
             storage:
                 typeof opts.storage === 'string'

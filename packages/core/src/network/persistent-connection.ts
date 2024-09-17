@@ -149,6 +149,8 @@ export abstract class PersistentConnection extends EventEmitter {
     private async _onError(err: Error) {
         this._updateLogPrefix()
         this.onError(err)
+
+        return 'reconnect' as const
     }
 
     async changeTransport(transport: TelegramTransport): Promise<void> {
