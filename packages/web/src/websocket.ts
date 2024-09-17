@@ -8,13 +8,10 @@ import {
     MtUnsupportedError,
     ObfuscatedPacketCodec,
 } from '@mtcute/core'
-import { WebSocketConnection } from '@fuman/net'
+import type { WebSocketConstructor } from '@fuman/net'
+import { connectWs } from '@fuman/net'
 
 import type { BasicDcOption } from './utils'
-
-export interface WebSocketConstructor {
-    new (address: string, protocol?: string): WebSocket
-}
 
 const subdomainsMap: Record<string, string> = {
     1: 'pluto',
@@ -60,18 +57,9 @@ export class WebSocketTransport implements TelegramTransport {
     async connect(dc: BasicDcOption, testMode: boolean): Promise<ITelegramConnection> {
         const url = `wss://${this._subdomains[dc.id]}.${this._baseDomain}/apiws${testMode ? '_test' : ''}`
 
-        return new Promise((resolve, reject) => {
-            const socket = new this._WebSocket(url)
-
-            const onError = (event: Event) => {
-                socket.removeEventListener('error', onError)
-                reject(event)
-            }
-            socket.addEventListener('error', onError)
-            socket.addEventListener('open', () => {
-                socket.removeEventListener('error', onError)
-                resolve(new WebSocketConnection(socket))
-            })
+        return connectWs({
+            url,
+            implementation: this._WebSocket,
         })
     }
 

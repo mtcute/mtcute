@@ -38,7 +38,7 @@ export class BaseTelegramClient extends BaseTelegramClientBase {
     constructor(opts: BaseTelegramClientOptions) {
         super({
             crypto: new BunCryptoProvider(),
-            transport: TcpTransport,
+            transport: new TcpTransport(),
             platform: new BunPlatform(),
             ...opts,
             storage:

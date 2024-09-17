@@ -1,7 +1,14 @@
 import { connectTcp } from '@fuman/bun-net'
 import { IntermediatePacketCodec, type TelegramTransport } from '@mtcute/core'
+import type { ITcpConnection } from '@fuman/net'
+import type { BasicDcOption } from '@mtcute/core/utils.js'
 
-export const TcpTransport: TelegramTransport = {
-    connect: dc => connectTcp({ address: dc.ipAddress, port: dc.port }),
-    packetCodec: () => new IntermediatePacketCodec(),
+export class TcpTransport implements TelegramTransport {
+    connect(dc: BasicDcOption): Promise<ITcpConnection> {
+        return connectTcp({ address: dc.ipAddress, port: dc.port })
+    }
+
+    packetCodec(): IntermediatePacketCodec {
+        return new IntermediatePacketCodec()
+    }
 }
