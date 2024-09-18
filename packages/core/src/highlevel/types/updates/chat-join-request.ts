@@ -1,6 +1,6 @@
 import type { tl } from '@mtcute/tl'
 
-import { getBarePeerId } from '../../../utils/peer-utils.js'
+import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import type { PeersIndex } from '../peers/index.js'
@@ -23,10 +23,10 @@ export class ChatJoinRequestUpdate {
     // recent requesters, not the chat
 
     /**
-     * ID of the chat/channel
+     * Marked ID of the chat/channel
      */
     get chatId(): number {
-        return getBarePeerId(this.raw.peer)
+        return getMarkedPeerId(this.raw.peer)
     }
 
     /**
