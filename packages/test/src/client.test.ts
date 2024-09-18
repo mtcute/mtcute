@@ -17,25 +17,22 @@ describe('client stub', () => {
         })
     })
 
-    // for some reason, this test fails in browser. todo: investigate
-    if (import.meta.env.TEST_ENV !== 'browser') {
-        it('should correctly decrypt intercepted raw messages', async () => {
-            const log: string[] = []
+    it('should correctly decrypt intercepted raw messages', async () => {
+        const log: string[] = []
 
-            const client = new StubTelegramClient()
+        const client = new StubTelegramClient()
 
-            client.onRawMessage((msg) => {
-                log.push(`message ctor=${hex.encode(msg.subarray(0, 4))}`)
-                client.close().catch(() => {})
-            })
-
-            await client.with(async () => {
-                await client.call({ _: 'help.getConfig' }).catch(() => {}) // ignore "client closed" error
-
-                expect(log).toEqual([
-                    'message ctor=dcf8f173', // msg_container
-                ])
-            })
+        client.onRawMessage((msg) => {
+            log.push(`message ctor=${hex.encode(msg.subarray(0, 4))}`)
+            client.close().catch(() => {})
         })
-    }
+
+        await client.with(async () => {
+            await client.call({ _: 'help.getConfig' }).catch(() => {}) // ignore "client closed" error
+
+            expect(log).toEqual([
+                'message ctor=dcf8f173', // msg_container
+            ])
+        })
+    })
 })

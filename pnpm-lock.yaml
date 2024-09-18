@@ -355,6 +355,9 @@ importers:
 
   packages/test:
     dependencies:
+      '@fuman/net':
+        specifier: workspace:^
+        version: link:../../private/fuman/packages/net
       '@fuman/utils':
         specifier: workspace:^
         version: link:../../private/fuman/packages/utils

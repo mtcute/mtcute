@@ -68,7 +68,7 @@ export abstract class PersistentConnection extends EventEmitter {
             connect: (dc) => {
                 this._updateLogPrefix()
                 this.log.debug('connecting to %j', dc)
-                return params.transport.connect(dc, params.testMode)
+                return params.transport.connect(dc)
             },
             onOpen: this._onOpen.bind(this),
             onClose: this._onClose.bind(this),
@@ -159,7 +159,7 @@ export abstract class PersistentConnection extends EventEmitter {
         this._codec = transport.packetCodec(this.params.dc)
         this._codec.setup?.(this.params.crypto, this.log)
 
-        await this._fuman.changeTransport(dc => transport.connect(dc, this.params.testMode))
+        await this._fuman.changeTransport(transport.connect.bind(transport))
         this._fuman.connect(this.params.dc)
     }
 

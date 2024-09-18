@@ -28,7 +28,8 @@
     },
     "dependencies": {
         "long": "5.2.3",
-        "@fuman/utils": "workspace:^"
+        "@fuman/utils": "workspace:^",
+        "@fuman/net": "workspace:^"
     },
     "devDependencies": {
         "@mtcute/tl-utils": "workspace:^"

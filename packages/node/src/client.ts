@@ -50,7 +50,7 @@ export class BaseTelegramClient extends BaseTelegramClientBase {
         super({
             // eslint-disable-next-line
             crypto: nativeCrypto ? new nativeCrypto() : new NodeCryptoProvider(),
-            transport: TcpTransport,
+            transport: new TcpTransport(),
             platform: new NodePlatform(),
             ...opts,
             storage:

@@ -1,68 +1,35 @@
-// todo: implement in fuman
-// import EventEmitter from 'node:events'
+import { type IPacketCodec, type ITelegramConnection, IntermediatePacketCodec, type TelegramTransport } from '@mtcute/core'
+import type { BasicDcOption } from '@mtcute/core/utils.js'
+import { FakeConnection } from '@fuman/net'
 
-// import type { ITelegramTransport } from '@mtcute/core'
-// import { TransportState } from '@mtcute/core'
-// import type { ICryptoProvider, Logger } from '@mtcute/core/utils.js'
-// import type { tl } from '@mtcute/tl'
+export class StubTelegramTransport implements TelegramTransport {
+    constructor(
+        readonly params: {
+            packetCodec?: () => IPacketCodec
+            onConnect?: (dc: BasicDcOption) => void
+            onClose?: () => void
+            onMessage?: (msg: Uint8Array, dcId: number) => void
+        },
+    ) {}
 
-// export class StubTelegramTransport extends EventEmitter implements ITelegramConnection {
-//     constructor(
-//         readonly params: {
-//             getMtproxyInfo?: () => tl.RawInputClientProxy
-//             onConnect?: (dc: tl.RawDcOption, testMode: boolean) => void
-//             onClose?: () => void
-//             onMessage?: (msg: Uint8Array) => void
-//         },
-//     ) {
-//         super()
+    private _dcId = 0
+    async connect(dc: BasicDcOption): Promise<ITelegramConnection> {
+        this.params.onConnect?.(dc)
+        this._dcId = dc.id
+        return new FakeConnection<BasicDcOption>(dc)
+    }
 
-//         if (params.getMtproxyInfo) {
-//             (this as unknown as ITelegramTransport).getMtproxyInfo = params.getMtproxyInfo
-//         }
-//     }
+    packetCodec(): IPacketCodec {
+        const inner = this.params.packetCodec?.() ?? new IntermediatePacketCodec()
 
-//     _state: TransportState = TransportState.Idle
-//     _currentDc: tl.RawDcOption | null = null
-//     _crypto!: ICryptoProvider
-//     _log!: Logger
-
-//     write(data: Uint8Array): void {
-//         this.emit('message', data)
-//     }
-
-//     setup(crypto: ICryptoProvider, log: Logger): void {
-//         this._crypto = crypto
-//         this._log = log
-//     }
-
-//     state(): TransportState {
-//         return this._state
-//     }
-
-//     currentDc(): tl.RawDcOption | null {
-//         return this._currentDc
-//     }
-
-//     connect(dc: tl.RawDcOption, testMode: boolean): void {
-//         this._currentDc = dc
-//         this._state = TransportState.Ready
-//         this.emit('ready')
-//         this._log.debug('stubbing connection to %s:%d', dc.ipAddress, dc.port)
-
-//         this.params.onConnect?.(dc, testMode)
-//     }
-
-//     close(): void {
-//         this._currentDc = null
-//         this._state = TransportState.Idle
-//         this.emit('close')
-//         this._log.debug('stub connection closed')
-
-//         this.params.onClose?.()
-//     }
-
-//     async send(data: Uint8Array): Promise<void> {
-//         this.params.onMessage?.(data)
-//     }
-// }
+        return {
+            decode: (reader, eof) => inner.decode(reader, eof),
+            reset: () => inner.reset(),
+            tag: () => inner.tag(),
+            encode: (message, into) => {
+                this.params.onMessage?.(message, this._dcId)
+                return inner.encode(message, into)
+            },
+        }
+    }
+}
