@@ -1,8 +1,8 @@
 import type { tl } from '@mtcute/tl'
+import { LruMap } from '@fuman/utils'
 
 import type { RpcCallOptions } from '../../../network/network-manager.js'
 import type { MustEqual } from '../../../types/utils.js'
-import { LruMap } from '../../../utils/lru-map.js'
 import type { ITelegramClient } from '../../client.types.js'
 import { getBusinessConnection } from '../premium/get-business-connection.js'
 

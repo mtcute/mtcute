@@ -1,6 +1,7 @@
+import { LruMap } from '@fuman/utils'
+
 import type { ServiceOptions } from '../../../storage/service/base.js'
 import { BaseService } from '../../../storage/service/base.js'
-import { LruMap } from '../../../utils/lru-map.js'
 import type { IReferenceMessagesRepository } from '../repository/ref-messages.js'
 
 export interface RefMessagesServiceOptions {

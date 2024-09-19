@@ -1,5 +1,5 @@
 import Long from 'long'
-import { typed } from '@fuman/utils'
+import { CustomMap, CustomSet, typed } from '@fuman/utils'
 
 import { getRandomInt } from './misc-utils.js'
 
@@ -109,41 +109,9 @@ export function longFromFastString(val: string, unsigned = false): Long {
  *
  * Uses fast string representation internally.
  */
-export class LongMap<V> {
-    private _map = new Map<string, V>()
-
-    set(key: Long, value: V): void {
-        this._map.set(longToFastString(key), value)
-    }
-
-    has(key: Long): boolean {
-        return this._map.has(longToFastString(key))
-    }
-
-    get(key: Long): V | undefined {
-        return this._map.get(longToFastString(key))
-    }
-
-    delete(key: Long): void {
-        this._map.delete(longToFastString(key))
-    }
-
-    *keys(unsigned?: boolean): IterableIterator<Long> {
-        for (const v of this._map.keys()) {
-            yield longFromFastString(v, unsigned)
-        }
-    }
-
-    values(): IterableIterator<V> {
-        return this._map.values()
-    }
-
-    clear(): void {
-        this._map.clear()
-    }
-
-    size(): number {
-        return this._map.size
+export class LongMap<V> extends CustomMap<Long, string, V> {
+    constructor() {
+        super(longToFastString, longFromFastString)
     }
 }
 
@@ -152,36 +120,8 @@ export class LongMap<V> {
  *
  * Uses fast string representation internally
  */
-export class LongSet {
-    private _set = new Set<string>()
-
-    get size(): number {
-        return this._set.size
-    }
-
-    add(val: Long): void {
-        this._set.add(longToFastString(val))
-    }
-
-    delete(val: Long): void {
-        this._set.delete(longToFastString(val))
-    }
-
-    has(val: Long): boolean {
-        return this._set.has(longToFastString(val))
-    }
-
-    clear(): void {
-        this._set.clear()
-    }
-
-    toArray(): Long[] {
-        const arr: Long[] = []
-
-        for (const v of this._set) {
-            arr.push(longFromFastString(v))
-        }
-
-        return arr
+export class LongSet extends CustomSet<Long, string> {
+    constructor() {
+        super(longToFastString, longFromFastString)
     }
 }

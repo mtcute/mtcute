@@ -2,7 +2,7 @@ import Long from 'long'
 import type { mtp, tl } from '@mtcute/tl'
 import type { TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import { TlSerializationCounter } from '@mtcute/tl-runtime'
-import { type Deferred, Deque } from '@fuman/utils'
+import { type Deferred, Deque, LruSet } from '@fuman/utils'
 
 import { MtcuteError } from '../types/index.js'
 import type {
@@ -11,7 +11,7 @@ import type {
 } from '../utils/index.js'
 import {
     LongMap,
-    LruSet,
+    LongSet,
     SortedArray,
     compareLongs,
     getRandomInt,
@@ -104,8 +104,8 @@ export class MtprotoSession {
 
     /// state ///
     // recent msg ids
-    recentOutgoingMsgIds: LruSet<Long> = new LruSet(1000, true)
-    recentIncomingMsgIds: LruSet<Long> = new LruSet(1000, true)
+    recentOutgoingMsgIds: LruSet<Long> = new LruSet(1000, LongSet)
+    recentIncomingMsgIds: LruSet<Long> = new LruSet(1000, LongSet)
 
     // queues
     queuedRpc: Deque<PendingRpc> = new Deque()

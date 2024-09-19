@@ -53,7 +53,7 @@ export async function getCustomEmojisFromMessages(
         }
     }
 
-    const arr = set.toArray()
+    const arr = [...set]
     if (!arr.length) return []
 
     return getCustomEmojis(client, arr)

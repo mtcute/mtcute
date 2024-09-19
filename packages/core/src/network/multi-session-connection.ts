@@ -228,7 +228,7 @@ export class MultiSessionConnection extends EventEmitter {
 
         for (let i = 0; i < this._connections.length; i++) {
             const conn = this._connections[i]
-            const total = conn._session.queuedRpc.length + conn._session.pendingMessages.size()
+            const total = conn._session.queuedRpc.length + conn._session.pendingMessages.size
 
             if (total < min) {
                 min = total

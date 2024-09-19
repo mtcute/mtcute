@@ -157,7 +157,7 @@ describe('LongMap', () => {
         map.set(Long.fromInt(123), 'test')
         map.set(Long.fromInt(456), 'test2')
 
-        expect(map.size()).toEqual(2)
+        expect(map.size).toEqual(2)
     })
 })
 
@@ -216,6 +216,6 @@ describe('LongSet', () => {
         set.add(Long.fromInt(123))
         set.add(Long.fromInt(456))
 
-        expect(set.toArray()).toEqual([Long.fromInt(123), Long.fromInt(456)])
+        expect([...set]).toEqual([Long.fromInt(123), Long.fromInt(456)])
     })
 })

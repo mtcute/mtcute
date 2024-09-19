@@ -1,10 +1,10 @@
 import Long from 'long'
 import type { tl } from '@mtcute/tl'
+import { LruMap } from '@fuman/utils'
 
 import type { ServiceOptions } from '../../../storage/service/base.js'
 import { BaseService } from '../../../storage/service/base.js'
 import { longFromFastString, longToFastString } from '../../../utils/long-utils.js'
-import { LruMap } from '../../../utils/lru-map.js'
 import { getAllPeersFrom, parseMarkedPeerId, toggleChannelIdMark } from '../../../utils/peer-utils.js'
 import { extractUsernames } from '../../utils/peer-utils.js'
 import type { IPeersRepository } from '../repository/peers.js'
