@@ -3,6 +3,7 @@ import * as fs from 'node:fs'
 import * as cp from 'node:child_process'
 import { resolve } from 'node:path'
 
+import { populateFromUpstream } from '@fuman/jsr'
 import * as glob from 'glob'
 import ts from 'typescript'
 
@@ -175,23 +176,12 @@ export async function runJsrBuildSync(packageName) {
 
         if (depsToPopulate.length) {
             console.log('[i] Populating %d dependencies...', depsToPopulate.length)
-            cp.spawnSync(
-                'pnpm',
-                [
-                    'exec',
-                    'slow-types-compiler',
-                    'populate',
-                    '--downstream',
-                    process.env.JSR_URL,
-                    '--token',
-                    process.env.JSR_TOKEN,
-                    '--unstable-create-via-api',
-                    ...depsToPopulate,
-                ],
-                {
-                    stdio: 'inherit',
-                },
-            )
+            await populateFromUpstream({
+                downstream: process.env.JSR_URL,
+                token: process.env.JSR_TOKEN,
+                unstable_createViaApi: true,
+                packages: depsToPopulate,
+            })
         }
     }
 

@@ -19,7 +19,7 @@
     },
     "dependencies": {
         "@db/sqlite": "npm:@jsr/db__sqlite@0.12.0",
-        "@fuman/deno-net": "workspace:^",
+        "@fuman/deno": "workspace:^",
         "@fuman/net": "workspace:^",
         "@fuman/io": "workspace:^",
         "@mtcute/core": "workspace:^",

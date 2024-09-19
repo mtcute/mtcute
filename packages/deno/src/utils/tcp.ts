@@ -1,4 +1,4 @@
-import { connectTcp } from '@fuman/deno-net'
+import { connectTcp } from '@fuman/deno'
 import type { ITcpConnection } from '@fuman/net'
 import { IntermediatePacketCodec, type TelegramTransport } from '@mtcute/core'
 import type { BasicDcOption } from '@mtcute/core/utils.js'

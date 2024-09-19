@@ -4,7 +4,7 @@ import { createRequire } from 'node:module'
 import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import * as stc from '@teidesu/slow-types-compiler'
+import { determinePublishOrder, jsrMaybeCreatePackage } from '@fuman/jsr'
 
 const IS_JSR = process.env.JSR === '1'
 const MAIN_REGISTRY = IS_JSR ? 'https://jsr.io/' : 'https://registry.npmjs.org'
@@ -95,7 +95,7 @@ async function publishSinglePackage(name) {
             return
         }
     } else if (IS_JSR && process.env.JSR_TOKEN) {
-        await stc.jsrMaybeCreatePackage({
+        await jsrMaybeCreatePackage({
             name: `@mtcute/${name}`,
             token: process.env.JSR_TOKEN,
             registry: REGISTRY,
@@ -154,7 +154,7 @@ function listPackages(all = false) {
                 .map(d => d.slice(8))
         }
 
-        packages = stc.determinePublishOrder(map)
+        packages = determinePublishOrder(map)
         console.log('[i] Publishing order:', packages.join(', '))
     }
 
@@ -216,7 +216,7 @@ async function main(arg = process.argv[2]) {
         pkgs = filteredPkgs
 
         if (IS_JSR) {
-            pkgs = stc.determinePublishOrder(deps)
+            pkgs = determinePublishOrder(deps)
         }
 
         for (const pkg of pkgs) {

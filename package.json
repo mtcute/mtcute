@@ -47,8 +47,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "2.26.0",
-    "@fuman/utils": "workspace:^",
-    "@teidesu/slow-types-compiler": "1.1.0",
+    "@fuman/jsr": "workspace:^",
     "@types/deno": "npm:@teidesu/deno-types@1.46.3",
     "@types/node": "20.10.0",
     "@types/ws": "8.5.4",
