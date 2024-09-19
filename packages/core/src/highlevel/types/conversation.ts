@@ -1,9 +1,8 @@
 import type { tl } from '@mtcute/tl'
-import { AsyncLock, Deferred, timers } from '@fuman/utils'
+import { AsyncLock, Deferred, Deque, timers } from '@fuman/utils'
 
 import { MtArgumentError, MtTimeoutError } from '../../types/errors.js'
 import type { MaybePromise } from '../../types/utils.js'
-import { Deque } from '../../utils/deque.js'
 import { getMarkedPeerId } from '../../utils/peer-utils.js'
 import type { ITelegramClient } from '../client.types.js'
 import { getPeerDialogs } from '../methods/dialogs/get-peer-dialogs.js'
@@ -55,7 +54,7 @@ export class Conversation {
     private _lock = new AsyncLock()
 
     private _pendingEditMessage: Map<number, QueuedHandler<Message>> = new Map()
-    private _recentEdits = new Deque<Message>(10)
+    private _recentEdits = new Deque<Message>(undefined, { capacity: 10 })
 
     private _pendingRead: Map<number, QueuedHandler<void>> = new Map()
 
@@ -627,7 +626,7 @@ export class Conversation {
     private _processRecentEdits() {
         if (!this._recentEdits.length) return
 
-        const iter = this._recentEdits.iter()
+        const iter = this._recentEdits[Symbol.iterator]()
         let it
 
         while (!(it = iter.next()).done) {

@@ -1,4 +1,5 @@
-import { Deque } from '../../utils/deque.js'
+import { Deque } from '@fuman/utils'
+
 import type { ITelegramClient } from '../client.types.js'
 
 type Resolve<T> = (value: T | PromiseLike<T>) => void

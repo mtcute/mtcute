@@ -2,7 +2,7 @@ import Long from 'long'
 import type { mtp, tl } from '@mtcute/tl'
 import type { TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import { TlSerializationCounter } from '@mtcute/tl-runtime'
-import type { Deferred } from '@fuman/utils'
+import { type Deferred, Deque } from '@fuman/utils'
 
 import { MtcuteError } from '../types/index.js'
 import type {
@@ -10,8 +10,6 @@ import type {
     Logger,
 } from '../utils/index.js'
 import {
-    Deque,
-
     LongMap,
     LruSet,
     SortedArray,

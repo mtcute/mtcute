@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/tl'
-import { AsyncLock, ConditionVariable, timers } from '@fuman/utils'
 import Long from 'long'
+import { AsyncLock, ConditionVariable, Deque, timers } from '@fuman/utils'
 
 import { MtArgumentError } from '../../types/errors.js'
 import type { MaybePromise } from '../../types/utils.js'
@@ -9,7 +9,6 @@ import type {
     Logger,
 } from '../../utils/index.js'
 import {
-    Deque,
     EarlyTimer,
     SortedLinkedList,
     getBarePeerId,

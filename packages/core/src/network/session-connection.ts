@@ -1489,7 +1489,7 @@ export class SessionConnection extends PersistentConnection {
         } else {
             // in case rpc wasn't sent yet (or had some error),
             // we can simply remove it from queue
-            this._session.queuedRpc.remove(rpc)
+            this._session.queuedRpc.removeBy(it => it === rpc)
         }
     }
 

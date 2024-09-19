@@ -1,4 +1,4 @@
-import { Deque } from '../../utils/deque.js'
+import { Deque } from '@fuman/utils'
 
 export class RpsMeter {
     _hits: Deque<bigint>
@@ -12,7 +12,7 @@ export class RpsMeter {
             throw new Error('RPS meter is not supported on this platform')
         }
 
-        this._hits = new Deque<bigint>(size)
+        this._hits = new Deque<bigint>(undefined, { capacity: size })
         this.time = BigInt(time) * BigInt(1e6)
     }
 
@@ -27,7 +27,7 @@ export class RpsMeter {
         const now = process.hrtime.bigint()
         const window = now - this.time
         // find the first hit within the last `time` ms
-        const iter = this._hits.iter()
+        const iter = this._hits[Symbol.iterator]()
         let first = iter.next()
         let idx = 0
 
