@@ -8,7 +8,7 @@ export function getWasmUrl(): URL {
     // making it not work. probably related to https://github.com/vitejs/vite/issues/8427,
     // but asking the user to deoptimize the entire @mtcute/web is definitely not a good idea
     // so we'll just use this hack for now
-    return new URL('./mtcute.wasm', import.meta.url)
+    return new URL(/* @vite-ignore */ './mtcute.wasm', import.meta.url)
 }
 
 let wasm!: MtcuteWasmModule
