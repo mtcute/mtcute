@@ -27,6 +27,7 @@ import { TransportError } from './transports/abstract.js'
 export interface SessionConnectionParams extends PersistentConnectionParams {
     initConnection: tl.RawInitConnectionRequest
     inactivityTimeout?: number
+    pingInterval: number
     enableErrorReporting: boolean
     layer: number
     disableUpdates?: boolean
@@ -43,7 +44,6 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
 }
 
 const TEMP_AUTH_KEY_EXPIRY = 86400 // 24 hours
-const PING_INTERVAL = 60000 // 1 minute
 const GET_STATE_INTERVAL = 1500 // 1.5 seconds
 
 // destroy_auth_key#d1435160 = DestroyAuthKeyRes;
@@ -84,12 +84,18 @@ export class SessionConnection extends PersistentConnection {
     private _crypto: ICryptoProvider
     private _salts: ServerSaltManager
 
+    // todo: we should probably do adaptive ping interval based on rtt like tdlib:
+    // https://github.com/tdlib/td/blob/91aa6c9e4d0774eabf4f8d7f3aa51239032059a6/td/mtproto/SessionConnection.h
+    private _pingInterval: number
+
     constructor(
         params: SessionConnectionParams,
         readonly _session: MtprotoSession,
     ) {
         super(params, _session.log.create('conn'))
         this._flushTimer.onTimeout(this._flush.bind(this))
+
+        this._pingInterval = params.pingInterval
 
         this._readerMap = params.readerMap
         this._writerMap = params.writerMap
@@ -1564,7 +1570,7 @@ export class SessionConnection extends PersistentConnection {
             // between multiple connections using the same session
             this._flushTimer.emitWhenIdle()
         } else {
-            const nextPingTime = this._session.lastPingTime + PING_INTERVAL
+            const nextPingTime = this._session.lastPingTime + this._pingInterval
             const nextGetScheduleTime = this._session.getStateSchedule.raw[0]?.getState || Infinity
 
             this._flushTimer.emitBefore(Math.min(nextPingTime, nextGetScheduleTime))
@@ -1629,17 +1635,19 @@ export class SessionConnection extends PersistentConnection {
             messageCount += 1
         }
 
-        if (now - this._session.lastPingTime > PING_INTERVAL) {
+        if (now - this._session.lastPingTime > this._pingInterval) {
             if (!this._session.lastPingMsgId.isZero()) {
-                this.log.warn("didn't receive pong for previous ping (msg_id = %l)", this._session.lastPingMsgId)
-                this._session.pendingMessages.delete(this._session.lastPingMsgId)
+                this.log.warn("didn't receive pong for previous ping (msg_id = %l). are we offline?", this._session.lastPingMsgId)
+                this._resetSession()
+                return
             }
 
             pingId = randomLong()
             const obj: mtp.RawMt_ping_delay_disconnect = {
                 _: 'mt_ping_delay_disconnect',
                 pingId,
-                disconnectDelay: 75,
+                // ÷ 1000 * 1.25
+                disconnectDelay: Math.round(this._pingInterval * 0.00125),
             }
 
             this._session.lastPingTime = Date.now()

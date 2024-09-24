@@ -108,6 +108,13 @@ export interface NetworkManagerExtraParams {
      * > If you need to handle incoming updates, use a {@link Dispatcher} instead.
      */
     middlewares?: Middleware<RpcCallMiddlewareContext, unknown>[]
+
+    /**
+     * Ping interval in milliseconds.
+     *
+     * @default  60000 (1 minute)
+     */
+    pingInterval?: number
 }
 
 /** Options that can be customized when making an RPC call */
@@ -255,6 +262,7 @@ export class DcConnectionManager {
             enableErrorReporting: this.manager.params.enableErrorReporting,
             salts: this._salts,
             platform: this.manager.params.platform,
+            pingInterval: this.manager.params.pingInterval ?? 60_000,
         })
 
         const mainParams = baseConnectionParams()

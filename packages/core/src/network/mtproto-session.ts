@@ -167,7 +167,6 @@ export class MtprotoSession {
 
         timers.clearTimeout(this.current429Timeout)
         this.resetState(withAuthKey)
-        this.resetLastPing(true)
     }
 
     resetAuthKey(): void {
@@ -231,6 +230,7 @@ export class MtprotoSession {
         this.getStateSchedule.clear()
         this.chains.clear()
         this.chainsPendingFails.clear()
+        this.resetLastPing(true)
     }
 
     enqueueRpc(rpc: PendingRpc, force?: boolean): boolean {
