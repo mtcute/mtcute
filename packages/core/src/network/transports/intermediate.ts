@@ -39,7 +39,7 @@ export class IntermediatePacketCodec implements IPacketCodec {
             return null
         }
 
-        return read.exactly(reader, length)
+        return new Uint8Array(read.exactly(reader, length))
     }
 
     encode(frame: Uint8Array, into: ISyncWritable): void {
