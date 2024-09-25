@@ -1,7 +1,7 @@
 {
   "name": "mtcute-workspace",
   "type": "module",
-  "version": "0.16.9",
+  "version": "0.16.11",
   "private": true,
   "packageManager": "pnpm@9.0.6",
   "description": "Type-safe library for MTProto (Telegram API) for browser and NodeJS",
@@ -48,7 +48,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "2.26.0",
     "@teidesu/slow-types-compiler": "1.1.0",
-    "@types/deno": "npm:@teidesu/deno-types@1.45.5",
+    "@types/deno": "npm:@teidesu/deno-types@1.46.3",
     "@types/node": "20.10.0",
     "@types/ws": "8.5.4",
     "@vitest/browser": "2.0.5",
