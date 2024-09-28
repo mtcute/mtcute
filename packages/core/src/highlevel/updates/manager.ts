@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+import Long from 'long'
 
 import { MtArgumentError } from '../../types/errors.js'
 import type { MaybePromise } from '../../types/utils.js'
@@ -22,6 +23,7 @@ import type { BaseTelegramClient } from '../base.js'
 import type { CurrentUserInfo } from '../storage/service/current-user.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
 import * as timers from '../../utils/timers.js'
+import { _getChannelsBatched } from '../methods/chats/batched-queries.js'
 
 import type { PendingUpdate, PendingUpdateContainer, RawUpdateHandler, UpdatesManagerParams } from './types.js'
 import {
@@ -601,12 +603,12 @@ export class UpdatesManager {
         }
     }
 
-    async _fetchMissingPeers(upd: tl.TypeUpdate, peers: PeersIndex, allowMissing = false): Promise<Set<number>> {
-        const { client } = this
+    async _fetchMissingPeers(upd: tl.TypeUpdate, peers: PeersIndex, fromDifference = false): Promise<Set<number>> {
+        const { client, log } = this
 
         const missing = new Set<number>()
 
-        async function fetchPeer(peer?: tl.TypePeer | number) {
+        async function fetchPeer(peer?: tl.TypePeer | number, allowZeroHash = false) {
             if (!peer) return true
 
             const bare = typeof peer === 'number' ? parseMarkedPeerId(peer)[1] : getBarePeerId(peer)
@@ -614,15 +616,40 @@ export class UpdatesManager {
             const marked = typeof peer === 'number' ? peer : getMarkedPeerId(peer)
             const index = marked > 0 ? peers.users : peers.chats
 
-            if (index.has(bare)) return true
+            const fromIndex = index.get(bare)
+            if (fromIndex && !(fromIndex as Extract<typeof fromIndex, { min?: unknown }>).min) return true
             if (missing.has(marked)) return false
 
             const cached = await client.storage.peers.getCompleteById(marked)
 
             if (!cached) {
+                // for user accounts, for a *very limited* amount of time, we can sometimes
+                // actually fetch the peers using access_hash=0.
+                // as it's very time-sensitive, we try this right away unlike usual
+                // this is very much a hack and might stop working at any time, but worth trying if anything else fails.
+                //
+                // we also do this *only* for chats as they are much more likely to be re-used
+                // later, and are also needed for input*FromMessage objects to work
+
+                if (fromDifference && allowZeroHash && parseMarkedPeerId(marked)[0] === 'channel') {
+                    log.debug('trying to fetch peer %d with zero access hash', marked)
+                    const fetched = await _getChannelsBatched(client, {
+                        _: 'inputChannel',
+                        channelId: bare,
+                        accessHash: Long.ZERO,
+                    })
+
+                    if (fetched?._ === 'channel' && !fetched.min) {
+                        // yay! we got it!
+                        (index as Map<number, tl.TypeUser | tl.TypeChat>).set(bare, fetched)
+
+                        return true
+                    }
+                }
+
                 missing.add(marked)
 
-                return allowMissing
+                return fromDifference
             }
 
             // whatever, ts is not smart enough to understand
@@ -641,7 +668,7 @@ export class UpdatesManager {
 
                 // ref: https://github.com/tdlib/td/blob/master/td/telegram/UpdatesManager.cpp
                 // (search by UpdatesManager::is_acceptable_update)
-                if (!(await fetchPeer(msg.peerId))) return missing
+                if (!(await fetchPeer(msg.peerId, true))) return missing
                 if (!(await fetchPeer(msg.fromId))) return missing
 
                 if (msg.replyTo) {
@@ -656,7 +683,10 @@ export class UpdatesManager {
                 if (msg._ !== 'messageService') {
                     if (
                         msg.fwdFrom
-                        && (!(await fetchPeer(msg.fwdFrom.fromId)) || !(await fetchPeer(msg.fwdFrom.savedFromPeer)))
+                        && (!(
+                            await fetchPeer(msg.fwdFrom.fromId))
+                            || !(await fetchPeer(msg.fwdFrom.savedFromPeer, true))
+                        )
                     ) {
                         return missing
                     }
@@ -696,7 +726,7 @@ export class UpdatesManager {
                             if (!(await fetchPeer(msg.action.userId))) return missing
                             break
                         case 'messageActionChatMigrateTo':
-                            if (!(await fetchPeer(toggleChannelIdMark(msg.action.channelId)))) {
+                            if (!(await fetchPeer(toggleChannelIdMark(msg.action.channelId), true))) {
                                 return missing
                             }
                             break
