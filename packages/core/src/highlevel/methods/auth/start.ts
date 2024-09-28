@@ -140,6 +140,8 @@ export async function start(
         if (tl.RpcError.is(e)) {
             if (e.text === 'SESSION_PASSWORD_NEEDED') has2fa = true
             else if (e.text !== 'AUTH_KEY_UNREGISTERED') throw e
+        } else {
+            throw e
         }
     }
 
