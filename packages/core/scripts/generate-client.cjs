@@ -464,6 +464,7 @@ async function main() {
     output.write(
         '/* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument */\n'
         + '/* THIS FILE WAS AUTO-GENERATED */\n'
+        + '// eslint-disable-next-line unicorn/prefer-node-protocol\n'
         + "import EventEmitter from 'events'\n"
         + "import Long from 'long'\n",
     )

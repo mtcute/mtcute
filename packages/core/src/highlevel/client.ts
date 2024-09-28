@@ -1,6 +1,7 @@
 /* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument */
 /* THIS FILE WAS AUTO-GENERATED */
-import EventEmitter from 'node:events'
+// eslint-disable-next-line unicorn/prefer-node-protocol
+import EventEmitter from 'events'
 
 import type Long from 'long'
 import type { tdFileId } from '@mtcute/file-id'
