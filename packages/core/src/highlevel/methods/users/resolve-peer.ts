@@ -8,6 +8,33 @@ import { MtPeerNotFoundError } from '../../types/errors.js'
 import type { InputPeerLike } from '../../types/peers/index.js'
 import { toInputChannel, toInputPeer, toInputUser } from '../../utils/peer-utils.js'
 
+export function _normalizePeerId(peerId: InputPeerLike): number | string | tl.TypeInputPeer {
+// for convenience we also accept tl and User/Chat objects directly
+    if (typeof peerId === 'object') {
+        if (tl.isAnyPeer(peerId)) {
+            peerId = getMarkedPeerId(peerId)
+        } else if ('inputPeer' in peerId) {
+        // User | Chat
+            peerId = peerId.inputPeer
+        } else {
+            peerId = toInputPeer(peerId)
+        }
+    }
+
+    if (typeof peerId === 'object') {
+        switch (peerId._) {
+            case 'mtcute.dummyInputPeerMinUser':
+                return peerId.userId
+            case 'mtcute.dummyInputPeerMinChannel':
+                return toggleChannelIdMark(peerId.channelId)
+            default:
+                return peerId
+        }
+    }
+
+    return peerId
+}
+
 // @available=both
 /**
  * Get the `InputPeer` of a known peer id.
@@ -21,29 +48,10 @@ export async function resolvePeer(
     peerId: InputPeerLike,
     force = false,
 ): Promise<tl.TypeInputPeer> {
-    // for convenience we also accept tl and User/Chat objects directly
+    peerId = _normalizePeerId(peerId)
     if (typeof peerId === 'object') {
-        if (tl.isAnyPeer(peerId)) {
-            peerId = getMarkedPeerId(peerId)
-        } else if ('inputPeer' in peerId) {
-            // User | Chat
-            peerId = peerId.inputPeer
-        } else {
-            peerId = toInputPeer(peerId)
-        }
-    }
-
-    if (typeof peerId === 'object') {
-        switch (peerId._) {
-            case 'mtcute.dummyInputPeerMinUser':
-                peerId = peerId.userId
-                break
-            case 'mtcute.dummyInputPeerMinChannel':
-                peerId = toggleChannelIdMark(peerId.channelId)
-                break
-            default:
-                return peerId
-        }
+        // InputPeer (actual one, not mtcute.*)
+        return peerId
     }
 
     if (typeof peerId === 'number' && !force) {
@@ -152,7 +160,7 @@ export async function resolvePeer(
     // if it's not the case, we'll get an `PEER_ID_INVALID` error anyways
     const [peerType, bareId] = parseMarkedPeerId(peerId)
 
-    if (peerType !== 'chat' && !client.storage.self.getCached(true)?.isBot) {
+    if (!(peerType === 'chat' || client.storage.self.getCached(true)?.isBot)) {
         throw new MtPeerNotFoundError(`Peer ${peerId} is not found in local cache`)
     }
 

@@ -264,6 +264,7 @@ import { getMyUsername } from './methods/users/get-my-username.js'
 import { getProfilePhoto } from './methods/users/get-profile-photo.js'
 import { getProfilePhotos } from './methods/users/get-profile-photos.js'
 import { getUsers } from './methods/users/get-users.js'
+import { isPeerAvailable } from './methods/users/is-peer-available.js'
 import { iterProfilePhotos } from './methods/users/iter-profile-photos.js'
 import { resolvePeerMany } from './methods/users/resolve-peer-many.js'
 import { resolveChannel, resolvePeer, resolveUser } from './methods/users/resolve-peer.js'
@@ -5537,6 +5538,27 @@ export interface TelegramClient extends ITelegramClient {
      */
     getUsers(ids: MaybeArray<InputPeerLike>): Promise<(User | null)[]>
     /**
+     * Check whether a given peer ID can be used to actually
+     * interact with the Telegram API.
+     * This method checks the internal peers cache for the given
+     * input peer, and returns `true` if it is available there.
+     *
+     * You can think of this method as a stripped down version of
+     * {@link resolvePeer}, which only returns `true` or `false`.
+     *
+     * > **Note:** This method works offline and never sends any requests.
+     * > This means that when passing a username or phone number, it will
+     * > only return `true` if the user with that username/phone number
+     * > is cached in the storage, and will not try to resolve the peer by calling the API,
+     * > which *may* lead to false negatives.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @returns
+     */
+    isPeerAvailable(
+        peerId: InputPeerLike): Promise<boolean>
+    /**
      * Iterate over profile photos
      *
      * **Available**: ✅ both users and bots
@@ -6528,6 +6550,9 @@ TelegramClient.prototype.getProfilePhotos = function (...args) {
 }
 TelegramClient.prototype.getUsers = function (...args) {
     return getUsers(this._client, ...args)
+}
+TelegramClient.prototype.isPeerAvailable = function (...args) {
+    return isPeerAvailable(this._client, ...args)
 }
 TelegramClient.prototype.iterProfilePhotos = function (...args) {
     return iterProfilePhotos(this._client, ...args)
