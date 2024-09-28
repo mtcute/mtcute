@@ -6,6 +6,7 @@ import type { ISqliteStatement } from '../types.js'
 interface PeerDto {
     id: number
     hash: string
+    isMin: 1 | 0
     usernames: string
     updated: number
     phone: string | null
@@ -16,6 +17,7 @@ function mapPeerDto(dto: PeerDto): IPeersRepository.PeerInfo {
     return {
         id: dto.id,
         accessHash: dto.hash,
+        isMin: dto.isMin === 1,
         usernames: JSON.parse(dto.usernames) as string[],
         updated: dto.updated,
         phone: dto.phone || undefined,
@@ -41,18 +43,22 @@ export class SqlitePeersRepository implements IPeersRepository {
                 create index idx_peers_phone on peers (phone);
             `)
         })
+        _driver.registerMigration('peers', 2, (db) => {
+            db.exec('alter table peers add column isMin integer not null default false;')
+        })
         _driver.onLoad((db) => {
             this._loaded = true
 
             this._store = db.prepare(
-                'insert or replace into peers (id, hash, usernames, updated, phone, complete) values (?, ?, ?, ?, ?, ?)',
+                'insert or replace into peers (id, hash, isMin, usernames, updated, phone, complete) values (?, ?, ?, ?, ?, ?, ?)',
             )
 
-            this._getById = db.prepare('select * from peers where id = ?')
+            this._getById = db.prepare('select * from peers where id = ? and isMin = false')
+            this._getByIdAllowMin = db.prepare('select * from peers where id = ?')
             this._getByUsername = db.prepare(
-                'select * from peers where exists (select 1 from json_each(usernames) where value = ?)',
+                'select * from peers where exists (select 1 from json_each(usernames) where value = ?) and isMin = false',
             )
-            this._getByPhone = db.prepare('select * from peers where phone = ?')
+            this._getByPhone = db.prepare('select * from peers where phone = ? and isMin = false')
 
             this._delAll = db.prepare('delete from peers')
         })
@@ -77,6 +83,7 @@ export class SqlitePeersRepository implements IPeersRepository {
         this._driver._writeLater(this._store, [
             peer.id,
             peer.accessHash,
+            peer.isMin ? 1 : 0,
             JSON.stringify(peer.usernames),
             peer.updated,
             peer.phone ?? null,
@@ -85,9 +92,10 @@ export class SqlitePeersRepository implements IPeersRepository {
     }
 
     private _getById!: ISqliteStatement
-    getById(id: number): IPeersRepository.PeerInfo | null {
+    private _getByIdAllowMin!: ISqliteStatement
+    getById(id: number, allowMin: boolean): IPeersRepository.PeerInfo | null {
         this._ensureLoaded()
-        const row = this._getById.get(id)
+        const row = (allowMin ? this._getByIdAllowMin : this._getById).get(id)
         if (!row) return null
 
         return mapPeerDto(row as PeerDto)

@@ -8,6 +8,8 @@ export namespace IPeersRepository {
         id: number
         /** Peer access hash, as a fast string representation */
         accessHash: string
+        /** Whether the peer is a "min" peer */
+        isMin: boolean
         /** Peer usernames, if any */
         usernames: string[]
         /** Timestamp (in seconds) when the peer was last updated */
@@ -26,11 +28,21 @@ export namespace IPeersRepository {
 export interface IPeersRepository {
     /** Store the given peer */
     store: (peer: IPeersRepository.PeerInfo) => MaybePromise<void>
-    /** Find a peer by their `id` */
-    getById: (id: number) => MaybePromise<IPeersRepository.PeerInfo | null>
-    /** Find a peer by their username (where `usernames` includes `username`) */
+    /**
+     * Find a peer by their `id`.
+     *
+     * @param allowMin  Whether to allow "min" peers to be returned
+     */
+    getById: (id: number, allowMin: boolean) => MaybePromise<IPeersRepository.PeerInfo | null>
+    /**
+     * Find a peer by their username (where `usernames` includes `username`).
+     * Should never return "min" peers
+     */
     getByUsername: (username: string) => MaybePromise<IPeersRepository.PeerInfo | null>
-    /** Find a peer by their `phone` */
+    /**
+     * Find a peer by their `phone`.
+     * Should never return "min" peers
+     */
     getByPhone: (phone: string) => MaybePromise<IPeersRepository.PeerInfo | null>
 
     deleteAll: () => MaybePromise<void>

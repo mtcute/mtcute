@@ -6,7 +6,7 @@ import { getMarkedPeerId, parseMarkedPeerId, toggleChannelIdMark } from '../../.
 import type { ITelegramClient } from '../../client.types.js'
 import { MtPeerNotFoundError } from '../../types/errors.js'
 import type { InputPeerLike } from '../../types/peers/index.js'
-import { toInputChannel, toInputPeer, toInputUser } from '../../utils/peer-utils.js'
+import { extractUsernames, toInputChannel, toInputPeer, toInputUser } from '../../utils/peer-utils.js'
 
 export function _normalizePeerId(peerId: InputPeerLike): number | string | tl.TypeInputPeer {
 // for convenience we also accept tl and User/Chat objects directly
@@ -161,6 +161,32 @@ export async function resolvePeer(
     const [peerType, bareId] = parseMarkedPeerId(peerId)
 
     if (!(peerType === 'chat' || client.storage.self.getCached(true)?.isBot)) {
+        // we might have a min peer in cache, which we can try to resolve by its username/phone
+        const cached = await client.storage.peers.getCompleteById(peerId, true)
+
+        if (cached && (cached._ === 'channel' || cached._ === 'user')) {
+            // do we have a username?
+            const [username] = extractUsernames(cached)
+
+            if (username) {
+                const resolved = await resolvePeer(client, username, true)
+
+                // username might already be taken by someone else, so we need to check it
+                if (getMarkedPeerId(resolved) === peerId) {
+                    return resolved
+                }
+            }
+
+            if (cached._ === 'user' && cached.phone) {
+                // try resolving by phone
+                const resolved = await resolvePeer(client, cached.phone, true)
+
+                if (getMarkedPeerId(resolved) === peerId) {
+                    return resolved
+                }
+            }
+        }
+
         throw new MtPeerNotFoundError(`Peer ${peerId} is not found in local cache`)
     }
 

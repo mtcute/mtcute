@@ -22,10 +22,14 @@ export class IdbPeersRepository implements IPeersRepository {
         return this._driver.db.transaction(TABLE, mode).objectStore(TABLE)
     }
 
-    async getById(id: number): Promise<IPeersRepository.PeerInfo | null> {
+    async getById(id: number, allowMin: boolean): Promise<IPeersRepository.PeerInfo | null> {
         const it = await reqToPromise(this.os().get(id) as IDBRequest<IPeersRepository.PeerInfo>)
 
-        return it ?? null
+        if (!it) return null
+        // NB: older objects might not have isMin field
+        if (it.isMin && !allowMin) return null
+
+        return it
     }
 
     async getByUsername(username: string): Promise<IPeersRepository.PeerInfo | null> {
@@ -33,13 +37,19 @@ export class IdbPeersRepository implements IPeersRepository {
             this.os().index('by_username').get(username) as IDBRequest<IPeersRepository.PeerInfo>,
         )
 
-        return it ?? null
+        // NB: older objects might not have isMin field
+        if (!it || it.isMin) return null
+
+        return it
     }
 
     async getByPhone(phone: string): Promise<IPeersRepository.PeerInfo | null> {
         const it = await reqToPromise(this.os().index('by_phone').get(phone) as IDBRequest<IPeersRepository.PeerInfo>)
 
-        return it ?? null
+        // NB: older objects might not have isMin field
+        if (!it || it.isMin) return null
+
+        return it
     }
 
     deleteAll(): Promise<void> {

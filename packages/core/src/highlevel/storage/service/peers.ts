@@ -64,10 +64,12 @@ export class PeersService extends BaseService {
 
     async updatePeersFrom(obj: tl.TlObject | tl.TlObject[]): Promise<boolean> {
         let count = 0
+        let minCount = 0
 
         for (const peer of getAllPeersFrom(obj)) {
-            // no point in caching min peers as we can't use them
-            if ((peer as Extract<typeof peer, { min?: unknown }>).min) continue
+            if ((peer as Extract<typeof peer, { min?: unknown }>).min) {
+                minCount += 1
+            }
 
             count += 1
 
@@ -76,7 +78,7 @@ export class PeersService extends BaseService {
 
         if (count > 0) {
             await this._driver.save?.()
-            this._log.debug('cached %d peers', count)
+            this._log.debug('cached %d peers (%d min)', count, minCount)
 
             return true
         }
@@ -99,6 +101,7 @@ export class PeersService extends BaseService {
                 dto = {
                     id: peer.id,
                     accessHash: longToFastString(peer.accessHash),
+                    isMin: peer.min! && !(peer.phone !== undefined && peer.phone.length === 0),
                     phone: peer.phone,
                     usernames: extractUsernames(peer),
                     updated: Date.now(),
@@ -112,6 +115,7 @@ export class PeersService extends BaseService {
                 dto = {
                     id: -peer.id,
                     accessHash: '',
+                    isMin: false, // chats can't be "min"
                     updated: Date.now(),
                     complete: this._serializeTl(peer),
                     usernames: [],
@@ -130,6 +134,7 @@ export class PeersService extends BaseService {
                 dto = {
                     id: toggleChannelIdMark(peer.id),
                     accessHash: longToFastString(peer.accessHash),
+                    isMin: peer._ === 'channel' ? peer.min! : false,
                     usernames: extractUsernames(peer as tl.RawChannel),
                     updated: Date.now(),
                     complete: this._serializeTl(peer),
@@ -193,7 +198,7 @@ export class PeersService extends BaseService {
         const cached = this._cache.get(id)
         if (cached) return cached.peer
 
-        const dto = await this._peers.getById(id)
+        const dto = await this._peers.getById(id, false)
 
         if (dto) {
             return this._returnCaching(id, dto)
@@ -248,11 +253,11 @@ export class PeersService extends BaseService {
         return this._returnCaching(dto.id, dto)
     }
 
-    async getCompleteById(id: number): Promise<tl.TypeUser | tl.TypeChat | null> {
+    async getCompleteById(id: number, allowMin = false): Promise<tl.TypeUser | tl.TypeChat | null> {
         const cached = this._cache.get(id)
         if (cached) return cached.complete
 
-        const dto = await this._peers.getById(id)
+        const dto = await this._peers.getById(id, allowMin)
         if (!dto) return null
 
         const cacheItem: CacheItem = {
