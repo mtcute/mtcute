@@ -1,10 +1,7 @@
-// eslint-disable-next-line unicorn/prefer-node-protocol
-import EventEmitter from 'events'
-
 import type { ReconnectionStrategy } from '@fuman/net'
 import { PersistentConnection as FumanPersistentConnection } from '@fuman/net'
 import { FramedReader, FramedWriter } from '@fuman/io'
-import { timers } from '@fuman/utils'
+import { Emitter, timers } from '@fuman/utils'
 
 import type { BasicDcOption, ICryptoProvider, Logger } from '../utils/index.js'
 
@@ -26,7 +23,7 @@ let nextConnectionUid = 0
  * Only used for {@link PersistentConnection} and used as a mean of code splitting.
  * This class doesn't know anything about MTProto, it just manages the transport.
  */
-export abstract class PersistentConnection extends EventEmitter {
+export abstract class PersistentConnection {
     private _uid = nextConnectionUid++
 
     readonly params: PersistentConnectionParams
@@ -45,10 +42,13 @@ export abstract class PersistentConnection extends EventEmitter {
     _destroyed = false
     _usable = false
 
+    readonly onWait: Emitter<number> = new Emitter()
+    readonly onUsable: Emitter<void> = new Emitter()
+    readonly onError: Emitter<Error> = new Emitter()
+
     protected abstract onConnected(): void
     protected abstract onClosed(): void
-
-    protected abstract onError(err: Error): void
+    protected abstract handleError(err: Error): void
 
     protected abstract onMessage(data: Uint8Array): void
 
@@ -56,7 +56,6 @@ export abstract class PersistentConnection extends EventEmitter {
         params: PersistentConnectionParams,
         readonly log: Logger,
     ) {
-        super()
         this.params = params
 
         this.params.transport.setup?.(this.params.crypto, log)
@@ -76,7 +75,7 @@ export abstract class PersistentConnection extends EventEmitter {
             onWait: (wait) => {
                 this._updateLogPrefix()
                 this.log.debug('waiting for %d ms before reconnecting', wait)
-                this.emit('wait', wait)
+                this.onWait.emit(wait)
             },
         })
 
@@ -125,7 +124,7 @@ export abstract class PersistentConnection extends EventEmitter {
         }
 
         this._rescheduleInactivity()
-        this.emit('usable') // is this needed?
+        this.onUsable.emit() // is this needed?
         this.onConnected()
 
         while (true) {
@@ -148,7 +147,7 @@ export abstract class PersistentConnection extends EventEmitter {
 
     private async _onError(err: Error) {
         this._updateLogPrefix()
-        this.onError(err)
+        this.handleError(err)
 
         return 'reconnect' as const
     }

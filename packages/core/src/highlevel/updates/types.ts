@@ -5,14 +5,15 @@ import type { EarlyTimer, Logger, SortedLinkedList } from '../../utils/index.js'
 import type { CurrentUserInfo } from '../storage/service/current-user.js'
 import type { PeersIndex } from '../types/peers/peers-index.js'
 
-/**
- * Function to be called for each update.
- *
- * @param upd  The update
- * @param peers  Peers that are present in the update
- */
-export type RawUpdateHandler = (upd: tl.TypeUpdate, peers: PeersIndex) => void
-
+/** Information about a raw update. */
+export class RawUpdateInfo {
+    constructor(
+        /** The update */
+        readonly update: tl.TypeUpdate,
+        /** Peers that are present in the update */
+        readonly peers: PeersIndex,
+    ) {}
+}
 /**
  * Parameters for the updates manager
  */
@@ -167,6 +168,5 @@ export interface UpdatesState {
 
     log: Logger
     stop: () => void
-    handler: RawUpdateHandler
     auth: CurrentUserInfo | null
 }

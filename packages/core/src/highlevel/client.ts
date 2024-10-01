@@ -1,8 +1,6 @@
 /* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument */
 /* THIS FILE WAS AUTO-GENERATED */
-// eslint-disable-next-line unicorn/prefer-node-protocol
-import EventEmitter from 'events'
-
+import { Emitter } from '@fuman/utils'
 import type Long from 'long'
 import type { tdFileId } from '@mtcute/file-id'
 import type { tl } from '@mtcute/tl'
@@ -14,7 +12,8 @@ import { MtUnsupportedError } from '../types/index.js'
 import type { BaseTelegramClientOptions } from './base.js'
 import { BaseTelegramClient } from './base.js'
 import type { ITelegramClient } from './client.types.js'
-import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatMember, ChatMemberUpdate, ChatPreview, ChatlistPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStickerSet, InputStickerSetItem, InputText, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, PeerReaction, PeerStories, PeersIndex, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SentCode, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerSourceType, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadFileLike, UploadedFile, User, UserStatusUpdate, UserTypingUpdate } from './types/index.js'
+import type { RawUpdateInfo } from './updates/types.js'
+import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatMember, ChatMemberUpdate, ChatPreview, ChatlistPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStickerSet, InputStickerSetItem, InputText, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, PeerReaction, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SentCode, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerSourceType, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadFileLike, UploadedFile, User, UserStatusUpdate, UserTypingUpdate } from './types/index.js'
 import type { StringSessionData } from './utils/string-session.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
 import { Conversation } from './types/conversation.js'
@@ -313,220 +312,65 @@ type TelegramClientOptions = (
 }
 
 export interface TelegramClient extends ITelegramClient {
-/**
- * Register a raw update handler
- *
- * @param name  Event name
- * @param handler  Raw update handler
- */
-    on(name: 'raw_update', handler: ((upd: tl.TypeUpdate | tl.TypeMessage, peers: PeersIndex) => void)): this
-    /**
-     * Register a parsed update handler
-     *
-     * @param name  Event name
-     * @param handler  Raw update handler
-     */
-    on(name: 'update', handler: ((upd: ParsedUpdate) => void)): this
-    /**
-     * Register a new message handler
-     *
-     * @param name  Event name
-     * @param handler  New message handler
-     */
-    on(name: 'new_message', handler: ((upd: Message) => void)): this
-    /**
-     * Register an edit message handler
-     *
-     * @param name  Event name
-     * @param handler  Edit message handler
-     */
-    on(name: 'edit_message', handler: ((upd: Message) => void)): this
-    /**
-     * Register a message group handler
-     *
-     * @param name  Event name
-     * @param handler  Message group handler
-     */
-    on(name: 'message_group', handler: ((upd: Message[]) => void)): this
-    /**
-     * Register a delete message handler
-     *
-     * @param name  Event name
-     * @param handler  Delete message handler
-     */
-    on(name: 'delete_message', handler: ((upd: DeleteMessageUpdate) => void)): this
-    /**
-     * Register a chat member update handler
-     *
-     * @param name  Event name
-     * @param handler  Chat member update handler
-     */
-    on(name: 'chat_member', handler: ((upd: ChatMemberUpdate) => void)): this
-    /**
-     * Register an inline query handler
-     *
-     * @param name  Event name
-     * @param handler  Inline query handler
-     */
-    on(name: 'inline_query', handler: ((upd: InlineQuery) => void)): this
-    /**
-     * Register a chosen inline result handler
-     *
-     * @param name  Event name
-     * @param handler  Chosen inline result handler
-     */
-    on(name: 'chosen_inline_result', handler: ((upd: ChosenInlineResult) => void)): this
-    /**
-     * Register a callback query handler
-     *
-     * @param name  Event name
-     * @param handler  Callback query handler
-     */
-    on(name: 'callback_query', handler: ((upd: CallbackQuery) => void)): this
-    /**
-     * Register an inline callback query handler
-     *
-     * @param name  Event name
-     * @param handler  Inline callback query handler
-     */
-    on(name: 'inline_callback_query', handler: ((upd: InlineCallbackQuery) => void)): this
-    /**
-     * Register a business callback query handler
-     *
-     * @param name  Event name
-     * @param handler  Business callback query handler
-     */
-    on(name: 'business_callback_query', handler: ((upd: BusinessCallbackQuery) => void)): this
-    /**
-     * Register a poll update handler
-     *
-     * @param name  Event name
-     * @param handler  Poll update handler
-     */
-    on(name: 'poll', handler: ((upd: PollUpdate) => void)): this
-    /**
-     * Register a poll vote handler
-     *
-     * @param name  Event name
-     * @param handler  Poll vote handler
-     */
-    on(name: 'poll_vote', handler: ((upd: PollVoteUpdate) => void)): this
-    /**
-     * Register an user status update handler
-     *
-     * @param name  Event name
-     * @param handler  User status update handler
-     */
-    on(name: 'user_status', handler: ((upd: UserStatusUpdate) => void)): this
-    /**
-     * Register an user typing handler
-     *
-     * @param name  Event name
-     * @param handler  User typing handler
-     */
-    on(name: 'user_typing', handler: ((upd: UserTypingUpdate) => void)): this
-    /**
-     * Register a history read handler
-     *
-     * @param name  Event name
-     * @param handler  History read handler
-     */
-    on(name: 'history_read', handler: ((upd: HistoryReadUpdate) => void)): this
-    /**
-     * Register a bot stopped handler
-     *
-     * @param name  Event name
-     * @param handler  Bot stopped handler
-     */
-    on(name: 'bot_stopped', handler: ((upd: BotStoppedUpdate) => void)): this
-    /**
-     * Register a bot chat join request handler
-     *
-     * @param name  Event name
-     * @param handler  Bot chat join request handler
-     */
-    on(name: 'bot_chat_join_request', handler: ((upd: BotChatJoinRequestUpdate) => void)): this
-    /**
-     * Register a chat join request handler
-     *
-     * @param name  Event name
-     * @param handler  Chat join request handler
-     */
-    on(name: 'chat_join_request', handler: ((upd: ChatJoinRequestUpdate) => void)): this
-    /**
-     * Register a pre checkout query handler
-     *
-     * @param name  Event name
-     * @param handler  Pre checkout query handler
-     */
-    on(name: 'pre_checkout_query', handler: ((upd: PreCheckoutQuery) => void)): this
-    /**
-     * Register a story update handler
-     *
-     * @param name  Event name
-     * @param handler  Story update handler
-     */
-    on(name: 'story', handler: ((upd: StoryUpdate) => void)): this
-    /**
-     * Register a delete story handler
-     *
-     * @param name  Event name
-     * @param handler  Delete story handler
-     */
-    on(name: 'delete_story', handler: ((upd: DeleteStoryUpdate) => void)): this
-    /**
-     * Register a bot reaction update handler
-     *
-     * @param name  Event name
-     * @param handler  Bot reaction update handler
-     */
-    on(name: 'bot_reaction', handler: ((upd: BotReactionUpdate) => void)): this
-    /**
-     * Register a bot reaction count update handler
-     *
-     * @param name  Event name
-     * @param handler  Bot reaction count update handler
-     */
-    on(name: 'bot_reaction_count', handler: ((upd: BotReactionCountUpdate) => void)): this
-    /**
-     * Register a business connection update handler
-     *
-     * @param name  Event name
-     * @param handler  Business connection update handler
-     */
-    on(name: 'business_connection', handler: ((upd: BusinessConnection) => void)): this
-    /**
-     * Register a new business message handler
-     *
-     * @param name  Event name
-     * @param handler  New business message handler
-     */
-    on(name: 'new_business_message', handler: ((upd: BusinessMessage) => void)): this
-    /**
-     * Register an edit business message handler
-     *
-     * @param name  Event name
-     * @param handler  Edit business message handler
-     */
-    on(name: 'edit_business_message', handler: ((upd: BusinessMessage) => void)): this
-    /**
-     * Register a business message group handler
-     *
-     * @param name  Event name
-     * @param handler  Business message group handler
-     */
-    on(name: 'business_message_group', handler: ((upd: BusinessMessage[]) => void)): this
-    /**
-     * Register a delete business message handler
-     *
-     * @param name  Event name
-     * @param handler  Delete business message handler
-     */
-    on(name: 'delete_business_message', handler: ((upd: DeleteBusinessMessageUpdate) => void)): this
-
-    // eslint-disable-next-line ts/no-explicit-any
-    on(name: string, handler: (...args: any[]) => void): this
-
+/** Raw update emitter */
+    readonly onRawUpdate: Emitter<RawUpdateInfo>
+    /** Parsed update emitter */
+    readonly onUpdate: Emitter<ParsedUpdate>/** a new message handler */
+    readonly onNewMessage: Emitter<Message>
+    /** an edit message handler */
+    readonly onEditMessage: Emitter<Message>
+    /** a message group handler */
+    readonly onMessageGroup: Emitter<Message[]>
+    /** a delete message handler */
+    readonly onDeleteMessage: Emitter<DeleteMessageUpdate>
+    /** a chat member update handler */
+    readonly onChatMemberUpdate: Emitter<ChatMemberUpdate>
+    /** an inline query handler */
+    readonly onInlineQuery: Emitter<InlineQuery>
+    /** a chosen inline result handler */
+    readonly onChosenInlineResult: Emitter<ChosenInlineResult>
+    /** a callback query handler */
+    readonly onCallbackQuery: Emitter<CallbackQuery>
+    /** an inline callback query handler */
+    readonly onInlineCallbackQuery: Emitter<InlineCallbackQuery>
+    /** a business callback query handler */
+    readonly onBusinessCallbackQuery: Emitter<BusinessCallbackQuery>
+    /** a poll update handler */
+    readonly onPollUpdate: Emitter<PollUpdate>
+    /** a poll vote handler */
+    readonly onPollVote: Emitter<PollVoteUpdate>
+    /** an user status update handler */
+    readonly onUserStatusUpdate: Emitter<UserStatusUpdate>
+    /** an user typing handler */
+    readonly onUserTyping: Emitter<UserTypingUpdate>
+    /** a history read handler */
+    readonly onHistoryRead: Emitter<HistoryReadUpdate>
+    /** a bot stopped handler */
+    readonly onBotStopped: Emitter<BotStoppedUpdate>
+    /** a bot chat join request handler */
+    readonly onBotChatJoinRequest: Emitter<BotChatJoinRequestUpdate>
+    /** a chat join request handler */
+    readonly onChatJoinRequest: Emitter<ChatJoinRequestUpdate>
+    /** a pre checkout query handler */
+    readonly onPreCheckoutQuery: Emitter<PreCheckoutQuery>
+    /** a story update handler */
+    readonly onStoryUpdate: Emitter<StoryUpdate>
+    /** a delete story handler */
+    readonly onDeleteStory: Emitter<DeleteStoryUpdate>
+    /** a bot reaction update handler */
+    readonly onBotReactionUpdate: Emitter<BotReactionUpdate>
+    /** a bot reaction count update handler */
+    readonly onBotReactionCountUpdate: Emitter<BotReactionCountUpdate>
+    /** a business connection update handler */
+    readonly onBusinessConnectionUpdate: Emitter<BusinessConnection>
+    /** a new business message handler */
+    readonly onNewBusinessMessage: Emitter<BusinessMessage>
+    /** an edit business message handler */
+    readonly onEditBusinessMessage: Emitter<BusinessMessage>
+    /** a business message group handler */
+    readonly onBusinessMessageGroup: Emitter<BusinessMessage[]>
+    /** a delete business message handler */
+    readonly onDeleteBusinessMessage: Emitter<DeleteBusinessMessageUpdate>
     /**
      * Wrap this client so that all RPC calls will use the specified parameters.
      *
@@ -5750,48 +5594,156 @@ export type { TelegramClientOptions }
 
 export * from './base.js'
 
-export class TelegramClient extends EventEmitter implements ITelegramClient {
+export class TelegramClient implements ITelegramClient {
     _client: ITelegramClient
     constructor(opts: TelegramClientOptions) {
-        super()
+        ;(this as any).onRawUpdate = new Emitter()
+        ;(this as any).onUpdate = new Emitter()
+        ;(this as any).onNewMessage = new Emitter()
+        ;(this as any).onEditMessage = new Emitter()
+        ;(this as any).onMessageGroup = new Emitter()
+        ;(this as any).onDeleteMessage = new Emitter()
+        ;(this as any).onChatMemberUpdate = new Emitter()
+        ;(this as any).onInlineQuery = new Emitter()
+        ;(this as any).onChosenInlineResult = new Emitter()
+        ;(this as any).onCallbackQuery = new Emitter()
+        ;(this as any).onInlineCallbackQuery = new Emitter()
+        ;(this as any).onBusinessCallbackQuery = new Emitter()
+        ;(this as any).onPollUpdate = new Emitter()
+        ;(this as any).onPollVote = new Emitter()
+        ;(this as any).onUserStatusUpdate = new Emitter()
+        ;(this as any).onUserTyping = new Emitter()
+        ;(this as any).onHistoryRead = new Emitter()
+        ;(this as any).onBotStopped = new Emitter()
+        ;(this as any).onBotChatJoinRequest = new Emitter()
+        ;(this as any).onChatJoinRequest = new Emitter()
+        ;(this as any).onPreCheckoutQuery = new Emitter()
+        ;(this as any).onStoryUpdate = new Emitter()
+        ;(this as any).onDeleteStory = new Emitter()
+        ;(this as any).onBotReactionUpdate = new Emitter()
+        ;(this as any).onBotReactionCountUpdate = new Emitter()
+        ;(this as any).onBusinessConnectionUpdate = new Emitter()
+        ;(this as any).onNewBusinessMessage = new Emitter()
+        ;(this as any).onEditBusinessMessage = new Emitter()
+        ;(this as any).onBusinessMessageGroup = new Emitter()
+        ;(this as any).onDeleteBusinessMessage = new Emitter()
         if ('client' in opts) {
             this._client = opts.client
         } else {
-            if (!opts.storage || typeof opts.storage === 'string' || !opts.transport || !opts.crypto) {
+            if (!opts.storage || typeof opts.storage === 'string' || !opts.transport || !opts.crypto || !opts.platform) {
                 throw new MtUnsupportedError(
-                    'You need to explicitly provide storage, transport and crypto for @mtcute/core',
+                    'You need to explicitly provide storage, transport, crypto and platform for @mtcute/core',
                 )
             }
 
             this._client = new BaseTelegramClient(opts as BaseTelegramClientOptions)
         }
 
-        // @ts-expect-error codegen
-        this.log = this._client.log
-        // @ts-expect-error codegen
-        this.storage = this._client.storage
-        Object.defineProperty(this, 'stopSignal', {
-            get: () => this._client.stopSignal,
-        })
-        Object.defineProperty(this, 'appConfig', {
-            get: () => this._client.appConfig,
-        })
+        Object.defineProperty(this, 'log', { value: this._client.log })
+        Object.defineProperty(this, 'storage', { value: this._client.storage })
+        Object.defineProperty(this, 'stopSignal', { value: this._client.stopSignal })
+        Object.defineProperty(this, 'appConfig', { value: this._client.appConfig })
+        Object.defineProperty(this, 'onServerUpdate', { value: this._client.onServerUpdate })
+        Object.defineProperty(this, 'onRawUpdate', { value: this._client.onServerUpdate })
+        Object.defineProperty(this, 'onConnectionState', { value: this._client.onConnectionState })
 
         if (!opts.disableUpdates) {
             const skipConversationUpdates = opts.skipConversationUpdates ?? true
             const { messageGroupingInterval } = opts.updates ?? {}
 
-            this._client.onUpdate(
+            this._client.onRawUpdate.add(
                 makeParsedUpdateHandler({
                     messageGroupingInterval,
                     onUpdate: (update) => {
                         if (Conversation.handleUpdate(this, update) && skipConversationUpdates) return
 
-                        this.emit('update', update)
-                        this.emit(update.name, update.data)
-                    },
-                    onRawUpdate: (update, peers) => {
-                        this.emit('raw_update', update, peers)
+                        this.onUpdate.emit(update)
+                        switch (update.name) {
+                            case 'new_message':
+                                this.onNewMessage.emit(update.data)
+                                break
+                            case 'edit_message':
+                                this.onEditMessage.emit(update.data)
+                                break
+                            case 'message_group':
+                                this.onMessageGroup.emit(update.data)
+                                break
+                            case 'delete_message':
+                                this.onDeleteMessage.emit(update.data)
+                                break
+                            case 'chat_member':
+                                this.onChatMemberUpdate.emit(update.data)
+                                break
+                            case 'inline_query':
+                                this.onInlineQuery.emit(update.data)
+                                break
+                            case 'chosen_inline_result':
+                                this.onChosenInlineResult.emit(update.data)
+                                break
+                            case 'callback_query':
+                                this.onCallbackQuery.emit(update.data)
+                                break
+                            case 'inline_callback_query':
+                                this.onInlineCallbackQuery.emit(update.data)
+                                break
+                            case 'business_callback_query':
+                                this.onBusinessCallbackQuery.emit(update.data)
+                                break
+                            case 'poll':
+                                this.onPollUpdate.emit(update.data)
+                                break
+                            case 'poll_vote':
+                                this.onPollVote.emit(update.data)
+                                break
+                            case 'user_status':
+                                this.onUserStatusUpdate.emit(update.data)
+                                break
+                            case 'user_typing':
+                                this.onUserTyping.emit(update.data)
+                                break
+                            case 'history_read':
+                                this.onHistoryRead.emit(update.data)
+                                break
+                            case 'bot_stopped':
+                                this.onBotStopped.emit(update.data)
+                                break
+                            case 'bot_chat_join_request':
+                                this.onBotChatJoinRequest.emit(update.data)
+                                break
+                            case 'chat_join_request':
+                                this.onChatJoinRequest.emit(update.data)
+                                break
+                            case 'pre_checkout_query':
+                                this.onPreCheckoutQuery.emit(update.data)
+                                break
+                            case 'story':
+                                this.onStoryUpdate.emit(update.data)
+                                break
+                            case 'delete_story':
+                                this.onDeleteStory.emit(update.data)
+                                break
+                            case 'bot_reaction':
+                                this.onBotReactionUpdate.emit(update.data)
+                                break
+                            case 'bot_reaction_count':
+                                this.onBotReactionCountUpdate.emit(update.data)
+                                break
+                            case 'business_connection':
+                                this.onBusinessConnectionUpdate.emit(update.data)
+                                break
+                            case 'new_business_message':
+                                this.onNewBusinessMessage.emit(update.data)
+                                break
+                            case 'edit_business_message':
+                                this.onEditBusinessMessage.emit(update.data)
+                                break
+                            case 'business_message_group':
+                                this.onBusinessMessageGroup.emit(update.data)
+                                break
+                            case 'delete_business_message':
+                                this.onDeleteBusinessMessage.emit(update.data)
+                                break
+                        }
                     },
                 }),
             )
@@ -6656,21 +6608,9 @@ TelegramClient.prototype.computeSrpParams = function (...args) {
 TelegramClient.prototype.computeNewPasswordHash = function (...args) {
     return this._client.computeNewPasswordHash(...args)
 }
-TelegramClient.prototype.onConnectionState = function (...args) {
-    return this._client.onConnectionState(...args)
-}
-TelegramClient.prototype.getServerUpdateHandler = function (...args) {
-    return this._client.getServerUpdateHandler(...args)
-}
 TelegramClient.prototype.changePrimaryDc = function (...args) {
     return this._client.changePrimaryDc(...args)
 }
 TelegramClient.prototype.getMtprotoMessageId = function (...args) {
     return this._client.getMtprotoMessageId(...args)
-}
-TelegramClient.prototype.onServerUpdate = function () {
-    throw new Error('onServerUpdate is not available for TelegramClient, use .on() methods instead')
-}
-TelegramClient.prototype.onUpdate = function () {
-    throw new Error('onUpdate is not available for TelegramClient, use .on() methods instead')
 }

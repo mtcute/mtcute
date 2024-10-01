@@ -14,6 +14,8 @@ import { BaseTelegramClient, BaseTelegramClientOptions } from '../base.js'
 // @copy
 import { ITelegramClient } from '../client.types.js'
 // @copy
+import { RawUpdateInfo } from '../updates/types.js'
+// @copy
 import {
     AllStories,
     ArrayPaginated,

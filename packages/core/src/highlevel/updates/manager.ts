@@ -22,7 +22,7 @@ import type { CurrentUserInfo } from '../storage/service/current-user.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
 import { _getChannelsBatched } from '../methods/chats/batched-queries.js'
 
-import type { PendingUpdate, PendingUpdateContainer, RawUpdateHandler, UpdatesManagerParams } from './types.js'
+import { type PendingUpdate, type PendingUpdateContainer, RawUpdateInfo, type UpdatesManagerParams } from './types.js'
 import {
     createDummyUpdatesContainer,
     extractChannelIdFromUpdate,
@@ -146,7 +146,6 @@ export class UpdatesManager {
     channelsOpened: Map<number, number> = new Map()
 
     log: Logger
-    private _handler: RawUpdateHandler = () => {}
 
     private _onCatchingUp: (catchingUp: boolean) => void = () => {}
 
@@ -184,14 +183,6 @@ export class UpdatesManager {
         } else {
             this._channelPtsLimit = () => (this.auth?.isBot ? 100000 : 100)
         }
-    }
-
-    setHandler(handler: RawUpdateHandler): void {
-        this._handler = handler
-    }
-
-    getHandler(): RawUpdateHandler {
-        return this._handler
     }
 
     onCatchingUp(handler: (catchingUp: boolean) => void): void {
@@ -1352,7 +1343,7 @@ export class UpdatesManager {
         }
 
         log.debug('dispatching %s (postponed = %s)', upd._, postponed)
-        this._handler(upd, pending.peers)
+        client.onRawUpdate.emit(new RawUpdateInfo(upd, pending.peers))
     }
 
     async _loop(): Promise<void> {

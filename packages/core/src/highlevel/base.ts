@@ -1,12 +1,12 @@
 import type { mtp } from '@mtcute/tl'
 import { tl } from '@mtcute/tl'
 import type Long from 'long'
+import { Emitter } from '@fuman/utils'
 
 import type { MtClientOptions } from '../network/client.js'
 import { MtClient } from '../network/client.js'
 import type { ConnectionKind, RpcCallOptions } from '../network/network-manager.js'
 import type { StorageManagerExtraOptions } from '../storage/storage.js'
-import { MtArgumentError } from '../types/errors.js'
 import type { MustEqual } from '../types/utils.js'
 import { reportUnknownError } from '../utils/error-reporting.js'
 import type {
@@ -25,13 +25,13 @@ import {
 import { LogManager } from '../utils/logger.js'
 import type { ICorePlatform } from '../types/platform'
 
-import type { ConnectionState, ITelegramClient, ServerUpdateHandler } from './client.types.js'
+import type { ConnectionState, ITelegramClient } from './client.types.js'
 import { AppConfigManager } from './managers/app-config-manager.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
 import type { TelegramStorageManagerExtraOptions } from './storage/storage.js'
 import { TelegramStorageManager } from './storage/storage.js'
 import { UpdatesManager } from './updates/manager.js'
-import type { RawUpdateHandler, UpdatesManagerParams } from './updates/types.js'
+import type { RawUpdateInfo, UpdatesManagerParams } from './updates/types.js'
 
 export interface BaseTelegramClientOptions extends MtClientOptions {
     storage: ITelegramStorageProvider
@@ -51,14 +51,16 @@ function makeRpcError(raw: mtp.RawMt_rpc_error, stack: string, method?: string) 
 
 export class BaseTelegramClient implements ITelegramClient {
     readonly updates?: UpdatesManager
-    private _serverUpdatesHandler: ServerUpdateHandler = () => {}
-    private _connectionStateHandler: (state: ConnectionState) => void = () => {}
 
     readonly log: Logger
     readonly mt: MtClient
     readonly crypto: ICryptoProvider
     readonly storage: TelegramStorageManager
     readonly platform: ICorePlatform
+
+    readonly onServerUpdate: Emitter<tl.TypeUpdates> = new Emitter()
+    readonly onRawUpdate: Emitter<RawUpdateInfo> = new Emitter()
+    readonly onConnectionState: Emitter<ConnectionState> = new Emitter()
 
     constructor(readonly params: BaseTelegramClientOptions) {
         this.log = this.params.logger ?? new LogManager('client', params.platform)
@@ -70,24 +72,18 @@ export class BaseTelegramClient implements ITelegramClient {
 
         if (!params.disableUpdates && params.updates !== false) {
             this.updates = new UpdatesManager(this, params.updates)
-            this._serverUpdatesHandler = this.updates.handleUpdate.bind(this.updates)
+            this.onServerUpdate.add(this.updates.handleUpdate.bind(this.updates))
             this.updates.onCatchingUp((catchingUp) => {
-                this._connectionStateHandler(catchingUp ? 'updating' : 'connected')
+                this.onConnectionState.emit(catchingUp ? 'updating' : 'connected')
             })
         }
 
-        this.mt.on('update', (update: tl.TypeUpdates) => {
-            this._serverUpdatesHandler(update)
-        })
-        this.mt.on('usable', () => {
-            this._connectionStateHandler('connected')
-        })
-        this.mt.on('wait', () => {
-            this._connectionStateHandler('connecting')
-        })
-        this.mt.on('networkChanged', (connected: boolean) => {
+        this.mt.onUpdate.forwardTo(this.onServerUpdate)
+        this.mt.onUsable.add(() => this.onConnectionState.emit('connected'))
+        this.mt.onConnecting.add(() => this.onConnectionState.emit('connecting'))
+        this.mt.onNetworkChanged.add((connected: boolean) => {
             if (!connected) {
-                this._connectionStateHandler('offline')
+                this.onConnectionState.emit('offline')
             }
         })
 
@@ -309,26 +305,6 @@ export class BaseTelegramClient implements ITelegramClient {
 
     handleClientUpdate(updates: tl.TypeUpdates, noDispatch?: boolean): void {
         this.updates?.handleClientUpdate(updates, noDispatch)
-    }
-
-    onServerUpdate(handler: ServerUpdateHandler): void {
-        this._serverUpdatesHandler = handler
-    }
-
-    getServerUpdateHandler(): ServerUpdateHandler {
-        return this._serverUpdatesHandler
-    }
-
-    onUpdate(handler: RawUpdateHandler): void {
-        if (!this.updates) {
-            throw new MtArgumentError('Updates manager is disabled')
-        }
-
-        this.updates.setHandler(handler)
-    }
-
-    onConnectionState(handler: (state: ConnectionState) => void): void {
-        this._connectionStateHandler = handler
     }
 
     async getApiCrenetials(): Promise<{

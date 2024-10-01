@@ -17,9 +17,6 @@ importers:
       '@fuman/jsr':
         specifier: workspace:^
         version: link:private/fuman/packages/jsr
-      '@fuman/utils':
-        specifier: workspace:^
-        version: link:private/fuman/packages/utils
       '@types/deno':
         specifier: npm:@teidesu/deno-types@1.46.3
         version: '@teidesu/deno-types@1.46.3'

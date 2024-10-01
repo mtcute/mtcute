@@ -464,8 +464,7 @@ async function main() {
     output.write(
         '/* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument */\n'
         + '/* THIS FILE WAS AUTO-GENERATED */\n'
-        + '// eslint-disable-next-line unicorn/prefer-node-protocol\n'
-        + "import EventEmitter from 'events'\n"
+        + "import { Emitter } from '@fuman/utils'\n"
         + "import Long from 'long'\n",
     )
     Object.entries(state.imports).forEach(([module, items]) => {
@@ -483,36 +482,17 @@ async function main() {
 
     output.write('\nexport interface TelegramClient extends ITelegramClient {\n')
 
-    output.write(`/**
- * Register a raw update handler
- *
- * @param name  Event name
- * @param handler  Raw update handler
- */
- on(name: 'raw_update', handler: ((upd: tl.TypeUpdate | tl.TypeMessage, peers: PeersIndex) => void)): this
-/**
- * Register a parsed update handler
- *
- * @param name  Event name
- * @param handler  Raw update handler
- */
- on(name: 'update', handler: ((upd: ParsedUpdate) => void)): this\n`)
+    output.write(`/** Raw update emitter */
+readonly onRawUpdate: Emitter<RawUpdateInfo>
+/** Parsed update emitter */
+readonly onUpdate: Emitter<ParsedUpdate>`)
 
     updates.types.forEach((type) => {
-        output.write(`/**
- * Register ${updates.toSentence(type, 'inline')}
- *
- * @param name  Event name
- * @param handler  ${updates.toSentence(type, 'full')}
- */
-on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this\n`)
+        output.write(`/** ${updates.toSentence(type, 'inline')} */\n`)
+        output.write(`readonly on${type.handlerTypeName}: Emitter<${type.updateType}>\n`)
     })
 
-    output.write(`
-// eslint-disable-next-line ts/no-explicit-any
-on(name: string, handler: (...args: any[]) => void): this\n
-
-/**
+    output.write(`/**
  * Wrap this client so that all RPC calls will use the specified parameters.
  * 
  * @param params  Parameters to use
@@ -691,14 +671,31 @@ withParams(params: RpcCallOptions): this\n`)
 
     output.write('\nexport type { TelegramClientOptions }\n')
     output.write('\nexport * from "./base.js"\n')
-    output.write('\nexport class TelegramClient extends EventEmitter implements ITelegramClient {\n')
+    output.write('\nexport class TelegramClient implements ITelegramClient {\n')
 
     output.write('    _client: ITelegramClient\n')
     state.fields.forEach(({ code }) => output.write(`protected ${code}\n`))
 
     output.write('constructor(opts: TelegramClientOptions) {\n')
-    output.write('    super()\n')
+    output.write('    ;(this as any).onRawUpdate = new Emitter()\n')
+    output.write('    ;(this as any).onUpdate = new Emitter()\n')
+    updates.types.forEach((type) => {
+        // we use declaration merging so we can't simply write into this because it thinks it's readonly and already has a value
+        output.write(`    ;(this as any).on${type.handlerTypeName} = new Emitter()\n`)
+    })
     state.init.forEach((code) => {
+        code = code.replace('// @generate-update-emitter', () => {
+            const lines = [
+                '                    switch (update.name) {',
+            ]
+            updates.types.forEach((type) => {
+                lines.push(`                        case '${type.typeName}':`)
+                lines.push(`                            this.on${type.handlerTypeName}.emit(update.data)`)
+                lines.push('                            break')
+            })
+            lines.push('                    }')
+            return lines.join('\n')
+        })
         output.write(`${code}\n`)
     })
     output.write('}\n')
@@ -734,23 +731,12 @@ withParams(params: RpcCallOptions): this\n`)
         'getPrimaryDcId',
         'computeSrpParams',
         'computeNewPasswordHash',
-        'onConnectionState',
-        'getServerUpdateHandler',
         'changePrimaryDc',
         'getMtprotoMessageId',
     ].forEach((name) => {
         output.write(
             `TelegramClient.prototype.${name} = function(...args) {\n`
             + `    return this._client.${name}(...args)\n`
-            + '}\n',
-        )
-    })
-    // disabled methods - they are used internally and we don't want to expose them
-    // if the user *really* needs them, they can use `client._client` to access the underlying client
-    ;['onServerUpdate', 'onUpdate'].forEach((name) => {
-        output.write(
-            `TelegramClient.prototype.${name} = function() {\n`
-            + `    throw new Error('${name} is not available for TelegramClient, use .on() methods instead')\n`
             + '}\n',
         )
     })

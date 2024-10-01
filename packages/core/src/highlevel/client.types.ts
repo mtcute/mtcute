@@ -1,5 +1,6 @@
 import type { tl } from '@mtcute/tl'
 import type Long from 'long'
+import type { Emitter } from '@fuman/utils'
 
 import type { ConnectionKind, RpcCallOptions } from '../network/index.js'
 import type { MustEqual, PublicPart } from '../types/utils.js'
@@ -8,8 +9,8 @@ import type { ICorePlatform } from '../types/platform'
 
 import type { AppConfigManager } from './managers/app-config-manager.js'
 import type { TelegramStorageManager } from './storage/storage.js'
-import type { RawUpdateHandler } from './updates/types.js'
 import type { StringSessionData } from './utils/string-session.js'
+import type { RawUpdateInfo } from './updates/types.js'
 
 /**
  * Connection state of the client
@@ -24,8 +25,6 @@ import type { StringSessionData } from './utils/string-session.js'
  *   may be emitted before `updating` state
  */
 export type ConnectionState = 'offline' | 'connecting' | 'updating' | 'connected'
-
-export type ServerUpdateHandler = (update: tl.TypeUpdates) => void
 
 // NB: when adding new methods, don't forget to add them to:
 //  - worker/port.ts
@@ -57,10 +56,9 @@ export interface ITelegramClient {
     emitError(err: unknown): void
     handleClientUpdate(updates: tl.TypeUpdates, noDispatch?: boolean): void
 
-    onServerUpdate(handler: ServerUpdateHandler): void
-    getServerUpdateHandler(): ServerUpdateHandler
-    onUpdate(handler: RawUpdateHandler): void
-    onConnectionState(handler: (state: ConnectionState) => void): void
+    onServerUpdate: Emitter<tl.TypeUpdates>
+    onRawUpdate: Emitter<RawUpdateInfo>
+    onConnectionState: Emitter<ConnectionState>
 
     getApiCrenetials(): Promise<{ id: number, hash: string }>
     // todo - this is only used for file dl/ul, which should probably be moved

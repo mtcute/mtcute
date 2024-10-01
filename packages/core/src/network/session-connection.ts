@@ -3,7 +3,7 @@ import type { mtp } from '@mtcute/tl'
 import { tl } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
-import { Deferred, u8 } from '@fuman/utils'
+import { Deferred, Emitter, u8 } from '@fuman/utils'
 
 import { MtArgumentError, MtTimeoutError, MtcuteError } from '../types/index.js'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
@@ -88,6 +88,16 @@ export class SessionConnection extends PersistentConnection {
     // https://github.com/tdlib/td/blob/91aa6c9e4d0774eabf4f8d7f3aa51239032059a6/td/mtproto/SessionConnection.h
     private _pingInterval: number
 
+    // NB: dont forget to update .reset()
+    readonly onDisconnect: Emitter<void> = new Emitter()
+    readonly onKeyChange: Emitter<Uint8Array | null> = new Emitter()
+    readonly onTmpKeyChange: Emitter<[Uint8Array, number] | null> = new Emitter()
+    readonly onFloodDone: Emitter<void> = new Emitter()
+    readonly onRequestAuth: Emitter<void> = new Emitter()
+    readonly onAuthBegin: Emitter<void> = new Emitter()
+    readonly onUpdate: Emitter<tl.TypeUpdates> = new Emitter()
+    readonly onFutureSalts: Emitter<mtp.RawMt_future_salt[]> = new Emitter()
+
     constructor(
         params: SessionConnectionParams,
         readonly _session: MtprotoSession,
@@ -148,7 +158,7 @@ export class SessionConnection extends PersistentConnection {
             }
         }
 
-        this.emit('disconnect')
+        this.onDisconnect.emit()
 
         this.reset()
     }
@@ -165,8 +175,18 @@ export class SessionConnection extends PersistentConnection {
 
         if (forever) {
             timers.clearTimeout(this._pfsUpdateTimeout)
-            this.removeAllListeners()
-            this.on('error', (err) => {
+            this.onDisconnect.clear()
+            this.onKeyChange.clear()
+            this.onTmpKeyChange.clear()
+            this.onFloodDone.clear()
+            this.onRequestAuth.clear()
+            this.onAuthBegin.clear()
+            this.onUpdate.clear()
+            this.onFutureSalts.clear()
+            this.onWait.clear()
+            this.onUsable.clear()
+            this.onError.clear()
+            this.onError.add((err) => {
                 this.log.warn('caught error after destroying: %s', err)
             })
         }
@@ -202,7 +222,7 @@ export class SessionConnection extends PersistentConnection {
         this.onConnectionUsable()
     }
 
-    protected onError(error: Error): void {
+    protected handleError(error: Error): void {
         // https://core.telegram.org/mtproto/mtproto-_transports#_transport-errors
         if (error instanceof TransportError) {
             if (error.code === 404) {
@@ -241,8 +261,8 @@ export class SessionConnection extends PersistentConnection {
                 this.log.info('transport error 404, reauthorizing')
                 this._session.resetAuthKey()
                 this._resetSession()
-                this.emit('key-change', null)
-                this.emit('error', error)
+                this.onKeyChange.emit(null)
+                this.onError.emit(error)
 
                 return
             }
@@ -252,13 +272,13 @@ export class SessionConnection extends PersistentConnection {
             this._onAllFailed(`transport error ${error.code}`)
 
             if (error.code === 429) {
-                this._session.onTransportFlood(this.emit.bind(this, 'flood-done'))
+                this._session.onTransportFlood(() => this.onFloodDone.emit())
 
                 return
             }
         }
 
-        this.emit('error', error)
+        this.onError.emit(error)
     }
 
     protected onConnectionUsable(): void {
@@ -285,13 +305,13 @@ export class SessionConnection extends PersistentConnection {
         if (!this.params.isMainConnection) {
             // we don't authorize on non-main connections
             this.log.debug('_authorize(): non-main connection, requesting...')
-            this.emit('request-auth')
+            this.onRequestAuth.emit()
 
             return
         }
 
         this._session.authorizationPending = true
-        this.emit('auth-begin')
+        this.onAuthBegin.emit()
 
         doAuthorization(this, this._crypto)
             .then(([authKey, serverSalt, timeOffset]) => {
@@ -301,7 +321,7 @@ export class SessionConnection extends PersistentConnection {
 
                 this._session.authorizationPending = false
 
-                this.emit('key-change', authKey)
+                this.onKeyChange.emit(authKey)
 
                 if (this._usePfs) {
                     return this._authorizePfs()
@@ -312,7 +332,7 @@ export class SessionConnection extends PersistentConnection {
                 this._session.authorizationPending = false
                 if (this._destroyed) return
                 this.log.error('Authorization error: %e', err)
-                this.onError(err)
+                this.handleError(err)
                 this.reconnect()
             })
     }
@@ -464,7 +484,7 @@ export class SessionConnection extends PersistentConnection {
                 // we must re-init connection after binding temp key
                 this._session.initConnectionCalled = false
 
-                this.emit('tmp-key-change', tempAuthKey, inner.expiresAt)
+                this.onTmpKeyChange.emit([tempAuthKey, inner.expiresAt])
                 this.onConnectionUsable()
 
                 // set a timeout to update temp auth key in advance to avoid interruption
@@ -489,7 +509,7 @@ export class SessionConnection extends PersistentConnection {
                 }
 
                 this._isPfsBindingPending = false
-                this.onError(err)
+                this.handleError(err)
                 this.reconnect()
             })
     }
@@ -661,7 +681,7 @@ export class SessionConnection extends PersistentConnection {
                         break
                     }
 
-                    this.emit('update', message)
+                    this.onUpdate.emit(message)
 
                     return
                 }
@@ -1145,7 +1165,7 @@ export class SessionConnection extends PersistentConnection {
             // force the client to fetch missed updates
             // when _lastSessionCreatedUid == 0, the connection has
             // just been established, and the client will fetch them anyways
-            this.emit('update', { _: 'updatesTooLong' })
+            this.onUpdate.emit({ _: 'updatesTooLong' })
         }
 
         this._salts.currentSalt = serverSalt
@@ -1287,7 +1307,7 @@ export class SessionConnection extends PersistentConnection {
 
         this._salts.isFetching = false
         this._salts.setFutureSalts(msg.salts.slice())
-        this.emit('future-salts', msg.salts)
+        this.onFutureSalts.emit(msg.salts)
     }
 
     private _onDestroySessionResult(msg: mtp.TypeDestroySessionRes): void {

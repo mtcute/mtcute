@@ -1,12 +1,10 @@
-// eslint-disable-next-line unicorn/prefer-node-protocol
-import EventEmitter from 'events'
-
 import type { mtp } from '@mtcute/tl'
 import { tl } from '@mtcute/tl'
 import { __tlReaderMap as defaultReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlWriterMap as defaultWriterMap } from '@mtcute/tl/binary/writer.js'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import type { ReconnectionStrategy } from '@fuman/net'
+import { Emitter } from '@fuman/utils'
 
 import type { IMtStorageProvider } from '../storage/provider.js'
 import type { StorageManagerExtraOptions } from '../storage/storage.js'
@@ -180,7 +178,7 @@ export interface MtClientOptions {
  * to make RPC calls and receive low-level updates, as well as providing
  * some APIs to manage that.
  */
-export class MtClient extends EventEmitter {
+export class MtClient {
     /**
      * Crypto provider taken from {@link MtClientOptions.crypto}
      */
@@ -223,9 +221,12 @@ export class MtClient extends EventEmitter {
     private _abortController: AbortController
     readonly stopSignal: AbortSignal
 
-    constructor(readonly params: MtClientOptions) {
-        super()
+    readonly onUsable: Emitter<void> = new Emitter()
+    readonly onConnecting: Emitter<void> = new Emitter()
+    readonly onNetworkChanged: Emitter<boolean> = new Emitter()
+    readonly onUpdate: Emitter<tl.TypeUpdates> = new Emitter()
 
+    constructor(readonly params: MtClientOptions) {
         this.log = params.logger ?? new LogManager(undefined, params.platform)
 
         if (params.logLevel !== undefined) {
@@ -281,10 +282,10 @@ export class MtClient extends EventEmitter {
                 isPremium: false,
                 useIpv6: Boolean(params.useIpv6),
                 enableErrorReporting: params.enableErrorReporting ?? false,
-                onUsable: () => this.emit('usable'),
-                onConnecting: () => this.emit('connecting'),
-                onNetworkChanged: connected => this.emit('networkChanged', connected),
-                onUpdate: upd => this.emit('update', upd),
+                onUsable: this.onUsable.emit.bind(this.onUsable),
+                onConnecting: this.onConnecting.emit.bind(this.onConnecting),
+                onNetworkChanged: this.onNetworkChanged.emit.bind(this.onNetworkChanged),
+                onUpdate: this.onUpdate.emit.bind(this.onUpdate),
                 stopSignal: this.stopSignal,
                 platform: params.platform,
                 ...params.network,

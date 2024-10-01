@@ -4,7 +4,7 @@ import type { Message } from '../types/messages/index.js'
 import type { BusinessMessage, ParsedUpdate } from '../types/updates/index.js'
 import { _parseUpdate } from '../types/updates/parse-update.js'
 
-import type { RawUpdateHandler } from './types.js'
+import type { RawUpdateInfo } from './types.js'
 
 export interface ParsedUpdateHandlerParams {
     /**
@@ -29,32 +29,23 @@ export interface ParsedUpdateHandlerParams {
 
     /** Handler for parsed updates */
     onUpdate: (update: ParsedUpdate) => void
-    /**
-     * Handler for raw updates.
-     *
-     * Note that this handler will be called **before** the parsed update handler.
-     */
-    onRawUpdate?: RawUpdateHandler
 }
 
-export function makeParsedUpdateHandler(params: ParsedUpdateHandlerParams): RawUpdateHandler {
-    const { messageGroupingInterval, onUpdate, onRawUpdate = () => {} } = params
+export function makeParsedUpdateHandler(params: ParsedUpdateHandlerParams): (update: RawUpdateInfo) => void {
+    const { messageGroupingInterval, onUpdate } = params
 
     if (!messageGroupingInterval) {
-        return (update, peers) => {
-            const parsed = _parseUpdate(update, peers)
+        return (info) => {
+            const parsed = _parseUpdate(info)
 
-            onRawUpdate(update, peers)
             if (parsed) onUpdate(parsed)
         }
     }
 
     const pending = new Map<string, [Message[], timers.Timer]>()
 
-    return (update, peers) => {
-        const parsed = _parseUpdate(update, peers)
-
-        onRawUpdate(update, peers)
+    return (info) => {
+        const parsed = _parseUpdate(info)
 
         if (parsed) {
             if (parsed.name === 'new_message' || parsed.name === 'new_business_message') {

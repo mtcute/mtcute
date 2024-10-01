@@ -16,7 +16,7 @@ import type { ConfigManager } from './config-manager.js'
 import { basic as defaultMiddlewares } from './middlewares/default.js'
 import { MultiSessionConnection } from './multi-session-connection.js'
 import { ServerSaltManager } from './server-salt.js'
-import type { SessionConnection, SessionConnectionParams } from './session-connection.js'
+import type { SessionConnectionParams } from './session-connection.js'
 import type { TelegramTransport } from './transports/abstract.js'
 
 export type ConnectionKind = 'main' | 'upload' | 'download' | 'downloadSmall'
@@ -43,7 +43,7 @@ export interface NetworkManagerParams {
     readerMap: TlReaderMap
     writerMap: TlWriterMap
     isPremium: boolean
-    emitError: (err: Error, connection?: SessionConnection) => void
+    emitError: (err: Error) => void
     onUpdate: (upd: tl.TypeUpdates) => void
     onUsable: () => void
     onConnecting: () => void
@@ -314,7 +314,7 @@ export class DcConnectionManager {
     private _setupMulti(kind: ConnectionKind): void {
         const connection = this[kind]
 
-        connection.on('key-change', (idx, key: Uint8Array | null) => {
+        connection.onKeyChange.add(([idx, key]) => {
             if (kind !== 'main') {
                 // main connection is responsible for authorization,
                 // and keys are then sent to other connections
@@ -340,7 +340,7 @@ export class DcConnectionManager {
                     this.manager.params.emitError(e)
                 })
         })
-        connection.on('tmp-key-change', (idx: number, key: Uint8Array | null, expires: number) => {
+        connection.onTmpKeyChange.add(([idx, key, expires]) => {
             if (kind !== 'main') {
                 this.manager._log.warn('got tmp-key-change from non-main connection, ignoring')
 
@@ -365,13 +365,13 @@ export class DcConnectionManager {
                     this.manager.params.emitError(e)
                 })
         })
-        connection.on('future-salts', (salts: mtp.RawMt_future_salt[]) => {
+        connection.onFutureSalts.add((salts: mtp.RawMt_future_salt[]) => {
             Promise.resolve(this.manager._storage.salts.store(this.dcId, salts)).catch((e: Error) =>
                 this.manager.params.emitError(e),
             )
         })
 
-        connection.on('auth-begin', () => {
+        connection.onAuthBegin.add(() => {
             // we need to propagate auth-begin to all connections
             // to avoid them sending requests before auth is complete
             if (kind !== 'main') {
@@ -387,19 +387,19 @@ export class DcConnectionManager {
             this.downloadSmall.resetAuthKeys()
         })
 
-        connection.on('request-auth', () => {
+        connection.onRequestAuth.add(() => {
             this.main.requestAuth()
         })
 
         // fucking awesome architecture, but whatever
-        connection.on('request-keys', (promise: Deferred<void>) => {
+        connection.onRequestKeys.add((promise: Deferred<void>) => {
             this.loadKeys(true)
                 .then(() => promise.resolve())
                 .catch((e: Error) => promise.reject(e))
         })
 
-        connection.on('error', (err: Error, conn: SessionConnection) => {
-            this.manager.params.emitError(err, conn)
+        connection.onError.add((err: Error) => {
+            this.manager.params.emitError(err)
         })
     }
 
@@ -562,15 +562,15 @@ export class NetworkManager {
 
         this.params.onConnecting()
 
-        dc.main.on('usable', () => {
+        dc.main.onUsable.add(() => {
             if (dc !== this._primaryDc) return
             this.params.onUsable()
         })
-        dc.main.on('wait', () => {
+        dc.main.onWait.add(() => {
             if (dc !== this._primaryDc) return
             this.params.onConnecting()
         })
-        dc.main.on('update', (update: tl.TypeUpdates) => {
+        dc.main.onUpdate.add((update: tl.TypeUpdates) => {
             this._updateHandler(update, false)
         })
 

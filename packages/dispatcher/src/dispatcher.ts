@@ -19,6 +19,7 @@ import type {
     PeersIndex,
     PollUpdate,
     PollVoteUpdate,
+    RawUpdateInfo,
     StoryUpdate,
     UserStatusUpdate,
     UserTypingUpdate,
@@ -270,8 +271,8 @@ export class Dispatcher<State extends object = never> {
      * Dispatcher also uses bound client to throw errors
      */
     bindToClient(client: TelegramClient): void {
-        client.on('update', this.dispatchUpdate)
-        client.on('raw_update', this.dispatchRawUpdate)
+        client.onUpdate.add(this.dispatchUpdate)
+        client.onRawUpdate.add(this.dispatchRawUpdate)
 
         this._client = client
     }
@@ -281,8 +282,8 @@ export class Dispatcher<State extends object = never> {
      */
     unbind(): void {
         if (this._client) {
-            this._client.off('update', this.dispatchUpdate)
-            this._client.off('raw_update', this.dispatchRawUpdate)
+            this._client.onUpdate.remove(this.dispatchUpdate)
+            this._client.onRawUpdate.remove(this.dispatchRawUpdate)
 
             this._client = undefined
         }
@@ -322,7 +323,7 @@ export class Dispatcher<State extends object = never> {
      * @param update  Update to process
      * @param peers Peers index
      */
-    dispatchRawUpdate(update: tl.TypeUpdate | tl.TypeMessage, peers: PeersIndex): void {
+    dispatchRawUpdate({ update, peers }: RawUpdateInfo): void {
         if (!this._client) return
 
         // order does not matter in the dispatcher,

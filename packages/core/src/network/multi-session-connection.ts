@@ -1,8 +1,5 @@
-// eslint-disable-next-line unicorn/prefer-node-protocol
-import EventEmitter from 'events'
-
 import type { mtp, tl } from '@mtcute/tl'
-import { Deferred } from '@fuman/utils'
+import { Deferred, Emitter } from '@fuman/utils'
 
 import type { Logger } from '../utils/index.js'
 
@@ -11,10 +8,22 @@ import type { SessionConnectionParams } from './session-connection.js'
 import { SessionConnection } from './session-connection.js'
 import type { TelegramTransport } from './transports'
 
-export class MultiSessionConnection extends EventEmitter {
+export class MultiSessionConnection {
     private _log: Logger
     readonly _sessions: MtprotoSession[]
     private _enforcePfs = false
+
+    // NB: dont forget to update .reset()
+    readonly onRequestKeys: Emitter<Deferred<void>> = new Emitter()
+    readonly onError: Emitter<Error> = new Emitter()
+    readonly onUpdate: Emitter<tl.TypeUpdates> = new Emitter()
+    readonly onKeyChange: Emitter<[number, Uint8Array | null]> = new Emitter()
+    readonly onTmpKeyChange: Emitter<[number, Uint8Array | null, number]> = new Emitter()
+    readonly onFutureSalts: Emitter<mtp.RawMt_future_salt[]> = new Emitter()
+    readonly onAuthBegin: Emitter<number> = new Emitter()
+    readonly onUsable: Emitter<number> = new Emitter()
+    readonly onWait: Emitter<number> = new Emitter()
+    readonly onRequestAuth: Emitter<number> = new Emitter()
 
     constructor(
         readonly params: SessionConnectionParams,
@@ -22,7 +31,6 @@ export class MultiSessionConnection extends EventEmitter {
         log: Logger,
         logPrefix = '',
     ) {
-        super()
         this._log = log.create('multi')
         if (logPrefix) this._log.prefix = `[${logPrefix}] `
         this._enforcePfs = _count > 1 && params.isMainConnection
@@ -119,7 +127,6 @@ export class MultiSessionConnection extends EventEmitter {
         if (this._connections.length > this._count) {
             // destroy extra connections
             for (let i = this._connections.length - 1; i >= this._count; i--) {
-                this._connections[i].removeAllListeners()
                 this._connections[i].destroy().catch((err) => {
                     this._log.warn('error destroying connection: %e', err)
                 })
@@ -133,7 +140,7 @@ export class MultiSessionConnection extends EventEmitter {
         if (enforcePfsChanged) {
             // we need to fetch new auth keys first
             const promise = new Deferred<void>()
-            this.emit('request-keys', promise)
+            this.onRequestKeys.emit(promise)
 
             promise.promise
                 .then(() => {
@@ -144,7 +151,7 @@ export class MultiSessionConnection extends EventEmitter {
                     })
                 })
                 .catch((err) => {
-                    this.emit('error', err)
+                    this.onError.emit(err)
                 })
         }
 
@@ -164,11 +171,11 @@ export class MultiSessionConnection extends EventEmitter {
             )
 
             if (this.params.isMainConnection && this.params.isMainDcConnection) {
-                conn.on('update', update => this.emit('update', update))
+                conn.onUpdate.add(update => this.onUpdate.emit(update))
             }
-            conn.on('error', err => this.emit('error', err, conn))
-            conn.on('key-change', (key) => {
-                this.emit('key-change', i, key)
+            conn.onError.add(err => this.onError.emit(err))
+            conn.onKeyChange.add((key) => {
+                this.onKeyChange.emit([i, key])
 
                 // notify other connections
                 for (const conn_ of this._connections) {
@@ -176,11 +183,13 @@ export class MultiSessionConnection extends EventEmitter {
                     conn_.onConnected()
                 }
             })
-            conn.on('tmp-key-change', (key, expires) => this.emit('tmp-key-change', i, key, expires))
-            conn.on('future-salts', salts => this.emit('future-salts', salts))
-            conn.on('auth-begin', () => {
+            conn.onTmpKeyChange.add(
+                event => this.onTmpKeyChange.emit(event === null ? [i, null, 0] : [i, event[0], event[1]]),
+            )
+            conn.onFutureSalts.add(salts => this.onFutureSalts.emit(salts))
+            conn.onAuthBegin.add(() => {
                 this._log.debug('received auth-begin from connection %d', i)
-                this.emit('auth-begin', i)
+                this.onAuthBegin.emit(i)
 
                 // we need to reset temp auth keys if there are any left
 
@@ -189,10 +198,10 @@ export class MultiSessionConnection extends EventEmitter {
                     if (conn_ !== conn) conn_.reconnect()
                 })
             })
-            conn.on('usable', () => this.emit('usable', i))
-            conn.on('wait', () => this.emit('wait', i))
-            conn.on('request-auth', () => this.emit('request-auth', i))
-            conn.on('flood-done', () => {
+            conn.onUsable.add(() => this.onUsable.emit(i))
+            conn.onWait.add(() => this.onWait.emit(i))
+            conn.onRequestAuth.add(() => this.onRequestAuth.emit(i))
+            conn.onFloodDone.add(() => {
                 this._log.debug('received flood-done from connection %d', i)
 
                 this._connections.forEach(it => it.flushWhenIdle())
@@ -208,7 +217,17 @@ export class MultiSessionConnection extends EventEmitter {
     async destroy(): Promise<void> {
         await Promise.all(this._connections.map(conn => conn.destroy()))
         this._sessions.forEach(sess => sess.reset())
-        this.removeAllListeners()
+
+        this.onRequestKeys.clear()
+        this.onError.clear()
+        this.onUpdate.clear()
+        this.onKeyChange.clear()
+        this.onTmpKeyChange.clear()
+        this.onFutureSalts.clear()
+        this.onAuthBegin.clear()
+        this.onUsable.clear()
+        this.onWait.clear()
+        this.onRequestAuth.clear()
 
         this._destroyed = true
     }

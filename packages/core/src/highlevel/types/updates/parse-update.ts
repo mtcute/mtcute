@@ -1,8 +1,5 @@
-import type { tl } from '@mtcute/tl'
-
 import type {
     ParsedUpdate,
-    PeersIndex,
 } from '../index.js'
 import {
     BotChatJoinRequestUpdate,
@@ -30,9 +27,10 @@ import {
     UserStatusUpdate,
     UserTypingUpdate,
 } from '../index.js'
+import type { RawUpdateInfo } from '../../updates/types.js'
 
 /** @internal */
-export function _parseUpdate(update: tl.TypeUpdate, peers: PeersIndex): ParsedUpdate | null {
+export function _parseUpdate({ update, peers }: RawUpdateInfo): ParsedUpdate | null {
     switch (update._) {
         case 'updateNewMessage':
         case 'updateNewChannelMessage':
