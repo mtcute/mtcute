@@ -1,4 +1,5 @@
-import EventEmitter from 'node:events'
+// eslint-disable-next-line unicorn/prefer-node-protocol
+import EventEmitter from 'events'
 
 import { MtcuteError } from '../types/index.js'
 import type { BasicDcOption, ICryptoProvider, Logger } from '../utils/index.js'

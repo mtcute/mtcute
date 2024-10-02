@@ -6,7 +6,34 @@ import { getMarkedPeerId, parseMarkedPeerId, toggleChannelIdMark } from '../../.
 import type { ITelegramClient } from '../../client.types.js'
 import { MtPeerNotFoundError } from '../../types/errors.js'
 import type { InputPeerLike } from '../../types/peers/index.js'
-import { toInputChannel, toInputPeer, toInputUser } from '../../utils/peer-utils.js'
+import { extractUsernames, toInputChannel, toInputPeer, toInputUser } from '../../utils/peer-utils.js'
+
+export function _normalizePeerId(peerId: InputPeerLike): number | string | tl.TypeInputPeer {
+// for convenience we also accept tl and User/Chat objects directly
+    if (typeof peerId === 'object') {
+        if (tl.isAnyPeer(peerId)) {
+            peerId = getMarkedPeerId(peerId)
+        } else if ('inputPeer' in peerId) {
+        // User | Chat
+            peerId = peerId.inputPeer
+        } else {
+            peerId = toInputPeer(peerId)
+        }
+    }
+
+    if (typeof peerId === 'object') {
+        switch (peerId._) {
+            case 'mtcute.dummyInputPeerMinUser':
+                return peerId.userId
+            case 'mtcute.dummyInputPeerMinChannel':
+                return toggleChannelIdMark(peerId.channelId)
+            default:
+                return peerId
+        }
+    }
+
+    return peerId
+}
 
 // @available=both
 /**
@@ -21,29 +48,10 @@ export async function resolvePeer(
     peerId: InputPeerLike,
     force = false,
 ): Promise<tl.TypeInputPeer> {
-    // for convenience we also accept tl and User/Chat objects directly
+    peerId = _normalizePeerId(peerId)
     if (typeof peerId === 'object') {
-        if (tl.isAnyPeer(peerId)) {
-            peerId = getMarkedPeerId(peerId)
-        } else if ('inputPeer' in peerId) {
-            // User | Chat
-            peerId = peerId.inputPeer
-        } else {
-            peerId = toInputPeer(peerId)
-        }
-    }
-
-    if (typeof peerId === 'object') {
-        switch (peerId._) {
-            case 'mtcute.dummyInputPeerMinUser':
-                peerId = peerId.userId
-                break
-            case 'mtcute.dummyInputPeerMinChannel':
-                peerId = toggleChannelIdMark(peerId.channelId)
-                break
-            default:
-                return peerId
-        }
+        // InputPeer (actual one, not mtcute.*)
+        return peerId
     }
 
     if (typeof peerId === 'number' && !force) {
@@ -152,7 +160,33 @@ export async function resolvePeer(
     // if it's not the case, we'll get an `PEER_ID_INVALID` error anyways
     const [peerType, bareId] = parseMarkedPeerId(peerId)
 
-    if (peerType !== 'chat' && !client.storage.self.getCached(true)?.isBot) {
+    if (!(peerType === 'chat' || client.storage.self.getCached(true)?.isBot)) {
+        // we might have a min peer in cache, which we can try to resolve by its username/phone
+        const cached = await client.storage.peers.getCompleteById(peerId, true)
+
+        if (cached && (cached._ === 'channel' || cached._ === 'user')) {
+            // do we have a username?
+            const [username] = extractUsernames(cached)
+
+            if (username) {
+                const resolved = await resolvePeer(client, username, true)
+
+                // username might already be taken by someone else, so we need to check it
+                if (getMarkedPeerId(resolved) === peerId) {
+                    return resolved
+                }
+            }
+
+            if (cached._ === 'user' && cached.phone) {
+                // try resolving by phone
+                const resolved = await resolvePeer(client, cached.phone, true)
+
+                if (getMarkedPeerId(resolved) === peerId) {
+                    return resolved
+                }
+            }
+        }
+
         throw new MtPeerNotFoundError(`Peer ${peerId} is not found in local cache`)
     }
 

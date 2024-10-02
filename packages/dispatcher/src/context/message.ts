@@ -1,4 +1,4 @@
-import type { OmitInputMessageId, ParametersSkip1, Peer, Sticker } from '@mtcute/core'
+import type { Chat, OmitInputMessageId, ParametersSkip1, Peer, Sticker } from '@mtcute/core'
 import { Message, MtPeerNotFoundError } from '@mtcute/core'
 import type { TelegramClient } from '@mtcute/core/client.js'
 import type {
@@ -63,6 +63,23 @@ export class MessageContext extends Message implements UpdateContext<Message> {
         if (!res) throw new MtPeerNotFoundError('Failed to fetch sender')
 
         Object.defineProperty(this, 'sender', { value: res })
+
+        return res
+    }
+
+    /**
+     * Get complete information about {@link chat}
+     *
+     * Learn more: [Incomplete peers](https://mtcute.dev/guide/topics/peers.html#incomplete-peers)
+     */
+    async getCompleteChat(): Promise<Chat> {
+        if (!this.chat.isMin) return this.chat
+
+        const res = await this.client.getChat(this.chat)
+
+        if (!res) throw new MtPeerNotFoundError('Failed to fetch chat')
+
+        Object.defineProperty(this, 'chat', { value: res })
 
         return res
     }

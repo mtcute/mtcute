@@ -32,6 +32,7 @@ export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriv
     const stubPeerUser: IPeersRepository.PeerInfo = {
         id: 123123,
         accessHash: '123|456',
+        isMin: false,
         usernames: ['some_user'],
         phone: '78005553535',
         updated: 666,
@@ -41,14 +42,17 @@ export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriv
     const stubPeerChannel: IPeersRepository.PeerInfo = {
         id: -1001183945448,
         accessHash: '666|555',
+        isMin: false,
         usernames: ['some_channel'],
         updated: 777,
         complete: TlBinaryWriter.serializeObject(__tlWriterMap, createStub('channel', { id: 123123 })),
     }
 
+    const stupPeerMinUser: IPeersRepository.PeerInfo = { ...stubPeerUser, isMin: true }
+
     describe('peers', () => {
         it('should be empty by default', async () => {
-            expect(await repo.getById(123123)).toEqual(null)
+            expect(await repo.getById(123123, false)).toEqual(null)
             expect(await repo.getByUsername('some_user')).toEqual(null)
             expect(await repo.getByPhone('phone')).toEqual(null)
         })
@@ -58,11 +62,11 @@ export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriv
             await repo.store(stubPeerChannel)
             await driver.save?.()
 
-            expect(fixPeerInfo(await repo.getById(123123))).toEqual(stubPeerUser)
+            expect(fixPeerInfo(await repo.getById(123123, false))).toEqual(stubPeerUser)
             expect(fixPeerInfo(await repo.getByUsername('some_user'))).toEqual(stubPeerUser)
             expect(fixPeerInfo(await repo.getByPhone('78005553535'))).toEqual(stubPeerUser)
 
-            expect(fixPeerInfo(await repo.getById(-1001183945448))).toEqual(stubPeerChannel)
+            expect(fixPeerInfo(await repo.getById(-1001183945448, false))).toEqual(stubPeerChannel)
             expect(fixPeerInfo(await repo.getByUsername('some_channel'))).toEqual(stubPeerChannel)
         })
 
@@ -74,9 +78,21 @@ export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriv
             await repo.store(modUser)
             await driver.save?.()
 
-            expect(fixPeerInfo(await repo.getById(123123))).toEqual(modUser)
+            expect(fixPeerInfo(await repo.getById(123123, false))).toEqual(modUser)
             expect(await repo.getByUsername('some_user')).toEqual(null)
             expect(fixPeerInfo(await repo.getByUsername('some_user2'))).toEqual(modUser)
+        })
+
+        it('should not return min peers by default', async () => {
+            await repo.deleteAll()
+            await repo.store(stupPeerMinUser)
+            await driver.save?.()
+
+            expect(await repo.getById(123123, false)).toEqual(null)
+            expect(await repo.getByUsername('some_user')).toEqual(null)
+            expect(await repo.getByPhone('78005553535')).toEqual(null)
+
+            expect(fixPeerInfo(await repo.getById(123123, true))).toEqual(stupPeerMinUser)
         })
     })
 }

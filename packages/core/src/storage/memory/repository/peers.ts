@@ -42,22 +42,31 @@ export class MemoryPeersRepository implements IPeersRepository {
         this.state.entities.set(peer.id, peer)
     }
 
-    getById(id: number): IPeersRepository.PeerInfo | null {
-        return this.state.entities.get(id) ?? null
+    getById(id: number, allowMin: boolean): IPeersRepository.PeerInfo | null {
+        const ent = this.state.entities.get(id)
+        if (!ent || (ent.isMin && !allowMin)) return null
+
+        return ent
     }
 
     getByUsername(username: string): IPeersRepository.PeerInfo | null {
         const id = this.state.usernameIndex.get(username.toLowerCase())
         if (!id) return null
 
-        return this.state.entities.get(id) ?? null
+        const ent = this.state.entities.get(id)
+        if (!ent || ent.isMin) return null
+
+        return ent
     }
 
     getByPhone(phone: string): IPeersRepository.PeerInfo | null {
         const id = this.state.phoneIndex.get(phone)
         if (!id) return null
 
-        return this.state.entities.get(id) ?? null
+        const ent = this.state.entities.get(id)
+        if (!ent || ent.isMin) return null
+
+        return ent
     }
 
     deleteAll(): void {

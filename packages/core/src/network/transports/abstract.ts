@@ -1,4 +1,5 @@
-import type EventEmitter from 'node:events'
+// eslint-disable-next-line unicorn/prefer-node-protocol
+import type EventEmitter from 'events'
 
 import type { tl } from '@mtcute/tl'
 

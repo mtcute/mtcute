@@ -58,12 +58,8 @@ export class User {
      * are always available, but other fields may be omitted
      * despite being available.
      *
-     * It was observed that these fields may be missing:
-     *   - `username, usernames`
-     *   - `status, lastOnline, nextOffline`
-     *   - `storiesMaxId`
-     *   - `photo` - in some cases when user has some some privacy settings
-     *   - and probably more
+     * For a rough list of fields that may be missing, see the
+     * [official docs](https://core.telegram.org/constructor/user).
      *
      * This currently only ever happens for non-bot users, so if you are building
      * a normal bot, you can safely ignore this field.

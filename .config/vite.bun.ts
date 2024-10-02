@@ -79,6 +79,15 @@ export default defineConfig({
             },
         },
         {
+            name: 'fix-events',
+            transform(code) {
+                if (!code.includes('events')) return code
+                return code.replace(/^import (.+?) from ['"]events['"]/gms, (_, name) => {
+                    return `import ${name} from 'node:events'`
+                })
+            },
+        },
+        {
             name: 'fix-wasm-load',
             async transform(code) {
                 if (code.includes('@mtcute/wasm/mtcute.wasm')) {
