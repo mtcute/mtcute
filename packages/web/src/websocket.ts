@@ -60,6 +60,7 @@ export class WebSocketTransport implements TelegramTransport {
         return connectWs({
             url,
             implementation: this._WebSocket,
+            protocols: 'binary',
         })
     }
 
