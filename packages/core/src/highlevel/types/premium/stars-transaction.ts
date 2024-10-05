@@ -9,6 +9,8 @@ import type { User } from '../peers/user.js'
 import { type MessageMedia, _messageMediaFromTl } from '../messages/message-media.js'
 import { WebDocument } from '../files/web-document.js'
 
+import { StarGift } from './stars-gift.js'
+
 // ref: https://github.com/tdlib/td/blob/master/td/telegram/StarManager.cpp#L223
 
 /**
@@ -23,6 +25,7 @@ import { WebDocument } from '../files/web-document.js'
  *  - `gift`: This transaction is a gift from a user
  *  - `bot_purchase`: This transaction is a purchase at a bot-operated store
  *  - `channel_subscription`: This transaction is a subscription to a channel
+ *  - `star_gift`: This transaction is either a star gift to a user (if outgoing), or converting a star gift to stars (if incoming)
  */
 export type StarsTransactionType =
   | { type: 'unsupported' }
@@ -113,6 +116,13 @@ export type StarsTransactionType =
       /** ID of the message containing the giveaway where the stars were given */
       messageId: number
   }
+  | {
+      type: 'star_gift'
+      /** Related peer */
+      peer: Peer
+      /** The gift */
+      gift: StarGift
+  }
 
 export class StarsTransaction {
     constructor(
@@ -198,6 +208,14 @@ export class StarsTransaction {
                         type: 'giveaway',
                         peer,
                         messageId: this.raw.giveawayPostId,
+                    }
+                }
+
+                if (this.raw.stargift) {
+                    return {
+                        type: 'star_gift',
+                        peer,
+                        gift: new StarGift(this.raw.stargift),
                     }
                 }
 

@@ -138,7 +138,6 @@
     "updateChatUserTyping": ["chat_id"],
     "updateDeleteChannelMessages": ["channel_id"],
     "updateGroupCall": ["chat_id"],
-    "updateGroupInvitePrivacyForbidden": ["user_id"],
     "updateInlineBotCallbackQuery": ["user_id"],
     "updatePinnedChannelMessages": ["channel_id"],
     "updateReadChannelDiscussionInbox": ["channel_id", "broadcast_id"],
@@ -157,6 +156,7 @@
     "user": ["id"],
     "userEmpty": ["id"],
     "userFull": ["id", "personal_channel_id"],
+    "userStarGift": ["from_id"],
     "userStories": ["user_id"],
     "webAuthorization": ["bot_id"],
     "_": "Dummy line teehee~"

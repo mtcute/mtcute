@@ -7,7 +7,7 @@ import { memoizeGetters } from '../../utils/memoize.js'
 import { MtEmptyError } from '../errors.js'
 import type { InputFileLike } from '../files/index.js'
 import { parseSticker } from '../media/document-utils.js'
-import type { MaskPosition, Sticker, StickerSourceType, StickerType } from '../media/index.js'
+import type { MaskPosition, Sticker, StickerType } from '../media/index.js'
 import { Thumbnail } from '../media/index.js'
 
 /**
@@ -173,21 +173,6 @@ export class StickerSet {
         }
 
         return 'sticker'
-    }
-
-    /**
-     * Source file type of the stickers in this set
-     */
-    get sourceType(): StickerSourceType {
-        if (this.brief.animated) {
-            return 'animated'
-        }
-
-        if (this.brief.videos) {
-            return 'video'
-        }
-
-        return 'static'
     }
 
     /**
