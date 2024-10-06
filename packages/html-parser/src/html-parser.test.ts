@@ -361,6 +361,14 @@ describe('HtmlMessageEntityParser', () => {
             test(htm`hewwo ${htm`<br>`} world`, [], 'hewwo \nworld')
         })
 
+        it('should keep whitespaces in raw strings', () => {
+            const dot = '  ∙  '
+            const lf = '\n'
+            test(htm`this  is${dot}some  text${lf}xd`, [], 'this is  ∙  some text\nxd')
+
+            test(htm`hewwo ${htm`<br>`} world`, [], 'hewwo \nworld')
+        })
+
         it('should not ignore newlines and indentation in pre', () => {
             test(
                 htm`<pre>this is some text\n\nwith newlines</pre>`,
