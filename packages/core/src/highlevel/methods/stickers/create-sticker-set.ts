@@ -5,7 +5,6 @@ import type {
     InputFileLike,
     InputPeerLike,
     InputStickerSetItem,
-    StickerSourceType,
     StickerType,
 } from '../../types/index.js'
 import {
@@ -53,13 +52,6 @@ export async function createStickerSet(
          * @default  `sticker`, i.e. regular stickers.
          */
         type?: StickerType
-
-        /**
-         * File source type for the stickers in this set.
-         *
-         * @default  `static`, i.e. regular WEBP stickers.
-         */
-        sourceType?: StickerSourceType
 
         /**
          * Whether to create "adaptive" emoji set.
@@ -113,8 +105,6 @@ export async function createStickerSet(
 
     const res = await client.call({
         _: 'stickers.createStickerSet',
-        animated: params.sourceType === 'animated',
-        videos: params.sourceType === 'video',
         masks: params.type === 'mask',
         emojis: params.type === 'emoji',
         textColor: params.adaptive,

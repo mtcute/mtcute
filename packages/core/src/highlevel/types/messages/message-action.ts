@@ -6,6 +6,8 @@ import { _callDiscardReasonFromTl } from '../calls/index.js'
 import { Photo } from '../media/photo.js'
 import type { Peer } from '../peers/peer.js'
 import { parsePeer } from '../peers/peer.js'
+import { StarGift } from '../premium/stars-gift.js'
+import type { TextWithEntities } from '../misc/entities.js'
 
 import type { Message } from './message.js'
 
@@ -478,7 +480,7 @@ export interface ActionPaymentRefunded {
 }
 
 /** Telegram Stars were gifted by the other chat participant */
-export interface ActionStarsGifted {
+export interface ActionStarGifted {
     readonly type: 'stars_gifted'
 
     /** Whether `currency` is a cryptocurrency */
@@ -512,10 +514,28 @@ export interface ActionStarsPrize {
     /** Transaction ID */
     transactionId: string
 
+    // todo: what does this mean?
     boostPeer: Peer
 
     /** Message ID containing the giveaway */
     giveawayMessageId: number
+}
+
+export interface ActionStarGift {
+    readonly type: 'stars_gift'
+
+    /** Whether the sender chose to send the gift anonymously */
+    nameHidden: boolean
+    /** Whether this gift was saved to the recipient's profile */
+    saved: boolean
+    /** Whether this gift was converted to stars */
+    converted: boolean
+    /** Amount of stars the gift can be converted to by the recipient */
+    convertStars: tl.Long
+    /** The gift itself */
+    gift: StarGift
+    /** Message attached to the gift */
+    message: TextWithEntities | null
 }
 
 export type MessageAction =
@@ -562,8 +582,9 @@ export type MessageAction =
   | ActionGiveawayEnded
   | ActionBoostApply
   | ActionPaymentRefunded
-  | ActionStarsGifted
+  | ActionStarGifted
   | ActionStarsPrize
+  | ActionStarGift
   | null
 
 /** @internal */
@@ -847,6 +868,16 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 transactionId: act.transactionId,
                 boostPeer: parsePeer(act.boostPeer, this._peers),
                 giveawayMessageId: act.giveawayMsgId,
+            }
+        case 'messageActionStarGift':
+            return {
+                type: 'stars_gift',
+                nameHidden: act.nameHidden!,
+                saved: act.saved!,
+                converted: act.converted!,
+                convertStars: act.convertStars,
+                gift: new StarGift(act.gift),
+                message: act.message ?? null,
             }
         default:
             return null
