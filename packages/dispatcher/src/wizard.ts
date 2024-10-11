@@ -66,7 +66,7 @@ export class WizardScene<State extends object> extends Dispatcher<State & Wizard
         if (step >= this._steps) {
             await state.exit()
         } else {
-            await state.merge({ $step: step }, this._defaultState)
+            await state.merge({ $step: step }, { fallback: this._defaultState })
         }
     }
 
