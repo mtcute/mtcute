@@ -262,9 +262,11 @@ function parse(
             return
         }
 
-        if (typeof it === 'string' || typeof it === 'number') {
+        if (typeof it === 'string') {
+            processPendingText()
             pendingText += it
-        } else if (Long.isLong(it)) {
+            processPendingText(false, true)
+        } else if (Long.isLong(it) || typeof it === 'number') {
             pendingText += it.toString(10)
         } else {
             // TextWithEntities or MessageEntity
