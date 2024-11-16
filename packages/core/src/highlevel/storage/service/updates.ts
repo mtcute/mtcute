@@ -1,4 +1,4 @@
-import { typed } from '@fuman/utils'
+import { typed, u8 } from '@fuman/utils'
 
 import type { IKeyValueRepository } from '../../../storage/repository/key-value.js'
 import type { ServiceOptions } from '../../../storage/service/base.js'
@@ -28,7 +28,7 @@ export class UpdatesStateService extends BaseService {
     }
 
     private async _setInt(key: string, val: number): Promise<void> {
-        const buf = new Uint8Array(4)
+        const buf = u8.alloc(4)
         typed.toDataView(buf).setInt32(0, val, true)
 
         await this._kv.set(key, buf)
@@ -73,7 +73,7 @@ export class UpdatesStateService extends BaseService {
     }
 
     async setChannelPts(channelId: number, pts: number): Promise<void> {
-        const buf = new Uint8Array(4)
+        const buf = u8.alloc(4)
         typed.toDataView(buf).setUint32(0, pts, true)
 
         await this._kv.set(KV_CHANNEL_PREFIX + channelId, buf)

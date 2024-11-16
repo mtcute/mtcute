@@ -4,10 +4,11 @@ import { Deferred, base64 } from '@fuman/utils'
 import type { MaybePromise } from '../../../types/utils.js'
 import { sleepWithAbort } from '../../../utils/misc-utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import type { ITelegramClient, ServerUpdateHandler } from '../../client.types.js'
+import type { ITelegramClient } from '../../client.types.js'
 import type { MaybeDynamic } from '../../types/index.js'
 import { User } from '../../types/index.js'
 import { resolveMaybeDynamic } from '../../utils/misc-utils.js'
+import type { RawUpdateInfo } from '../../updates/types.js'
 
 import { checkPassword } from './check-password.js'
 
@@ -53,26 +54,19 @@ export async function signInQr(
 
     let waiter: Deferred<void> | undefined
 
-    // crutch – we need to wait for the updateLoginToken update.
-    // we replace the server update handler temporarily because:
-    //   - updates manager may be disabled, in which case `onUpdate` will never be called
-    //   - even if the updates manager is enabled, it won't start until we're logged in
-    //
-    // todo: how can we make this more clean?
-    const originalHandler = client.getServerUpdateHandler()
-
-    const onUpdate: ServerUpdateHandler = (upd) => {
-        if (upd._ === 'updateShort' && upd.update._ === 'updateLoginToken') {
+    // todo: we should probably make this into an await-able function
+    const onUpdate = ({ update }: RawUpdateInfo) => {
+        if (update._ === 'updateLoginToken') {
             onQrScanned?.()
             waiter?.resolve()
-            client.onServerUpdate(originalHandler)
+            client.onRawUpdate.remove(onUpdate)
         }
     }
 
-    client.onServerUpdate(onUpdate)
+    client.onRawUpdate.add(onUpdate)
 
     abortSignal?.addEventListener('abort', () => {
-        client.onServerUpdate(originalHandler)
+        client.onRawUpdate.remove(onUpdate)
         waiter?.reject(abortSignal.reason)
     })
 
@@ -180,6 +174,6 @@ export async function signInQr(
 
         return new User(self)
     } finally {
-        client.onServerUpdate(originalHandler)
+        client.onRawUpdate.remove(onUpdate)
     }
 }

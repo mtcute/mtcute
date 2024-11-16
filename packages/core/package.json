@@ -15,14 +15,13 @@
         "./methods.js": "./src/highlevel/methods.ts"
     },
     "scripts": {
-        "build": "pnpm run -w build-package core",
         "gen-client": "node ./scripts/generate-client.cjs",
         "gen-updates": "node ./scripts/generate-updates.cjs"
     },
     "dependencies": {
-        "@fuman/io": "workspace:^",
-        "@fuman/net": "workspace:^",
-        "@fuman/utils": "workspace:^",
+        "@fuman/io": "0.0.1",
+        "@fuman/net": "0.0.1",
+        "@fuman/utils": "0.0.1",
         "@mtcute/file-id": "workspace:^",
         "@mtcute/tl": "workspace:^",
         "@mtcute/tl-runtime": "workspace:^",

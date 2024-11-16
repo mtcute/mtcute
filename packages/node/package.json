@@ -12,21 +12,21 @@
         "./utils.js": "./src/utils.ts",
         "./methods.js": "./src/methods.ts"
     },
-    "scripts": {
-        "docs": "typedoc",
-        "build": "pnpm run -w build-package node"
-    },
     "dependencies": {
         "@mtcute/core": "workspace:^",
         "@mtcute/html-parser": "workspace:^",
         "@mtcute/markdown-parser": "workspace:^",
         "@mtcute/wasm": "workspace:^",
-        "@fuman/net": "workspace:^",
-        "@fuman/node": "workspace:^",
+        "@fuman/utils": "0.0.1",
+        "@fuman/net": "0.0.1",
+        "@fuman/node": "0.0.1",
         "better-sqlite3": "11.3.0"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^",
         "@types/better-sqlite3": "7.6.4"
+    },
+    "fuman": {
+        "jsr": "skip"
     }
 }

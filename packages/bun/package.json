@@ -12,20 +12,20 @@
     "./utils.js": "./src/utils.ts",
     "./methods.js": "./src/methods.ts"
   },
-  "scripts": {
-    "docs": "typedoc",
-    "build": "pnpm run -w build-package bun"
-  },
   "dependencies": {
     "@mtcute/core": "workspace:^",
     "@mtcute/html-parser": "workspace:^",
     "@mtcute/markdown-parser": "workspace:^",
     "@mtcute/wasm": "workspace:^",
-    "@fuman/bun": "workspace:^",
-    "@fuman/net": "workspace:^",
-    "@fuman/io": "workspace:^"
+    "@fuman/utils": "0.0.1",
+    "@fuman/bun": "0.0.1",
+    "@fuman/net": "0.0.1",
+    "@fuman/io": "0.0.1"
   },
   "devDependencies": {
     "@mtcute/test": "workspace:^"
+  },
+  "fuman": {
+    "jsr": "skip"
   }
 }

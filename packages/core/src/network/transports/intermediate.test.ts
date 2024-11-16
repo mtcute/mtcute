@@ -4,8 +4,8 @@ import { defaultTestCryptoProvider, useFakeMathRandom } from '@mtcute/test'
 import { hex } from '@fuman/utils'
 import { Bytes, write } from '@fuman/io'
 
-import { IntermediatePacketCodec, PaddedIntermediatePacketCodec } from './intermediate'
-import { TransportError } from './abstract'
+import { IntermediatePacketCodec, PaddedIntermediatePacketCodec } from './intermediate.js'
+import { TransportError } from './abstract.js'
 
 describe('IntermediatePacketCodec', () => {
     it('should return correct tag', () => {

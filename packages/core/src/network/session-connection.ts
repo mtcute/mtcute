@@ -3,7 +3,7 @@ import type { mtp } from '@mtcute/tl'
 import { tl } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
-import { Deferred, Emitter, u8 } from '@fuman/utils'
+import { Deferred, Emitter, timers, u8 } from '@fuman/utils'
 
 import { MtArgumentError, MtTimeoutError, MtcuteError } from '../types/index.js'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
@@ -13,7 +13,6 @@ import {
     longFromBuffer,
     randomLong,
     removeFromLongArray,
-    timers,
 } from '../utils/index.js'
 import type { ICorePlatform } from '../types/platform'
 

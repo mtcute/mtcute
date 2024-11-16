@@ -179,8 +179,8 @@ describe('ObfuscatedPacketCodec', () => {
 
         await codec.tag()
 
-        expect(codec.decode(Bytes.from(hex.decode(msg1)), false)).rejects.toThrow(TransportError)
-        expect(codec.decode(Bytes.from(hex.decode(msg2)), false)).rejects.toThrow(TransportError)
+        await expect(codec.decode(Bytes.from(hex.decode(msg1)), false)).rejects.toThrow(TransportError)
+        await expect(codec.decode(Bytes.from(hex.decode(msg2)), false)).rejects.toThrow(TransportError)
     })
 
     it('should correctly reset', async () => {

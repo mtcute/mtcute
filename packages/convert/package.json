@@ -8,13 +8,10 @@
     "license": "MIT",
     "sideEffects": false,
     "exports": "./src/index.ts",
-    "scripts": {
-        "build": "pnpm run -w build-package convert"
-    },
     "dependencies": {
         "@mtcute/core": "workspace:^",
-        "@fuman/utils": "workspace:^",
-        "@fuman/net": "workspace:^"
+        "@fuman/utils": "0.0.1",
+        "@fuman/net": "0.0.1"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^"

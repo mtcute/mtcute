@@ -1,5 +1,5 @@
 import type { tl } from '@mtcute/tl'
-import { AsyncLock, Deferred, Deque, timers } from '@fuman/utils'
+import { AsyncLock, Deferred, Deque, timers, unknownToError } from '@fuman/utils'
 
 import { MtArgumentError, MtTimeoutError } from '../../types/errors.js'
 import type { MaybePromise } from '../../types/utils.js'
@@ -564,7 +564,7 @@ export class Conversation {
                     this._queuedNewMessage.popFront()
                 }
             } catch (e: unknown) {
-                this.client.emitError(e)
+                this.client.onError.emit(unknownToError(e))
             }
 
             this._lastMessage = this._lastReceivedMessage = msg.id
@@ -594,7 +594,7 @@ export class Conversation {
                 this._pendingEditMessage.delete(msg.id)
             }
         })().catch((e) => {
-            this.client.emitError(e)
+            this.client.onError.emit(unknownToError(e))
         })
     }
 

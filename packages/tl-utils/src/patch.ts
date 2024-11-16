@@ -5,7 +5,7 @@ import { generateWriterCodeForTlEntries } from './codegen/writer.js'
 import { parseTlToEntries } from './parse.js'
 
 function evalForResult<T>(js: string): T {
-    // eslint-disable-next-line ts/no-implied-eval, no-new-func
+    // eslint-disable-next-line ts/no-implied-eval, no-new-func, ts/no-unsafe-call
     return new Function(js)() as T
 }
 

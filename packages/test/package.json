@@ -8,9 +8,6 @@
     "license": "MIT",
     "sideEffects": false,
     "exports": "./src/index.ts",
-    "scripts": {
-        "build": "pnpm run -w build-package test"
-    },
     "peerDependencies": {
         "@mtcute/core": "workspace:^",
         "@mtcute/node": "workspace:^",
@@ -28,13 +25,16 @@
     },
     "dependencies": {
         "long": "5.2.3",
-        "@fuman/utils": "workspace:^",
-        "@fuman/net": "workspace:^"
+        "@fuman/utils": "0.0.1",
+        "@fuman/net": "0.0.1"
     },
     "devDependencies": {
         "@mtcute/tl-utils": "workspace:^"
     },
     "browser": {
         "./src/platform.js": "./src/platform.web.js"
+    },
+    "fuman": {
+        "jsr": "skip"
     }
 }

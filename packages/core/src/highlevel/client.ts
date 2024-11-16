@@ -6584,12 +6584,6 @@ TelegramClient.prototype.importSession = function (...args) {
 TelegramClient.prototype.exportSession = function (...args) {
     return this._client.exportSession(...args)
 }
-TelegramClient.prototype.onError = function (...args) {
-    return this._client.onError(...args)
-}
-TelegramClient.prototype.emitError = function (...args) {
-    return this._client.emitError(...args)
-}
 TelegramClient.prototype.handleClientUpdate = function (...args) {
     return this._client.handleClientUpdate(...args)
 }

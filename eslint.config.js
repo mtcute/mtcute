@@ -87,6 +87,7 @@ export default antfu({
         'ts/switch-exhaustiveness-check': 'off',
         'ts/restrict-template-expressions': 'off',
         'ts/method-signature-style': 'off',
+        'style/indent-binary-ops': 'off',
     },
 }, {
     ignores: [

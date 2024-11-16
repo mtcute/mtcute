@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createStub } from '@mtcute/test'
 import type { tl } from '@mtcute/tl'
+import type { AsyncResourceContext } from '@fuman/utils'
 
 import { ConfigManager } from './config-manager.js'
 
@@ -9,13 +10,20 @@ describe('ConfigManager', () => {
         expires: 300,
     })
     const getConfig = vi.fn()
+    const fakePerfNow = vi.fn(() => Date.now())
 
     beforeEach(() => {
         vi.useFakeTimers()
         vi.setSystemTime(0)
+        vi.stubGlobal('performance', {
+            now: fakePerfNow,
+        })
         getConfig.mockClear().mockImplementation(() => Promise.resolve(config))
     })
-    afterEach(() => void vi.useRealTimers())
+    afterEach(() => {
+        vi.useRealTimers()
+        vi.unstubAllGlobals()
+    })
 
     it('should fetch initial config', async () => {
         const cm = new ConfigManager(getConfig)
@@ -24,7 +32,7 @@ describe('ConfigManager', () => {
 
         expect(getConfig).toHaveBeenCalledTimes(1)
         expect(fetchedConfig).toEqual(config)
-        expect(cm.getNow()).toEqual(config)
+        expect(cm.getCached()).toEqual(config)
     })
 
     it('should automatically update config', async () => {
@@ -47,7 +55,7 @@ describe('ConfigManager', () => {
         const cm = new ConfigManager(getConfig)
         expect(cm.isStale).toBe(true)
 
-        cm.setData(config)
+        cm.setData(config, config.expires * 1000)
         expect(cm.isStale).toBe(false)
 
         vi.setSystemTime(300_000)
@@ -84,15 +92,23 @@ describe('ConfigManager', () => {
     it('should call listeners on config update', async () => {
         const cm = new ConfigManager(getConfig)
         const listener = vi.fn()
-        cm.onReload(listener)
+        cm.onUpdated.add(listener)
+
         await cm.update()
+        const call = structuredClone(listener.mock.calls[0][0]) as AsyncResourceContext<tl.RawConfig>
 
         vi.setSystemTime(300_000)
-        cm.onReload(listener)
+        cm.onUpdated.remove(listener)
         await cm.update()
 
         expect(listener).toHaveBeenCalledOnce()
-        expect(listener).toHaveBeenCalledWith(config)
+        expect(call).toEqual({
+            abort: {},
+            current: config,
+            currentExpiresAt: 300_000,
+            currentFetchedAt: 0,
+            isBackground: false,
+        })
     })
 
     it('should correctly destroy', async () => {

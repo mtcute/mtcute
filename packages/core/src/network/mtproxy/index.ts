@@ -167,7 +167,7 @@ export abstract class BaseMtProxyTransport implements TelegramTransport {
             u8.concat([
                 helloRand,
                 respBuf.slice(0, 11),
-                new Uint8Array(32),
+                u8.alloc(32),
                 respBuf.slice(11 + 32),
             ]),
             this._rawSecret,

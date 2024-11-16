@@ -10,7 +10,7 @@
   "homepage": "https://mtcute.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mtcute/mtcute"
+    "url": "git+https://github.com/mtcute/mtcute.git"
   },
   "keywords": [
     "telegram",
@@ -26,7 +26,7 @@
     "packages/*"
   ],
   "scripts": {
-    "postinstall": "node scripts/validate-deps-versions.js && node scripts/remove-jsr-sourcefiles.js",
+    "postinstall": "fuman-build validate-workspace-deps && node scripts/remove-jsr-sourcefiles.js",
     "test": "vitest --config .config/vite.ts run",
     "test:dev": "vitest --config .config/vite.ts watch",
     "test:ui": "vitest --config .config/vite.ts --ui",
@@ -42,12 +42,13 @@
     "lint:fix": "eslint --fix .",
     "publish-all": "node scripts/publish.js all",
     "docs": "typedoc --options .config/typedoc/config.cjs",
-    "build-package": "node scripts/build-package.js",
+    "build-package": "tsx scripts/build-package.js",
     "build-package-vite": "node scripts/build-package-vite.js"
   },
   "devDependencies": {
     "@antfu/eslint-config": "2.26.0",
-    "@fuman/jsr": "workspace:^",
+    "@fuman/build": "0.0.1",
+    "@fuman/utils": "0.0.1",
     "@types/deno": "npm:@teidesu/deno-types@1.46.3",
     "@types/node": "20.10.0",
     "@types/ws": "8.5.4",

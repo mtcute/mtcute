@@ -1,12 +1,18 @@
 import { fileURLToPath } from 'node:url'
 
+/** @type {import('@fuman/build/vite').CustomBuildConfig} */
 export default () => {
     const clientId = fileURLToPath(new URL('./src/client.ts', import.meta.url))
-    // const buildingCjs = false
 
     return {
-        external: ['@mtcute/crypto-node'],
-        rollupPluginsPre: [
+        viteConfig: {
+            build: {
+                rollupOptions: {
+                    external: ['@mtcute/crypto-node'],
+                },
+            },
+        },
+        pluginsPre: [
             {
                 // very much a crutch, but it works
                 // i couldn't figure out a way to hook into the esm->cjs transform,

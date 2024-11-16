@@ -9,12 +9,11 @@
     "sideEffects": false,
     "exports": "./src/index.ts",
     "scripts": {
-        "build": "pnpm run -w build-package dispatcher",
         "gen-updates": "node ./scripts/generate.cjs"
     },
     "dependencies": {
         "@mtcute/core": "workspace:^",
-        "@fuman/utils": "workspace:^",
+        "@fuman/utils": "0.0.1",
         "events": "3.2.0"
     },
     "devDependencies": {

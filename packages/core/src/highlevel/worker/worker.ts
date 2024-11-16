@@ -55,13 +55,13 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
                 fmt,
                 args,
             })
-        client.onError(err =>
+        client.onError.add(err =>
             this.broadcast({
                 type: 'error',
-                error: err,
+                error: serializeError(err),
             }),
         )
-        client.onConnectionState(state =>
+        client.onConnectionState.add(state =>
             this.broadcast({
                 type: 'conn_state',
                 state,
@@ -70,7 +70,7 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
         client.stopSignal.addEventListener('abort', () => this.broadcast({ type: 'stop' }))
 
         if (client.updates) {
-            client.onUpdate((update, peers) =>
+            client.onRawUpdate.add(({ update, peers }) =>
                 this.broadcast({
                     type: 'update',
                     update: serializeResult(update),
@@ -80,7 +80,7 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
                 }),
             )
         } else {
-            client.onServerUpdate(update =>
+            client.onServerUpdate.add(update =>
                 this.broadcast({
                     type: 'server_update',
                     update: serializeResult(update),

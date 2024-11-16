@@ -1,18 +1,20 @@
 import type { tl } from '@mtcute/tl'
+import { Emitter } from '@fuman/utils'
 
 import type { RpcCallOptions } from '../../network/network-manager.js'
 import type { MustEqual } from '../../types/utils.js'
 import { LogManager } from '../../utils/logger.js'
-import type { ConnectionState, ITelegramClient, ServerUpdateHandler } from '../client.types.js'
+import type { ConnectionState, ITelegramClient } from '../client.types.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
-import type { RawUpdateHandler } from '../updates/types.js'
 import type { ICorePlatform } from '../../types/platform'
+import type { RawUpdateInfo } from '../updates/types.js'
 
 import { AppConfigManagerProxy } from './app-config.js'
 import { WorkerInvoker } from './invoker.js'
 import type { ClientMessageHandler, SendFn, SomeWorker, WorkerCustomMethods } from './protocol.js'
 import { deserializeResult } from './protocol.js'
 import { TelegramStorageProxy } from './storage.js'
+import { deserializeError } from './errors.js'
 
 export interface TelegramWorkerPortOptions {
     worker: SomeWorker
@@ -104,33 +106,10 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
 
     abstract connectToWorker(worker: SomeWorker, handler: ClientMessageHandler): [SendFn, () => void]
 
-    private _serverUpdatesHandler: ServerUpdateHandler = () => {}
-    onServerUpdate(handler: ServerUpdateHandler): void {
-        this._serverUpdatesHandler = handler
-    }
-
-    getServerUpdateHandler(): ServerUpdateHandler {
-        return this._serverUpdatesHandler
-    }
-
-    private _errorHandler: (err: unknown) => void = () => {}
-    onError(handler: (err: unknown) => void): void {
-        this._errorHandler = handler
-    }
-
-    emitError(err: unknown): void {
-        this._errorHandler(err)
-    }
-
-    private _updateHandler: RawUpdateHandler = () => {}
-    onUpdate(handler: RawUpdateHandler): void {
-        this._updateHandler = handler
-    }
-
-    private _connectionStateHandler: (state: ConnectionState) => void = () => {}
-    onConnectionState(handler: (state: ConnectionState) => void): void {
-        this._connectionStateHandler = handler
-    }
+    onServerUpdate: Emitter<tl.TypeUpdates> = new Emitter()
+    onRawUpdate: Emitter<RawUpdateInfo> = new Emitter()
+    onConnectionState: Emitter<ConnectionState> = new Emitter()
+    onError: Emitter<Error> = new Emitter()
 
     private _onMessage: ClientMessageHandler = (message) => {
         switch (message.type) {
@@ -138,22 +117,22 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
                 this.log.handler(message.color, message.level, message.tag, message.fmt, message.args)
                 break
             case 'server_update':
-                this._serverUpdatesHandler(deserializeResult(message.update))
+                this.onServerUpdate.emit(deserializeResult(message.update))
                 break
             case 'conn_state':
-                this._connectionStateHandler(message.state)
+                this.onConnectionState.emit(message.state)
                 break
             case 'update': {
                 const peers = new PeersIndex(deserializeResult(message.users), deserializeResult(message.chats))
                 peers.hasMin = message.hasMin
-                this._updateHandler(deserializeResult(message.update), peers)
+                this.onRawUpdate.emit({ update: deserializeResult(message.update), peers })
                 break
             }
             case 'result':
                 this._invoker.handleResult(message)
                 break
             case 'error':
-                this.emitError(message.error)
+                this.onError.emit(deserializeError(message.error))
                 break
             case 'stop':
                 this._abortController.abort()

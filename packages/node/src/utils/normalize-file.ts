@@ -4,7 +4,7 @@ import { basename } from 'node:path'
 import { Readable } from 'node:stream'
 
 import type { UploadFileLike } from '@mtcute/core'
-import { nodeStreamToWeb } from '@fuman/node'
+import { nodeReadableToFuman } from '@fuman/node'
 
 export async function normalizeFile(file: UploadFileLike): Promise<{
     file: UploadFileLike
@@ -20,7 +20,7 @@ export async function normalizeFile(file: UploadFileLike): Promise<{
         const fileSize = await stat(file.path.toString()).then(stat => stat.size)
 
         return {
-            file: nodeStreamToWeb(file),
+            file: nodeReadableToFuman(file),
             fileName,
             fileSize,
         }
@@ -28,7 +28,7 @@ export async function normalizeFile(file: UploadFileLike): Promise<{
 
     if (file instanceof Readable) {
         return {
-            file: nodeStreamToWeb(file),
+            file: nodeReadableToFuman(file),
         }
     }
 

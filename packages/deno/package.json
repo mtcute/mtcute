@@ -12,16 +12,11 @@
         "./utils.js": "./src/utils.ts",
         "./methods.js": "./src/methods.ts"
     },
-    "main": "src/index.ts",
-    "scripts": {
-        "docs": "typedoc",
-        "build": "pnpm run -w build-package deno"
-    },
     "dependencies": {
         "@db/sqlite": "npm:@jsr/db__sqlite@0.12.0",
-        "@fuman/deno": "workspace:^",
-        "@fuman/net": "workspace:^",
-        "@fuman/io": "workspace:^",
+        "@fuman/utils": "0.0.1",
+        "@fuman/net": "0.0.1",
+        "@fuman/io": "0.0.1",
         "@mtcute/core": "workspace:^",
         "@mtcute/html-parser": "workspace:^",
         "@mtcute/markdown-parser": "workspace:^",
@@ -30,5 +25,8 @@
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^"
+    },
+    "fuman": {
+        "jsr": "only"
     }
 }

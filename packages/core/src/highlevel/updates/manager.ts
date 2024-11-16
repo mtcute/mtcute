@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/tl'
 import Long from 'long'
-import { AsyncLock, ConditionVariable, Deque, timers } from '@fuman/utils'
+import { AsyncLock, ConditionVariable, Deque, timers, unknownToError } from '@fuman/utils'
 
 import { MtArgumentError } from '../../types/errors.js'
 import type { MaybePromise } from '../../types/utils.js'
@@ -195,7 +195,7 @@ export class UpdatesManager {
 
     notifyLoggedIn(self: CurrentUserInfo): void {
         this.auth = self
-        this.startLoop().catch(err => this.client.emitError(err))
+        this.startLoop().catch(err => this.client.onError.emit(unknownToError(err)))
     }
 
     notifyLoggedOut(): void {
@@ -238,7 +238,7 @@ export class UpdatesManager {
         this.updatesLoopActive = true
         timers.clearInterval(this.keepAliveInterval)
         this.keepAliveInterval = timers.setInterval(this._onKeepAlive, KEEP_ALIVE_INTERVAL)
-        this._loop().catch(err => this.client.emitError(err))
+        this._loop().catch(err => this.client.onError.emit(unknownToError(err)))
 
         if (this.catchUpOnStart) {
             this.catchUp()
@@ -1245,20 +1245,20 @@ export class UpdatesManager {
                 // we just needed to apply new pts values
                 return
             case 'updateDcOptions': {
-                const config = client.mt.network.config.getNow()
+                const config = client.mt.network.config.getCached()
 
                 if (config) {
                     client.mt.network.config.setData({
                         ...config,
                         dcOptions: upd.dcOptions,
-                    })
+                    }, config.expires * 1000)
                 } else {
-                    client.mt.network.config.update(true).catch(err => client.emitError(err))
+                    client.mt.network.config.update(true).catch(err => client.onError.emit(unknownToError(err)))
                 }
                 break
             }
             case 'updateConfig':
-                client.mt.network.config.update(true).catch(err => client.emitError(err))
+                client.mt.network.config.update(true).catch(err => client.onError.emit(unknownToError(err)))
                 break
             case 'updateUserName':
                 // todo

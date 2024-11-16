@@ -1,6 +1,6 @@
 import type { tl } from '@mtcute/tl'
+import type { Middleware } from '@fuman/utils'
 
-import type { Middleware } from '../../utils/composer.js'
 import type { RpcCallMiddleware, RpcCallMiddlewareContext } from '../network-manager.js'
 
 /**

@@ -67,6 +67,7 @@ function _initializeClient(this: TelegramClient, opts: TelegramClientOptions) {
     Object.defineProperty(this, 'onServerUpdate', { value: this._client.onServerUpdate })
     Object.defineProperty(this, 'onRawUpdate', { value: this._client.onServerUpdate })
     Object.defineProperty(this, 'onConnectionState', { value: this._client.onConnectionState })
+    Object.defineProperty(this, 'onError', { value: this._client.onError })
 
     if (!opts.disableUpdates) {
         const skipConversationUpdates = opts.skipConversationUpdates ?? true

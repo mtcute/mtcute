@@ -1,6 +1,5 @@
+import { AsyncResource } from '@fuman/utils'
 import type { tl } from '@mtcute/tl'
-
-import { Reloadable } from '../utils/reloadable.js'
 
 /**
  * Config manager is responsible for keeping
@@ -8,11 +7,18 @@ import { Reloadable } from '../utils/reloadable.js'
  * and providing methods to find the best DC
  * option for the current session.
  */
-export class ConfigManager extends Reloadable<tl.RawConfig> {
+export class ConfigManager extends AsyncResource<tl.RawConfig> {
     constructor(update: () => Promise<tl.RawConfig>) {
         super({
-            reload: update,
-            getExpiresAt: data => data.expires * 1000,
+            fetcher: async () => {
+                const res = await update()
+
+                return {
+                    data: res,
+                    expiresIn: res.expires * 1000 - Date.now(),
+                }
+            },
+            autoReload: true,
         })
     }
 
@@ -26,7 +32,9 @@ export class ConfigManager extends Reloadable<tl.RawConfig> {
     }): Promise<tl.RawDcOption | undefined> {
         if (this.isStale) await this.update()
 
-        const options = this._data!.dcOptions.filter((opt) => {
+        const data = this.getCached()!
+
+        const options = data.dcOptions.filter((opt) => {
             if (opt.tcpoOnly) return false // unsupported
             if (opt.ipv6 && !params.allowIpv6) return false
             if (opt.mediaOnly && !params.allowMedia) return false

@@ -1,5 +1,6 @@
 import type { tl } from '@mtcute/tl'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
+import { u8 } from '@fuman/utils'
 
 import type { IKeyValueRepository } from '../../../storage/repository/key-value.js'
 import type { ServiceOptions } from '../../../storage/service/base.js'
@@ -18,7 +19,7 @@ export interface CurrentUserInfo {
 const KV_CURRENT_USER = 'current_user'
 
 function serialize(info: CurrentUserInfo | null): Uint8Array {
-    if (!info) return new Uint8Array(0)
+    if (!info) return u8.alloc(0)
 
     const hasUsernames = info.usernames.length > 0
 

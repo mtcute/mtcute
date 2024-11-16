@@ -44,7 +44,7 @@ export class AuthKey {
         let padding = (16 /* header size */ + message.length + 12) /* min padding */ % 16
         padding = 12 + (padding ? 16 - padding : 0)
 
-        const buf = new Uint8Array(16 + message.length + padding)
+        const buf = u8.alloc(16 + message.length + padding)
         const dv = typed.toDataView(buf)
 
         dv.setInt32(0, serverSalt.low, true)

@@ -14,7 +14,7 @@ import {
     TelegramWorkerPort as TelegramWorkerPortBase,
 } from '@mtcute/core/worker.js'
 
-import { BunPlatform } from './platform'
+import { BunPlatform } from './platform.js'
 
 export type { TelegramWorkerOptions, WorkerCustomMethods }
 

@@ -1,4 +1,4 @@
-import { typed } from '@fuman/utils'
+import { typed, u8 } from '@fuman/utils'
 
 /**
  * Decode 5-bit encoded voice message waveform into
@@ -49,7 +49,7 @@ export function decodeWaveform(wf: Uint8Array): number[] {
 export function encodeWaveform(wf: number[]): Uint8Array {
     const bitsCount = wf.length * 5
     const bytesCount = ~~((bitsCount + 7) / 8)
-    const result = new Uint8Array(bytesCount + 1)
+    const result = u8.alloc(bytesCount + 1)
     const dv = typed.toDataView(result)
 
     // Write each 0-31 unsigned char as 5 bit to result.

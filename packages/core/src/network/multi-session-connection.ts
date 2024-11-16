@@ -1,5 +1,5 @@
 import type { mtp, tl } from '@mtcute/tl'
-import { Deferred, Emitter } from '@fuman/utils'
+import { Deferred, Emitter, unknownToError } from '@fuman/utils'
 
 import type { Logger } from '../utils/index.js'
 
@@ -151,7 +151,7 @@ export class MultiSessionConnection {
                     })
                 })
                 .catch((err) => {
-                    this.onError.emit(err)
+                    this.onError.emit(unknownToError(err))
                 })
         }
 
@@ -342,8 +342,8 @@ export class MultiSessionConnection {
         }
     }
 
-    changeTransport(factory: TelegramTransport): void {
-        this._connections.forEach(conn => conn.changeTransport(factory))
+    async changeTransport(factory: TelegramTransport): Promise<void> {
+        await Promise.all(this._connections.map(conn => conn.changeTransport(factory)))
     }
 
     getPoolSize(): number {

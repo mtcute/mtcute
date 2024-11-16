@@ -1,5 +1,5 @@
 import { Long, MtArgumentError } from '@mtcute/core'
-import { base64, typed } from '@fuman/utils'
+import { base64, typed, u8 } from '@fuman/utils'
 
 import type { PyrogramSession } from './types.js'
 
@@ -13,32 +13,32 @@ export function serializePyrogramSession(session: PyrogramSession): string {
 
     const userIdLong = Long.fromNumber(session.userId, true)
 
-    let u8: Uint8Array
+    let buf: Uint8Array
 
     if (session.apiId === undefined) {
         // old format
-        u8 = new Uint8Array(SESSION_STRING_SIZE_OLD)
-        const dv = typed.toDataView(u8)
+        buf = u8.alloc(SESSION_STRING_SIZE_OLD)
+        const dv = typed.toDataView(buf)
 
         dv.setUint8(0, session.dcId)
         dv.setUint8(1, session.isTest ? 1 : 0)
-        u8.set(session.authKey, 2)
+        buf.set(session.authKey, 2)
         dv.setUint32(258, userIdLong.high)
         dv.setUint32(262, userIdLong.low)
         dv.setUint8(266, session.isBot ? 1 : 0)
     } else {
-        u8 = new Uint8Array(SESSION_STRING_SIZE)
-        const dv = typed.toDataView(u8)
+        buf = u8.alloc(SESSION_STRING_SIZE)
+        const dv = typed.toDataView(buf)
 
         dv.setUint8(0, session.dcId)
         dv.setUint32(1, session.apiId)
         dv.setUint8(5, session.isTest ? 1 : 0)
-        u8.set(session.authKey, 6)
+        buf.set(session.authKey, 6)
 
         dv.setUint32(262, userIdLong.high)
         dv.setUint32(266, userIdLong.low)
         dv.setUint8(270, session.isBot ? 1 : 0)
     }
 
-    return base64.encode(u8, true)
+    return base64.encode(buf, true)
 }

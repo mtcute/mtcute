@@ -10,12 +10,9 @@
     "exports": {
         ".": "./src/index.ts"
     },
-    "scripts": {
-        "build": "pnpm run -w build-package file-id"
-    },
     "dependencies": {
         "@mtcute/tl-runtime": "workspace:^",
-        "@fuman/utils": "workspace:^",
+        "@fuman/utils": "0.0.1",
         "long": "5.2.3"
     }
 }

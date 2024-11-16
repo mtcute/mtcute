@@ -1,6 +1,7 @@
 import Long from 'long'
 import type { tl } from '@mtcute/tl'
 import type { TlArgument } from '@mtcute/tl-utils'
+import { u8 } from '@fuman/utils'
 
 import { getEntriesMap } from './schema.js'
 
@@ -21,13 +22,13 @@ function getDefaultFor(arg: TlArgument): unknown {
         case 'long':
             return Long.ZERO
         case 'int128':
-            return new Uint8Array(16)
+            return u8.alloc(16)
         case 'int256':
-            return new Uint8Array(32)
+            return u8.alloc(32)
         case 'string':
             return ''
         case 'bytes':
-            return new Uint8Array(0)
+            return u8.alloc(0)
         case 'Bool':
         case 'bool':
             return false

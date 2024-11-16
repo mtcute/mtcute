@@ -579,8 +579,10 @@ withParams(params: RpcCallOptions): this\n`)
                                 it.type = { kind: ts.SyntaxKind.StringKeyword }
                             } else if (
                                 it.initializer.kind === ts.SyntaxKind.NumericLiteral
-                                || (it.initializer.kind === ts.SyntaxKind.Identifier
-                                && (it.initializer.escapedText === 'NaN' || it.initializer.escapedText === 'Infinity'))
+                                || (
+                                    it.initializer.kind === ts.SyntaxKind.Identifier
+                                    && (it.initializer.escapedText === 'NaN' || it.initializer.escapedText === 'Infinity')
+                                )
                             ) {
                                 it.type = { kind: ts.SyntaxKind.NumberKeyword }
                             } else {
@@ -723,8 +725,6 @@ withParams(params: RpcCallOptions): this\n`)
         'call',
         'importSession',
         'exportSession',
-        'onError',
-        'emitError',
         'handleClientUpdate',
         'getApiCrenetials',
         'getPoolSize',

@@ -2,12 +2,11 @@ import type { mtp, tl } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import type Long from 'long'
 import { type ReconnectionStrategy, defaultReconnectionStrategy } from '@fuman/net'
-import { Deferred } from '@fuman/utils'
+import type { AsyncResourceContext, ComposedMiddleware, Middleware } from '@fuman/utils'
+import { Deferred, composeMiddlewares } from '@fuman/utils'
 
 import type { StorageManager } from '../storage/storage.js'
 import { MtArgumentError, MtUnsupportedError, MtcuteError } from '../types/index.js'
-import type { ComposedMiddleware, Middleware } from '../utils/composer.js'
-import { composeMiddlewares } from '../utils/composer.js'
 import type { DcOptions, ICryptoProvider, Logger } from '../utils/index.js'
 import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
 import type { ICorePlatform } from '../types/platform'
@@ -279,7 +278,7 @@ export class DcConnectionManager {
             mainCount = this._mainCountOverride
 
             if (mainCount === 0) {
-                mainCount = this.manager.config.getNow()?.tmpSessions ?? 1
+                mainCount = this.manager.config.getCached()?.tmpSessions ?? 1
             }
         } else {
             mainCount = 1
@@ -519,7 +518,7 @@ export class NetworkManager {
         this.call = this._composeCall(params.middlewares)
 
         this._onConfigChanged = this._onConfigChanged.bind(this)
-        config.onReload(this._onConfigChanged)
+        config.onUpdated.add(this._onConfigChanged)
 
         this._log = params.log.create('network')
         this._storage = params.storage
@@ -749,9 +748,9 @@ export class NetworkManager {
         dc.downloadSmall.resetSessions()
     }
 
-    private _onConfigChanged(config: tl.RawConfig): void {
-        if (config.tmpSessions) {
-            this._primaryDc?.setMainConnectionCount(config.tmpSessions)
+    private _onConfigChanged({ current }: AsyncResourceContext<tl.RawConfig>): void {
+        if (current?.tmpSessions) {
+            this._primaryDc?.setMainConnectionCount(current.tmpSessions)
         }
     }
 
@@ -866,12 +865,12 @@ export class NetworkManager {
         return res
     }
 
-    changeTransport(transport: TelegramTransport): void {
+    async changeTransport(transport: TelegramTransport): Promise<void> {
         for (const dc of this._dcConnections.values()) {
-            dc.main.changeTransport(transport)
-            dc.upload.changeTransport(transport)
-            dc.download.changeTransport(transport)
-            dc.downloadSmall.changeTransport(transport)
+            await dc.main.changeTransport(transport)
+            await dc.upload.changeTransport(transport)
+            await dc.download.changeTransport(transport)
+            await dc.downloadSmall.changeTransport(transport)
         }
     }
 
@@ -902,7 +901,7 @@ export class NetworkManager {
             await dc.destroy()
         }
         this._dcConnections.clear()
-        this.config.offReload(this._onConfigChanged)
+        this.config.onUpdated.remove(this._onConfigChanged)
         this._resetOnNetworkChange?.()
     }
 

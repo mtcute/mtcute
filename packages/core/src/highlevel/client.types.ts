@@ -52,13 +52,12 @@ export interface ITelegramClient {
     ): Promise<tl.RpcCallReturn[T['_']]>
     importSession(session: string | StringSessionData, force?: boolean): Promise<void>
     exportSession(): Promise<string>
-    onError(handler: (err: unknown) => void): void
-    emitError(err: unknown): void
     handleClientUpdate(updates: tl.TypeUpdates, noDispatch?: boolean): void
 
     onServerUpdate: Emitter<tl.TypeUpdates>
     onRawUpdate: Emitter<RawUpdateInfo>
     onConnectionState: Emitter<ConnectionState>
+    onError: Emitter<Error>
 
     getApiCrenetials(): Promise<{ id: number, hash: string }>
     // todo - this is only used for file dl/ul, which should probably be moved

@@ -6,7 +6,6 @@ import { fixupCjs } from './vite-utils/fixup-cjs'
 import { testSetup } from './vite-utils/test-setup-plugin'
 import { collectTestEntrypoints } from './vite-utils/collect-test-entrypoints'
 
-// eslint-disable-next-line no-restricted-globals
 const POLYFILLS = resolve(__dirname, 'vite-utils/polyfills-deno.ts')
 
 export default defineConfig({

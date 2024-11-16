@@ -42,7 +42,7 @@ export async function computeNewPasswordHash(
 ): Promise<Uint8Array> {
     assertTypeIs('account.getPassword', algo, 'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow')
 
-    const salt1 = new Uint8Array(algo.salt1.length + 32)
+    const salt1 = u8.alloc(algo.salt1.length + 32)
     salt1.set(algo.salt1)
     crypto.randomFill(salt1.subarray(algo.salt1.length))
     ;(algo as tl.Mutable<typeof algo>).salt1 = salt1

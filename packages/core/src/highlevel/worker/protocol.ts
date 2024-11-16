@@ -31,7 +31,7 @@ export type WorkerOutboundMessage =
       chats: SerializedResult<Map<number, tl.TypeChat>>
       hasMin: boolean
   }
-  | { type: 'error', error: unknown }
+  | { type: 'error', error: SerializedError }
   | { type: 'stop' }
   | { type: 'conn_state', state: ConnectionState }
   | {

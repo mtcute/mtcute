@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-globals */
 import { resolve } from 'node:path'
 
 import { defineConfig } from 'vite'
@@ -76,15 +75,6 @@ export default defineConfig({
                     return code
                 })
                 return code
-            },
-        },
-        {
-            name: 'fix-events',
-            transform(code) {
-                if (!code.includes('events')) return code
-                return code.replace(/^import (.+?) from ['"]events['"]/gms, (_, name) => {
-                    return `import ${name} from 'node:events'`
-                })
             },
         },
         {

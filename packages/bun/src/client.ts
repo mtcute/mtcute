@@ -11,6 +11,7 @@ import {
     BaseTelegramClient as BaseTelegramClientBase,
     TelegramClient as TelegramClientBase,
 } from '@mtcute/core/client.js'
+import { unknownToError } from '@fuman/utils'
 
 import { downloadToFile } from './methods/download-file.js'
 import { downloadAsNodeStream } from './methods/download-node-stream.js'
@@ -127,7 +128,7 @@ export class TelegramClient extends TelegramClientBase {
 
         this.start(params)
             .then(then)
-            .catch(err => this.emitError(err))
+            .catch(err => this.onError.emit(unknownToError(err)))
     }
 
     downloadToFile(

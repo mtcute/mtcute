@@ -128,13 +128,13 @@ function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey): Ui
         throw new MtArgumentError('Failed to pad: too big data')
     }
 
-    const dataPadded = new Uint8Array(192)
+    const dataPadded = u8.alloc(192)
     dataPadded.set(data, 0)
     crypto.randomFill(dataPadded.subarray(data.length))
     data = dataPadded
 
     for (;;) {
-        const aesIv = new Uint8Array(32)
+        const aesIv = u8.alloc(32)
 
         const aesKey = crypto.randomBytes(32)
 
@@ -417,7 +417,7 @@ export async function doAuthorization(
         }
 
         if (dhGen._ === 'mt_dh_gen_retry') {
-            const expectedHash = crypto.sha1(u8.concat3(newNonce, new Uint8Array([2]), authKeyAuxHash))
+            const expectedHash = crypto.sha1(u8.concat3(newNonce, [2], authKeyAuxHash))
 
             if (!typed.equal(expectedHash.subarray(4, 20), dhGen.newNonceHash2)) {
                 throw new MtSecurityError('Step 4: invalid retry nonce hash from server')

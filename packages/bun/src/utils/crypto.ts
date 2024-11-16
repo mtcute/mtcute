@@ -12,6 +12,7 @@ import {
     ige256Encrypt,
     initSync,
 } from '@mtcute/wasm'
+import { u8 } from '@fuman/utils'
 
 // we currently prefer wasm for ctr because bun mostly uses browserify polyfills for node:crypto
 // which are slow AND semi-broken
@@ -52,20 +53,20 @@ export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProv
         algo = 'sha512',
     ): Promise<Uint8Array> {
         return new Promise((resolve, reject) =>
-            pbkdf2(password, salt, iterations, keylen, algo, (err: Error | null, buf: Uint8Array) =>
-                err !== null ? reject(err) : resolve(buf)),
+            pbkdf2(password, salt, iterations, keylen, algo, (err: Error | null, buf: Buffer) =>
+                err !== null ? reject(err) : resolve(buf as unknown as Uint8Array)),
         )
     }
 
     sha1(data: Uint8Array): Uint8Array {
-        const res = new Uint8Array(Bun.SHA1.byteLength)
+        const res = u8.alloc(Bun.SHA1.byteLength)
         Bun.SHA1.hash(data, res)
 
         return res
     }
 
     sha256(data: Uint8Array): Uint8Array {
-        const res = new Uint8Array(Bun.SHA256.byteLength)
+        const res = u8.alloc(Bun.SHA256.byteLength)
         Bun.SHA256.hash(data, res)
 
         return res
@@ -90,7 +91,7 @@ export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProv
             // telegram accepts both zlib and gzip, but zlib is faster and has less overhead, so we use it here
             return deflateSync(data, {
                 maxOutputLength: maxSize,
-            })
+            }) as unknown as Uint8Array
             // hot path, avoid additional runtime checks
         } catch (e: any) {
             if (e.code === 'ERR_BUFFER_TOO_LARGE') {
@@ -102,7 +103,7 @@ export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProv
     }
 
     gunzip(data: Uint8Array): Uint8Array {
-        return gunzipSync(data)
+        return gunzipSync(data) as unknown as Uint8Array
     }
 
     randomFill(buf: Uint8Array): void {

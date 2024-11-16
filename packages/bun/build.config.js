@@ -1,4 +1,13 @@
+/** @type {import('@fuman/build/vite').CustomBuildConfig} */
 export default () => ({
-    buildCjs: false,
-    external: ['bun', 'bun:sqlite'],
+    viteConfig: {
+        build: {
+            lib: {
+                formats: ['es'],
+            },
+            rollupOptions: {
+                external: ['bun', 'bun:sqlite'],
+            },
+        },
+    },
 })

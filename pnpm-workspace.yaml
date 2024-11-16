@@ -1,4 +1,3 @@
 packages:
   - packages/*
-  - private/fuman/packages/*
   - '!e2e/*'

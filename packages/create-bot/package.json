@@ -10,7 +10,6 @@
     "create-bot": "./src/main.ts"
   },
   "scripts": {
-    "build": "pnpm run -w build-package create-bot",
     "run": "tsx src/main.ts",
     "run:deno": "node scripts/generate-import-map.js && deno run --import-map=./scripts/import-map.json -A --unstable-sloppy-imports src/main.ts"
   },
@@ -26,5 +25,8 @@
     "@types/cross-spawn": "^6.0.6",
     "@types/inquirer": "^9.0.6",
     "@types/openurl": "^1.0.3"
+  },
+  "fuman": {
+    "jsr": "skip"
   }
 }

@@ -2,7 +2,7 @@ import Long from 'long'
 import type { mtp, tl } from '@mtcute/tl'
 import type { TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import { TlSerializationCounter } from '@mtcute/tl-runtime'
-import { type Deferred, Deque, LruSet } from '@fuman/utils'
+import { type Deferred, Deque, LruSet, timers } from '@fuman/utils'
 
 import { MtcuteError } from '../types/index.js'
 import type {
@@ -16,7 +16,6 @@ import {
     compareLongs,
     getRandomInt,
     randomLong,
-    timers,
 } from '../utils/index.js'
 
 import { AuthKey } from './auth-key.js'

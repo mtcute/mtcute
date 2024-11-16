@@ -1,4 +1,4 @@
-/* eslint-disable import/no-relative-packages, no-console, no-restricted-globals */
+/* eslint-disable no-console, no-restricted-globals */
 import { createHash } from 'node:crypto'
 import path from 'node:path'
 import * as fs from 'node:fs'
@@ -155,8 +155,9 @@ async function extractArtifacts(artifacts) {
     )
 }
 
+/** @type {import('@fuman/build/vite').CustomBuildConfig} */
 export default () => ({
-    async final({ packageDir, outDir }) {
+    async finalize({ packageDir, outDir }) {
         const libDir = path.resolve(packageDir, 'lib')
 
         if (!SKIP_PREBUILT) {

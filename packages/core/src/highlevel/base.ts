@@ -290,18 +290,7 @@ export class BaseTelegramClient implements ITelegramClient {
         })
     }
 
-    /**
-     * Register an error handler for the client
-     *
-     * @param handler  Error handler.
-     */
-    onError(handler: (err: unknown) => void): void {
-        this.mt.onError(handler)
-    }
-
-    emitError(err: unknown): void {
-        this.mt.emitError(err)
-    }
+    onError: Emitter<Error> = new Emitter()
 
     handleClientUpdate(updates: tl.TypeUpdates, noDispatch?: boolean): void {
         this.updates?.handleClientUpdate(updates, noDispatch)

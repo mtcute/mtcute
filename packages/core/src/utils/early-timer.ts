@@ -6,7 +6,6 @@ import { timers } from '@fuman/utils'
  */
 export class EarlyTimer {
     private _timeout?: timers.Timer
-    private _immediate?: timers.Immediate
     private _timeoutTs?: number
 
     private _handler: () => void = () => {}
@@ -20,13 +19,11 @@ export class EarlyTimer {
      * (basically `setImmediate()`)
      */
     emitWhenIdle(): void {
-        if (this._immediate) return
-
         timers.clearTimeout(this._timeout)
         this._timeoutTs = Date.now()
 
-        if (typeof timers.setImmediate !== 'undefined') {
-            this._immediate = timers.setImmediate(this.emitNow)
+        if (typeof queueMicrotask !== 'undefined') {
+            queueMicrotask(this.emitNow)
         } else {
             this._timeout = timers.setTimeout(this.emitNow, 0)
         }
@@ -68,12 +65,7 @@ export class EarlyTimer {
      * Cancel the timer
      */
     reset(): void {
-        if (this._immediate) {
-            timers.clearImmediate(this._immediate)
-            this._immediate = undefined
-        } else {
-            timers.clearTimeout(this._timeout)
-        }
+        timers.clearTimeout(this._timeout)
         this._timeoutTs = undefined
     }
 

@@ -12,17 +12,12 @@
     "./mtcute.wasm": "./src/mtcute.wasm"
   },
   "scripts": {
-    "docs": "typedoc",
-    "build": "pnpm run -w build-package wasm",
     "build:wasm": "docker build --output=lib --target=binaries lib"
   },
   "devDependencies": {
     "@mtcute/core": "workspace:^",
     "@mtcute/node": "workspace:^",
     "@mtcute/web": "workspace:^",
-    "@fuman/utils": "workspace:^"
-  },
-  "jsrOnlyFields": {
-    "exports": "./src/index.ts"
+    "@fuman/utils": "0.0.1"
   }
 }

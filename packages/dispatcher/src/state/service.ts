@@ -1,6 +1,6 @@
-import { asyncResettable, timers } from '@mtcute/core/utils.js'
+import { asyncResettable } from '@mtcute/core/utils.js'
 import type { MaybePromise } from '@mtcute/core'
-import { LruMap } from '@fuman/utils'
+import { LruMap, timers } from '@fuman/utils'
 
 import type { IStateStorageProvider } from './provider.js'
 

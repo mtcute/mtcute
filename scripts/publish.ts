@@ -1,15 +1,15 @@
 import * as cp from 'node:child_process'
-import * as fs from 'node:fs'
 import { createRequire } from 'node:module'
 import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { determinePublishOrder, jsrMaybeCreatePackage } from '@fuman/jsr'
+import { jsrCheckVersion, jsrMaybeCreatePackage } from '@fuman/build/jsr'
+import type { WorkspacePackage } from '@fuman/build'
+import { collectPackageJsons, exec, filterPackageJsonsForPublish, npmCheckVersion, sortWorkspaceByPublishOrder, writeGithubActionsOutput } from '@fuman/build'
 
 const IS_JSR = process.env.JSR === '1'
 const MAIN_REGISTRY = IS_JSR ? 'https://jsr.io/' : 'https://registry.npmjs.org'
 let REGISTRY = process.env.REGISTRY || MAIN_REGISTRY
-const EXPORTED_REGISTRY = REGISTRY
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 const require = createRequire(import.meta.url)
@@ -29,50 +29,18 @@ if (IS_JSR) {
     process.env.JSR_URL = REGISTRY
 }
 
-const JSR_EXCEPTIONS = {
-    'bun': 'never',
-    'create-bot': 'never',
-    'crypto-node': 'never',
-    'deno': 'only',
-    'node': 'never',
-    'http-proxy': 'never',
-    'socks-proxy': 'never',
-    'mtproxy': 'never',
-    'test': 'never',
+async function checkVersion(name: string, version: string) {
+    return IS_JSR
+        ? jsrCheckVersion({ package: `@mtcute/${name}`, version, registry: REGISTRY })
+        : npmCheckVersion({ package: `@mtcute/${name}`, version, registry: REGISTRY })
 }
 
-function fetchRetry(url, init, retry = 0) {
-    return fetch(url, init).catch((err) => {
-        if (retry >= 5) throw err
-
-        // for whatever reason this request sometimes fails with ECONNRESET
-        // no idea why, probably some issue in docker networking
-        if (err.cause?.code !== 'UND_ERR_SOCKET') {
-            console.log('[i] Error fetching %s:', url)
-            console.log(err)
-        }
-
-        return new Promise(resolve => setTimeout(resolve, 1000)).then(() => fetchRetry(url, init, retry + 1))
-    })
-}
-
-async function checkVersion(name, version) {
-    const registry = REGISTRY
-
-    const url = IS_JSR ? `${registry}@mtcute/${name}/${version}_meta.json` : `${registry}@mtcute/${name}/${version}`
-
-    return fetchRetry(url).then(r => r.status === 200)
-}
-
-async function publishSinglePackage(name) {
+async function publishSinglePackage(name: string) {
     const packageDir = path.join(__dirname, '../packages', name)
 
     console.log('[i] Building %s', name)
 
-    // run build script
-    cp.execSync(`pnpm run build-package ${name}`, {
-        stdio: 'inherit',
-    })
+    await exec(['pnpm', 'run', 'build-package', name], { stdio: 'inherit' })
 
     console.log('[i] Publishing %s', name)
 
@@ -85,7 +53,7 @@ async function publishSinglePackage(name) {
     if (exists) {
         if (process.env.E2E && !IS_JSR) {
             console.log('[i] %s already exists, unpublishing..', name)
-            cp.execSync(`npm unpublish --registry ${REGISTRY} --force @mtcute/${name}`, {
+            await exec(['npm', 'unpublish', '--registry', REGISTRY, '--force', `@mtcute/${name}`], {
                 cwd: path.join(packageDir, 'dist'),
                 stdio: 'inherit',
             })
@@ -105,57 +73,29 @@ async function publishSinglePackage(name) {
     if (IS_JSR) {
         // publish to jsr
         const params = process.env.JSR_TOKEN ? `--token ${process.env.JSR_TOKEN}` : ''
-        cp.execSync(`deno publish --allow-dirty --quiet ${params}`, {
-            cwd: path.join(packageDir, 'dist/jsr'),
+        await exec(['deno', 'publish', '--allow-dirty', '--quiet', params], {
+            cwd: path.join(packageDir, 'dist'),
             stdio: 'inherit',
         })
     } else {
-        // make sure dist/jsr doesn't exist (it shouldn't, but just in case)
-        if (fs.existsSync(path.join(packageDir, 'dist/jsr'))) {
-            fs.rmdirSync(path.join(packageDir, 'dist/jsr'), { recursive: true })
-        }
-
         // publish to npm
         const params = REGISTRY === MAIN_REGISTRY ? '--access public' : '--force'
-        cp.execSync(`npm publish --registry ${REGISTRY} ${params} -q`, {
+        await exec(['npm', 'publish', '--registry', REGISTRY, params, '-q'], {
             cwd: path.join(packageDir, 'dist'),
             stdio: 'inherit',
         })
     }
 }
 
-function listPackages(all = false) {
-    let packages = []
-
-    for (const f of fs.readdirSync(path.join(__dirname, '../packages'))) {
-        if (f[0] === '.') continue
-
-        if (f === 'mtproxy' || f === 'socks-proxy' || f === 'http-proxy' || f === 'bun') {
-            // todo: return once we figure out fuman
-            continue
-        }
-
-        if (!all) {
-            if (IS_JSR && JSR_EXCEPTIONS[f] === 'never') continue
-            if (!IS_JSR && JSR_EXCEPTIONS[f] === 'only') continue
-        }
-
-        packages.push(f)
+async function listPackages(all = false): Promise<WorkspacePackage[]> {
+    let packages = await collectPackageJsons(path.join(__dirname, '..'))
+    if (!all) {
+        filterPackageJsonsForPublish(packages, IS_JSR ? 'jsr' : 'npm')
     }
 
     if (IS_JSR) {
-        // we should sort them in a way that dependencies are published first. stc has a util for that
-        const map = {}
-
-        for (const pkg of packages) {
-            const deps = require(`../packages/${pkg}/package.json`).dependencies || {}
-            map[pkg] = Object.keys(deps)
-                .filter(d => d.startsWith('@mtcute/'))
-                .map(d => d.slice(8))
-        }
-
-        packages = determinePublishOrder(map)
-        console.log('[i] Publishing order:', packages.join(', '))
+        packages = sortWorkspaceByPublishOrder(packages)
+        console.log('[i] Publishing order:', packages.map(it => it.json.name).join(', '))
     }
 
     return packages
@@ -173,9 +113,9 @@ async function main(arg = process.argv[2]) {
     const failedPkgs = []
 
     if (arg === 'all' || arg === 'updated') {
-        for (const pkg of listPackages()) {
+        for (const pkg of await listPackages()) {
             const pkgVersion = require(`../packages/${pkg}/package.json`).version
-            const published = await checkVersion(pkg, pkgVersion)
+            const published = await checkVersion(pkg.json.name!, pkgVersion)
 
             if (published && !process.env.E2E) {
                 console.log('[i] %s is up to date', pkg)
@@ -183,7 +123,7 @@ async function main(arg = process.argv[2]) {
             }
 
             try {
-                await publishSinglePackage(pkg)
+                await publishSinglePackage(pkg.json.name!)
                 publishedPkgs.push(pkg)
             } catch (e) {
                 console.error('[!] Failed to publish %s:', pkg)
@@ -253,7 +193,7 @@ async function main(arg = process.argv[2]) {
             tarballs.push(path.join(dir, tar.toString().trim()))
         }
 
-        fs.writeFileSync(process.env.GITHUB_OUTPUT, `tarballs=${tarballs.join(',')}\n`, { flag: 'a' })
+        writeGithubActionsOutput('tarballs', tarballs.join(','))
     }
 
     process.exit(0) // idk why but it sometimes hangs indefinitely

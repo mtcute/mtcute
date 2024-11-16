@@ -1,6 +1,6 @@
 import type { tl } from '@mtcute/tl'
 import type { IReadable } from '@fuman/io'
-import { read } from '@fuman/io'
+import { read, webReadableToFuman } from '@fuman/io'
 import { AsyncLock } from '@fuman/utils'
 
 import { MtArgumentError } from '../../../types/errors.js'
@@ -175,7 +175,7 @@ export async function uploadFile(
     }
 
     if (file instanceof ReadableStream) {
-        file = read.async.fromWeb(file)
+        file = webReadableToFuman(file)
     } else if (!(typeof file === 'object' && 'read' in file)) { // IReadable
         throw new MtArgumentError('Could not convert input `file` to stream!')
     }

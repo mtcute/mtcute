@@ -29,6 +29,7 @@ import {
     MtArgumentError,
 } from '@mtcute/core'
 import type { TelegramClient } from '@mtcute/core/client.js'
+import { unknownToError } from '@fuman/utils'
 
 import type { UpdateContext } from './context/base.js'
 import type { BusinessMessageContext } from './context/business-message.js'
@@ -328,7 +329,8 @@ export class Dispatcher<State extends object = never> {
 
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
-        this.dispatchRawUpdateNow(update, peers).catch(err => this._client!.emitError(err))
+        this.dispatchRawUpdateNow(update, peers)
+            .catch(err => this._client!.onError.emit(unknownToError(err)))
     }
 
     /**
@@ -400,7 +402,8 @@ export class Dispatcher<State extends object = never> {
 
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
-        this.dispatchUpdateNow(update).catch(err => this._client!.emitError(err))
+        this.dispatchUpdateNow(update)
+            .catch(err => this._client!.onError.emit(unknownToError(err)))
     }
 
     /**

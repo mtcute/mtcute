@@ -1,5 +1,5 @@
 import { TlBinaryWriter } from '@mtcute/tl-runtime'
-import { base64, utf8 } from '@fuman/utils'
+import { base64, u8, utf8 } from '@fuman/utils'
 
 import { tdFileId as td } from './types.js'
 import { assertNever, telegramRleEncode } from './utils.js'
@@ -105,7 +105,7 @@ export function toFileId(location: Omit<td.RawFullRemoteFileLocation, '_'>): str
     }
 
     const result = telegramRleEncode(writer.result())
-    const withSuffix = new Uint8Array(result.length + SUFFIX.length)
+    const withSuffix = u8.alloc(result.length + SUFFIX.length)
     withSuffix.set(result)
     withSuffix.set(SUFFIX, result.length)
 

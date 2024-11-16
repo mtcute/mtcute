@@ -1,3 +1,5 @@
+import { u8 } from '@fuman/utils'
+
 import type { MaybePromise } from '../../types/index.js'
 
 import { factorizePQSync } from './factorization.js'
@@ -50,7 +52,7 @@ export abstract class BaseCryptoProvider {
     }
 
     randomBytes(size: number): Uint8Array {
-        const buf = new Uint8Array(size)
+        const buf = u8.alloc(size)
         this.randomFill(buf)
 
         return buf

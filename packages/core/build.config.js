@@ -5,6 +5,7 @@ import * as fs from 'node:fs'
 
 const KNOWN_DECORATORS = ['memoizeGetters', 'makeInspectable']
 
+/** @type {import('@fuman/build/vite').CustomBuildConfig} */
 export default () => {
     const networkManagerId = fileURLToPath(new URL('./src/network/network-manager.ts', import.meta.url))
     const highlevelTypesDir = fileURLToPath(new URL('./src/highlevel/types', import.meta.url))
@@ -18,7 +19,7 @@ export default () => {
     )
 
     return {
-        rollupPluginsPre: [
+        pluginsPre: [
             {
                 name: 'mtcute-core-build-plugin',
                 transform(code, id) {
@@ -70,7 +71,7 @@ export default () => {
                 },
             },
         ],
-        finalJsr({ outDir }) {
+        finalizeJsr({ outDir }) {
             const networkMgrFile = resolve(outDir, 'network/network-manager.ts')
             const code = fs.readFileSync(networkMgrFile, 'utf8')
 

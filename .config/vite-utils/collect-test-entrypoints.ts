@@ -6,7 +6,6 @@ import { globSync } from 'glob'
 export function collectTestEntrypoints(params: { skipPackages: string[], skipTests: string[] }) {
     const files: string[] = []
 
-    // eslint-disable-next-line no-restricted-globals
     const packages = resolve(__dirname, '../../packages')
 
     const skipTests = params.skipTests.map(path => resolve(packages, path))

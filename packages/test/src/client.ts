@@ -33,7 +33,7 @@ export class StubTelegramClient extends BaseTelegramClient {
                 onMessage: (data, dcId) => {
                     if (!this._onRawMessage) {
                         if (this._responders.size) {
-                            this.emitError(new Error('Unexpected outgoing message'))
+                            this.onError.emit(new Error('Unexpected outgoing message'))
                         }
 
                         return
@@ -288,9 +288,11 @@ export class StubTelegramClient extends BaseTelegramClient {
 
         let error: unknown
 
-        this.onError((err) => {
+        const handler = (err: Error) => {
             error = err
-        })
+        }
+
+        this.onError.add(handler)
 
         try {
             await fn()
@@ -299,6 +301,8 @@ export class StubTelegramClient extends BaseTelegramClient {
         }
 
         await this.close()
+
+        this.onError.remove(handler)
 
         if (error) {
             throw error

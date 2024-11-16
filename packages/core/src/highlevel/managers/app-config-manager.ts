@@ -1,36 +1,41 @@
 import type { tl } from '@mtcute/tl'
+import { AsyncResource, asNonNull } from '@fuman/utils'
 
 import { MtTypeAssertionError } from '../../types/errors.js'
-import { Reloadable } from '../../utils/reloadable.js'
 import { tlJsonToJson } from '../../utils/tl-json.js'
 import type { BaseTelegramClient } from '../base.js'
 import type { AppConfigSchema } from '../types/misc/app-config.js'
 
 export class AppConfigManager {
-    constructor(private client: BaseTelegramClient) {}
+    private _resource
+    constructor(private client: BaseTelegramClient) {
+        this._resource = new AsyncResource<tl.help.RawAppConfig>({
+            fetcher: async ({ current }) => {
+                const res = await this.client.call({
+                    _: 'help.getAppConfig',
+                    hash: current?.hash ?? 0,
+                })
 
-    private _reloadable = new Reloadable<tl.help.RawAppConfig>({
-        reload: this._reload.bind(this),
-        getExpiresAt: () => 3_600_000,
-        disableAutoReload: true,
-    })
+                if (res._ === 'help.appConfigNotModified') {
+                    return {
+                        data: asNonNull(current),
+                        expiresIn: 3_600_000,
+                    }
+                }
 
-    private async _reload(old?: tl.help.RawAppConfig) {
-        const res = await this.client.call({
-            _: 'help.getAppConfig',
-            hash: old?.hash ?? 0,
+                return {
+                    data: res,
+                    expiresIn: 3_600_000,
+                }
+            },
         })
-
-        if (res._ === 'help.appConfigNotModified') return old!
-
-        return res
     }
 
     private _object?: AppConfigSchema
     async get(): Promise<AppConfigSchema> {
-        if (!this._reloadable.isStale && this._object) return this._object
+        if (!this._resource.isStale && this._object) return this._object
 
-        const obj = tlJsonToJson((await this._reloadable.get()).config)
+        const obj = tlJsonToJson((await this._resource.get()).config)
 
         if (!obj || typeof obj !== 'object') {
             throw new MtTypeAssertionError('appConfig', 'object', typeof obj)
