@@ -23,6 +23,7 @@ import {
     writeTlEntryToString,
 } from '@mtcute/tl-utils'
 import { parseTlEntriesFromJson } from '@mtcute/tl-utils/json.js'
+import { ffetch } from '@fuman/fetch'
 
 import {
     API_SCHEMA_DIFF_JSON_FILE,
@@ -41,7 +42,6 @@ import {
 import { applyDocumentation, fetchDocumentation, getCachedDocumentation } from './documentation.js'
 import type { TlPackedSchema } from './schema.js'
 import { packTlSchema, unpackTlSchema } from './schema.js'
-import { fetchRetry } from './utils.js'
 
 const README_MD_FILE = join(__dirname, '../README.md')
 const PACKAGE_JSON_FILE = join(__dirname, '../package.json')
@@ -61,10 +61,8 @@ interface Schema {
 }
 
 async function fetchTdlibSchema(): Promise<Schema> {
-    const schema = await fetchRetry(TDLIB_SCHEMA)
-    const versionHtml = await fetch('https://raw.githubusercontent.com/tdlib/td/master/td/telegram/Version.h').then(
-        i => i.text(),
-    )
+    const schema = await ffetch(TDLIB_SCHEMA).text()
+    const versionHtml = await ffetch('https://raw.githubusercontent.com/tdlib/td/master/td/telegram/Version.h').text()
 
     const layer = versionHtml.match(/^constexpr int32 MTPROTO_LAYER = (\d+)/m)
     if (!layer) throw new Error('Layer number not available')
@@ -77,8 +75,8 @@ async function fetchTdlibSchema(): Promise<Schema> {
 }
 
 async function fetchTdesktopSchema(): Promise<Schema> {
-    const schema = await fetchRetry(TDESKTOP_SCHEMA)
-    const layerFile = await fetchRetry(TDESKTOP_LAYER)
+    const schema = await ffetch(TDESKTOP_SCHEMA).text()
+    const layerFile = await ffetch(TDESKTOP_LAYER).text()
     const layer = `${schema}\n\n${layerFile}`.match(/^\/\/ LAYER (\d+)/m)
     if (!layer) throw new Error('Layer number not available')
 
@@ -90,7 +88,7 @@ async function fetchTdesktopSchema(): Promise<Schema> {
 }
 
 async function fetchCoreSchema(domain = CORE_DOMAIN, name = 'Core'): Promise<Schema> {
-    const html = await fetchRetry(`${domain}/schema`)
+    const html = await ffetch(`${domain}/schema`).text()
     const $ = cheerio.load(html)
     // cheerio doesn't always unescape them
     const schema = $('.page_scheme code').text().replace(/&lt;/g, '<').replace(/&gt;/g, '>')
@@ -109,7 +107,7 @@ async function fetchCoreSchema(domain = CORE_DOMAIN, name = 'Core'): Promise<Sch
 }
 
 async function fetchWebkSchema(): Promise<Schema> {
-    const schema = await fetchRetry(WEBK_SCHEMA)
+    const schema = await ffetch(WEBK_SCHEMA).text()
     const json = JSON.parse(schema) as {
         layer: number
         API: object
@@ -133,7 +131,10 @@ async function fetchWebkSchema(): Promise<Schema> {
 }
 
 async function fetchWebaSchema(): Promise<Schema> {
-    const [schema, layerFile] = await Promise.all([fetchRetry(WEBA_SCHEMA), fetchRetry(WEBA_LAYER)])
+    const [schema, layerFile] = await Promise.all([
+        ffetch(WEBA_SCHEMA).text(),
+        ffetch(WEBA_LAYER).text(),
+    ])
 
     // const LAYER = 174;
     const version = layerFile.match(/^const LAYER = (\d+);$/m)

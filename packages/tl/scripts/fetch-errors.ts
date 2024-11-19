@@ -2,6 +2,7 @@ import { writeFile } from 'node:fs/promises'
 
 import { parse } from 'csv-parse/sync'
 import type { TlErrors } from '@mtcute/tl-utils'
+import { ffetch } from '@fuman/fetch'
 
 import { ERRORS_JSON_FILE } from './constants.js'
 
@@ -27,11 +28,11 @@ interface TelegramErrorsSpec {
 }
 
 async function fetchFromTelegram(errors: TlErrors) {
-    const page = await fetch(ERRORS_PAGE_TG).then(it => it.text())
+    const page = await ffetch(ERRORS_PAGE_TG).text()
     const jsonUrl = page.match(/can be found <a href="([^"]+)">here »<\/a>/i)?.[1]
     if (!jsonUrl) throw new Error('Cannot find JSON URL')
 
-    const json = (await fetch(new URL(jsonUrl, ERRORS_PAGE_TG)).then(it => it.json())) as TelegramErrorsSpec
+    const json = await ffetch(new URL(jsonUrl, ERRORS_PAGE_TG).href).json<TelegramErrorsSpec>()
 
     // since nobody fucking guarantees that .descriptions
     // will have description for each described here (or vice versa),
@@ -122,13 +123,9 @@ async function fetchFromTelegram(errors: TlErrors) {
 }
 
 async function fetchFromTelethon(errors: TlErrors) {
-    const csv = await fetch(ERRORS_PAGE_TELETHON)
+    const csv = await ffetch(ERRORS_PAGE_TELETHON).text()
 
-    if (!csv.body) {
-        throw new Error('No body in response')
-    }
-
-    const records = parse(await csv.text(), {
+    const records = parse(csv, {
         columns: true,
         skip_empty_lines: true,
     }) as {

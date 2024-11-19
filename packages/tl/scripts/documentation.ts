@@ -2,6 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { createInterface } from 'node:readline'
 
+import { ffetchAddons, ffetchBase } from '@fuman/fetch'
 import * as cheerio from 'cheerio'
 import { asyncPool } from '@fuman/utils'
 import jsYaml from 'js-yaml'
@@ -29,7 +30,6 @@ import {
 import { applyDescriptionsYamlFile } from './process-descriptions-yaml.js'
 import type { TlPackedSchema } from './schema.js'
 import { packTlSchema, unpackTlSchema } from './schema.js'
-import { fetchRetry } from './utils.js'
 
 export interface CachedDocumentationEntry {
     comment?: string
@@ -44,6 +44,14 @@ export interface CachedDocumentation {
     methods: Record<string, CachedDocumentationEntry>
     unions: Record<string, string>
 }
+
+const ffetch = ffetchBase.extend({
+    addons: [
+        ffetchAddons.retry(),
+        ffetchAddons.timeout(),
+    ],
+    timeout: 30_000,
+})
 
 function normalizeLinks(url: string, el: cheerio.Cheerio<cheerio.Element>): void {
     el.find('a').each((i, _it) => {
@@ -118,7 +126,7 @@ async function chooseDomainForDocs(headers: Record<string, string>): Promise<[nu
     let maxDomain = ''
 
     for (const domain of [CORE_DOMAIN, COREFORK_DOMAIN, BLOGFORK_DOMAIN]) {
-        const index = await fetchRetry(`${domain}/schema`, { headers })
+        const index = await ffetch(`${domain}/schema`, { headers }).text()
         const layerMatch = cheerio
             .load(index)('.dev_layer_select .dropdown-toggle')
             .text()
@@ -171,7 +179,7 @@ async function fetchAppConfigDocumentation() {
 
     const [, domain] = await chooseDomainForDocs(headers)
 
-    const page = await fetchRetry(`${domain}/api/config`, { headers })
+    const page = await ffetch(`${domain}/api/config`, { headers }).text()
     const $ = cheerio.load(page)
 
     const fields = $('p:icontains(typical fields included)').nextUntil('h3')
@@ -341,9 +349,7 @@ export async function fetchDocumentation(
     async function fetchDocsForEntry(entry: TlEntry) {
         const url = `${domain}/${entry.kind === 'class' ? 'constructor' : 'method'}/${entry.name}`
 
-        const html = await fetchRetry(url, {
-            headers,
-        })
+        const html = await ffetch(url, { headers }).text()
         const $ = cheerio.load(html)
         const content = $('#dev_page_content')
 
@@ -417,9 +423,7 @@ export async function fetchDocumentation(
 
         const url = `${domain}/type/${name}`
 
-        const html = await fetchRetry(url, {
-            headers,
-        })
+        const html = await ffetch(url, { headers }).text()
         const $ = cheerio.load(html)
         const content = $('#dev_page_content')
 
