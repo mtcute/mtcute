@@ -15,7 +15,7 @@
     "dependencies": {
         "@mtcute/core": "workspace:^",
         "@mtcute/wasm": "workspace:^",
-        "@fuman/net": "0.0.1",
+        "@fuman/net": "https://pkg.pr.new/teidesu/fuman/@fuman/net@a3f52dc",
         "events": "3.2.0"
     },
     "devDependencies": {

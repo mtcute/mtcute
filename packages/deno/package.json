@@ -14,9 +14,9 @@
     },
     "dependencies": {
         "@db/sqlite": "npm:@jsr/db__sqlite@0.12.0",
-        "@fuman/utils": "0.0.1",
-        "@fuman/net": "0.0.1",
-        "@fuman/io": "0.0.1",
+        "@fuman/utils": "https://pkg.pr.new/teidesu/fuman/@fuman/utils@a3f52dc",
+        "@fuman/net": "https://pkg.pr.new/teidesu/fuman/@fuman/net@a3f52dc",
+        "@fuman/io": "https://pkg.pr.new/teidesu/fuman/@fuman/io@a3f52dc",
         "@mtcute/core": "workspace:^",
         "@mtcute/html-parser": "workspace:^",
         "@mtcute/markdown-parser": "workspace:^",
