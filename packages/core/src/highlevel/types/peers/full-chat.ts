@@ -201,9 +201,26 @@ export class FullChat extends Chat {
         return this.fullPeer?.boostsUnrestrict ?? 0
     }
 
+    /** Number of star gifts the user has chosen to display on their profile */
+    get starGiftsCount(): number {
+        if (this.fullPeer._ !== 'userFull') return 0
+
+        return this.fullPeer?.stargiftsCount ?? 0
+    }
+
     /** Whether the current user can view Telegram Stars revenue for this chat */
     get canViewStarsRevenue(): boolean {
-        return this.fullPeer._ === 'channelFull' && this.fullPeer.canViewStats!
+        return this.fullPeer._ === 'channelFull' && this.fullPeer.canViewStarsRevenue!
+    }
+
+    /** Whether the current user can view ad revenue for this chat */
+    get canViewAdRevenue(): boolean {
+        return this.fullPeer._ === 'channelFull' && this.fullPeer.canViewRevenue!
+    }
+
+    /** If this chat is a bot, whether the current user can manage its emoji status */
+    get canManageBotEmojiStatus(): boolean {
+        return this.fullPeer._ === 'userFull' && this.fullPeer.botCanManageEmojiStatus!
     }
 
     /**

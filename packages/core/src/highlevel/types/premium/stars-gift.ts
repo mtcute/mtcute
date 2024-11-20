@@ -23,6 +23,33 @@ export class StarGift {
         return this.raw.id
     }
 
+    /** Whether this gift sold out and cannot be bought anymore */
+    get isSoldOut(): boolean {
+        return this.raw.soldOut!
+    }
+
+    /** Whether this gift has limited availability */
+    get isLimited(): boolean {
+        return this.raw.limited!
+    }
+
+    /** Additional information for sold-out gifts */
+    get soldOutInfo(): {
+        /** Date when the first gift was bought */
+        firstSale: Date
+        /** Date when the last gift was bought */
+        lastSale: Date
+    } | null {
+        if (this.raw.firstSaleDate == null || this.raw.lastSaleDate == null) {
+            return null
+        }
+
+        return {
+            firstSale: new Date(this.raw.firstSaleDate * 1000),
+            lastSale: new Date(this.raw.lastSaleDate * 1000),
+        }
+    }
+
     /** Sticker associated with the gift */
     get sticker(): Sticker {
         assertTypeIs('StarGift#sticker', this.raw.sticker, 'document')
@@ -52,7 +79,7 @@ export class StarGift {
      * the number of remaining and total gifts available
      */
     get availability(): { remains: number, total: number } | null {
-        if (!this.raw.availabilityRemains || !this.raw.availabilityTotal) {
+        if (this.raw.availabilityRemains == null || this.raw.availabilityTotal == null) {
             return null
         }
 

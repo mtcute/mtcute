@@ -119,6 +119,13 @@ export interface CommonSendParams {
     businessConnectionId?: string
 
     /**
+     * Bots only: if set, allows sending up to 1000 messages per second,
+     * ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message.
+     * The Stars will be withdrawn from the bot's balance.
+     */
+    allowPaidFloodskip?: boolean
+
+    /**
      * ID of a message effect to use when sending the message
      * (see {@link TelegramClient.getAvailableMessageEffects})
      */

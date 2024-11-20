@@ -26,6 +26,8 @@ import { StarGift } from './stars-gift.js'
  *  - `bot_purchase`: This transaction is a purchase at a bot-operated store
  *  - `channel_subscription`: This transaction is a subscription to a channel
  *  - `star_gift`: This transaction is either a star gift to a user (if outgoing), or converting a star gift to stars (if incoming)
+ *  - `api_*`: This transaction is a payment for paid API features
+ *     - `api_floodskip`: This transaction is a payment for a paid bot broadcast
  */
 export type StarsTransactionType =
   | { type: 'unsupported' }
@@ -123,6 +125,11 @@ export type StarsTransactionType =
       /** The gift */
       gift: StarGift
   }
+  | {
+      type: 'api_floodskip'
+      /** The number of billed API calls */
+      count: number
+  }
 
 export class StarsTransaction {
     constructor(
@@ -200,6 +207,15 @@ export class StarsTransaction {
             }
             case 'starsTransactionPeerAds':
                 return { type: 'ads' }
+            case 'starsTransactionPeerAPI':
+                if (this.raw.floodskipNumber != null) {
+                    return {
+                        type: 'api_floodskip',
+                        count: this.raw.floodskipNumber,
+                    }
+                }
+
+                return { type: 'unsupported' }
             case 'starsTransactionPeer': {
                 const peer = parsePeer(this.raw.peer.peer, this.peers)
 

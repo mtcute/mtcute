@@ -1,4 +1,5 @@
 import type { tl } from '@mtcute/tl'
+import Long from 'long'
 
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import type { CallDiscardReason } from '../calls/index.js'
@@ -162,6 +163,9 @@ export interface ActionPaymentReceived {
 
     /** Payment provider ID */
     readonly charge?: tl.TypePaymentCharge
+
+    /** If this is a subscription being bought, the date when the subscription will expire */
+    readonly subscriptionUntilDate?: Date
 }
 
 /** A payment was sent to a user */
@@ -177,6 +181,9 @@ export interface ActionPaymentSent {
      * `US$ 1.45`, `amount = 145`
      */
     readonly amount: tl.Long
+
+    /** If this is a subscription being bought, the date when the subscription will expire */
+    readonly subscriptionUntilDate?: Date
 }
 
 /** A phone call */
@@ -368,6 +375,9 @@ export interface ActionPremiumGifted {
         /** Price in the smallest units */
         amount: number
     }
+
+    /** Message attached to the gift */
+    message?: TextWithEntities
 }
 
 /** A photo has been suggested as a profile photo */
@@ -433,6 +443,9 @@ export interface ActionGiftCode {
 
     /** Information about the gift code */
     raw: tl.RawMessageActionGiftCode
+
+    /** Message attached to the gift */
+    message?: TextWithEntities
 }
 
 /** A Telergam Premium giveaway was started */
@@ -530,7 +543,10 @@ export interface ActionStarGift {
     saved: boolean
     /** Whether this gift was converted to stars */
     converted: boolean
-    /** Amount of stars the gift can be converted to by the recipient */
+    /**
+     * Amount of stars the gift can be converted to by the recipient
+     * (0 if the gift cannot be converted)
+     */
     convertStars: tl.Long
     /** The gift itself */
     gift: StarGift
@@ -679,12 +695,20 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 info: act.info,
                 shippingOptionId: act.shippingOptionId,
                 charge: act.charge,
+                subscriptionUntilDate:
+                    act.subscriptionUntilDate
+                        ? new Date(act.subscriptionUntilDate * 1000)
+                        : undefined,
             }
         case 'messageActionPaymentSent':
             return {
                 type: 'payment_sent',
                 currency: act.currency,
                 amount: act.totalAmount,
+                subscriptionUntilDate:
+                    act.subscriptionUntilDate
+                        ? new Date(act.subscriptionUntilDate * 1000)
+                        : undefined,
             }
         case 'messageActionPhoneCall':
             return {
@@ -797,6 +821,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                         amount: act.cryptoAmount.toNumber(),
                     }
                     : undefined,
+                message: act.message,
             }
         case 'messageActionSuggestProfilePhoto':
             return {
@@ -826,6 +851,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
             return {
                 type: 'gift_code',
                 raw: act,
+                message: act.message,
             }
         case 'messageActionGiveawayLaunch':
             return {
@@ -875,7 +901,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 nameHidden: act.nameHidden!,
                 saved: act.saved!,
                 converted: act.converted!,
-                convertStars: act.convertStars,
+                convertStars: act.convertStars ?? Long.ZERO,
                 gift: new StarGift(act.gift),
                 message: act.message ?? null,
             }

@@ -70,6 +70,13 @@ export interface ForwardMessageOptions {
      * to the client's update handler.
      */
     shouldDispatch?: true
+
+    /**
+     * Bots only: if set, allows sending up to 1000 messages per second,
+     * ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message.
+     * The Stars will be withdrawn from the bot's balance.
+     */
+    allowPaidFloodskip?: boolean
 }
 
 /**
@@ -91,7 +98,18 @@ export async function forwardMessagesById(
         messages: number[]
     },
 ): Promise<Message[]> {
-    const { messages, toChatId, fromChatId, silent, schedule, forbidForwards, sendAs, noAuthor, noCaption } = params
+    const {
+        messages,
+        toChatId,
+        fromChatId,
+        silent,
+        schedule,
+        forbidForwards,
+        sendAs,
+        noAuthor,
+        noCaption,
+        allowPaidFloodskip,
+    } = params
 
     // sending more than 100 will not result in a server-sent
     // error, instead only first 100 IDs will be forwarded,
@@ -115,6 +133,7 @@ export async function forwardMessagesById(
         noforwards: forbidForwards,
         sendAs: sendAs ? await resolvePeer(client, sendAs) : undefined,
         quickReplyShortcut: _normalizeQuickReplyShortcut(params.quickReply),
+        allowPaidFloodskip,
     })
 
     assertIsUpdatesGroup('messages.forwardMessages', res)

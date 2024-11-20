@@ -85,6 +85,7 @@ export async function sendText(
             invertMedia: params.invertMedia,
             quickReplyShortcut,
             effect: params.effect,
+            allowPaidFloodskip: params.allowPaidFloodskip,
         },
         { chainId },
     )

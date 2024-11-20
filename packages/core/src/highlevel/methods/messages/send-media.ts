@@ -113,6 +113,7 @@ export async function sendMedia(
             invertMedia: params.invert,
             quickReplyShortcut,
             effect: params.effect,
+            allowPaidFloodskip: params.allowPaidFloodskip,
         },
         { chainId },
     )

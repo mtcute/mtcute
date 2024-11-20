@@ -1,3 +1,5 @@
+import type { tl } from '@mtcute/tl'
+
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
 import { ChatInviteLink } from '../../types/index.js'
@@ -37,6 +39,13 @@ export async function createInviteLink(
          * approved by an admin
          */
         withApproval?: boolean
+
+        /**
+         * When a pricing plan is passed, this link will become a paid subscription link
+         *
+         * Currently the only allowed `.period` is 1 month, i.e. `2592000`
+         */
+        subscriptionPricing?: tl.TypeStarsSubscriptionPricing
     },
 ): Promise<ChatInviteLink> {
     if (!params) params = {}
@@ -47,6 +56,7 @@ export async function createInviteLink(
         expireDate: normalizeDate(params.expires),
         usageLimit: params.usageLimit,
         requestNeeded: params.withApproval,
+        subscriptionPricing: params.subscriptionPricing,
     })
 
     return new ChatInviteLink(res)

@@ -498,6 +498,11 @@ export class Message {
         return this.raw.effect ?? null
     }
 
+    /** Whether this message has a video that is still being processed */
+    get videoProcessingPending(): boolean {
+        return this.raw._ === 'message' && this.raw.videoProcessingPending!
+    }
+
     /**
      * Generated permalink to this message, only for groups and channels
      *
