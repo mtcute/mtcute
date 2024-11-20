@@ -55,22 +55,20 @@ export async function findDialogs(client: ITelegramClient, peers: MaybeArray<str
         foundIdxToOriginalIdx.set(foundInputPeers.length - 1, i)
     }
 
-    if (foundInputPeers.length === 0) {
-        // we didn't find anything, we can't even fetch the dialogs
-        throw new MtPeerNotFoundError(`Could not find dialogs with peers: ${peers.join(', ')}`)
-    }
-
-    const dialogs = await getPeerDialogs(client, foundInputPeers)
-
-    if (foundInputPeers.length === peers.length) {
-        return dialogs
-    }
-
     const ret: Dialog[] = Array.from({ length: peers.length })
 
-    // populate found dialogs
-    for (const [idx, origIdx] of foundIdxToOriginalIdx) {
-        ret[origIdx] = dialogs[idx]
+    if (foundInputPeers.length !== 0) {
+        // we have some input peers, try to fetch them
+        const dialogs = await getPeerDialogs(client, foundInputPeers)
+
+        if (foundInputPeers.length === peers.length) {
+            return dialogs
+        }
+
+        // populate found dialogs
+        for (const [idx, origIdx] of foundIdxToOriginalIdx) {
+            ret[origIdx] = dialogs[idx]
+        }
     }
 
     // now we need to iterate over all dialogs and try to find the rest

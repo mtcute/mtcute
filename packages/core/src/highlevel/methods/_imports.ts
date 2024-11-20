@@ -89,6 +89,7 @@ import {
     RawDocument,
     ReplyMarkup,
     SentCode,
+    StarGift,
     StarsStatus,
     StarsTransaction,
     Sticker,
@@ -107,6 +108,7 @@ import {
     UploadFileLike,
     UploadedFile,
     User,
+    UserStarGift,
     UserStatusUpdate,
     UserTypingUpdate,
 } from '../types/index.js'

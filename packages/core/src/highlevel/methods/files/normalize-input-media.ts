@@ -257,6 +257,7 @@ export async function _normalizeInputMedia(
             fileMime: sendMime,
             fileSize: media.fileSize,
             requireFileSize: media.type === 'photo',
+            requireExtension: media.type === 'photo',
         })
         inputFile = uploaded.inputFile
         mime = uploaded.mime

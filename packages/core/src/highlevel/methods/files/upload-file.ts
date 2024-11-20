@@ -102,6 +102,15 @@ export async function uploadFile(
          * the stream will be buffered in memory and the file size will be inferred from the buffer.
          */
         requireFileSize?: boolean
+
+        /**
+         * When using `inputMediaUploadedPhoto` (e.g. when sending an uploaded photo) require
+         * the file extension to be known beforehand.
+         *
+         * This will make the library try to guess the file extension from the file mime type,
+         * or throw an error if it cannot be guessed.
+         */
+        requireExtension?: boolean
     },
 ): Promise<UploadedFile> {
     // normalize params
@@ -128,6 +137,7 @@ export async function uploadFile(
     if (HAS_FILE && file instanceof File) {
         fileName = file.name
         fileSize = file.size
+        fileMime = file.type
         file = file.stream()
     }
 
@@ -312,6 +322,21 @@ export async function uploadFile(
         // telegram requires us to specify the file extension
         const ext = MIME_TO_EXTENSION[fileMime!]
         fileName = ext ? `${DEFAULT_FILE_NAME}.${ext}` : DEFAULT_FILE_NAME
+    } else if (params.requireExtension) {
+        const extFromMime = MIME_TO_EXTENSION[fileMime!]
+
+        const idx = fileName.lastIndexOf('.')
+        const extFromName = idx === -1 ? undefined : fileName.slice(idx + 1)
+
+        if (!extFromName) {
+            if (!extFromMime) {
+                throw new MtArgumentError(`File name does not have an extension, and we cannot guess it from the mime type (${fileMime})`)
+            }
+
+            fileName = `${fileName}.${extFromMime}`
+        } else if (extFromMime && extFromName !== extFromMime) {
+            throw new MtArgumentError(`File name has ${extFromName} extension (${fileName}), but the mime type (${fileMime}) expects it to be ${extFromMime}`)
+        }
     }
 
     let inputFile: tl.TypeInputFile

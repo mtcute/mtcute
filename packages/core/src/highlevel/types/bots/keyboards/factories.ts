@@ -334,6 +334,20 @@ export function requestPeer(
 }
 
 /**
+ * Button to copy text to the user's clipboard
+ */
+export function copy(params: {
+    text: string
+    copyText?: string
+}): tl.RawKeyboardButtonCopy {
+    return {
+        _: 'keyboardButtonCopy',
+        text: params.text,
+        copyText: params?.copyText ?? params.text,
+    }
+}
+
+/**
  * Find a button in the keyboard by its text or by predicate
  *
  * @param buttons  Two-dimensional array of buttons

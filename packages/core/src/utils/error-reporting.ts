@@ -5,10 +5,10 @@ import type { Logger } from './logger.js'
 export function reportUnknownError(log: Logger, error: tl.RpcError, method: string): void {
     if (typeof fetch !== 'function') return
 
-    fetch(`https://rpc.pwrtelegram.xyz/?code=${error.code}&method=${method}&error=${error.text}`)
+    fetch(`https://report-rpc-error.madelineproto.xyz/?code=${error.code}&method=${method}&error=${error.text}`)
         .then(r => r.json())
         .then((r) => {
-            if (r.ok) {
+            if (r.result) {
                 log.info('telerpc responded with error info for %s: %s', error.text, r.result)
             } else {
                 log.info(
