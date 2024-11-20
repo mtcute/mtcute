@@ -3,7 +3,6 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-// todo
 import { fumanBuild } from '@fuman/build/vite'
 import type { ConfigEnv, UserConfig } from 'vite'
 import { nodeExternals } from 'rollup-plugin-node-externals'
@@ -39,11 +38,16 @@ if (typeof globalThis !== 'undefined' && !globalThis._MTCUTE_CJS_DEPRECATION_WAR
                         },
                     },
                 ],
+                output: {
+                    // re-exported namespaces can't be tree-shaken when bundled
+                    // see: https://github.com/rollup/rollup/issues/5161
+                    preserveModules: true,
+                },
             },
             minify: false,
             outDir: 'dist',
             emptyOutDir: true,
-            target: 'es2022',
+            target: 'esnext',
         },
         plugins: [
             nodeExternals({
@@ -52,11 +56,11 @@ if (typeof globalThis !== 'undefined' && !globalThis._MTCUTE_CJS_DEPRECATION_WAR
             fumanBuild({
                 root: rootDir,
                 autoSideEffectsFalse: true,
+                insertTypesEntry: true,
             }),
             dts({
                 // broken; see https://github.com/qmhc/vite-plugin-dts/issues/321, https://github.com/microsoft/rushstack/issues/3557
                 // rollupTypes: true,
-                insertTypesEntry: true,
             }),
         ],
     }

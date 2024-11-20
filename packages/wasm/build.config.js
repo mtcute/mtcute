@@ -3,7 +3,7 @@ import * as fs from 'node:fs'
 
 /** @type {import('@fuman/build/vite').CustomBuildConfig} */
 export default () => ({
-    finalizePackageJson({ packageJson }) {
+    preparePackageJson({ packageJson }) {
         packageJson.exports['./mtcute.wasm'] = './mtcute.wasm'
     },
     finalize({ packageDir, outDir }) {

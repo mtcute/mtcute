@@ -76,7 +76,7 @@ async function fetchTdlibSchema(): Promise<Schema> {
 
 async function fetchTdesktopSchema(): Promise<Schema> {
     const schema = await ffetch(TDESKTOP_SCHEMA).text()
-    const layerFile = await ffetch(TDESKTOP_LAYER).text()
+    const layerFile = await ffetch(TDESKTOP_LAYER, { validateResponse: false }).text()
     const layer = `${schema}\n\n${layerFile}`.match(/^\/\/ LAYER (\d+)/m)
     if (!layer) throw new Error('Layer number not available')
 
