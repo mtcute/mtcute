@@ -13,6 +13,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
 
 import { _getDiscussionMessage } from './get-discussion-message.js'
 import { getMessages } from './get-messages.js'
+import { _getTypingTimerId } from './set-typing.js'
 
 // @exported
 export interface CommonSendParams {
@@ -171,6 +172,8 @@ export async function _processCommonSendParameters(
         chainId: string
     }> {
     let peer = await resolvePeer(client, chatId)
+
+    client.timers.cancel(_getTypingTimerId(peer, params.businessConnectionId))
 
     let replyTo = normalizeMessageId(params.replyTo)
     const replyToPeer = typeof params.replyTo === 'number' ? undefined : params.replyTo?.chat.inputPeer

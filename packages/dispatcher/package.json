@@ -13,7 +13,7 @@
     },
     "dependencies": {
         "@mtcute/core": "workspace:^",
-        "@fuman/utils": "https://pkg.pr.new/teidesu/fuman/@fuman/utils@a3f52dc",
+        "@fuman/utils": "https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4",
         "events": "3.2.0"
     },
     "devDependencies": {

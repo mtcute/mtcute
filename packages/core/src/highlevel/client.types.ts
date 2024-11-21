@@ -11,6 +11,7 @@ import type { AppConfigManager } from './managers/app-config-manager.js'
 import type { TelegramStorageManager } from './storage/storage.js'
 import type { StringSessionData } from './utils/string-session.js'
 import type { RawUpdateInfo } from './updates/types.js'
+import type { TimersManager } from './managers/timers.js'
 
 /**
  * Connection state of the client
@@ -34,6 +35,7 @@ export interface ITelegramClient {
     readonly log: Logger
     readonly storage: PublicPart<TelegramStorageManager>
     readonly appConfig: PublicPart<AppConfigManager>
+    readonly timers: Pick<TimersManager, 'create' | 'cancel' | 'exists'>
     readonly stopSignal: AbortSignal
     readonly platform: ICorePlatform
 

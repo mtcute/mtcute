@@ -8,6 +8,7 @@ import { normalizeDate } from '../../utils/misc-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 import { _normalizeQuickReplyShortcut } from './send-common.js'
+import { _getTypingTimerId } from './set-typing.js'
 
 // @exported
 export interface ForwardMessageOptions {
@@ -119,6 +120,8 @@ export async function forwardMessagesById(
     }
 
     const toPeer = await resolvePeer(client, toChatId)
+
+    client.timers.cancel(_getTypingTimerId(toPeer))
 
     const res = await client.call({
         _: 'messages.forwardMessages',

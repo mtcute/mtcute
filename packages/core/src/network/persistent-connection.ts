@@ -177,6 +177,7 @@ export abstract class PersistentConnection {
     }
 
     async destroy(): Promise<void> {
+        this._destroyed = true
         await this._fuman.close()
     }
 

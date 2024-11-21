@@ -12,6 +12,6 @@
     },
     "dependencies": {
         "long": "5.2.3",
-        "@fuman/utils": "https://pkg.pr.new/teidesu/fuman/@fuman/utils@a3f52dc"
+        "@fuman/utils": "https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4"
     }
 }

@@ -2026,6 +2026,7 @@ export class SessionConnection extends PersistentConnection {
 
         const enc = this._session.encryptMessage(result)
         const promise = this.send(enc).catch((err: Error) => {
+            if (this._destroyed) return
             this.log.error('error while sending pending messages (root msg_id = %l): %e', rootMsgId, err)
 
             // put acks in the front so they are the first to be sent

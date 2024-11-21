@@ -197,6 +197,7 @@ import { sendScheduled } from './methods/messages/send-scheduled.js'
 import { sendText } from './methods/messages/send-text.js'
 import { sendTyping } from './methods/messages/send-typing.js'
 import { sendVote } from './methods/messages/send-vote.js'
+import { setTyping } from './methods/messages/set-typing.js'
 import { translateMessage } from './methods/messages/translate-message.js'
 import { translateText } from './methods/messages/translate-text.js'
 import { unpinAllMessages } from './methods/messages/unpin-all-messages.js'
@@ -279,7 +280,7 @@ import { setGlobalTtl } from './methods/users/set-global-ttl.js'
 import { setMyBirthday } from './methods/users/set-my-birthday.js'
 import { setMyProfilePhoto } from './methods/users/set-my-profile-photo.js'
 import { setMyUsername } from './methods/users/set-my-username.js'
-import { setOffline } from './methods/users/set-offline.js'
+import { setOffline, setOnline } from './methods/users/set-online.js'
 import { unblockUser } from './methods/users/unblock-user.js'
 import { updateProfile } from './methods/users/update-profile.js'
 import { withParams } from './methods/misc/with-params.js'
@@ -995,6 +996,13 @@ export interface TelegramClient extends ITelegramClient {
         params: {
             userId: InputPeerLike
             result: InputInlineResult
+
+            /**
+             * Filters for the client to use when prompting the user for the
+             * chat to send the inline message to.
+             *
+             * Note that this is just a hint for the client, and the client is free to ignore it.
+             */
             filter?: tl.TypeInlineQueryPeerType[] | {
             /** private chat with the bot itself */
                 botSelf?: boolean
@@ -1002,8 +1010,11 @@ export interface TelegramClient extends ITelegramClient {
                 private?: boolean
                 /** private chats with other bots */
                 bots?: boolean
+                /** "basic" chats */
                 chats?: boolean
+                /** supergroups */
                 supergroups?: boolean
+                /** broadcast channels */
                 channels?: boolean
             }
         }): Promise<tl.messages.TypeBotPreparedInlineMessage>
@@ -4200,6 +4211,7 @@ export interface TelegramClient extends ITelegramClient {
      * @param chatId  Chat ID
      * @param [status='typing']  Typing status
      * @param params
+     * @deprecated - use {@link setTyping} instead
      */
     sendTyping(
         chatId: InputPeerLike, status?: Exclude<TypingStatus, 'interaction' | 'interaction_seen'> | tl.TypeSendMessageAction,
@@ -4234,6 +4246,40 @@ export interface TelegramClient extends ITelegramClient {
          */
             options: null | MaybeArray<number | Uint8Array>
         }): Promise<Poll>
+    /**
+     * Sets whether a user is typing in a specific chat
+     *
+     * This status is automatically renewed by mtcute until a further
+     * call with `sendMessageCancelAction` is made, or a message is sent to the chat.
+     * **Available**: ✅ both users and bots
+     *
+     */
+    setTyping(
+        params: {
+        /** Chat ID where the user is currently typing */
+            peerId: InputPeerLike
+            /**
+             * Typing status to send (false is a shortcut for `{ _: 'sendMessageCancelAction' }`)
+             *
+             * @default  `{ _: 'sendMessageTypingAction' }`
+             */
+            status?: tl.TypeSendMessageAction | false
+
+            /**
+             * For `upload_*` and history import actions, progress of the upload
+             */
+            progress?: number
+
+            /**
+             * Unique identifier of the business connection on behalf of which the action will be sent
+             */
+            businessConnectionId?: string
+
+            /**
+             * For comment threads, ID of the thread (i.e. top message)
+             */
+            threadId?: number
+        }): Promise<void>
     /**
      * Translate message text to a given language.
      *
@@ -5709,8 +5755,20 @@ export interface TelegramClient extends ITelegramClient {
      * **Available**: 👤 users only
      *
      * @param [offline=true]  Whether the user is currently offline
+     * @deprecated - use {@link setOnline} instead
      */
     setOffline(offline?: boolean): Promise<void>
+    /**
+     * Change user status to online or offline
+     *
+     * Once called with `true`, mtcute will keep notifying the server
+     * that the user is still online until a further call with `false` is made.
+     *
+     * **Available**: 👤 users only
+     *
+     * @param [online=true]
+     */
+    setOnline(online?: boolean): Promise<void>
     /**
      * Unblock a user
      *
@@ -6452,6 +6510,9 @@ TelegramClient.prototype.sendTyping = function (...args) {
 TelegramClient.prototype.sendVote = function (...args) {
     return sendVote(this._client, ...args)
 }
+TelegramClient.prototype.setTyping = function (...args) {
+    return setTyping(this._client, ...args)
+}
 TelegramClient.prototype.translateMessage = function (...args) {
     return translateMessage(this._client, ...args)
 }
@@ -6720,6 +6781,9 @@ TelegramClient.prototype.setMyUsername = function (...args) {
 }
 TelegramClient.prototype.setOffline = function (...args) {
     return setOffline(this._client, ...args)
+}
+TelegramClient.prototype.setOnline = function (...args) {
+    return setOnline(this._client, ...args)
 }
 TelegramClient.prototype.unblockUser = function (...args) {
     return unblockUser(this._client, ...args)

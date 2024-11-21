@@ -1,5 +1,5 @@
 import type { tl } from '@mtcute/tl'
-import { Emitter } from '@fuman/utils'
+import { Emitter, unknownToError } from '@fuman/utils'
 
 import type { RpcCallOptions } from '../../network/network-manager.js'
 import type { MustEqual } from '../../types/utils.js'
@@ -8,6 +8,7 @@ import type { ConnectionState, ITelegramClient } from '../client.types.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
 import type { ICorePlatform } from '../../types/platform'
 import type { RawUpdateInfo } from '../updates/types.js'
+import { TimersManager } from '../managers/timers.js'
 
 import { AppConfigManagerProxy } from './app-config.js'
 import { WorkerInvoker } from './invoker.js'
@@ -30,6 +31,10 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
 
     readonly storage: TelegramStorageProxy
     readonly appConfig: AppConfigManagerProxy
+    // todo: ideally timers should be handled on the worker side,
+    // but i'm not sure yet of the best way to handle multiple clients (e.g. in SharedWorker-s)
+    // (with one worker client it's not that big of a deal)
+    readonly timers: TimersManager
 
     // bound methods
     readonly prepare: ITelegramClient['prepare']
@@ -87,6 +92,9 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
         this.startUpdatesLoop = bind('startUpdatesLoop')
         this.stopUpdatesLoop = bind('stopUpdatesLoop')
         this.getMtprotoMessageId = bind('getMtprotoMessageId')
+
+        this.timers = new TimersManager()
+        this.timers.onError(err => this.onError.emit(unknownToError(err)))
     }
 
     call<T extends tl.RpcMethod>(
@@ -143,6 +151,7 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     private _destroyed = false
     destroy(terminate = false): void {
         if (this._destroyed) return
+        this.timers.destroy()
         this._connection[1]()
         this._destroyed = true
 

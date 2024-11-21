@@ -1,7 +1,7 @@
 import type { mtp } from '@mtcute/tl'
 import { tl } from '@mtcute/tl'
 import type Long from 'long'
-import { Emitter } from '@fuman/utils'
+import { Emitter, unknownToError } from '@fuman/utils'
 
 import type { MtClientOptions } from '../network/client.js'
 import { MtClient } from '../network/client.js'
@@ -32,6 +32,7 @@ import type { TelegramStorageManagerExtraOptions } from './storage/storage.js'
 import { TelegramStorageManager } from './storage/storage.js'
 import { UpdatesManager } from './updates/manager.js'
 import type { RawUpdateInfo, UpdatesManagerParams } from './updates/types.js'
+import { TimersManager } from './managers/timers.js'
 
 export interface BaseTelegramClientOptions extends MtClientOptions {
     storage: ITelegramStorageProvider
@@ -57,6 +58,7 @@ export class BaseTelegramClient implements ITelegramClient {
     readonly crypto: ICryptoProvider
     readonly storage: TelegramStorageManager
     readonly platform: ICorePlatform
+    readonly timers: TimersManager
 
     readonly onServerUpdate: Emitter<tl.TypeUpdates> = new Emitter()
     readonly onRawUpdate: Emitter<RawUpdateInfo> = new Emitter()
@@ -92,6 +94,8 @@ export class BaseTelegramClient implements ITelegramClient {
             provider: this.params.storage,
             ...this.params.storageOptions,
         })
+        this.timers = new TimersManager()
+        this.timers.onError(err => this.onError.emit(unknownToError(err)))
     }
 
     readonly appConfig: AppConfigManager = new AppConfigManager(this)
@@ -142,6 +146,7 @@ export class BaseTelegramClient implements ITelegramClient {
     }
 
     async close(): Promise<void> {
+        this.timers.destroy()
         this._connected = false
         await this.mt.close()
         this.updates?.stopLoop()

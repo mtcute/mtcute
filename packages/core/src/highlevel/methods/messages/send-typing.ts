@@ -8,6 +8,45 @@ import { resolvePeer } from '../users/resolve-peer.js'
 
 import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 
+export function _mapTypingStatus(status: Exclude<TypingStatus, 'interaction' | 'interaction_seen'>, progress: number = 0): tl.TypeSendMessageAction {
+    switch (status) {
+        case 'typing':
+            return { _: 'sendMessageTypingAction' }
+        case 'cancel':
+            return { _: 'sendMessageCancelAction' }
+        case 'record_video':
+            return { _: 'sendMessageRecordVideoAction' }
+        case 'upload_video':
+            return { _: 'sendMessageUploadVideoAction', progress }
+        case 'record_voice':
+            return { _: 'sendMessageRecordAudioAction' }
+        case 'upload_voice':
+            return { _: 'sendMessageUploadAudioAction', progress }
+        case 'upload_photo':
+            return { _: 'sendMessageUploadPhotoAction', progress }
+        case 'upload_document':
+            return { _: 'sendMessageUploadDocumentAction', progress }
+        case 'geo':
+            return { _: 'sendMessageGeoLocationAction' }
+        case 'contact':
+            return { _: 'sendMessageChooseContactAction' }
+        case 'game':
+            return { _: 'sendMessageGamePlayAction' }
+        case 'record_round':
+            return { _: 'sendMessageRecordRoundAction' }
+        case 'upload_round':
+            return { _: 'sendMessageUploadRoundAction', progress }
+        case 'speak_call':
+            return { _: 'speakingInGroupCallAction' }
+        case 'history_import':
+            return { _: 'sendMessageHistoryImportAction', progress }
+        case 'sticker':
+            return { _: 'sendMessageChooseStickerAction' }
+        default:
+            assertNever(status)
+    }
+}
+
 /**
  * Sends a current user/bot typing event
  * to a conversation partner or group.
@@ -15,6 +54,8 @@ import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
  * This status is set for 6 seconds, and is
  * automatically cancelled if you send a
  * message.
+ *
+ * If you need a continuous typing status, use {@link setTyping} instead.
  *
  * @param chatId  Chat ID
  * @param status  Typing status
@@ -42,60 +83,7 @@ export async function sendTyping(
     },
 ): Promise<void> {
     if (typeof status === 'string') {
-        const progress = params?.progress ?? 0
-
-        switch (status) {
-            case 'typing':
-                status = { _: 'sendMessageTypingAction' }
-                break
-            case 'cancel':
-                status = { _: 'sendMessageCancelAction' }
-                break
-            case 'record_video':
-                status = { _: 'sendMessageRecordVideoAction' }
-                break
-            case 'upload_video':
-                status = { _: 'sendMessageUploadVideoAction', progress }
-                break
-            case 'record_voice':
-                status = { _: 'sendMessageRecordAudioAction' }
-                break
-            case 'upload_voice':
-                status = { _: 'sendMessageUploadAudioAction', progress }
-                break
-            case 'upload_photo':
-                status = { _: 'sendMessageUploadPhotoAction', progress }
-                break
-            case 'upload_document':
-                status = { _: 'sendMessageUploadDocumentAction', progress }
-                break
-            case 'geo':
-                status = { _: 'sendMessageGeoLocationAction' }
-                break
-            case 'contact':
-                status = { _: 'sendMessageChooseContactAction' }
-                break
-            case 'game':
-                status = { _: 'sendMessageGamePlayAction' }
-                break
-            case 'record_round':
-                status = { _: 'sendMessageRecordRoundAction' }
-                break
-            case 'upload_round':
-                status = { _: 'sendMessageUploadRoundAction', progress }
-                break
-            case 'speak_call':
-                status = { _: 'speakingInGroupCallAction' }
-                break
-            case 'history_import':
-                status = { _: 'sendMessageHistoryImportAction', progress }
-                break
-            case 'sticker':
-                status = { _: 'sendMessageChooseStickerAction' }
-                break
-            default:
-                assertNever(status)
-        }
+        status = _mapTypingStatus(status, params?.progress ?? 0)
     }
 
     const r = await _maybeInvokeWithBusinessConnection(client, params?.businessConnectionId, {
