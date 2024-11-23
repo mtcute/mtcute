@@ -7,6 +7,7 @@ import type { ITelegramClient } from '../../client.types.js'
 import { MtPeerNotFoundError } from '../../types/errors.js'
 import type { InputPeerLike } from '../../types/peers/index.js'
 import { extractUsernames, toInputChannel, toInputPeer, toInputUser } from '../../utils/peer-utils.js'
+import { _getChannelsBatched, _getUsersBatched } from '../chats/batched-queries.js'
 
 export function _normalizePeerId(peerId: InputPeerLike): number | string | tl.TypeInputPeer {
 // for convenience we also accept tl and User/Chat objects directly
@@ -160,55 +161,95 @@ export async function resolvePeer(
     // if it's not the case, we'll get an `PEER_ID_INVALID` error anyways
     const [peerType, bareId] = parseMarkedPeerId(peerId)
 
-    if (!(peerType === 'chat' || client.storage.self.getCached(true)?.isBot)) {
-        // we might have a min peer in cache, which we can try to resolve by its username/phone
-        const cached = await client.storage.peers.getCompleteById(peerId, true)
-
-        if (cached && (cached._ === 'channel' || cached._ === 'user')) {
-            // do we have a username?
-            const [username] = extractUsernames(cached)
-
-            if (username) {
-                const resolved = await resolvePeer(client, username, true)
-
-                // username might already be taken by someone else, so we need to check it
-                if (getMarkedPeerId(resolved) === peerId) {
-                    return resolved
+    if (peerType === 'chat' || client.storage.self.getCached(true)?.isBot) {
+        // bots can use access_hash=0 in most of the cases
+        switch (peerType) {
+            case 'user':
+                return {
+                    _: 'inputPeerUser',
+                    userId: bareId,
+                    accessHash: Long.ZERO,
                 }
-            }
-
-            if (cached._ === 'user' && cached.phone) {
-                // try resolving by phone
-                const resolved = await resolvePeer(client, cached.phone, true)
-
-                if (getMarkedPeerId(resolved) === peerId) {
-                    return resolved
+            case 'chat':
+                return {
+                    _: 'inputPeerChat',
+                    chatId: bareId,
                 }
+            case 'channel':
+                return {
+                    _: 'inputPeerChannel',
+                    channelId: bareId,
+                    accessHash: Long.ZERO,
+                }
+        }
+    }
+
+    // users can only use access_hash=0 in some very limited cases, so first try resolving some other way
+    // we might have a min peer in cache, which we can try to resolve by its username/phone
+    const cached = await client.storage.peers.getCompleteById(peerId, true)
+
+    if (cached && (cached._ === 'channel' || cached._ === 'user')) {
+        // do we have a username?
+        const [username] = extractUsernames(cached)
+
+        if (username) {
+            const resolved = await resolvePeer(client, username, true)
+
+            // username might already be taken by someone else, so we need to check it
+            if (getMarkedPeerId(resolved) === peerId) {
+                return resolved
             }
         }
 
-        throw new MtPeerNotFoundError(`Peer ${peerId} is not found in local cache`)
+        if (cached._ === 'user' && cached.phone) {
+            // try resolving by phone
+            const resolved = await resolvePeer(client, cached.phone, true)
+
+            if (getMarkedPeerId(resolved) === peerId) {
+                return resolved
+            }
+        }
     }
 
+    // finally let's try resolving by access_hash=0
     switch (peerType) {
-        case 'user':
-            return {
-                _: 'inputPeerUser',
+        case 'user': {
+            const res = await _getUsersBatched(client, {
+                _: 'inputUser',
                 userId: bareId,
                 accessHash: Long.ZERO,
+            })
+
+            if (res != null && res._ === 'user' && res.accessHash != null) {
+                return {
+                    _: 'inputPeerUser',
+                    userId: bareId,
+                    accessHash: res.accessHash,
+                }
             }
-        case 'chat':
-            return {
-                _: 'inputPeerChat',
-                chatId: bareId,
-            }
-        case 'channel':
-            return {
-                _: 'inputPeerChannel',
+            break
+        }
+        case 'channel': {
+            const res = await _getChannelsBatched(client, {
+                _: 'inputChannel',
                 channelId: bareId,
                 accessHash: Long.ZERO,
+            })
+
+            if (res != null && res._ === 'channel' && res.accessHash != null) {
+                return {
+                    _: 'inputPeerChannel',
+                    channelId: bareId,
+                    accessHash: res.accessHash,
+                }
             }
+            break
+        }
     }
+
+    // we couldn't resolve the peer by any means, so throw an error
+
+    throw new MtPeerNotFoundError(`Peer ${peerId} is not found in local cache`)
 }
 
 /**
