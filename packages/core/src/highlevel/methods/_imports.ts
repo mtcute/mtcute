@@ -71,6 +71,7 @@ import {
     InputStickerSet,
     InputStickerSetItem,
     InputText,
+    InputWebview,
     MaybeDynamic,
     Message,
     MessageEffect,
@@ -111,6 +112,7 @@ import {
     UserStarGift,
     UserStatusUpdate,
     UserTypingUpdate,
+    WebviewResult,
 } from '../types/index.js'
 // @copy
 import { StringSessionData } from '../utils/string-session.js'

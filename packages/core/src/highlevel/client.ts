@@ -13,7 +13,7 @@ import type { BaseTelegramClientOptions } from './base.js'
 import { BaseTelegramClient } from './base.js'
 import type { ITelegramClient } from './client.types.js'
 import type { RawUpdateInfo } from './updates/types.js'
-import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatMember, ChatMemberUpdate, ChatPreview, ChatlistPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStickerSet, InputStickerSetItem, InputText, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, PeerReaction, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SentCode, StarGift, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadFileLike, UploadedFile, User, UserStarGift, UserStatusUpdate, UserTypingUpdate } from './types/index.js'
+import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatMember, ChatMemberUpdate, ChatPreview, ChatlistPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, PeerReaction, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SentCode, StarGift, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadFileLike, UploadedFile, User, UserStarGift, UserStatusUpdate, UserTypingUpdate, WebviewResult } from './types/index.js'
 import type { StringSessionData } from './utils/string-session.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
 import { Conversation } from './types/conversation.js'
@@ -43,6 +43,7 @@ import { getBotMenuButton } from './methods/bots/get-bot-menu-button.js'
 import { getCallbackAnswer } from './methods/bots/get-callback-answer.js'
 import { getGameHighScores, getInlineGameHighScores } from './methods/bots/get-game-high-scores.js'
 import { getMyCommands } from './methods/bots/get-my-commands.js'
+import { closeWebview, openWebview } from './methods/bots/open-webview.js'
 import { prepareInlineMessage } from './methods/bots/prepare-inline-message.js'
 import { setBotInfo } from './methods/bots/set-bot-info.js'
 import { setBotMenuButton } from './methods/bots/set-bot-menu-button.js'
@@ -280,7 +281,7 @@ import { setGlobalTtl } from './methods/users/set-global-ttl.js'
 import { setMyBirthday } from './methods/users/set-my-birthday.js'
 import { setMyProfilePhoto } from './methods/users/set-my-profile-photo.js'
 import { setMyUsername } from './methods/users/set-my-username.js'
-import { setOffline, setOnline } from './methods/users/set-online.js'
+import { sendOnline, setOnline } from './methods/users/set-online.js'
 import { unblockUser } from './methods/users/unblock-user.js'
 import { updateProfile } from './methods/users/update-profile.js'
 import { withParams } from './methods/misc/with-params.js'
@@ -988,6 +989,92 @@ export interface TelegramClient extends ITelegramClient {
              */
             langCode?: string
         }): Promise<tl.RawBotCommand[]>
+    /**
+     * Open a webview.
+     * **Available**: 👤 users only
+     *
+     */
+    openWebview(
+        params: {
+        /** Information about the webview to open */
+            webview: InputWebview
+
+            /**
+             * Bot whose webview to open
+             */
+            bot: InputPeerLike
+
+            /**
+             * Chat to report to the server as the "currently open chat",
+             * also the chat to which the message will be sent in case of
+             * `from_inline_keyboard`, `from_bot_menu` and `from_attach_menu` webviews
+             */
+            chat?: InputPeerLike
+
+            /**
+             * Theme parameters to pass to the mini app
+             *
+             * Each value should be a string (hex-encoded RGB, no alpha)
+             */
+            theme?: tl.TypeDataJSON | {
+            // https://corefork.telegram.org/api/bots/webapps#theme-parameters
+            /** Background color */
+                bg_color?: string
+                /** Secondary background color */
+                secondary_bg_color?: string
+                /** Text color */
+                text_color?: string
+                /** Hint text color */
+                hint_color?: string
+                /** Link color */
+                link_color?: string
+                /** Button color */
+                button_color?: string
+                /** Button text color */
+                button_text_color?: string
+                /** Header background color */
+                header_bg_color?: string
+                /** Accent text color */
+                accent_text_color?: string
+                /** Section background color */
+                section_bg_color?: string
+                /** Section header text color */
+                section_header_text_color?: string
+                /** Section separator color */
+                section_separator_color?: string
+                /** Sub title text color */
+                subtitle_text_color?: string
+                /** Text color for destructive action buttons in prompts */
+                destructive_text_color?: string
+            }
+
+            /**
+             * Webview platform to use in the init data
+             *
+             * Some of the known values:
+             *  - `android` - Android clients
+             *  - `ios` - iOS clients
+             *  - `tdesktop` - Telegram Desktop
+             *  - `macos` - Telegram for macOS
+             *  - `unigram` - Unigram
+             */
+            platform:
+            | 'android'
+            | 'ios'
+            | 'tdesktop'
+            | 'macos'
+            | 'unigram'
+            | (string & {})
+        }): Promise<WebviewResult>
+    /**
+     * Close a webview previously opened by {@link openWebview} method.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param webview  Webview result returned by {@link openWebview}, or its `.queryId`
+     */
+    closeWebview(
+        webview: WebviewResult | tl.Long): Promise<void>
     /**
      * Prepare an inline message result to be sent later via the
      * `shareMessage` [mini-app api method](https://core.telegram.org/bots/webapps#initializing-mini-apps).
@@ -4206,12 +4293,13 @@ export interface TelegramClient extends ITelegramClient {
      * automatically cancelled if you send a
      * message.
      *
+     * If you need a continuous typing status, use {@link setTyping} instead.
+     *
      * **Available**: ✅ both users and bots
      *
      * @param chatId  Chat ID
      * @param [status='typing']  Typing status
      * @param params
-     * @deprecated - use {@link setTyping} instead
      */
     sendTyping(
         chatId: InputPeerLike, status?: Exclude<TypingStatus, 'interaction' | 'interaction_seen'> | tl.TypeSendMessageAction,
@@ -4250,7 +4338,7 @@ export interface TelegramClient extends ITelegramClient {
      * Sets whether a user is typing in a specific chat
      *
      * This status is automatically renewed by mtcute until a further
-     * call with `sendMessageCancelAction` is made, or a message is sent to the chat.
+     * call with `cancel` is made, or a message is sent to the chat.
      * **Available**: ✅ both users and bots
      *
      */
@@ -4258,12 +4346,13 @@ export interface TelegramClient extends ITelegramClient {
         params: {
         /** Chat ID where the user is currently typing */
             peerId: InputPeerLike
+
             /**
-             * Typing status to send (false is a shortcut for `{ _: 'sendMessageCancelAction' }`)
+             * Typing status to send
              *
-             * @default  `{ _: 'sendMessageTypingAction' }`
+             * @default  `typing`
              */
-            status?: tl.TypeSendMessageAction | false
+            status?: Exclude<TypingStatus, 'interaction' | 'interaction_seen'> | tl.TypeSendMessageAction
 
             /**
              * For `upload_*` and history import actions, progress of the upload
@@ -5750,14 +5839,16 @@ export interface TelegramClient extends ITelegramClient {
      */
     setMyUsername(username: string | null): Promise<User>
     /**
-     * Change user status to offline or online
+     * Change user status to offline or online once,
+     * which will expire after a while (currently ~5 minutes)
+     *
+     * For continuously sending online/offline status, use {@link setOnline}
      *
      * **Available**: 👤 users only
      *
-     * @param [offline=true]  Whether the user is currently offline
-     * @deprecated - use {@link setOnline} instead
+     * @param online  Whether the user is currently online
      */
-    setOffline(offline?: boolean): Promise<void>
+    sendOnline(online: boolean): Promise<void>
     /**
      * Change user status to online or offline
      *
@@ -6041,6 +6132,12 @@ TelegramClient.prototype.getInlineGameHighScores = function (...args) {
 }
 TelegramClient.prototype.getMyCommands = function (...args) {
     return getMyCommands(this._client, ...args)
+}
+TelegramClient.prototype.openWebview = function (...args) {
+    return openWebview(this._client, ...args)
+}
+TelegramClient.prototype.closeWebview = function (...args) {
+    return closeWebview(this._client, ...args)
 }
 TelegramClient.prototype.prepareInlineMessage = function (...args) {
     return prepareInlineMessage(this._client, ...args)
@@ -6779,8 +6876,8 @@ TelegramClient.prototype.setMyProfilePhoto = function (...args) {
 TelegramClient.prototype.setMyUsername = function (...args) {
     return setMyUsername(this._client, ...args)
 }
-TelegramClient.prototype.setOffline = function (...args) {
-    return setOffline(this._client, ...args)
+TelegramClient.prototype.sendOnline = function (...args) {
+    return sendOnline(this._client, ...args)
 }
 TelegramClient.prototype.setOnline = function (...args) {
     return setOnline(this._client, ...args)
