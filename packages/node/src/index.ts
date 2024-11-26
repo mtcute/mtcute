@@ -1,5 +1,5 @@
 export * from './client.js'
-export * from './common-internals-node/platform.js'
+export * from './utils/platform.js'
 export * from './sqlite/index.js'
 export * from './utils/tcp.js'
 export * from './utils/proxies.js'

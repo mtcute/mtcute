@@ -18,7 +18,7 @@ import { downloadAsNodeStream } from './methods/download-node-stream.js'
 import { SqliteStorage } from './sqlite/index.js'
 import { NodeCryptoProvider } from './utils/crypto.js'
 import { TcpTransport } from './utils/tcp.js'
-import { NodePlatform } from './common-internals-node/platform.js'
+import { NodePlatform } from './utils/platform.js'
 
 export type { TelegramClientOptions }
 

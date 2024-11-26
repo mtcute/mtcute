@@ -15,11 +15,14 @@ importers:
         specifier: 2.26.0
         version: 2.26.0(@typescript-eslint/utils@8.14.0(eslint@9.9.0)(typescript@5.5.4))(@vue/compiler-sfc@3.5.13)(eslint@9.9.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@20.10.0)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5))
       '@fuman/build':
-        specifier: https://pkg.pr.new/teidesu/fuman/@fuman/build@6017eb4
-        version: https://pkg.pr.new/teidesu/fuman/@fuman/build@6017eb4(tough-cookie@4.1.4)(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))
+        specifier: https://pkg.pr.new/teidesu/fuman/@fuman/build@1a73dc1
+        version: https://pkg.pr.new/teidesu/fuman/@fuman/build@1a73dc1(tough-cookie@4.1.4)(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))
       '@fuman/utils':
         specifier: https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4
         version: https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4
+      '@types/bun':
+        specifier: 1.1.14
+        version: 1.1.14
       '@types/deno':
         specifier: npm:@teidesu/deno-types@1.46.3
         version: '@teidesu/deno-types@1.46.3'
@@ -44,9 +47,6 @@ importers:
       '@vitest/ui':
         specifier: 2.0.5
         version: 2.0.5(vitest@2.0.5)
-      bun-types:
-        specifier: ^1.1.24
-        version: 1.1.34
       chai:
         specifier: 5.1.0
         version: 5.1.0
@@ -904,8 +904,8 @@ packages:
     resolution: {integrity: sha512-BsWiH1yFGjXXS2yvrf5LyuoSIIbPrGUWob917o+BTKuZ7qJdxX8aJLRxs1fS9n6r7vESrq1OUqb68dANcFXuQQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@6017eb4':
-    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/build@6017eb4}
+  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@1a73dc1':
+    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/build@1a73dc1}
     version: 0.0.1
     hasBin: true
     peerDependencies:
@@ -915,6 +915,24 @@ packages:
   '@fuman/bun@https://pkg.pr.new/teidesu/fuman/@fuman/bun@6017eb4':
     resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/bun@6017eb4}
     version: 0.0.1
+
+  '@fuman/fetch@https://pkg.pr.new/teidesu/fuman/@fuman/fetch@1a73dc1':
+    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/fetch@1a73dc1}
+    version: 0.0.1
+    peerDependencies:
+      tough-cookie: ^5.0.0 || ^4.0.0
+      valibot: ^0.42.0
+      yup: ^1.0.0
+      zod: ^3.0.0
+    peerDependenciesMeta:
+      tough-cookie:
+        optional: true
+      valibot:
+        optional: true
+      yup:
+        optional: true
+      zod:
+        optional: true
 
   '@fuman/fetch@https://pkg.pr.new/teidesu/fuman/@fuman/fetch@6017eb4':
     resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/fetch@6017eb4}
@@ -934,16 +952,32 @@ packages:
       zod:
         optional: true
 
+  '@fuman/io@https://pkg.pr.new/teidesu/fuman/@fuman/io@1a73dc1':
+    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/io@1a73dc1}
+    version: 0.0.1
+
   '@fuman/io@https://pkg.pr.new/teidesu/fuman/@fuman/io@6017eb4':
     resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/io@6017eb4}
+    version: 0.0.1
+
+  '@fuman/net@https://pkg.pr.new/teidesu/fuman/@fuman/net@1a73dc1':
+    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/net@1a73dc1}
     version: 0.0.1
 
   '@fuman/net@https://pkg.pr.new/teidesu/fuman/@fuman/net@6017eb4':
     resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/net@6017eb4}
     version: 0.0.1
 
+  '@fuman/node@https://pkg.pr.new/teidesu/fuman/@fuman/node@1a73dc1':
+    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/node@1a73dc1}
+    version: 0.0.1
+
   '@fuman/node@https://pkg.pr.new/teidesu/fuman/@fuman/node@6017eb4':
     resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/node@6017eb4}
+    version: 0.0.1
+
+  '@fuman/utils@https://pkg.pr.new/teidesu/fuman/@fuman/utils@1a73dc1':
+    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/utils@1a73dc1}
     version: 0.0.1
 
   '@fuman/utils@https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4':
@@ -1275,6 +1309,9 @@ packages:
 
   '@types/better-sqlite3@7.6.4':
     resolution: {integrity: sha512-dzrRZCYPXIXfSR1/surNbJ/grU3scTaygS0OMzjlGf71i9sc2fGyHPXXiXmEvNIoE0cGwsanEFMVJxPXmco9Eg==}
+
+  '@types/bun@1.1.14':
+    resolution: {integrity: sha512-opVYiFGtO2af0dnWBdZWlioLBoxSdDO5qokaazLhq8XQtGZbY4pY3/JxY8Zdf/hEwGubbp7ErZXoN1+h2yesxA==}
 
   '@types/cookie@0.6.0':
     resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
@@ -1691,8 +1728,8 @@ packages:
   builtin-status-codes@3.0.0:
     resolution: {integrity: sha512-HpGFw18DgFWlncDfjTa2rcQ4W88O1mC8e8yZ2AvQY5KDaktSTwo+KRf6nHK6FRI5FyRyb/5T6+TSxfP7QyGsmQ==}
 
-  bun-types@1.1.34:
-    resolution: {integrity: sha512-br5QygTEL/TwB4uQOb96Ky22j4Gq2WxWH/8Oqv20fk5HagwKXo/akB+LiYgSfzexCt6kkcUaVm+bKiPl71xPvw==}
+  bun-types@1.1.37:
+    resolution: {integrity: sha512-C65lv6eBr3LPJWFZ2gswyrGZ82ljnH8flVE03xeXxKhi2ZGtFiO4isRKTKnitbSqtRAcaqYSR6djt1whI66AbA==}
 
   cac@6.7.14:
     resolution: {integrity: sha512-b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ==}
@@ -4253,13 +4290,13 @@ snapshots:
 
   '@eslint/object-schema@2.1.4': {}
 
-  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@6017eb4(tough-cookie@4.1.4)(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))':
+  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@1a73dc1(tough-cookie@4.1.4)(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))':
     dependencies:
       '@drizzle-team/brocli': 0.10.2
-      '@fuman/fetch': https://pkg.pr.new/teidesu/fuman/@fuman/fetch@6017eb4(tough-cookie@4.1.4)(zod@3.23.8)
-      '@fuman/io': https://pkg.pr.new/teidesu/fuman/@fuman/io@6017eb4
-      '@fuman/node': https://pkg.pr.new/teidesu/fuman/@fuman/node@6017eb4
-      '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4
+      '@fuman/fetch': https://pkg.pr.new/teidesu/fuman/@fuman/fetch@1a73dc1(tough-cookie@4.1.4)(zod@3.23.8)
+      '@fuman/io': https://pkg.pr.new/teidesu/fuman/@fuman/io@1a73dc1
+      '@fuman/node': https://pkg.pr.new/teidesu/fuman/@fuman/node@1a73dc1
+      '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@1a73dc1
       cross-spawn: 7.0.3
       detect-indent: 7.0.1
       js-yaml: 4.1.0
@@ -4280,6 +4317,13 @@ snapshots:
       '@fuman/net': https://pkg.pr.new/teidesu/fuman/@fuman/net@6017eb4
       '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4
 
+  '@fuman/fetch@https://pkg.pr.new/teidesu/fuman/@fuman/fetch@1a73dc1(tough-cookie@4.1.4)(zod@3.23.8)':
+    dependencies:
+      '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@1a73dc1
+    optionalDependencies:
+      tough-cookie: 4.1.4
+      zod: 3.23.8
+
   '@fuman/fetch@https://pkg.pr.new/teidesu/fuman/@fuman/fetch@6017eb4(tough-cookie@4.1.4)(zod@3.23.8)':
     dependencies:
       '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4
@@ -4287,20 +4331,37 @@ snapshots:
       tough-cookie: 4.1.4
       zod: 3.23.8
 
+  '@fuman/io@https://pkg.pr.new/teidesu/fuman/@fuman/io@1a73dc1':
+    dependencies:
+      '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@1a73dc1
+
   '@fuman/io@https://pkg.pr.new/teidesu/fuman/@fuman/io@6017eb4':
     dependencies:
       '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4
+
+  '@fuman/net@https://pkg.pr.new/teidesu/fuman/@fuman/net@1a73dc1':
+    dependencies:
+      '@fuman/io': https://pkg.pr.new/teidesu/fuman/@fuman/io@1a73dc1
+      '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@1a73dc1
 
   '@fuman/net@https://pkg.pr.new/teidesu/fuman/@fuman/net@6017eb4':
     dependencies:
       '@fuman/io': https://pkg.pr.new/teidesu/fuman/@fuman/io@6017eb4
       '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4
 
+  '@fuman/node@https://pkg.pr.new/teidesu/fuman/@fuman/node@1a73dc1':
+    dependencies:
+      '@fuman/io': https://pkg.pr.new/teidesu/fuman/@fuman/io@1a73dc1
+      '@fuman/net': https://pkg.pr.new/teidesu/fuman/@fuman/net@1a73dc1
+      '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@1a73dc1
+
   '@fuman/node@https://pkg.pr.new/teidesu/fuman/@fuman/node@6017eb4':
     dependencies:
       '@fuman/io': https://pkg.pr.new/teidesu/fuman/@fuman/io@6017eb4
       '@fuman/net': https://pkg.pr.new/teidesu/fuman/@fuman/net@6017eb4
       '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4
+
+  '@fuman/utils@https://pkg.pr.new/teidesu/fuman/@fuman/utils@1a73dc1': {}
 
   '@fuman/utils@https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4': {}
 
@@ -4664,6 +4725,10 @@ snapshots:
   '@types/better-sqlite3@7.6.4':
     dependencies:
       '@types/node': 20.10.0
+
+  '@types/bun@1.1.14':
+    dependencies:
+      bun-types: 1.1.37
 
   '@types/cookie@0.6.0': {}
 
@@ -5202,7 +5267,7 @@ snapshots:
 
   builtin-status-codes@3.0.0: {}
 
-  bun-types@1.1.34:
+  bun-types@1.1.37:
     dependencies:
       '@types/node': 20.12.14
       '@types/ws': 8.5.13

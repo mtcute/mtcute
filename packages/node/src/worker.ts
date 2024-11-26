@@ -14,7 +14,7 @@ import {
     TelegramWorkerPort as TelegramWorkerPortBase,
 } from '@mtcute/core/worker.js'
 
-import { NodePlatform } from './common-internals-node/platform.js'
+import { NodePlatform } from './utils/platform.js'
 
 export type { TelegramWorkerOptions, WorkerCustomMethods }
 

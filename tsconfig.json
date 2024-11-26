@@ -12,7 +12,7 @@
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "types": [
-      "bun-types",
+      "bun",
       "node",
       "deno/ns",
       "vite/client"
