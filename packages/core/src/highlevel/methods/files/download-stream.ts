@@ -1,12 +1,11 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { FileDownloadLocation, FileDownloadParameters } from '../../types/index.js'
 import { FileLocation } from '../../types/index.js'
-import { bufferToStream } from '../../utils/stream-utils.js'
 
 import { downloadAsIterable } from './download-iterable.js'
 
 /**
- * Download a file and return it as a readable stream,
+ * Download a file and return it as a `@fuman/io` stream,
  * streaming file contents.
  *
  * @param params  File download parameters
@@ -17,7 +16,13 @@ export function downloadAsStream(
     params?: FileDownloadParameters,
 ): ReadableStream<Uint8Array> {
     if (location instanceof FileLocation && ArrayBuffer.isView(location.location)) {
-        return bufferToStream(location.location)
+        const buf = location.location
+        return new ReadableStream({
+            start(controller) {
+                controller.enqueue(buf)
+                controller.close()
+            },
+        })
     }
 
     const cancel = new AbortController()
