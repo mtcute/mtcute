@@ -10,7 +10,7 @@ import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 import { _mapTypingStatus } from './send-typing.js'
 
 export function _getTypingTimerId(peer: tl.TypeInputPeer, businessId?: string): string {
-    let base = `typing:${getMarkedPeerId(peer)}`
+    let base = `typing:${peer._ === 'inputPeerSelf' ? 'self' : getMarkedPeerId(peer)}`
     if (businessId) base += `:b${businessId}`
 
     return base
