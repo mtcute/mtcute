@@ -18,6 +18,6 @@
     "@mtcute/core": "workspace:^",
     "@mtcute/node": "workspace:^",
     "@mtcute/web": "workspace:^",
-    "@fuman/utils": "https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4"
+    "@fuman/utils": "https://pkg.pr.new/teidesu/fuman/@fuman/utils@b0c74cb"
   }
 }

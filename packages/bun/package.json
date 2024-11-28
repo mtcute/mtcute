@@ -17,10 +17,10 @@
     "@mtcute/html-parser": "workspace:^",
     "@mtcute/markdown-parser": "workspace:^",
     "@mtcute/wasm": "workspace:^",
-    "@fuman/utils": "https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4",
-    "@fuman/bun": "https://pkg.pr.new/teidesu/fuman/@fuman/bun@6017eb4",
-    "@fuman/net": "https://pkg.pr.new/teidesu/fuman/@fuman/net@6017eb4",
-    "@fuman/io": "https://pkg.pr.new/teidesu/fuman/@fuman/io@6017eb4"
+    "@fuman/utils": "https://pkg.pr.new/teidesu/fuman/@fuman/utils@b0c74cb",
+    "@fuman/bun": "https://pkg.pr.new/teidesu/fuman/@fuman/bun@b0c74cb",
+    "@fuman/net": "https://pkg.pr.new/teidesu/fuman/@fuman/net@b0c74cb",
+    "@fuman/io": "https://pkg.pr.new/teidesu/fuman/@fuman/io@b0c74cb"
   },
   "devDependencies": {
     "@mtcute/test": "workspace:^"

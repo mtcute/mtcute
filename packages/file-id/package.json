@@ -12,7 +12,7 @@
     },
     "dependencies": {
         "@mtcute/tl-runtime": "workspace:^",
-        "@fuman/utils": "https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4",
+        "@fuman/utils": "https://pkg.pr.new/teidesu/fuman/@fuman/utils@b0c74cb",
         "long": "5.2.3"
     }
 }

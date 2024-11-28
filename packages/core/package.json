@@ -19,9 +19,9 @@
         "gen-updates": "node ./scripts/generate-updates.cjs"
     },
     "dependencies": {
-        "@fuman/io": "https://pkg.pr.new/teidesu/fuman/@fuman/io@6017eb4",
-        "@fuman/net": "https://pkg.pr.new/teidesu/fuman/@fuman/net@6017eb4",
-        "@fuman/utils": "https://pkg.pr.new/teidesu/fuman/@fuman/utils@6017eb4",
+        "@fuman/io": "https://pkg.pr.new/teidesu/fuman/@fuman/io@b0c74cb",
+        "@fuman/net": "https://pkg.pr.new/teidesu/fuman/@fuman/net@b0c74cb",
+        "@fuman/utils": "https://pkg.pr.new/teidesu/fuman/@fuman/utils@b0c74cb",
         "@mtcute/file-id": "workspace:^",
         "@mtcute/tl": "workspace:^",
         "@mtcute/tl-runtime": "workspace:^",
