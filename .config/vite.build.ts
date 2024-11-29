@@ -20,7 +20,7 @@ export default async (env: ConfigEnv): Promise<UserConfig> => {
     const CJS_DEPRECATION_WARNING = `
 if (typeof globalThis !== 'undefined' && !globalThis._MTCUTE_CJS_DEPRECATION_WARNED) { 
     globalThis._MTCUTE_CJS_DEPRECATION_WARNED = true
-    console.warn("[${packageJson.name}] CommonJS support is deprecated and will be removed soon. Please consider switching to ESM, it's "+(new Date()).getFullYear()+" already.")
+    console.warn("[${packageJson.name}] CommonJS support is deprecated and will be removed in 0.20.0. Please consider switching to ESM, it's "+(new Date()).getFullYear()+" already.")
     console.warn("[${packageJson.name}] Learn more about switching to ESM: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c")
 }
     `.trim()
