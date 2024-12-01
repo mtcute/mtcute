@@ -42,5 +42,5 @@ export async function getStarGifts(
     const peers = PeersIndex.from(res)
     const gifts = res.gifts.map(gift => new UserStarGift(gift, peers))
 
-    return makeArrayPaginated(gifts, res.count, offset)
+    return makeArrayPaginated(gifts, res.count, res.nextOffset)
 }
