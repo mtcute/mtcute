@@ -7,6 +7,8 @@ import { utf8ByteLength, utf8Decode, utf8Encode } from './common-internals-web/u
 import { beforeExit } from './exit-hook.js'
 
 export class WebPlatform implements ICorePlatform {
+    name = 'Web'
+
     // ICorePlatform
     declare log: typeof defaultLoggingHandler
     declare beforeExit: typeof beforeExit

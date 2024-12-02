@@ -12,6 +12,8 @@ const BUFFER_BASE64_URL_AVAILABLE = typeof Buffer.isEncoding === 'function' && B
 const toBuffer = (buf: Uint8Array): Buffer => Buffer.from(buf.buffer, buf.byteOffset, buf.byteLength)
 
 export class NodePlatform implements ICorePlatform {
+    name = 'Node'
+
     // ICorePlatform
     declare log: typeof defaultLoggingHandler
     declare beforeExit: typeof beforeExit

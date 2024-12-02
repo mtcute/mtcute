@@ -8,6 +8,8 @@ import { beforeExit } from './utils/exit-hook.js'
 import { normalizeFile } from './utils/normalize-file.js'
 
 export class DenoPlatform implements ICorePlatform {
+    name = 'Deno'
+
     declare log: typeof defaultLoggingHandler
     declare beforeExit: typeof beforeExit
     declare normalizeFile: typeof normalizeFile

@@ -4,6 +4,8 @@ import { NodePlatform } from './common-internals-node/platform.js'
 import { normalizeFile } from './utils/normalize-file.js'
 
 export class BunPlatform extends NodePlatform {
+    name = 'Bun'
+
     declare normalizeFile: typeof normalizeFile
 
     getDeviceModel(): string {
