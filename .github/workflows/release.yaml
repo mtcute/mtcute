@@ -3,16 +3,13 @@ name: Run release
 on:
   workflow_dispatch:
     inputs:
-      packages:
-        description: 'Packages to release (comma separated names, `all` or `updated`)'
-        required: true
-        default: 'updated'
       kind:
         description: 'Release kind (major, minor, patch)'
         required: true
-        default: 'patch'
+        default: 'auto'
         type: choice
         options:
+          - auto
           - major
           - minor
           - patch
@@ -27,7 +24,7 @@ jobs:
     permissions:
       contents: write
       packages: write
-      id-token: write # The OIDC ID token is used for authentication with JSR.      
+      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -36,49 +33,24 @@ jobs:
           token: ${{ secrets.BOT_PAT }}
       - if: ${{ github.event.inputs.branch != 'master' }}
         run: git checkout ${{ github.event.inputs.branch }}
+
       - uses: ./.github/actions/init
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: '2.0'
+
       - name: Initialize configs
         run: |
           git config user.name "mtcute-bot"
           git config user.email mtcute-bot@tei.su
-          npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-      - name: Verify NPM token
-        run: npm whoami
-      - name: Find packages to publish
-        id: find
-        run: node scripts/find-updated-packages.js ${{ inputs.kind }} ${{ inputs.packages }}
-      - name: Generate changelog
-        id: changelog
-        run: node scripts/generate-changelog.js ${{ steps.find.outputs.modified }}
-      - name: Bump versions
-        id: bump
-        run: node scripts/bump-version.js ${{ inputs.kind }} ${{ steps.find.outputs.modified }}
-      - name: Build packages and publish to NPM
-        id: build
+      
+      - name: Run release
         env:
-          GH_RELEASE: 1
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/publish.js ${{ steps.find.outputs.modified }}
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: '1.46.3'
-      - name: Build packages and publish to JSR
-        continue-on-error: true # temporary
-        env:
-          JSR: 1
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/publish.js ${{ steps.find.outputs.modified }}
-      - name: Commit version bumps
         run: |
-          git commit -am "v${{ steps.bump.outputs.version }}"
-          git push
-      - name: GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: v${{ steps.bump.outputs.version }}
-          name: v${{ steps.bump.outputs.version }}
-          artifacts: ${{ steps.build.outputs.tarballs }}
-          body: ${{ steps.changelog.outputs.changelog }}
-          draft: false
-          prerelease: false
+          fuman-build release \
+            --kind=${{ github.event.inputs.kind }} \
+            --with-npm \
+            --npm-token=${{ secrets.NPM_TOKEN }} \
+            --with-jsr \
+            --with-github-release
