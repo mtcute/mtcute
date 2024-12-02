@@ -1,10 +1,12 @@
 import type {
     BusinessCallbackQuery,
-    BusinessMessage,
     CallbackQuery,
     ChosenInlineResult,
     InlineCallbackQuery,
     InlineQuery,
+} from '@mtcute/core'
+import {
+    BusinessMessage,
     Message,
 } from '@mtcute/core'
 
@@ -12,21 +14,23 @@ import type { UpdateContextDistributed } from '../context/base.js'
 
 import type { UpdateFilter } from './types.js'
 
-type UpdatesWithText = UpdateContextDistributed<
-  | Message
-  | BusinessMessage
-  | InlineQuery
-  | ChosenInlineResult
-  | CallbackQuery
-  | InlineCallbackQuery
-  | BusinessCallbackQuery
->
+type UpdatesWithText =
+    | Message
+    | BusinessMessage
+    | UpdateContextDistributed<
+        | InlineQuery
+        | ChosenInlineResult
+        | CallbackQuery
+        | InlineCallbackQuery
+        | BusinessCallbackQuery
+    >
 
 function extractText(obj: UpdatesWithText): string | null {
+    if (obj instanceof Message || obj instanceof BusinessMessage) {
+        return obj.text
+    }
+
     switch (obj._name) {
-        case 'new_message':
-        case 'new_business_message':
-            return obj.text
         case 'inline_query':
             return obj.query
         case 'chosen_inline_result':
