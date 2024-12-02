@@ -19,6 +19,7 @@ import type {
     Sticker,
     StickerSourceType,
     StickerType,
+    Story,
     User,
     Venue,
     Video,
@@ -119,6 +120,8 @@ export const venue: UpdateFilter<Message, { media: Venue }> = mediaOf('venue')
 export const poll: UpdateFilter<Message, { media: Poll }> = mediaOf('poll')
 /** Filter messages containing an invoice */
 export const invoice: UpdateFilter<Message, { media: Invoice }> = mediaOf('invoice')
+/** Filter messages containing a story */
+export const story: UpdateFilter<Message, { media: Story }> = mediaOf('story')
 
 /**
  * Filter messages containing any location (live or static).
