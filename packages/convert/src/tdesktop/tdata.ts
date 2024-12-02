@@ -230,9 +230,9 @@ export class Tdata {
         passcode: string = this.options.passcode ?? '',
     ): Promise<Uint8Array> {
         const hasher = await this.crypto.createHash('sha512')
-        hasher.update(salt)
-        hasher.update(utf8.encoder.encode(passcode))
-        hasher.update(salt)
+        await hasher.update(salt)
+        await hasher.update(utf8.encoder.encode(passcode))
+        await hasher.update(salt)
         const hash = await hasher.digest()
 
         return this.crypto.pbkdf2(
@@ -322,7 +322,7 @@ export class Tdata {
 
         const localKey = keyInnerData
         const count = read.int32be(info)
-        const order = [...Array(count)].map(() => read.int32be(info))
+        const order = [...Array<number>(count)].map(() => read.int32be(info))
         const active = read.int32be(info)
 
         return {

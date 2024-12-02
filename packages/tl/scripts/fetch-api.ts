@@ -23,7 +23,7 @@ import {
     writeTlEntryToString,
 } from '@mtcute/tl-utils'
 import { parseTlEntriesFromJson } from '@mtcute/tl-utils/json.js'
-import { ffetch } from '@fuman/fetch'
+import { ffetchBase as ffetch } from '@fuman/fetch'
 
 import {
     API_SCHEMA_DIFF_JSON_FILE,

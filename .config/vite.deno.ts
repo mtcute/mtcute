@@ -15,7 +15,7 @@ export default defineConfig({
                 ? [process.env.ENTRYPOINT]
                 : collectTestEntrypoints({
                     // these packages rely on node apis and are not meant to be run under deno
-                    skipPackages: ['create-bot', 'crypto-node', 'bun', 'node', 'http-proxy', 'socks-proxy', 'mtproxy'],
+                    skipPackages: ['create-bot', 'crypto-node', 'bun', 'node'],
                     skipTests: [
                     // uses timers
                         'core/src/network/config-manager.test.ts',
@@ -58,15 +58,6 @@ export default defineConfig({
                     return `import {${namesParsed.join(', ')}} from '${POLYFILLS}'`
                 })
                 return code
-            },
-        },
-        {
-            name: 'fix-events',
-            transform(code) {
-                if (!code.includes('events')) return code
-                return code.replace(/^import (.+?) from ['"]events['"]/gms, (_, name) => {
-                    return `import ${name} from 'node:events'`
-                })
             },
         },
         {

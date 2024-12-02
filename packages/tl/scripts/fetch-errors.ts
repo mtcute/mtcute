@@ -2,7 +2,7 @@ import { writeFile } from 'node:fs/promises'
 
 import { parse } from 'csv-parse/sync'
 import type { TlErrors } from '@mtcute/tl-utils'
-import { ffetch } from '@fuman/fetch'
+import { ffetchBase as ffetch } from '@fuman/fetch'
 
 import { ERRORS_JSON_FILE } from './constants.js'
 

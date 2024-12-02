@@ -1,6 +1,5 @@
 import type { HttpProxySettings as FumanHttpProxySettings, ITcpConnection, SocksProxySettings, TcpEndpoint } from '@fuman/net'
 import { performHttpProxyHandshake, performSocksHandshake } from '@fuman/net'
-// @ts-expect-error wip
 import { connectTcp, connectTls } from '@fuman/deno'
 import { BaseMtProxyTransport, type ITelegramConnection, IntermediatePacketCodec, type TelegramTransport } from '@mtcute/core'
 import type { BasicDcOption } from '@mtcute/core/utils.js'

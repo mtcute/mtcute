@@ -1,4 +1,3 @@
-// @ts-expect-error wip
 import { connectTcp } from '@fuman/deno'
 import type { ITcpConnection } from '@fuman/net'
 import { IntermediatePacketCodec, type TelegramTransport } from '@mtcute/core'

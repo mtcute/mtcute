@@ -25,8 +25,8 @@
     },
     "dependencies": {
         "long": "5.2.3",
-        "@fuman/utils": "https://pkg.pr.new/teidesu/fuman/@fuman/utils@b0c74cb",
-        "@fuman/net": "https://pkg.pr.new/teidesu/fuman/@fuman/net@b0c74cb"
+        "@fuman/utils": "0.0.1",
+        "@fuman/net": "0.0.1"
     },
     "devDependencies": {
         "@mtcute/tl-utils": "workspace:^"
