@@ -28,19 +28,21 @@ const platformKey = typeof Symbol !== 'undefined' ? Symbol.for('mtcute.platform'
 let _platform: ICorePlatform | null = (globalThis as any)?.[platformKey] ?? null
 
 export function setPlatform(platform: ICorePlatform): void {
+    let finalPlatform = platform
+
     if (_platform) {
-        if (_platform.constructor !== platform.constructor) {
+        if (_platform.name !== platform.name) {
             throw new MtUnsupportedError('Platform may not be changed at runtime!')
         }
 
-        return
+        finalPlatform = _platform
     }
 
-    _platform = platform
-    TlBinaryReader.platform = platform
-    TlBinaryWriter.platform = platform
+    _platform = finalPlatform
+    TlBinaryReader.platform = finalPlatform
+    TlBinaryWriter.platform = finalPlatform
 
-    ;(globalThis as any)[platformKey] = platform
+    ;(globalThis as any)[platformKey] = finalPlatform
 }
 
 export function getPlatform(): ICorePlatform {
