@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest'
 import { fakeKeyValueRepository } from '@mtcute/test'
+import { describe, expect, it, vi } from 'vitest'
 
 import { UpdatesStateService } from '../../highlevel/storage/service/updates.js'
 

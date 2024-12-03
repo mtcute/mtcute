@@ -1,8 +1,8 @@
 import type { RpcCallMiddleware } from '../network-manager.js'
 
 import type { FloodWaiterOptions } from './flood-waiter.js'
-import { floodWaiter } from './flood-waiter.js'
 import type { InternalErrorsHandlerOptions } from './internal-errors.js'
+import { floodWaiter } from './flood-waiter.js'
 import { internalErrorsHandler } from './internal-errors.js'
 
 export interface BasicMiddlewaresOptions {

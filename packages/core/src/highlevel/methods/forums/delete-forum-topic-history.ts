@@ -1,6 +1,6 @@
-import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { ForumTopic, InputPeerLike } from '../../types/index.js'
+import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import { createDummyUpdate } from '../../updates/utils.js'
 import { resolveChannel } from '../users/resolve-peer.js'
 

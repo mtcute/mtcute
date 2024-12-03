@@ -1,7 +1,7 @@
 import type { tl } from '@mtcute/tl'
 
-import { assertTypeIs } from '../../../utils/type-assertions.js'
 import type { Peer, PeersIndex } from '../../types/peers/index.js'
+import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { parsePeer } from '../../types/peers/index.js'
 import { Story } from '../../types/stories/index.js'
 import { makeInspectable } from '../../utils/index.js'

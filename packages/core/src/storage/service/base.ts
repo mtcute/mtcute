@@ -1,9 +1,9 @@
 import type { tl } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
-import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
-
 import type { Logger } from '../../utils/logger.js'
+
 import type { IStorageDriver } from '../driver.js'
+import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
 
 export interface ServiceOptions {
     driver: IStorageDriver

@@ -14,9 +14,9 @@ import type {
     PollUpdate,
     PollVoteUpdate,
     StoryUpdate,
+    tl,
     UserStatusUpdate,
     UserTypingUpdate,
-    tl,
 } from '@mtcute/core'
 import type { TelegramClient } from '@mtcute/core/client.js'
 

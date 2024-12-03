@@ -1,6 +1,6 @@
-import { Database } from 'bun:sqlite'
 import type { ISqliteDatabase } from '@mtcute/core'
 import { BaseSqliteStorageDriver } from '@mtcute/core'
+import { Database } from 'bun:sqlite'
 
 export interface SqliteStorageDriverOptions {
     /**

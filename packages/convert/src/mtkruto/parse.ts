@@ -1,10 +1,10 @@
-import { MtArgumentError } from '@mtcute/core'
-import { TlBinaryReader } from '@mtcute/core/utils.js'
+import type { MtkrutoSession } from './types.js'
 import { base64 } from '@fuman/utils'
+import { MtArgumentError } from '@mtcute/core'
+
+import { TlBinaryReader } from '@mtcute/core/utils.js'
 
 import { telegramRleDecode } from '../utils/rle.js'
-
-import type { MtkrutoSession } from './types.js'
 
 export function parseMtkrutoSession(session: string): MtkrutoSession {
     const data = telegramRleDecode(base64.decode(session, true))

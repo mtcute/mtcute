@@ -1,5 +1,5 @@
-import { MemoryStorage, MtArgumentError } from '@mtcute/core'
 import type { ICryptoProvider } from '@mtcute/core/utils.js'
+import { MemoryStorage, MtArgumentError } from '@mtcute/core'
 import { createAesIgeForMessage } from '@mtcute/core/utils.js'
 
 export class StubMemoryTelegramStorage extends MemoryStorage {

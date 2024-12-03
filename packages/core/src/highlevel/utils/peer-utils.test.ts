@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { createStub } from '@mtcute/test'
+import { describe, expect, it } from 'vitest'
 
 import { MtInvalidPeerTypeError } from '../types/index.js'
 

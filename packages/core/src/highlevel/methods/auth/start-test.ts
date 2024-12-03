@@ -1,6 +1,6 @@
-import { MtArgumentError } from '../../../types/errors.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { User } from '../../types/index.js'
+import { MtArgumentError } from '../../../types/errors.js'
 
 import { logOut } from './log-out.js'
 import { start } from './start.js'

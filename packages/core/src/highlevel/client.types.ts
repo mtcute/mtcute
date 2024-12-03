@@ -1,17 +1,17 @@
+import type { Emitter } from '@fuman/utils'
 import type { tl } from '@mtcute/tl'
 import type Long from 'long'
-import type { Emitter } from '@fuman/utils'
 
 import type { ConnectionKind, RpcCallOptions } from '../network/index.js'
+import type { ICorePlatform } from '../types/platform.js'
 import type { MustEqual, PublicPart } from '../types/utils.js'
 import type { Logger } from '../utils/logger.js'
-import type { ICorePlatform } from '../types/platform'
 
 import type { AppConfigManager } from './managers/app-config-manager.js'
-import type { TelegramStorageManager } from './storage/storage.js'
-import type { StringSessionData } from './utils/string-session.js'
-import type { RawUpdateInfo } from './updates/types.js'
 import type { TimersManager } from './managers/timers.js'
+import type { TelegramStorageManager } from './storage/storage.js'
+import type { RawUpdateInfo } from './updates/types.js'
+import type { StringSessionData } from './utils/string-session.js'
 
 /**
  * Connection state of the client

@@ -1,14 +1,14 @@
-import Long from 'long'
 import type { tl } from '@mtcute/tl'
-
 import type { ITelegramClient } from '../../client.types.js'
+
 import type { InputPeerLike } from '../../types/index.js'
-import { ChatEvent, PeersIndex } from '../../types/index.js'
 import type { InputChatEventFilters } from '../../types/peers/chat-event/filters.js'
+import Long from 'long'
+import { ChatEvent, PeersIndex } from '../../types/index.js'
 import { normalizeChatEventFilters } from '../../types/peers/chat-event/filters.js'
 import { toInputUser } from '../../utils/peer-utils.js'
-import { resolveChannel } from '../users/resolve-peer.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 
 /**
  * Get chat event log ("Recent actions" in official clients).

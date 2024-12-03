@@ -1,12 +1,12 @@
-import { tl } from '@mtcute/tl'
+import type { PeersIndex } from '../peers/peers-index.js'
 
+import { tl } from '@mtcute/tl'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { Chat } from '../peers/chat.js'
 import { ChatInviteLink } from '../peers/chat-invite-link.js'
 import { ChatMember } from '../peers/chat-member.js'
-import type { PeersIndex } from '../peers/peers-index.js'
+import { Chat } from '../peers/chat.js'
 import { User } from '../peers/user.js'
 
 /**

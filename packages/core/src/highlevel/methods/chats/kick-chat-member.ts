@@ -1,6 +1,6 @@
-import { sleepWithAbort } from '../../../utils/misc-utils.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike, Message } from '../../types/index.js'
+import { sleepWithAbort } from '../../../utils/misc-utils.js'
 import { isInputPeerChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 

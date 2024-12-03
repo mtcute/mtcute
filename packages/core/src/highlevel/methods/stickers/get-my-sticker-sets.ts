@@ -1,8 +1,8 @@
-import Long from 'long'
-
 import type { ITelegramClient } from '../../client.types.js'
-import { StickerSet } from '../../types/misc/sticker-set.js'
+
 import type { ArrayPaginated } from '../../types/utils.js'
+import Long from 'long'
+import { StickerSet } from '../../types/misc/sticker-set.js'
 import { makeArrayPaginated } from '../../utils/misc-utils.js'
 
 // @available=user

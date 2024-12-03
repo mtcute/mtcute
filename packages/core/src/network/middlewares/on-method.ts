@@ -1,5 +1,5 @@
-import type { tl } from '@mtcute/tl'
 import type { Middleware } from '@fuman/utils'
+import type { tl } from '@mtcute/tl'
 
 import type { RpcCallMiddleware, RpcCallMiddlewareContext } from '../network-manager.js'
 

@@ -61,10 +61,8 @@ export default antfu({
         'test/consistent-test-it': 'off',
         'test/prefer-lowercase-title': 'off',
         'test/no-identical-title': 'off',
-        'import/order': ['error', { 'newlines-between': 'always' }],
         'antfu/if-newline': 'off',
         'import/no-relative-packages': 'error',
-        'import/extensions': ['error', 'ignorePackages'],
         'style/max-statements-per-line': ['error', { max: 2 }],
         'ts/no-redeclare': 'off',
         'eslint-comments/no-unlimited-disable': 'off',
@@ -88,6 +86,11 @@ export default antfu({
         'ts/restrict-template-expressions': 'off',
         'ts/method-signature-style': 'off',
         'style/indent-binary-ops': 'off',
+        'antfu/no-top-level-await': 'off',
+        'import/extensions': ['error', 'always', {
+            ignorePackages: true,
+            checkTypeImports: true,
+        }],
     },
 }, {
     ignores: [

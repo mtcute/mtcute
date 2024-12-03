@@ -1,5 +1,5 @@
-import { utf8 } from '@fuman/utils'
 import type Long from 'long'
+import { utf8 } from '@fuman/utils'
 
 const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
 

@@ -1,7 +1,7 @@
-import { typed, u8 } from '@fuman/utils'
-
 import type { IKeyValueRepository } from '../../../storage/repository/key-value.js'
+
 import type { ServiceOptions } from '../../../storage/service/base.js'
+import { typed, u8 } from '@fuman/utils'
 import { BaseService } from '../../../storage/service/base.js'
 
 const KV_PTS = 'updates_pts'

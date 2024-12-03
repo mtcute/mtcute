@@ -1,6 +1,5 @@
 import type { BaseTelegramClient } from '../base.js'
 
-import { serializeError } from './errors.js'
 import type {
     RespondFn,
     SerializedResult,
@@ -8,6 +7,7 @@ import type {
     WorkerInboundMessage,
     WorkerMessageHandler,
 } from './protocol.js'
+import { serializeError } from './errors.js'
 import {
     deserializeResult,
     serializeResult,

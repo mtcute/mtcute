@@ -1,4 +1,5 @@
 import type {
+    _RepliedMessageAssertionsByOrigin,
     Audio,
     Contact,
     Dice,
@@ -25,17 +26,16 @@ import type {
     Video,
     Voice,
     WebPage,
-    _RepliedMessageAssertionsByOrigin,
 } from '@mtcute/core'
+import type { BusinessMessageContext } from '../context/business-message.js'
+
+import type { MessageContext } from '../index.js'
+import type { Modify, UpdateFilter } from './types.js'
+
 import {
     RawDocument,
     RawLocation,
 } from '@mtcute/core'
-
-import type { BusinessMessageContext } from '../context/business-message.js'
-import type { MessageContext } from '../index.js'
-
-import type { Modify, UpdateFilter } from './types.js'
 
 /**
  * Filter incoming messages.

@@ -1,7 +1,7 @@
 import type { tl } from '@mtcute/tl'
 
-import { assertTypeIs } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
+import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { SentCode } from '../../types/auth/sent-code.js'
 import { normalizePhoneNumber } from '../../utils/misc-utils.js'
 

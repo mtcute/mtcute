@@ -1,4 +1,4 @@
-import type { ICorePlatform } from '../types/platform'
+import type { ICorePlatform } from '../types/platform.js'
 import type { MaybePromise } from '../types/utils.js'
 import type { Logger } from '../utils/logger.js'
 

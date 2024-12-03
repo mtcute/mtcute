@@ -1,14 +1,14 @@
 import type { tl } from '@mtcute/tl'
 
 import type { Sticker } from '../media/sticker.js'
-import { parseDocument } from '../media/document-utils.js'
-import { assertTypeIs } from '../../../utils/type-assertions.js'
+import type { TextWithEntities } from '../misc/entities.js'
+import type { PeersIndex } from '../peers/peers-index.js'
 import { MtTypeAssertionError } from '../../../types/errors.js'
+import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import type { PeersIndex } from '../peers/peers-index.js'
+import { parseDocument } from '../media/document-utils.js'
 import { User } from '../peers/user.js'
-import type { TextWithEntities } from '../misc/entities.js'
 
 /**
  * A gift with stars attached to it.

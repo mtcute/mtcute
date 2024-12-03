@@ -1,9 +1,9 @@
 import type { tl } from '@mtcute/tl'
 
-import { MtTypeAssertionError } from '../../../types/errors.js'
-import { assertTrue } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
+import { MtTypeAssertionError } from '../../../types/errors.js'
+import { assertTrue } from '../../../utils/type-assertions.js'
 import { MtInvalidPeerTypeError } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerUser, toInputChannel } from '../../utils/index.js'
 import { isSelfPeer } from '../auth/utils.js'

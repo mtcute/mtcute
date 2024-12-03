@@ -1,10 +1,10 @@
-import Long from 'long'
 import type { tl } from '@mtcute/tl'
+import type { ITelegramClient } from '../../client.types.js'
 
+import type { ArrayWithTotal, InputPeerLike } from '../../types/index.js'
+import Long from 'long'
 import { assertNever } from '../../../types/utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { ArrayWithTotal, InputPeerLike } from '../../types/index.js'
 import { ChatMember, MtInvalidPeerTypeError, PeersIndex } from '../../types/index.js'
 import { makeArrayWithTotal } from '../../utils/index.js'
 import { isInputPeerChannel, isInputPeerChat, toInputChannel } from '../../utils/peer-utils.js'

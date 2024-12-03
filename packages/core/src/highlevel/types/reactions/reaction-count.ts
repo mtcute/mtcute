@@ -1,8 +1,8 @@
 import type { tl } from '@mtcute/tl'
 
-import { makeInspectable } from '../../utils/index.js'
-
 import type { ReactionEmoji } from './types.js'
+
+import { makeInspectable } from '../../utils/index.js'
 import { toReactionEmoji } from './types.js'
 
 /**

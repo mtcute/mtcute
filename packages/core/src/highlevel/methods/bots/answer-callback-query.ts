@@ -1,8 +1,8 @@
-import Long from 'long'
-
-import { assertTrue } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
+
 import type { CallbackQuery } from '../../types/updates/callback-query.js'
+import Long from 'long'
+import { assertTrue } from '../../../utils/type-assertions.js'
 
 /**
  * Send an answer to a callback query.

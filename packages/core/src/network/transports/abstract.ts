@@ -1,6 +1,6 @@
-import type { tl } from '@mtcute/tl'
 import type { IFrameDecoder, IFrameEncoder } from '@fuman/io'
 import type { IConnection } from '@fuman/net'
+import type { tl } from '@mtcute/tl'
 
 import type { MaybePromise } from '../../types/index.js'
 import type { BasicDcOption, ICryptoProvider, Logger } from '../../utils/index.js'

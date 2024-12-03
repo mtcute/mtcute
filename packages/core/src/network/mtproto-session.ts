@@ -1,25 +1,25 @@
-import Long from 'long'
 import type { mtp, tl } from '@mtcute/tl'
 import type { TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
-import { TlSerializationCounter } from '@mtcute/tl-runtime'
-import { type Deferred, Deque, LruSet, timers } from '@fuman/utils'
-
-import { MtcuteError } from '../types/index.js'
 import type {
     ICryptoProvider,
     Logger,
 } from '../utils/index.js'
+import type { ServerSaltManager } from './server-salt.js'
+import { type Deferred, Deque, LruSet, timers } from '@fuman/utils'
+
+import { TlSerializationCounter } from '@mtcute/tl-runtime'
+import Long from 'long'
+import { MtcuteError } from '../types/index.js'
+
 import {
-    LongMap,
-    LongSet,
-    SortedArray,
     compareLongs,
     getRandomInt,
+    LongMap,
+    LongSet,
     randomLong,
+    SortedArray,
 } from '../utils/index.js'
-
 import { AuthKey } from './auth-key.js'
-import type { ServerSaltManager } from './server-salt.js'
 
 export interface PendingRpc {
     method: string

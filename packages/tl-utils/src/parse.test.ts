@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from 'vitest'
-
-import { parseTlToEntries } from './parse.js'
 import type { TlEntry } from './types.js'
+
+import { describe, expect, it, vi } from 'vitest'
+import { parseTlToEntries } from './parse.js'
 
 describe('tl parser', () => {
     const test = (tl: string, expected: TlEntry[], params?: Parameters<typeof parseTlToEntries>[1]) => {

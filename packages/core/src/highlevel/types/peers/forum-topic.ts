@@ -1,12 +1,12 @@
 import type { tl } from '@mtcute/tl'
 
+import type { Peer } from './peer.js'
 import { hasValueAtKey } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MtMessageNotFoundError } from '../errors.js'
-import { DraftMessage, Message } from '../messages/index.js'
 
-import type { Peer } from './peer.js'
+import { DraftMessage, Message } from '../messages/index.js'
 import { parsePeer } from './peer.js'
 import { PeersIndex } from './peers-index.js'
 

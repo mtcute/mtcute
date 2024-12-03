@@ -1,9 +1,9 @@
 import type { tl } from '@mtcute/tl'
 
+import type { Sticker } from '../media/sticker.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { parseDocument } from '../media/document-utils.js'
-import type { Sticker } from '../media/sticker.js'
 
 /**
  * Information about a "business intro" – text that is displayed

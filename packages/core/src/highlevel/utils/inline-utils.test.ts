@@ -1,6 +1,6 @@
+import type { tl } from '@mtcute/tl'
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
-import type { tl } from '@mtcute/tl'
 
 import { encodeInlineMessageId, normalizeInlineId, parseInlineMessageId } from './inline-utils.js'
 

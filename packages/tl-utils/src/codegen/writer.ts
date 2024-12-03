@@ -1,6 +1,6 @@
+import type { TlArgument, TlEntry } from '../types.js'
 import { calculateStaticSizes } from '../calculator.js'
 import { computeConstructorIdFromEntry } from '../ctor-id.js'
-import type { TlArgument, TlEntry } from '../types.js'
 import { TL_PRIMITIVES } from '../types.js'
 
 import { snakeToCamel } from './utils.js'

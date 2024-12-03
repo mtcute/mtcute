@@ -1,8 +1,8 @@
 import type { tl } from '@mtcute/tl'
 
-import { randomLong } from '../../../utils/long-utils.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputMediaLike, InputPeerLike, InputPrivacyRule, InputText, Story } from '../../types/index.js'
+import { randomLong } from '../../../utils/long-utils.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizePrivacyRules } from '../misc/normalize-privacy-rules.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'

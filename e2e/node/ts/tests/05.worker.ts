@@ -1,15 +1,15 @@
+import type { Message } from '@mtcute/node'
+import type { CustomMethods } from './_worker.js'
+
 import path from 'node:path'
 import { Worker } from 'node:worker_threads'
-
-import { expect } from 'chai'
-import { describe, it } from 'mocha'
 import { TelegramClient } from '@mtcute/core/client.js'
-import type { Message } from '@mtcute/node'
 import { Long, TelegramWorkerPort, tl } from '@mtcute/node'
+import { expect } from 'chai'
+
+import { describe, it } from 'mocha'
 
 import { getApiParams, waitFor } from '../utils.js'
-
-import type { CustomMethods } from './_worker.js'
 
 describe('5. worker', function () {
     this.timeout(300_000)

@@ -1,5 +1,5 @@
-import { beforeAll, describe, expect, it } from 'vitest'
 import { hex, utf8 } from '@fuman/utils'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 import { __getWasm, sha1, sha256 } from '../src/index.js'
 

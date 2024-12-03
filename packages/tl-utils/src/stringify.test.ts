@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
-
-import { writeTlEntryToString } from './stringify.js'
 import type { TlArgument, TlEntry } from './types.js'
+
+import { describe, expect, it } from 'vitest'
+import { writeTlEntryToString } from './stringify.js'
 
 describe('writeTlEntryToString', () => {
     const make = (name: string, type: string, ...args: string[]): TlEntry => ({

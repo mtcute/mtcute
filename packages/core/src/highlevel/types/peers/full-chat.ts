@@ -7,9 +7,9 @@ import { Photo } from '../media/photo.js'
 import { StickerSet } from '../misc/sticker-set.js'
 import { BusinessAccount } from '../premium/business-account.js'
 
-import { Chat } from './chat.js'
 import { ChatInviteLink } from './chat-invite-link.js'
 import { ChatLocation } from './chat-location.js'
+import { Chat } from './chat.js'
 import { PeersIndex } from './peers-index.js'
 
 /**

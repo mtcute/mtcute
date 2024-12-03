@@ -1,12 +1,12 @@
-import type Long from 'long'
 import type { tl } from '@mtcute/tl'
 import type { TlReaderMap } from '@mtcute/tl-runtime'
-import { TlBinaryReader } from '@mtcute/tl-runtime'
+import type Long from 'long'
+import type { ICryptoProvider, Logger } from '../utils/index.js'
 import { typed, u8 } from '@fuman/utils'
 
+import { TlBinaryReader } from '@mtcute/tl-runtime'
 import { MtcuteError } from '../types/errors.js'
 import { createAesIgeForMessage } from '../utils/crypto/mtproto.js'
-import type { ICryptoProvider, Logger } from '../utils/index.js'
 
 export class AuthKey {
     ready = false

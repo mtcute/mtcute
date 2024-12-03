@@ -2,8 +2,8 @@ import type { tl } from '@mtcute/tl'
 
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputMessageId } from '../../types/messages/index.js'
-import { Message, normalizeInputMessageId } from '../../types/messages/index.js'
 import type { InputPeerLike } from '../../types/peers/index.js'
+import { Message, normalizeInputMessageId } from '../../types/messages/index.js'
 import { PeersIndex } from '../../types/peers/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 

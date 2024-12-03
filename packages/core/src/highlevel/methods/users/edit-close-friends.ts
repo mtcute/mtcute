@@ -1,6 +1,6 @@
-import { assertTrue } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
+import { assertTrue } from '../../../utils/type-assertions.js'
 import { toInputUser } from '../../utils/index.js'
 
 import { resolvePeerMany } from './resolve-peer-many.js'

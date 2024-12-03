@@ -1,8 +1,8 @@
-import { tl } from '@mtcute/tl'
-
-import { assertTypeIs } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
+
 import type { InputPeerLike } from '../../types/index.js'
+import { tl } from '@mtcute/tl'
+import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { ChatMember, MtInvalidPeerTypeError, PeersIndex } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerChat, isInputPeerUser, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'

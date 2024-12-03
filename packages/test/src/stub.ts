@@ -1,7 +1,7 @@
-import Long from 'long'
 import type { tl } from '@mtcute/tl'
 import type { TlArgument } from '@mtcute/tl-utils'
 import { u8 } from '@fuman/utils'
+import Long from 'long'
 
 import { getEntriesMap } from './schema.js'
 

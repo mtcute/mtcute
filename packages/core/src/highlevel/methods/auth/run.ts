@@ -1,7 +1,7 @@
-import { unknownToError } from '@fuman/utils'
-
 import type { ITelegramClient } from '../../client.types.js'
+
 import type { User } from '../../types/index.js'
+import { unknownToError } from '@fuman/utils'
 
 import { start } from './start.js'
 

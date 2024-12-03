@@ -46,7 +46,7 @@
     "build-package-vite": "node scripts/build-package-vite.js"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "2.26.0",
+    "@antfu/eslint-config": "^3.11.2",
     "@fuman/build": "0.0.1",
     "@fuman/utils": "0.0.1",
     "@types/deno": "npm:@teidesu/deno-types@1.46.3",

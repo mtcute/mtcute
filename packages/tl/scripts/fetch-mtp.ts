@@ -2,9 +2,9 @@
 
 import { writeFile } from 'node:fs/promises'
 
-import * as cheerio from 'cheerio'
-import { parseTlToEntries } from '@mtcute/tl-utils'
 import { ffetchBase as ffetch } from '@fuman/fetch'
+import { parseTlToEntries } from '@mtcute/tl-utils'
+import * as cheerio from 'cheerio'
 
 import { CORE_DOMAIN, MTP_SCHEMA_JSON_FILE } from './constants.js'
 

@@ -1,5 +1,5 @@
-import { TlBinaryWriter } from '@mtcute/tl-runtime'
 import { base64, utf8 } from '@fuman/utils'
+import { TlBinaryWriter } from '@mtcute/tl-runtime'
 
 import { tdFileId as td } from './types.js'
 import { assertNever, telegramRleEncode } from './utils.js'

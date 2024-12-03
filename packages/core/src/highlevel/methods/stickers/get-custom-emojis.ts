@@ -1,11 +1,11 @@
 import type { tl } from '@mtcute/tl'
 
-import { MtTypeAssertionError } from '../../../types/errors.js'
 import type { MaybeArray } from '../../../types/utils.js'
-import { LongSet } from '../../../utils/long-utils.js'
-import { assertTypeIs } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { Message, Sticker } from '../../types/index.js'
+import { MtTypeAssertionError } from '../../../types/errors.js'
+import { LongSet } from '../../../utils/long-utils.js'
+import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { parseDocument } from '../../types/media/document-utils.js'
 
 /**

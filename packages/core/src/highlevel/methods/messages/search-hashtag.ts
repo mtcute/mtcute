@@ -1,9 +1,9 @@
 import type { tl } from '@mtcute/tl'
 
-import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
-import { Message, PeersIndex } from '../../types/index.js'
 import type { ArrayPaginated } from '../../types/utils.js'
+import { assertTypeIsNot } from '../../../utils/type-assertions.js'
+import { Message, PeersIndex } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/misc-utils.js'
 
 // @exported

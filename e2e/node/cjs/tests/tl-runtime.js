@@ -1,8 +1,8 @@
+const { NodePlatform } = require('@mtcute/node')
 const { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } = require('@mtcute/tl-runtime')
+const { expect } = require('chai')
 const Long = require('long')
 const { describe, it } = require('mocha')
-const { expect } = require('chai')
-const { NodePlatform } = require('@mtcute/node')
 
 // here we primarily want to check that everything imports properly,
 // and that the code is actually executable. The actual correctness

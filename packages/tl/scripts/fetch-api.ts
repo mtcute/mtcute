@@ -4,16 +4,17 @@
 //
 // Conflicts merging is interactive, so we can't put this in CI
 
-import { readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
-import * as readline from 'node:readline'
-
-import * as cheerio from 'cheerio'
-import { isPresent } from '@mtcute/core/utils.js'
 import type {
     TlEntry,
     TlFullSchema,
 } from '@mtcute/tl-utils'
+import type { TlPackedSchema } from './schema.js'
+import { readFile, writeFile } from 'node:fs/promises'
+
+import { join } from 'node:path'
+import * as readline from 'node:readline'
+import { ffetchBase as ffetch } from '@fuman/fetch'
+import { isPresent } from '@mtcute/core/utils.js'
 import {
     generateTlSchemasDifference,
     mergeTlEntries,
@@ -23,24 +24,23 @@ import {
     writeTlEntryToString,
 } from '@mtcute/tl-utils'
 import { parseTlEntriesFromJson } from '@mtcute/tl-utils/json.js'
-import { ffetchBase as ffetch } from '@fuman/fetch'
 
+import * as cheerio from 'cheerio'
 import {
+    __dirname,
     API_SCHEMA_DIFF_JSON_FILE,
     API_SCHEMA_JSON_FILE,
     BLOGFORK_DOMAIN,
-    COREFORK_DOMAIN,
     CORE_DOMAIN,
+    COREFORK_DOMAIN,
     TDESKTOP_LAYER,
     TDESKTOP_SCHEMA,
     TDLIB_SCHEMA,
     WEBA_LAYER,
     WEBA_SCHEMA,
     WEBK_SCHEMA,
-    __dirname,
 } from './constants.js'
 import { applyDocumentation, fetchDocumentation, getCachedDocumentation } from './documentation.js'
-import type { TlPackedSchema } from './schema.js'
 import { packTlSchema, unpackTlSchema } from './schema.js'
 
 const README_MD_FILE = join(__dirname, '../README.md')

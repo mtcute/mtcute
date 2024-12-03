@@ -1,6 +1,6 @@
+import type { ITelegramClient } from '../../client.types.js'
 import { MtArgumentError } from '../../../types/errors.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import type { ITelegramClient } from '../../client.types.js'
 
 /**
  * Enable 2FA password on your account

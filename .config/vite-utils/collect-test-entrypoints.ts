@@ -1,5 +1,5 @@
-import { join, resolve } from 'node:path'
 import * as fs from 'node:fs'
+import { join, resolve } from 'node:path'
 
 import { globSync } from 'glob'
 

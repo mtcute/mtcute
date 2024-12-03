@@ -1,15 +1,15 @@
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
-import { asyncResettable } from '../utils/index.js'
+import type { ICorePlatform } from '../types/platform.js'
 import type { Logger } from '../utils/logger.js'
-import type { ICorePlatform } from '../types/platform'
+import type { IStorageDriver } from './driver.js'
 
 import type { IMtStorageProvider } from './provider.js'
-import { AuthKeysService } from './service/auth-keys.js'
 import type { ServiceOptions } from './service/base.js'
+import { asyncResettable } from '../utils/index.js'
+import { AuthKeysService } from './service/auth-keys.js'
 import { DefaultDcsService } from './service/default-dcs.js'
 import { FutureSaltsService } from './service/future-salts.js'
-import type { IStorageDriver } from './driver.js'
 
 interface StorageManagerOptions {
     provider: IMtStorageProvider

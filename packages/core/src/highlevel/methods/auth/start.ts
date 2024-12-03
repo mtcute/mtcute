@@ -1,22 +1,22 @@
 /* eslint-disable no-console */
-import { tl } from '@mtcute/tl'
-
-import { MtArgumentError, MtcuteError } from '../../../types/errors.js'
 import type { MaybePromise } from '../../../types/utils.js'
+
 import type { ITelegramClient } from '../../client.types.js'
 import type { SentCode } from '../../types/auth/sent-code.js'
 import type { User } from '../../types/peers/user.js'
 import type { MaybeDynamic } from '../../types/utils.js'
-import { normalizePhoneNumber, resolveMaybeDynamic } from '../../utils/misc-utils.js'
 import type { StringSessionData } from '../../utils/string-session.js'
+import { tl } from '@mtcute/tl'
+import { MtArgumentError, MtcuteError } from '../../../types/errors.js'
+import { normalizePhoneNumber, resolveMaybeDynamic } from '../../utils/misc-utils.js'
 import { getMe } from '../users/get-me.js'
 
 import { checkPassword } from './check-password.js'
 import { resendCode } from './resend-code.js'
 import { sendCode } from './send-code.js'
-import { signIn } from './sign-in.js'
 import { signInBot } from './sign-in-bot.js'
 import { signInQr } from './sign-in-qr.js'
+import { signIn } from './sign-in.js'
 
 // @available=both
 /**

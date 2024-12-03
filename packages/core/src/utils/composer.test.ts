@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-
 import type { Middleware } from './composer.js'
+
+import { describe, expect, it } from 'vitest'
 import { composeMiddlewares } from './composer.js'
 
 describe('composeMiddlewares', () => {

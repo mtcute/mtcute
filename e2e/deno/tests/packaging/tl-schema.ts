@@ -1,11 +1,11 @@
-import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 import { Long } from '@mtcute/core'
 import { setPlatform } from '@mtcute/core/platform.js'
 import { tl } from '@mtcute/tl'
+import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
 import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
-import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
 import { WebPlatform } from '@mtcute/web'
+import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 
 // here we primarily want to check that @mtcute/tl correctly works with @mtcute/tl-runtime
 

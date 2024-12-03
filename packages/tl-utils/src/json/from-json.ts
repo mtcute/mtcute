@@ -1,8 +1,8 @@
 import type { TlArgument, TlEntry } from '../types.js'
-import { TL_PRIMITIVES } from '../types.js'
-import { parseArgumentType } from '../utils.js'
-
 import type { TlParamJson } from './types.js'
+import { TL_PRIMITIVES } from '../types.js'
+
+import { parseArgumentType } from '../utils.js'
 import { parseTlSchemaFromJson } from './types.js'
 
 function paramsToArguments(params: TlParamJson[]): TlArgument[] {

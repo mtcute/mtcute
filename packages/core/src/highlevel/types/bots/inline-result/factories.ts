@@ -1,11 +1,6 @@
 import type { tl } from '@mtcute/tl'
 
-import { MtArgumentError } from '../../../../types/errors.js'
 import type { ITelegramClient } from '../../../client.types.js'
-import { fileIdToInputDocument, fileIdToInputPhoto } from '../../../utils/convert-file-id.js'
-import { extractFileName } from '../../../utils/file-utils.js'
-import { BotInlineMessage } from '../inline-message/index.js'
-
 import type {
     InputInlineResult,
     InputInlineResultArticle,
@@ -21,6 +16,11 @@ import type {
     InputInlineResultVideo,
     InputInlineResultVoice,
 } from './types.js'
+import { MtArgumentError } from '../../../../types/errors.js'
+import { fileIdToInputDocument, fileIdToInputPhoto } from '../../../utils/convert-file-id.js'
+import { extractFileName } from '../../../utils/file-utils.js'
+
+import { BotInlineMessage } from '../inline-message/index.js'
 
 /**
  * Create an inline result containing an article

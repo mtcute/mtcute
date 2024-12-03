@@ -1,11 +1,11 @@
 import type { tl } from '@mtcute/tl'
 
+import type { PeersIndex } from '../peers-index.js'
+import type { ChatAction } from './actions.js'
 import { makeInspectable } from '../../../utils/index.js'
 import { memoizeGetters } from '../../../utils/memoize.js'
-import type { PeersIndex } from '../peers-index.js'
-import { User } from '../user.js'
 
-import type { ChatAction } from './actions.js'
+import { User } from '../user.js'
 import { _actionFromTl } from './actions.js'
 
 export * from './actions.js'

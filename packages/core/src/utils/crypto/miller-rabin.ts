@@ -1,8 +1,8 @@
+import type { ICryptoProvider } from './abstract.js'
+
 import { bigint } from '@fuman/utils'
 
 import { randomBigIntBits } from '../bigint-utils.js'
-
-import type { ICryptoProvider } from './abstract.js'
 
 export function millerRabin(crypto: ICryptoProvider, n: bigint, rounds = 20): boolean {
     // small numbers: 0, 1 are not prime, 2, 3 are prime

@@ -1,6 +1,6 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputStickerSet } from '../../types/index.js'
-import { StickerSet, normalizeInputStickerSet } from '../../types/index.js'
+import { normalizeInputStickerSet, StickerSet } from '../../types/index.js'
 
 /**
  * Get a sticker set and stickers inside of it.

@@ -1,13 +1,13 @@
-import type { SecureContextOptions } from 'node:tls'
-
 import type { HttpProxySettings as FumanHttpProxySettings, ITcpConnection, SocksProxySettings, TcpEndpoint } from '@fuman/net'
+
+import type { BasicDcOption } from '@mtcute/core/utils.js'
+import type { SecureContextOptions } from 'node:tls'
 import { performHttpProxyHandshake, performSocksHandshake } from '@fuman/net'
 import { connectTcp, connectTls } from '@fuman/node'
-import { BaseMtProxyTransport, type ITelegramConnection, IntermediatePacketCodec, type TelegramTransport } from '@mtcute/core'
-import type { BasicDcOption } from '@mtcute/core/utils.js'
+import { BaseMtProxyTransport, IntermediatePacketCodec, type ITelegramConnection, type TelegramTransport } from '@mtcute/core'
 
 export type { SocksProxySettings } from '@fuman/net'
-export { SocksProxyConnectionError, HttpProxyConnectionError } from '@fuman/net'
+export { HttpProxyConnectionError, SocksProxyConnectionError } from '@fuman/net'
 export type { MtProxySettings } from '@mtcute/core'
 
 export interface HttpProxySettings extends FumanHttpProxySettings {

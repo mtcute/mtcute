@@ -1,7 +1,7 @@
-import { fileURLToPath } from 'node:url'
+import * as fs from 'node:fs'
 import { createRequire } from 'node:module'
 import { resolve } from 'node:path'
-import * as fs from 'node:fs'
+import { fileURLToPath } from 'node:url'
 
 const KNOWN_DECORATORS = ['memoizeGetters', 'makeInspectable']
 

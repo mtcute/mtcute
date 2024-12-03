@@ -1,12 +1,12 @@
-import Long from 'long'
-import { describe, expect, it } from 'vitest'
 import type { TextWithEntities, tl } from '@mtcute/core'
-import { MessageEntity } from '@mtcute/core'
-
 // prettier has "html" special-cased which breaks the formatting
 // this is not an issue when using normally, since we properly handle newlines/spaces,
 // but here we want to test everything as it is
 import type { HtmlUnparseOptions } from './index.js'
+import { MessageEntity } from '@mtcute/core'
+import Long from 'long'
+
+import { describe, expect, it } from 'vitest'
 import { html as htm } from './index.js'
 
 function createEntity<T extends tl.TypeMessageEntity['_']>(type: T, offset: number, length: number, additional?: Omit<tl.FindByName<tl.TypeMessageEntity, T>, '_' | 'offset' | 'length'>): tl.TypeMessageEntity {

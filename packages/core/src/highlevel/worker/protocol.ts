@@ -1,11 +1,11 @@
-import type { Worker as NodeWorker } from 'node:worker_threads'
-
-import Long from 'long'
 import type { tl } from '@mtcute/tl'
 
+import type { Worker as NodeWorker } from 'node:worker_threads'
 import type { ConnectionState } from '../client.types.js'
 
 import type { SerializedError } from './errors.js'
+
+import Long from 'long'
 
 export type WorkerInboundMessage =
   | {

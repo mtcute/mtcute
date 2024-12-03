@@ -1,8 +1,8 @@
 import type { tl } from '@mtcute/tl'
 
+import type { MessageMedia } from '../messages/message-media.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import type { MessageMedia } from '../messages/message-media.js'
 
 import { ExtendedMediaPreview } from './extended-media.js'
 

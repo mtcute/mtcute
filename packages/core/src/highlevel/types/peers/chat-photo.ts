@@ -1,6 +1,6 @@
-import Long from 'long'
-import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
 import type { tl } from '@mtcute/tl'
+import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
+import Long from 'long'
 
 import { MtArgumentError } from '../../../types/errors.js'
 import { toggleChannelIdMark } from '../../../utils/peer-utils.js'

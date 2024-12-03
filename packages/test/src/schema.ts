@@ -1,5 +1,5 @@
-import * as schema_ from '@mtcute/tl/api-schema.json' assert { type: 'json' }
 import type { TlEntry } from '@mtcute/tl-utils'
+import * as schema_ from '@mtcute/tl/api-schema.json' assert { type: 'json' }
 
 const schema = ('default' in schema_ ? schema_.default : schema_) as { e: TlEntry[] }
 

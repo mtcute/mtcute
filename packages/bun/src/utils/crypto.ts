@@ -1,8 +1,9 @@
-import { readFile } from 'node:fs/promises'
-import { deflateSync, gunzipSync } from 'node:zlib'
-import { pbkdf2 } from 'node:crypto'
-
 import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
+import { pbkdf2 } from 'node:crypto'
+import { readFile } from 'node:fs/promises'
+
+import { deflateSync, gunzipSync } from 'node:zlib'
+import { u8 } from '@fuman/utils'
 import { BaseCryptoProvider } from '@mtcute/core/utils.js'
 import {
     createCtr256,
@@ -12,7 +13,6 @@ import {
     ige256Encrypt,
     initSync,
 } from '@mtcute/wasm'
-import { u8 } from '@fuman/utils'
 
 // we currently prefer wasm for ctr because bun mostly uses browserify polyfills for node:crypto
 // which are slow AND semi-broken

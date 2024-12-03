@@ -1,8 +1,8 @@
 import type { tl } from '@mtcute/tl'
 
-import { isPresent } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPrivacyRule } from '../../types/index.js'
+import { isPresent } from '../../../utils/type-assertions.js'
 import { toInputUser } from '../../utils/index.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
 

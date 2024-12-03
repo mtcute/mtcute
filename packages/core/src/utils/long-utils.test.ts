@@ -2,10 +2,10 @@ import Long from 'long'
 import { describe, expect, it } from 'vitest'
 
 import {
-    LongMap,
-    LongSet,
     longFromBuffer,
     longFromFastString,
+    LongMap,
+    LongSet,
     longToFastString,
     randomLong,
     removeFromLongArray,

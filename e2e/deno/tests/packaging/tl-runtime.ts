@@ -1,8 +1,8 @@
-import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 import { Long } from '@mtcute/core'
 import { setPlatform } from '@mtcute/core/platform.js'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
 import { WebPlatform } from '@mtcute/web'
+import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 
 // here we primarily want to check that everything imports properly,
 // and that the code is actually executable. The actual correctness

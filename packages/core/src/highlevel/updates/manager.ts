@@ -1,26 +1,26 @@
-import { tl } from '@mtcute/tl'
-import Long from 'long'
-import { AsyncLock, ConditionVariable, Deque, timers, unknownToError } from '@fuman/utils'
-
-import { MtArgumentError } from '../../types/errors.js'
 import type { MaybePromise } from '../../types/utils.js'
-import { assertNever } from '../../types/utils.js'
 import type {
     Logger,
 } from '../../utils/index.js'
+import type { BaseTelegramClient } from '../base.js'
+
+import type { CurrentUserInfo } from '../storage/service/current-user.js'
+import { AsyncLock, ConditionVariable, Deque, timers, unknownToError } from '@fuman/utils'
+import { tl } from '@mtcute/tl'
+import Long from 'long'
+import { MtArgumentError } from '../../types/errors.js'
+import { assertNever } from '../../types/utils.js'
 import {
     EarlyTimer,
-    SortedLinkedList,
     getBarePeerId,
     getMarkedPeerId,
     parseMarkedPeerId,
-    toInputChannel,
+    SortedLinkedList,
     toggleChannelIdMark,
+    toInputChannel,
 } from '../../utils/index.js'
-import type { BaseTelegramClient } from '../base.js'
-import type { CurrentUserInfo } from '../storage/service/current-user.js'
-import { PeersIndex } from '../types/peers/peers-index.js'
 import { _getChannelsBatched } from '../methods/chats/batched-queries.js'
+import { PeersIndex } from '../types/peers/peers-index.js'
 
 import { type PendingUpdate, type PendingUpdateContainer, RawUpdateInfo, type UpdatesManagerParams } from './types.js'
 import {

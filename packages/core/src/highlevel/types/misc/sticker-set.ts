@@ -1,13 +1,13 @@
-import { tl } from '@mtcute/tl'
+import type { InputFileLike } from '../files/index.js'
 
+import type { MaskPosition, Sticker, StickerType } from '../media/index.js'
+import { tl } from '@mtcute/tl'
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { LongMap } from '../../../utils/long-utils.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MtEmptyError } from '../errors.js'
-import type { InputFileLike } from '../files/index.js'
 import { parseSticker } from '../media/document-utils.js'
-import type { MaskPosition, Sticker, StickerType } from '../media/index.js'
 import { Thumbnail } from '../media/index.js'
 
 /**

@@ -1,10 +1,10 @@
-import * as os from 'node:os'
-
 import type { ICorePlatform } from '@mtcute/core'
 
-import { normalizeFile } from './utils/normalize-file.js'
-import { defaultLoggingHandler } from './utils/logging.js'
+import * as os from 'node:os'
+
 import { beforeExit } from './utils/exit-hook.js'
+import { defaultLoggingHandler } from './utils/logging.js'
+import { normalizeFile } from './utils/normalize-file.js'
 
 export class BunPlatform implements ICorePlatform {
     // ICorePlatform

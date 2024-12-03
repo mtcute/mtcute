@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import type { OtherLanguageWrap } from '../src/index.js'
 import { Message, PeersIndex } from '@mtcute/core'
 import { MessageContext } from '@mtcute/dispatcher'
 
-import type { OtherLanguageWrap } from '../src/index.js'
+import { describe, expect, it } from 'vitest'
 import { createMtcuteI18n } from '../src/index.js'
 import { createPluralEnglish, pluralizeEnglish } from '../src/plurals/english.js'
 import { createPluralRussian } from '../src/plurals/russian.js'

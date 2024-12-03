@@ -1,5 +1,5 @@
-import type Long from 'long'
 import type { tl } from '@mtcute/tl'
+import type Long from 'long'
 
 import { makeInspectable } from '../../utils/inspectable.js'
 

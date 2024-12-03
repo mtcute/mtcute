@@ -1,7 +1,7 @@
-import { tl } from '@mtcute/tl'
-
 import type { ITelegramClient } from '../../client.types.js'
+
 import type { InputMediaLike, InputText, ReplyMarkup } from '../../types/index.js'
+import { tl } from '@mtcute/tl'
 import { BotKeyboard } from '../../types/index.js'
 import { normalizeInlineId } from '../../utils/inline-utils.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'

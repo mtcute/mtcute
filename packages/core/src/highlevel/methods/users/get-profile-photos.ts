@@ -1,9 +1,9 @@
-import Long from 'long'
 import type { tl } from '@mtcute/tl'
-
-import { assertTypeIs } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
+
 import type { ArrayPaginated, InputPeerLike } from '../../types/index.js'
+import Long from 'long'
+import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { Photo } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/index.js'
 

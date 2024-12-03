@@ -1,9 +1,9 @@
 import type { tl } from '@mtcute/tl'
 
+import type { PeersIndex, PeerType } from '../peers/index.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Location } from '../media/location.js'
-import type { PeerType, PeersIndex } from '../peers/index.js'
 import { User } from '../peers/index.js'
 
 const PEER_TYPE_MAP: Record<tl.TypeInlineQueryPeerType['_'], PeerType> = {

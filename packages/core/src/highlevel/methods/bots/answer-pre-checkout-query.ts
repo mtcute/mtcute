@@ -1,9 +1,9 @@
-import Long from 'long'
 import type { tl } from '@mtcute/tl'
-
-import { assertTrue } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
+
 import type { PreCheckoutQuery } from '../../types/updates/pre-checkout-query.js'
+import Long from 'long'
+import { assertTrue } from '../../../utils/type-assertions.js'
 
 /**
  * Answer a pre-checkout query.

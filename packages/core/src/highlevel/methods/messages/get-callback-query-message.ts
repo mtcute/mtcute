@@ -1,11 +1,11 @@
 import type { tl } from '@mtcute/tl'
 
-import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
-import { Message } from '../../types/messages/message.js'
 import type { InputPeerLike } from '../../types/peers/index.js'
-import { PeersIndex } from '../../types/peers/index.js'
 import type { CallbackQuery } from '../../types/updates/callback-query.js'
+import { assertTypeIsNot } from '../../../utils/type-assertions.js'
+import { Message } from '../../types/messages/message.js'
+import { PeersIndex } from '../../types/peers/index.js'
 import { isInputPeerChannel, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 

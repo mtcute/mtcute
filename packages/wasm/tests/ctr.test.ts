@@ -1,5 +1,5 @@
-import { beforeAll, describe, expect, it } from 'vitest'
 import { hex } from '@fuman/utils'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 import { __getWasm, createCtr256, ctr256, freeCtr256 } from '../src/index.js'
 

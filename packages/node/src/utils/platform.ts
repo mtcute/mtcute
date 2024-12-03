@@ -1,6 +1,6 @@
-import * as os from 'node:os'
-
 import type { ICorePlatform } from '@mtcute/core'
+
+import * as os from 'node:os'
 
 import { normalizeFile } from '../utils/normalize-file.js'
 

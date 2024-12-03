@@ -1,7 +1,7 @@
-import Long from 'long'
-
-import { assertTypeIs } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
+
+import Long from 'long'
+import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { StickerSet } from '../../types/index.js'
 
 /**

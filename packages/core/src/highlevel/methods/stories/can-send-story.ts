@@ -1,7 +1,7 @@
-import { tl } from '@mtcute/tl'
-
 import type { ITelegramClient } from '../../client.types.js'
+
 import type { InputPeerLike } from '../../types/index.js'
+import { tl } from '@mtcute/tl'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 // @exported

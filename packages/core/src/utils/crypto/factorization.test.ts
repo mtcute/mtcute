@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import { defaultCryptoProvider } from '@mtcute/test'
 import { bigint } from '@fuman/utils'
+import { defaultCryptoProvider } from '@mtcute/test'
+import { describe, expect, it } from 'vitest'
 
 import { factorizePQSync } from './factorization.js'
 

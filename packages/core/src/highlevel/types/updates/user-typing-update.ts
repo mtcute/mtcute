@@ -1,10 +1,10 @@
 import type { tl } from '@mtcute/tl'
 
 import type { BasicPeerType } from '../../../types/peers.js'
+import type { TypingStatus } from '../peers/index.js'
 import { assertNever } from '../../../types/utils.js'
 import { getBarePeerId, toggleChannelIdMark } from '../../../utils/peer-utils.js'
 import { makeInspectable } from '../../utils/index.js'
-import type { TypingStatus } from '../peers/index.js'
 
 /**
  * User's typing status has changed.

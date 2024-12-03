@@ -1,7 +1,7 @@
+import { tl, User } from '@mtcute/core'
+import { BaseTelegramClient, TelegramClient } from '@mtcute/core/client.js'
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
-import { User, tl } from '@mtcute/core'
-import { BaseTelegramClient, TelegramClient } from '@mtcute/core/client.js'
 
 import { getApiParams } from '../utils.js'
 

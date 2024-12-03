@@ -1,11 +1,11 @@
-import { parseFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
-import { ConditionVariable } from '@fuman/utils'
-
 import type { ConnectionKind } from '../../../network/network-manager.js'
-import { MtArgumentError, MtUnsupportedError } from '../../../types/errors.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { FileDownloadLocation, FileDownloadParameters } from '../../types/index.js'
+
+import { ConditionVariable } from '@fuman/utils'
+import { parseFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
+import { MtArgumentError, MtUnsupportedError } from '../../../types/errors.js'
 import { FileLocation } from '../../types/index.js'
 import { fileIdToInputFileLocation, fileIdToInputWebFileLocation } from '../../utils/convert-file-id.js'
 import { determinePartSize } from '../../utils/file-utils.js'

@@ -1,8 +1,8 @@
+import { NodePlatform } from '@mtcute/node'
+import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
 import { expect } from 'chai'
 import Long from 'long'
 import { describe, it } from 'mocha'
-import { NodePlatform } from '@mtcute/node'
-import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
 
 // here we primarily want to check that everything imports properly,
 // and that the code is actually executable. The actual correctness

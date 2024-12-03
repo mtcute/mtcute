@@ -1,3 +1,4 @@
+import type { RawUpdateInfo } from '../../updates/types.js'
 import type {
     ParsedUpdate,
 } from '../index.js'
@@ -27,7 +28,6 @@ import {
     UserStatusUpdate,
     UserTypingUpdate,
 } from '../index.js'
-import type { RawUpdateInfo } from '../../updates/types.js'
 
 /** @internal */
 export function _parseUpdate({ update, peers }: RawUpdateInfo): ParsedUpdate | null {

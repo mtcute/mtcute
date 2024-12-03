@@ -1,5 +1,4 @@
 import type { Message, OmitInputMessageId, ParametersSkip1, Sticker } from '@mtcute/core'
-import { BusinessMessage } from '@mtcute/core'
 import type { TelegramClient } from '@mtcute/core/client.js'
 import type {
     DeleteMessagesParams,
@@ -7,8 +6,9 @@ import type {
     SendCopyGroupParams,
     SendCopyParams,
 } from '@mtcute/core/methods.js'
-
 import type { UpdateContext } from './base.js'
+
+import { BusinessMessage } from '@mtcute/core'
 
 /**
  * Context of a business message related update.

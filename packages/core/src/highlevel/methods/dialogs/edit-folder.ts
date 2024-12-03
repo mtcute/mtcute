@@ -1,8 +1,8 @@
 import type { tl } from '@mtcute/tl'
 
+import type { ITelegramClient } from '../../client.types.js'
 import { MtArgumentError } from '../../../types/errors.js'
 import { assertTrue } from '../../../utils/type-assertions.js'
-import type { ITelegramClient } from '../../client.types.js'
 
 import { getFolders } from './get-folders.js'
 

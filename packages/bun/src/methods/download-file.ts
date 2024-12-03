@@ -1,6 +1,6 @@
-import { unlinkSync } from 'node:fs'
-
 import type { FileDownloadLocation, FileDownloadParameters, ITelegramClient } from '@mtcute/core'
+
+import { unlinkSync } from 'node:fs'
 import { FileLocation } from '@mtcute/core'
 import { downloadAsIterable } from '@mtcute/core/methods.js'
 

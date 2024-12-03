@@ -1,7 +1,7 @@
+import { defaultPlatform } from '@mtcute/test'
+import { tl } from '@mtcute/tl'
 import Long from 'long'
 import { describe, expect, it, vi } from 'vitest'
-import { tl } from '@mtcute/tl'
-import { defaultPlatform } from '@mtcute/test'
 
 import { LogManager } from './logger.js'
 
@@ -149,7 +149,7 @@ describe('logger', () => {
             it('should trim long buffers', () => {
                 const [mgr, spy] = createManager()
 
-                const _150hexZeros = Array(150).fill('00').join('')
+                const _150hexZeros = new Array(150).fill('00').join('')
 
                 mgr.info('test %j', { a: new Uint8Array(300) })
 

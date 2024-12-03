@@ -1,9 +1,9 @@
-import { MtArgumentError, MtcuteError } from '@mtcute/core'
+import type { Dispatcher } from '../dispatcher.js'
+import type { StateService } from './service.js'
+
 import { sleep } from '@fuman/utils'
 
-import type { Dispatcher } from '../dispatcher.js'
-
-import type { StateService } from './service.js'
+import { MtArgumentError, MtcuteError } from '@mtcute/core'
 
 /**
  * Error thrown by `.rateLimit()`

@@ -1,5 +1,5 @@
-import { MtArgumentError } from '../../../types/errors.js'
 import type { ITelegramClient } from '../../client.types.js'
+import { MtArgumentError } from '../../../types/errors.js'
 import { ChatPreview, MtPeerNotFoundError } from '../../types/index.js'
 import { INVITE_LINK_REGEX } from '../../utils/peer-utils.js'
 

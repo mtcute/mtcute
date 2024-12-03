@@ -1,8 +1,8 @@
-import { MtArgumentError } from '@mtcute/core'
-import { base64, typed, u8 } from '@fuman/utils'
-import { ip } from '@fuman/net'
-
 import type { TelethonSession } from './types.js'
+import { ip } from '@fuman/net'
+import { base64, typed, u8 } from '@fuman/utils'
+
+import { MtArgumentError } from '@mtcute/core'
 
 export function serializeTelethonSession(session: TelethonSession): string {
     if (session.authKey.length !== 256) {

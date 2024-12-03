@@ -1,5 +1,5 @@
-import { AsyncResource } from '@fuman/utils'
 import type { tl } from '@mtcute/tl'
+import { AsyncResource } from '@fuman/utils'
 
 /**
  * Config manager is responsible for keeping

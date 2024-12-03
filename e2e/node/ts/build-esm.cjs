@@ -1,6 +1,6 @@
+const cp = require('node:child_process')
 const fs = require('node:fs')
 const path = require('node:path')
-const cp = require('node:child_process')
 
 const glob = require('glob')
 

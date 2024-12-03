@@ -1,13 +1,13 @@
 import type { tl } from '@mtcute/tl'
-import { utf8 } from '@fuman/utils'
+import type { PeersIndex } from '../peers/peers-index.js'
 
+import { utf8 } from '@fuman/utils'
 import { MtArgumentError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { encodeInlineMessageId } from '../../utils/inline-utils.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Message } from '../messages/message.js'
 import { Chat } from '../peers/chat.js'
-import type { PeersIndex } from '../peers/peers-index.js'
 import { User } from '../peers/user.js'
 
 /** Base class for callback queries */

@@ -1,21 +1,21 @@
 import type { tl } from '@mtcute/tl'
-import { Emitter, unknownToError } from '@fuman/utils'
-
 import type { RpcCallOptions } from '../../network/network-manager.js'
+
+import type { ICorePlatform } from '../../types/platform.js'
 import type { MustEqual } from '../../types/utils.js'
-import { LogManager } from '../../utils/logger.js'
 import type { ConnectionState, ITelegramClient } from '../client.types.js'
-import { PeersIndex } from '../types/peers/peers-index.js'
-import type { ICorePlatform } from '../../types/platform'
 import type { RawUpdateInfo } from '../updates/types.js'
+import type { ClientMessageHandler, SendFn, SomeWorker, WorkerCustomMethods } from './protocol.js'
+import { Emitter, unknownToError } from '@fuman/utils'
+import { LogManager } from '../../utils/logger.js'
 import { TimersManager } from '../managers/timers.js'
 
+import { PeersIndex } from '../types/peers/peers-index.js'
 import { AppConfigManagerProxy } from './app-config.js'
+import { deserializeError } from './errors.js'
 import { WorkerInvoker } from './invoker.js'
-import type { ClientMessageHandler, SendFn, SomeWorker, WorkerCustomMethods } from './protocol.js'
 import { deserializeResult } from './protocol.js'
 import { TelegramStorageProxy } from './storage.js'
-import { deserializeError } from './errors.js'
 
 export interface TelegramWorkerPortOptions {
     worker: SomeWorker

@@ -1,14 +1,14 @@
 import type { tl } from '@mtcute/tl'
-import { asNonNull } from '@fuman/utils'
-import Long from 'long'
-
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
-import { type InputWebview, WebviewResult } from '../../types/bots/webview.js'
-import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
-import { longToFastString } from '../../../utils/long-utils.js'
-import { toInputPeer } from '../../utils/peer-utils.js'
+
+import { asNonNull } from '@fuman/utils'
+import Long from 'long'
 import { assertNever } from '../../../types/utils.js'
+import { longToFastString } from '../../../utils/long-utils.js'
+import { type InputWebview, WebviewResult } from '../../types/bots/webview.js'
+import { toInputPeer } from '../../utils/peer-utils.js'
+import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 
 const _getWebviewTimerId = (queryId: tl.Long) => `webview:${longToFastString(queryId)}`
 

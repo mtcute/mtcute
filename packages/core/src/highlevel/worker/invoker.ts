@@ -1,7 +1,7 @@
-import { Deferred } from '@fuman/utils'
-
-import { deserializeError } from './errors.js'
 import type { SendFn, WorkerInboundMessage, WorkerOutboundMessage } from './protocol.js'
+
+import { Deferred } from '@fuman/utils'
+import { deserializeError } from './errors.js'
 import { deserializeResult, serializeResult } from './protocol.js'
 
 export type InvokeTarget = Extract<WorkerInboundMessage, { type: 'invoke' }>['target']

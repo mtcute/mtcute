@@ -2,8 +2,8 @@ import type { ITelegramClient } from '../../client.types.js'
 import type { Message } from '../../types/messages/message.js'
 import type { ParametersSkip2 } from '../../types/utils.js'
 
-import { sendMedia } from './send-media.js'
 import { sendMediaGroup } from './send-media-group.js'
+import { sendMedia } from './send-media.js'
 import { sendText } from './send-text.js'
 
 /** Send a text in reply to a given message */

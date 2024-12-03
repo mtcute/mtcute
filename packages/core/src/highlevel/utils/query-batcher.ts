@@ -1,6 +1,6 @@
-import { Deque } from '@fuman/utils'
-
 import type { ITelegramClient } from '../client.types.js'
+
+import { Deque } from '@fuman/utils'
 
 type Resolve<T> = (value: T | PromiseLike<T>) => void
 type Reject = (err?: unknown) => void

@@ -2,10 +2,10 @@ import type { MaybePromise } from '@mtcute/core'
 
 import type { MessageContext } from './context/message.js'
 import type { DispatcherParams } from './dispatcher.js'
-import { Dispatcher } from './dispatcher.js'
 import type { UpdateFilter } from './filters/index.js'
-import { filters } from './filters/index.js'
 import type { UpdateState } from './state/update-state.js'
+import { Dispatcher } from './dispatcher.js'
+import { filters } from './filters/index.js'
 
 /**
  * Action for the wizard scene.

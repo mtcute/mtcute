@@ -1,9 +1,9 @@
 import type { tl } from '@mtcute/tl'
 
+import type { PeersIndex } from '../peers/index.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import type { PeersIndex } from '../peers/index.js'
 import { Chat } from '../peers/index.js'
 
 /**

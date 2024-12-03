@@ -10,8 +10,8 @@ import {
 
 import { WebCryptoProvider } from './crypto.js'
 import { IdbStorage } from './idb/index.js'
-import { WebSocketTransport } from './websocket.js'
 import { WebPlatform } from './platform.js'
+import { WebSocketTransport } from './websocket.js'
 
 export type { TelegramClientOptions }
 

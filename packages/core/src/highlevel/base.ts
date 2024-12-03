@@ -1,19 +1,25 @@
 import type { mtp } from '@mtcute/tl'
-import { tl } from '@mtcute/tl'
 import type Long from 'long'
-import { Emitter, unknownToError } from '@fuman/utils'
-
 import type { MtClientOptions } from '../network/client.js'
-import { MtClient } from '../network/client.js'
 import type { ConnectionKind, RpcCallOptions } from '../network/network-manager.js'
+
 import type { StorageManagerExtraOptions } from '../storage/storage.js'
+import type { ICorePlatform } from '../types/platform.js'
 import type { MustEqual } from '../types/utils.js'
-import { reportUnknownError } from '../utils/error-reporting.js'
 import type {
     ICryptoProvider,
     Logger,
     StringSessionData,
 } from '../utils/index.js'
+import type { ConnectionState, ITelegramClient } from './client.types.js'
+import type { ITelegramStorageProvider } from './storage/provider.js'
+import type { TelegramStorageManagerExtraOptions } from './storage/storage.js'
+import type { RawUpdateInfo, UpdatesManagerParams } from './updates/types.js'
+import { Emitter, unknownToError } from '@fuman/utils'
+import { tl } from '@mtcute/tl'
+
+import { MtClient } from '../network/client.js'
+import { reportUnknownError } from '../utils/error-reporting.js'
 import {
     asyncResettable,
     computeNewPasswordHash,
@@ -23,16 +29,10 @@ import {
     writeStringSession,
 } from '../utils/index.js'
 import { LogManager } from '../utils/logger.js'
-import type { ICorePlatform } from '../types/platform'
-
-import type { ConnectionState, ITelegramClient } from './client.types.js'
 import { AppConfigManager } from './managers/app-config-manager.js'
-import type { ITelegramStorageProvider } from './storage/provider.js'
-import type { TelegramStorageManagerExtraOptions } from './storage/storage.js'
+import { TimersManager } from './managers/timers.js'
 import { TelegramStorageManager } from './storage/storage.js'
 import { UpdatesManager } from './updates/manager.js'
-import type { RawUpdateInfo, UpdatesManagerParams } from './updates/types.js'
-import { TimersManager } from './managers/timers.js'
 
 export interface BaseTelegramClientOptions extends MtClientOptions {
     storage: ITelegramStorageProvider

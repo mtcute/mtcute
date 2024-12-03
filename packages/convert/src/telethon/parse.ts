@@ -1,8 +1,8 @@
-import { MtArgumentError } from '@mtcute/core'
-import { base64, typed } from '@fuman/utils'
-import { ip } from '@fuman/net'
-
 import type { TelethonSession } from './types.js'
+import { ip } from '@fuman/net'
+import { base64, typed } from '@fuman/utils'
+
+import { MtArgumentError } from '@mtcute/core'
 
 export function parseTelethonSession(session: string): TelethonSession {
     if (session[0] !== '1') {

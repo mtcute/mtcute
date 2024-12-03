@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { createStub } from '@mtcute/test'
+import { describe, expect, it } from 'vitest'
 
 import { BusinessWorkHours, businessWorkHoursDaysToRaw } from './business-work-hours.js'
 

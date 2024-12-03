@@ -1,11 +1,11 @@
-import Long from 'long'
-import { tl } from '@mtcute/tl'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/peers/index.js'
 
+import { tl } from '@mtcute/tl'
+import Long from 'long'
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { getMarkedPeerId, parseMarkedPeerId, toggleChannelIdMark } from '../../../utils/peer-utils.js'
-import type { ITelegramClient } from '../../client.types.js'
 import { MtPeerNotFoundError } from '../../types/errors.js'
-import type { InputPeerLike } from '../../types/peers/index.js'
 import { extractUsernames, toInputChannel, toInputPeer, toInputUser } from '../../utils/peer-utils.js'
 import { _getChannelsBatched, _getUsersBatched } from '../chats/batched-queries.js'
 

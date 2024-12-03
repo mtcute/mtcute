@@ -1,10 +1,10 @@
 import type { ISyncWritable } from '@fuman/io'
-import { Bytes, write } from '@fuman/io'
-import { typed, u8 } from '@fuman/utils'
-
 import type { IAesCtr, ICryptoProvider, Logger } from '../../utils/index.js'
-
 import type { IPacketCodec } from './abstract.js'
+
+import { Bytes, write } from '@fuman/io'
+
+import { typed, u8 } from '@fuman/utils'
 
 export interface MtProxyInfo {
     dcId: number

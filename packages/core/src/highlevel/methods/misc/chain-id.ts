@@ -1,7 +1,7 @@
 import type { tl } from '@mtcute/tl'
 
-import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import type { ITelegramClient } from '../../client.types.js'
+import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 
 /** @internal */
 export function _getPeerChainId(client: ITelegramClient, peer: tl.TypeInputPeer, prefix = 'peer') {

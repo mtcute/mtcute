@@ -1,11 +1,11 @@
 /* eslint-disable ts/no-unsafe-call,ts/no-unsafe-assignment,ts/no-unsafe-return,ts/no-unsafe-argument */
 
+import type { TlReaderMap } from './reader.js'
+import { hex } from '@fuman/utils'
 // import Long from 'long'
 import Long from 'long'
-import { describe, expect, it } from 'vitest'
-import { hex } from '@fuman/utils'
 
-import type { TlReaderMap } from './reader.js'
+import { describe, expect, it } from 'vitest'
 import { TlBinaryReader } from './reader.js'
 
 let randomBytes: (n: number) => Uint8Array

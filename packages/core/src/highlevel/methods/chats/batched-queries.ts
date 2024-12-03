@@ -1,7 +1,8 @@
-import { tl } from '@mtcute/tl'
-
-import { MtArgumentError } from '../../../types/errors.js'
 import type { ITelegramClient } from '../../client.types.js'
+
+import type { BatchedQuery } from '../../utils/query-batcher.js'
+import { tl } from '@mtcute/tl'
+import { MtArgumentError } from '../../../types/errors.js'
 import {
     isInputPeerChannel,
     isInputPeerChat,
@@ -9,7 +10,6 @@ import {
     toInputChannel,
     toInputUser,
 } from '../../utils/peer-utils.js'
-import type { BatchedQuery } from '../../utils/query-batcher.js'
 import { batchedQuery } from '../../utils/query-batcher.js'
 
 /** @internal */

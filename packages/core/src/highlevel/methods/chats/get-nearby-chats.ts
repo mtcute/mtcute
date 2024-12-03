@@ -1,8 +1,8 @@
 import type { tl } from '@mtcute/tl'
 
+import type { ITelegramClient } from '../../client.types.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import type { ITelegramClient } from '../../client.types.js'
 import { Chat } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 

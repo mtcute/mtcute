@@ -1,13 +1,13 @@
-import type { tl } from '@mtcute/tl'
 import type { IReadable } from '@fuman/io'
+import type { tl } from '@mtcute/tl'
+import type { ITelegramClient } from '../../client.types.js'
+import type { UploadedFile, UploadFileLike } from '../../types/index.js'
+
 import { Bytes, read, webReadableToFuman } from '@fuman/io'
 import { AsyncLock } from '@fuman/utils'
-
 import { MtArgumentError } from '../../../types/errors.js'
 import { randomLong } from '../../../utils/long-utils.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { UploadFileLike, UploadedFile } from '../../types/index.js'
-import { MIME_TO_EXTENSION, guessFileMime } from '../../utils/file-type.js'
+import { guessFileMime, MIME_TO_EXTENSION } from '../../utils/file-type.js'
 import { determinePartSize, isProbablyPlainText } from '../../utils/file-utils.js'
 
 const OVERRIDE_MIME: Record<string, string> = {

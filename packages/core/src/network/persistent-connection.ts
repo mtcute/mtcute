@@ -1,11 +1,11 @@
 import type { ReconnectionStrategy } from '@fuman/net'
-import { PersistentConnection as FumanPersistentConnection } from '@fuman/net'
-import { FramedReader, FramedWriter } from '@fuman/io'
-import { Emitter, timers } from '@fuman/utils'
-
 import type { BasicDcOption, ICryptoProvider, Logger } from '../utils/index.js'
-
 import type { IPacketCodec, ITelegramConnection, TelegramTransport } from './transports/abstract.js'
+import { FramedReader, FramedWriter } from '@fuman/io'
+
+import { PersistentConnection as FumanPersistentConnection } from '@fuman/net'
+
+import { Emitter, timers } from '@fuman/utils'
 
 export interface PersistentConnectionParams {
     crypto: ICryptoProvider

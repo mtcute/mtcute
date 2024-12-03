@@ -1,8 +1,8 @@
-import Long from 'long'
 import type { tl } from '@mtcute/tl'
-
 import type { PartialOnly } from '../../../types/utils.js'
+
 import type { ITelegramClient } from '../../client.types.js'
+import Long from 'long'
 
 /**
  * Import contacts to your Telegram contacts list.

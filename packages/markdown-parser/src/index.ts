@@ -1,5 +1,5 @@
-import Long from 'long'
 import type { InputText, MessageEntity, TextWithEntities, tl } from '@mtcute/core'
+import Long from 'long'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 const EMOJI_REGEX = /^tg:\/\/emoji\?id=(-?\d+)/

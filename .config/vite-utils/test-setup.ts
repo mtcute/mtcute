@@ -1,5 +1,5 @@
-import { expect } from 'vitest'
 import { typed } from '@fuman/utils'
+import { expect } from 'vitest'
 
 // consider Buffers equal to Uint8Arrays
 expect.addEqualityTesters([

@@ -1,6 +1,6 @@
 import type { tl } from '@mtcute/tl'
-import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
 import { base64 } from '@fuman/utils'
+import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
 
 import { assertNever } from '../../types/utils.js'
 

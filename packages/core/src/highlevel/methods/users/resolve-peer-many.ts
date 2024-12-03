@@ -1,9 +1,9 @@
 import type { tl } from '@mtcute/tl'
-import { ConditionVariable } from '@fuman/utils'
-
 import type { ITelegramClient } from '../../client.types.js'
-import { MtPeerNotFoundError } from '../../types/errors.js'
+
 import type { InputPeerLike } from '../../types/peers/index.js'
+import { ConditionVariable } from '@fuman/utils'
+import { MtPeerNotFoundError } from '../../types/errors.js'
 
 import { resolvePeer } from './resolve-peer.js'
 

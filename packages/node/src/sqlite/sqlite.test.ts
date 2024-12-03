@@ -1,4 +1,3 @@
-import { afterAll, beforeAll, describe } from 'vitest'
 import { LogManager } from '@mtcute/core/utils.js'
 import {
     defaultPlatform,
@@ -7,6 +6,7 @@ import {
     testPeersRepository,
     testRefMessagesRepository,
 } from '@mtcute/test'
+import { afterAll, beforeAll, describe } from 'vitest'
 
 if (import.meta.env.TEST_ENV === 'node') {
     const { SqliteStorage } = await import('./index.js')

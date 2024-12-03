@@ -1,13 +1,13 @@
 import type { tl } from '@mtcute/tl'
 
+import type { Peer } from '../peers/peer.js'
+import type { PeersIndex } from '../peers/peers-index.js'
+import type { InputReaction } from '../reactions/types.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Chat } from '../peers/chat.js'
-import type { Peer } from '../peers/peer.js'
 import { parsePeer } from '../peers/peer.js'
-import type { PeersIndex } from '../peers/peers-index.js'
 import { ReactionCount } from '../reactions/reaction-count.js'
-import type { InputReaction } from '../reactions/types.js'
 import { toReactionEmoji } from '../reactions/types.js'
 
 /**

@@ -1,17 +1,17 @@
+import type { WebSocketConstructor } from '@fuman/net'
 import type {
     IPacketCodec,
     ITelegramConnection,
     TelegramTransport,
 } from '@mtcute/core'
+import type { BasicDcOption } from './utils.js'
+import { connectWs } from '@fuman/net'
+
 import {
     IntermediatePacketCodec,
     MtUnsupportedError,
     ObfuscatedPacketCodec,
 } from '@mtcute/core'
-import type { WebSocketConstructor } from '@fuman/net'
-import { connectWs } from '@fuman/net'
-
-import type { BasicDcOption } from './utils'
 
 const subdomainsMap: Record<string, string> = {
     1: 'pluto',

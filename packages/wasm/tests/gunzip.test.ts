@@ -1,7 +1,7 @@
 import { gzipSync } from 'node:zlib'
 
-import { beforeAll, describe, expect, it } from 'vitest'
 import { utf8 } from '@fuman/utils'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 import { __getWasm, gunzip } from '../src/index.js'
 

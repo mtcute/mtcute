@@ -1,8 +1,8 @@
 import type { ITcpConnection } from '@fuman/net'
-import { connectTcp } from '@fuman/node'
 import type { TelegramTransport } from '@mtcute/core'
-import { IntermediatePacketCodec } from '@mtcute/core'
 import type { BasicDcOption } from '@mtcute/core/utils.js'
+import { connectTcp } from '@fuman/node'
+import { IntermediatePacketCodec } from '@mtcute/core'
 
 export class TcpTransport implements TelegramTransport {
     connect(dc: BasicDcOption): Promise<ITcpConnection> {

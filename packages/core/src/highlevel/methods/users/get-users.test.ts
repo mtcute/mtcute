@@ -1,6 +1,6 @@
+import { createStub, StubTelegramClient } from '@mtcute/test'
 import Long from 'long'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { StubTelegramClient, createStub } from '@mtcute/test'
 
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { User } from '../../types/index.js'

@@ -1,5 +1,5 @@
-import Long from 'long'
 import { CustomMap, CustomSet, typed } from '@fuman/utils'
+import Long from 'long'
 
 import { getRandomInt } from './misc-utils.js'
 

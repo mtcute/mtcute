@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { hex } from '@fuman/utils'
+import { describe, expect, it } from 'vitest'
 
 import { decodeWaveform, encodeWaveform } from './voice-utils.js'
 

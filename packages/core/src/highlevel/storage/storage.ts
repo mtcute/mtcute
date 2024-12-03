@@ -3,10 +3,10 @@ import type { StorageManager } from '../../storage/storage.js'
 import type { PublicPart } from '../../types/utils.js'
 
 import type { ITelegramStorageProvider } from './provider.js'
-import { CurrentUserService } from './service/current-user.js'
 import type { PeersServiceOptions } from './service/peers.js'
-import { PeersService } from './service/peers.js'
 import type { RefMessagesServiceOptions } from './service/ref-messages.js'
+import { CurrentUserService } from './service/current-user.js'
+import { PeersService } from './service/peers.js'
 import { RefMessagesService } from './service/ref-messages.js'
 import { UpdatesStateService } from './service/updates.js'
 

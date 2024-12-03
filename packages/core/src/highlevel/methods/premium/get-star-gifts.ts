@@ -1,8 +1,8 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/peers/peer.js'
+import type { ArrayPaginated } from '../../types/utils.js'
 import { PeersIndex } from '../../types/peers/peers-index.js'
 import { UserStarGift } from '../../types/premium/stars-gift.js'
-import type { ArrayPaginated } from '../../types/utils.js'
 import { makeArrayPaginated } from '../../utils/misc-utils.js'
 import { resolveUser } from '../users/resolve-peer.js'
 

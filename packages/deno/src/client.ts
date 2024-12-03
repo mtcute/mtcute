@@ -1,17 +1,17 @@
-import type { Interface as RlInterface } from 'node:readline'
-import { createInterface } from 'node:readline'
-import { Readable, Writable } from 'node:stream'
-
 import type { FileDownloadLocation, FileDownloadParameters, ITelegramStorageProvider, PartialOnly, User } from '@mtcute/core'
 import type {
     BaseTelegramClientOptions as BaseTelegramClientOptionsBase,
     TelegramClientOptions,
 } from '@mtcute/core/client.js'
+import type { Interface as RlInterface } from 'node:readline'
+
+import { createInterface } from 'node:readline'
+import { Readable, Writable } from 'node:stream'
+import { unknownToError } from '@fuman/utils'
 import {
     BaseTelegramClient as BaseTelegramClientBase,
     TelegramClient as TelegramClientBase,
 } from '@mtcute/core/client.js'
-import { unknownToError } from '@fuman/utils'
 
 import { downloadToFile } from './methods/download-file.js'
 import { DenoPlatform } from './platform.js'

@@ -1,7 +1,7 @@
 import type { tl } from '@mtcute/tl'
 
-import { assertTrue } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
+import { assertTrue } from '../../../utils/type-assertions.js'
 
 /**
  * Sets the default chat permissions for the bot in the supergroup or channel.

@@ -1,8 +1,8 @@
 import type { tl } from '@mtcute/tl'
 
-import { assertTrue } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { BusinessWorkHoursDay } from '../../types/premium/business-work-hours.js'
+import { assertTrue } from '../../../utils/type-assertions.js'
 import { businessWorkHoursDaysToRaw } from '../../types/premium/business-work-hours.js'
 
 // @available=user

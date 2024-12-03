@@ -1,9 +1,9 @@
 import type { tl } from '@mtcute/tl'
 
 import type { MaybeArray } from '../../../../types/utils.js'
-import { assertNever } from '../../../../types/utils.js'
-
 import type { ChatAction } from './actions.js'
+
+import { assertNever } from '../../../../types/utils.js'
 
 export interface ChatEventFilters {
     serverFilter?: tl.TypeChannelAdminLogEventsFilter

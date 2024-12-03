@@ -1,20 +1,20 @@
-import { readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
-
 import type {
     TlEntry,
     TlErrors,
     TlFullSchema,
 } from '@mtcute/tl-utils'
+import type { TlPackedSchema } from './schema.js'
+
+import { readFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+
 import {
     generateReaderCodeForTlEntries,
     generateTypescriptDefinitionsForTlSchema,
     generateWriterCodeForTlEntries,
     parseFullTlSchema,
 } from '@mtcute/tl-utils'
-
-import { API_SCHEMA_JSON_FILE, ERRORS_JSON_FILE, ESM_PRELUDE, MTP_SCHEMA_JSON_FILE, __dirname } from './constants.js'
-import type { TlPackedSchema } from './schema.js'
+import { __dirname, API_SCHEMA_JSON_FILE, ERRORS_JSON_FILE, ESM_PRELUDE, MTP_SCHEMA_JSON_FILE } from './constants.js'
 import { unpackTlSchema } from './schema.js'
 
 const OUT_TYPINGS_FILE = join(__dirname, '../index.d.ts')

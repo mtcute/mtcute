@@ -1,5 +1,5 @@
-import { MtArgumentError } from '../../types/errors.js'
 import type { ArrayPaginated, ArrayWithTotal, MaybeDynamic, Message } from '../types/index.js'
+import { MtArgumentError } from '../../types/errors.js'
 
 /**
  * Normalize phone number by stripping formatting

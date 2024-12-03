@@ -1,6 +1,6 @@
+import type { InputText, MessageEntity, TextWithEntities, tl } from '@mtcute/core'
 import { Parser } from 'htmlparser2'
 import Long from 'long'
-import type { InputText, MessageEntity, TextWithEntities, tl } from '@mtcute/core'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 

@@ -1,10 +1,10 @@
 import type { tl } from '@mtcute/tl'
-import { objectKeys } from '@fuman/utils'
-
 import type { ITelegramClient } from '../../client.types.js'
+
 import type { InputInlineResult } from '../../types/bots/inline-result/types.js'
-import { BotInline, type InputPeerLike } from '../../types/index.js'
+import { objectKeys } from '@fuman/utils'
 import { assertNever } from '../../../types/utils.js'
+import { BotInline, type InputPeerLike } from '../../types/index.js'
 import { resolveUser } from '../users/resolve-peer.js'
 
 /**

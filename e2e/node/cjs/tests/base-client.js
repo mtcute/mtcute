@@ -1,6 +1,6 @@
 const { BaseTelegramClient } = require('@mtcute/core/client.js')
-const { describe, it } = require('mocha')
 const { expect } = require('chai')
+const { describe, it } = require('mocha')
 
 const { getApiParams } = require('../utils')
 

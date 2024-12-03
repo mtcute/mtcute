@@ -1,10 +1,10 @@
-import { tdFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
-
-import { MtArgumentError } from '../../../types/errors.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputFileLike, InputPeerLike } from '../../types/index.js'
-import { MtInvalidPeerTypeError, isUploadedFile } from '../../types/index.js'
+
+import { tdFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
+import { MtArgumentError } from '../../../types/errors.js'
+import { isUploadedFile, MtInvalidPeerTypeError } from '../../types/index.js'
 import { fileIdToInputPhoto } from '../../utils/convert-file-id.js'
 import { isInputPeerChannel, isInputPeerChat, toInputChannel } from '../../utils/peer-utils.js'
 import { uploadFile } from '../files/upload-file.js'

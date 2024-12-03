@@ -1,5 +1,3 @@
-import { Worker, parentPort } from 'node:worker_threads'
-
 import type {
     ClientMessageHandler,
     RespondFn,
@@ -9,6 +7,8 @@ import type {
     WorkerCustomMethods,
     WorkerMessageHandler,
 } from '@mtcute/core/worker.js'
+
+import { parentPort, Worker } from 'node:worker_threads'
 import {
     TelegramWorker as TelegramWorkerBase,
     TelegramWorkerPort as TelegramWorkerPortBase,

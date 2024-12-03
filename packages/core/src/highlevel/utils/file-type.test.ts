@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
 import { hex } from '@fuman/utils'
+import { describe, expect, it } from 'vitest'
 
-import { MIME_TO_EXTENSION, guessFileMime } from './file-type.js'
+import { guessFileMime, MIME_TO_EXTENSION } from './file-type.js'
 
 describe('guessFileMime', () => {
     it.each([

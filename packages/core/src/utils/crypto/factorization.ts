@@ -1,8 +1,8 @@
+import type { ICryptoProvider } from './abstract.js'
+
 import { bigint } from '@fuman/utils'
 
 import { randomBigIntInRange } from '../bigint-utils.js'
-
-import type { ICryptoProvider } from './abstract.js'
 
 /**
  * Factorize `p*q` to `p` and `q` synchronously using Brent-Pollard rho algorithm

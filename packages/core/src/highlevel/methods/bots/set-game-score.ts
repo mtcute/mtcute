@@ -1,8 +1,8 @@
 import type { tl } from '@mtcute/tl'
 
-import { assertTrue } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputMessageId, InputPeerLike, Message } from '../../types/index.js'
+import { assertTrue } from '../../../utils/type-assertions.js'
 import { normalizeInputMessageId } from '../../types/index.js'
 import { normalizeInlineId } from '../../utils/inline-utils.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'

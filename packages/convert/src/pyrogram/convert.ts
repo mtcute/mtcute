@@ -1,11 +1,11 @@
 import type { StringSessionData } from '@mtcute/core/utils.js'
+import type { PyrogramSession } from './types.js'
+
 import { readStringSession } from '@mtcute/core/utils.js'
 
 import { DC_MAPPING_PROD, DC_MAPPING_TEST } from '../dcs.js'
-
 import { parsePyrogramSession } from './parse.js'
 import { serializePyrogramSession } from './serialize.js'
-import type { PyrogramSession } from './types.js'
 
 export function convertFromPyrogramSession(session: PyrogramSession | string): StringSessionData {
     if (typeof session === 'string') {

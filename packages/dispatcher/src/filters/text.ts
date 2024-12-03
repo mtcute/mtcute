@@ -5,14 +5,14 @@ import type {
     InlineCallbackQuery,
     InlineQuery,
 } from '@mtcute/core'
+import type { UpdateContextDistributed } from '../context/base.js'
+
+import type { UpdateFilter } from './types.js'
+
 import {
     BusinessMessage,
     Message,
 } from '@mtcute/core'
-
-import type { UpdateContextDistributed } from '../context/base.js'
-
-import type { UpdateFilter } from './types.js'
 
 type UpdatesWithText =
     | Message

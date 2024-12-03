@@ -1,6 +1,6 @@
-import { BaseStorageDriver } from '../driver.js'
-
 import type { ISqliteDatabase, ISqliteStatement } from './types.js'
+
+import { BaseStorageDriver } from '../driver.js'
 
 const MIGRATIONS_TABLE_NAME = 'mtcute_migrations'
 const MIGRATIONS_TABLE_SQL = `

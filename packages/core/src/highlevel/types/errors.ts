@@ -1,6 +1,6 @@
-import { MtcuteError } from '../../types/errors.js'
-
 import type { InputPeerLike } from './peers/index.js'
+
+import { MtcuteError } from '../../types/errors.js'
 
 /**
  * Could not find a peer by the provided information

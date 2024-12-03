@@ -1,9 +1,9 @@
 /* eslint-disable ts/no-unsafe-call */
-import Long from 'long'
-import { describe, expect, it } from 'vitest'
-import { hex } from '@fuman/utils'
-
 import type { TlWriterMap } from './writer.js'
+import { hex } from '@fuman/utils'
+import Long from 'long'
+
+import { describe, expect, it } from 'vitest'
 import { TlBinaryWriter, TlSerializationCounter } from './writer.js'
 
 let randomBytes: (n: number) => Uint8Array

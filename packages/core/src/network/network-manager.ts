@@ -1,22 +1,22 @@
+import type { AsyncResourceContext, ComposedMiddleware, Middleware } from '@fuman/utils'
 import type { mtp, tl } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import type Long from 'long'
-import { type ReconnectionStrategy, defaultReconnectionStrategy } from '@fuman/net'
-import type { AsyncResourceContext, ComposedMiddleware, Middleware } from '@fuman/utils'
-import { Deferred, composeMiddlewares } from '@fuman/utils'
-
 import type { StorageManager } from '../storage/storage.js'
-import { MtArgumentError, MtUnsupportedError, MtcuteError } from '../types/index.js'
-import type { DcOptions, ICryptoProvider, Logger } from '../utils/index.js'
-import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
-import type { ICorePlatform } from '../types/platform'
+import type { ICorePlatform } from '../types/platform.js'
 
+import type { DcOptions, ICryptoProvider, Logger } from '../utils/index.js'
 import type { ConfigManager } from './config-manager.js'
+import type { SessionConnectionParams } from './session-connection.js'
+import type { TelegramTransport } from './transports/abstract.js'
+import { defaultReconnectionStrategy, type ReconnectionStrategy } from '@fuman/net'
+
+import { composeMiddlewares, Deferred } from '@fuman/utils'
+import { MtArgumentError, MtcuteError, MtUnsupportedError } from '../types/index.js'
+import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
 import { basic as defaultMiddlewares } from './middlewares/default.js'
 import { MultiSessionConnection } from './multi-session-connection.js'
 import { ServerSaltManager } from './server-salt.js'
-import type { SessionConnectionParams } from './session-connection.js'
-import type { TelegramTransport } from './transports/abstract.js'
 
 export type ConnectionKind = 'main' | 'upload' | 'download' | 'downloadSmall'
 

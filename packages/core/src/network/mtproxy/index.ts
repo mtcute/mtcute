@@ -1,12 +1,12 @@
-import type { tl } from '@mtcute/tl'
 import type { ITcpConnection, TcpEndpoint } from '@fuman/net'
+import type { tl } from '@mtcute/tl'
+import type { BasicDcOption, ICryptoProvider, Logger } from '../../utils/index.js'
+import type { IPacketCodec, ITelegramConnection, MtProxyInfo, TelegramTransport } from '../transports/index.js'
+
 import { Bytes, read, write } from '@fuman/io'
 import { base64, hex, typed, u8 } from '@fuman/utils'
-
-import type { IPacketCodec, ITelegramConnection, MtProxyInfo, TelegramTransport } from '../transports/index.js'
-import { IntermediatePacketCodec, ObfuscatedPacketCodec, PaddedIntermediatePacketCodec } from '../transports/index.js'
-import type { BasicDcOption, ICryptoProvider, Logger } from '../../utils/index.js'
 import { MtSecurityError, MtUnsupportedError } from '../../types/errors.js'
+import { IntermediatePacketCodec, ObfuscatedPacketCodec, PaddedIntermediatePacketCodec } from '../transports/index.js'
 
 import { FakeTlsPacketCodec, generateFakeTlsHeader } from './_fake-tls.js'
 

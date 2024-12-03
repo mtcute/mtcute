@@ -1,6 +1,6 @@
+import { createStub, StubTelegramClient } from '@mtcute/test'
 import Long from 'long'
 import { describe, expect, it, vi } from 'vitest'
-import { StubTelegramClient, createStub } from '@mtcute/test'
 
 import { Chat, MtPeerNotFoundError, User } from '../../types/index.js'
 

@@ -1,11 +1,11 @@
+import { Bytes, write } from '@fuman/io'
+import { hex } from '@fuman/utils'
+import { defaultTestCryptoProvider, useFakeMathRandom } from '@mtcute/test'
 // todo: fix test
 import { describe, expect, it } from 'vitest'
-import { defaultTestCryptoProvider, useFakeMathRandom } from '@mtcute/test'
-import { hex } from '@fuman/utils'
-import { Bytes, write } from '@fuman/io'
 
-import { IntermediatePacketCodec, PaddedIntermediatePacketCodec } from './intermediate.js'
 import { TransportError } from './abstract.js'
+import { IntermediatePacketCodec, PaddedIntermediatePacketCodec } from './intermediate.js'
 
 describe('IntermediatePacketCodec', () => {
     it('should return correct tag', () => {

@@ -1,8 +1,8 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { Message } from '../../types/messages/index.js'
 
-import { getMessages } from './get-messages.js'
 import { getMessagesUnsafe } from './get-messages-unsafe.js'
+import { getMessages } from './get-messages.js'
 
 /**
  * For messages containing a reply, fetch the message that is being replied.

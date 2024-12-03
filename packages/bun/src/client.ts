@@ -1,24 +1,24 @@
-import type { Interface as RlInterface } from 'node:readline'
-import { createInterface } from 'node:readline'
-import type { Readable } from 'node:stream'
-
 import type { FileDownloadLocation, FileDownloadParameters, ITelegramStorageProvider, PartialOnly, User } from '@mtcute/core'
 import type {
     BaseTelegramClientOptions as BaseTelegramClientOptionsBase,
     TelegramClientOptions,
 } from '@mtcute/core/client.js'
+import type { Interface as RlInterface } from 'node:readline'
+
+import type { Readable } from 'node:stream'
+import { createInterface } from 'node:readline'
+import { unknownToError } from '@fuman/utils'
 import {
     BaseTelegramClient as BaseTelegramClientBase,
     TelegramClient as TelegramClientBase,
 } from '@mtcute/core/client.js'
-import { unknownToError } from '@fuman/utils'
 
 import { downloadToFile } from './methods/download-file.js'
 import { downloadAsNodeStream } from './methods/download-node-stream.js'
+import { BunPlatform } from './platform.js'
 import { SqliteStorage } from './sqlite/index.js'
 import { BunCryptoProvider } from './utils/crypto.js'
 import { TcpTransport } from './utils/tcp.js'
-import { BunPlatform } from './platform.js'
 
 export type { TelegramClientOptions }
 

@@ -1,5 +1,5 @@
-import Long from 'long'
 import type { tl } from '@mtcute/tl'
+import Long from 'long'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
 

@@ -8,7 +8,7 @@ import * as colors from 'colorette'
 import { askForConfig } from './cli.js'
 import { installDependencies } from './dependencies.js'
 import { MtcuteFeature } from './features/types.js'
-import { PackageManager, getExecCommand, getPackageManager } from './package-manager.js'
+import { getExecCommand, getPackageManager, PackageManager } from './package-manager.js'
 import { runTemplater } from './templater.js'
 import { exec } from './utils.js'
 

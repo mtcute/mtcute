@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import type { tl } from '@mtcute/tl'
+import { describe, expect, it } from 'vitest'
 
 import { BotKeyboard } from './index.js'
 

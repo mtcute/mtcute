@@ -1,9 +1,9 @@
-import Long from 'long'
 import type { tl } from '@mtcute/tl'
-
-import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
+
 import type { ArrayPaginated, InputPeerLike } from '../../types/index.js'
+import Long from 'long'
+import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import { Message, PeersIndex } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'

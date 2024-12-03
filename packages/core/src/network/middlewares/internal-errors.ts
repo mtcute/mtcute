@@ -1,10 +1,10 @@
-import { tl } from '@mtcute/tl'
+import type { RpcCallMiddleware } from '../network-manager.js'
 
+import { tl } from '@mtcute/tl'
 import { MtTimeoutError } from '../../types/errors.js'
 import { combineAbortSignals } from '../../utils/abort-signal.js'
 import { sleepWithAbort } from '../../utils/misc-utils.js'
 import { isTlRpcError } from '../../utils/type-assertions.js'
-import type { RpcCallMiddleware } from '../network-manager.js'
 
 const CLIENT_ERRORS = /* #__PURE__ */ new Set<number>([
     tl.RpcError.BAD_REQUEST,

@@ -1,9 +1,9 @@
 import type { tl } from '@mtcute/tl'
 
-import { makeInspectable } from '../../utils/inspectable.js'
 import type { Peer } from '../peers/peer.js'
-import { parsePeer } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
+import { makeInspectable } from '../../utils/inspectable.js'
+import { parsePeer } from '../peers/peer.js'
 import { Story } from '../stories/story.js'
 
 /**

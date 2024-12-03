@@ -1,18 +1,18 @@
-import { randomLong } from '../../../utils/long-utils.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { ReplyMarkup } from '../../types/bots/keyboards/index.js'
-import { BotKeyboard } from '../../types/bots/keyboards/index.js'
 import type { InputMediaLike } from '../../types/media/input-media/types.js'
 import type { Message } from '../../types/messages/message.js'
 import type { InputText } from '../../types/misc/entities.js'
 import type { InputPeerLike } from '../../types/peers/index.js'
+import type { CommonSendParams } from './send-common.js'
+import { randomLong } from '../../../utils/long-utils.js'
+import { BotKeyboard } from '../../types/bots/keyboards/index.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
-import { resolvePeer } from '../users/resolve-peer.js'
 
+import { resolvePeer } from '../users/resolve-peer.js'
 import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 import { _findMessageInUpdate } from './find-in-update.js'
-import type { CommonSendParams } from './send-common.js'
 import { _processCommonSendParameters } from './send-common.js'
 
 /**

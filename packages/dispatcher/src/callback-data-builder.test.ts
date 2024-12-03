@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import type { UpdateFilter } from './filters/index.js'
 import { CallbackQuery, MtArgumentError, PeersIndex } from '@mtcute/core'
 import { createStub } from '@mtcute/test'
 
+import { describe, expect, it } from 'vitest'
 import { CallbackDataBuilder } from './callback-data-builder.js'
-import type { UpdateFilter } from './filters/index.js'
 
 describe('CallbackDataBuilder', () => {
     it('should correctly build data', () => {

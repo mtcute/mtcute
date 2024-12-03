@@ -1,8 +1,8 @@
 import type { tl } from '@mtcute/tl'
 
-import { MtArgumentError } from '../../../types/errors.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputDialogFolder } from '../../types/index.js'
+import { MtArgumentError } from '../../../types/errors.js'
 
 /**
  * Get list of folders.

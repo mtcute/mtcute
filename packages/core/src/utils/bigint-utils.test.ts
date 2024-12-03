@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import { defaultTestCryptoProvider } from '@mtcute/test'
 import { bigint } from '@fuman/utils'
+import { defaultTestCryptoProvider } from '@mtcute/test'
+import { describe, expect, it } from 'vitest'
 
 import {
     randomBigInt,

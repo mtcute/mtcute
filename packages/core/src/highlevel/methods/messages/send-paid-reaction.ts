@@ -1,20 +1,20 @@
-import { tl } from '@mtcute/tl'
-
 import type { ITelegramClient } from '../../client.types.js'
+
 import type {
     InputMessageId,
 } from '../../types/index.js'
+import { tl } from '@mtcute/tl'
+import { MtcuteError } from '../../../types/errors.js'
+import { getMarkedPeerId } from '../../../utils/peer-utils.js'
+import { assertTypeIs } from '../../../utils/type-assertions.js'
 import {
     MessageReactions,
 
-    PeersIndex,
     normalizeInputMessageId,
+    PeersIndex,
 } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
-import { MtcuteError } from '../../../types/errors.js'
-import { assertTypeIs } from '../../../utils/type-assertions.js'
-import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 
 // @available=user
 /**

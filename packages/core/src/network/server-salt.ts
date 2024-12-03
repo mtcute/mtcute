@@ -1,6 +1,6 @@
-import Long from 'long'
 import type { mtp } from '@mtcute/tl'
 import { timers } from '@fuman/utils'
+import Long from 'long'
 
 export class ServerSaltManager {
     private _futureSalts: mtp.RawMt_future_salt[] = []

@@ -1,11 +1,11 @@
-const Long = require('long')
-const { TlBinaryReader, TlBinaryWriter } = require('@mtcute/tl-runtime')
+const { NodePlatform } = require('@mtcute/node')
 const { tl } = require('@mtcute/tl')
+const { TlBinaryReader, TlBinaryWriter } = require('@mtcute/tl-runtime')
 const { __tlReaderMap } = require('@mtcute/tl/binary/reader')
 const { __tlWriterMap } = require('@mtcute/tl/binary/writer')
-const { describe, it } = require('mocha')
 const { expect } = require('chai')
-const { NodePlatform } = require('@mtcute/node')
+const Long = require('long')
+const { describe, it } = require('mocha')
 
 // here we primarily want to check that @mtcute/tl correctly works with @mtcute/tl-runtime
 

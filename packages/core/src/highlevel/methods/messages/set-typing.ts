@@ -1,10 +1,10 @@
 import type { tl } from '@mtcute/tl'
 
-import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/peers/peer.js'
-import { resolvePeer } from '../users/resolve-peer.js'
 import type { TypingStatus } from '../../types/peers/typing-status.js'
+import { getMarkedPeerId } from '../../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 import { _mapTypingStatus } from './send-typing.js'

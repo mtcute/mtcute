@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
 import { Message, PeersIndex } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
-import { StubTelegramClient, createStub } from '@mtcute/test'
+import { createStub, StubTelegramClient } from '@mtcute/test'
+import { describe, expect, it } from 'vitest'
 
 import { Dispatcher, PropagationAction } from '../src/index.js'
 

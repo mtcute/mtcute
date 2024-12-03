@@ -1,11 +1,11 @@
+import type { UserConfig } from './cli.js'
+import type { MtcuteFeature } from './features/types.js'
+
 import { promises as fs } from 'node:fs'
 import * as path from 'node:path'
 
 import * as glob from 'glob'
 import Handlebars from 'handlebars'
-
-import type { UserConfig } from './cli.js'
-import type { MtcuteFeature } from './features/types.js'
 import { getPackageManagerVersion, packageManagerToRuntime } from './package-manager.js'
 
 const templater = Handlebars.create()

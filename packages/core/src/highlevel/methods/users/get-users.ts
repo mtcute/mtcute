@@ -5,8 +5,8 @@ import { User } from '../../types/index.js'
 import { toInputUser } from '../../utils/peer-utils.js'
 import { _getUsersBatched } from '../chats/batched-queries.js'
 
-import { resolveUser } from './resolve-peer.js'
 import { resolvePeerMany } from './resolve-peer-many.js'
+import { resolveUser } from './resolve-peer.js'
 
 /**
  * Get information about multiple users.

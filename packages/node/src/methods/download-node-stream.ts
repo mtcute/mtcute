@@ -1,8 +1,8 @@
-import type { Readable } from 'node:stream'
-
 import type { FileDownloadLocation, FileDownloadParameters, ITelegramClient } from '@mtcute/core'
-import { downloadAsStream } from '@mtcute/core/methods.js'
+
+import type { Readable } from 'node:stream'
 import { webReadableToNode } from '@fuman/node'
+import { downloadAsStream } from '@mtcute/core/methods.js'
 
 /**
  * Download a remote file as a Node.js Readable stream.

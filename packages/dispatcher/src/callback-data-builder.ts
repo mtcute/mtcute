@@ -5,11 +5,11 @@ import type {
     MaybeArray,
     MaybePromise,
 } from '@mtcute/core'
+import type { UpdateFilter } from './filters/types.js'
+
 import {
     MtArgumentError,
 } from '@mtcute/core'
-
-import type { UpdateFilter } from './filters/types.js'
 
 /**
  * Callback data builder, inspired by [aiogram](https://github.com/aiogram/aiogram).

@@ -14,8 +14,6 @@ import { BaseTelegramClient, BaseTelegramClientOptions } from '../base.js'
 // @copy
 import { ITelegramClient } from '../client.types.js'
 // @copy
-import { RawUpdateInfo } from '../updates/types.js'
-// @copy
 import {
     AllStories,
     ArrayPaginated,
@@ -39,10 +37,10 @@ import {
     ChatInviteLink,
     ChatInviteLinkMember,
     ChatJoinRequestUpdate,
+    ChatlistPreview,
     ChatMember,
     ChatMemberUpdate,
     ChatPreview,
-    ChatlistPreview,
     ChosenInlineResult,
     CollectibleInfo,
     DeleteBusinessMessageUpdate,
@@ -80,8 +78,8 @@ import {
     ParametersSkip2,
     ParsedUpdate,
     PeerReaction,
-    PeerStories,
     PeersIndex,
+    PeerStories,
     Photo,
     Poll,
     PollUpdate,
@@ -106,13 +104,15 @@ import {
     TakeoutSession,
     TextWithEntities,
     TypingStatus,
-    UploadFileLike,
     UploadedFile,
+    UploadFileLike,
     User,
     UserStarGift,
     UserStatusUpdate,
     UserTypingUpdate,
     WebviewResult,
 } from '../types/index.js'
+// @copy
+import { RawUpdateInfo } from '../updates/types.js'
 // @copy
 import { StringSessionData } from '../utils/string-session.js'

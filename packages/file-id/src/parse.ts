@@ -1,5 +1,5 @@
-import { TlBinaryReader } from '@mtcute/tl-runtime'
 import { base64 } from '@fuman/utils'
+import { TlBinaryReader } from '@mtcute/tl-runtime'
 
 import { tdFileId as td } from './types.js'
 import { telegramRleDecode } from './utils.js'

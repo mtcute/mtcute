@@ -1,16 +1,16 @@
-import { dirname, join } from 'node:path/posix'
-
-import { Bytes, read, write } from '@fuman/io'
 import type { UnsafeMutable } from '@fuman/utils'
-import { typed, u8, utf8 } from '@fuman/utils'
-import { createAesIgeForMessageOld } from '@mtcute/core/utils.js'
-import { Long, MtUnsupportedError } from '@mtcute/core'
 
 import type { INodeFsLike } from '../utils/fs.js'
-import { type IExtendedCryptoProvider, getDefaultCryptoProvider } from '../utils/crypto.js'
-
-import { readLong, readQByteArray } from './qt-reader.js'
 import type { InputTdKeyData, TdAuthKey, TdKeyData, TdMtpAuthorization } from './types.js'
+import { dirname, join } from 'node:path/posix'
+import { Bytes, read, write } from '@fuman/io'
+import { typed, u8, utf8 } from '@fuman/utils'
+
+import { Long, MtUnsupportedError } from '@mtcute/core'
+import { createAesIgeForMessageOld } from '@mtcute/core/utils.js'
+
+import { getDefaultCryptoProvider, type IExtendedCryptoProvider } from '../utils/crypto.js'
+import { readLong, readQByteArray } from './qt-reader.js'
 import { writeLong, writeQByteArray } from './qt-writer.js'
 
 const TDF_MAGIC = /* #__PURE__ */ utf8.encoder.encode('TDF$')
@@ -322,7 +322,7 @@ export class Tdata {
 
         const localKey = keyInnerData
         const count = read.int32be(info)
-        const order = [...Array<number>(count)].map(() => read.int32be(info))
+        const order = [...new Array<number>(count)].map(() => read.int32be(info))
         const active = read.int32be(info)
 
         return {

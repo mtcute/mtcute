@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { IAuthKeysRepository } from '@mtcute/core'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 export function fakeAuthKeysRepository(): IAuthKeysRepository {
     return {

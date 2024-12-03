@@ -1,11 +1,11 @@
-import { createHash } from 'node:crypto'
-
-import { expect } from 'chai'
-import { describe, it } from 'mocha'
 import type { FileDownloadLocation } from '@mtcute/core'
+
+import { createHash } from 'node:crypto'
 import { Thumbnail } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
 import { sleep } from '@mtcute/core/utils.js'
+import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
 import { getApiParams } from '../utils.js'
 

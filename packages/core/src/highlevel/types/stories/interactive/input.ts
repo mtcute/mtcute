@@ -1,8 +1,8 @@
-import Long from 'long'
 import type { tl } from '@mtcute/tl'
-
 import type { VenueSource } from '../../media/index.js'
+
 import type { InputReaction } from '../../reactions/index.js'
+import Long from 'long'
 import { normalizeInputReaction } from '../../reactions/index.js'
 
 /**

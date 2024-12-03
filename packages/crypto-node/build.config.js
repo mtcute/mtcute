@@ -1,8 +1,8 @@
-/* eslint-disable no-console, no-restricted-globals */
-import { createHash } from 'node:crypto'
-import path from 'node:path'
-import * as fs from 'node:fs'
+/* eslint-disable no-restricted-globals */
 import { spawn } from 'node:child_process'
+import { createHash } from 'node:crypto'
+import * as fs from 'node:fs'
+import path from 'node:path'
 import { Readable } from 'node:stream'
 import { fileURLToPath } from 'node:url'
 

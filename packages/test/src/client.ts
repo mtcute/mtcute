@@ -1,13 +1,13 @@
 import type { MaybePromise, MustEqual, RpcCallOptions } from '@mtcute/core'
-import { tl } from '@mtcute/core'
 import type { BaseTelegramClientOptions } from '@mtcute/core/client.js'
-import { BaseTelegramClient } from '@mtcute/core/client.js'
+import type { InputResponder } from './types.js'
+import { tl } from '@mtcute/core'
 
+import { BaseTelegramClient } from '@mtcute/core/client.js'
 import { defaultCryptoProvider, defaultPlatform } from './platform.js'
 import { StubMemoryTelegramStorage } from './storage.js'
-import type { InputResponder } from './types.js'
-import { markedIdToPeer } from './utils.js'
 import { StubTelegramTransport } from './transport.js'
+import { markedIdToPeer } from './utils.js'
 
 interface MessageBox {
     pts: number

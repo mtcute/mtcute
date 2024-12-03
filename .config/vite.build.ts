@@ -1,10 +1,10 @@
+import type { ConfigEnv, UserConfig } from 'vite'
 /// <reference types="vitest" />
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
+import { fileURLToPath } from 'node:url'
 import { fumanBuild } from '@fuman/build/vite'
-import type { ConfigEnv, UserConfig } from 'vite'
 import { nodeExternals } from 'rollup-plugin-node-externals'
 import dts from 'vite-plugin-dts'
 

@@ -1,9 +1,9 @@
 import type { tl } from '@mtcute/tl'
 
-import { MtTypeAssertionError } from '../../types/errors.js'
 import type { PeersIndex } from '../types/peers/peers-index.js'
-
 import type { PendingUpdate } from './types.js'
+
+import { MtTypeAssertionError } from '../../types/errors.js'
 
 export function messageToUpdate(message: tl.TypeMessage): tl.TypeUpdate {
     switch (message.peerId!._) {

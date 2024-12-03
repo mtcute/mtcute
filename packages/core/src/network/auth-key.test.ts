@@ -1,8 +1,8 @@
-import Long from 'long'
-import { describe, expect, it, vi } from 'vitest'
-import { defaultPlatform, defaultTestCryptoProvider } from '@mtcute/test'
 import type { TlBinaryReader, TlReaderMap } from '@mtcute/tl-runtime'
 import { hex, utf8 } from '@fuman/utils'
+import { defaultPlatform, defaultTestCryptoProvider } from '@mtcute/test'
+import Long from 'long'
+import { describe, expect, it, vi } from 'vitest'
 
 import { LogManager } from '../utils/index.js'
 

@@ -1,7 +1,7 @@
-import { expect } from 'chai'
-import { describe, it } from 'mocha'
 import type { Message } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
+import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
 import { getApiParams, waitFor } from '../utils.js'
 

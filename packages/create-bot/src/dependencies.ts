@@ -1,9 +1,9 @@
-import { join } from 'node:path'
-
 import type { UserConfig } from './cli.js'
+
+import { join } from 'node:path'
 import { MtcuteFeature } from './features/types.js'
 import { fetchAllLatestVersionsJsr } from './jsr.js'
-import { PackageManager, getInstallCommand } from './package-manager.js'
+import { getInstallCommand, PackageManager } from './package-manager.js'
 import { exec } from './utils.js'
 
 export interface DependenciesList {

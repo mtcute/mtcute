@@ -1,7 +1,7 @@
-import { expect } from 'chai'
-import { before, describe, it } from 'mocha'
 import { NodeCryptoProvider } from '@mtcute/node/utils.js'
 import { ige256Decrypt, ige256Encrypt } from '@mtcute/wasm'
+import { expect } from 'chai'
+import { before, describe, it } from 'mocha'
 
 before(async () => {
     await new NodeCryptoProvider().initialize()

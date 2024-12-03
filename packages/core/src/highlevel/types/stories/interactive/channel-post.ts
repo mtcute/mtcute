@@ -1,9 +1,9 @@
 import type { tl } from '@mtcute/tl'
 
+import type { PeersIndex } from '../../peers/peers-index.js'
 import { makeInspectable } from '../../../utils/index.js'
 import { memoizeGetters } from '../../../utils/memoize.js'
 import { Chat } from '../../peers/chat.js'
-import type { PeersIndex } from '../../peers/peers-index.js'
 
 import { StoryInteractiveArea } from './base.js'
 

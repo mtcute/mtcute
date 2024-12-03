@@ -1,26 +1,26 @@
-import Long from 'long'
 import type { mtp } from '@mtcute/tl'
-import { tl } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
-import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
-import { Deferred, Emitter, timers, u8 } from '@fuman/utils'
-
-import { MtArgumentError, MtTimeoutError, MtcuteError } from '../types/index.js'
-import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
+import type { ICorePlatform } from '../types/platform.js'
 import type { ICryptoProvider } from '../utils/index.js'
+import type { MtprotoSession, PendingMessage, PendingRpc } from './mtproto-session.js'
+import type { PersistentConnectionParams } from './persistent-connection.js'
+
+import type { ServerSaltManager } from './server-salt.js'
+import { Deferred, Emitter, timers, u8 } from '@fuman/utils'
+import { tl } from '@mtcute/tl'
+import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
+import Long from 'long'
+
+import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
+import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
 import {
     EarlyTimer,
     longFromBuffer,
     randomLong,
     removeFromLongArray,
 } from '../utils/index.js'
-import type { ICorePlatform } from '../types/platform'
-
 import { doAuthorization } from './authorization.js'
-import type { MtprotoSession, PendingMessage, PendingRpc } from './mtproto-session.js'
-import type { PersistentConnectionParams } from './persistent-connection.js'
 import { PersistentConnection } from './persistent-connection.js'
-import type { ServerSaltManager } from './server-salt.js'
 import { TransportError } from './transports/abstract.js'
 
 export interface SessionConnectionParams extends PersistentConnectionParams {

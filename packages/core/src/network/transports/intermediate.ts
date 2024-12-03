@@ -1,11 +1,11 @@
 import type { Bytes, ISyncWritable } from '@fuman/io'
+import type { ICryptoProvider } from '../../utils/index.js'
+import type { IPacketCodec } from './abstract.js'
+
 import { read, write } from '@fuman/io'
 import { typed } from '@fuman/utils'
 
-import type { ICryptoProvider } from '../../utils/index.js'
 import { getRandomInt } from '../../utils/index.js'
-
-import type { IPacketCodec } from './abstract.js'
 import { TransportError } from './abstract.js'
 
 const TAG = new Uint8Array([0xEE, 0xEE, 0xEE, 0xEE])

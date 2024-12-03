@@ -1,10 +1,10 @@
 import type { tl } from '@mtcute/tl'
-import { AsyncResource, asNonNull } from '@fuman/utils'
+import type { BaseTelegramClient } from '../base.js'
 
+import type { AppConfigSchema } from '../types/misc/app-config.js'
+import { asNonNull, AsyncResource } from '@fuman/utils'
 import { MtTypeAssertionError } from '../../types/errors.js'
 import { tlJsonToJson } from '../../utils/tl-json.js'
-import type { BaseTelegramClient } from '../base.js'
-import type { AppConfigSchema } from '../types/misc/app-config.js'
 
 export class AppConfigManager {
     private _resource

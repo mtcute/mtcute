@@ -1,10 +1,10 @@
-import Long from 'long'
 import type { tl } from '@mtcute/tl'
+import type { PeersIndex } from '../peers/peers-index.js'
 
+import Long from 'long'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MessageEntity } from '../messages/message-entity.js'
-import type { PeersIndex } from '../peers/peers-index.js'
 
 export class PollAnswer {
     constructor(

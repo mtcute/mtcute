@@ -1,9 +1,9 @@
+import type { UploadFileLike } from '@mtcute/core'
 import { ReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { basename } from 'node:path'
-import { Readable as NodeReadable } from 'node:stream'
 
-import type { UploadFileLike } from '@mtcute/core'
+import { Readable as NodeReadable } from 'node:stream'
 import { extractFileName } from '@mtcute/core/utils.js'
 
 export async function normalizeFile(file: UploadFileLike): Promise<{

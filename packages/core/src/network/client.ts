@@ -1,35 +1,35 @@
-import type { mtp } from '@mtcute/tl'
-import { tl } from '@mtcute/tl'
-import { __tlReaderMap as defaultReaderMap } from '@mtcute/tl/binary/reader.js'
-import { __tlWriterMap as defaultWriterMap } from '@mtcute/tl/binary/writer.js'
-import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import type { ReconnectionStrategy } from '@fuman/net'
-import { Emitter } from '@fuman/utils'
-
+import type { mtp } from '@mtcute/tl'
+import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import type { IMtStorageProvider } from '../storage/provider.js'
 import type { StorageManagerExtraOptions } from '../storage/storage.js'
-import { StorageManager } from '../storage/storage.js'
 import type { MustEqual } from '../types/index.js'
+import type { ICorePlatform } from '../types/platform.js'
+
 import type {
     DcOptions,
     ICryptoProvider,
     Logger,
 } from '../utils/index.js'
+import type { NetworkManagerExtraParams, RpcCallOptions } from './network-manager.js'
+import type { TelegramTransport } from './transports/abstract.js'
+import { Emitter } from '@fuman/utils'
+import { tl } from '@mtcute/tl'
+import { __tlReaderMap as defaultReaderMap } from '@mtcute/tl/binary/reader.js'
+import { __tlWriterMap as defaultWriterMap } from '@mtcute/tl/binary/writer.js'
+
+import { StorageManager } from '../storage/storage.js'
 import {
-    LogManager,
     asyncResettable,
     defaultProductionDc,
     defaultProductionIpv6Dc,
     defaultTestDc,
     defaultTestIpv6Dc,
     isTlRpcError,
+    LogManager,
 } from '../utils/index.js'
-import type { ICorePlatform } from '../types/platform.js'
-
 import { ConfigManager } from './config-manager.js'
-import type { NetworkManagerExtraParams, RpcCallOptions } from './network-manager.js'
 import { NetworkManager } from './network-manager.js'
-import type { TelegramTransport } from './transports'
 
 /** Options for {@link MtClient} */
 export interface MtClientOptions {

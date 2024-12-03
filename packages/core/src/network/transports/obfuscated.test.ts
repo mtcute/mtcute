@@ -1,14 +1,14 @@
-import { describe, expect, it, vi } from 'vitest'
-import { defaultPlatform, defaultTestCryptoProvider } from '@mtcute/test'
+import type { MtProxyInfo } from './obfuscated.js'
 import { Bytes } from '@fuman/io'
 import { hex } from '@fuman/utils'
+import { defaultPlatform, defaultTestCryptoProvider } from '@mtcute/test'
+
+import { describe, expect, it, vi } from 'vitest'
 
 import { LogManager } from '../../utils/index.js'
-
-import { IntermediatePacketCodec } from './intermediate.js'
-import type { MtProxyInfo } from './obfuscated.js'
-import { ObfuscatedPacketCodec } from './obfuscated.js'
 import { TransportError } from './abstract.js'
+import { IntermediatePacketCodec } from './intermediate.js'
+import { ObfuscatedPacketCodec } from './obfuscated.js'
 
 describe('ObfuscatedPacketCodec', () => {
     const create = async (randomSource?: string, proxy?: MtProxyInfo) => {

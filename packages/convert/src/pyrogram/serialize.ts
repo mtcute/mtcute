@@ -1,7 +1,7 @@
-import { Long, MtArgumentError } from '@mtcute/core'
+import type { PyrogramSession } from './types.js'
 import { base64, typed, u8 } from '@fuman/utils'
 
-import type { PyrogramSession } from './types.js'
+import { Long, MtArgumentError } from '@mtcute/core'
 
 const SESSION_STRING_SIZE_OLD = 267
 const SESSION_STRING_SIZE = 271

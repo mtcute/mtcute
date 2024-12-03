@@ -1,8 +1,8 @@
 import type { tl } from '@mtcute/tl'
 
 import type { MaybeArray } from '../../../types/utils.js'
-import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
+import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import { Message, PeersIndex } from '../../types/index.js'
 
 /**

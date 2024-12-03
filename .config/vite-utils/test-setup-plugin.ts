@@ -1,6 +1,6 @@
-import { fileURLToPath } from 'node:url'
-
 import type { Plugin } from 'vite'
+
+import { fileURLToPath } from 'node:url'
 
 const setupFile = fileURLToPath(new URL('./test-setup.ts', import.meta.url))
 

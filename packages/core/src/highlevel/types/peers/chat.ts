@@ -1,16 +1,16 @@
 import type { tl } from '@mtcute/tl'
 
+import type { PeersIndex } from './peers-index.js'
 import { MtArgumentError, MtTypeAssertionError } from '../../../types/errors.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MessageEntity } from '../messages/message-entity.js'
-import { EmojiStatus } from '../reactions/emoji-status.js'
 
+import { EmojiStatus } from '../reactions/emoji-status.js'
 import { ChatColors } from './chat-colors.js'
 import { ChatPermissions } from './chat-permissions.js'
 import { ChatPhoto } from './chat-photo.js'
-import type { PeersIndex } from './peers-index.js'
 import { User } from './user.js'
 
 /**

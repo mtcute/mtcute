@@ -1,6 +1,6 @@
-import { u8 } from '@fuman/utils'
-
 import type { MaybePromise } from '../../types/index.js'
+
+import { u8 } from '@fuman/utils'
 
 import { factorizePQSync } from './factorization.js'
 

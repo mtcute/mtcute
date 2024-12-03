@@ -1,11 +1,11 @@
-import { assertEquals, assertGreater, assertInstanceOf } from 'https://deno.land/std@0.223.0/assert/mod.ts'
-import { TelegramClient } from '@mtcute/core/client.js'
 import type { Message } from '@mtcute/deno'
+import type { CustomMethods } from './_worker.ts'
+import { TelegramClient } from '@mtcute/core/client.js'
 import { Long, TelegramWorkerPort, tl } from '@mtcute/deno'
 
-import { getApiParams, waitFor } from '../utils.ts'
+import { assertEquals, assertGreater, assertInstanceOf } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 
-import type { CustomMethods } from './_worker.ts'
+import { getApiParams, waitFor } from '../utils.ts'
 
 Deno.test('5. worker', { sanitizeResources: false }, async (t) => {
     const worker = new Worker(new URL('_worker.ts', import.meta.url), {

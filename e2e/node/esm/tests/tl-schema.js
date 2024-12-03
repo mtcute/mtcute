@@ -1,11 +1,11 @@
+import { NodePlatform } from '@mtcute/node'
+import { tl } from '@mtcute/tl'
+import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
+import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
+import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 import { expect } from 'chai'
 import Long from 'long'
 import { describe, it } from 'mocha'
-import { NodePlatform } from '@mtcute/node'
-import { tl } from '@mtcute/tl'
-import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
-import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
-import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
 
 // here we primarily want to check that @mtcute/tl correctly works with @mtcute/tl-runtime
 

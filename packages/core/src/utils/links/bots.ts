@@ -1,9 +1,9 @@
 import type { tl } from '@mtcute/tl'
 
-import { isPresent } from '../type-assertions.js'
+import type { Deeplink } from './common.js'
 import { assertNever } from '../../types/utils.js'
 
-import type { Deeplink } from './common.js'
+import { isPresent } from '../type-assertions.js'
 import { deeplinkBuilder } from './common.js'
 
 /**

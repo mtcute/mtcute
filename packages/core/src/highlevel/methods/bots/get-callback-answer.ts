@@ -1,8 +1,8 @@
 import type { tl } from '@mtcute/tl'
-import { utf8 } from '@fuman/utils'
-
 import type { ITelegramClient } from '../../client.types.js'
+
 import type { InputMessageId } from '../../types/index.js'
+import { utf8 } from '@fuman/utils'
 import { normalizeInputMessageId } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 

@@ -1,7 +1,7 @@
-const wasm = require('@mtcute/wasm')
-const { describe, it, before } = require('mocha')
-const { expect } = require('chai')
 const { NodeCryptoProvider } = require('@mtcute/node/utils.js')
+const wasm = require('@mtcute/wasm')
+const { expect } = require('chai')
+const { describe, it, before } = require('mocha')
 
 before(async () => {
     await new NodeCryptoProvider().initialize()

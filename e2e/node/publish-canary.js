@@ -2,9 +2,9 @@
 // at this point, we should have all our packages installed in node_modules
 // so it should be safe to just cd into them and run `npm publish` on them
 
+const { execSync } = require('node:child_process')
 const fs = require('node:fs')
 const path = require('node:path')
-const { execSync } = require('node:child_process')
 
 // setup tokenw
 const { NPM_TOKEN, REGISTRY, CURRENT_COMMIT } = process.env

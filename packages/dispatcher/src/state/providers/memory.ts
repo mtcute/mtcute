@@ -1,8 +1,8 @@
 import type { MaybePromise } from '@mtcute/core'
-import { MemoryStorageDriver } from '@mtcute/core'
-
 import type { IStateStorageProvider } from '../provider.js'
+
 import type { IStateRepository } from '../repository.js'
+import { MemoryStorageDriver } from '@mtcute/core'
 
 interface StateDto {
     value: string

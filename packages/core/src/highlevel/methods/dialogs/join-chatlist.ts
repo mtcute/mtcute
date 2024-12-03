@@ -1,10 +1,10 @@
 import type { tl } from '@mtcute/tl'
 
-import { MtTypeAssertionError } from '../../../types/errors.js'
 import type { MaybeArray } from '../../../types/utils.js'
-import { assertTypeIs, isPresent } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
+import { MtTypeAssertionError } from '../../../types/errors.js'
+import { assertTypeIs, isPresent } from '../../../utils/type-assertions.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
 

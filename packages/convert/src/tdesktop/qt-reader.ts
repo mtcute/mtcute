@@ -1,6 +1,6 @@
-import { Long } from '@mtcute/core'
 import { type ISyncReadable, read } from '@fuman/io'
 import { u8 } from '@fuman/utils'
+import { Long } from '@mtcute/core'
 
 export function readQByteArray(readable: ISyncReadable): Uint8Array {
     const length = read.uint32be(readable)

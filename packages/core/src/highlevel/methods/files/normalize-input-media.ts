@@ -1,12 +1,12 @@
-import Long from 'long'
-import { parseFileId, tdFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
-
-import { assertTypeIs } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
-import { isUploadedFile } from '../../types/files/uploaded-file.js'
 import type { UploadFileLike } from '../../types/files/utils.js'
 import type { InputMediaLike } from '../../types/media/input-media/types.js'
+
+import { parseFileId, tdFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
+import Long from 'long'
+import { assertTypeIs } from '../../../utils/type-assertions.js'
+import { isUploadedFile } from '../../types/files/uploaded-file.js'
 import { inputTextToTl } from '../../types/misc/entities.js'
 import { fileIdToInputDocument, fileIdToInputPhoto } from '../../utils/convert-file-id.js'
 import { normalizeDate } from '../../utils/misc-utils.js'

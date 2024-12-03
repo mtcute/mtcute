@@ -1,7 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createStub } from '@mtcute/test'
-import type { tl } from '@mtcute/tl'
 import type { AsyncResourceContext } from '@fuman/utils'
+import type { tl } from '@mtcute/tl'
+import { createStub } from '@mtcute/test'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ConfigManager } from './config-manager.js'
 

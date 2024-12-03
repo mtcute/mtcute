@@ -2,9 +2,9 @@ import { resolve } from 'node:path'
 
 import { defineConfig } from 'vite'
 
+import { collectTestEntrypoints } from './vite-utils/collect-test-entrypoints'
 import { fixupCjs } from './vite-utils/fixup-cjs'
 import { testSetup } from './vite-utils/test-setup-plugin'
-import { collectTestEntrypoints } from './vite-utils/collect-test-entrypoints'
 
 const POLYFILLS = resolve(__dirname, 'vite-utils/polyfills-deno.ts')
 

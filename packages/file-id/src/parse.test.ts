@@ -1,6 +1,6 @@
+import { hex } from '@fuman/utils'
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
-import { hex } from '@fuman/utils'
 
 import { parseFileId } from './parse.js'
 import { tdFileId as td } from './types.js'

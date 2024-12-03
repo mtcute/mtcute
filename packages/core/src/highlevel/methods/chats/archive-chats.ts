@@ -1,7 +1,7 @@
 import type { MaybeArray } from '../../../types/utils.js'
-import { isPresent } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
+import { isPresent } from '../../../utils/type-assertions.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 /**

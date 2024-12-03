@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import type { INodeFsLike } from '../utils/fs.js'
 import { Long } from '@mtcute/core'
 
-import type { INodeFsLike } from '../utils/fs.js'
+import { describe, expect, it } from 'vitest'
 
 class FakeFs implements INodeFsLike {
     readonly files = new Map<string, Uint8Array>()

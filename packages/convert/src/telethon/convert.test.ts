@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { hex } from '@fuman/utils'
+import { describe, expect, it } from 'vitest'
 
 import { TELETHON_TEST_SESSION } from './__fixtures__/session.js'
 import { convertFromTelethonSession, convertToTelethonSession } from './convert.js'

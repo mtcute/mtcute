@@ -1,34 +1,34 @@
-import { readFile, writeFile } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
-import { createInterface } from 'node:readline'
-
-import { ffetchAddons, ffetchBase } from '@fuman/fetch'
-import * as cheerio from 'cheerio'
-import { asyncPool } from '@fuman/utils'
-import jsYaml from 'js-yaml'
 import type {
     TlEntry,
     TlFullSchema,
 } from '@mtcute/tl-utils'
+import type { TlPackedSchema } from './schema.js'
+import { readFile, writeFile } from 'node:fs/promises'
+
+import { createInterface } from 'node:readline'
+import { fileURLToPath } from 'node:url'
+import { ffetchAddons, ffetchBase } from '@fuman/fetch'
+import { asyncPool } from '@fuman/utils'
 import {
-    PRIMITIVE_TO_TS,
     camelToPascal,
     jsComment,
+    PRIMITIVE_TO_TS,
     snakeToCamel,
     splitNameToNamespace,
 } from '@mtcute/tl-utils'
+import * as cheerio from 'cheerio'
 
+import jsYaml from 'js-yaml'
 import {
     API_SCHEMA_JSON_FILE,
     APP_CONFIG_JSON_FILE,
     BLOGFORK_DOMAIN,
-    COREFORK_DOMAIN,
     CORE_DOMAIN,
+    COREFORK_DOMAIN,
     DESCRIPTIONS_YAML_FILE,
     DOC_CACHE_FILE,
 } from './constants.js'
 import { applyDescriptionsYamlFile } from './process-descriptions-yaml.js'
-import type { TlPackedSchema } from './schema.js'
 import { packTlSchema, unpackTlSchema } from './schema.js'
 
 export interface CachedDocumentationEntry {

@@ -1,14 +1,14 @@
 import type { tl } from '@mtcute/tl'
 
-import { MtArgumentError } from '../../../types/errors.js'
-import { isPresent } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { Message } from '../../types/messages/message.js'
 import type { InputPeerLike } from '../../types/peers/index.js'
-import { resolvePeer } from '../users/resolve-peer.js'
-
-import { getMessages } from './get-messages.js'
 import type { CommonSendParams } from './send-common.js'
+import { MtArgumentError } from '../../../types/errors.js'
+import { isPresent } from '../../../utils/type-assertions.js'
+
+import { resolvePeer } from '../users/resolve-peer.js'
+import { getMessages } from './get-messages.js'
 import { sendMediaGroup } from './send-media-group.js'
 
 // @exported

@@ -1,6 +1,6 @@
-import Long from 'long'
-import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 import type { tl } from '@mtcute/tl'
+import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
+import Long from 'long'
 
 import { MtArgumentError, MtTypeAssertionError } from '../../../types/errors.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'

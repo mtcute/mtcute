@@ -1,14 +1,14 @@
+import type { TlPublicKey } from '../binary/rsa-keys.js'
 import { createReadStream } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import readline from 'node:readline'
 
+import readline from 'node:readline'
 import { parsePublicKey } from '@mtcute/core/utils.js'
+
 import { NodeCryptoProvider } from '@mtcute/node/utils.js'
 
-import type { TlPublicKey } from '../binary/rsa-keys.js'
-
-import { ESM_PRELUDE, __dirname } from './constants.js'
+import { __dirname, ESM_PRELUDE } from './constants.js'
 
 const IN_TXT_FILE = join(__dirname, '../data/rsa-keys.txt')
 const OUT_JS_FILE = join(__dirname, '../binary/rsa-keys.js')

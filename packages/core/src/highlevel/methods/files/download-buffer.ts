@@ -1,7 +1,7 @@
-import { u8 } from '@fuman/utils'
-
 import type { ITelegramClient } from '../../client.types.js'
+
 import type { FileDownloadLocation, FileDownloadParameters } from '../../types/index.js'
+import { u8 } from '@fuman/utils'
 import { FileLocation } from '../../types/index.js'
 
 import { downloadAsIterable } from './download-iterable.js'

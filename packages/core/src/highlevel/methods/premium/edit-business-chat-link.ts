@@ -1,6 +1,6 @@
-import { assertTrue } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputText } from '../../types/index.js'
+import { assertTrue } from '../../../utils/type-assertions.js'
 import { BusinessChatLink } from '../../types/premium/business-chat-link.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 

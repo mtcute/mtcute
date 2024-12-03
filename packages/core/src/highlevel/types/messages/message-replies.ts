@@ -1,11 +1,11 @@
 import type { tl } from '@mtcute/tl'
 
+import type { Peer } from '../peers/peer.js'
+import type { PeersIndex } from '../peers/peers-index.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import type { Peer } from '../peers/peer.js'
 import { parsePeer } from '../peers/peer.js'
-import type { PeersIndex } from '../peers/peers-index.js'
 
 /**
  * Information about replies to a message

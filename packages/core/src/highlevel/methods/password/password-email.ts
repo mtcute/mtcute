@@ -1,5 +1,5 @@
-import { assertTrue } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
+import { assertTrue } from '../../../utils/type-assertions.js'
 
 /**
  * Verify an email to use as 2FA recovery method

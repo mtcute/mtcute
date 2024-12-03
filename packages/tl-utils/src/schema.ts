@@ -1,6 +1,6 @@
+import type { TlEntry, TlFullSchema } from './types.js'
 import { computeConstructorIdFromEntry } from './ctor-id.js'
 import { writeTlEntryToString } from './stringify.js'
-import type { TlEntry, TlFullSchema } from './types.js'
 
 const replaceNewlineInComment = (s: string): string => s.replace(/\n/g, '\n//- ')
 

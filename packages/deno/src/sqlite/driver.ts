@@ -1,8 +1,8 @@
-import type { ISqliteDatabase, ISqliteStatement } from '@mtcute/core'
-import { BaseSqliteStorageDriver } from '@mtcute/core'
 import type { BindParameters, Database as TDatabase, Statement as TStatement } from '@db/sqlite'
-
+import type { ISqliteDatabase, ISqliteStatement } from '@mtcute/core'
 import type { Logger } from '../utils.js'
+
+import { BaseSqliteStorageDriver } from '@mtcute/core'
 
 let Database: typeof import('@db/sqlite').Database
 

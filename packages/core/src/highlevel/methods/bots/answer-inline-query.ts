@@ -1,10 +1,10 @@
-import Long from 'long'
 import type { tl } from '@mtcute/tl'
-
 import type { ITelegramClient } from '../../client.types.js'
+
 import type { InputInlineResult } from '../../types/bots/index.js'
-import { BotInline } from '../../types/bots/index.js'
 import type { InlineQuery } from '../../types/updates/inline-query.js'
+import Long from 'long'
+import { BotInline } from '../../types/bots/index.js'
 
 /**
  * Answer an inline query.

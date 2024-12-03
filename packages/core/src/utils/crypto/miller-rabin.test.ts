@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { defaultCryptoProvider } from '@mtcute/test'
+import { describe, expect, it } from 'vitest'
 
 import { millerRabin } from './miller-rabin.js'
 

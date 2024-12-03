@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { hex } from '@fuman/utils'
+import { describe, expect, it } from 'vitest'
 
 import { telegramRleDecode, telegramRleEncode } from './utils.js'
 

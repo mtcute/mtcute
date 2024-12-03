@@ -1,5 +1,5 @@
-import { beforeAll, describe, expect, it } from 'vitest'
 import { hex } from '@fuman/utils'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 import { __getWasm, ige256Decrypt, ige256Encrypt } from '../src/index.js'
 

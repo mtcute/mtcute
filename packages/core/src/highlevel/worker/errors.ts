@@ -2,11 +2,11 @@ import { tl } from '@mtcute/tl'
 
 import {
     MtArgumentError,
+    MtcuteError,
     MtSecurityError,
     MtTimeoutError,
     MtTypeAssertionError,
     MtUnsupportedError,
-    MtcuteError,
 } from '../../types/errors.js'
 import { MtEmptyError, MtInvalidPeerTypeError, MtMessageNotFoundError, MtPeerNotFoundError } from '../types/errors.js'
 

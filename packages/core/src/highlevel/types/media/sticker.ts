@@ -1,5 +1,5 @@
-import { tdFileId } from '@mtcute/file-id'
 import type { tl } from '@mtcute/tl'
+import { tdFileId } from '@mtcute/file-id'
 
 import { MtArgumentError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'

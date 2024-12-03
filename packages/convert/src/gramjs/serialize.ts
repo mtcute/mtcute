@@ -1,7 +1,7 @@
-import { MtArgumentError } from '@mtcute/core'
+import type { TelethonSession } from '../telethon/types.js'
 import { base64, typed, utf8 } from '@fuman/utils'
 
-import type { TelethonSession } from '../telethon/types.js'
+import { MtArgumentError } from '@mtcute/core'
 
 export function serializeGramjsSession(session: TelethonSession): string {
     if (session.authKey.length !== 256) {

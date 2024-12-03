@@ -1,7 +1,7 @@
 import type { tl } from '@mtcute/tl'
 
-import { MtTypeAssertionError } from '../../../../types/errors.js'
 import type { PeersIndex } from '../../peers/index.js'
+import { MtTypeAssertionError } from '../../../../types/errors.js'
 
 import { StoryInteractiveChannelPost } from './channel-post.js'
 import { StoryInteractiveLocation } from './location.js'

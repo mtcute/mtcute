@@ -1,7 +1,7 @@
-import CRC32 from 'crc-32'
-
-import { writeTlEntryToString } from './stringify.js'
 import type { TlEntry } from './types.js'
+
+import CRC32 from 'crc-32'
+import { writeTlEntryToString } from './stringify.js'
 
 /**
  * Computes the constructor id for a given TL entry.

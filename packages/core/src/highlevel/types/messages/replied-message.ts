@@ -1,15 +1,15 @@
 import type { tl } from '@mtcute/tl'
 
+import type { PeerSender } from '../peers/peer.js'
+import type { PeersIndex } from '../peers/peers-index.js'
+import type { MessageMedia } from './message-media.js'
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Chat } from '../peers/chat.js'
-import type { PeerSender } from '../peers/peer.js'
-import type { PeersIndex } from '../peers/peers-index.js'
-import { User } from '../peers/user.js'
 
+import { User } from '../peers/user.js'
 import { MessageEntity } from './message-entity.js'
-import type { MessageMedia } from './message-media.js'
 import { _messageMediaFromTl } from './message-media.js'
 
 /**

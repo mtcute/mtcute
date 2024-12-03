@@ -1,6 +1,6 @@
 import * as fsp from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import { parsePackageJsonFile, processPackageJson } from '@fuman/build'
 import { packageJsonToDeno } from '@fuman/build/jsr'

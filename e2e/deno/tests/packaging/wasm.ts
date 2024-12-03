@@ -1,6 +1,6 @@
-import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 import { ige256Decrypt, ige256Encrypt } from '@mtcute/wasm'
 import { WebCryptoProvider, WebPlatform } from '@mtcute/web'
+import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 
 await new WebCryptoProvider().initialize()
 const platform = new WebPlatform()

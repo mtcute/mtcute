@@ -1,5 +1,5 @@
-import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 import type { tl } from '@mtcute/tl'
+import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'

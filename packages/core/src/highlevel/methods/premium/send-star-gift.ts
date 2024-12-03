@@ -1,14 +1,14 @@
-import Long from 'long'
 import type { tl } from '@mtcute/tl'
+import type { ITelegramClient } from '../../client.types.js'
 
+import type { Message } from '../../types/messages/message.js'
 import type { InputPeerLike } from '../../types/peers/peer.js'
 import type { StarGift } from '../../types/premium/stars-gift.js'
-import { type InputText, inputTextToTl } from '../../types/misc/entities.js'
-import type { ITelegramClient } from '../../client.types.js'
-import { resolveUser } from '../users/resolve-peer.js'
+import Long from 'long'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
+import { type InputText, inputTextToTl } from '../../types/misc/entities.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
-import type { Message } from '../../types/messages/message.js'
+import { resolveUser } from '../users/resolve-peer.js'
 
 /**
  * Send a star gift to a user.

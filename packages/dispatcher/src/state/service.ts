@@ -1,8 +1,8 @@
-import { asyncResettable } from '@mtcute/core/utils.js'
 import type { MaybePromise } from '@mtcute/core'
+import type { IStateStorageProvider } from './provider.js'
 import { LruMap, timers } from '@fuman/utils'
 
-import type { IStateStorageProvider } from './provider.js'
+import { asyncResettable } from '@mtcute/core/utils.js'
 
 const makeCurrentSceneKey = (key: string) => `$current_scene_${key}`
 

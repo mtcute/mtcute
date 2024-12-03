@@ -1,8 +1,8 @@
 /* eslint-disable ts/no-unsafe-assignment */
 /* eslint-disable ts/no-unsafe-call,ts/no-unsafe-argument */
 
-import Long from 'long'
 import { base64 } from '@fuman/utils'
+import Long from 'long'
 
 const customInspectSymbol = Symbol.for('nodejs.util.inspect.custom')
 

@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { hex } from '@fuman/utils'
+import { describe, expect, it } from 'vitest'
 
 import { PYROGRAM_TEST_SESSION_OLD } from './__fixtures__/session_old.js'
 import { convertFromPyrogramSession, convertToPyrogramSession } from './convert.js'

@@ -1,8 +1,8 @@
+import type { TlArgument, TlEntry } from './index.js'
+
 import { describe, expect, it } from 'vitest'
 
 import { computeConstructorIdFromEntry } from './ctor-id.js'
-
-import type { TlArgument, TlEntry } from './index.js'
 
 describe('computeConstructorIdFromEntry', () => {
     const make = (name: string, type: string, ...args: string[]): TlEntry => ({

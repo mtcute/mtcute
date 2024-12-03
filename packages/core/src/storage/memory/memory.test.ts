@@ -1,10 +1,10 @@
-import { describe } from 'vitest'
 import {
     testAuthKeysRepository,
     testKeyValueRepository,
     testPeersRepository,
     testRefMessagesRepository,
 } from '@mtcute/test'
+import { describe } from 'vitest'
 
 import { MemoryStorage } from './index.js'
 

@@ -1,9 +1,9 @@
 import type { tl } from '@mtcute/tl'
 
+import type { PeersIndex } from '../peers/peers-index.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Poll } from '../media/poll.js'
-import type { PeersIndex } from '../peers/peers-index.js'
 
 /**
  * Poll state has changed (stopped, somebody

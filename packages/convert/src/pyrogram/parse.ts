@@ -1,10 +1,10 @@
 // source: https://github.com/pyrogram/pyrogram/blob/master/pyrogram/storage/storage.py
 
-import { Long } from '@mtcute/core'
-import { longFromBuffer } from '@mtcute/core/utils.js'
-import { base64, typed } from '@fuman/utils'
-
 import type { PyrogramSession } from './types.js'
+import { base64, typed } from '@fuman/utils'
+import { Long } from '@mtcute/core'
+
+import { longFromBuffer } from '@mtcute/core/utils.js'
 
 const SESSION_STRING_SIZE = 351
 const SESSION_STRING_SIZE_64 = 356

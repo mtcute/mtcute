@@ -1,12 +1,12 @@
 import type { mtp, tl } from '@mtcute/tl'
-import { Deferred, Emitter, unknownToError } from '@fuman/utils'
-
 import type { Logger } from '../utils/index.js'
 
-import { MtprotoSession } from './mtproto-session.js'
 import type { SessionConnectionParams } from './session-connection.js'
+
+import type { TelegramTransport } from './transports/index.js'
+import { Deferred, Emitter, unknownToError } from '@fuman/utils'
+import { MtprotoSession } from './mtproto-session.js'
 import { SessionConnection } from './session-connection.js'
-import type { TelegramTransport } from './transports'
 
 export class MultiSessionConnection {
     private _log: Logger

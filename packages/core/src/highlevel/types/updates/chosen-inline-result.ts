@@ -1,10 +1,10 @@
 import type { tl } from '@mtcute/tl'
 
+import type { PeersIndex } from '../peers/index.js'
 import { makeInspectable } from '../../utils/index.js'
 import { encodeInlineMessageId } from '../../utils/inline-utils.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Location } from '../media/location.js'
-import type { PeersIndex } from '../peers/index.js'
 import { User } from '../peers/index.js'
 
 /**

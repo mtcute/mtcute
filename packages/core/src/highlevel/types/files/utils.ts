@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
+import type { IReadable } from '@fuman/io'
 import type { tdFileId } from '@mtcute/file-id'
 import type { tl } from '@mtcute/tl'
-import type { IReadable } from '@fuman/io'
 
 import type { AnyToNever } from '../../../types/utils.js'
 

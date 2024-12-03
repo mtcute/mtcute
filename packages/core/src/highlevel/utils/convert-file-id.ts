@@ -1,9 +1,9 @@
-import Long from 'long'
-import { parseFileId, tdFileId as td } from '@mtcute/file-id'
 import type { tl } from '@mtcute/tl'
+import { parseFileId, tdFileId as td } from '@mtcute/file-id'
+import Long from 'long'
 
-import { parseMarkedPeerId } from '../../utils/peer-utils.js'
 import { assertNever } from '../../types/utils.js'
+import { parseMarkedPeerId } from '../../utils/peer-utils.js'
 
 import FileType = td.FileType
 

@@ -4,8 +4,8 @@ import type {
     InputStickerSetItem,
 } from '../../types/index.js'
 import {
-    StickerSet,
     normalizeInputStickerSet,
+    StickerSet,
 } from '../../types/index.js'
 
 import { _normalizeInputStickerSetItem } from './_utils.js'

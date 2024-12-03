@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { IReferenceMessagesRepository, IStorageDriver } from '@mtcute/core'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 export function fakeRefMessagesRepository(): IReferenceMessagesRepository {
     return {

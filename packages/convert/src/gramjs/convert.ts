@@ -1,8 +1,8 @@
 import type { StringSessionData } from '@mtcute/core/utils.js'
-import { readStringSession } from '@mtcute/core/utils.js'
-
-import { convertFromTelethonSession } from '../telethon/convert.js'
 import type { TelethonSession } from '../telethon/types.js'
+
+import { readStringSession } from '@mtcute/core/utils.js'
+import { convertFromTelethonSession } from '../telethon/convert.js'
 
 import { parseGramjsSession } from './parse.js'
 import { serializeGramjsSession } from './serialize.js'

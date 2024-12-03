@@ -1,6 +1,6 @@
-import { type IPacketCodec, type ITelegramConnection, IntermediatePacketCodec, type TelegramTransport } from '@mtcute/core'
 import type { BasicDcOption } from '@mtcute/core/utils.js'
 import { FakeConnection } from '@fuman/net'
+import { IntermediatePacketCodec, type IPacketCodec, type ITelegramConnection, type TelegramTransport } from '@mtcute/core'
 
 export class StubTelegramTransport implements TelegramTransport {
     constructor(

@@ -1,10 +1,10 @@
+import type { UploadFileLike } from '@mtcute/core'
+import type { BunFile } from 'bun'
 import { ReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
+
 import { basename } from 'node:path'
 import { Readable as NodeReadable } from 'node:stream'
-
-import type { BunFile } from 'bun'
-import type { UploadFileLike } from '@mtcute/core'
 
 // https://github.com/oven-sh/bun/issues/10481
 function isBunFile(file: unknown): file is BunFile {

@@ -1,12 +1,12 @@
-import { MtArgumentError } from '../../../types/errors.js'
-import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike, InputText, Message, ReplyMarkup } from '../../types/index.js'
-import { MtMessageNotFoundError } from '../../types/index.js'
-import { resolvePeer } from '../users/resolve-peer.js'
-
-import { getMessages } from './get-messages.js'
 import type { CommonSendParams } from './send-common.js'
+import { MtArgumentError } from '../../../types/errors.js'
+import { getMarkedPeerId } from '../../../utils/peer-utils.js'
+import { MtMessageNotFoundError } from '../../types/index.js'
+
+import { resolvePeer } from '../users/resolve-peer.js'
+import { getMessages } from './get-messages.js'
 import { sendMedia } from './send-media.js'
 import { sendText } from './send-text.js'
 

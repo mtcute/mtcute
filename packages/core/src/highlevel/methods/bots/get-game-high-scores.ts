@@ -2,7 +2,7 @@ import type { tl } from '@mtcute/tl'
 
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputMessageId, InputPeerLike } from '../../types/index.js'
-import { GameHighScore, PeersIndex, normalizeInputMessageId } from '../../types/index.js'
+import { GameHighScore, normalizeInputMessageId, PeersIndex } from '../../types/index.js'
 import { normalizeInlineId } from '../../utils/inline-utils.js'
 import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 

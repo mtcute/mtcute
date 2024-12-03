@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import type { TlEntryDiff, TlSchemaDiff } from './types.js'
 
+import { describe, expect, it } from 'vitest'
 import { generateTlEntriesDifference, generateTlSchemasDifference } from './diff.js'
 import { parseTlToEntries } from './parse.js'
 import { parseFullTlSchema } from './schema.js'
-import type { TlEntryDiff, TlSchemaDiff } from './types.js'
 
 describe('generateTlEntriesDifference', () => {
     const test = (tl: string[], expected?: TlEntryDiff) => {

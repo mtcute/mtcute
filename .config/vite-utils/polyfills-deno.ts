@@ -3,15 +3,15 @@ import util from 'node:util'
 // @ts-expect-error  no typings
 import { describe as _describe, afterAll, afterEach, beforeAll, beforeEach, it } from 'jsr:@std/testing/bdd'
 // @ts-expect-error  no typings
+import * as vitestExpect from 'npm:@vitest/expect@1.4.0'
+// @ts-expect-error  no typings
 import * as vitestSpy from 'npm:@vitest/spy@1.4.0'
 // @ts-expect-error  no typings
 import * as chai from 'npm:chai'
-// @ts-expect-error  no typings
-import * as vitestExpect from 'npm:@vitest/expect@1.4.0'
 
 import { setupChai, stubGlobal, unstubAllGlobals, waitFor } from './polyfills'
 
-export { it, beforeEach, afterEach, beforeAll, afterAll }
+export { afterAll, afterEach, beforeAll, beforeEach, it }
 
 setupChai(chai, vitestExpect)
 

@@ -1,5 +1,5 @@
-import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
+import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import { StarGift } from '../../types/premium/stars-gift.js'
 
 // @available=user

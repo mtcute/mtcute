@@ -1,12 +1,8 @@
 import type { tl } from '@mtcute/tl'
 
-import { assertNever } from '../../../../types/utils.js'
 import type { ITelegramClient } from '../../../client.types.js'
-import { _normalizeInputText } from '../../../methods/misc/normalize-text.js'
 import type { InputText } from '../../../types/misc/entities.js'
 import type { InputMediaGeoLive } from '../../media/index.js'
-import { BotKeyboard } from '../keyboards/index.js'
-
 import type {
     InputInlineMessage,
     InputInlineMessageContact,
@@ -18,6 +14,10 @@ import type {
     InputInlineMessageVenue,
     InputInlineMessageWebpage,
 } from './types.js'
+import { assertNever } from '../../../../types/utils.js'
+import { _normalizeInputText } from '../../../methods/misc/normalize-text.js'
+
+import { BotKeyboard } from '../keyboards/index.js'
 
 /**
  * Create a text inline message

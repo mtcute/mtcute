@@ -1,6 +1,6 @@
-import { bigint } from '@fuman/utils'
-
 import type { ICryptoProvider } from './crypto/abstract.js'
+
+import { bigint } from '@fuman/utils'
 
 /**
  * Generate a cryptographically safe random big integer of the given size (in bytes)

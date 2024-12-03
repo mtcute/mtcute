@@ -1,8 +1,8 @@
 import type { tl } from '@mtcute/tl'
 
+import type { ITelegramClient } from '../../client.types.js'
 import { LongMap } from '../../../utils/long-utils.js'
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
-import type { ITelegramClient } from '../../client.types.js'
 import { MessageEffect } from '../../types/index.js'
 
 // @available=user

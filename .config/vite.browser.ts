@@ -2,8 +2,8 @@
 import { mergeConfig } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
-import baseConfig from './vite.js'
 import { fixupCjs } from './vite-utils/fixup-cjs'
+import baseConfig from './vite.js'
 
 export default mergeConfig(baseConfig, {
     test: {

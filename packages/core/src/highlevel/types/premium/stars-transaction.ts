@@ -1,13 +1,13 @@
 import type { tl } from '@mtcute/tl'
 
+import type { Peer } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
+import type { User } from '../peers/user.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import type { Peer } from '../peers/peer.js'
-import { parsePeer } from '../peers/peer.js'
-import type { User } from '../peers/user.js'
-import { type MessageMedia, _messageMediaFromTl } from '../messages/message-media.js'
 import { WebDocument } from '../files/web-document.js'
+import { _messageMediaFromTl, type MessageMedia } from '../messages/message-media.js'
+import { parsePeer } from '../peers/peer.js'
 
 import { StarGift } from './stars-gift.js'
 

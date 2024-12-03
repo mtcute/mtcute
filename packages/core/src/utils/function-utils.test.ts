@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { ConditionVariable } from '@fuman/utils'
+import { describe, expect, it } from 'vitest'
 
 import { throttle } from './function-utils.js'
 

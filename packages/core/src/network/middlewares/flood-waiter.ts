@@ -1,9 +1,9 @@
 import type { mtp } from '@mtcute/tl'
 
+import type { RpcCallMiddleware } from '../network-manager.js'
 import { combineAbortSignals } from '../../utils/abort-signal.js'
 import { sleepWithAbort } from '../../utils/misc-utils.js'
 import { isTlRpcError } from '../../utils/type-assertions.js'
-import type { RpcCallMiddleware } from '../network-manager.js'
 
 export interface FloodWaiterOptions {
     /**

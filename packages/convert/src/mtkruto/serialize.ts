@@ -1,9 +1,9 @@
-import { TlBinaryWriter } from '@mtcute/core/utils.js'
+import type { MtkrutoSession } from './types.js'
 import { base64 } from '@fuman/utils'
 
-import { telegramRleEncode } from '../utils/rle.js'
+import { TlBinaryWriter } from '@mtcute/core/utils.js'
 
-import type { MtkrutoSession } from './types.js'
+import { telegramRleEncode } from '../utils/rle.js'
 
 export function serializeMtkrutoSession(session: MtkrutoSession): string {
     const dcIdStr = `${session.dcId}${session.isTest ? '-test' : ''}`

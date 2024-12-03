@@ -1,9 +1,9 @@
-import { gzipSync, inflateSync } from 'node:zlib'
+import type { ICryptoProvider } from '@mtcute/core/utils.js'
 
 import type { MockInstance } from 'vitest'
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { ICryptoProvider } from '@mtcute/core/utils.js'
+import { gzipSync, inflateSync } from 'node:zlib'
 import { hex, typed, utf8 } from '@fuman/utils'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { defaultCryptoProvider } from './platform.js'
 

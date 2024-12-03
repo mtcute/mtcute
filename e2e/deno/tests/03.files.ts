@@ -1,10 +1,10 @@
-import { createHash } from 'node:crypto'
-
-import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 import type { FileDownloadLocation } from '@mtcute/core'
+
+import { createHash } from 'node:crypto'
 import { Thumbnail } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
 import { sleep } from '@mtcute/core/utils.js'
+import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 
 import { getApiParams } from '../utils.ts'
 

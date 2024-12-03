@@ -1,6 +1,6 @@
-import { u8 } from '@fuman/utils'
-
 import type { ICryptoProvider, IEncryptionScheme } from './abstract.js'
+
+import { u8 } from '@fuman/utils'
 
 /**
  * Generate AES key and IV from nonces as defined by MTProto.

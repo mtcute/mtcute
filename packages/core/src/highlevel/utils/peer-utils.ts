@@ -1,8 +1,8 @@
-import { tl } from '@mtcute/tl'
+import type { InputPeerLike } from '../types/peers/index.js'
 
+import { tl } from '@mtcute/tl'
 import { assertNever } from '../../types/utils.js'
 import { MtInvalidPeerTypeError } from '../types/errors.js'
-import type { InputPeerLike } from '../types/peers/index.js'
 
 export const INVITE_LINK_REGEX: RegExp
     = /^(?:https?:\/\/)?(?:www\.)?t(?:elegram)?\.(?:org|me|dog)\/(?:joinchat\/|\+)([\w-]+)$/i

@@ -1,10 +1,10 @@
-import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
-import { base64 } from '@fuman/utils'
-
-import { MtArgumentError } from '../../types/index.js'
 import type { BasicDcOption, DcOptions } from '../../utils/dcs.js'
-import { parseBasicDcOption, serializeBasicDcOption } from '../../utils/dcs.js'
 import type { CurrentUserInfo } from '../storage/service/current-user.js'
+
+import { base64 } from '@fuman/utils'
+import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
+import { MtArgumentError } from '../../types/index.js'
+import { parseBasicDcOption, serializeBasicDcOption } from '../../utils/dcs.js'
 
 export interface StringSessionData {
     version: number

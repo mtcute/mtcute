@@ -1,17 +1,17 @@
-import Long from 'long'
-import { mtp } from '@mtcute/tl'
 import type { TlPublicKey } from '@mtcute/tl/binary/rsa-keys.js'
-import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
+import type { ICryptoProvider, Logger } from '../utils/index.js'
+import type { SessionConnection } from './session-connection.js'
 import { bigint, typed, u8 } from '@fuman/utils'
+import { mtp } from '@mtcute/tl'
 
+import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
+import Long from 'long'
 import { MtArgumentError, MtSecurityError, MtTypeAssertionError } from '../types/index.js'
 import { findKeyByFingerprints } from '../utils/crypto/keys.js'
 import { millerRabin } from '../utils/crypto/miller-rabin.js'
 import { generateKeyAndIvFromNonce } from '../utils/crypto/mtproto.js'
-import type { ICryptoProvider, Logger } from '../utils/index.js'
-import { mtpAssertTypeIs } from '../utils/type-assertions.js'
 
-import type { SessionConnection } from './session-connection.js'
+import { mtpAssertTypeIs } from '../utils/type-assertions.js'
 
 // Heavily based on code from https://github.com/LonamiWebs/Telethon/blob/master/telethon/network/authenticator.py
 

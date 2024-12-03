@@ -1,7 +1,7 @@
-export * from '../highlevel/utils/index.js'
 // todo: remove after 1.0.0
 export * from '../highlevel/storage/service/current-user.js'
 export * from '../highlevel/storage/service/updates.js'
+export * from '../highlevel/utils/index.js'
 export * from '../storage/service/base.js'
 export * from '../storage/service/default-dcs.js'
 // end todo

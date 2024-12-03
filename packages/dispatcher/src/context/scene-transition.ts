@@ -1,10 +1,10 @@
+import type { UpdateContextType } from './parse.js'
 import { MtTypeAssertionError } from '@mtcute/core'
-import { makeInspectable } from '@mtcute/core/utils.js'
 
+import { makeInspectable } from '@mtcute/core/utils.js'
 import { BusinessMessageContext } from './business-message.js'
 import { CallbackQueryContext, InlineCallbackQueryContext } from './callback-query.js'
 import { MessageContext } from './message.js'
-import type { UpdateContextType } from './parse.js'
 
 /** Update which is dispatched whenever scene is entered or exited */
 export class SceneTransitionContext {

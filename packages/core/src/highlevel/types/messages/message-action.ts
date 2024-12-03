@@ -1,16 +1,16 @@
 import type { tl } from '@mtcute/tl'
-import Long from 'long'
-
-import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import type { CallDiscardReason } from '../calls/index.js'
+
+import type { TextWithEntities } from '../misc/entities.js'
+import type { Peer } from '../peers/peer.js'
+import type { Message } from './message.js'
+import Long from 'long'
+import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { _callDiscardReasonFromTl } from '../calls/index.js'
 import { Photo } from '../media/photo.js'
-import type { Peer } from '../peers/peer.js'
 import { parsePeer } from '../peers/peer.js'
-import { StarGift } from '../premium/stars-gift.js'
-import type { TextWithEntities } from '../misc/entities.js'
 
-import type { Message } from './message.js'
+import { StarGift } from '../premium/stars-gift.js'
 
 /** Group was created */
 export interface ActionChatCreated {

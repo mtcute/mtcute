@@ -3,9 +3,9 @@ import type { Chat, MaybeArray, MaybePromise, Message } from '@mtcute/core'
 import type { BusinessMessageContext } from '../context/business-message.js'
 import type { MessageContext } from '../context/message.js'
 
+import type { Modify, UpdateFilter } from './types.js'
 import { chat } from './chat.js'
 import { and, or } from './logic.js'
-import type { Modify, UpdateFilter } from './types.js'
 
 /**
  * Filter messages that call the given command(s)..

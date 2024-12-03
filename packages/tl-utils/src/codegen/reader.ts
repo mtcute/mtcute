@@ -1,5 +1,5 @@
-import { computeConstructorIdFromEntry } from '../ctor-id.js'
 import type { TlEntry } from '../types.js'
+import { computeConstructorIdFromEntry } from '../ctor-id.js'
 import { TL_PRIMITIVES } from '../types.js'
 
 import { snakeToCamel } from './utils.js'

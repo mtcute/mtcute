@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from 'vitest'
 import type { IPeersRepository, IStorageDriver } from '@mtcute/core'
 import { TlBinaryWriter } from '@mtcute/core/utils.js'
 import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
+import { describe, expect, it, vi } from 'vitest'
 
 import { createStub } from '../stub.js'
 

@@ -1,7 +1,7 @@
-import { expect } from 'chai'
-import { describe, it } from 'mocha'
 import { MtPeerNotFoundError } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
+import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
 import { getApiParams } from '../utils.js'
 

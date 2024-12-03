@@ -1,10 +1,10 @@
+import type { Message } from '../types/messages/index.js'
+
+import type { BusinessMessage, ParsedUpdate } from '../types/updates/index.js'
+import type { RawUpdateInfo } from './types.js'
 import { timers } from '@fuman/utils'
 
-import type { Message } from '../types/messages/index.js'
-import type { BusinessMessage, ParsedUpdate } from '../types/updates/index.js'
 import { _parseUpdate } from '../types/updates/parse-update.js'
-
-import type { RawUpdateInfo } from './types.js'
 
 export interface ParsedUpdateHandlerParams {
     /**

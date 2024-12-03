@@ -5,10 +5,10 @@ import type {
     InputReaction,
 } from '../../types/index.js'
 import {
-    PeerReaction,
-    PeersIndex,
     normalizeInputMessageId,
     normalizeInputReaction,
+    PeerReaction,
+    PeersIndex,
 } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'

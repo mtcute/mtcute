@@ -1,10 +1,10 @@
 import type { tl } from '@mtcute/tl'
 
 import type { MaybeArray } from '../../../types/utils.js'
-import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import type { ITelegramClient } from '../../client.types.js'
-import { Message } from '../../types/messages/index.js'
 import type { InputPeerLike } from '../../types/peers/index.js'
+import { assertTypeIsNot } from '../../../utils/type-assertions.js'
+import { Message } from '../../types/messages/index.js'
 import { PeersIndex } from '../../types/peers/index.js'
 import { isInputPeerChannel, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'

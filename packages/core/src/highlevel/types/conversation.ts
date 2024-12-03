@@ -1,21 +1,21 @@
 import type { tl } from '@mtcute/tl'
-import { AsyncLock, Deferred, Deque, timers, unknownToError } from '@fuman/utils'
-
-import { MtArgumentError, MtTimeoutError } from '../../types/errors.js'
 import type { MaybePromise } from '../../types/utils.js'
-import { getMarkedPeerId } from '../../utils/peer-utils.js'
-import type { ITelegramClient } from '../client.types.js'
-import { getPeerDialogs } from '../methods/dialogs/get-peer-dialogs.js'
-import { readHistory } from '../methods/messages/read-history.js'
-import { sendMedia } from '../methods/messages/send-media.js'
-import { sendMediaGroup } from '../methods/messages/send-media-group.js'
-import { sendText } from '../methods/messages/send-text.js'
-import { resolvePeer } from '../methods/users/resolve-peer.js'
 
+import type { ITelegramClient } from '../client.types.js'
 import type { Message } from './messages/message.js'
 import type { InputPeerLike } from './peers/index.js'
 import type { HistoryReadUpdate, ParsedUpdate } from './updates/index.js'
 import type { ParametersSkip2 } from './utils.js'
+import { AsyncLock, Deferred, Deque, timers, unknownToError } from '@fuman/utils'
+import { MtArgumentError, MtTimeoutError } from '../../types/errors.js'
+import { getMarkedPeerId } from '../../utils/peer-utils.js'
+import { getPeerDialogs } from '../methods/dialogs/get-peer-dialogs.js'
+import { readHistory } from '../methods/messages/read-history.js'
+
+import { sendMediaGroup } from '../methods/messages/send-media-group.js'
+import { sendMedia } from '../methods/messages/send-media.js'
+import { sendText } from '../methods/messages/send-text.js'
+import { resolvePeer } from '../methods/users/resolve-peer.js'
 
 interface QueuedHandler<T> {
     promise: Deferred<T>

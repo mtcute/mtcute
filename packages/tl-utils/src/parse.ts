@@ -1,5 +1,5 @@
-import { computeConstructorIdFromEntry } from './ctor-id.js'
 import type { TlArgument, TlEntry } from './types.js'
+import { computeConstructorIdFromEntry } from './ctor-id.js'
 import { TL_PRIMITIVES } from './types.js'
 import { parseArgumentType, parseTdlibStyleComment } from './utils.js'
 

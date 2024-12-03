@@ -1,7 +1,7 @@
 import type { tl } from '@mtcute/tl'
 
-import { Chat } from './chat.js'
 import type { PeersIndex } from './peers-index.js'
+import { Chat } from './chat.js'
 import { User } from './user.js'
 
 /**

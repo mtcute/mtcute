@@ -1,8 +1,8 @@
-import { LruMap } from '@fuman/utils'
-
 import type { ServiceOptions } from '../../../storage/service/base.js'
-import { BaseService } from '../../../storage/service/base.js'
+
 import type { IReferenceMessagesRepository } from '../repository/ref-messages.js'
+import { LruMap } from '@fuman/utils'
+import { BaseService } from '../../../storage/service/base.js'
 
 export interface RefMessagesServiceOptions {
     cacheSize?: number

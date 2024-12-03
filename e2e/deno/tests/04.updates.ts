@@ -1,6 +1,6 @@
-import { assertEquals, assertNotEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 import type { Message } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
+import { assertEquals, assertNotEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 
 import { getApiParams, waitFor } from '../utils.ts'
 

@@ -1,5 +1,7 @@
 import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
+import type { WasmInitInput } from './wasm.js'
 import { BaseCryptoProvider } from '@mtcute/core/utils.js'
+
 import {
     createCtr256,
     ctr256,
@@ -12,8 +14,6 @@ import {
     sha1,
     sha256,
 } from '@mtcute/wasm'
-
-import type { WasmInitInput } from './wasm.js'
 import { loadWasmBinary } from './wasm.js'
 
 const ALGO_TO_SUBTLE: Record<string, string> = {

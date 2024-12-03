@@ -5,8 +5,8 @@ import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
 import { MtInvalidPeerTypeError } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerChat, toInputChannel, toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
+import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 
 /**
  * Add one or more new members to a group, supergroup or channel.

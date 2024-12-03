@@ -1,8 +1,8 @@
 import type { DcOptions } from '../../utils/dcs.js'
-import { parseBasicDcOption, serializeBasicDcOption } from '../../utils/dcs.js'
 import type { IKeyValueRepository } from '../repository/key-value.js'
-
 import type { ServiceOptions } from './base.js'
+
+import { parseBasicDcOption, serializeBasicDcOption } from '../../utils/dcs.js'
 import { BaseService } from './base.js'
 
 const KV_MAIN = 'dc_main'

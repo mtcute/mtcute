@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { hex } from '@fuman/utils'
+import { describe, expect, it } from 'vitest'
 
 import { MTKRUTO_SESSION } from './__fixtures__/session.js'
 import { serializeMtkrutoSession } from './serialize.js'

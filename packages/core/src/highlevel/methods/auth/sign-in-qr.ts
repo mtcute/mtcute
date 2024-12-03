@@ -1,14 +1,14 @@
-import { tl } from '@mtcute/tl'
-import { Deferred, base64 } from '@fuman/utils'
-
 import type { MaybePromise } from '../../../types/utils.js'
+import type { ITelegramClient } from '../../client.types.js'
+
+import type { MaybeDynamic } from '../../types/index.js'
+import type { RawUpdateInfo } from '../../updates/types.js'
+import { base64, Deferred } from '@fuman/utils'
+import { tl } from '@mtcute/tl'
 import { sleepWithAbort } from '../../../utils/misc-utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { MaybeDynamic } from '../../types/index.js'
 import { User } from '../../types/index.js'
 import { resolveMaybeDynamic } from '../../utils/misc-utils.js'
-import type { RawUpdateInfo } from '../../updates/types.js'
 
 import { checkPassword } from './check-password.js'
 

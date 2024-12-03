@@ -1,7 +1,7 @@
 import type { ISyncWritable } from '@fuman/io'
+import type { Long } from '@mtcute/core'
 import { write } from '@fuman/io'
 import { u8 } from '@fuman/utils'
-import type { Long } from '@mtcute/core'
 
 export function writeQByteArray(into: ISyncWritable, buf: Uint8Array): void {
     write.uint32be(into, buf.length)

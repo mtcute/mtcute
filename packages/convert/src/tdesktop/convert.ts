@@ -1,12 +1,12 @@
-import { type StringSessionData, readStringSession } from '@mtcute/core/utils.js'
 import type { MaybeArray } from '@fuman/utils'
+import type { TdataOptions } from './tdata.js'
+import type { InputTdKeyData } from './types.js'
+
 import { Long } from '@mtcute/core'
 
+import { readStringSession, type StringSessionData } from '@mtcute/core/utils.js'
 import { DC_MAPPING_PROD } from '../dcs.js'
-
-import type { TdataOptions } from './tdata.js'
 import { Tdata } from './tdata.js'
-import type { InputTdKeyData } from './types.js'
 
 export async function convertFromTdata(tdata: Tdata | TdataOptions, accountIdx = 0): Promise<StringSessionData> {
     if (!(tdata instanceof Tdata)) {

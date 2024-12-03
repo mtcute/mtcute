@@ -1,10 +1,3 @@
-import { tl } from '@mtcute/tl'
-import { utf8 } from '@fuman/utils'
-
-import { assertNever } from '../../../../types/utils.js'
-import { toInputUser } from '../../../utils/peer-utils.js'
-
-import { BotKeyboardBuilder } from './builder.js'
 import type {
     InlineKeyboardMarkup,
     ReplyKeyboardForceReply,
@@ -12,6 +5,13 @@ import type {
     ReplyKeyboardMarkup,
     ReplyMarkup,
 } from './types.js'
+import { utf8 } from '@fuman/utils'
+
+import { tl } from '@mtcute/tl'
+import { assertNever } from '../../../../types/utils.js'
+
+import { toInputUser } from '../../../utils/peer-utils.js'
+import { BotKeyboardBuilder } from './builder.js'
 
 /** Create a keyboard builder */
 export function builder(maxRowWidth?: number | null): BotKeyboardBuilder {

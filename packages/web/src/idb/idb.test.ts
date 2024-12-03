@@ -1,10 +1,10 @@
-import { afterAll, beforeAll, describe } from 'vitest'
 import {
     testAuthKeysRepository,
     testKeyValueRepository,
     testPeersRepository,
     testRefMessagesRepository,
 } from '@mtcute/test'
+import { afterAll, beforeAll, describe } from 'vitest'
 
 import { IdbStorage } from './index.js'
 

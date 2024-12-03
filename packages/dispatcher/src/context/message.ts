@@ -1,5 +1,4 @@
 import type { Chat, OmitInputMessageId, ParametersSkip1, Peer, Sticker } from '@mtcute/core'
-import { Message, MtPeerNotFoundError } from '@mtcute/core'
 import type { TelegramClient } from '@mtcute/core/client.js'
 import type {
     DeleteMessagesParams,
@@ -7,8 +6,9 @@ import type {
     SendCopyGroupParams,
     SendCopyParams,
 } from '@mtcute/core/methods.js'
-
 import type { UpdateContext } from './base.js'
+
+import { Message, MtPeerNotFoundError } from '@mtcute/core'
 
 /**
  * Context of a message-related update.

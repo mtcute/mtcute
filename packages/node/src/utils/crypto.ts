@@ -1,9 +1,9 @@
+import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
 import { createCipheriv, createHash, createHmac, pbkdf2, randomFillSync } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
-import { deflateSync, gunzipSync } from 'node:zlib'
 
-import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
+import { deflateSync, gunzipSync } from 'node:zlib'
 import { BaseCryptoProvider } from '@mtcute/core/utils.js'
 import { ige256Decrypt, ige256Encrypt, initSync } from '@mtcute/wasm'
 

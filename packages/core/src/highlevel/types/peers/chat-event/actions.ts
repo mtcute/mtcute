@@ -1,5 +1,6 @@
 import type { tl } from '@mtcute/tl'
 
+import type { PeersIndex } from '../peers-index.js'
 import { toggleChannelIdMark } from '../../../../utils/peer-utils.js'
 import { assertTypeIs } from '../../../../utils/type-assertions.js'
 import { Photo } from '../../media/photo.js'
@@ -9,7 +10,6 @@ import { ChatLocation } from '../chat-location.js'
 import { ChatMember } from '../chat-member.js'
 import { ChatPermissions } from '../chat-permissions.js'
 import { ForumTopic } from '../forum-topic.js'
-import type { PeersIndex } from '../peers-index.js'
 import { User } from '../user.js'
 
 /** A user has joined the channel (in the case of big groups, info of the user that has joined isn't shown) */
