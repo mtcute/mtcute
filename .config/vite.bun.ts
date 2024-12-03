@@ -20,9 +20,11 @@ export default defineConfig({
                     // bun:test doesn't support certain features of vitest, so we'll skip them for now
                     // https://github.com/oven-sh/bun/issues/1825
                     skipTests: [
-                    // uses timers
+                        // uses timers
                         'core/src/network/config-manager.test.ts',
                         'core/src/network/persistent-connection.test.ts',
+                        // use fixtures
+                        'convert/src/tdesktop/tdata.test.ts',
                     ],
                 }),
             formats: ['es'],

@@ -95,15 +95,20 @@ describe('ConfigManager', () => {
         cm.onUpdated.add(listener)
 
         await cm.update()
-        const call = structuredClone(listener.mock.calls[0][0]) as AsyncResourceContext<tl.RawConfig>
+        const call = listener.mock.calls[0][0] as AsyncResourceContext<tl.RawConfig>
+        const callCopy = structuredClone({
+            current: call.current,
+            currentFetchedAt: call.currentFetchedAt,
+            currentExpiresAt: call.currentExpiresAt,
+            isBackground: call.isBackground,
+        })
 
         vi.setSystemTime(300_000)
         cm.onUpdated.remove(listener)
         await cm.update()
 
         expect(listener).toHaveBeenCalledOnce()
-        expect(call).toEqual({
-            abort: {},
+        expect(callCopy).toEqual({
             current: config,
             currentExpiresAt: 300_000,
             currentFetchedAt: 0,

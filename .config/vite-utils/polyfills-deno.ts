@@ -1,6 +1,6 @@
-// @ts-expect-error  no typings
 import util from 'node:util'
 
+// @ts-expect-error  no typings
 import { describe as _describe, afterAll, afterEach, beforeAll, beforeEach, it } from 'jsr:@std/testing/bdd'
 // @ts-expect-error  no typings
 import * as vitestSpy from 'npm:@vitest/spy@1.4.0'

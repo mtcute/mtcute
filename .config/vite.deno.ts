@@ -17,12 +17,14 @@ export default defineConfig({
                     // these packages rely on node apis and are not meant to be run under deno
                     skipPackages: ['create-bot', 'crypto-node', 'bun', 'node'],
                     skipTests: [
-                    // uses timers
+                        // uses timers
                         'core/src/network/config-manager.test.ts',
                         'core/src/network/persistent-connection.test.ts',
                         // https://github.com/denoland/deno/issues/22470
                         'wasm/tests/gunzip.test.ts',
                         'wasm/tests/zlib.test.ts',
+                        // use fixtures
+                        'convert/src/tdesktop/tdata.test.ts',
                     ],
                 }),
             formats: ['es'],
