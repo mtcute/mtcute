@@ -140,8 +140,43 @@ describe('resolvePeer', () => {
                 })
             })
 
-            it('should throw if not in storage', async () => {
+            it('should return with zero hash for bots if not in storage', async () => {
+                const client = StubTelegramClient.offline()
+
+                await client.storage.self.storeFrom(createStub('user', {
+                    bot: true,
+                }))
+
+                expect(await resolvePeer(client, 123)).toEqual({
+                    _: 'inputPeerUser',
+                    userId: 123,
+                    accessHash: Long.ZERO,
+                })
+            })
+
+            it('should try fetching with zero hash for users if not in storage', async () => {
                 const client = new StubTelegramClient()
+
+                const handler = vi.fn().mockResolvedValue([
+                    createStub('user', {
+                        id: 123,
+                        accessHash: Long.fromBits(456, 789),
+                    }),
+                ])
+                client.respondWith('users.getUsers', handler)
+
+                expect(await resolvePeer(client, 123)).toEqual({
+                    _: 'inputPeerUser',
+                    userId: 123,
+                    accessHash: Long.fromBits(456, 789),
+                })
+            })
+
+            it('should throw if zero hash fetch failed', async () => {
+                const client = new StubTelegramClient()
+
+                const handler = vi.fn().mockResolvedValue([])
+                client.respondWith('users.getUsers', handler)
 
                 await expect(resolvePeer(client, 123)).rejects.toThrow(MtPeerNotFoundError)
             })
@@ -192,8 +227,47 @@ describe('resolvePeer', () => {
                 })
             })
 
-            it('should throw if not in storage', async () => {
+            it('should return with zero hash for bots if not in storage', async () => {
+                const client = StubTelegramClient.offline()
+
+                await client.storage.self.storeFrom(createStub('user', {
+                    bot: true,
+                }))
+
+                expect(await resolvePeer(client, -1000000000123)).toEqual({
+                    _: 'inputPeerChannel',
+                    channelId: 123,
+                    accessHash: Long.ZERO,
+                })
+            })
+
+            it('should try fetching with zero hash for users if not in storage', async () => {
                 const client = new StubTelegramClient()
+
+                const handler = vi.fn().mockResolvedValue({
+                    chats: [
+                        createStub('channel', {
+                            id: 123,
+                            accessHash: Long.fromBits(456, 789),
+                        }),
+                    ],
+                })
+                client.respondWith('channels.getChannels', handler)
+
+                expect(await resolvePeer(client, -1000000000123)).toEqual({
+                    _: 'inputPeerChannel',
+                    channelId: 123,
+                    accessHash: Long.fromBits(456, 789),
+                })
+            })
+
+            it('should throw if zero hash fetch failed', async () => {
+                const client = new StubTelegramClient()
+
+                const handler = vi.fn().mockResolvedValue({
+                    chats: [],
+                })
+                client.respondWith('channels.getChannels', handler)
 
                 await expect(resolvePeer(client, -1000000000123)).rejects.toThrow(MtPeerNotFoundError)
             })
