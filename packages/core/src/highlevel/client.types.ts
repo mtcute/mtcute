@@ -11,7 +11,7 @@ import type { AppConfigManager } from './managers/app-config-manager.js'
 import type { TimersManager } from './managers/timers.js'
 import type { TelegramStorageManager } from './storage/storage.js'
 import type { RawUpdateInfo } from './updates/types.js'
-import type { StringSessionData } from './utils/string-session.js'
+import type { InputStringSessionData } from './utils/string-session.js'
 
 /**
  * Connection state of the client
@@ -52,7 +52,7 @@ export interface ITelegramClient {
         message: MustEqual<T, tl.RpcMethod>,
         params?: RpcCallOptions,
     ): Promise<tl.RpcCallReturn[T['_']]>
-    importSession(session: string | StringSessionData, force?: boolean): Promise<void>
+    importSession(session: string | InputStringSessionData, force?: boolean): Promise<void>
     exportSession(): Promise<string>
     handleClientUpdate(updates: tl.TypeUpdates, noDispatch?: boolean): void
 

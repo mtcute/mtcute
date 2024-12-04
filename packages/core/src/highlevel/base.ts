@@ -8,8 +8,8 @@ import type { ICorePlatform } from '../types/platform.js'
 import type { MustEqual } from '../types/utils.js'
 import type {
     ICryptoProvider,
+    InputStringSessionData,
     Logger,
-    StringSessionData,
 } from '../utils/index.js'
 import type { ConnectionState, ITelegramClient } from './client.types.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
@@ -234,14 +234,14 @@ export class BaseTelegramClient implements ITelegramClient {
      * @param session  Session string to import
      * @param force  Whether to overwrite existing session
      */
-    async importSession(session: string | StringSessionData, force = false): Promise<void> {
+    async importSession(session: string | InputStringSessionData, force = false): Promise<void> {
         await this.prepare()
 
         const defaultDcAuthKey = await this.mt.storage.provider.authKeys.get(this.mt._defaultDcs.main.id)
 
         if (defaultDcAuthKey && !force) return
 
-        const data = typeof session === 'string' ? readStringSession(session) : session
+        const data = readStringSession(session)
         const testMode = data.primaryDcs.main.testMode
 
         if (testMode && !this.params.testMode) {

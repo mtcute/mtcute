@@ -3,11 +3,9 @@ import type { tdFileId } from '@mtcute/file-id'
 import type { tl } from '@mtcute/tl'
 import type Long from 'long'
 import type { RpcCallOptions } from '../network/index.js'
-
 import type { MaybeArray, MaybePromise, PartialExcept, PartialOnly } from '../types/index.js'
 import type { BaseTelegramClientOptions } from './base.js'
 import type { ITelegramClient } from './client.types.js'
-
 import type { LogOutResult } from './methods/auth/log-out.js'
 import type { CreateGroupResult } from './methods/chats/create-group.js'
 import type { GetForumTopicsOffset } from './methods/forums/get-forum-topics.js'
@@ -29,7 +27,7 @@ import type { ITelegramStorageProvider } from './storage/provider.js'
 import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, PeerReaction, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SentCode, StarGift, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStarGift, UserStatusUpdate, UserTypingUpdate, WebviewResult } from './types/index.js'
 import type { ParsedUpdateHandlerParams } from './updates/parsed.js'
 import type { RawUpdateInfo } from './updates/types.js'
-import type { StringSessionData } from './utils/string-session.js'
+import type { InputStringSessionData } from './utils/string-session.js'
 /* THIS FILE WAS AUTO-GENERATED */
 import { Emitter } from '@fuman/utils'
 import { MtUnsupportedError } from '../types/index.js'
@@ -620,7 +618,7 @@ export interface TelegramClient extends ITelegramClient {
          * Note that passed session will be ignored in case storage already
          * contains authorization.
          */
-            session?: string | StringSessionData
+            session?: string | InputStringSessionData
 
             /**
              * Whether to overwrite existing session.
@@ -1059,12 +1057,12 @@ export interface TelegramClient extends ITelegramClient {
              *  - `unigram` - Unigram
              */
             platform:
-            | 'android'
-            | 'ios'
-            | 'tdesktop'
-            | 'macos'
-            | 'unigram'
-            | (string & {})
+              | 'android'
+              | 'ios'
+              | 'tdesktop'
+              | 'macos'
+              | 'unigram'
+              | (string & {})
         }): Promise<WebviewResult>
     /**
      * Close a webview previously opened by {@link openWebview} method.
@@ -2448,7 +2446,7 @@ export interface TelegramClient extends ITelegramClient {
         location: FileDownloadLocation,
         params?: FileDownloadParameters): import('node:stream').Readable
     /**
-     * Download a file and return it as a readable stream,
+     * Download a file and return it as a `@fuman/io` stream,
      * streaming file contents.
      *
      * **Available**: ✅ both users and bots
@@ -3362,13 +3360,13 @@ export interface TelegramClient extends ITelegramClient {
      */
     getCallbackQueryMessage(
         id:
-      | CallbackQuery
-      | tl.RawUpdateBotCallbackQuery
-      | {
-          messageId: number
-          queryId: tl.Long
-          peer: InputPeerLike
-      }): Promise<Message | null>
+          | CallbackQuery
+          | tl.RawUpdateBotCallbackQuery
+          | {
+              messageId: number
+              queryId: tl.Long
+              peer: InputPeerLike
+          }): Promise<Message | null>
     // public version of the same method because why not
     /**
      * Get discussion message for some channel post.
@@ -4040,14 +4038,14 @@ export interface TelegramClient extends ITelegramClient {
      */
     sendCopyGroup(
         params: SendCopyGroupParams &
-    (
-      | {
-          /** Source chat ID */
-          fromChatId: InputPeerLike
-          /** Message IDs to forward */
-          messages: number[]
-      }
-      | { messages: Message[] }
+          (
+            | {
+            /** Source chat ID */
+                fromChatId: InputPeerLike
+                /** Message IDs to forward */
+                messages: number[]
+            }
+            | { messages: Message[] }
         )): Promise<Message[]>
     /**
      * Copy a message (i.e. send the same message, but do not forward it).
@@ -4061,14 +4059,14 @@ export interface TelegramClient extends ITelegramClient {
      */
     sendCopy(
         params: SendCopyParams &
-    (
-      | {
-          /** Source chat ID */
-          fromChatId: InputPeerLike
-          /** Message ID to forward */
-          message: number
-      }
-      | { message: Message }
+          (
+            | {
+            /** Source chat ID */
+                fromChatId: InputPeerLike
+                /** Message ID to forward */
+                message: number
+            }
+            | { message: Message }
         )): Promise<Message>
     /**
      * Send a group of media.

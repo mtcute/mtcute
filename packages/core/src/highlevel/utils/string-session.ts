@@ -4,7 +4,14 @@ import type { CurrentUserInfo } from '../storage/service/current-user.js'
 import { base64 } from '@fuman/utils'
 import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
 import { MtArgumentError } from '../../types/index.js'
-import { parseBasicDcOption, serializeBasicDcOption } from '../../utils/dcs.js'
+import { defaultProductionDc, defaultTestDc, parseBasicDcOption, serializeBasicDcOption } from '../../utils/dcs.js'
+
+export interface InputStringSessionData {
+    primaryDcs?: DcOptions
+    testMode?: boolean
+    self?: CurrentUserInfo | null
+    authKey: Uint8Array
+}
 
 export interface StringSessionData {
     version: number
@@ -77,7 +84,16 @@ export function writeStringSession(data: StringSessionData): string {
     return base64.encode(writer.result(), true)
 }
 
-export function readStringSession(data: string): StringSessionData {
+export function readStringSession(data: string | InputStringSessionData): StringSessionData {
+    if (typeof data !== 'string') {
+        return {
+            version: 3,
+            primaryDcs: data.primaryDcs ?? (data.testMode ? defaultTestDc : defaultProductionDc),
+            self: data.self ?? null,
+            authKey: data.authKey,
+        }
+    }
+
     const buf = base64.decode(data, true)
 
     const version = buf[0]

@@ -74,18 +74,14 @@ export default antfu({
         'jsdoc/check-param-names': 'off', // todo: will fix in another iteration
         'jsdoc/require-returns-description': 'off', // todo: will fix in another iteration
         'ts/no-unsafe-member-access': 'off',
-        'ts/no-dynamic-delete': 'off',
-        'ts/strict-boolean-expressions': 'off',
         'ts/unbound-method': 'off',
-        'ts/no-invalid-void-type': 'off',
-        'ts/no-unsafe-enum-comparison': 'off',
+        'ts/strict-boolean-expressions': 'off',
         'ts/promise-function-async': 'off',
         'dot-notation': 'off',
         'ts/dot-notation': 'off',
         'ts/switch-exhaustiveness-check': 'off',
         'ts/restrict-template-expressions': 'off',
         'ts/method-signature-style': 'off',
-        'style/indent-binary-ops': 'off',
         'antfu/no-top-level-await': 'off',
         'import/extensions': ['error', 'always', {
             ignorePackages: true,

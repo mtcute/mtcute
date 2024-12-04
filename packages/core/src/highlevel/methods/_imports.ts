@@ -115,4 +115,4 @@ import {
 // @copy
 import { RawUpdateInfo } from '../updates/types.js'
 // @copy
-import { StringSessionData } from '../utils/string-session.js'
+import { InputStringSessionData } from '../utils/string-session.js'
