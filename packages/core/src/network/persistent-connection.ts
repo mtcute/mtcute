@@ -173,10 +173,16 @@ export abstract class PersistentConnection {
     }
 
     async disconnectManual(): Promise<void> {
+        if (this._inactivityTimeout) {
+            timers.clearTimeout(this._inactivityTimeout)
+        }
         await this._fuman.close()
     }
 
     async destroy(): Promise<void> {
+        if (this._inactivityTimeout) {
+            timers.clearTimeout(this._inactivityTimeout)
+        }
         this._destroyed = true
         await this._fuman.close()
     }

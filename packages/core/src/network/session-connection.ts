@@ -768,6 +768,8 @@ export class SessionConnection extends PersistentConnection {
 
         const rpc = msg.rpc
 
+        rpc.resetAbortSignal?.()
+
         const resultConstructorId = message.peekUint()
 
         let result: any
@@ -1451,6 +1453,7 @@ export class SessionConnection extends PersistentConnection {
             acked: undefined,
             cancelled: undefined,
             timeout: undefined,
+            resetAbortSignal: undefined,
         }
 
         if (abortSignal?.aborted) {
@@ -1464,7 +1467,9 @@ export class SessionConnection extends PersistentConnection {
         }
 
         if (abortSignal) {
-            abortSignal.addEventListener('abort', () => this._cancelRpc(pending, false, abortSignal))
+            const cancel = () => this._cancelRpc(pending, false, abortSignal)
+            abortSignal.addEventListener('abort', cancel)
+            pending.resetAbortSignal = () => abortSignal.removeEventListener('abort', cancel)
         }
 
         this._enqueueRpc(pending, true)
@@ -1494,6 +1499,8 @@ export class SessionConnection extends PersistentConnection {
         if (!onTimeout && rpc.timeout) {
             timers.clearTimeout(rpc.timeout)
         }
+
+        rpc.resetAbortSignal?.()
 
         if (onTimeout) {
             rpc.promise.resolve({

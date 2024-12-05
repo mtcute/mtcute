@@ -41,6 +41,7 @@ export interface PendingRpc {
     getState?: number
     cancelled?: boolean
     timeout?: timers.Timer
+    resetAbortSignal?: () => void
 }
 
 export type PendingMessage =
