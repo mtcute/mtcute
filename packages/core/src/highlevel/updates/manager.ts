@@ -673,7 +673,7 @@ export class UpdatesManager {
                         msg.fwdFrom
                         && (!(
                             await fetchPeer(msg.fwdFrom.fromId))
-                            || !(await fetchPeer(msg.fwdFrom.savedFromPeer, true))
+                          || !(await fetchPeer(msg.fwdFrom.savedFromPeer, true))
                         )
                     ) {
                         return missing

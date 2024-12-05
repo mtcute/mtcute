@@ -1,0 +1,30 @@
+{
+  "name": "@mtcute/e2e-tests",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "fuman": {
+    "private": true
+  },
+  "scripts": {
+    "test": "dotenv tsx --trace-warnings --test --test-timeout=300000",
+    "test:all": "find tests -type f -name '*.e2e.ts' -print0 | sort -z | xargs -0 -n1 pnpm run test",
+    "deno:test": "deno test -A --unstable-ffi --trace-leaks --import-map=import-map.json --unstable-sloppy-imports --no-check --env-file=.env",
+    "deno:test:all": "pnpm run deno:test tests/*.e2e.ts"
+  },
+  "dependencies": {
+    "@fuman/utils": "0.0.1",
+    "chai": "^4.3.10",
+    "dotenv-cli": "7.4.4",
+    "mtcute": "file:../packages/node",
+    "tsx": "^4.19.2",
+    "esbuild": "^0.24.0",
+    "better-sqlite3": "11.6.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.8",
+    "@types/mocha": "^10.0.2",
+    "@types/node": "^20.8.10",
+    "globstar": "1.0.0"
+  }
+}

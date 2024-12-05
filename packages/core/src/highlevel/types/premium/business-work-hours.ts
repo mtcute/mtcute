@@ -177,7 +177,7 @@ export class BusinessWorkHours {
                 interval.startHour === 0
                 && interval.startMinute === 0
                 && ((interval.endHour === 24 && interval.endMinute === 0)
-                || (interval.endHour === 23 && interval.endMinute === 59))
+                  || (interval.endHour === 23 && interval.endMinute === 59))
             ) {
                 (day as tl.Mutable<BusinessWorkHoursDay>).is24h = true
             }

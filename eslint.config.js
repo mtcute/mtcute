@@ -2,6 +2,7 @@ import antfu from '@antfu/eslint-config'
 
 export default antfu({
     type: 'lib',
+    ignores: ['e2e/runtime/*'],
     typescript: process.env.CI
         ? {
             tsconfigPath: 'tsconfig.json',

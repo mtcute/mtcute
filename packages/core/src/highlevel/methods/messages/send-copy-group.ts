@@ -25,14 +25,14 @@ export interface SendCopyGroupParams extends CommonSendParams {
 export async function sendCopyGroup(
     client: ITelegramClient,
     params: SendCopyGroupParams &
-    (
-      | {
-          /** Source chat ID */
-          fromChatId: InputPeerLike
-          /** Message IDs to forward */
-          messages: number[]
-      }
-      | { messages: Message[] }
+      (
+        | {
+            /** Source chat ID */
+            fromChatId: InputPeerLike
+            /** Message IDs to forward */
+            messages: number[]
+        }
+        | { messages: Message[] }
         ),
 ): Promise<Message[]> {
     const { toChatId, ...rest } = params

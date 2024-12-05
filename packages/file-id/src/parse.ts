@@ -251,8 +251,8 @@ function fromPersistentIdV23(binary: Uint8Array, version: number): td.RawFullRem
                         if (
                             location.source.fileType !== fileType
                             || (fileType !== td.FileType.Photo
-                            && fileType !== td.FileType.Thumbnail
-                            && fileType !== td.FileType.EncryptedThumbnail)
+                              && fileType !== td.FileType.Thumbnail
+                              && fileType !== td.FileType.EncryptedThumbnail)
                         ) {
                             throw new td.InvalidFileIdError('Invalid FileType in PhotoRemoteFileLocation Thumbnail')
                         }

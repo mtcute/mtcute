@@ -38,14 +38,14 @@ export interface SendCopyParams extends CommonSendParams {
 export async function sendCopy(
     client: ITelegramClient,
     params: SendCopyParams &
-    (
-      | {
-          /** Source chat ID */
-          fromChatId: InputPeerLike
-          /** Message ID to forward */
-          message: number
-      }
-      | { message: Message }
+      (
+        | {
+            /** Source chat ID */
+            fromChatId: InputPeerLike
+            /** Message ID to forward */
+            message: number
+        }
+        | { message: Message }
         ),
 ): Promise<Message> {
     const { toChatId, ...rest } = params

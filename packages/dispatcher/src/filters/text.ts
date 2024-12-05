@@ -15,15 +15,15 @@ import {
 } from '@mtcute/core'
 
 type UpdatesWithText =
-    | Message
-    | BusinessMessage
-    | UpdateContextDistributed<
-        | InlineQuery
-        | ChosenInlineResult
-        | CallbackQuery
-        | InlineCallbackQuery
-        | BusinessCallbackQuery
-    >
+  | Message
+  | BusinessMessage
+  | UpdateContextDistributed<
+    | InlineQuery
+    | ChosenInlineResult
+    | CallbackQuery
+    | InlineCallbackQuery
+    | BusinessCallbackQuery
+  >
 
 function extractText(obj: UpdatesWithText): string | null {
     if (obj instanceof Message || obj instanceof BusinessMessage) {

@@ -55,7 +55,7 @@ export default defineConfig({
             name: 'polyfills',
             transform(code) {
                 if (!code.includes('vitest')) return code
-                code = code.replace(/^import \{(.+?)\} from ['"]vitest['"]/gms, (_, names) => {
+                code = code.replace(/^import \{([^}]+)\} from ['"]vitest['"];?$/gm, (_, names) => {
                     const namesParsed = names.split(',').map(name => name.trim())
 
                     const namesFromFixup: string[] = []

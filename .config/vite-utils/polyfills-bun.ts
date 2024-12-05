@@ -1,7 +1,6 @@
 import * as vitestExpect from '@vitest/expect'
 import * as vitestSpy from '@vitest/spy'
 import { afterAll, afterEach, beforeAll, beforeEach, vi as bunVi, it, jest } from 'bun:test'
-// https://github.com/oven-sh/bun/issues/6044
 import * as chai from 'chai'
 
 import { setupChai, stubGlobal, unstubAllGlobals, waitFor } from './polyfills'

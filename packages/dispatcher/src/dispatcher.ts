@@ -436,12 +436,12 @@ export class Dispatcher<State extends object = never> {
                 this._storage
                 && this._scenes
                 && (update.name === 'new_message'
-                || update.name === 'edit_message'
-                || update.name === 'callback_query'
-                || update.name === 'message_group'
-                || update.name === 'new_business_message'
-                || update.name === 'edit_business_message'
-                || update.name === 'business_message_group')
+                  || update.name === 'edit_message'
+                  || update.name === 'callback_query'
+                  || update.name === 'message_group'
+                  || update.name === 'new_business_message'
+                  || update.name === 'edit_business_message'
+                  || update.name === 'business_message_group')
             ) {
                 // no need to fetch scene if there are no registered scenes
 
@@ -478,12 +478,12 @@ export class Dispatcher<State extends object = never> {
             if (
                 this._storage
                 && (update.name === 'new_message'
-                || update.name === 'edit_message'
-                || update.name === 'callback_query'
-                || update.name === 'message_group'
-                || update.name === 'new_business_message'
-                || update.name === 'edit_business_message'
-                || update.name === 'business_message_group')
+                  || update.name === 'edit_message'
+                  || update.name === 'callback_query'
+                  || update.name === 'message_group'
+                  || update.name === 'new_business_message'
+                  || update.name === 'edit_business_message'
+                  || update.name === 'business_message_group')
             ) {
                 if (!parsedContext) parsedContext = _parsedUpdateToContext(this._client, update)
                 const key = await this._stateKeyDelegate!(parsedContext as any)

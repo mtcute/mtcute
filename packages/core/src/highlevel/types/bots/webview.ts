@@ -16,106 +16,106 @@ import { makeInspectable } from '../../utils/inspectable.js'
  * - `from_link` - webview opened via [direct links](https://corefork.telegram.org/api/bots/webapps#direct-link-mini-apps)
  */
 export type InputWebview =
-    | {
-        type: 'main'
+  | {
+      type: 'main'
 
-        /**
-         * If set, requests to open the mini app in compact mode (as opposed to fullview mode).
-         * Must be set if the `mode` parameter of the Main Mini App link is equal to `compact`.
-         */
-        compact?: boolean
+      /**
+       * If set, requests to open the mini app in compact mode (as opposed to fullview mode).
+       * Must be set if the `mode` parameter of the Main Mini App link is equal to `compact`.
+       */
+      compact?: boolean
 
-        /** Start parameter from the deep link for the mini app */
-        startParam?: string
-    }
-    | {
-        type: 'from_reply_keyboard' | 'from_switch_inline'
+      /** Start parameter from the deep link for the mini app */
+      startParam?: string
+  }
+  | {
+      type: 'from_reply_keyboard' | 'from_switch_inline'
 
-        /** URL of the mini app found in the button */
-        url: string
-    }
-    | { type: 'from_side_menu' }
-    | {
-        type: 'from_inline_keyboard' | 'from_bot_menu'
+      /** URL of the mini app found in the button */
+      url: string
+  }
+  | { type: 'from_side_menu' }
+  | {
+      type: 'from_inline_keyboard' | 'from_bot_menu'
 
-        /** URL of the mini app found in the button */
-        url: string
+      /** URL of the mini app found in the button */
+      url: string
 
-        /**
-         * If set, requests to open the mini app in compact mode (as opposed to fullview mode).
-         * Must be set if the `mode` parameter of the Main Mini App link is equal to `compact`.
-         */
-        compact?: boolean
+      /**
+       * If set, requests to open the mini app in compact mode (as opposed to fullview mode).
+       * Must be set if the `mode` parameter of the Main Mini App link is equal to `compact`.
+       */
+      compact?: boolean
 
-        /** ID of the message to which we should reply if the mini app asks to do so */
-        replyTo?: number | tl.TypeInputReplyTo
-        /**
-         * Peer to use when sending the message.
-         */
-        sendAs?: InputPeerLike
+      /** ID of the message to which we should reply if the mini app asks to do so */
+      replyTo?: number | tl.TypeInputReplyTo
+      /**
+       * Peer to use when sending the message.
+       */
+      sendAs?: InputPeerLike
 
-        /** If the mini app asks to send a message, whether to send it silently */
-        silent?: boolean
+      /** If the mini app asks to send a message, whether to send it silently */
+      silent?: boolean
 
-        /**
-         * Telegram asks us to keep sending `messages.prolongWebView` requests every minute until the webview is closed.
-         * If this parameter is set to `true`, the timer will not be started, and the webview will never be prolonged.
-         */
-        fireAndForget?: boolean
-    }
-    | {
-        type: 'from_attach_menu'
+      /**
+       * Telegram asks us to keep sending `messages.prolongWebView` requests every minute until the webview is closed.
+       * If this parameter is set to `true`, the timer will not be started, and the webview will never be prolonged.
+       */
+      fireAndForget?: boolean
+  }
+  | {
+      type: 'from_attach_menu'
 
-        /**
-         * If set, requests to open the mini app in compact mode (as opposed to fullview mode).
-         * Must be set if the `mode` parameter of the Main Mini App link is equal to `compact`.
-         */
-        compact?: boolean
+      /**
+       * If set, requests to open the mini app in compact mode (as opposed to fullview mode).
+       * Must be set if the `mode` parameter of the Main Mini App link is equal to `compact`.
+       */
+      compact?: boolean
 
-        /** ID of the message to which we should reply if the mini app asks to do so */
-        replyTo?: number | tl.TypeInputReplyTo
+      /** ID of the message to which we should reply if the mini app asks to do so */
+      replyTo?: number | tl.TypeInputReplyTo
 
-        /**
-         * Peer to use when sending the message.
-         */
-        sendAs?: InputPeerLike
+      /**
+       * Peer to use when sending the message.
+       */
+      sendAs?: InputPeerLike
 
-        /** If the mini app asks to send a message, whether to send it silently */
-        silent?: boolean
+      /** If the mini app asks to send a message, whether to send it silently */
+      silent?: boolean
 
-        /**
-         * Telegram asks us to keep sending `messages.prolongWebView` requests every minute until the webview is closed.
-         * If this parameter is set to `true`, the timer will not be started, and the webview will never be prolonged.
-         */
-        fireAndForget?: boolean
-    }
-    | {
-        type: 'from_link'
+      /**
+       * Telegram asks us to keep sending `messages.prolongWebView` requests every minute until the webview is closed.
+       * If this parameter is set to `true`, the timer will not be started, and the webview will never be prolonged.
+       */
+      fireAndForget?: boolean
+  }
+  | {
+      type: 'from_link'
 
-        /** Short name of the app (from the link) */
-        shortName: string
+      /** Short name of the app (from the link) */
+      shortName: string
 
-        /**
-         * If the bot is asking permission to send messages to the user,
-         * whether to allow it to do so
-         */
-        allowWrite?: boolean
+      /**
+       * If the bot is asking permission to send messages to the user,
+       * whether to allow it to do so
+       */
+      allowWrite?: boolean
 
-        /**
-         * If set, requests to open the mini app in compact mode (as opposed to fullview mode).
-         * Must be set if the `mode` parameter of the Main Mini App link is equal to `compact`.
-         */
-        compact?: boolean
+      /**
+       * If set, requests to open the mini app in compact mode (as opposed to fullview mode).
+       * Must be set if the `mode` parameter of the Main Mini App link is equal to `compact`.
+       */
+      compact?: boolean
 
-        /** Start parameter from the deep link for the mini app */
-        startParam?: string
+      /** Start parameter from the deep link for the mini app */
+      startParam?: string
 
-        /**
-         * Telegram asks us to keep sending `messages.prolongWebView` requests every minute until the webview is closed.
-         * If this parameter is set to `true`, the timer will not be started, and the webview will never be prolonged.
-         */
-        fireAndForget?: boolean
-    }
+      /**
+       * Telegram asks us to keep sending `messages.prolongWebView` requests every minute until the webview is closed.
+       * If this parameter is set to `true`, the timer will not be started, and the webview will never be prolonged.
+       */
+      fireAndForget?: boolean
+  }
 
 /**
  * Result of {@link openWebview} method call

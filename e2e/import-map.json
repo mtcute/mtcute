@@ -1,0 +1,23 @@
+{
+    "imports": {
+        "@fuman/utils": "jsr:@fuman/utils@0.0.1",
+        "chai": "https://esm.sh/chai@5.1.2",
+        "node:test": "./tests/deno-shims/node-test.js",
+        "mtcute": "../packages/deno/src/index.ts",
+        "mtcute/utils.js": "../packages/deno/src/utils.ts",
+        "@mtcute/core": "../packages/core/src/index.ts",
+        "@mtcute/core/client.js": "../packages/core/src/highlevel/client.ts",
+        "@mtcute/core/methods.js": "../packages/core/src/highlevel/methods.ts",
+        "@mtcute/core/utils.js": "../packages/core/src/utils/index.ts",
+        "@mtcute/core/worker.js": "../packages/core/src/highlevel/worker/index.ts",
+        "@mtcute/markdown-parser": "../packages/markdown-parser/src/index.ts",
+        "@mtcute/html-parser": "../packages/html-parser/src/index.ts",
+        "@mtcute/file-id": "../packages/file-id/src/index.ts",
+        "@mtcute/tl-runtime": "../packages/tl-runtime/src/index.ts",
+        "@mtcute/wasm": "../packages/wasm/src/index.ts",
+        "@mtcute/tl": "./tests/deno-shims/tl.js",
+        "@mtcute/tl/binary/rsa-keys.js": "./tests/deno-shims/tl-rsa.js",
+        "@mtcute/tl/binary/reader.js": "./tests/deno-shims/tl-reader.js",
+        "@mtcute/tl/binary/writer.js": "./tests/deno-shims/tl-writer.js"
+    }
+}

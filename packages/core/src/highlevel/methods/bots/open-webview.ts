@@ -81,12 +81,12 @@ export async function openWebview(
          *  - `unigram` - Unigram
          */
         platform:
-            | 'android'
-            | 'ios'
-            | 'tdesktop'
-            | 'macos'
-            | 'unigram'
-            | (string & {})
+          | 'android'
+          | 'ios'
+          | 'tdesktop'
+          | 'macos'
+          | 'unigram'
+          | (string & {})
     },
 ): Promise<WebviewResult> {
     const {

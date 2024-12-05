@@ -32,7 +32,6 @@
     "skipLibCheck": true
   },
   "exclude": [
-    "e2e/",
     "**/node_modules",
     "**/private",
     "**/__snapshots__"

@@ -69,11 +69,11 @@ jobs:
       - uses: ./.github/actions/init
       - uses: denoland/setup-deno@v1
         with:
-          deno-version: '1.46.3'
+          deno-version: '2.0'
       - name: 'Build tests'
         run: pnpm exec vite build -c .config/vite.deno.ts
       - name: 'Run tests'
-        run: cd dist/tests && deno test -A --unstable-ffi
+        run: cd dist/tests && deno test -A --unstable-ffi --node-modules-dir=false
   
   test-web:
     runs-on: ubuntu-latest
@@ -102,12 +102,15 @@ jobs:
       actions: write
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/init
       - name: Run end-to-end tests
         env:
           API_ID: ${{ secrets.TELEGRAM_API_ID }}
           API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          SESSION_DC1: ${{ secrets.SESSION_DC1 }}
+          SESSION_DC2: ${{ secrets.SESSION_DC2 }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cd e2e/node && ./cli.sh ci
+        run: 'cd e2e && pnpm run test:all'
   e2e-deno:
     runs-on: ubuntu-latest
     needs: [lint, test-node, test-web, test-bun, test-deno]
@@ -116,17 +119,18 @@ jobs:
       actions: write
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/init
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: '2.0'
       - name: Run end-to-end tests under Deno
         env:
           API_ID: ${{ secrets.TELEGRAM_API_ID }}
           API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          SESSION_DC1: ${{ secrets.SESSION_DC1 }}
+          SESSION_DC2: ${{ secrets.SESSION_DC2 }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: nick-fields/retry@v2
-        # thanks docker networking very cool
-        with:
-          max_attempts: 3
-          timeout_minutes: 30
-          command: cd e2e/deno && ./cli.sh ci
+        run: 'cd e2e && pnpm run deno:test:all'
 
   cr:
     needs:
