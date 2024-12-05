@@ -90,6 +90,7 @@ export function floodWaiter(options: FloodWaiterOptions): RpcCallMiddleware {
                 err.startsWith('FLOOD_WAIT_')
                 || err.startsWith('SLOWMODE_WAIT_')
                 || err.startsWith('FLOOD_TEST_PHONE_WAIT_')
+                || err.startsWith('FLOOD_PREMIUM_WAIT_')
             ) {
                 let seconds = Number(err.slice(err.lastIndexOf('_') + 1))
 
@@ -113,7 +114,11 @@ export function floodWaiter(options: FloodWaiterOptions): RpcCallMiddleware {
                 const ms = seconds * 1000
 
                 if (ms <= floodSleepThreshold) {
-                    ctx.manager._log.warn('%s resulted in a flood wait, will retry in %d seconds', method, seconds)
+                    if (ctx.request._ !== 'upload.getFile') {
+                        // upload.getFile often results in flood waits, so we don't want to spam the log
+                        ctx.manager._log.warn('%s resulted in a flood wait, will retry in %d seconds', method, seconds)
+                    }
+
                     await sleepWithAbort(
                         ms,
                         combineAbortSignals(ctx.manager.params.stopSignal, ctx.params?.abortSignal),
