@@ -138,8 +138,8 @@ export class FullChat extends Chat {
      * Bio of the other party in a private chat, or description of a
      * group, supergroup or channel.
      */
-    get bio(): string | null {
-        return this.fullPeer?.about ?? null
+    get bio(): string {
+        return this.fullPeer.about ?? ''
     }
 
     /**

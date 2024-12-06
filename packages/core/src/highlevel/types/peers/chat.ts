@@ -291,13 +291,14 @@ export class Chat {
 
     /**
      * Title, for supergroups, channels and groups
+     * (`null` for private chats)
      */
     get title(): string | null {
         return this.peer._ !== 'user' ? this.peer.title ?? null : null
     }
 
     /**
-     * Username, for private chats, bots, supergroups and channels if available
+     * Username, for private chats, bots, supergroups and channels (if available)
      */
     get username(): string | null {
         if (!('username' in this.peer)) return null
@@ -320,6 +321,7 @@ export class Chat {
     /**
      * First name of the other party in a private chat,
      * for private chats and bots
+     * (`null` for supergroups and channels)
      */
     get firstName(): string | null {
         return this.peer._ === 'user' ? this.peer.firstName ?? null : null
@@ -327,6 +329,7 @@ export class Chat {
 
     /**
      * Last name of the other party in a private chat, for private chats
+     * (`null` for supergroups and channels)
      */
     get lastName(): string | null {
         return this.peer._ === 'user' ? this.peer.lastName ?? null : null
