@@ -8,9 +8,7 @@
   },
   "scripts": {
     "test": "dotenv tsx --trace-warnings --test --test-timeout=300000",
-    "test:all": "find tests -type f -name '*.e2e.ts' -print0 | sort -z | xargs -0 -n1 pnpm run test",
-    "deno:test": "deno test -A --unstable-ffi --trace-leaks --import-map=import-map.json --unstable-sloppy-imports --no-check --env-file=.env",
-    "deno:test:all": "pnpm run deno:test tests/*.e2e.ts"
+    "test:all": "find tests -type f -name '*.e2e.ts' -print0 | sort -z | xargs -0 -n1 pnpm run test"
   },
   "dependencies": {
     "@fuman/utils": "0.0.1",

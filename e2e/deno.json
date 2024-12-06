@@ -19,5 +19,9 @@
         "@mtcute/tl/binary/rsa-keys.js": "./tests/deno-shims/tl-rsa.js",
         "@mtcute/tl/binary/reader.js": "./tests/deno-shims/tl-reader.js",
         "@mtcute/tl/binary/writer.js": "./tests/deno-shims/tl-writer.js"
+    },
+    "tasks": {
+        "test": "deno test -A --unstable-ffi --trace-leaks --unstable-sloppy-imports --no-check --env-file=.env --unstable-detect-cjs",
+        "test:all": "deno task test tests/*.e2e.ts"
     }
 }

@@ -10,6 +10,7 @@ export function describe(name, opts, fn) {
         ...opts,
         // we don't close @db/sqlite
         sanitizeResources: false,
+        sanitizeOps: false,
     }, fn)
 }
 export const it = bdd.it

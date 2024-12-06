@@ -130,7 +130,7 @@ jobs:
           SESSION_DC1: ${{ secrets.SESSION_DC1 }}
           SESSION_DC2: ${{ secrets.SESSION_DC2 }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: 'cd e2e && pnpm run deno:test:all'
+        run: 'cd e2e && deno task test:all'
 
   cr:
     needs:
@@ -145,4 +145,4 @@ jobs:
       - name: 'publish to pkg.pr.new'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: fuman-build cr
+        run: pnpx fuman-build cr
