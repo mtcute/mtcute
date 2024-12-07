@@ -11,7 +11,7 @@ import type { SessionConnectionParams } from './session-connection.js'
 import type { TelegramTransport } from './transports/abstract.js'
 import { defaultReconnectionStrategy, type ReconnectionStrategy } from '@fuman/net'
 
-import { composeMiddlewares, Deferred } from '@fuman/utils'
+import { asNonNull, composeMiddlewares, Deferred } from '@fuman/utils'
 import { MtArgumentError, MtcuteError, MtUnsupportedError } from '../types/index.js'
 import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
 import { basic as defaultMiddlewares } from './middlewares/default.js'
@@ -580,10 +580,11 @@ export class NetworkManager {
     async _getOtherDc(dcId: number): Promise<DcConnectionManager> {
         if (!this._dcConnections.has(dcId)) {
             if (this._dcCreationPromise.has(dcId)) {
-                this._log.debug('waiting for DC %d to be created', dcId)
+                this._log.debug('waiting for dc %d to be created', dcId)
                 await this._dcCreationPromise.get(dcId)
+                this._log.debug('dc %d was created', dcId)
 
-                return this._dcConnections.get(dcId)!
+                return asNonNull(this._dcConnections.get(dcId))
             }
 
             const promise = new Deferred<void>()
@@ -602,8 +603,11 @@ export class NetworkManager {
 
                 this._dcConnections.set(dcId, dc)
                 promise.resolve()
+                this._dcCreationPromise.delete(dcId)
             } catch (e) {
                 promise.reject(e)
+                this._dcCreationPromise.delete(dcId)
+                return this._getOtherDc(dcId)
             }
         }
 
@@ -632,17 +636,17 @@ export class NetworkManager {
         await this._switchPrimaryDc(dc)
     }
 
-    private _pendingExports: Record<number, Promise<void>> = {}
+    private _pendingExports = new Map<number, Promise<void>>()
     private async _exportAuthTo(manager: DcConnectionManager): Promise<void> {
-        if (manager.dcId in this._pendingExports) {
+        if (this._pendingExports.has(manager.dcId)) {
             this._log.debug('waiting for auth export to dc %d', manager.dcId)
 
-            return this._pendingExports[manager.dcId]
+            return this._pendingExports.get(manager.dcId)
         }
 
         this._log.debug('exporting auth to dc %d', manager.dcId)
         const promise = new Deferred<void>()
-        this._pendingExports[manager.dcId] = promise.promise
+        this._pendingExports.set(manager.dcId, promise.promise)
 
         try {
             const auth = await this.call({
@@ -670,7 +674,7 @@ export class NetworkManager {
             assertTypeIs('auth.importAuthorization', res, 'auth.authorization')
 
             promise.resolve()
-            delete this._pendingExports[manager.dcId]
+            this._pendingExports.delete(manager.dcId)
         } catch (e) {
             this._log.warn('failed to export auth to dc %d: %s', manager.dcId, e)
             promise.reject(e)

@@ -316,7 +316,7 @@ export class MultiSessionConnection {
         if (this._sessions[0].queuedRpc.length) {
             // there are pending requests, we need to reconnect.
             this._log.debug('notifying key change on the connection due to queued rpc')
-            this._connections[0].onConnected()
+            this._connections.forEach(conn => conn.onConnected())
         }
 
         // connection is idle, we don't need to notify it
