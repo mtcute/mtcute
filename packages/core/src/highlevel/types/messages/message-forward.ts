@@ -45,7 +45,9 @@ export class MessageForwardInfo {
 
     /**
      * For "saved" messages (i.e. messages forwarded to yourself,
-     * "Saved Messages"), the peer where the message was originally sent
+     * "Saved Messages"), the peer where the message was originally sent.
+     *
+     * `null` for other messages, you might want to use {@link sender} instead
      */
     fromChat(): Chat | null {
         if (!this.raw.savedFromPeer) return null
@@ -56,6 +58,8 @@ export class MessageForwardInfo {
     /**
      * For messages forwarded from channels,
      * identifier of the original message in the channel
+     *
+     * (only availale if {@link fromChat} is not `null`)
      */
     get fromMessageId(): number | null {
         return this.raw.savedFromMsgId ?? null

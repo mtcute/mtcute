@@ -70,8 +70,6 @@ export async function getHistory(
         /**
          * Maximum message ID to return.
          *
-         * Unless {@link addOffset} is used, this will work the same as {@link offset}.
-         *
          * @default  `0` (disabled).
          */
         maxId?: number
