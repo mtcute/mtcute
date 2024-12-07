@@ -1,5 +1,6 @@
 // todo: merge this with the main utils dir?
 
+export * from './convert-file-id.js'
 export * from './entities.js'
 export * from './file-utils.js'
 export * from './inline-utils.js'
