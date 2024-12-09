@@ -3445,8 +3445,6 @@ export interface TelegramClient extends ITelegramClient {
             /**
              * Maximum message ID to return.
              *
-             * Unless {@link addOffset} is used, this will work the same as {@link offset}.
-             *
              * @default  `0` (disabled).
              */
             maxId?: number
@@ -6945,4 +6943,7 @@ TelegramClient.prototype.changePrimaryDc = function (...args) {
 }
 TelegramClient.prototype.getMtprotoMessageId = function (...args) {
     return this._client.getMtprotoMessageId(...args)
+}
+TelegramClient.prototype.recreateDc = function (...args) {
+    return this._client.recreateDc(...args)
 }

@@ -733,6 +733,7 @@ withParams(params: RpcCallOptions): this\n`)
         'computeNewPasswordHash',
         'changePrimaryDc',
         'getMtprotoMessageId',
+        'recreateDc',
     ].forEach((name) => {
         output.write(
             `TelegramClient.prototype.${name} = function(...args) {\n`

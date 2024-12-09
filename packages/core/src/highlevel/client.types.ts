@@ -72,4 +72,6 @@ export interface ITelegramClient {
     computeSrpParams(request: tl.account.RawPassword, password: string): Promise<tl.RawInputCheckPasswordSRP>
     computeNewPasswordHash(algo: tl.TypePasswordKdfAlgo, password: string): Promise<Uint8Array>
     getMtprotoMessageId(): Promise<Long>
+
+    recreateDc(dcId: number): Promise<void>
 }

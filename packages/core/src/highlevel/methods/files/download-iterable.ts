@@ -145,6 +145,12 @@ export async function* downloadAsIterable(
                 // todo: implement someday
                 // see: https://github.com/LonamiWebs/Telethon/blob/0e8bd8248cc649637b7c392616887c50986427a0/telethon/client/downloads.py#L99
                 throw new MtUnsupportedError('File ref expired!')
+            } else if (e.is('MTPROTO_CLUSTER_INVALID') && dcId != null) {
+                // this is a weird error that happens when we are trying to download a file from a "wrong" media dc
+                // (e.g. this happens when we load media dc ip from session, but the current media dc ip is different)
+                client.log.debug('received cluster invalid error for dc %d, recreating dc', dcId)
+                await client.recreateDc(dcId)
+                return downloadChunk(chunk)
             } else {
                 throw e
             }

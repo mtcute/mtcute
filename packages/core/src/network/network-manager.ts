@@ -487,6 +487,7 @@ export class NetworkManager {
 
     protected readonly _dcConnections: Map<number, DcConnectionManager> = new Map()
     protected _primaryDc?: DcConnectionManager
+    protected _primaryDcRecreationPromise?: Deferred<void>
 
     private _updateHandler: (upd: tl.TypeUpdates, fromClient: boolean) => void
 
@@ -804,7 +805,11 @@ export class NetworkManager {
         params?: RpcCallOptions,
     ): Promise<tl.RpcCallReturn[T['_']] | mtp.RawMt_rpc_error> => {
         if (!this._primaryDc) {
-            throw new MtcuteError('Not connected to any DC')
+            if (this._primaryDcRecreationPromise) {
+                await this._primaryDcRecreationPromise.promise
+            } else {
+                throw new MtcuteError('Not connected to any DC')
+            }
         }
 
         const kind = params?.kind ?? 'main'
@@ -812,10 +817,10 @@ export class NetworkManager {
 
         if (params?.manager) {
             manager = params.manager
-        } else if (params?.dcId && params.dcId !== this._primaryDc.dcId) {
+        } else if (params?.dcId && params.dcId !== this._primaryDc!.dcId) {
             manager = await this._getOtherDc(params.dcId)
         } else {
-            manager = this._primaryDc
+            manager = this._primaryDc!
         }
 
         let multi = manager[kind]
@@ -911,5 +916,47 @@ export class NetworkManager {
 
     getMtprotoMessageId(): Long {
         return this._primaryDc!.main._sessions[0].getMessageId()
+    }
+
+    async recreateDc(dcId: number): Promise<void> {
+        this._log.debug('recreating dc %d', dcId)
+        const existing = this._dcConnections.get(dcId)
+        if (existing) {
+            await existing.destroy()
+        }
+
+        this._dcConnections.delete(dcId)
+
+        if (dcId === this._primaryDc?.dcId) {
+            const oldPrimaryDc = this._primaryDc
+            this._primaryDc = undefined
+            this._primaryDcRecreationPromise = new Deferred()
+
+            try {
+                const newDefaultDcs: DcOptions = {
+                    main: asNonNull(await this.config.findOption({
+                        dcId,
+                        allowIpv6: this.params.useIpv6,
+                    })),
+                    media: asNonNull(await this.config.findOption({
+                        dcId,
+                        allowIpv6: this.params.useIpv6,
+                        allowMedia: true,
+                        preferMedia: true,
+                    })),
+                }
+
+                await this._storage.dcs.store(newDefaultDcs)
+                await this.connect(newDefaultDcs)
+                this._primaryDcRecreationPromise.resolve()
+                this._primaryDcRecreationPromise = undefined
+            } catch (e) {
+                // restore old primary dc to avoid a deadlock
+                this._primaryDc = oldPrimaryDc
+                this._primaryDcRecreationPromise?.resolve()
+                this._primaryDcRecreationPromise = undefined
+                throw e
+            }
+        }
     }
 }

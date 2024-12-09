@@ -56,6 +56,7 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     readonly startUpdatesLoop: ITelegramClient['startUpdatesLoop']
     readonly stopUpdatesLoop: ITelegramClient['stopUpdatesLoop']
     readonly getMtprotoMessageId: ITelegramClient['getMtprotoMessageId']
+    readonly recreateDc: ITelegramClient['recreateDc']
 
     private _abortController = new AbortController()
     readonly stopSignal: AbortSignal = this._abortController.signal
@@ -92,6 +93,7 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
         this.startUpdatesLoop = bind('startUpdatesLoop')
         this.stopUpdatesLoop = bind('stopUpdatesLoop')
         this.getMtprotoMessageId = bind('getMtprotoMessageId')
+        this.recreateDc = bind('recreateDc')
 
         this.timers = new TimersManager()
         this.timers.onError(err => this.onError.emit(unknownToError(err)))

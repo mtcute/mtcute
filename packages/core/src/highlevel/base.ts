@@ -346,4 +346,9 @@ export class BaseTelegramClient implements ITelegramClient {
     async getMtprotoMessageId(): Promise<Long> {
         return this.mt.network.getMtprotoMessageId()
     }
+
+    async recreateDc(dcId: number): Promise<void> {
+        await this.mt.network.config.update(true)
+        await this.mt.network.recreateDc(dcId)
+    }
 }
