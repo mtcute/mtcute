@@ -1,13 +1,14 @@
 import type { tl } from '@mtcute/tl'
-import type { PeersIndex } from '../peers/peers-index.js'
+import type { Peer } from '../peers/peer.js'
 
+import type { PeersIndex } from '../peers/peers-index.js'
 import { utf8 } from '@fuman/utils'
 import { MtArgumentError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { encodeInlineMessageId } from '../../utils/inline-utils.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Message } from '../messages/message.js'
-import { Chat } from '../peers/chat.js'
+import { parsePeer } from '../peers/peer.js'
 import { User } from '../peers/user.js'
 
 /** Base class for callback queries */
@@ -91,12 +92,12 @@ export class CallbackQuery extends BaseCallbackQuery {
     /**
      * Chat where the originating message was sent
      */
-    get chat(): Chat {
+    get chat(): Peer {
         if (this.raw._ !== 'updateBotCallbackQuery') {
             throw new MtArgumentError('Cannot get message id for inline callback')
         }
 
-        return new Chat(this._peers.get(this.raw.peer))
+        return parsePeer(this.raw.peer, this._peers)
     }
 
     /**

@@ -316,7 +316,7 @@ export async function* iterDialogs(
         if (!dialogs.length) return
 
         const last = dialogs[dialogs.length - 1]
-        offsetPeer = last.chat.inputPeer
+        offsetPeer = last.peer.inputPeer
         offsetId = last.raw.topMessage
 
         if (last.lastMessage) {

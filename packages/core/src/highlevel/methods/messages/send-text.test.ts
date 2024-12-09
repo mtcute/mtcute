@@ -1,9 +1,10 @@
+import type { Chat } from '../../types/index.js'
 import { createStub, StubTelegramClient } from '@mtcute/test'
 import Long from 'long'
+
 import { describe, expect, it } from 'vitest'
 
 import { toggleChannelIdMark } from '../../../utils/peer-utils.js'
-
 import { sendText } from './send-text.js'
 
 const stubUser = createStub('user', {
@@ -52,7 +53,7 @@ describe('sendText', () => {
 
             expect(msg).toBeDefined()
             expect(msg.id).toEqual(123)
-            expect(msg.chat.chatType).toEqual('private')
+            expect(msg.chat.type).toEqual('user')
             expect(msg.chat.id).toEqual(stubUser.id)
             expect(msg.text).toEqual('test')
         })
@@ -96,7 +97,8 @@ describe('sendText', () => {
 
             expect(msg).toBeDefined()
             expect(msg.id).toEqual(123)
-            expect(msg.chat.chatType).toEqual('supergroup')
+            expect(msg.chat.type).toEqual('chat')
+            expect((msg.chat as Chat).chatType).toEqual('supergroup')
             expect(msg.chat.id).toEqual(markedChannelId)
             expect(msg.text).toEqual('test')
         })
@@ -124,7 +126,7 @@ describe('sendText', () => {
 
             expect(msg).toBeDefined()
             expect(msg.id).toEqual(123)
-            expect(msg.chat.chatType).toEqual('private')
+            expect(msg.chat.type).toEqual('user')
             expect(msg.chat.id).toEqual(stubUser.id)
             expect(msg.text).toEqual('test')
         })

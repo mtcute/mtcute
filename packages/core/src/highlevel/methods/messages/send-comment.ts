@@ -23,7 +23,7 @@ export function commentText(
     message: Message,
     ...params: ParametersSkip2<typeof sendText>
 ): ReturnType<typeof sendText> {
-    if (message.chat.chatType !== 'channel') {
+    if (message.chat.type !== 'chat' || message.chat.chatType !== 'channel') {
         return replyText(client, message, ...params)
     }
 
@@ -52,7 +52,7 @@ export function commentMedia(
     message: Message,
     ...params: ParametersSkip2<typeof sendMedia>
 ): ReturnType<typeof sendMedia> {
-    if (message.chat.chatType !== 'channel') {
+    if (message.chat.type !== 'chat' || message.chat.chatType !== 'channel') {
         return replyMedia(client, message, ...params)
     }
 
@@ -81,7 +81,7 @@ export function commentMediaGroup(
     message: Message,
     ...params: ParametersSkip2<typeof sendMediaGroup>
 ): ReturnType<typeof sendMediaGroup> {
-    if (message.chat.chatType !== 'channel') {
+    if (message.chat.type !== 'chat' || message.chat.chatType !== 'channel') {
         return replyMediaGroup(client, message, ...params)
     }
 

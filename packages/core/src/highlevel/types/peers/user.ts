@@ -128,6 +128,16 @@ export class User {
         return this.raw.botAttachMenu!
     }
 
+    /** Whether this bot offers an attachment menu web app, and we have it enabled */
+    get isBotAttachmentMenuEnabled(): boolean {
+        return this.raw.attachMenuEnabled!
+    }
+
+    /** Whether this bot can request geolocation when used in inline mode */
+    get isBotWithInlineGeo(): boolean {
+        return this.raw.botInlineGeo!
+    }
+
     /** Whether this bot can be edited by the current user */
     get isBotEditable(): boolean {
         return this.raw.botCanEdit!

@@ -75,7 +75,7 @@ export async function findDialogs(client: ITelegramClient, peers: MaybeArray<str
     for await (const dialog of iterDialogs(client, {
         archived: 'keep',
     })) {
-        const chat = dialog.chat
+        const chat = dialog.peer
 
         const idxById = notFoundIds.get(chat.id)
 

@@ -29,8 +29,8 @@ describe('2. calling methods', () => {
 
         const history = await tg.getHistory(777000, { limit: 5 })
 
-        expect(history[0].chat.chatType).to.equal('private')
+        expect(history[0].chat.type).to.equal('user')
         expect(history[0].chat.id).to.equal(777000)
-        expect(history[0].chat.firstName).to.equal('Telegram')
+        expect(history[0].chat.displayName).to.equal('Telegram')
     })
 })

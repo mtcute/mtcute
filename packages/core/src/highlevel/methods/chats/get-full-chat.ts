@@ -3,14 +3,12 @@ import type { tl } from '@mtcute/tl'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
 import { MtArgumentError } from '../../../types/errors.js'
-import { FullChat } from '../../types/index.js'
+import { FullChat, MtInvalidPeerTypeError } from '../../types/index.js'
 import {
     INVITE_LINK_REGEX,
     isInputPeerChannel,
     isInputPeerChat,
-    isInputPeerUser,
     toInputChannel,
-    toInputUser,
 } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -44,16 +42,11 @@ export async function getFullChat(client: ITelegramClient, chatId: InputPeerLike
 
     const peer = await resolvePeer(client, chatId)
 
-    let res: tl.messages.TypeChatFull | tl.users.TypeUserFull
+    let res: tl.messages.TypeChatFull
     if (isInputPeerChannel(peer)) {
         res = await client.call({
             _: 'channels.getFullChannel',
             channel: toInputChannel(peer),
-        })
-    } else if (isInputPeerUser(peer)) {
-        res = await client.call({
-            _: 'users.getFullUser',
-            id: toInputUser(peer),
         })
     } else if (isInputPeerChat(peer)) {
         res = await client.call({
@@ -61,8 +54,8 @@ export async function getFullChat(client: ITelegramClient, chatId: InputPeerLike
             chatId: peer.chatId,
         })
     } else {
-        throw new Error('should not happen')
+        throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
     }
 
-    return FullChat._parse(res)
+    return new FullChat(res)
 }

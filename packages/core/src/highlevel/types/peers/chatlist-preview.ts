@@ -1,9 +1,10 @@
 import type { tl } from '@mtcute/tl'
 
+import type { Peer } from './peer.js'
 import { makeInspectable } from '../../utils/inspectable.js'
-import { memoizeGetters } from '../../utils/memoize.js'
 
-import { Chat } from './chat.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { parsePeer } from './peer.js'
 import { PeersIndex } from './peers-index.js'
 
 /**
@@ -36,7 +37,7 @@ export class ChatlistPreview {
     }
 
     /** List of all chats contained in the chatlist */
-    get chats(): Chat[] {
+    get chats(): Peer[] {
         let peers
 
         if (this.raw._ === 'chatlists.chatlistInvite') {
@@ -45,7 +46,7 @@ export class ChatlistPreview {
             peers = [...this.raw.alreadyPeers, ...this.raw.missingPeers]
         }
 
-        return peers.map(peer => Chat._parseFromPeer(peer, this.peers))
+        return peers.map(peer => parsePeer(peer, this.peers))
     }
 }
 

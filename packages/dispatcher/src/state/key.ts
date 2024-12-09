@@ -34,9 +34,9 @@ export const defaultStateKeyDelegate: StateKeyDelegate = (upd): string | null =>
     }
 
     if (upd._name === 'new_message' || upd._name === 'new_business_message') {
+        if (upd.chat.type === 'user') return String(upd.chat.id)
+
         switch (upd.chat.chatType) {
-            case 'private':
-            case 'bot':
             case 'channel':
                 return String(upd.chat.id)
             case 'group':
@@ -49,7 +49,7 @@ export const defaultStateKeyDelegate: StateKeyDelegate = (upd): string | null =>
     }
 
     if (upd._name === 'callback_query') {
-        if (upd.chat.chatType === 'private') return `${upd.user.id}`
+        if (upd.chat.type === 'user') return `${upd.user.id}`
 
         return `${upd.chat.id}_${upd.user.id}`
     }

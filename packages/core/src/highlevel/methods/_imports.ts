@@ -52,6 +52,7 @@ import {
     FileDownloadParameters,
     ForumTopic,
     FullChat,
+    FullUser,
     GameHighScore,
     HistoryReadUpdate,
     InlineCallbackQuery,

@@ -5,7 +5,6 @@ import type { PeersIndex } from '../peers/peers-index.js'
 import type { InputReaction } from '../reactions/types.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { Chat } from '../peers/chat.js'
 import { parsePeer } from '../peers/peer.js'
 import { ReactionCount } from '../reactions/reaction-count.js'
 import { toReactionEmoji } from '../reactions/types.js'
@@ -27,8 +26,8 @@ export class BotReactionUpdate {
     /**
      * Chat where the reaction has been changed
      */
-    get chat(): Chat {
-        return Chat._parseFromPeer(this.raw.peer, this._peers)
+    get chat(): Peer {
+        return parsePeer(this.raw.peer, this._peers)
     }
 
     /**
@@ -87,8 +86,8 @@ export class BotReactionCountUpdate {
     /**
      * Chat where the reaction has been changed
      */
-    get chat(): Chat {
-        return Chat._parseFromPeer(this.raw.peer, this._peers)
+    get chat(): Peer {
+        return parsePeer(this.raw.peer, this._peers)
     }
 
     /**

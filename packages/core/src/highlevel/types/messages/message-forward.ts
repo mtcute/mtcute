@@ -1,11 +1,10 @@
 import type { tl } from '@mtcute/tl'
 
-import type { PeerSender } from '../peers/peer.js'
+import type { Peer, PeerSender } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { Chat } from '../peers/chat.js'
 import { parsePeer } from '../peers/peer.js'
 
 /**
@@ -49,10 +48,10 @@ export class MessageForwardInfo {
      *
      * `null` for other messages, you might want to use {@link sender} instead
      */
-    fromChat(): Chat | null {
+    fromChat(): Peer | null {
         if (!this.raw.savedFromPeer) return null
 
-        return Chat._parseFromPeer(this.raw.savedFromPeer, this._peers)
+        return parsePeer(this.raw.savedFromPeer, this._peers)
     }
 
     /**

@@ -2,6 +2,7 @@ import type { tl } from '@mtcute/tl'
 
 import type { ReplyMarkup } from '../bots/keyboards/index.js'
 import type { TextWithEntities } from '../misc/index.js'
+import type { Chat } from '../peers/chat.js'
 import type { Peer } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
 import type { MessageAction } from './message-action.js'
@@ -12,9 +13,8 @@ import { getMarkedPeerId, toggleChannelIdMark } from '../../../utils/peer-utils.
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { BotKeyboard } from '../bots/keyboards/index.js'
-import { Chat } from '../peers/chat.js'
 
+import { BotKeyboard } from '../bots/keyboards/index.js'
 import { parsePeer } from '../peers/peer.js'
 import { User } from '../peers/user.js'
 import { FactCheck } from './fact-check.js'
@@ -174,7 +174,7 @@ export class Message {
     /**
      * Message sender.
      *
-     * Usually is a {@link User}, but can be a {@link Chat}
+     * Usually is a {@link User}, but can be a {@link Peer}
      * in case the message was sent by an anonymous admin, anonymous premium user,
      * or if the message is a forwarded channel post.
      *
@@ -211,8 +211,8 @@ export class Message {
     /**
      * Conversation the message belongs to
      */
-    get chat(): Chat {
-        return Chat._parseFromMessage(this.raw, this._peers)
+    get chat(): Peer {
+        return parsePeer(this.raw.peerId, this._peers)
     }
 
     /**
@@ -252,7 +252,8 @@ export class Message {
         const fwd = this.raw.fwdFrom
 
         return Boolean(
-            this.chat.chatType === 'supergroup'
+            this.chat.type === 'chat'
+            && this.chat.chatType === 'supergroup'
             && fwd.savedFromMsgId
             && fwd.savedFromPeer?._ === 'peerChannel'
             && getMarkedPeerId(fwd.savedFromPeer) !== getMarkedPeerId(this.raw.peerId),
@@ -509,7 +510,7 @@ export class Message {
      * @throws MtArgumentError  In case the chat does not support message links
      */
     get link(): string {
-        if (this.chat.chatType === 'supergroup' || this.chat.chatType === 'channel') {
+        if (this.chat.type === 'chat' && (this.chat.chatType === 'supergroup' || this.chat.chatType === 'channel')) {
             if (this.chat.username) {
                 return `https://t.me/${this.chat.username}/${this.id}`
             }
@@ -517,7 +518,7 @@ export class Message {
             return `https://t.me/c/${toggleChannelIdMark(this.chat.id)}/${this.id}`
         }
 
-        throw new MtArgumentError(`Cannot generate message link for ${this.chat.chatType}`)
+        throw new MtArgumentError(`Cannot generate message link for ${(this.chat as Chat).chatType ?? this.chat.type}`)
     }
 }
 

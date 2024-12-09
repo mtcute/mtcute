@@ -1,4 +1,4 @@
-import type { Chat, MaybeArray, MaybePromise, Message } from '@mtcute/core'
+import type { Chat, MaybeArray, MaybePromise, Message, User } from '@mtcute/core'
 
 import type { BusinessMessageContext } from '../context/business-message.js'
 import type { MessageContext } from '../context/message.js'
@@ -100,12 +100,10 @@ export function command(commands: MaybeArray<string | RegExp>, {
 export const start: UpdateFilter<
     MessageContext | BusinessMessageContext,
     {
-        chat: Modify<Chat, {
-            chatType: 'private'
-        }>
+        chat: User
         command: string[]
     }
-> = and(chat('private'), command('start'))
+> = and(chat('user'), command('start'))
 
 /**
  * Shorthand filter that matches /start commands

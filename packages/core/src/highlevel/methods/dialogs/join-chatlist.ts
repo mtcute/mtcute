@@ -33,7 +33,7 @@ export async function joinChatlist(
         peers = all.filter(isPresent)
     } else {
         const preview = await getChatlistPreview(client, link)
-        peers = preview.chats.filter(it => !it.isUnavailable).map(it => it.inputPeer)
+        peers = preview.chats.filter(it => !(it.type === 'chat' && it.isBanned)).map(it => it.inputPeer)
     }
 
     const res = await client.call({

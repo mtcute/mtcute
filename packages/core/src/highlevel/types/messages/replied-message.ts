@@ -1,12 +1,12 @@
 import type { tl } from '@mtcute/tl'
 
-import type { PeerSender } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
 import type { MessageMedia } from './message-media.js'
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Chat } from '../peers/chat.js'
+import { parsePeer, type Peer, type PeerSender } from '../peers/peer.js'
 
 import { User } from '../peers/user.js'
 import { MessageEntity } from './message-entity.js'
@@ -114,14 +114,14 @@ export class RepliedMessageInfo {
      *
      * If `null`, the message was sent in the same chat.
      */
-    get chat(): Chat | null {
+    get chat(): Peer | null {
         if (!this.raw.replyToPeerId || !this.raw.replyFrom) {
             // same chat or private. even if `replyToPeerId` is available,
             // without `replyFrom` it would contain the sender, not the chat
             return null
         }
 
-        return Chat._parseFromPeer(this.raw.replyToPeerId, this._peers)
+        return parsePeer(this.raw.replyToPeerId, this._peers)
     }
 
     /**

@@ -1,9 +1,10 @@
 import type { tl } from '@mtcute/tl'
 
+import type { Peer } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { Chat } from '../peers/chat.js'
+import { parsePeer } from '../peers/peer.js'
 
 /**
  * One or more messages were deleted from a connected business account
@@ -29,8 +30,8 @@ export class DeleteBusinessMessageUpdate {
     /**
      * Chat where the messages were deleted
      */
-    get chat(): Chat {
-        return Chat._parseFromPeer(this.raw.peer, this._peers)
+    get chat(): Peer {
+        return parsePeer(this.raw.peer, this._peers)
     }
 }
 

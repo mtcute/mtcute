@@ -1,12 +1,13 @@
 import type { tl } from '@mtcute/tl'
 
+import type { Peer } from '../peers/peer.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { assertTypeIsNot, hasValueAtKey } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { Chat } from '../peers/chat.js'
-import { PeersIndex } from '../peers/peers-index.js'
 
+import { parsePeer } from '../peers/peer.js'
+import { PeersIndex } from '../peers/peers-index.js'
 import { DraftMessage } from './draft-message.js'
 import { Message } from './message.js'
 
@@ -71,7 +72,7 @@ export class Dialog {
                 index[getMarkedPeerId(peer)] = true
             })
 
-            return dialogs.filter(i => index[i.chat.id])
+            return dialogs.filter(i => index[i.peer.id])
         }
 
         return dialogs.filter(i => i.isPinned)
@@ -105,11 +106,11 @@ export class Dialog {
 
         if (folder._ === 'dialogFilterChatlist') {
             return (dialog) => {
-                const chatId = dialog.chat.id
+                const peerId = dialog.peer.id
 
-                if (excludePinned && pinned[chatId]) return false
+                if (excludePinned && pinned[peerId]) return false
 
-                return include[chatId] || pinned[chatId]
+                return include[peerId] || pinned[peerId]
             }
         }
 
@@ -118,14 +119,13 @@ export class Dialog {
         })
 
         return (dialog) => {
-            const chat = dialog.chat
-            const chatId = dialog.chat.id
-            const chatType = dialog.chat.chatType
+            const peer = dialog.peer
+            const peerId = dialog.peer.id
 
             // manual exclusion/inclusion and pins
-            if (include[chatId]) return true
+            if (include[peerId]) return true
 
-            if (exclude[chatId] || (excludePinned && pinned[chatId])) {
+            if (exclude[peerId] || (excludePinned && pinned[peerId])) {
                 return false
             }
 
@@ -137,17 +137,17 @@ export class Dialog {
             if (folder.excludeArchived && dialog.isArchived) return false
 
             // inclusions based on chat type
-            if (folder.contacts && chatType === 'private' && chat.isContact) {
+            if (folder.contacts && peer.type === 'user' && peer.isContact) {
                 return true
             }
-            if (folder.nonContacts && chatType === 'private' && !chat.isContact) {
+            if (folder.nonContacts && peer.type === 'user' && !peer.isContact) {
                 return true
             }
-            if (folder.groups && (chatType === 'group' || chatType === 'supergroup')) {
+            if (folder.groups && peer.type === 'chat' && peer.isGroup) {
                 return true
             }
-            if (folder.broadcasts && chatType === 'channel') return true
-            if (folder.bots && chatType === 'bot') return true
+            if (folder.broadcasts && peer.type === 'chat' && peer.chatType === 'channel') return true
+            if (folder.bots && peer.type === 'user' && peer.isBot) return true
 
             return false
         }
@@ -193,17 +193,17 @@ export class Dialog {
     }
 
     /**
-     * Chat that this dialog represents
+     * Peer that this dialog represents
      */
-    get chat(): Chat {
-        return Chat._parseFromPeer(this.raw.peer, this._peers)
+    get peer(): Peer {
+        return parsePeer(this.raw.peer, this._peers)
     }
 
     /**
      * The latest message sent in this chat (if any)
      */
     get lastMessage(): Message | null {
-        const cid = this.chat.id
+        const cid = this.peer.id
 
         if (this._messages.has(cid)) {
             return new Message(this._messages.get(cid)!, this._peers)
@@ -273,5 +273,5 @@ export class Dialog {
     }
 }
 
-memoizeGetters(Dialog, ['chat', 'lastMessage', 'draftMessage'])
+memoizeGetters(Dialog, ['peer', 'lastMessage', 'draftMessage'])
 makeInspectable(Dialog)

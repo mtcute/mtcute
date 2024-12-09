@@ -96,7 +96,7 @@ export const userId: {
             case 'edit_business_message': {
                 const sender = upd.sender
 
-                return (matchSelf && sender.isSelf)
+                return (matchSelf && sender.type === 'user' && sender.isSelf)
                   || indexId.has(sender.id)
                   || indexUsername.has(sender.username!)
             }

@@ -1,11 +1,11 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
 import { MtArgumentError } from '../../../types/errors.js'
-import { Chat, MtPeerNotFoundError } from '../../types/index.js'
-import { INVITE_LINK_REGEX } from '../../utils/peer-utils.js'
+import { Chat, MtInvalidPeerTypeError, MtPeerNotFoundError } from '../../types/index.js'
+import { INVITE_LINK_REGEX, isInputPeerChannel, isInputPeerChat, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
-import { _getRawPeerBatched } from './batched-queries.js'
+import { _getChannelsBatched, _getChatsBatched } from './batched-queries.js'
 
 // @available=both
 /**
@@ -36,7 +36,14 @@ export async function getChat(client: ITelegramClient, chatId: InputPeerLike): P
 
     const peer = await resolvePeer(client, chatId)
 
-    const res = await _getRawPeerBatched(client, peer)
+    let res
+    if (isInputPeerChannel(peer)) {
+        res = await _getChannelsBatched(client, toInputChannel(peer))
+    } else if (isInputPeerChat(peer)) {
+        res = await _getChatsBatched(client, peer.chatId)
+    } else {
+        throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+    }
 
     if (!res) throw new MtPeerNotFoundError(`Chat ${JSON.stringify(chatId)} was not found`)
 

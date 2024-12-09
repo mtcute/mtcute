@@ -24,7 +24,7 @@ import type { QuoteParamsFrom } from './methods/messages/send-quote.js'
 import type { CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
 import type { CanSendStoryResult } from './methods/stories/can-send-story.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
-import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, PeerReaction, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SentCode, StarGift, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStarGift, UserStatusUpdate, UserTypingUpdate, WebviewResult } from './types/index.js'
+import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, PeerReaction, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SentCode, StarGift, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStarGift, UserStatusUpdate, UserTypingUpdate, WebviewResult } from './types/index.js'
 import type { ParsedUpdateHandlerParams } from './updates/parsed.js'
 import type { RawUpdateInfo } from './updates/types.js'
 import type { InputStringSessionData } from './utils/string-session.js'
@@ -81,8 +81,10 @@ import { getChatMembers } from './methods/chats/get-chat-members.js'
 import { getChatPreview } from './methods/chats/get-chat-preview.js'
 import { getChat } from './methods/chats/get-chat.js'
 import { getFullChat } from './methods/chats/get-full-chat.js'
+import { getFullUser } from './methods/chats/get-full-user.js'
 import { getNearbyChats } from './methods/chats/get-nearby-chats.js'
 import { getSimilarChannels } from './methods/chats/get-similar-channels.js'
+import { getUser } from './methods/chats/get-user.js'
 import { iterChatEventLog } from './methods/chats/iter-chat-event-log.js'
 import { iterChatMembers } from './methods/chats/iter-chat-members.js'
 import { joinChat } from './methods/chats/join-chat.js'
@@ -1655,6 +1657,15 @@ export interface TelegramClient extends ITelegramClient {
      *   Use {@link getChatPreview} instead.
      */
     getFullChat(chatId: InputPeerLike): Promise<FullChat>
+
+    /**
+     * Get full information about a user.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param userId  ID of the user or their username
+     */
+    getFullUser(userId: InputPeerLike): Promise<FullUser>
     /**
      * Get nearby chats
      *
@@ -1678,6 +1689,15 @@ export interface TelegramClient extends ITelegramClient {
      */
     getSimilarChannels(
         channel: InputPeerLike): Promise<ArrayWithTotal<Chat>>
+
+    /**
+     * Get basic information about a user.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param userId  ID of the user or their username or invite link
+     */
+    getUser(userId: InputPeerLike): Promise<User>
     /**
      * Iterate over chat event log.
      *
@@ -6216,11 +6236,17 @@ TelegramClient.prototype.getChat = function (...args) {
 TelegramClient.prototype.getFullChat = function (...args) {
     return getFullChat(this._client, ...args)
 }
+TelegramClient.prototype.getFullUser = function (...args) {
+    return getFullUser(this._client, ...args)
+}
 TelegramClient.prototype.getNearbyChats = function (...args) {
     return getNearbyChats(this._client, ...args)
 }
 TelegramClient.prototype.getSimilarChannels = function (...args) {
     return getSimilarChannels(this._client, ...args)
+}
+TelegramClient.prototype.getUser = function (...args) {
+    return getUser(this._client, ...args)
 }
 TelegramClient.prototype.iterChatEventLog = function (...args) {
     return iterChatEventLog(this._client, ...args)

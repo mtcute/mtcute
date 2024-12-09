@@ -8,6 +8,7 @@ import type {
     HistoryReadUpdate,
     MaybeArray,
     Message,
+    Peer,
     PollVoteUpdate,
     User,
     UserTypingUpdate,
@@ -20,20 +21,26 @@ import type { EmptyObject, Modify, UpdateFilter } from './types.js'
 /**
  * Filter updates by type of the chat where they happened
  */
-export function chat<T extends ChatType, Obj extends { chat: Chat }>(type: T): UpdateFilter<
+export function chat<T extends ChatType | 'user', Obj extends { chat: Peer }>(type: T): UpdateFilter<
     Obj,
     {
-        chat: Modify<Chat, { chatType: T }>
-    } & (Obj extends Message
-        ? T extends 'private' | 'bot' | 'group'
+        chat: T extends 'user'
+            ? User
+            : Modify<Chat, { chatType: T }>
+    }
+    & (Obj extends Message
+        ? T extends 'user' | 'group'
             ? {
                 sender: User
             }
-            : EmptyObject
+            : {
+                sender: Chat
+            }
         : EmptyObject)
 > {
-    return msg =>
-        msg.chat.chatType === type
+    if (type === 'user') return msg => msg.chat.type === 'user'
+
+    return msg => msg.chat.type === 'chat' && msg.chat.chatType === type
 }
 
 /**
@@ -98,7 +105,7 @@ export const chatId: {
 
         const chat = upd.chat
 
-        return (matchSelf && chat.isSelf)
+        return (matchSelf && chat.type === 'user' && chat.isSelf)
           || indexId.has(chat.id)
           || Boolean(chat.usernames?.some(u => indexUsername.has(u.username)))
     }
