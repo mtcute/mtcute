@@ -120,7 +120,7 @@ export interface MtClientOptions {
 
     /**
      * mtcute can send all unknown RPC errors to [danog](https://github.com/danog)'s
-     * [error reporting service](https://rpc.pwrtelegram.xyz/).
+     * [error reporting service](https://report-rpc-error.madelineproto.xyz/).
      *
      * This is fully anonymous (except maybe IP) and is only used to improve the library
      * and developer experience for everyone working with MTProto. This is fully opt-in,
