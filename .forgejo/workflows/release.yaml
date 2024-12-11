@@ -34,7 +34,7 @@ jobs:
       - if: ${{ github.event.inputs.branch != 'master' }}
         run: git checkout ${{ github.event.inputs.branch }}
 
-      - uses: ./.github/actions/init
+      - uses: ./.forgejo/actions/init
       - uses: denoland/setup-deno@v1
         with:
           deno-version: '2.0'

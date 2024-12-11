@@ -1,14 +1,6 @@
-inputs:
-  node-version:
-    default: '18.x'
-
 runs:
   using: 'composite'
   steps:
-    - name: Use Node.js ${{ inputs.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ inputs.node-version }}
     - name: Setup pnpm
       uses: pnpm/action-setup@v2
       with:

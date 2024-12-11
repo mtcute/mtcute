@@ -1,0 +1,37 @@
+name: Docs
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: node22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.forgejo/actions/init
+      - name: Build
+        env:
+          BUILD_FOR_DOCS: 1
+        run: pnpm run -r --workspace-concurrency=1 build
+      - name: Build docs
+        run: |
+          pnpm run docs 
+          touch docs/.nojekyll
+          echo "ref.mtcute.dev" > docs/CNAME
+      - name: Deploy
+        # do not run on forks and releases
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor == 'desu-bot'
+        uses: https://github.com/cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy docs --project-name=mtcute-apiref

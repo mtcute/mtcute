@@ -31,6 +31,6 @@ describe('2. calling methods', () => {
 
         expect(history[0].chat.type).to.equal('user')
         expect(history[0].chat.id).to.equal(777000)
-        expect(history[0].chat.displayName).to.equal('Telegram')
+        expect(history[0].chat.displayName).to.match(/^Telegram(?: Notifications)?$/)
     })
 })

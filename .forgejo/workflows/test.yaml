@@ -10,17 +10,11 @@ on:
 
 jobs:
   lint: 
-    runs-on: ubuntu-latest
+    runs-on: node22
     if: github.actor != 'mtcute-bot' # do not run after release
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch fuman
-        uses: actions/checkout@v4
-        with:
-          repository: teidesu/fuman
-          path: private/fuman
-          token: ${{ secrets.BOT_PAT }}
-      - uses: ./.github/actions/init
+      - uses: ./.forgejo/actions/init
       - name: 'TypeScript'
         run: pnpm run lint:tsc:ci
       - name: 'ESLint'
@@ -29,31 +23,21 @@ jobs:
         run: pnpm run lint:dpdm
 
   test-node:
-    runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [node18, node20, node22]
+    runs-on: ${{ matrix.node-version }}
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/init
-        with: 
-          node-version: ${{ matrix.node-version }}
+      - uses: ./.forgejo/actions/init
       - name: 'Run tests'
         run: pnpm run test:ci
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        if: ${{ matrix.node-version == '18.x' }} # to avoid uploading twice
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        with:
-          files: ./coverage/coverage-final.json
   
   test-bun:
-    runs-on: ubuntu-latest
+    runs-on: node22
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/init
+      - uses: ./.forgejo/actions/init
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: '1.1.4'
@@ -63,11 +47,11 @@ jobs:
         run: cd dist/tests && bun test
   
   test-deno:
-    runs-on: ubuntu-latest
+    runs-on: node22
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/init
-      - uses: denoland/setup-deno@v1
+      - uses: ./.forgejo/actions/init
+      - uses: https://github.com/denoland/setup-deno@v1
         with:
           deno-version: '2.0'
       - name: 'Build tests'
@@ -76,33 +60,34 @@ jobs:
         run: cd dist/tests && deno test -A --unstable-ffi --node-modules-dir=false
   
   test-web:
-    runs-on: ubuntu-latest
+    runs-on: docker
+    container: mcr.microsoft.com/playwright:v1.42.1
 
     strategy:
       matrix:
         browser: [chromium, firefox]
     steps:
       - uses: actions/checkout@v4
-      - name: 'Build Docker image'
-        run: docker build . -f .github/Dockerfile.test-web --build-arg BROWSER=${{ matrix.browser }} -t mtcute/test-web
+      - run: apt-get update && apt-get install -y make gcc g++
+      - uses: ./.forgejo/actions/init
       - name: 'Run tests'
         # i wish we didn't have to do this, but vitest in browser is very flaky
         # see: https://github.com/vitest-dev/vitest/issues/4173
-        uses: nick-fields/retry@v2
+        uses: https://github.com/nick-fields/retry@v2
         with:
           max_attempts: 3
           timeout_minutes: 30
-          command: docker run -e CI=1 mtcute/test-web
-  
+          command: pnpm run test:browser --browser.name=${{ matrix.browser }}
+
   e2e:
-    runs-on: ubuntu-latest
+    runs-on: node22
     needs: [lint, test-node, test-web, test-bun, test-deno]
     permissions:
       contents: read
       actions: write
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/init
+      - uses: ./.forgejo/actions/init
       - name: Run end-to-end tests
         env:
           API_ID: ${{ secrets.TELEGRAM_API_ID }}
@@ -112,15 +97,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: 'cd e2e && pnpm run test:all'
   e2e-deno:
-    runs-on: ubuntu-latest
+    runs-on: node22
     needs: [lint, test-node, test-web, test-bun, test-deno]
     permissions:
       contents: read
       actions: write
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/init
-      - uses: denoland/setup-deno@v1
+      - uses: ./.forgejo/actions/init
+      - uses: https://github.com/denoland/setup-deno@v1
         with:
           deno-version: '2.0'
       - name: Run end-to-end tests under Deno
@@ -131,18 +116,3 @@ jobs:
           SESSION_DC2: ${{ secrets.SESSION_DC2 }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: 'cd e2e && deno task test:all'
-
-  cr:
-    needs:
-      - e2e-deno
-      - e2e
-    runs-on: ubuntu-latest
-    # dont run on forks or release commits
-    if: github.repository == 'mtcute/mtcute' && github.actor != 'mtcute-bot'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/init
-      - name: 'publish to pkg.pr.new'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpx fuman-build cr
