@@ -1,4 +1,4 @@
-import type { BasicDcOption, DcOptions } from '../../utils/dcs.js'
+import type { DcOptions } from '../../utils/dcs.js'
 import type { CurrentUserInfo } from '../storage/service/current-user.js'
 
 import { base64 } from '@fuman/utils'
@@ -20,31 +20,6 @@ export interface StringSessionData {
     authKey: Uint8Array
 }
 
-function readTlDcOption(reader: TlBinaryReader): BasicDcOption {
-    const ctorId = reader.uint()
-
-    if (ctorId !== 414687501) {
-        throw new MtArgumentError(`Invalid dcOption constructor id: ${ctorId}`)
-    }
-
-    const flags = reader.uint()
-    const id = reader.int()
-    const ipAddress = reader.string()
-    const port = reader.int()
-
-    if (flags & 1024) {
-        reader.bytes() // skip secret
-    }
-
-    return {
-        id,
-        ipAddress,
-        port,
-        ipv6: Boolean(flags & 1),
-        mediaOnly: Boolean(flags & 2),
-    }
-}
-
 export function writeStringSession(data: StringSessionData): string {
     const writer = TlBinaryWriter.manual(512)
 
@@ -63,14 +38,14 @@ export function writeStringSession(data: StringSessionData): string {
     writer.uint8View[0] = version
     writer.pos += 1
 
-    if (version >= 2 && data.primaryDcs.media !== data.primaryDcs.main) {
+    if (data.primaryDcs.media !== data.primaryDcs.main) {
         flags |= 4
     }
 
     writer.int(flags)
     writer.bytes(serializeBasicDcOption(data.primaryDcs.main))
 
-    if (version >= 2 && data.primaryDcs.media !== data.primaryDcs.main) {
+    if (data.primaryDcs.media !== data.primaryDcs.main) {
         writer.bytes(serializeBasicDcOption(data.primaryDcs.media))
     }
 
@@ -98,17 +73,8 @@ export function readStringSession(data: string | InputStringSessionData): String
 
     const version = buf[0]
 
-    if (version !== 1 && version !== 2 && version !== 3) {
+    if (version !== 3) {
         throw new Error(`Invalid session string (version = ${version})`)
-    }
-
-    if (version < 3) {
-        console.warn(
-            `You are using a deprecated session string (${data.slice(
-                0,
-                10,
-            )}...). Please update your session string, as it will stop working in the future.`,
-        )
     }
 
     const reader = TlBinaryReader.manual(buf, 1)
@@ -118,32 +84,16 @@ export function readStringSession(data: string | InputStringSessionData): String
     const testModeOld = Boolean(flags & 2)
     const hasMedia = version >= 2 && Boolean(flags & 4)
 
-    let primaryDc: BasicDcOption
-    let primaryMediaDc: BasicDcOption
+    const primaryDc = parseBasicDcOption(reader.bytes())
 
-    if (version <= 2) {
-        const primaryDc_ = readTlDcOption(reader)
-        const primaryMediaDc_ = hasMedia ? readTlDcOption(reader) : primaryDc_
+    if (primaryDc === null) {
+        throw new MtArgumentError('Invalid session string (failed to parse primaryDc)')
+    }
 
-        primaryDc = primaryDc_
-        primaryMediaDc = primaryMediaDc_
-    } else if (version === 3) {
-        const primaryDc_ = parseBasicDcOption(reader.bytes())
+    const primaryMediaDc = hasMedia ? parseBasicDcOption(reader.bytes()) : primaryDc
 
-        if (primaryDc_ === null) {
-            throw new MtArgumentError('Invalid session string (failed to parse primaryDc)')
-        }
-
-        const primaryMediaDc_ = hasMedia ? parseBasicDcOption(reader.bytes()) : primaryDc_
-
-        if (primaryMediaDc_ === null) {
-            throw new MtArgumentError('Invalid session string (failed to parse primaryMediaDc)')
-        }
-
-        primaryDc = primaryDc_
-        primaryMediaDc = primaryMediaDc_
-    } else {
-        throw new Error('unreachable')
+    if (primaryMediaDc === null) {
+        throw new MtArgumentError('Invalid session string (failed to parse primaryMediaDc)')
     }
 
     if (testModeOld) {
