@@ -13,7 +13,7 @@
     },
     "dependencies": {
         "@mtcute/core": "workspace:^",
-        "@fuman/utils": "0.0.2",
+        "@fuman/utils": "0.0.3",
         "events": "3.2.0"
     },
     "devDependencies": {
