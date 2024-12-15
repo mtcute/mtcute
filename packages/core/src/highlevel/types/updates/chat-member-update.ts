@@ -108,7 +108,8 @@ export class ChatMemberUpdate {
         const actorId = this.raw.actorId
 
         if (!old && cur) {
-            // join or added
+            // joined, added or kicked
+            if (cur._ === 'channelParticipantBanned') return 'kicked'
             return actorId === curId ? 'joined' : 'added'
         }
 
