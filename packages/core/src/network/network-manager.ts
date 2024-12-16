@@ -341,24 +341,13 @@ export class DcConnectionManager {
         })
         connection.onTmpKeyChange.add(([idx, key, expires]) => {
             if (kind !== 'main') {
-                this.manager._log.warn('got tmp-key-change from non-main connection, ignoring')
-
+                // tmp keys in media dcs are ephemeral so there's no point in storing them
                 return
             }
 
             this.manager._log.debug('temp key change for dc %d from connection %d', this.dcId, idx)
 
-            // send key to other connections
-            this.upload.setAuthKey(key, true)
-            this.download.setAuthKey(key, true)
-            this.downloadSmall.setAuthKey(key, true)
-
             Promise.resolve(this.manager._storage.provider.authKeys.setTemp(this.dcId, idx, key, expires * 1000))
-                .then(() => {
-                    this.upload.notifyKeyChange()
-                    this.download.notifyKeyChange()
-                    this.downloadSmall.notifyKeyChange()
-                })
                 .catch((e: Error) => {
                     this.manager._log.warn('failed to save temp auth key %d for dc %d: %e', idx, this.dcId, e)
                     this.manager.params.emitError(e)
@@ -442,15 +431,12 @@ export class DcConnectionManager {
         if (this.manager.params.usePfs || forcePfs) {
             const now = Date.now()
             await Promise.all(
-                this.main._sessions.map(async (_, i) => {
+                Array.from({ length: this.main.getCount() }, async (_, i) => {
                     const temp = await this.manager._storage.provider.authKeys.getTemp(this.dcId, i, now)
                     this.main.setAuthKey(temp, true, i)
 
-                    if (i === 0) {
-                        this.upload.setAuthKey(temp, true)
-                        this.download.setAuthKey(temp, true)
-                        this.downloadSmall.setAuthKey(temp, true)
-                    }
+                    // NB: we do not set temp auth keys for media connections,
+                    // as they are ephemeral and dc-bound. doing this *will* lead to unwanted -404s
                 }),
             )
         }
@@ -915,7 +901,7 @@ export class NetworkManager {
     }
 
     getMtprotoMessageId(): Long {
-        return this._primaryDc!.main._sessions[0].getMessageId()
+        return this._primaryDc!.main._connections[0]._session.getMessageId()
     }
 
     async recreateDc(dcId: number): Promise<void> {

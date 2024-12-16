@@ -1,17 +1,17 @@
 import type { mtp } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import type { ICorePlatform } from '../types/platform.js'
-import type { ICryptoProvider } from '../utils/index.js'
-import type { MtprotoSession, PendingMessage, PendingRpc } from './mtproto-session.js'
+import type { ICryptoProvider, Logger } from '../utils/index.js'
+import type { PendingMessage, PendingRpc } from './mtproto-session.js'
 import type { PersistentConnectionParams } from './persistent-connection.js'
-
 import type { ServerSaltManager } from './server-salt.js'
+
 import { Deferred, Emitter, timers, u8 } from '@fuman/utils'
 import { tl } from '@mtcute/tl'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
 import Long from 'long'
-
 import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
+
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
 import {
     EarlyTimer,
@@ -20,6 +20,7 @@ import {
     removeFromLongArray,
 } from '../utils/index.js'
 import { doAuthorization } from './authorization.js'
+import { MtprotoSession } from './mtproto-session.js'
 import { PersistentConnection } from './persistent-connection.js'
 import { TransportError } from './transports/abstract.js'
 
@@ -82,6 +83,7 @@ export class SessionConnection extends PersistentConnection {
     private _writerMap: TlWriterMap
     private _crypto: ICryptoProvider
     private _salts: ServerSaltManager
+    readonly _session: MtprotoSession
 
     // todo: we should probably do adaptive ping interval based on rtt like tdlib:
     // https://github.com/tdlib/td/blob/91aa6c9e4d0774eabf4f8d7f3aa51239032059a6/td/mtproto/SessionConnection.h
@@ -97,11 +99,15 @@ export class SessionConnection extends PersistentConnection {
     readonly onUpdate: Emitter<tl.TypeUpdates> = new Emitter()
     readonly onFutureSalts: Emitter<mtp.RawMt_future_salt[]> = new Emitter()
 
-    constructor(
-        params: SessionConnectionParams,
-        readonly _session: MtprotoSession,
-    ) {
-        super(params, _session.log.create('conn'))
+    constructor(params: SessionConnectionParams, log: Logger) {
+        super(params, log.create('conn'))
+        this._session = new MtprotoSession(
+            params.crypto,
+            log.create('session'),
+            params.readerMap,
+            params.writerMap,
+            params.salts,
+        )
         this._flushTimer.onTimeout(this._flush.bind(this))
 
         this._pingInterval = params.pingInterval
@@ -188,6 +194,7 @@ export class SessionConnection extends PersistentConnection {
             this.onError.add((err) => {
                 this.log.warn('caught error after destroying: %s', err)
             })
+            this._session.reset()
         }
     }
 

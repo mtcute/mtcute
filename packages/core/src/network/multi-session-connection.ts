@@ -5,12 +5,10 @@ import type { SessionConnectionParams } from './session-connection.js'
 
 import type { TelegramTransport } from './transports/index.js'
 import { Deferred, Emitter, unknownToError } from '@fuman/utils'
-import { MtprotoSession } from './mtproto-session.js'
 import { SessionConnection } from './session-connection.js'
 
 export class MultiSessionConnection {
     private _log: Logger
-    readonly _sessions: MtprotoSession[]
     private _enforcePfs = false
 
     // NB: dont forget to update .reset()
@@ -35,11 +33,10 @@ export class MultiSessionConnection {
         if (logPrefix) this._log.prefix = `[${logPrefix}] `
         this._enforcePfs = _count > 1 && params.isMainConnection
 
-        this._sessions = []
         this._updateConnections()
     }
 
-    protected _connections: SessionConnection[] = []
+    readonly _connections: SessionConnection[] = []
 
     setCount(count: number, connect: boolean = this.params.isMainConnection): void {
         this._count = count
@@ -47,71 +44,11 @@ export class MultiSessionConnection {
         this._updateConnections(connect)
     }
 
-    private _updateSessions(): void {
-        // there are two cases
-        // 1. this msc is main, in which case every connection should have its own session
-        // 2. this msc is not main, in which case all connections should share the same session
-        // if (!this.params.isMainConnection) {
-        //     // case 2
-        //     this._log.debug(
-        //         'updating sessions count: %d -> 1',
-        //         this._sessions.length,
-        //     )
-        //
-        //     if (this._sessions.length === 0) {
-        //         this._sessions.push(
-        //             new MtprotoSession(
-        //                 this.params.crypto,
-        //                 this._log.create('session'),
-        //                 this.params.readerMap,
-        //                 this.params.writerMap,
-        //             ),
-        //         )
-        //     }
-        //
-        //     // shouldn't happen, but just in case
-        //     while (this._sessions.length > 1) {
-        //         this._sessions.pop()!.reset()
-        //     }
-        //
-        //     return
-        // }
-
-        this._log.debug('updating sessions count: %d -> %d', this._sessions.length, this._count)
-
-        // case 1
-        if (this._sessions.length === this._count) return
-
-        if (this._sessions.length > this._count) {
-            // destroy extra sessions
-            for (let i = this._sessions.length - 1; i >= this._count; i--) {
-                this._sessions[i].reset()
-            }
-
-            this._sessions.splice(this._count)
-
-            return
-        }
-
-        while (this._sessions.length < this._count) {
-            const idx = this._sessions.length
-            const session = new MtprotoSession(
-                this.params.crypto,
-                this._log.create('session'),
-                this.params.readerMap,
-                this.params.writerMap,
-                this.params.salts,
-            )
-
-            // brvh
-            if (idx !== 0) session._authKey = this._sessions[0]._authKey
-
-            this._sessions.push(session)
-        }
+    getCount(): number {
+        return this._count
     }
 
     private _updateConnections(connect = false): void {
-        this._updateSessions()
         if (this._connections.length === this._count) return
 
         this._log.debug('updating connections count: %d -> %d', this._connections.length, this._count)
@@ -157,8 +94,6 @@ export class MultiSessionConnection {
 
         // create new connections
         for (let i = this._connections.length; i < this._count; i++) {
-            const session = this._sessions[i] // this.params.isMainConnection ? // :
-            // this._sessions[0]
             const conn = new SessionConnection(
                 {
                     ...this.params,
@@ -167,7 +102,7 @@ export class MultiSessionConnection {
                     withUpdates:
                         this.params.isMainConnection && this.params.isMainDcConnection && !this.params.disableUpdates,
                 },
-                session,
+                this._log,
             )
 
             if (this.params.isMainConnection && this.params.isMainDcConnection) {
@@ -216,7 +151,6 @@ export class MultiSessionConnection {
     _destroyed = false
     async destroy(): Promise<void> {
         await Promise.all(this._connections.map(conn => conn.destroy()))
-        this._sessions.forEach(sess => sess.reset())
 
         this.onRequestKeys.clear()
         this.onError.clear()
@@ -279,14 +213,14 @@ export class MultiSessionConnection {
     }
 
     setAuthKey(authKey: Uint8Array | null, temp = false, idx = 0): void {
-        const session = this._sessions[idx]
+        const session = this._connections[idx]._session
         const key = temp ? session._authKeyTemp : session._authKey
         key.setup(authKey)
     }
 
     resetAuthKeys(): void {
-        for (const session of this._sessions) {
-            session.reset(true)
+        for (const conn of this._connections) {
+            conn._session.reset(true)
         }
         this.notifyKeyChange()
     }
@@ -305,21 +239,23 @@ export class MultiSessionConnection {
 
     notifyKeyChange(): void {
         // only expected to be called on non-main connections
-        const session = this._sessions[0]
+        for (const conn of this._connections) {
+            const session = conn._session
 
-        if (this.params.usePfs && !session._authKeyTemp.ready) {
-            this._log.debug('temp auth key needed but not ready, ignoring key change')
+            if (this.params.usePfs && !session._authKeyTemp.ready) {
+                this._log.debug('temp auth key needed but not ready, ignoring key change')
 
-            return
+                continue
+            }
+
+            if (session.queuedRpc.length) {
+                // there are pending requests, we need to reconnect.
+                this._log.debug('notifying key change on the connection due to queued rpc')
+                this._connections.forEach(conn => conn.onConnected())
+            }
+
+            // connection is idle, we don't need to notify it
         }
-
-        if (this._sessions[0].queuedRpc.length) {
-            // there are pending requests, we need to reconnect.
-            this._log.debug('notifying key change on the connection due to queued rpc')
-            this._connections.forEach(conn => conn.onConnected())
-        }
-
-        // connection is idle, we don't need to notify it
     }
 
     notifyNetworkChanged(connected: boolean): void {
