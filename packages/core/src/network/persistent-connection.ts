@@ -37,8 +37,7 @@ export abstract class PersistentConnection {
 
     // inactivity timeout
     private _inactivityTimeout: timers.Timer | null = null
-    private _inactive = true
-
+    _inactive = true
     _destroyed = false
     _usable = false
 
@@ -169,6 +168,11 @@ export abstract class PersistentConnection {
     }
 
     reconnect(): void {
+        if (this._disconnectedManually) {
+            this._disconnectedManually = false
+            this.connect()
+            return
+        }
         this._fuman.reconnect(true)
     }
 
@@ -176,6 +180,7 @@ export abstract class PersistentConnection {
         if (this._inactivityTimeout) {
             timers.clearTimeout(this._inactivityTimeout)
         }
+        this._disconnectedManually = true
         await this._fuman.close()
     }
 

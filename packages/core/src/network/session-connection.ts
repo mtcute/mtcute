@@ -237,7 +237,7 @@ export class SessionConnection extends PersistentConnection {
 
                 if (this._usePfs) {
                     if (!this._isPfsBindingPending && this._session._authKeyTemp.ready) {
-                        this.log.info('transport error 404, reauthorizing pfs')
+                        this.log.debug('transport error 404, reauthorizing pfs')
 
                         // this is important! we must reset temp auth key before
                         // we proceed with new temp key derivation.
@@ -253,7 +253,7 @@ export class SessionConnection extends PersistentConnection {
 
                         return
                     } else if (this._isPfsBindingPending) {
-                        this.log.info('transport error 404, pfs binding in progress')
+                        this.log.debug('transport error 404, pfs binding in progress')
 
                         this._onAllFailed('temp key expired, binding pending')
 
@@ -264,11 +264,10 @@ export class SessionConnection extends PersistentConnection {
                 }
 
                 // there happened a little trolling
-                this.log.info('transport error 404, reauthorizing')
+                this.log.warn('transport error 404, reauthorizing')
                 this._session.resetAuthKey()
                 this._resetSession()
                 this.onKeyChange.emit(null)
-                this.onError.emit(error)
 
                 return
             }
@@ -1488,6 +1487,7 @@ export class SessionConnection extends PersistentConnection {
         this._online = online
 
         if (online) {
+            if (this._inactive) return
             this.reconnect()
         } else {
             this.disconnectManual().catch((err) => {
