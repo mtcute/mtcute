@@ -1,10 +1,11 @@
 import type { ReconnectionStrategy } from '@fuman/net'
+import type { tl } from '@mtcute/tl'
 import type { BasicDcOption, ICryptoProvider, Logger } from '../utils/index.js'
 import type { IPacketCodec, ITelegramConnection, TelegramTransport } from './transports/abstract.js'
+
 import { FramedReader, FramedWriter } from '@fuman/io'
 
 import { PersistentConnection as FumanPersistentConnection } from '@fuman/net'
-
 import { Emitter, timers } from '@fuman/utils'
 
 export interface PersistentConnectionParams {
@@ -99,6 +100,8 @@ export abstract class PersistentConnection {
 
     private _writer?: FramedWriter
 
+    protected _mtproxyInfo?: tl.RawInputClientProxy
+
     private async _onOpen(conn: ITelegramConnection) {
         this._updateLogPrefix()
         this.log.debug('connected')
@@ -107,6 +110,8 @@ export abstract class PersistentConnection {
         if (tag) {
             await conn.write(tag)
         }
+
+        this._mtproxyInfo = conn.getMtproxyInfo?.()
 
         const reader = new FramedReader(conn, this._codec)
         this._writer = new FramedWriter(conn, this._codec)

@@ -1388,13 +1388,12 @@ export class SessionConnection extends PersistentConnection {
             // either acked or returns rpc_result
 
             this.log.debug('wrapping %s with initConnection, layer: %d', method, this.params.layer)
-            // const proxy = this._transport.getMtproxyInfo?.()
             obj = {
                 _: 'invokeWithLayer',
                 layer: this.params.layer,
                 query: {
                     ...this.params.initConnection,
-                    // proxy,
+                    proxy: this._mtproxyInfo,
                     query: obj,
                 },
             }
