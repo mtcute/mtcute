@@ -15,11 +15,11 @@ importers:
         specifier: ^3.11.2
         version: 3.11.2(@typescript-eslint/utils@8.17.0(eslint@9.9.0)(typescript@5.5.4))(@vue/compiler-sfc@3.5.13)(eslint@9.9.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@20.10.0)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5))
       '@fuman/build':
-        specifier: 0.0.3
-        version: 0.0.3(tough-cookie@4.1.4)(typedoc@0.26.5(typescript@5.5.4))(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))
+        specifier: 0.0.7
+        version: 0.0.7(tough-cookie@4.1.4)(typedoc@0.26.5(typescript@5.5.4))(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))
       '@fuman/utils':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@types/bun':
         specifier: 1.1.14
         version: 1.1.14
@@ -142,17 +142,17 @@ importers:
   packages/bun:
     dependencies:
       '@fuman/bun':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@fuman/io':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@fuman/net':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@fuman/utils':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -173,14 +173,14 @@ importers:
   packages/convert:
     dependencies:
       '@fuman/io':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@fuman/net':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@fuman/utils':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -195,14 +195,14 @@ importers:
   packages/core:
     dependencies:
       '@fuman/io':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@fuman/net':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@fuman/utils':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@mtcute/file-id':
         specifier: workspace:^
         version: link:../file-id
@@ -285,14 +285,14 @@ importers:
         specifier: npm:@jsr/fuman__deno@0.0.3
         version: '@jsr/fuman__deno@0.0.3'
       '@fuman/io':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@fuman/net':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@fuman/utils':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -316,8 +316,8 @@ importers:
   packages/dispatcher:
     dependencies:
       '@fuman/utils':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -332,8 +332,8 @@ importers:
   packages/file-id:
     dependencies:
       '@fuman/utils':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@mtcute/tl-runtime':
         specifier: workspace:^
         version: link:../tl-runtime
@@ -374,14 +374,14 @@ importers:
   packages/node:
     dependencies:
       '@fuman/net':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@fuman/node':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@fuman/utils':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -408,11 +408,11 @@ importers:
   packages/test:
     dependencies:
       '@fuman/net':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@fuman/utils':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -443,11 +443,11 @@ importers:
         version: 5.2.3
     devDependencies:
       '@fuman/fetch':
-        specifier: 0.0.3
-        version: 0.0.3(tough-cookie@4.1.4)(zod@3.23.8)
+        specifier: 0.0.7
+        version: 0.0.7(tough-cookie@4.1.4)(zod@3.23.8)
       '@fuman/utils':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -473,8 +473,8 @@ importers:
   packages/tl-runtime:
     dependencies:
       '@fuman/utils':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       long:
         specifier: 5.2.3
         version: 5.2.3
@@ -491,8 +491,8 @@ importers:
   packages/wasm:
     devDependencies:
       '@fuman/utils':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -506,8 +506,8 @@ importers:
   packages/web:
     dependencies:
       '@fuman/net':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -1109,8 +1109,8 @@ packages:
     resolution: {integrity: sha512-2b/g5hRmpbb1o4GnTZax9N9m0FXzz9OV42ZzI4rDDMDuHUqigAiQCEWChBWCY4ztAGVRjoWT19v0yMmc5/L5kA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@fuman/build@0.0.3':
-    resolution: {integrity: sha512-R2LrXbSUaCERI2G2zxPluohjAw2B6nRHL4XB5XEMHQvF9ZpDe6wf68VNh0VzY0noGphV85DgV0DGFviB/CdHqw==}
+  '@fuman/build@0.0.7':
+    resolution: {integrity: sha512-CZXNNf6Ux3+PgPRN80WvojVCrp12GKHHW/BbHvaabIjYLqmSA6B4BkE06tv12lLri+3llvHPaXmTO5GiRtitYA==}
     hasBin: true
     peerDependencies:
       typedoc: '>=0.24.0'
@@ -1120,17 +1120,20 @@ packages:
       typedoc:
         optional: true
 
-  '@fuman/bun@0.0.3':
-    resolution: {integrity: sha512-muVjLPL623sZy90viERR4g9i8eFLWDJZ+Fy917afaqlo5YnwGGijn2VvgosvB4r1zTTDGQmwPjNLkqlpHLZujA==}
+  '@fuman/bun@0.0.4':
+    resolution: {integrity: sha512-SZtzOpeGypRrKuauedXrW2cmqIEI8SGlbCe584ErHsWkN3zYtse0A6z1ClUTwfR6xWdA8qCLiPDcgEQkX6b3kQ==}
 
-  '@fuman/fetch@0.0.3':
-    resolution: {integrity: sha512-jvL+g+luuPXKd79dFjeWA3ceePipBXsrWJp9enkVYTalg+XSo+wpmcYNTOHoOxJyhbwHMpfUk81TBt9706y9BA==}
+  '@fuman/fetch@0.0.7':
+    resolution: {integrity: sha512-yzyQI9ssqBrx04zKlfZwRHvJ9sw44RvfForjhaMhy7yA9jtghgVAjceeLTvF5xWEMgvIlIMfZRmSzEtCgGlfcg==}
     peerDependencies:
+      '@badrap/valita': '>=0.4.0'
       tough-cookie: ^5.0.0 || ^4.0.0
       valibot: ^0.42.0
       yup: ^1.0.0
       zod: ^3.0.0
     peerDependenciesMeta:
+      '@badrap/valita':
+        optional: true
       tough-cookie:
         optional: true
       valibot:
@@ -1140,20 +1143,20 @@ packages:
       zod:
         optional: true
 
-  '@fuman/io@0.0.3':
-    resolution: {integrity: sha512-RK7lu1PsYHuteaBPDlomCjinMrX8CmbF/cv4KYqJrXWtprmBHMIJhpAg517WhMICeYEiWyfLLUWAzV6L/diLdg==}
+  '@fuman/io@0.0.4':
+    resolution: {integrity: sha512-IXzBJjHTVKyi04WaGtSXE0dhL3QK45ekrEZNfH/V59XQ1WupSqWevfSWd9T07rdagc2jtaeu8aJY6bwaiJpdYg==}
 
-  '@fuman/net@0.0.3':
-    resolution: {integrity: sha512-gvpes8JLN0yVpJIGzzCQNleELKMNnkTbwP+BZMRS4O+i1Ap6K5c5WyDTMXUSkTIIjVtpssD40rxjVu8beWb5lA==}
+  '@fuman/net@0.0.4':
+    resolution: {integrity: sha512-a8Isnj+qgRNaqqmBCT6lZ9GZj5F3vQdygN5AzB6GGCbLKcOeH+1u5Twh5CUAW/dM7oogrTWOwCqgvS2XHbjzaQ==}
 
-  '@fuman/node@0.0.3':
-    resolution: {integrity: sha512-mFZWoWiZEyk9kkrSwR2066AMJu7TLxoaOKnBtlVJsywSl65BsWj52rWqu4bfTzV1CSM2KvWFDltLRAXJb/uCmA==}
+  '@fuman/node@0.0.4':
+    resolution: {integrity: sha512-tgwbIceUHWuwh4RTwJRQ1sLjzuIGrWx0SeCrqYhGF+IkI/B7DY0FP2SZykWImkVDtW8IzmdZskPZqiDINRGcNg==}
 
   '@fuman/utils@0.0.1':
     resolution: {integrity: sha512-9zT7TiQEm2leoXVoN1Fs7m0d6bZcJXWDWQl9MhoySb+z0+iXb05PcDuTxTfCAvpGK1XVFf3n+MyN0w1yCKHc7Q==}
 
-  '@fuman/utils@0.0.3':
-    resolution: {integrity: sha512-EhWPFvVHqFSWVi9VMTutvUQ/btDVIz0dKJV90oOPzl4wMCB0WDrIYlGnt698tqbxWHLUCEos1FomSe1McVklyQ==}
+  '@fuman/utils@0.0.4':
+    resolution: {integrity: sha512-YBZIlGDbM8s9G85pWFZJ9wQrDY4511XLHZ06/uxZfXBY0eSStwje8JFNmRMNF0SjRk4D3iRmPl9wirHKTkg89w==}
 
   '@humanwhocodes/module-importer@1.0.1':
     resolution: {integrity: sha512-bxveV4V8v5Yb4ncFTT3rPSgZBOpCkjfK0y4oVVVJwIuDVBRMDXrPyXRL988i5ap9m9bnyEEjWfm5WkBmtffLfA==}
@@ -4779,13 +4782,13 @@ snapshots:
     dependencies:
       levn: 0.4.1
 
-  '@fuman/build@0.0.3(tough-cookie@4.1.4)(typedoc@0.26.5(typescript@5.5.4))(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))':
+  '@fuman/build@0.0.7(tough-cookie@4.1.4)(typedoc@0.26.5(typescript@5.5.4))(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))':
     dependencies:
       '@drizzle-team/brocli': 0.10.2
-      '@fuman/fetch': 0.0.3(tough-cookie@4.1.4)(zod@3.23.8)
-      '@fuman/io': 0.0.3
-      '@fuman/node': 0.0.3
-      '@fuman/utils': 0.0.3
+      '@fuman/fetch': 0.0.7(tough-cookie@4.1.4)(zod@3.23.8)
+      '@fuman/io': 0.0.4
+      '@fuman/node': 0.0.4
+      '@fuman/utils': 0.0.4
       cross-spawn: 7.0.6
       detect-indent: 7.0.1
       js-yaml: 4.1.0
@@ -4798,41 +4801,42 @@ snapshots:
     optionalDependencies:
       typedoc: 0.26.5(typescript@5.5.4)
     transitivePeerDependencies:
+      - '@badrap/valita'
       - tough-cookie
       - valibot
       - yup
 
-  '@fuman/bun@0.0.3':
+  '@fuman/bun@0.0.4':
     dependencies:
-      '@fuman/io': 0.0.3
-      '@fuman/net': 0.0.3
-      '@fuman/utils': 0.0.3
+      '@fuman/io': 0.0.4
+      '@fuman/net': 0.0.4
+      '@fuman/utils': 0.0.4
 
-  '@fuman/fetch@0.0.3(tough-cookie@4.1.4)(zod@3.23.8)':
+  '@fuman/fetch@0.0.7(tough-cookie@4.1.4)(zod@3.23.8)':
     dependencies:
-      '@fuman/utils': 0.0.3
+      '@fuman/utils': 0.0.4
     optionalDependencies:
       tough-cookie: 4.1.4
       zod: 3.23.8
 
-  '@fuman/io@0.0.3':
+  '@fuman/io@0.0.4':
     dependencies:
-      '@fuman/utils': 0.0.3
+      '@fuman/utils': 0.0.4
 
-  '@fuman/net@0.0.3':
+  '@fuman/net@0.0.4':
     dependencies:
-      '@fuman/io': 0.0.3
-      '@fuman/utils': 0.0.3
+      '@fuman/io': 0.0.4
+      '@fuman/utils': 0.0.4
 
-  '@fuman/node@0.0.3':
+  '@fuman/node@0.0.4':
     dependencies:
-      '@fuman/io': 0.0.3
-      '@fuman/net': 0.0.3
-      '@fuman/utils': 0.0.3
+      '@fuman/io': 0.0.4
+      '@fuman/net': 0.0.4
+      '@fuman/utils': 0.0.4
 
   '@fuman/utils@0.0.1': {}
 
-  '@fuman/utils@0.0.3': {}
+  '@fuman/utils@0.0.4': {}
 
   '@humanwhocodes/module-importer@1.0.1': {}
 
@@ -5010,9 +5014,9 @@ snapshots:
 
   '@mtcute/node@file:packages/node':
     dependencies:
-      '@fuman/net': 0.0.3
-      '@fuman/node': 0.0.3
-      '@fuman/utils': 0.0.3
+      '@fuman/net': 0.0.4
+      '@fuman/node': 0.0.4
+      '@fuman/utils': 0.0.4
       '@mtcute/core': link:packages/core
       '@mtcute/html-parser': link:packages/html-parser
       '@mtcute/markdown-parser': link:packages/markdown-parser

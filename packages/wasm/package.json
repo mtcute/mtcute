@@ -18,6 +18,6 @@
     "@mtcute/core": "workspace:^",
     "@mtcute/node": "workspace:^",
     "@mtcute/web": "workspace:^",
-    "@fuman/utils": "0.0.3"
+    "@fuman/utils": "0.0.4"
   }
 }
