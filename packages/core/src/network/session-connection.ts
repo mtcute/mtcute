@@ -99,6 +99,8 @@ export class SessionConnection extends PersistentConnection {
     readonly onUpdate: Emitter<tl.TypeUpdates> = new Emitter()
     readonly onFutureSalts: Emitter<mtp.RawMt_future_salt[]> = new Emitter()
 
+    private _triedReconnectingOn404 = false
+
     constructor(params: SessionConnectionParams, log: Logger) {
         super(params, log.create('conn'))
         this._session = new MtprotoSession(
@@ -261,6 +263,14 @@ export class SessionConnection extends PersistentConnection {
                     }
 
                     // otherwise, 404 must be referencing the perm_key
+                }
+
+                if (!this._triedReconnectingOn404) {
+                    // maybe this is some mtproto issue? let's try reconnecting and hope for the best
+                    this.log.warn('transport error 404. trying to reconnect')
+                    this._triedReconnectingOn404 = true
+                    this._resetSession()
+                    return
                 }
 
                 // there happened a little trolling
@@ -1176,6 +1186,7 @@ export class SessionConnection extends PersistentConnection {
         }
 
         this._salts.currentSalt = serverSalt
+        this._triedReconnectingOn404 = false
 
         this.log.debug('received new_session_created, uid = %l, first msg_id = %l', uniqueId, firstMsgId)
 

@@ -314,7 +314,7 @@ export class DcConnectionManager {
         const connection = this[kind]
 
         connection.onKeyChange.add(([idx, key]) => {
-            if (kind !== 'main') {
+            if (kind !== 'main' && key !== null) {
                 // main connection is responsible for authorization,
                 // and keys are then sent to other connections
                 this.manager._log.warn('got key-change from non-main connection, ignoring')
@@ -322,7 +322,7 @@ export class DcConnectionManager {
                 return
             }
 
-            this.manager._log.debug('key change for dc %d from connection %d', this.dcId, idx)
+            this.manager._log.debug('key change (empty=%b) for dc %d from connection %d', key === null, this.dcId, idx)
 
             // send key to other connections
             this.upload.setAuthKey(key)
@@ -433,7 +433,7 @@ export class DcConnectionManager {
             await Promise.all(
                 Array.from({ length: this.main.getCount() }, async (_, i) => {
                     const temp = await this.manager._storage.provider.authKeys.getTemp(this.dcId, i, now)
-                    this.main.setAuthKey(temp, true, i)
+                    this.main.setTempAuthKey(temp, i)
 
                     // NB: we do not set temp auth keys for media connections,
                     // as they are ephemeral and dc-bound. doing this *will* lead to unwanted -404s

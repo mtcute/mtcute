@@ -143,6 +143,7 @@ export class MultiSessionConnection {
             })
 
             this._connections.push(conn)
+            if (this._authKey !== null) conn._session._authKey.setup(this._authKey)
             // if enforcePfsChanged, we need to connect after setting the new auth key
             if (connect && !enforcePfsChanged) conn.connect()
         }
@@ -212,10 +213,16 @@ export class MultiSessionConnection {
         this.connect()
     }
 
-    setAuthKey(authKey: Uint8Array | null, temp = false, idx = 0): void {
-        const session = this._connections[idx]._session
-        const key = temp ? session._authKeyTemp : session._authKey
-        key.setup(authKey)
+    private _authKey: Uint8Array | null = null
+    setAuthKey(authKey: Uint8Array | null): void {
+        this._authKey = authKey
+        for (const conn of this._connections) {
+            conn._session._authKey.setup(authKey)
+        }
+    }
+
+    setTempAuthKey(authKey: Uint8Array | null, idx: number): void {
+        this._connections[idx]?._session._authKeyTemp.setup(authKey)
     }
 
     resetAuthKeys(): void {
