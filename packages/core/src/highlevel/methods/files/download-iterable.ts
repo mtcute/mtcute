@@ -38,7 +38,7 @@ export async function* downloadAsIterable(
     let fileSize = params?.fileSize
 
     const abortSignal = params?.abortSignal
-    let aborted = false
+    let ended = false
 
     let location: tl.TypeInputFileLocation | tl.TypeInputWebFileLocation
     if (input instanceof FileLocation) {
@@ -92,7 +92,9 @@ export async function* downloadAsIterable(
     const nextChunkCv = new ConditionVariable()
     const buffer: Record<number, Uint8Array> = {}
 
-    const isSmall = fileSize && fileSize <= SMALL_FILE_MAX_SIZE
+    // inputPeerPhotoFileLocation files are usually within a few hundred kb-s, so we can treat them as small to avoid extra network load
+    // (we don't know their exact size, so we can't use the file size limit)
+    const isSmall = (fileSize && fileSize <= SMALL_FILE_MAX_SIZE) || location._ === 'inputPeerPhotoFileLocation'
     let connectionKind: ConnectionKind
 
     if (isSmall) {
@@ -113,7 +115,7 @@ export async function* downloadAsIterable(
     const downloadChunk = async (chunk = nextWorkerChunkIdx++): Promise<void> => {
         let result: tl.RpcCallReturn['upload.getFile'] | tl.RpcCallReturn['upload.getWebFile']
 
-        if (aborted) {
+        if (ended) {
             return
         }
 
@@ -163,7 +165,7 @@ export async function* downloadAsIterable(
             throw new MtUnsupportedError('Received CDN redirect, which is not supported (yet)')
         }
 
-        if (aborted) {
+        if (ended) {
             return
         }
 
@@ -184,11 +186,13 @@ export async function* downloadAsIterable(
     }
 
     let error: unknown
-    void Promise.all(Array.from({ length: Math.min(poolSize * REQUESTS_PER_CONNECTION, numChunks) }, downloadChunk))
+    void Promise.all(Array.from({
+        length: Math.min(poolSize * (isSmall ? 1 : REQUESTS_PER_CONNECTION), numChunks),
+    }, downloadChunk))
         .catch((e) => {
             client.log.debug('download workers errored: %e', e)
             error = e
-            aborted = true // not really aborted, but we dont want to download more chunks
+            ended = true // not really aborted, but we dont want to download more chunks
             nextChunkCv.notify()
         })
         .then(() => {
@@ -200,7 +204,7 @@ export async function* downloadAsIterable(
     abortSignal?.addEventListener('abort', () => {
         client.log.debug('download aborted')
         error = abortSignal.reason
-        aborted = true
+        ended = true
         nextChunkCv.notify()
     })
 
