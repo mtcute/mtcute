@@ -15,7 +15,7 @@ import { User } from '../peers/index.js'
  * - `giveaway` - boost applied because the user was chosen in a giveaway
  * - `user` - boost applied because the user directly boosted the channel
  */
-type BoostOrigin = 'gift' | 'unclaimed_gift' | 'giveaway' | 'user'
+export type BoostOrigin = 'gift' | 'unclaimed_gift' | 'giveaway' | 'user'
 
 /**
  * Information about a boost (one or more)
