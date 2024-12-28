@@ -1,5 +1,5 @@
 /** @type {import('@fuman/build/vite').CustomBuildConfig} */
-export default () => ({
+export default {
     viteConfig: {
         build: {
             lib: {
@@ -10,4 +10,12 @@ export default () => ({
             },
         },
     },
-})
+    typedoc: {
+        externalPattern: [
+            '../core/**',
+            '../html-parser/**',
+            '../markdown-parser/**',
+            '../sqlite/**',
+        ],
+    },
+}

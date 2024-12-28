@@ -64,5 +64,20 @@ export default {
             '{scripts,dist,tests,private}/**',
         ],
     },
+    typedoc: {
+        excludePackages: [
+            '@mtcute/tl',
+            '@mtcute/create-bot',
+        ],
+        validation: {
+            notExported: true,
+            invalidLink: false,
+            notDocumented: false,
+        },
+        plugin: [
+            './.config/typedoc/plugin-external-links.js',
+            './.config/typedoc/plugin-umami.js',
+        ],
+    },
     viteConfig: '.config/vite.build.ts',
 }

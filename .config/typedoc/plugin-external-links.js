@@ -1,17 +1,10 @@
-function load(app) {
+export function load(app) {
     app.converter.addUnknownSymbolResolver((declaration) => {
         const symbol = declaration.symbolReference?.path?.map(path => path.path).join('.')
 
         if (symbol === 'Long' || symbol === 'tl.Long') {
             return {
                 target: 'https://github.com/dcodeIO/long.js',
-                caption: symbol,
-            }
-        }
-
-        if (symbol === 'BigInteger') {
-            return {
-                target: 'https://github.com/peterolson/BigInteger.js',
                 caption: symbol,
             }
         }
@@ -63,5 +56,3 @@ function load(app) {
         }
     })
 }
-
-module.exports = { load }

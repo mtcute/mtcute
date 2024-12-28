@@ -18,18 +18,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.forgejo/actions/init
-      - name: Build
-        env:
-          BUILD_FOR_DOCS: 1
-        run: pnpm run -r --workspace-concurrency=1 build
       - name: Build docs
         run: |
-          pnpm run docs 
+          pnpm run docs
           touch docs/.nojekyll
           echo "ref.mtcute.dev" > docs/CNAME
       - name: Deploy
         # do not run on forks and releases
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor == 'desu-bot'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor == 'mtcute-bot'
         uses: https://github.com/cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

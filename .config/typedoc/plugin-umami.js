@@ -1,4 +1,4 @@
-const { JSX } = require('typedoc')
+import { JSX } from 'typedoc'
 
 const WEBSITE_ID = '4aac3220-0450-44d6-9d0c-8fe7fe8e62bd'
 const UMAMI_URL = 'https://zond.tei.su'
@@ -6,7 +6,7 @@ const UMAMI_NOSCRIPT = `https://tei.su/zond.php?website=${WEBSITE_ID}`
 
 const { createElement: h } = JSX
 
-function load(app) {
+export function load(app) {
     app.renderer.hooks.on('head.end', () => {
         return h('script', {
             'async': true,
@@ -22,5 +22,3 @@ function load(app) {
         )
     })
 }
-
-module.exports = { load }

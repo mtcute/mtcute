@@ -8,4 +8,12 @@ export default () => ({
         fs.unlinkSync(`${outDir}/common-internals-web`)
         fs.cpSync(real, `${outDir}/common-internals-web`, { recursive: true })
     },
+    typedoc: {
+        externalPattern: [
+            '../core/**',
+            '../html-parser/**',
+            '../markdown-parser/**',
+            '../sqlite/**',
+        ],
+    },
 })

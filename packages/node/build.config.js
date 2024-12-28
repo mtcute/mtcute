@@ -43,5 +43,13 @@ export default () => {
                 },
             },
         ],
+        typedoc: {
+            externalPattern: [
+                '../core/**',
+                '../html-parser/**',
+                '../markdown-parser/**',
+                '../sqlite/**',
+            ],
+        },
     }
 }
