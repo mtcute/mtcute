@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/mtcute/mtcute/">
-        <img src="https://raw.githubusercontent.com/mtcute/mtcute/master/.github/logo.svg?new" alt="mtcute logo" title="mtcute" width="480" /><br/>
+        <img src="https://raw.githubusercontent.com/mtcute/mtcute/master/.forgejo/logo.svg?new" alt="mtcute logo" title="mtcute" width="480" /><br/>
     </a><br/>
     <b>modern typescript library for mtproto</b>
     <br>
@@ -10,7 +10,7 @@
     &nbsp;•&nbsp;
     <a href="https://t.me/mt_cute">telegram chat</a>
     <br/><br/>
-    <img src="https://github.com/mtcute/mtcute/actions/workflows/test.yaml/badge.svg" alt="NodeJS CI" />
+    <img src="https://codeberg.org/teidesu/mtcute/actions/workflows/test.yaml/badge.svg" alt="Tests CI" />
     <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmtcute%2Fmtcute%2Fmaster%2Fpackages%2Ftl%2Fapi-schema.json&query=l&label=tl%20layer" alt="tl layer" />
     <a href="https://www.npmjs.com/search?q=%40mtcute">
         <img src="https://img.shields.io/npm/v/@mtcute/node" alt="npm" />
@@ -21,8 +21,6 @@
 > [!WARNING]
 > mtcute is currently in alpha stage: the api is not very stable yet, and there may be a lot of bugs
 > feel free to try it out, though, any feedback is appreciated!
->
-> releases may not follow semver just yet, so please pin the versions for now
 
 ```ts
 import { TelegramClient } from '@mtcute/node'
