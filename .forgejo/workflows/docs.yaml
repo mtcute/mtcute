@@ -23,11 +23,12 @@ jobs:
           pnpm run docs
           touch docs/.nojekyll
           echo "ref.mtcute.dev" > docs/CNAME
+          echo "ignore-workspace-root-check=true" >> .npmrc
       - name: Deploy
         # do not run on forks and releases
         if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor == 'desu-bot'
         uses: https://github.com/cloudflare/wrangler-action@v3
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          apiToken: ${{ secrets.CLOUDFLARE_PAGES_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy docs --project-name=mtcute-apiref
