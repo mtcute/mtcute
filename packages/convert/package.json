@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/convert",
     "type": "module",
-    "version": "0.17.0",
+    "version": "0.18.0",
     "private": true,
     "description": "Cross-library session conversion utilities",
     "author": "alina sireneva <alina@tei.su>",
@@ -12,7 +12,7 @@
         "@mtcute/core": "workspace:^",
         "@fuman/utils": "0.0.4",
         "@fuman/net": "0.0.4",
-        "@fuman/io": "0.0.4" 
+        "@fuman/io": "0.0.4"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^",
