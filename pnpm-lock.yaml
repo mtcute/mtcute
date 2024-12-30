@@ -282,8 +282,8 @@ importers:
         specifier: npm:@jsr/db__sqlite@0.12.0
         version: '@jsr/db__sqlite@0.12.0'
       '@fuman/deno':
-        specifier: npm:@jsr/fuman__deno@0.0.3
-        version: '@jsr/fuman__deno@0.0.3'
+        specifier: npm:@jsr/fuman__deno@0.0.4
+        version: '@jsr/fuman__deno@0.0.4'
       '@fuman/io':
         specifier: 0.0.4
         version: 0.0.4
@@ -1221,17 +1221,17 @@ packages:
   '@jsr/denosaurs__plug@1.0.6':
     resolution: {integrity: sha512-3sRBjWs6Str1+5w8Lj5t4dDNxUJB6RWJaxAf1e04CHwbbPBbyzrzKs2iammkGlEra8yL2RO70+c8x0/52as6XA==, tarball: https://npm.jsr.io/~/11/@jsr/denosaurs__plug/1.0.6.tgz}
 
-  '@jsr/fuman__deno@0.0.3':
-    resolution: {integrity: sha512-yBOlSu+gyuHkhY7c/cYj3Qv9i2B2KaiRdgyQL/7ViMHYYVSRKl3EpexWRw5u+KQ5gMNsclh6w58P5J8P/olEGA==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__deno/0.0.3.tgz}
+  '@jsr/fuman__deno@0.0.4':
+    resolution: {integrity: sha512-YA4buvDFuZFu7RNhyQMrTL8+IKqxRJqfiX20CdE2uzoCtNtwAZNhCl/1x3o/9i9oYZ9j/7Z6AyypuaUEDoFkLA==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__deno/0.0.4.tgz}
 
-  '@jsr/fuman__io@0.0.3':
-    resolution: {integrity: sha512-gX4ZlwkqqfvldhJBxW8jVYy6qAwbTGsN91NjxWJL28bAmCwSwuUNmhvORpOlqdq0tp7eiXqOPDp0XI+Rf0/wOg==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__io/0.0.3.tgz}
+  '@jsr/fuman__io@0.0.4':
+    resolution: {integrity: sha512-Ff2XhI2i3qR4UkXI9OPVFGu5/KBaLB56kVI1q0DIzOWPUv7dbEGaVbkNkyPhdnwryS88PG8KUJzRv9Y0sT772A==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__io/0.0.4.tgz}
 
-  '@jsr/fuman__net@0.0.3':
-    resolution: {integrity: sha512-aEC1A5T+lkmGIWSckAWOc4SxsxY+dEZJHQQZlwKZOA2/6KgYoM5phUiCVgANGnUvLy7s54pk09htFba/NrXM5A==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__net/0.0.3.tgz}
+  '@jsr/fuman__net@0.0.4':
+    resolution: {integrity: sha512-Q1F2tRtJuLKAzZGl6oC+Qkb1SzMDZ2PeQDtXZdpXItROH+Bllx3OdSxB9kRbBHkv5qUuz9yiFawXP+sirF7Kiw==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__net/0.0.4.tgz}
 
-  '@jsr/fuman__utils@0.0.3':
-    resolution: {integrity: sha512-vEMeUk1J2Ldw0oPq0w2AkCOCEs+p7XiamYLXOPeSzdfZeg6oyzpTOycl4tOstIqr/PQ2ELCbEsHXFmsmxDpw/g==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__utils/0.0.3.tgz}
+  '@jsr/fuman__utils@0.0.4':
+    resolution: {integrity: sha512-sa+603rLtUQzvso2sqR/9QIv0knab2Mv7I7Jnv1BEx6IxaK4VpccfctGvdffEp3nY5rh+FhfGMiTUazC06AmRg==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__utils/0.0.4.tgz}
 
   '@jsr/std__assert@0.217.0':
     resolution: {integrity: sha512-kCGfcXX8lMcZHWrCgFhbdpNloB50MkLwHdRZvZKjZK424F9g+M742jkTDLMOJmwkDoEqFKyNVrGhPtspS4+NvQ==, tarball: https://npm.jsr.io/~/11/@jsr/std__assert/0.217.0.tgz}
@@ -4853,21 +4853,21 @@ snapshots:
       '@jsr/std__fs': 0.221.0
       '@jsr/std__path': 0.221.0
 
-  '@jsr/fuman__deno@0.0.3':
+  '@jsr/fuman__deno@0.0.4':
     dependencies:
-      '@jsr/fuman__io': 0.0.3
-      '@jsr/fuman__net': 0.0.3
+      '@jsr/fuman__io': 0.0.4
+      '@jsr/fuman__net': 0.0.4
 
-  '@jsr/fuman__io@0.0.3':
+  '@jsr/fuman__io@0.0.4':
     dependencies:
-      '@jsr/fuman__utils': 0.0.3
+      '@jsr/fuman__utils': 0.0.4
 
-  '@jsr/fuman__net@0.0.3':
+  '@jsr/fuman__net@0.0.4':
     dependencies:
-      '@jsr/fuman__io': 0.0.3
-      '@jsr/fuman__utils': 0.0.3
+      '@jsr/fuman__io': 0.0.4
+      '@jsr/fuman__utils': 0.0.4
 
-  '@jsr/fuman__utils@0.0.3': {}
+  '@jsr/fuman__utils@0.0.4': {}
 
   '@jsr/std__assert@0.217.0':
     dependencies:

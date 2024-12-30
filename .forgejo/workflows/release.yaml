@@ -17,10 +17,11 @@ on:
         description: 'Branch to release from'
         required: true
         default: 'master'
+        type: string
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: node22
     permissions:
       contents: write
       packages: write
@@ -33,9 +34,8 @@ jobs:
           token: ${{ secrets.BOT_PAT }}
       - if: ${{ github.event.inputs.branch != 'master' }}
         run: git checkout ${{ github.event.inputs.branch }}
-
       - uses: ./.forgejo/actions/init
-      - uses: denoland/setup-deno@v1
+      - uses: https://github.com/denoland/setup-deno@v1
         with:
           deno-version: '2.0'
 
@@ -48,9 +48,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          fuman-build release \
+          pnpm exec fuman-build release \
             --kind=${{ github.event.inputs.kind }} \
             --with-npm \
             --npm-token=${{ secrets.NPM_TOKEN }} \
-            --with-jsr \
-            --with-github-release
+            --with-github-release \
+            --github-repo=mtcute/mtcute \
+            --github-token=${{ secrets.GH_PAT }}
