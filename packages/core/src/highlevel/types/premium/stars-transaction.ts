@@ -151,18 +151,22 @@ export class StarsTransaction {
      * Whether this transaction is outgoing or incoming
      */
     get direction(): 'incoming' | 'outgoing' {
-        let isNegative = this.raw.stars.isNegative()
+        let isNegative = this.raw.stars.amount.isNegative()
         if (this.raw.refund) isNegative = !isNegative
 
         return isNegative ? 'outgoing' : 'incoming'
     }
 
     /** Absolute amount of stars in the transaction */
-    get amount(): tl.Long {
+    get amount(): tl.RawStarsAmount {
         let res = this.raw.stars
 
-        if (res.isNegative()) {
-            res = res.negate()
+        if (res.amount.isNegative()) {
+            res = {
+                ...res,
+                nanos: Math.abs(res.nanos),
+                amount: res.amount.negate(),
+            }
         }
 
         return res

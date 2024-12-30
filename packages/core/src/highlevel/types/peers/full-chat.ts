@@ -337,7 +337,7 @@ export class FullChat extends Chat {
     get recentRequesters(): User[] {
         if (this.full._ !== 'channelFull' || !this.full.recentRequesters) return []
 
-        return this.full.recentRequesters.map(it => new User(this.peers.user(it.toNumber())))
+        return this.full.recentRequesters.map(it => new User(this.peers.user(it)))
     }
 
     /** Reactions available in this chat */
