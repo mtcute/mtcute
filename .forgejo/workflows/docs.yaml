@@ -25,7 +25,7 @@ jobs:
           echo "ref.mtcute.dev" > docs/CNAME
       - name: Deploy
         # do not run on forks and releases
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor == 'mtcute-bot'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor == 'desu-bot'
         uses: https://github.com/cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
