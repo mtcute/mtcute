@@ -1,15 +1,14 @@
 import type { UnsafeMutable } from '@fuman/utils'
 
-import type { INodeFsLike } from '../utils/fs.js'
 import type { InputTdKeyData, TdAuthKey, TdKeyData, TdMtpAuthorization } from './types.js'
-import { dirname, join } from 'node:path/posix'
 import { Bytes, read, write } from '@fuman/io'
 import { typed, u8, utf8 } from '@fuman/utils'
-
 import { Long, MtUnsupportedError } from '@mtcute/core'
-import { createAesIgeForMessageOld } from '@mtcute/core/utils.js'
 
+import { createAesIgeForMessageOld } from '@mtcute/core/utils.js'
 import { getDefaultCryptoProvider, type IExtendedCryptoProvider } from '../utils/crypto.js'
+
+import { dirname, type INodeFsLike, joinPaths } from '../utils/fs.js'
 import { readLong, readQByteArray } from './qt-reader.js'
 import { writeLong, writeQByteArray } from './qt-writer.js'
 
@@ -138,14 +137,14 @@ export class Tdata {
         const order: string[] = []
 
         const modern = `${filename}s`
-        if (await this.fs.stat(join(this.options.path, modern))) {
+        if (await this.fs.stat(joinPaths(this.options.path, modern))) {
             order.push(modern)
         } else {
             const try0 = `${filename}0`
             const try1 = `${filename}1`
 
-            const try0s = await this.fs.stat(join(this.options.path, try0))
-            const try1s = await this.fs.stat(join(this.options.path, try1))
+            const try0s = await this.fs.stat(joinPaths(this.options.path, try0))
+            const try1s = await this.fs.stat(joinPaths(this.options.path, try1))
 
             if (try0s) {
                 order.push(try0)
@@ -164,7 +163,7 @@ export class Tdata {
         let lastError = 'file not found'
 
         for (const file of order) {
-            const data = await this.fs.readFile(join(this.options.path, file))
+            const data = await this.fs.readFile(joinPaths(this.options.path, file))
             const magic = data.subarray(0, 4)
 
             if (!typed.equal(magic, TDF_MAGIC)) {
@@ -205,7 +204,7 @@ export class Tdata {
         data: Uint8Array,
         mkdir = false,
     ): Promise<void> {
-        filename = join(this.options.path, `${filename}s`)
+        filename = joinPaths(this.options.path, `${filename}s`)
 
         const version = this.#writeInt32(u8.alloc(4), TDF_VERSION)
         const dataSize = this.#writeInt32(u8.alloc(4), data.length)
@@ -486,7 +485,7 @@ export class Tdata {
         writeQByteArray(writer, await this.encryptLocal(u8.empty, this.keyData.localKey))
 
         await this.writeFile(
-            join(await this.computeDataNameKeyHex(accountIdx), 'map'),
+            joinPaths(await this.computeDataNameKeyHex(accountIdx), 'map'),
             writer.result(),
             true,
         )
