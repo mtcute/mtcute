@@ -23,7 +23,32 @@ import {
     sub_,
     // @ts-expect-error: add leemon
 } from 'leemon'
-import { bufferToBigInt, factorizePQSync } from '../utils.js'
+import { factorizePQSync, fromBytes } from '../utils.js'
+
+const hexCharValueTable: Record<string, number> = {
+    0: 0,
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 4,
+    5: 5,
+    6: 6,
+    7: 7,
+    8: 8,
+    9: 9,
+    a: 10,
+    b: 11,
+    c: 12,
+    d: 13,
+    e: 14,
+    f: 15,
+    A: 10,
+    B: 11,
+    C: 12,
+    D: 13,
+    E: 14,
+    F: 15,
+}
 
 function hexDecodeInner(buf: Uint8Array, string: string): void {
     const strLen = string.length
@@ -137,7 +162,7 @@ function pqPrimeLeemon(what: any): [Uint8Array, Uint8Array] {
 }
 
 export function webogramFactorizePQSync(crypto: ICryptoProvider, pq: Uint8Array): [Uint8Array, Uint8Array] {
-    const what = bufferToBigInt(pq)
+    const what = fromBytes(pq)
 
     try {
         console.time('leemon pq')
