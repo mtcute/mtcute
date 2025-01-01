@@ -726,7 +726,7 @@ withParams(params: RpcCallOptions): this\n`)
         'importSession',
         'exportSession',
         'handleClientUpdate',
-        'getApiCrenetials',
+        'getApiCredentials',
         'getPoolSize',
         'getPrimaryDcId',
         'computeSrpParams',

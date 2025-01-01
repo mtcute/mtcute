@@ -301,7 +301,7 @@ export class BaseTelegramClient implements ITelegramClient {
         this.updates?.handleClientUpdate(updates, noDispatch)
     }
 
-    async getApiCrenetials(): Promise<{
+    async getApiCredentials(): Promise<{
         id: number
         hash: string
     }> {

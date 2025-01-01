@@ -61,7 +61,7 @@ export interface ITelegramClient {
     onConnectionState: Emitter<ConnectionState>
     onError: Emitter<Error>
 
-    getApiCrenetials(): Promise<{ id: number, hash: string }>
+    getApiCredentials(): Promise<{ id: number, hash: string }>
     // todo - this is only used for file dl/ul, which should probably be moved
     // to the client to allow moving the thing to worker
     // or at least load this once at startup (and then these methods can be made sync)

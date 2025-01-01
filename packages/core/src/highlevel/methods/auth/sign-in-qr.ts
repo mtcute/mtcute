@@ -99,7 +99,7 @@ export async function signInQr(
     }
 
     try {
-        const { id, hash } = await client.getApiCrenetials()
+        const { id, hash } = await client.getApiCredentials()
 
         loop: while (true) {
             let res: tl.auth.TypeLoginToken
