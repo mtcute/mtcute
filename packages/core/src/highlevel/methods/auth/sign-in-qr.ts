@@ -2,7 +2,6 @@ import type { MaybePromise } from '../../../types/utils.js'
 import type { ITelegramClient } from '../../client.types.js'
 
 import type { MaybeDynamic } from '../../types/index.js'
-import type { RawUpdateInfo } from '../../updates/types.js'
 import { base64, Deferred } from '@fuman/utils'
 import { tl } from '@mtcute/tl'
 import { sleepWithAbort } from '../../../utils/misc-utils.js'
@@ -54,19 +53,19 @@ export async function signInQr(
 
     let waiter: Deferred<void> | undefined
 
-    // todo: we should probably make this into an await-able function
-    const onUpdate = ({ update }: RawUpdateInfo) => {
-        if (update._ === 'updateLoginToken') {
+    // NB: at this point update manager is not active yet, so we can't use onRawUpdate
+    const onUpdate = (update: tl.TypeUpdates) => {
+        if (update._ === 'updateShort' && update.update._ === 'updateLoginToken') {
             onQrScanned?.()
             waiter?.resolve()
-            client.onRawUpdate.remove(onUpdate)
+            client.onServerUpdate.remove(onUpdate)
         }
     }
 
-    client.onRawUpdate.add(onUpdate)
+    client.onServerUpdate.add(onUpdate)
 
     abortSignal?.addEventListener('abort', () => {
-        client.onRawUpdate.remove(onUpdate)
+        client.onServerUpdate.remove(onUpdate)
         waiter?.reject(abortSignal.reason)
     })
 
@@ -130,7 +129,10 @@ export async function signInQr(
                     )
 
                     waiter = new Deferred()
-                    await Promise.race([waiter, sleepWithAbort(res.expires * 1000 - Date.now(), client.stopSignal)])
+                    await Promise.race([
+                        waiter.promise,
+                        sleepWithAbort(res.expires * 1000 - Date.now(), client.stopSignal),
+                    ])
                     break
                 case 'auth.loginTokenMigrateTo': {
                     await client.changePrimaryDc(res.dcId)
@@ -174,6 +176,6 @@ export async function signInQr(
 
         return new User(self)
     } finally {
-        client.onRawUpdate.remove(onUpdate)
+        client.onServerUpdate.remove(onUpdate)
     }
 }
