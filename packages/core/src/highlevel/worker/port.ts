@@ -47,7 +47,7 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     readonly importSession: ITelegramClient['importSession']
     readonly exportSession: ITelegramClient['exportSession']
     readonly handleClientUpdate: ITelegramClient['handleClientUpdate']
-    readonly getApiCrenetials: ITelegramClient['getApiCrenetials']
+    readonly getApiCredentials: ITelegramClient['getApiCredentials']
     readonly getPoolSize: ITelegramClient['getPoolSize']
     readonly getPrimaryDcId: ITelegramClient['getPrimaryDcId']
     readonly changePrimaryDc: ITelegramClient['changePrimaryDc']
@@ -84,7 +84,7 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
         this.importSession = bind('importSession')
         this.exportSession = bind('exportSession')
         this.handleClientUpdate = bind('handleClientUpdate', true)
-        this.getApiCrenetials = bind('getApiCrenetials')
+        this.getApiCredentials = bind('getApiCredentials')
         this.getPoolSize = bind('getPoolSize')
         this.getPrimaryDcId = bind('getPrimaryDcId')
         this.changePrimaryDc = bind('changePrimaryDc')

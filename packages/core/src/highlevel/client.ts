@@ -6949,8 +6949,8 @@ TelegramClient.prototype.exportSession = function (...args) {
 TelegramClient.prototype.handleClientUpdate = function (...args) {
     return this._client.handleClientUpdate(...args)
 }
-TelegramClient.prototype.getApiCrenetials = function (...args) {
-    return this._client.getApiCrenetials(...args)
+TelegramClient.prototype.getApiCredentials = function (...args) {
+    return this._client.getApiCredentials(...args)
 }
 TelegramClient.prototype.getPoolSize = function (...args) {
     return this._client.getPoolSize(...args)

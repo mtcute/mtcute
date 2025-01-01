@@ -1,6 +1,5 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
-import { assertTrue } from '../../../utils/type-assertions.js'
 import { createDummyUpdate } from '../../updates/utils.js'
 import { isInputPeerChannel, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -53,13 +52,11 @@ export async function readHistory(
     }
 
     if (isInputPeerChannel(peer)) {
-        const r = await client.call({
+        await client.call({
             _: 'channels.readHistory',
             channel: toInputChannel(peer),
             maxId,
         })
-
-        assertTrue('channels.readHistory', r)
     } else {
         const res = await client.call({
             _: 'messages.readHistory',

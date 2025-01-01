@@ -28,7 +28,7 @@ export async function sendCode(
 ): Promise<SentCode> {
     const phone = normalizePhoneNumber(params.phone)
 
-    const { id, hash } = await client.getApiCrenetials()
+    const { id, hash } = await client.getApiCredentials()
 
     const res = await client.call(
         {
