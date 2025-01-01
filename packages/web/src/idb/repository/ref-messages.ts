@@ -46,11 +46,12 @@ export class IdbRefMsgRepository implements IReferenceMessagesRepository {
         const index = os.index('by_msg')
 
         for (const msgId of msgIds) {
-            const keys = await reqToPromise(index.getAllKeys([chatId, msgId]))
-
-            // there are never that many keys, so we can avoid using cursor
-            for (const key of keys) {
-                os.delete(key)
+            const req = index.getAllKeys([chatId, msgId])
+            req.onsuccess = () => {
+                for (const key of req.result) {
+                    // there are never that many keys, so we can avoid using cursor
+                    os.delete(key)
+                }
             }
         }
 
@@ -64,12 +65,11 @@ export class IdbRefMsgRepository implements IReferenceMessagesRepository {
 
         const req = index.openCursor(peerId)
 
-        let cursor = await reqToPromise(req)
-
-        while (cursor) {
-            cursor.delete()
-            cursor.continue()
-            cursor = await reqToPromise(req)
+        req.onsuccess = () => {
+            if (req.result) {
+                req.result.delete()
+                req.result.continue()
+            }
         }
 
         return txToPromise(tx)

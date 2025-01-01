@@ -26,21 +26,13 @@ export class WebPlatform implements ICorePlatform {
         return null
     }
 
+    // eslint-disable-next-line unused-imports/no-unused-vars
     onNetworkChanged(fn: (connected: boolean) => void): () => void {
-        if (!('onLine' in navigator)) return () => {}
-
-        const onlineHandler = () => fn(navigator.onLine)
-        window.addEventListener('online', onlineHandler)
-        window.addEventListener('offline', onlineHandler)
-
-        return () => {
-            window.removeEventListener('online', onlineHandler)
-            window.removeEventListener('offline', onlineHandler)
-        }
+        return () => {}
     }
 
     isOnline(): boolean {
-        return navigator.onLine
+        return true
     }
 }
 

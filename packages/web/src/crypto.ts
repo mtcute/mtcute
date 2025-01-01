@@ -1,121 +1,74 @@
-import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
-import type { WasmInitInput } from './wasm.js'
-import { BaseCryptoProvider } from '@mtcute/core/utils.js'
+import type { MaybePromise } from '@mtcute/core'
 
-import {
-    createCtr256,
-    ctr256,
-    deflateMaxSize,
-    freeCtr256,
-    gunzip,
-    ige256Decrypt,
-    ige256Encrypt,
-    initSync,
-    sha1,
-    sha256,
-} from '@mtcute/wasm'
-import { loadWasmBinary } from './wasm.js'
+import type { AsmCryptoProvider } from './asmjs/crypto.js'
+import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from './utils.js'
+import type { WasmCryptoProvider } from './wasm/crypto.js'
 
-const ALGO_TO_SUBTLE: Record<string, string> = {
-    sha256: 'SHA-256',
-    sha1: 'SHA-1',
-    sha512: 'SHA-512',
-}
-
-export interface WebCryptoProviderOptions {
-    crypto?: Crypto
-    wasmInput?: WasmInitInput
-}
-
-export class WebCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
-    readonly crypto: Crypto
-    private _wasmInput?: WasmInitInput
-
-    sha1(data: Uint8Array): Uint8Array {
-        return sha1(data)
-    }
-
-    sha256(data: Uint8Array): Uint8Array {
-        return sha256(data)
-    }
-
-    createAesCtr(key: Uint8Array, iv: Uint8Array): IAesCtr {
-        const ctx = createCtr256(key, iv)
-
-        return {
-            process: data => ctr256(ctx, data),
-            close: () => freeCtr256(ctx),
-        }
-    }
-
-    createAesIge(key: Uint8Array, iv: Uint8Array): IEncryptionScheme {
-        return {
-            encrypt: data => ige256Encrypt(data, key, iv),
-            decrypt: data => ige256Decrypt(data, key, iv),
-        }
-    }
-
-    gzip(data: Uint8Array, maxSize: number): Uint8Array | null {
-        return deflateMaxSize(data, maxSize)
-    }
-
-    gunzip(data: Uint8Array): Uint8Array {
-        return gunzip(data)
-    }
-
-    constructor(params?: WebCryptoProviderOptions) {
-        super()
-        const crypto = params?.crypto ?? globalThis.crypto
-
-        if (!crypto || !crypto.subtle) {
-            throw new Error('WebCrypto is not available')
-        }
-        this.crypto = crypto
-        this._wasmInput = params?.wasmInput
-    }
+export class WebCryptoProvider implements ICryptoProvider {
+    instance!: AsmCryptoProvider | WasmCryptoProvider
 
     async initialize(): Promise<void> {
-        initSync(await loadWasmBinary(this._wasmInput))
+        // eslint-disable-next-line eqeqeq
+        const isKai3 = import.meta.env.VITE_KAIOS == 3
+
+        if (isKai3) {
+            const m = await import('./wasm/crypto.js')
+            this.instance = new m.WasmCryptoProvider()
+        } else {
+            const m = await import('./asmjs/crypto.js')
+            this.instance = new m.AsmCryptoProvider()
+        }
+
+        await this.instance.initialize()
     }
 
-    async pbkdf2(
+    pbkdf2(
         password: Uint8Array,
         salt: Uint8Array,
         iterations: number,
-        keylen?: number | undefined,
-        algo?: string | undefined,
-    ): Promise<Uint8Array> {
-        const keyMaterial = await this.crypto.subtle.importKey('raw', password, 'PBKDF2', false, ['deriveBits'])
-
-        return this.crypto.subtle
-            .deriveBits(
-                {
-                    name: 'PBKDF2',
-                    salt,
-                    iterations,
-                    hash: algo ? ALGO_TO_SUBTLE[algo] : 'SHA-512',
-                },
-                keyMaterial,
-                (keylen || 64) * 8,
-            )
-            .then(result => new Uint8Array(result))
+        keylen?: number,
+        algo?: string,
+    ): MaybePromise<Uint8Array> {
+        return this.instance.pbkdf2(password, salt, iterations, keylen, algo)
     }
 
-    async hmacSha256(data: Uint8Array, key: Uint8Array): Promise<Uint8Array> {
-        const keyMaterial = await this.crypto.subtle.importKey(
-            'raw',
-            key,
-            { name: 'HMAC', hash: { name: 'SHA-256' } },
-            false,
-            ['sign'],
-        )
+    createAesCtr(key: Uint8Array, iv: Uint8Array): IAesCtr {
+        return this.instance.createAesCtr(key, iv)
+    }
 
-        const res = await this.crypto.subtle.sign({ name: 'HMAC' }, keyMaterial, data)
+    createAesIge(key: Uint8Array, iv: Uint8Array): IEncryptionScheme {
+        return this.instance.createAesIge(key, iv)
+    }
 
-        return new Uint8Array(res)
+    factorizePQ(pq: Uint8Array): MaybePromise<[Uint8Array, Uint8Array]> {
+        return this.instance.factorizePQ(pq)
+    }
+
+    gzip(data: Uint8Array, maxSize: number): Uint8Array | null {
+        return this.instance.gzip(data, maxSize)
+    }
+
+    gunzip(data: Uint8Array): Uint8Array {
+        return this.instance.gunzip(data)
     }
 
     randomFill(buf: Uint8Array): void {
-        this.crypto.getRandomValues(buf)
+        return this.instance.randomFill(buf)
+    }
+
+    randomBytes(size: number): Uint8Array {
+        return this.instance.randomBytes(size)
+    }
+
+    sha1(data: Uint8Array): Uint8Array {
+        return this.instance.sha1(data)
+    }
+
+    sha256(data: Uint8Array): Uint8Array {
+        return this.instance.sha256(data)
+    }
+
+    hmacSha256(data: Uint8Array, key: Uint8Array): MaybePromise<Uint8Array> {
+        return this.instance.hmacSha256(data, key)
     }
 }

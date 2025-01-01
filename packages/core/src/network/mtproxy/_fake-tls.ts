@@ -1,49 +1,54 @@
 import type { ICryptoProvider } from '../../utils/crypto/abstract.js'
 import type { Logger } from '../../utils/logger.js'
-
 import type { IPacketCodec } from '../transports/index.js'
 import { Bytes, type ISyncWritable, read } from '@fuman/io'
-import { bigint, typed, u8 } from '@fuman/utils'
+
+import { typed, u8 } from '@fuman/utils'
+import { BigInteger } from '@modern-dev/jsbn'
+import { fromBytes, fromInt, fromRadix, toBytes } from '../../utils/bigint-utils.js'
 
 const MAX_TLS_PACKET_LENGTH = 2878
 
 // ref: https://github.com/tdlib/td/blob/master/td/mtproto/TlsInit.cpp
-const KEY_MOD = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEDn
+const KEY_MOD = fromRadix('7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed', 16)
 // 2^255 - 19
-const QUAD_RES_MOD = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEDn
+const QUAD_RES_MOD = fromRadix('7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed', 16)
 // (mod - 1) / 2 = 2^254 - 10
-const QUAD_RES_POW = 0x3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6n
+const QUAD_RES_POW = fromRadix('3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6', 16)
 
-function _getY2(x: bigint, mod: bigint): bigint {
+const BigInteger_486662 = fromInt(486662)
+const FOUR = fromInt(4)
+
+function _getY2(x: BigInteger, mod: BigInteger): BigInteger {
     // returns y = x^3 + x^2 * 486662 + x
     let y = x
-    y = (y + 486662n) % mod
-    y = (y * x) % mod
-    y = (y + 1n) % mod
-    y = (y * x) % mod
+    y = y.add(BigInteger_486662).mod(mod)
+    y = y.multiply(x).mod(mod)
+    y = y.add(BigInteger.ONE).mod(mod)
+    y = y.multiply(x).mod(mod)
 
     return y
 }
 
-function _getDoubleX(x: bigint, mod: bigint): bigint {
+function _getDoubleX(x: BigInteger, mod: BigInteger): BigInteger {
     // returns x_2 = (x^2 - 1)^2/(4*y^2)
     let denominator = _getY2(x, mod)
-    denominator = (denominator * 4n) % mod
+    denominator = denominator.multiply(FOUR).mod(mod)
 
-    let numerator = (x * x) % mod
-    numerator = (numerator - 1n) % mod
-    numerator = (numerator * numerator) % mod
+    let numerator = x.multiply(x).mod(mod)
+    numerator = numerator.subtract(BigInteger.ONE).mod(mod)
+    numerator = numerator.multiply(numerator).mod(mod)
 
-    denominator = bigint.modInv(denominator, mod)
-    numerator = (numerator * denominator) % mod
+    denominator = denominator.modInverse(mod)
+    numerator = numerator.multiply(denominator).mod(mod)
 
     return numerator
 }
 
-function _isQuadraticResidue(a: bigint): boolean {
-    const r = bigint.modPowBinary(a, QUAD_RES_POW, QUAD_RES_MOD)
+function _isQuadraticResidue(a: BigInteger): boolean {
+    const r = a.modPow(QUAD_RES_POW, QUAD_RES_MOD)
 
-    return r === 1n
+    return r.equals(BigInteger.ONE)
 }
 
 function executeTlsOperations(h: TlsHelloWriter): void {
@@ -157,7 +162,7 @@ class TlsHelloWriter {
             const key = this.crypto.randomBytes(32)
             key[31] &= 127
 
-            let x = bigint.fromBytes(key)
+            let x = fromBytes(key)
             const y = _getY2(x, KEY_MOD)
 
             if (_isQuadraticResidue(y)) {
@@ -165,7 +170,7 @@ class TlsHelloWriter {
                     x = _getDoubleX(x, KEY_MOD)
                 }
 
-                const key = bigint.toBytes(x, 32, true)
+                const key = toBytes(x, 32, true)
                 this.string(key)
 
                 return

@@ -1,8 +1,9 @@
+import type { BigInteger } from '@modern-dev/jsbn'
 import type { ICorePlatform } from '../types/platform.js'
+
 import { hex } from '@fuman/utils'
 
 import { tl } from '@mtcute/tl'
-
 import { isTlRpcError } from './type-assertions.js'
 
 const DEFAULT_LOG_LEVEL = 2
@@ -68,7 +69,7 @@ export class Logger {
 
                     if (m === '%h') {
                         if (ArrayBuffer.isView(val)) return hex.encode(val as Uint8Array)
-                        if (typeof val === 'number' || typeof val === 'bigint') return val.toString(16)
+                        if (typeof val === 'number' || typeof val === 'bigint' || (typeof val == 'object' && (typeof (val as BigInteger).intValue) === 'function' && (typeof (val as BigInteger).millerRabin) === 'function')) return (val as any).toString(16)
 
                         return String(val)
                     }

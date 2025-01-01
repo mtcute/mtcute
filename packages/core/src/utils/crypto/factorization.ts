@@ -1,23 +1,24 @@
 import type { ICryptoProvider } from './abstract.js'
 
-import { bigint } from '@fuman/utils'
+import { BigInteger } from '@modern-dev/jsbn'
+import { fromBytes, fromInt, geq, leq, lt, min2, randomBigIntInRange, toBytes } from '../bigint-utils.js'
 
-import { randomBigIntInRange } from '../bigint-utils.js'
+const TWO = fromInt(2)
 
 /**
  * Factorize `p*q` to `p` and `q` synchronously using Brent-Pollard rho algorithm
  * @param pq
  */
 export function factorizePQSync(crypto: ICryptoProvider, pq: Uint8Array): [Uint8Array, Uint8Array] {
-    const pq_ = bigint.fromBytes(pq)
+    const pq_ = fromBytes(pq)
 
     const n = PollardRhoBrent(crypto, pq_)
-    const m = pq_ / n
+    const m = pq_.divide(n)
 
     let p
     let q
 
-    if (n < m) {
+    if (lt(n, m)) {
         p = n
         q = m
     } else {
@@ -25,49 +26,55 @@ export function factorizePQSync(crypto: ICryptoProvider, pq: Uint8Array): [Uint8
         q = n
     }
 
-    return [bigint.toBytes(p), bigint.toBytes(q)]
+    return [toBytes(p), toBytes(q)]
 }
 
-function PollardRhoBrent(crypto: ICryptoProvider, n: bigint): bigint {
-    if (n % 2n === 0n) return 2n
+function PollardRhoBrent(crypto: ICryptoProvider, n: BigInteger): BigInteger {
+    if (n.isEven()) return TWO
 
-    let y = randomBigIntInRange(crypto, n - 1n)
-    const c = randomBigIntInRange(crypto, n - 1n)
-    const m = randomBigIntInRange(crypto, n - 1n)
-    let g = 1n
-    let r = 1n
-    let q = 1n
+    const nSub1 = n.subtract(BigInteger.ONE)
 
-    let ys: bigint
-    let x: bigint
+    let y = randomBigIntInRange(crypto, nSub1)
+    const c = randomBigIntInRange(crypto, nSub1)
+    const m = randomBigIntInRange(crypto, nSub1)
+    let g = fromInt(1)
+    let r = fromInt(1)
+    let q = fromInt(1)
 
-    while (g === 1n) {
+    let ys: BigInteger
+    let x: BigInteger
+
+    while (g.equals(BigInteger.ONE)) {
         x = y
-        for (let i = 0; r >= i; i++) y = (((y * y) % n) + c) % n
+        for (let i = 0; geq(r, fromInt(i)); i++) y = y.multiply(y).mod(n).add(c).mod(n)
+        // y = ((y * y) % n + c) % n
 
-        let k = 0n
+        let k = fromInt(0)
 
-        while (k < r && g === 1n) {
+        while (lt(k, r) && g.equals(BigInteger.ONE)) {
             ys = y
 
-            for (let i = 0n; i < bigint.min2(m, r - k); i++) {
-                y = (((y * y) % n) + c) % n
-                q = (q * bigint.abs(x - y)) % n
+            for (let i = fromInt(0); lt(i, min2(m, r.subtract(k))); i = i.add(BigInteger.ONE)) {
+                y = y.multiply(y).mod(n).add(c).mod(n)
+                q = q.multiply(x.subtract(y).abs()).mod(n)
+                // y = (y * y % n + c) % n
+                // q = q * abs(x - y) % n
             }
 
-            g = bigint.euclideanGcd(q, n)
-            k = k + m
+            g = q.GCD(n)
+            k = k.add(m)
         }
 
-        r <<= 1n
+        r = r.shiftLeft(1)
     }
 
-    if (g === n) {
+    if (g.equals(n)) {
         do {
-            ys = (((ys! * ys!) % n) + c) % n
+            ys = ys!.multiply(ys!).mod(n).add(c).mod(n)
+            // ys = ((ys * ys) % n + c) % n
 
-            g = bigint.euclideanGcd(x! - ys!, n)
-        } while (g <= 1n)
+            g = x!.subtract(ys).GCD(n)
+        } while (leq(g, BigInteger.ONE))
     }
 
     return g

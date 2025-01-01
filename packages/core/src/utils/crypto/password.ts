@@ -1,9 +1,11 @@
 import type { tl } from '@mtcute/tl'
 import type { ICryptoProvider } from './abstract.js'
 
-import { bigint, u8, utf8 } from '@fuman/utils'
-import { MtSecurityError, MtUnsupportedError } from '../../types/errors.js'
+import { u8, utf8 } from '@fuman/utils'
+import { BigInteger } from '@modern-dev/jsbn'
 
+import { MtSecurityError, MtUnsupportedError } from '../../types/errors.js'
+import { fromBytes, fromInt, lt, toBytes } from '../bigint-utils.js'
 import { assertTypeIs } from '../type-assertions.js'
 
 /**
@@ -49,11 +51,11 @@ export async function computeNewPasswordHash(
 
     const _x = await computePasswordHash(crypto, utf8.encoder.encode(password), algo.salt1, algo.salt2)
 
-    const g = BigInt(algo.g)
-    const p = bigint.fromBytes(algo.p)
-    const x = bigint.fromBytes(_x)
+    const g = fromInt(algo.g)
+    const p = fromBytes(algo.p)
+    const x = fromBytes(_x)
 
-    return bigint.toBytes(bigint.modPowBinary(g, x, p), 256)
+    return toBytes(g.modPow(x, p), 256)
 }
 
 /**
@@ -88,31 +90,31 @@ export async function computeSrpParams(
         throw new MtSecurityError('SRP_ID is not present in the request')
     }
 
-    const g = BigInt(algo.g)
-    const _g = bigint.toBytes(g, 256)
-    const p = bigint.fromBytes(algo.p)
-    const gB = bigint.fromBytes(request.srpB)
+    const g = fromInt(algo.g)
+    const _g = toBytes(g, 256)
+    const p = fromBytes(algo.p)
+    const gB = fromBytes(request.srpB)
 
-    const a = bigint.fromBytes(crypto.randomBytes(256))
-    const gA = bigint.modPowBinary(g, a, p)
-    const _gA = bigint.toBytes(gA, 256)
+    const a = fromBytes(crypto.randomBytes(256))
+    const gA = g.modPow(a, p)
+    const _gA = toBytes(gA, 256)
 
     const H = (data: Uint8Array) => crypto.sha256(data)
 
     const _k = crypto.sha256(u8.concat2(algo.p, _g))
     const _u = crypto.sha256(u8.concat2(_gA, request.srpB))
     const _x = await computePasswordHash(crypto, utf8.encoder.encode(password), algo.salt1, algo.salt2)
-    const k = bigint.fromBytes(_k)
-    const u = bigint.fromBytes(_u)
-    const x = bigint.fromBytes(_x)
+    const k = fromBytes(_k)
+    const u = fromBytes(_u)
+    const x = fromBytes(_x)
 
-    const v = bigint.modPowBinary(g, x, p)
-    const kV = (k * v) % p
+    const v = g.modPow(x, p)
+    const kV = k.multiply(v).mod(p)
 
-    let t = gB - kV
-    if (t < 0n) t += p
-    const sA = bigint.modPowBinary(t, a + u * x, p)
-    const _kA = H(bigint.toBytes(sA, 256))
+    let t = gB.subtract(kV)
+    if (lt(t, BigInteger.ZERO)) t = t.add(p)
+    const sA = t.modPow(a.add(u.multiply(x)), p)
+    const _kA = H(toBytes(sA, 256))
 
     const _M1 = H(u8.concat([
         u8.xor(H(algo.p), H(_g)),

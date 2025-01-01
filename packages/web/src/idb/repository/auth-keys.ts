@@ -70,21 +70,22 @@ export class IdbAuthKeysRepository implements IAuthKeysRepository {
     }
 
     async deleteByDc(dc: number): Promise<void> {
-        const tx = this._driver.db.transaction([TABLE_AUTH_KEYS, TABLE_TEMP_AUTH_KEYS], 'readwrite')
+        return new Promise<void>((res) => {
+            const tx = this._driver.db.transaction([TABLE_AUTH_KEYS, TABLE_TEMP_AUTH_KEYS], 'readwrite')
 
-        tx.objectStore(TABLE_AUTH_KEYS).delete(dc)
+            tx.objectStore(TABLE_AUTH_KEYS).delete(dc)
 
-        // IndexedDB sucks
-        const tempOs = tx.objectStore(TABLE_TEMP_AUTH_KEYS)
-        const keys = await reqToPromise(tempOs.getAllKeys())
-
-        for (const key of keys) {
-            if ((key as [number, number])[0] === dc) {
-                tempOs.delete(key)
+            const tempOs = tx.objectStore(TABLE_TEMP_AUTH_KEYS)
+            const keys = tempOs.getAllKeys()
+            keys.onsuccess = () => {
+                for (const key of keys.result) {
+                    if ((key as [number, number])[0] === dc) {
+                        tempOs.delete(key)
+                    }
+                }
+                res(txToPromise(tx))
             }
-        }
-
-        await txToPromise(tx)
+        })
     }
 
     deleteAll(): Promise<void> {
