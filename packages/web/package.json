@@ -15,8 +15,7 @@
     "dependencies": {
         "@mtcute/core": "workspace:^",
         "@mtcute/wasm": "workspace:^",
-        "@fuman/net": "0.0.4",
-        "events": "3.2.0"
+        "@fuman/net": "0.0.4"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^"

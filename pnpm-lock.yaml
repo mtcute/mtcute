@@ -212,9 +212,6 @@ importers:
       '@types/events':
         specifier: 3.0.0
         version: 3.0.0
-      events:
-        specifier: 3.2.0
-        version: 3.2.0
       long:
         specifier: 5.2.3
         version: 5.2.3
@@ -318,9 +315,6 @@ importers:
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
-      events:
-        specifier: 3.2.0
-        version: 3.2.0
     devDependencies:
       '@mtcute/test':
         specifier: workspace:^
@@ -511,9 +505,6 @@ importers:
       '@mtcute/wasm':
         specifier: workspace:^
         version: link:../wasm
-      events:
-        specifier: 3.2.0
-        version: 3.2.0
     devDependencies:
       '@mtcute/test':
         specifier: workspace:^
