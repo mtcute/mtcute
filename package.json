@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.11.2",
-    "@fuman/build": "https://pkg.pr.new/teidesu/fuman/@fuman/build@c073041",
+    "@fuman/build": "https://pkg.pr.new/teidesu/fuman/@fuman/build@c0e740b",
     "@fuman/utils": "0.0.4",
     "@types/deno": "npm:@teidesu/deno-types@1.46.3",
     "@types/node": "20.10.0",

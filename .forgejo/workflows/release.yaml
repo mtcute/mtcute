@@ -40,9 +40,18 @@ jobs:
           deno-version: '2.0'
 
       - name: Initialize configs
+        env:
+          GH_PRIVKEY: ${{ secrets.GH_PRIVKEY }}
         run: |
           git config user.name "mtcute-bot"
           git config user.email mtcute-bot@tei.su
+
+          echo "$GH_PRIVKEY" > /tmp/bot-key
+          mkdir -p ~/.ssh
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+          echo "Host github.com" >> ~/.ssh/config
+          echo "  IdentityFile /tmp/bot-key" >> ~/.ssh/config
+          chmod 600 /tmp/bot-key
           git remote add github git@github.com:mtcute/mtcute.git
       
       - name: Run release

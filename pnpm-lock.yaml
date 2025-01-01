@@ -15,8 +15,8 @@ importers:
         specifier: ^3.11.2
         version: 3.11.2(@typescript-eslint/utils@8.17.0(eslint@9.9.0)(typescript@5.5.4))(@vue/compiler-sfc@3.5.13)(eslint@9.9.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@20.10.0)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5))
       '@fuman/build':
-        specifier: https://pkg.pr.new/teidesu/fuman/@fuman/build@c073041
-        version: https://pkg.pr.new/teidesu/fuman/@fuman/build@c073041(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))
+        specifier: https://pkg.pr.new/teidesu/fuman/@fuman/build@c0e740b
+        version: https://pkg.pr.new/teidesu/fuman/@fuman/build@c0e740b(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))
       '@fuman/utils':
         specifier: 0.0.4
         version: 0.0.4
@@ -1097,8 +1097,8 @@ packages:
     resolution: {integrity: sha512-2b/g5hRmpbb1o4GnTZax9N9m0FXzz9OV42ZzI4rDDMDuHUqigAiQCEWChBWCY4ztAGVRjoWT19v0yMmc5/L5kA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@c073041':
-    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/build@c073041}
+  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@c0e740b':
+    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/build@c0e740b}
     version: 0.0.7
     hasBin: true
     peerDependencies:
@@ -1132,8 +1132,8 @@ packages:
       zod:
         optional: true
 
-  '@fuman/fetch@https://pkg.pr.new/teidesu/fuman/@fuman/fetch@c0730413e863fa6ba6c7f1750fbee3c018e8f610':
-    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/fetch@c0730413e863fa6ba6c7f1750fbee3c018e8f610}
+  '@fuman/fetch@https://pkg.pr.new/teidesu/fuman/@fuman/fetch@c0e740bafe591eab2377545771c62f620b7099d2':
+    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/fetch@c0e740bafe591eab2377545771c62f620b7099d2}
     version: 0.0.7
     peerDependencies:
       '@badrap/valita': '>=0.4.0'
@@ -4615,10 +4615,10 @@ snapshots:
     dependencies:
       levn: 0.4.1
 
-  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@c073041(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))':
+  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@c0e740b(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))':
     dependencies:
       '@drizzle-team/brocli': 0.10.2
-      '@fuman/fetch': https://pkg.pr.new/teidesu/fuman/@fuman/fetch@c0730413e863fa6ba6c7f1750fbee3c018e8f610(tough-cookie@4.1.4)(zod@3.23.8)
+      '@fuman/fetch': https://pkg.pr.new/teidesu/fuman/@fuman/fetch@c0e740bafe591eab2377545771c62f620b7099d2(tough-cookie@4.1.4)(zod@3.23.8)
       '@fuman/io': 0.0.4
       '@fuman/node': 0.0.4
       '@fuman/utils': 0.0.4
@@ -4652,7 +4652,7 @@ snapshots:
       tough-cookie: 4.1.4
       zod: 3.23.8
 
-  '@fuman/fetch@https://pkg.pr.new/teidesu/fuman/@fuman/fetch@c0730413e863fa6ba6c7f1750fbee3c018e8f610(tough-cookie@4.1.4)(zod@3.23.8)':
+  '@fuman/fetch@https://pkg.pr.new/teidesu/fuman/@fuman/fetch@c0e740bafe591eab2377545771c62f620b7099d2(tough-cookie@4.1.4)(zod@3.23.8)':
     dependencies:
       '@fuman/utils': 0.0.4
     optionalDependencies:
