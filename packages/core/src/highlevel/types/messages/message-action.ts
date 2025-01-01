@@ -1,15 +1,14 @@
 import type { tl } from '@mtcute/tl'
-import type { CallDiscardReason } from '../calls/index.js'
 
 import type { TextWithEntities } from '../misc/entities.js'
 import type { Peer } from '../peers/peer.js'
 import type { Message } from './message.js'
 import Long from 'long'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
-import { _callDiscardReasonFromTl } from '../calls/index.js'
 import { Photo } from '../media/photo.js'
-import { parsePeer } from '../peers/peer.js'
 
+import { parsePeer } from '../peers/peer.js'
+import { StarGiftUnique } from '../premium/stars-gift-unique.js'
 import { StarGift } from '../premium/stars-gift.js'
 
 /** Group was created */
@@ -200,7 +199,7 @@ export interface ActionCall {
     readonly duration: number
 
     /** Call discard reason, if available */
-    readonly reason?: CallDiscardReason
+    readonly reason?: tl.TypePhoneCallDiscardReason
 }
 
 /** A screenshot was taken */
@@ -534,6 +533,7 @@ export interface ActionStarsPrize {
     giveawayMessageId: number
 }
 
+/** A star gift was sent */
 export interface ActionStarGift {
     readonly type: 'stars_gift'
 
@@ -541,6 +541,9 @@ export interface ActionStarGift {
     nameHidden: boolean
     /** Whether this gift was saved to the recipient's profile */
     saved: boolean
+    /** Whether this gift was refunded */
+    refunded: boolean
+
     /** Whether this gift was converted to stars */
     converted: boolean
     /**
@@ -548,8 +551,18 @@ export interface ActionStarGift {
      * (0 if the gift cannot be converted)
      */
     convertStars: tl.Long
+
+    /** Whether this gift can be upgraded to a unique gift */
+    canUpgrade: boolean
+    /** Whether this gift was upgraded to a unique gift */
+    upgraded: boolean
+    /** Number of stars to upgrade the gift to a unique gift (may be 0) */
+    upgradeStars: tl.Long
+    /** If the gift was upgraded, ID of the message where this happened */
+    upgradeMsgId: number | null
+
     /** The gift itself */
-    gift: StarGift
+    gift: StarGift | StarGiftUnique
     /** Message attached to the gift */
     message: TextWithEntities | null
 }
@@ -715,7 +728,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 type: 'call',
                 id: act.callId,
                 isVideo: Boolean(act.video),
-                reason: act.reason ? _callDiscardReasonFromTl(act.reason) : undefined,
+                reason: act.reason,
                 duration: act.duration ?? 0,
             }
         case 'messageActionScreenshotTaken':
@@ -902,8 +915,15 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 saved: act.saved!,
                 converted: act.converted!,
                 convertStars: act.convertStars ?? Long.ZERO,
-                gift: new StarGift(act.gift),
+                refunded: act.refunded!,
+                gift: act.gift._ === 'starGift'
+                    ? new StarGift(act.gift)
+                    : new StarGiftUnique(act.gift, this._peers),
                 message: act.message ?? null,
+                canUpgrade: act.canUpgrade!,
+                upgraded: act.upgraded!,
+                upgradeStars: act.upgradeStars ?? Long.ZERO,
+                upgradeMsgId: act.upgradeMsgId ?? null,
             }
         default:
             return null

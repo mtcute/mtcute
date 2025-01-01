@@ -35,7 +35,7 @@ export async function findFolder(
         (folders.filters.find((it) => {
             if (it._ === 'dialogFilterDefault') return false
             if (params.id && it.id !== params.id) return false
-            if (params.title && it.title !== params.title) return false
+            if (params.title && it.title.text !== params.title) return false
             if (params.emoji && it.emoticon !== params.emoji) return false
 
             return true

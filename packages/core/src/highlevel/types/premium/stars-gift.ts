@@ -3,20 +3,20 @@ import type { tl } from '@mtcute/tl'
 import type { Sticker } from '../media/sticker.js'
 import type { TextWithEntities } from '../misc/entities.js'
 import type { PeersIndex } from '../peers/peers-index.js'
+import Long from 'long'
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { parseDocument } from '../media/document-utils.js'
 import { User } from '../peers/user.js'
+import { StarGiftUnique } from './stars-gift-unique.js'
 
 /**
  * A gift with stars attached to it.
  */
 export class StarGift {
-    constructor(
-        readonly raw: tl.TypeStarGift,
-    ) {}
+    constructor(readonly raw: tl.RawStarGift) {}
 
     /** ID of the gift */
     get id(): tl.Long {
@@ -32,6 +32,9 @@ export class StarGift {
     get isLimited(): boolean {
         return this.raw.limited!
     }
+
+    /** Whether this gift is a unique gift */
+    readonly isUnique = true as const
 
     /** Additional information for sold-out gifts */
     get soldOutInfo(): {
@@ -75,6 +78,13 @@ export class StarGift {
     }
 
     /**
+     * Amount of stars the gift can be upgraded for
+     */
+    get upgradeStars(): tl.Long | null {
+        return this.raw.upgradeStars ?? null
+    }
+
+    /**
      * For limited availability gifts,
      * the number of remaining and total gifts available
      */
@@ -112,6 +122,10 @@ export class UserStarGift {
         return this.raw.unsaved!
     }
 
+    get isRefunded(): boolean {
+        return this.raw.refunded!
+    }
+
     /** Sender of the gift, if available */
     get sender(): User | null {
         return this.raw.fromId ? new User(this.peers.user(this.raw.fromId)) : null
@@ -122,14 +136,27 @@ export class UserStarGift {
         return this.raw.msgId ?? null
     }
 
-    /** Date the gift was sent */
+    /** Date the gift was sent or minted */
     get date(): Date {
         return new Date(this.raw.date * 1000)
     }
 
+    /** Whether the gift can be upgraded to a unique gift */
+    get canUpgrade(): boolean {
+        return this.raw.canUpgrade!
+    }
+
+    /** Number of stars to upgrade the gift to a unique gift (may be 0) */
+    get upgradeStars(): tl.Long | null {
+        if (!this.raw.canUpgrade) return null
+        return this.raw.upgradeStars ?? Long.ZERO
+    }
+
     /** The gift itself */
-    get gift(): StarGift {
-        return new StarGift(this.raw.gift)
+    get gift(): StarGift | StarGiftUnique {
+        return this.raw.gift._ === 'starGift'
+            ? new StarGift(this.raw.gift)
+            : new StarGiftUnique(this.raw.gift, this.peers)
     }
 
     /** Text attached to the gift */
@@ -143,6 +170,15 @@ export class UserStarGift {
      */
     get convertStars(): tl.Long | null {
         return this.raw.convertStars ?? null
+    }
+
+    get canExportAt(): Date | null {
+        return this.raw.canExportAt ? new Date(this.raw.canExportAt * 1000) : null
+    }
+
+    /** Number of stars this gift can be transferred for */
+    get transferStars(): tl.Long | null {
+        return this.raw.transferStars ?? null
     }
 }
 

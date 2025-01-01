@@ -4,6 +4,7 @@ import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Photo } from '../media/photo.js'
 
+import { BotVerification } from './bot-verification.js'
 import { User } from './user.js'
 
 /**
@@ -80,6 +81,14 @@ export class ChatPreview {
      */
     get withApproval(): boolean {
         return this.invite.requestNeeded!
+    }
+
+    /**
+     * If non-null, this user was verified by a bot, and this field contains
+     * the ID of the custom emoji to display as the verification icon.
+     */
+    get customVerification(): BotVerification | null {
+        return this.invite.botVerification ? new BotVerification(this.invite.botVerification) : null
     }
 }
 

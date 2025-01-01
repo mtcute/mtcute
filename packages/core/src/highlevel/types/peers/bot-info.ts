@@ -53,6 +53,10 @@ export class BotInfo {
     get privacyPolicyUrl(): string | null {
         return this.raw.privacyPolicyUrl ?? null
     }
+
+    get verifierSettings(): tl.TypeBotVerifierSettings | null {
+        return this.raw.verifierSettings ?? null
+    }
 }
 
 makeInspectable(BotInfo)

@@ -1,4 +1,5 @@
 export * from './bot-info.js'
+export * from './bot-verification.js'
 export * from './chat-colors.js'
 export * from './chat-event/index.js'
 export * from './chat-invite-link-member.js'

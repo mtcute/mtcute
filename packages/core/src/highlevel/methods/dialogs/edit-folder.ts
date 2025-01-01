@@ -34,7 +34,7 @@ export async function editFolder(
     }
     if (typeof folder === 'number' || typeof folder === 'string') {
         const old = await getFolders(client)
-        const found = old.filters.find(it => it._ === 'dialogFilter' && (it.id === folder || it.title === folder))
+        const found = old.filters.find(it => it._ === 'dialogFilter' && (it.id === folder || it.title.text === folder))
 
         if (!found) {
             throw new MtArgumentError(`Could not find a folder ${folder}`)

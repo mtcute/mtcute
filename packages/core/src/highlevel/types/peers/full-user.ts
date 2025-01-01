@@ -6,6 +6,7 @@ import { Photo } from '../media/photo.js'
 
 import { BusinessAccount } from '../premium/business-account.js'
 
+import { BotVerification } from './bot-verification.js'
 import { Chat } from './chat.js'
 import { PeersIndex } from './peers-index.js'
 import { User } from './user.js'
@@ -251,6 +252,13 @@ export class FullUser extends User {
         }
         return null
     }
+
+    /** Information about a bot-issued verification (if any) */
+    get botVerification(): BotVerification | null {
+        if (!this.full.botVerification) return null
+
+        return new BotVerification(this.full.botVerification)
+    }
 }
 
 memoizeGetters(FullUser, [
@@ -260,5 +268,6 @@ memoizeGetters(FullUser, [
     'publicPhoto',
     'personalChannel',
     'business',
+    'botVerification',
 ])
 makeInspectable(FullUser)

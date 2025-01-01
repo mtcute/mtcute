@@ -1,6 +1,5 @@
 export * from './auth/index.js'
 export * from './bots/index.js'
-export * from './calls/index.js'
 export * from './conversation.js'
 export * from './errors.js'
 export * from './files/index.js'

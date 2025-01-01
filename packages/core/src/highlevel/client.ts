@@ -230,6 +230,8 @@ import { iterStarsTransactions } from './methods/premium/iter-stars-transactions
 import { sendStarGift } from './methods/premium/send-star-gift.js'
 import { setBusinessIntro } from './methods/premium/set-business-intro.js'
 import { setBusinessWorkHours } from './methods/premium/set-business-work-hours.js'
+import { transferStarGift } from './methods/premium/transfer-star-gift.js'
+import { upgradeStarGift } from './methods/premium/upgrade-star-gift.js'
 import { addStickerToSet } from './methods/stickers/add-sticker-to-set.js'
 import { createStickerSet } from './methods/stickers/create-sticker-set.js'
 import { deleteStickerFromSet } from './methods/stickers/delete-sticker-from-set.js'
@@ -1078,6 +1080,8 @@ export interface TelegramClient extends ITelegramClient {
     /**
      * Prepare an inline message result to be sent later via the
      * `shareMessage` [mini-app api method](https://core.telegram.org/bots/webapps#initializing-mini-apps).
+     * **Available**: 🤖 bots only
+     *
      */
     prepareInlineMessage(
         params: {
@@ -1245,6 +1249,8 @@ export interface TelegramClient extends ITelegramClient {
         }): Promise<void>
     /**
      * Give or revoke permission for a bot to update emoji status for your account
+     * **Available**: 👤 users only
+     *
      */
     toggleEmojiStatusPermission(
         params: {
@@ -4844,6 +4850,9 @@ export interface TelegramClient extends ITelegramClient {
             /** Message to send along with the gift */
             message?: InputText
 
+            /** Whether to automatically upgrade the gift to a unique star gift */
+            withUpgrade?: boolean
+
             /**
              * Whether to dispatch the new message event
              * to the client's update handler.
@@ -4899,6 +4908,61 @@ export interface TelegramClient extends ITelegramClient {
           }
           ))
           | null): Promise<void>
+    /**
+     * Transfer a unique star gift.
+     *
+     * > **Note**: this method is not indended to be used by full-fledged clients,
+     * > as this method hides the actual invoice and payment form from the user.
+     * > For GUI clients, you should refer to the method's source code and
+     * > present the payment form to the user.
+     *
+     * **Available**: 👤 users only
+     *
+     * @returns  Service message about the transferred gift
+     */
+    transferStarGift(
+        params: {
+        /** ID of the message containing the gift */
+            message: number | Message
+
+            /** ID of the user to transfer the gift to */
+            recepient: InputPeerLike
+
+            /**
+             * Whether to dispatch the new message event
+             * to the client's update handler.
+             */
+            shouldDispatch?: true
+        }): Promise<Message>
+    /**
+     * Upgrades a star gift to a unique gift.
+     *
+     * > **Note**: this method is not indended to be used by full-fledged clients,
+     * > as this method hides the actual invoice and payment form from the user.
+     * > For GUI clients, you should refer to the method's source code and
+     * > present the payment form to the user.
+     *
+     * **Available**: 👤 users only
+     *
+     * @returns  Service message about the upgraded gift
+     */
+    upgradeStarGift(
+        params: {
+        /** ID of the message containing the gift */
+            message: number | Message
+
+            /**
+             * Whether to retain the original details of the gift
+             * (like sender, recipient, date, message)
+             */
+            keepOriginalDetails?: boolean
+
+            /**
+             * Whether to dispatch the new message event
+             * to the client's update handler.
+             */
+            shouldDispatch?: true
+        }): Promise<Message>
     /**
      * Add a sticker to a sticker set.
      *
@@ -6730,6 +6794,12 @@ TelegramClient.prototype.setBusinessIntro = function (...args) {
 }
 TelegramClient.prototype.setBusinessWorkHours = function (...args) {
     return setBusinessWorkHours(this._client, ...args)
+}
+TelegramClient.prototype.transferStarGift = function (...args) {
+    return transferStarGift(this._client, ...args)
+}
+TelegramClient.prototype.upgradeStarGift = function (...args) {
+    return upgradeStarGift(this._client, ...args)
 }
 TelegramClient.prototype.addStickerToSet = function (...args) {
     return addStickerToSet(this._client, ...args)
