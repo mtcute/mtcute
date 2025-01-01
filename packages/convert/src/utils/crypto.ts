@@ -12,6 +12,7 @@ export async function getDefaultCryptoProvider(): Promise<IExtendedCryptoProvide
     const crypto = /* @vite-ignore */ await import('node:crypto')
     const { NodeCryptoProvider } = /* @vite-ignore */ await import('@mtcute/node/utils.js')
 
+    // <deno-tsignore>
     return new (class extends NodeCryptoProvider implements IExtendedCryptoProvider {
         createHash(algorithm: 'md5' | 'sha512') {
             const hasher = crypto.createHash(algorithm)

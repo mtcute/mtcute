@@ -11,16 +11,21 @@ on:
 jobs:
   lint: 
     runs-on: node22
-    if: github.actor != 'mtcute-bot' # do not run after release
+    if: github.actor != 'desu-bot' # do not run after release
     steps:
       - uses: actions/checkout@v4
       - uses: ./.forgejo/actions/init
+      - uses: https://github.com/denoland/setup-deno@v1
+        with:
+          deno-version: '2.0'
       - name: 'TypeScript'
         run: pnpm run lint:tsc:ci
       - name: 'ESLint'
         run: pnpm run lint:ci
       - name: 'Circular dependencies'
         run: pnpm run lint:dpdm
+      - name: 'deno publish --dry-run'
+        run: pnpm exec fuman-build jsr gen-deno-workspace --with-dry-run
 
   test-node:
     strategy:

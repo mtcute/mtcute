@@ -14,6 +14,14 @@ import {
 
 import { DenoPlatform } from './platform.js'
 
+// <deno-insert>
+// declare const WorkerGlobalScope: any
+// declare const self: typeof globalThis & {
+//   postMessage: Function,
+//   addEventListener: (type: 'message', listener: (ev: { data: any }) => void) => void,
+// }
+// </deno-insert>
+
 export type { TelegramWorkerOptions, WorkerCustomMethods }
 export interface TelegramWorkerPortOptions {
     worker: SomeWorker

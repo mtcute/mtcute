@@ -14,7 +14,7 @@ export class Audio extends RawDocument {
     readonly type = 'audio' as const
 
     /** Type of the file for File ID generation */
-    protected _fileIdType(): tdFileId.FileType {
+    protected override _fileIdType(): tdFileId.FileType {
         return tdFileId.FileType.Audio
     }
 

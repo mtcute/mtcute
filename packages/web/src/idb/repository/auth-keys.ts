@@ -6,6 +6,13 @@ import { reqToPromise, txToPromise } from '../utils.js'
 const TABLE_AUTH_KEYS = 'authKeys'
 const TABLE_TEMP_AUTH_KEYS = 'tempAuthKeys'
 
+// <deno-insert>
+// declare type IDBTransactionMode = any
+// declare type IDBObjectStore = any
+// declare type IDBValidKey = any
+// declare type IDBRequest<T> = { result: T }
+// </deno-insert>
+
 interface AuthKeyDto {
     dc: number
     key: Uint8Array
@@ -76,7 +83,7 @@ export class IdbAuthKeysRepository implements IAuthKeysRepository {
 
         // IndexedDB sucks
         const tempOs = tx.objectStore(TABLE_TEMP_AUTH_KEYS)
-        const keys = await reqToPromise(tempOs.getAllKeys())
+        const keys = await reqToPromise<IDBValidKey[]>(tempOs.getAllKeys())
 
         for (const key of keys) {
             if ((key as [number, number])[0] === dc) {

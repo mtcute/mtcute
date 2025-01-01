@@ -55,7 +55,7 @@ export class IntermediatePacketCodec implements IPacketCodec {
  * See https://core.telegram.org/mtproto/mtproto-transports#padded-intermediate
  */
 export class PaddedIntermediatePacketCodec extends IntermediatePacketCodec implements IPacketCodec {
-    tag(): Uint8Array {
+    override tag(): Uint8Array {
         return PADDED_TAG
     }
 
@@ -64,7 +64,7 @@ export class PaddedIntermediatePacketCodec extends IntermediatePacketCodec imple
         this._crypto = crypto
     }
 
-    encode(frame: Uint8Array, into: ISyncWritable): void {
+    override encode(frame: Uint8Array, into: ISyncWritable): void {
         // padding size, 0-15
         const padSize = getRandomInt(16)
 

@@ -43,6 +43,7 @@ jobs:
         run: |
           git config user.name "mtcute-bot"
           git config user.email mtcute-bot@tei.su
+          git remote add github git@github.com:mtcute/mtcute.git
       
       - name: Run release
         env:
@@ -52,6 +53,9 @@ jobs:
             --kind=${{ github.event.inputs.kind }} \
             --with-npm \
             --npm-token=${{ secrets.NPM_TOKEN }} \
+            --with-jsr \
+            --jsr-token=${{ secrets.JSR_TOKEN }} \
+            --git-extra-origins=github \
             --with-github-release \
             --github-repo=mtcute/mtcute \
             --github-token=${{ secrets.GH_PAT }}

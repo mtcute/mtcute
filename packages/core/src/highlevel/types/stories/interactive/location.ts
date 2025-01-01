@@ -13,7 +13,7 @@ import { StoryInteractiveArea } from './base.js'
 export class StoryInteractiveLocation extends StoryInteractiveArea {
     readonly type = 'location' as const
 
-    constructor(readonly raw: tl.RawMediaAreaGeoPoint) {
+    constructor(override readonly raw: tl.RawMediaAreaGeoPoint) {
         super(raw)
     }
 

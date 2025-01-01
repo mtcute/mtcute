@@ -83,7 +83,7 @@ class BaseCallbackQuery {
  */
 export class CallbackQuery extends BaseCallbackQuery {
     constructor(
-        readonly raw: tl.RawUpdateBotCallbackQuery,
+        override readonly raw: tl.RawUpdateBotCallbackQuery,
         _peers: PeersIndex,
     ) {
         super(raw, _peers)
@@ -116,7 +116,7 @@ makeInspectable(CallbackQuery)
  */
 export class InlineCallbackQuery extends BaseCallbackQuery {
     constructor(
-        readonly raw: tl.RawUpdateInlineBotCallbackQuery,
+        override readonly raw: tl.RawUpdateInlineBotCallbackQuery,
         _peers: PeersIndex,
     ) {
         super(raw, _peers)
@@ -151,7 +151,7 @@ makeInspectable(InlineCallbackQuery)
  */
 export class BusinessCallbackQuery extends BaseCallbackQuery {
     constructor(
-        readonly raw: tl.RawUpdateBusinessBotCallbackQuery,
+        override readonly raw: tl.RawUpdateBusinessBotCallbackQuery,
         _peers: PeersIndex,
     ) {
         super(raw, _peers)

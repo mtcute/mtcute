@@ -133,7 +133,7 @@ export class LiveLocation extends RawLocation {
      * independent live geolocation, which
      * will not be auto-updated with the current
      */
-    get inputMedia(): tl.TypeInputMedia {
+    override get inputMedia(): tl.TypeInputMedia {
         return {
             _: 'inputMediaGeoLive',
             geoPoint: {

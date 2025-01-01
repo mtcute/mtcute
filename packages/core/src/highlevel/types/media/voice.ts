@@ -13,7 +13,7 @@ import { RawDocument } from './document.js'
 export class Voice extends RawDocument {
     readonly type = 'voice' as const
 
-    protected _fileIdType(): tdFileId.FileType {
+    protected override _fileIdType(): tdFileId.FileType {
         return tdFileId.FileType.VoiceNote
     }
 

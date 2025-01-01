@@ -4,51 +4,37 @@ export default {
         exclude: ['**/*.{test,bench,test-utils}.ts', '**/__fixtures__/**'],
         sourceDir: 'src',
         transformCode: (path, code) => {
-            // add shims for node-specific APIs and replace NodeJS.* types
-            // pretty fragile, but it works for now
-            // todo: remove this god awfulness and use `declare const` in-place instead
+            if (!path.endsWith('.ts')) return code
+            if (!code.match('<deno-(insert|remove|tsignore)>')) return code
 
-            const typesToReplace = {
-                'NodeJS\\.Timeout': 'number',
-                'NodeJS\\.Immediate': 'number',
-            }
-            const nodeSpecificApis = {
-                setImmediate: '(cb: (...args: any[]) => void, ...args: any[]) => number',
-                clearImmediate: '(id: number) => void',
-                Buffer:
-                '{ '
-                + 'concat: (...args: any[]) => Uint8Array, '
-                + 'from: (data: any, encoding?: string) => { toString(encoding?: string): string }, '
-                + ' }',
-                SharedWorker: ['type', 'never'],
-                WorkerGlobalScope:
-                '{ '
-                + '  new (): typeof WorkerGlobalScope, '
-                + '  postMessage: (message: any, transfer?: Transferable[]) => void, '
-                + '  addEventListener: (type: "message", listener: (ev: MessageEvent) => void) => void, '
-                + ' }',
-                process: '{ ' + 'hrtime: { bigint: () => bigint }, ' + '}',
+            // deno is missing some types, so we have to add them manually
+            // i dont want to manually write types for them, so we just declare them as `any` in a comment
+            // and un-comment them when building for deno
+            //
+            // this way we can still have proper types in the code, while also being able to build for deno
+            // very much a crutch, but welp, deno sucks
+
+            let insertContent = code.match(/<deno-insert>(.*?)<\/deno-insert>/s)
+            while (insertContent) {
+                code = code.slice(0, insertContent.index)
+                + insertContent[1].replace(/\/\/\s*/g, '')
+                + code.slice(insertContent.index + insertContent[0].length)
+
+                insertContent = code.match(/<deno-insert>(.*?)<\/deno-insert>/s)
             }
 
-            for (const [name, decl_] of Object.entries(nodeSpecificApis)) {
-                if (code.includes(name)) {
-                    if (name === 'Buffer' && code.includes('node:buffer')) continue
+            let removeContent = code.match(/<deno-remove>(.*?)<\/deno-remove>/s)
+            while (removeContent) {
+                code = code.slice(0, removeContent.index) + code.slice(removeContent.index + removeContent[0].length)
 
-                    const isType = Array.isArray(decl_) && decl_[0] === 'type'
-                    const decl = isType ? decl_[1] : decl_
-
-                    if (isType) {
-                        code = `declare type ${name} = ${decl};\n${code}`
-                    } else {
-                        code = `declare const ${name}: ${decl};\n${code}`
-                    }
-                }
+                removeContent = code.match(/<deno-remove>(.*?)<\/deno-remove>/s)
             }
 
-            for (const [oldType, newType] of Object.entries(typesToReplace)) {
-                if (code.match(oldType)) {
-                    code = code.replace(new RegExp(oldType, 'g'), newType)
-                }
+            let tsIgnoreContent = code.match(/\/\/\s*<deno-tsignore>/)
+            while (tsIgnoreContent) {
+                code = `${code.slice(0, tsIgnoreContent.index)}/* @ts-ignore */${code.slice(tsIgnoreContent.index + tsIgnoreContent[0].length)}`
+
+                tsIgnoreContent = code.match(/\/\/\s*<deno-tsignore>/)
             }
 
             return code

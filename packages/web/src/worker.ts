@@ -21,6 +21,14 @@ export interface TelegramWorkerPortOptions {
 }
 let _registered = false
 
+// <deno-insert>
+// declare const WorkerGlobalScope: any
+// declare const self: typeof globalThis & {
+//   postMessage: Function,
+//   addEventListener: (type: 'message', listener: (ev: MessageEvent) => void) => void,
+// }
+// </deno-insert>
+
 export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorkerBase<T> {
     registerWorker(handler: WorkerMessageHandler): RespondFn {
         if (_registered) {
@@ -29,6 +37,7 @@ export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorke
 
         _registered = true
 
+        // <deno-remove>
         if (typeof SharedWorkerGlobalScope !== 'undefined' && self instanceof SharedWorkerGlobalScope) {
             const connections: MessagePort[] = []
 
@@ -89,6 +98,7 @@ export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorke
 
             return broadcast
         }
+        // </deno-remove>
 
         if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
             const respond: RespondFn = self.postMessage.bind(self)
@@ -132,6 +142,7 @@ export class TelegramWorkerPort<T extends WorkerCustomMethods> extends TelegramW
             ]
         }
 
+        // <deno-remove>
         if (worker instanceof SharedWorker) {
             const send: SendFn = worker.port.postMessage.bind(worker.port)
 
@@ -171,6 +182,7 @@ export class TelegramWorkerPort<T extends WorkerCustomMethods> extends TelegramW
 
             return [send, close]
         }
+        // </deno-remove>
 
         throw new Error('Only workers and shared workers are supported')
     }

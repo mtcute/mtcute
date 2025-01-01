@@ -8,6 +8,10 @@ import { isTlRpcError } from './type-assertions.js'
 const DEFAULT_LOG_LEVEL = 2
 const FORMATTER_RE = /%[a-z]/gi
 
+// <deno-insert>
+// declare const Buffer: typeof import('node:buffer').Buffer
+// </deno-insert>
+
 /**
  * Logger created by {@link LogManager}
  */
@@ -179,7 +183,7 @@ export class LogManager extends Logger {
      *
      * @param tag  Logger tag
      */
-    create(tag: string): Logger {
+    override create(tag: string): Logger {
         return new Logger(this, tag)
     }
 

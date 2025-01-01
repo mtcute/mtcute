@@ -170,7 +170,7 @@ export class SessionConnection extends PersistentConnection {
         this.reset()
     }
 
-    async destroy(): Promise<void> {
+    override async destroy(): Promise<void> {
         await super.destroy()
         this.reset(true)
     }
@@ -1542,7 +1542,7 @@ export class SessionConnection extends PersistentConnection {
         }
     }
 
-    protected _onInactivityTimeout(): void {
+    protected override _onInactivityTimeout(): void {
         // we should send all pending acks and other service messages
         // before dropping the connection
         // additionally, if we are still waiting for some rpc results,

@@ -16,7 +16,7 @@ import { StoryInteractiveArea } from './base.js'
 export class StoryInteractiveReaction extends StoryInteractiveArea {
     readonly type = 'reaction' as const
 
-    constructor(readonly raw: tl.RawMediaAreaSuggestedReaction) {
+    constructor(override readonly raw: tl.RawMediaAreaSuggestedReaction) {
         super(raw)
     }
 

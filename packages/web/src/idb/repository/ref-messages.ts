@@ -11,6 +11,14 @@ interface MessageRefDto {
     msgId: number
 }
 
+// <deno-insert>
+// declare type IDBTransactionMode = any
+// declare type IDBObjectStore = any
+// declare type IDBValidKey = any
+// declare type IDBRequest<T> = { result: T }
+// declare type IDBCursorWithValue = { delete: () => void, continue: () => void }
+// </deno-insert>
+
 export class IdbRefMsgRepository implements IReferenceMessagesRepository {
     constructor(readonly _driver: IdbStorageDriver) {
         _driver.registerMigration(TABLE, 1, (db) => {
@@ -46,7 +54,7 @@ export class IdbRefMsgRepository implements IReferenceMessagesRepository {
         const index = os.index('by_msg')
 
         for (const msgId of msgIds) {
-            const keys = await reqToPromise(index.getAllKeys([chatId, msgId]))
+            const keys = await reqToPromise<IDBValidKey[]>(index.getAllKeys([chatId, msgId]))
 
             // there are never that many keys, so we can avoid using cursor
             for (const key of keys) {
@@ -64,12 +72,12 @@ export class IdbRefMsgRepository implements IReferenceMessagesRepository {
 
         const req = index.openCursor(peerId)
 
-        let cursor = await reqToPromise(req)
+        let cursor = await reqToPromise<IDBCursorWithValue | null>(req)
 
         while (cursor) {
             cursor.delete()
             cursor.continue()
-            cursor = await reqToPromise(req)
+            cursor = await reqToPromise<IDBCursorWithValue | null>(req)
         }
 
         return txToPromise(tx)

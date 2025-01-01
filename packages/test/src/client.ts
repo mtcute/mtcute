@@ -185,7 +185,7 @@ export class StubTelegramClient extends BaseTelegramClient {
         return response
     }
 
-    async call<T extends tl.RpcMethod>(
+    override async call<T extends tl.RpcMethod>(
         message: MustEqual<T, tl.RpcMethod>,
         params?: RpcCallOptions,
     ): Promise<tl.RpcCallReturn[T['_']]> {
