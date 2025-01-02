@@ -34,7 +34,7 @@ export class StarGift {
     }
 
     /** Whether this gift is a unique gift */
-    readonly isUnique = true as const
+    readonly isUnique = false as const
 
     /** Additional information for sold-out gifts */
     get soldOutInfo(): {
