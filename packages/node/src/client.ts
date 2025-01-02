@@ -103,13 +103,13 @@ export class TelegramClient extends TelegramClientBase {
         return new Promise(res => this._rl?.question(text, res))
     }
 
-    close(): Promise<void> {
+    override close(): Promise<void> {
         this._rl?.close()
 
         return super.close()
     }
 
-    start(params: Parameters<TelegramClientBase['start']>[0] = {}): Promise<User> {
+    override start(params: Parameters<TelegramClientBase['start']>[0] = {}): Promise<User> {
         if (!params.botToken) {
             if (!params.phone) params.phone = () => this.input('phone > ')
             if (!params.code) params.code = () => this.input('code > ')
@@ -129,7 +129,7 @@ export class TelegramClient extends TelegramClientBase {
         })
     }
 
-    run(
+    override run(
         params: Parameters<TelegramClient['start']>[0] | ((user: User) => void | Promise<void>),
         then?: (user: User) => void | Promise<void>,
     ): void {
@@ -143,7 +143,7 @@ export class TelegramClient extends TelegramClientBase {
             .catch(err => this.onError.emit(unknownToError(err)))
     }
 
-    downloadToFile(
+    override downloadToFile(
         filename: string,
         location: FileDownloadLocation,
         params?: FileDownloadParameters | undefined,
@@ -151,7 +151,10 @@ export class TelegramClient extends TelegramClientBase {
         return downloadToFile(this, filename, location, params)
     }
 
-    downloadAsNodeStream(location: FileDownloadLocation, params?: FileDownloadParameters | undefined): Readable {
+    override downloadAsNodeStream(
+        location: FileDownloadLocation,
+        params?: FileDownloadParameters | undefined,
+    ): Readable {
         return downloadAsNodeStream(this, location, params)
     }
 }

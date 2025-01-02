@@ -14,7 +14,7 @@ import { StoryInteractiveArea } from './base.js'
 export class StoryInteractiveVenue extends StoryInteractiveArea {
     readonly type = 'venue' as const
 
-    constructor(readonly raw: tl.RawMediaAreaVenue) {
+    constructor(override readonly raw: tl.RawMediaAreaVenue) {
         super(raw)
     }
 

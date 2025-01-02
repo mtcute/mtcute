@@ -230,6 +230,8 @@ export { iterStarsTransactions } from './methods/premium/iter-stars-transactions
 export { sendStarGift } from './methods/premium/send-star-gift.js'
 export { setBusinessIntro } from './methods/premium/set-business-intro.js'
 export { setBusinessWorkHours } from './methods/premium/set-business-work-hours.js'
+export { transferStarGift } from './methods/premium/transfer-star-gift.js'
+export { upgradeStarGift } from './methods/premium/upgrade-star-gift.js'
 export { addStickerToSet } from './methods/stickers/add-sticker-to-set.js'
 export { createStickerSet } from './methods/stickers/create-sticker-set.js'
 export { deleteStickerFromSet } from './methods/stickers/delete-sticker-from-set.js'

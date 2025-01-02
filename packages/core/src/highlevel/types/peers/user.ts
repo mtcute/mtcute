@@ -149,6 +149,14 @@ export class User {
     }
 
     /**
+     * If non-null, this user was verified by a bot, and this field contains
+     * the ID of the custom emoji to display as the verification icon.
+     */
+    get customVerificationEmojiId(): tl.Long | null {
+        return this.raw.botVerificationIcon ?? null
+    }
+
+    /**
      * Whether this user has been restricted. Bots only.
      * See {@link restrictionReason} for details
      */

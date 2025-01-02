@@ -5,6 +5,12 @@ import { txToPromise } from './utils.js'
 export type PostMigrationFunction = (db: IDBDatabase) => Promise<void>
 type MigrationFunction = (db: IDBDatabase) => void | PostMigrationFunction
 
+// <deno-insert>
+// declare const indexedDB: any
+// declare type IDBDatabase = any
+// declare type IDBObjectStore = any
+// </deno-insert>
+
 const REPO_VERSION_PREFIX = '__version:'
 
 export class IdbStorageDriver extends BaseStorageDriver {

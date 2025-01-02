@@ -11,6 +11,14 @@ interface MessageRefDto {
     msgId: number
 }
 
+// <deno-insert>
+// declare type IDBTransactionMode = any
+// declare type IDBObjectStore = any
+// declare type IDBValidKey = any
+// declare type IDBRequest<T> = { result: T }
+// declare type IDBCursorWithValue = { delete: () => void, continue: () => void }
+// </deno-insert>
+
 export class IdbRefMsgRepository implements IReferenceMessagesRepository {
     constructor(readonly _driver: IdbStorageDriver) {
         _driver.registerMigration(TABLE, 1, (db) => {

@@ -5,6 +5,12 @@ import { reqToPromise } from '../utils.js'
 
 const TABLE = 'peers'
 
+// <deno-insert>
+// declare type IDBTransactionMode = any
+// declare type IDBObjectStore = any
+// declare type IDBRequest<T> = { result: T }
+// </deno-insert>
+
 export class IdbPeersRepository implements IPeersRepository {
     constructor(readonly _driver: IdbStorageDriver) {
         _driver.registerMigration(TABLE, 1, (db) => {

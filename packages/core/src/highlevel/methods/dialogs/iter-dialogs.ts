@@ -144,7 +144,7 @@ export async function* iterDialogs(
             localFilters_ = {
                 _: 'dialogFilter',
                 id: 0,
-                title: '',
+                title: { _: 'textWithEntities', text: '', entities: [] },
                 pinnedPeers: [],
                 includePeers: [],
                 excludePeers: [],

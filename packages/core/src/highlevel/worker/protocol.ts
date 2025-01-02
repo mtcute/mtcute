@@ -49,6 +49,10 @@ export type WorkerOutboundMessage =
       error?: SerializedError
   }
 
+// <deno-insert>
+// declare type SharedWorker = never
+// </deno-insert>
+
 export type SomeWorker = NodeWorker | Worker | SharedWorker
 
 export type SendFn = (message: WorkerInboundMessage) => void

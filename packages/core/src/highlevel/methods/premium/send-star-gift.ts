@@ -39,6 +39,9 @@ export async function sendStarGift(
         /** Message to send along with the gift */
         message?: InputText
 
+        /** Whether to automatically upgrade the gift to a unique star gift */
+        withUpgrade?: boolean
+
         /**
          * Whether to dispatch the new message event
          * to the client's update handler.
@@ -46,7 +49,14 @@ export async function sendStarGift(
         shouldDispatch?: true
     },
 ): Promise<Message> {
-    const { userId, gift, anonymous, message, shouldDispatch } = params
+    const {
+        userId,
+        gift,
+        anonymous,
+        message,
+        shouldDispatch,
+        withUpgrade,
+    } = params
 
     const invoice: tl.TypeInputInvoice = {
         _: 'inputInvoiceStarGift',
@@ -54,6 +64,7 @@ export async function sendStarGift(
         userId: await resolveUser(client, userId),
         giftId: Long.isLong(gift) ? gift : gift.id,
         message: message ? inputTextToTl(message) : undefined,
+        includeUpgrade: withUpgrade,
     }
 
     const form = await client.call({

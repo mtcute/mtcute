@@ -8,7 +8,7 @@ import { StoryInteractiveArea } from './base.js'
 export class StoryInteractiveUrl extends StoryInteractiveArea {
     readonly type = 'url' as const
 
-    constructor(readonly raw: tl.RawMediaAreaUrl) {
+    constructor(override readonly raw: tl.RawMediaAreaUrl) {
         super(raw)
     }
 

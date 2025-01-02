@@ -25,7 +25,7 @@ export async function _normalizeInputFolder(
                 return folder === 0
             }
 
-            return it.id === folder || it.title === folder
+            return it.id === folder || it.title.text === folder
         })
 
         if (!found) {

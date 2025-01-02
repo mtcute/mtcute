@@ -14,7 +14,7 @@ export class StoryInteractiveChannelPost extends StoryInteractiveArea {
     readonly type = 'channel_post' as const
 
     constructor(
-        readonly raw: tl.RawMediaAreaChannelPost,
+        override readonly raw: tl.RawMediaAreaChannelPost,
         readonly _peers: PeersIndex,
     ) {
         super(raw)

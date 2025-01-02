@@ -3,6 +3,10 @@ import type { ICorePlatform } from '@mtcute/core'
 import { defaultLoggingHandler } from './common-internals-web/logging.js'
 import { beforeExit } from './exit-hook.js'
 
+// <deno-insert>
+// declare const navigator: (typeof globalThis)['navigator'] & { onLine: boolean }
+// </deno-insert>
+
 export class WebPlatform implements ICorePlatform {
     // ICorePlatform
     declare log: typeof defaultLoggingHandler

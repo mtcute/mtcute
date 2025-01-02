@@ -20,6 +20,7 @@
     "strict": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
+    "noImplicitOverride": true,
     "declaration": true,
     "inlineSources": true,
     "noEmit": true,

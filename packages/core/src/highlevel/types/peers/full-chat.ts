@@ -7,6 +7,7 @@ import { StickerSet } from '../misc/sticker-set.js'
 
 import { PeerStories } from '../stories/peer-stories.js'
 import { BotInfo } from './bot-info.js'
+import { BotVerification } from './bot-verification.js'
 import { ChatInviteLink } from './chat-invite-link.js'
 import { ChatLocation } from './chat-location.js'
 import { Chat } from './chat.js'
@@ -356,6 +357,13 @@ export class FullChat extends Chat {
 
         return new PeerStories(this.full.stories, this.peers)
     }
+
+    /** Information about a bot-issued verification (if any) */
+    get botVerification(): BotVerification | null {
+        if (this.full._ !== 'channelFull' || !this.full.botVerification) return null
+
+        return new BotVerification(this.full.botVerification)
+    }
 }
 
 memoizeGetters(FullChat, [
@@ -368,5 +376,6 @@ memoizeGetters(FullChat, [
     'linkedChat',
     'recentRequesters',
     'stories',
+    'botVerification',
 ])
 makeInspectable(FullChat)

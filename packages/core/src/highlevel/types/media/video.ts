@@ -14,7 +14,7 @@ import { RawDocument } from './document.js'
 export class Video extends RawDocument {
     readonly type = 'video' as const
 
-    protected _fileIdType(): tdFileId.FileType {
+    protected override _fileIdType(): tdFileId.FileType {
         if (this.isRound) return tdFileId.FileType.VideoNote
         if (this.isAnimation) return tdFileId.FileType.Animation
 

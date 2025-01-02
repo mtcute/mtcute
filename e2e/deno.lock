@@ -168,7 +168,6 @@
         "npm:chai@^4.3.10",
         "npm:dotenv-cli@7.4.4",
         "npm:esbuild@0.24",
-        "npm:globstar@1.0.0",
         "npm:tsx@^4.19.2"
       ]
     }

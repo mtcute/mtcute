@@ -65,7 +65,7 @@ const MASK_POS = ['forehead', 'eyes', 'mouth', 'chin'] as const
 export class Sticker extends RawDocument {
     readonly type = 'sticker' as const
 
-    protected _fileIdType(): tdFileId.FileType {
+    protected override _fileIdType(): tdFileId.FileType {
         return tdFileId.FileType.Sticker
     }
 

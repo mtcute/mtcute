@@ -25,6 +25,7 @@ export default defineConfig({
                         'core/src/network/persistent-connection.test.ts',
                         // use fixtures
                         'convert/src/tdesktop/tdata.test.ts',
+                        'convert/src/gramjs/store-session.test.ts',
                     ],
                 }),
             formats: ['es'],

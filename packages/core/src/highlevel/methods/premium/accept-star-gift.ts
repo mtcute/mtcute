@@ -1,6 +1,5 @@
 import type { ITelegramClient } from '../../client.types.js'
-import { type InputMessageId, normalizeInputMessageId } from '../../types/messages/input-message-id.js'
-import { resolveUser } from '../users/resolve-peer.js'
+import type { Message } from '../../types/messages/message.js'
 
 // @available=user
 /**
@@ -10,7 +9,9 @@ import { resolveUser } from '../users/resolve-peer.js'
  */
 export async function acceptStarGift(
     client: ITelegramClient,
-    params: InputMessageId & {
+    params: {
+        /** ID of the message containing the gift */
+        message: number | Message
         /**
          * Action to perform on the gift.
          *  - `save` - save the gift to your profile
@@ -21,20 +22,17 @@ export async function acceptStarGift(
     },
 ): Promise<boolean> {
     const { action } = params
-    const { chatId, message } = normalizeInputMessageId(params)
-    const userId = await resolveUser(client, chatId)
+    const message = typeof params.message === 'number' ? params.message : params.message.id
 
     return client.call(
         action === 'convert'
             ? {
                 _: 'payments.convertStarGift',
-                userId,
                 msgId: message,
             }
             : {
                 _: 'payments.saveStarGift',
                 unsave: action === 'hide',
-                userId,
                 msgId: message,
             },
     )

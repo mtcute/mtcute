@@ -470,10 +470,21 @@ export class Message {
     }
 
     /**
+     * Whether reactions are possible on this message
+     *
+     * > **Note**: for non-service message this is always `true`,
+     * > regardless if the message can actually be reacted to.
+     */
+    get canBeReacted(): boolean {
+        if (this.raw._ === 'message') return true
+        return this.raw.reactionsArePossible!
+    }
+
+    /**
      * Reactions added to this message, if any
      */
     get reactions(): MessageReactions | null {
-        if (this.raw._ === 'messageService' || !this.raw.reactions) {
+        if (!this.raw.reactions) {
             return null
         }
 

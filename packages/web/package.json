@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/web",
     "type": "module",
-    "version": "0.19.0",
+    "version": "0.19.1",
     "private": true,
     "description": "Meta-package for the web platform",
     "author": "alina sireneva <alina@tei.su>",
@@ -15,8 +15,7 @@
     "dependencies": {
         "@mtcute/core": "workspace:^",
         "@mtcute/wasm": "workspace:^",
-        "@fuman/net": "0.0.4",
-        "events": "3.2.0"
+        "@fuman/net": "0.0.4"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^"

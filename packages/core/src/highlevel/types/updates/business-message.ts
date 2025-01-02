@@ -9,7 +9,7 @@ import { Message } from '../messages/message.js'
 export class BusinessMessage extends Message {
     constructor(
         readonly update: tl.RawUpdateBotNewBusinessMessage | tl.RawUpdateBotEditBusinessMessage,
-        readonly _peers: PeersIndex,
+        _peers: PeersIndex,
     ) {
         super(update.message, _peers)
     }
@@ -21,7 +21,7 @@ export class BusinessMessage extends Message {
         return this.update.connectionId
     }
 
-    get groupedIdUnique(): string | null {
+    override get groupedIdUnique(): string | null {
         const superGroupedIdUnique = super.groupedIdUnique
 
         if (!superGroupedIdUnique) {

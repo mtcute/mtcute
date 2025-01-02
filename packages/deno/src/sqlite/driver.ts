@@ -88,7 +88,7 @@ export class SqliteStorageDriver extends BaseSqliteStorageDriver {
         super()
     }
 
-    async _load(): Promise<void> {
+    override async _load(): Promise<void> {
         if (!Database) {
             // we load this lazily to avoid loading ffi if it's not needed,
             // in case the user doesn't use sqlite storage

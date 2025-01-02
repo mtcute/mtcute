@@ -10,7 +10,7 @@ import { StoryInteractiveArea } from './base.js'
 export class StoryInteractiveWeather extends StoryInteractiveArea {
     readonly type = 'weather' as const
 
-    constructor(readonly raw: tl.RawMediaAreaWeather) {
+    constructor(override readonly raw: tl.RawMediaAreaWeather) {
         super(raw)
     }
 

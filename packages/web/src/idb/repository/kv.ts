@@ -9,6 +9,12 @@ interface KeyValueDto {
     value: Uint8Array
 }
 
+// <deno-insert>
+// declare type IDBTransactionMode = any
+// declare type IDBObjectStore = any
+// declare type IDBRequest<T> = { result: T }
+// </deno-insert>
+
 export class IdbKvRepository implements IKeyValueRepository {
     constructor(readonly _driver: IdbStorageDriver) {
         _driver.registerMigration(KV_TABLE, 1, (db) => {

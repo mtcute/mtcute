@@ -1,8 +1,9 @@
 import type { tl } from '@mtcute/tl'
 
+import type { TextWithEntities } from '../misc/entities.js'
 import type { Peer } from './peer.js'
-import { makeInspectable } from '../../utils/inspectable.js'
 
+import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { parsePeer } from './peer.js'
 import { PeersIndex } from './peers-index.js'
@@ -27,8 +28,8 @@ export class ChatlistPreview {
     }
 
     /** Title of the chatlist (only available for non-joined chatlists) */
-    get title(): string {
-        return this.raw._ === 'chatlists.chatlistInvite' ? this.raw.title : ''
+    get title(): TextWithEntities {
+        return this.raw._ === 'chatlists.chatlistInvite' ? this.raw.title : { text: '', entities: [] }
     }
 
     /** Emoji representing an icon of the chatlist (may only be available for non-joined chatlists) */

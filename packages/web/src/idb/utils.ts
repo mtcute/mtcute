@@ -1,3 +1,8 @@
+// <deno-insert>
+// declare type IDBTransaction = any
+// declare type IDBRequest<T> = { result: T, onsuccess?: (ev: any) => void, onerror?: (ev: any) => void, error?: any }
+// </deno-insert>
+
 export function txToPromise(tx: IDBTransaction): Promise<void> {
     return new Promise((resolve, reject) => {
         tx.oncomplete = () => resolve()

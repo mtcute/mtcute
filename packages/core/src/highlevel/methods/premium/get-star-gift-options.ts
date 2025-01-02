@@ -14,5 +14,12 @@ export async function getStarGiftOptions(client: ITelegramClient): Promise<StarG
 
     assertTypeIsNot('payments.getStarGifts', res, 'payments.starGiftsNotModified')
 
-    return res.gifts.map(gift => new StarGift(gift))
+    const ret: StarGift[] = []
+    for (const gift of res.gifts) {
+        if (gift._ === 'starGift') {
+            ret.push(new StarGift(gift))
+        }
+    }
+
+    return ret
 }

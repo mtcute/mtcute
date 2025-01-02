@@ -410,6 +410,15 @@ export class Chat {
     }
 
     /**
+     * If non-null, this user was verified by a bot, and this field contains
+     * the ID of the custom emoji to display as the verification icon.
+     */
+    get customVerificationEmojiId(): tl.Long | null {
+        if (this.raw._ !== 'channel') return null
+        return this.raw.botVerificationIcon ?? null
+    }
+
+    /**
      * Color that should be used when rendering the header of
      * the user's profile
      */
