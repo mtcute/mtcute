@@ -24,6 +24,9 @@ jobs:
           touch docs/.nojekyll
           echo "ref.mtcute.dev" > docs/CNAME
           echo "ignore-workspace-root-check=true" >> .npmrc
+
+          curl -O https://gist.githubusercontent.com/j0nl1/7f9b5210c9e6ecbabe322baa16dcb5db/raw/760de77327bf83671cfb6bd4e64181299ba26113/typedoc-fix-cf.mjs
+          node typedoc-fix-cf.mjs docs
       - name: Deploy
         # do not run on forks and releases
         if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor == 'desu-bot'

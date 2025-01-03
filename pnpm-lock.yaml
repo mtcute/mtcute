@@ -80,6 +80,9 @@ importers:
       semver:
         specifier: 7.5.1
         version: 7.5.1
+      tinyglobby:
+        specifier: ^0.2.10
+        version: 0.2.10
       tsx:
         specifier: 4.17.0
         version: 4.17.0
