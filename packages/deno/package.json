@@ -15,9 +15,9 @@
     "dependencies": {
         "@db/sqlite": "npm:@jsr/db__sqlite@0.12.0",
         "@fuman/utils": "0.0.4",
-        "@fuman/net": "0.0.4",
-        "@fuman/io": "0.0.4",
-        "@fuman/deno": "npm:@jsr/fuman__deno@0.0.4",
+        "@fuman/net": "0.0.8",
+        "@fuman/io": "0.0.8",
+        "@fuman/deno": "npm:@jsr/fuman__deno@0.0.8",
         "@mtcute/core": "workspace:^",
         "@mtcute/html-parser": "workspace:^",
         "@mtcute/markdown-parser": "workspace:^",

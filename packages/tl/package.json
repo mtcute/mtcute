@@ -24,7 +24,7 @@
         "@mtcute/node": "workspace:^",
         "@mtcute/tl-utils": "workspace:^",
         "@fuman/utils": "0.0.4",
-        "@fuman/fetch": "0.0.7",
+        "@fuman/fetch": "0.0.8",
         "@types/js-yaml": "^4.0.5",
         "cheerio": "1.0.0-rc.12",
         "csv-parse": "^5.5.0",
