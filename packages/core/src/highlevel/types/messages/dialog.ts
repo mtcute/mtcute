@@ -206,7 +206,10 @@ export class Dialog {
         const cid = this.peer.id
 
         if (this._messages.has(cid)) {
-            return new Message(this._messages.get(cid)!, this._peers)
+            const msg = this._messages.get(cid)!
+            if (msg._ === 'messageEmpty') return null
+
+            return new Message(msg, this._peers)
         }
 
         return null
