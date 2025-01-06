@@ -11,7 +11,7 @@
     "dependencies": {
         "@mtcute/core": "workspace:^",
         "@fuman/utils": "0.0.4",
-        "@fuman/net": "0.0.8",
+        "@fuman/net": "0.0.9",
         "@fuman/io": "0.0.8"
     },
     "devDependencies": {

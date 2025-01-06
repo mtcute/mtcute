@@ -20,7 +20,7 @@
     },
     "dependencies": {
         "@fuman/io": "0.0.8",
-        "@fuman/net": "0.0.8",
+        "@fuman/net": "0.0.9",
         "@fuman/utils": "0.0.4",
         "@mtcute/file-id": "workspace:^",
         "@mtcute/tl": "workspace:^",
