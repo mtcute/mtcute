@@ -1,3 +1,7 @@
+import { writeFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+import { asNonNull } from '@fuman/utils'
+
 /** @type {import('@fuman/build').RootConfig} */
 export default {
     jsr: {
@@ -49,6 +53,18 @@ export default {
             'typedoc.cjs',
             '{scripts,dist,tests,private}/**',
         ],
+        beforeReleaseCommit: async (packages) => {
+            const OUT_FILE = fileURLToPath(new URL('./latest-versions.json', import.meta.url))
+
+            const versions = {}
+
+            for (const { json, root } of packages) {
+                if (root) continue
+                versions[asNonNull(json.name)] = asNonNull(json.version)
+            }
+
+            await writeFile(OUT_FILE, JSON.stringify(versions, null, 4))
+        },
     },
     typedoc: {
         excludePackages: [
