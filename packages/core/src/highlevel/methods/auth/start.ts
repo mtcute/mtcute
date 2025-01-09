@@ -12,6 +12,7 @@ import { normalizePhoneNumber, resolveMaybeDynamic } from '../../utils/misc-util
 
 import { getMe } from '../users/get-me.js'
 import { checkPassword } from './check-password.js'
+import { logOut } from './log-out.js'
 import { resendCode } from './resend-code.js'
 import { sendCode } from './send-code.js'
 import { signInBot } from './sign-in-bot.js'
@@ -138,8 +139,16 @@ export async function start(
         return me
     } catch (e) {
         if (tl.RpcError.is(e)) {
-            if (e.text === 'SESSION_PASSWORD_NEEDED') has2fa = true
-            else if (e.text !== 'AUTH_KEY_UNREGISTERED') throw e
+            if (e.text === 'SESSION_PASSWORD_NEEDED') {
+                has2fa = true
+            } else if (e.text === 'SESSION_REVOKED' || e.text === 'USER_DEACTIVATED' || e.text === 'USER_DEACTIVATED_BAN') {
+                // session is dead, we need to explicitly log out before we can log in again
+                await logOut(client).catch((err) => {
+                    client.log.warn('failed to log out: %e', err)
+                })
+            } else if (e.text !== 'AUTH_KEY_UNREGISTERED') {
+                throw e
+            }
         } else {
             throw e
         }
