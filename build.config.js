@@ -1,5 +1,6 @@
 import { writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
+import { exec } from '@fuman/build'
 import { asNonNull } from '@fuman/utils'
 
 /** @type {import('@fuman/build').RootConfig} */
@@ -54,7 +55,7 @@ export default {
             '{scripts,dist,tests,private}/**',
         ],
         beforeReleaseCommit: async (packages) => {
-            const OUT_FILE = fileURLToPath(new URL('./latest-versions.json', import.meta.url))
+            const OUT_FILE = fileURLToPath(new URL('./scripts/latest-versions.json', import.meta.url))
 
             const versions = {}
 
@@ -64,6 +65,7 @@ export default {
             }
 
             await writeFile(OUT_FILE, JSON.stringify(versions, null, 4))
+            await exec('git', ['add', 'scripts/latest-versions.json'])
         },
     },
     typedoc: {
