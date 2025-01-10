@@ -25,7 +25,7 @@ export function getApiParams(storage?: string): BaseTelegramClientOptions {
     }
 }
 
-export async function waitFor(condition: () => MaybePromise<void>, timeout = 5000): Promise<void> {
+export async function waitFor(condition: () => MaybePromise<void>, timeout = 15000): Promise<void> {
     const start = Date.now()
     let lastError
 
