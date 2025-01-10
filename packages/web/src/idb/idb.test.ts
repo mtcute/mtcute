@@ -4,8 +4,9 @@ import {
     testPeersRepository,
     testRefMessagesRepository,
 } from '@mtcute/test'
-import { afterAll, beforeAll, describe } from 'vitest'
+import { expect } from 'chai'
 
+import { afterAll, beforeAll, describe, it } from 'vitest'
 import { IdbStorage } from './index.js'
 
 if (import.meta.env.TEST_ENV === 'browser') {
@@ -20,6 +21,13 @@ if (import.meta.env.TEST_ENV === 'browser') {
         testKeyValueRepository(storage.kv, storage.driver)
         testPeersRepository(storage.peers, storage.driver)
         testRefMessagesRepository(storage.refMessages, storage.driver)
+
+        it('should support multiple connections', async () => {
+            const storage2 = new IdbStorage(idbName)
+            await storage2.driver.load()
+
+            expect(storage2.driver.db.version).to.equal(storage.driver.db.version)
+        })
 
         afterAll(async () => {
             await storage.driver.destroy()

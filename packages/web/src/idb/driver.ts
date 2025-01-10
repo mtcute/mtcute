@@ -12,6 +12,7 @@ type MigrationFunction = (db: IDBDatabase) => void | PostMigrationFunction
 // </deno-insert>
 
 const REPO_VERSION_PREFIX = '__version:'
+const V2_MIGRATIONS_EPOCH = 2000000000000 // 18-05-2033, i sure hope that by then everyone will have upgraded :3
 
 export class IdbStorageDriver extends BaseStorageDriver {
     db!: IDBDatabase
@@ -54,6 +55,31 @@ export class IdbStorageDriver extends BaseStorageDriver {
         }
     }
 
+    private _repoCountOverride: number | undefined
+    setRepoCountOverride(repoCount: number): void {
+        if (repoCount < this._maxVersion.size) {
+            throw new Error(`Cannot override repo count with a lower value (we already have ${this._maxVersion.size} repos registered)`)
+        }
+
+        this._repoCountOverride = repoCount
+    }
+
+    calculateVersion(): number {
+        // we calculate the version number as V2_MIGRATIONS_EPOCH + (repo_count << 8) + sum(...repo_versions)
+        // this way we can also account for adding new repos in the future, and
+        // have up to 512 total migrations, which is probably enough for now
+        // (NB: we can't detect removed repos this way, so we will have to rely on user calling `setRepoCountOverride` to fix that)
+        const repoCount = this._maxVersion.size
+
+        let version = (this._repoCountOverride ?? repoCount) << 8
+
+        for (const repo of this._maxVersion.keys()) {
+            version += this._maxVersion.get(repo)!
+        }
+
+        return V2_MIGRATIONS_EPOCH + version
+    }
+
     writeLater(os: string, obj: unknown): void {
         this._pendingWrites.push([os, obj])
         this._pendingWritesOses.add(os)
@@ -65,19 +91,32 @@ export class IdbStorageDriver extends BaseStorageDriver {
             // and making an ever-incrementing version number is pretty hard
             // since migrations are added dynamically.
             //
-            // force the database to always emit `upgradeneeded` by passing current time
-            const req = indexedDB.open(this._dbName, Date.now())
+            // previously we forced the database to always emit `upgradeneeded` by passing current time,
+            // but that was causing issues because it wasn't possible to open multiple connections to the same database
+            // at the same time (since it would need to be upgraded)
+            //
+            // instead, we now use a somewhat-persistent version number that is incremented when a migration is actually needed,
+            // plus an arbitrary timestamp in the future to make sure we don't break existing databases
+            const req = indexedDB.open(this._dbName, this.calculateVersion())
 
             req.onerror = () => reject(req.error)
 
             const postUpgrade: PostMigrationFunction[] = []
 
             req.onsuccess = async () => {
+                // verify that the version number is correct and we didn't have a downgrade
+                const db = req.result
+                if (db.version !== this.calculateVersion()) {
+                    const ourRepoCount = this._maxVersion.size
+                    const dbRepoCount = (db.version - V2_MIGRATIONS_EPOCH) >> 8
+                    reject(new Error(`IDB version number mismatch. Did some repository get removed? If so, please use \`setRepoCountOverride\` (DB has ${dbRepoCount} repos, but we have ${ourRepoCount})`))
+                }
+
                 try {
                     for (const cb of postUpgrade) {
-                        await cb(req.result)
+                        await cb(db)
                     }
-                    resolve(req.result)
+                    resolve(db)
                 } catch (e) {
                     reject(e)
                 }
