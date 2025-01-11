@@ -70,6 +70,13 @@ export class BaseTelegramClient implements ITelegramClient {
         this.mt = new MtClient({
             ...this.params,
             logger: this.log.create('mtproto'),
+            onError: (err) => {
+                if (this.onError.length > 0) {
+                    this.onError.emit(unknownToError(err))
+                } else if (this._connect.finished()) {
+                    this.log.error('unhandled error:', err)
+                }
+            },
         })
 
         if (!params.disableUpdates && params.updates !== false) {

@@ -275,6 +275,7 @@ export class SessionConnection extends PersistentConnection {
 
                 // there happened a little trolling
                 this.log.warn('transport error 404, reauthorizing')
+                this.onError.emit(error)
                 this._session.resetAuthKey()
                 this._resetSession()
                 this.onKeyChange.emit(null)

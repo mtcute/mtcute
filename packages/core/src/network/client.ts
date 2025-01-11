@@ -213,8 +213,6 @@ export class MtClient {
         return res
     })
 
-    private _emitError?: (err: unknown) => void
-
     readonly log: Logger
     readonly network: NetworkManager
 
@@ -226,7 +224,7 @@ export class MtClient {
     readonly onNetworkChanged: Emitter<boolean> = new Emitter()
     readonly onUpdate: Emitter<tl.TypeUpdates> = new Emitter()
 
-    constructor(readonly params: MtClientOptions) {
+    constructor(readonly params: MtClientOptions & { onError: (err: unknown) => void }) {
         this.log = params.logger ?? new LogManager(undefined, params.platform)
 
         if (params.logLevel !== undefined) {
@@ -278,7 +276,7 @@ export class MtClient {
                 storage: this.storage,
                 testMode: Boolean(params.testMode),
                 transport: params.transport,
-                emitError: this.emitError.bind(this),
+                emitError: params.onError,
                 isPremium: false,
                 useIpv6: Boolean(params.useIpv6),
                 enableErrorReporting: params.enableErrorReporting ?? false,
@@ -292,14 +290,6 @@ export class MtClient {
             },
             this._config,
         )
-    }
-
-    emitError(err: unknown): void {
-        if (this._emitError) {
-            this._emitError(err)
-        } else if (this._connect.finished()) {
-            this.log.error('unhandled error:', err)
-        }
     }
 
     private _prepare = asyncResettable(async () => {
@@ -374,14 +364,5 @@ export class MtClient {
         params?: RpcCallOptions,
     ): Promise<tl.RpcCallReturn[T['_']] | mtp.RawMt_rpc_error> {
         return this.network.call(message, params)
-    }
-
-    /**
-     * Register an error handler for the client
-     *
-     * @param handler Error handler.
-     */
-    onError(handler: (err: unknown) => void): void {
-        this._emitError = handler
     }
 }
