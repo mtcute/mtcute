@@ -65,7 +65,7 @@ export default {
             }
 
             await writeFile(OUT_FILE, JSON.stringify(versions, null, 4))
-            await exec('git', ['add', 'scripts/latest-versions.json'])
+            await exec(['git', 'add', 'scripts/latest-versions.json'])
         },
     },
     typedoc: {
