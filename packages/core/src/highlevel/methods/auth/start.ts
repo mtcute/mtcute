@@ -266,7 +266,10 @@ export async function start(
             const password = await resolveMaybeDynamic(params.password)
 
             try {
-                return await checkPassword(client, password)
+                return await checkPassword(client, {
+                    password,
+                    abortSignal,
+                })
             } catch (e) {
                 if (typeof params.password !== 'function') {
                     throw new MtArgumentError('Provided password was invalid')

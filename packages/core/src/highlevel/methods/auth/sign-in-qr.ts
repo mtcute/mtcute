@@ -76,7 +76,10 @@ export async function signInQr(
             const password = await resolveMaybeDynamic(input)
 
             try {
-                return await checkPassword(client, password)
+                return await checkPassword(client, {
+                    password,
+                    abortSignal,
+                })
             } catch (e) {
                 if (tl.RpcError.is(e, 'PASSWORD_HASH_INVALID')) {
                     if (!isDynamic) {

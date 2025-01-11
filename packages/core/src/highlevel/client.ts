@@ -393,11 +393,20 @@ export interface TelegramClient extends ITelegramClient {
      *
      * **Available**: 👤 users only
      *
-     * @param password  Your Two-Step verification password
      * @returns  The authorized user
      * @throws BadRequestError  In case the password is invalid
      */
-    checkPassword(password: string): Promise<User>
+    checkPassword(
+        options: string | {
+        /** Your Two-Step verification password */
+            password: string
+
+            /** Existing response from `account.getPassword`, if available (to avoid extra API calls) */
+            passwordObj?: tl.account.TypePassword
+
+            /** Abort signal */
+            abortSignal?: AbortSignal
+        }): Promise<User>
     /**
      * Get your Two-Step Verification password hint.
      *
@@ -4543,13 +4552,15 @@ export interface TelegramClient extends ITelegramClient {
      * @returns  Whether the action was successful
      */
     acceptStarGift(
-        params: InputMessageId & {
-        /**
-         * Action to perform on the gift.
-         *  - `save` - save the gift to your profile
-         *  - `hide` - hide the gift from your profile
-         *  - `convert` - convert the gift to stars (can't be undone)
-         */
+        params: {
+        /** ID of the message containing the gift */
+            message: number | Message
+            /**
+             * Action to perform on the gift.
+             *  - `save` - save the gift to your profile
+             *  - `hide` - hide the gift from your profile
+             *  - `convert` - convert the gift to stars (can't be undone)
+             */
             action: 'save' | 'hide' | 'convert'
         }): Promise<boolean>
     /**
