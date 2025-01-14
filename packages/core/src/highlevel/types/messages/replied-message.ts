@@ -106,6 +106,10 @@ export class RepliedMessageInfo {
 
     /** ID of the replies thread where this message belongs to */
     get threadId(): number | null {
+        if (this.raw.forumTopic) {
+            return this.raw.replyToTopId ?? this.raw.replyToMsgId ?? null
+        }
+
         return this.raw.replyToTopId ?? null
     }
 
