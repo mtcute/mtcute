@@ -1,7 +1,7 @@
 {
   "name": "mtcute-workspace",
   "type": "module",
-  "version": "0.19.6",
+  "version": "0.19.7",
   "private": true,
   "packageManager": "pnpm@9.0.6",
   "description": "Type-safe library for MTProto (Telegram API) for browser and NodeJS",
