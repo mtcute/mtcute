@@ -3,8 +3,6 @@ runs:
   steps:
     - name: Setup pnpm
       uses: pnpm/action-setup@v2
-      with:
-        version: '9.0.6'
     - run: pnpm install --frozen-lockfile
       shell: bash
     - name: 'TL codegen'

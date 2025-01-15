@@ -13,10 +13,10 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^3.11.2
-        version: 3.11.2(@typescript-eslint/utils@8.17.0(eslint@9.9.0)(typescript@5.5.4))(@vue/compiler-sfc@3.5.13)(eslint@9.9.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@20.10.0)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5))
+        version: 3.11.2(@typescript-eslint/utils@8.17.0(eslint@9.9.0)(typescript@5.5.4))(@vue/compiler-sfc@3.5.13)(eslint@9.9.0)(typescript@5.5.4)(vitest@2.0.5)
       '@fuman/build':
-        specifier: https://pkg.pr.new/teidesu/fuman/@fuman/build@ccea1c7
-        version: https://pkg.pr.new/teidesu/fuman/@fuman/build@ccea1c7(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))
+        specifier: https://pkg.pr.new/teidesu/fuman/@fuman/build@c5f4664
+        version: https://pkg.pr.new/teidesu/fuman/@fuman/build@c5f4664(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))
       '@fuman/utils':
         specifier: 0.0.4
         version: 0.0.4
@@ -37,7 +37,7 @@ importers:
         version: 2.0.5(@types/node@20.10.0)(playwright@1.42.1)(typescript@5.5.4)(vitest@2.0.5)
       '@vitest/coverage-v8':
         specifier: 2.0.5
-        version: 2.0.5(vitest@2.0.5(@types/node@20.10.0)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5))
+        version: 2.0.5(vitest@2.0.5)
       '@vitest/expect':
         specifier: 2.0.5
         version: 2.0.5
@@ -424,7 +424,7 @@ importers:
         version: 5.2.3
       vitest:
         specifier: '*'
-        version: 2.0.5(@types/node@20.10.0)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5)
+        version: 2.0.5(@types/node@20.12.14)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5)
     devDependencies:
       '@mtcute/tl-utils':
         specifier: workspace:^
@@ -1100,8 +1100,8 @@ packages:
     resolution: {integrity: sha512-2b/g5hRmpbb1o4GnTZax9N9m0FXzz9OV42ZzI4rDDMDuHUqigAiQCEWChBWCY4ztAGVRjoWT19v0yMmc5/L5kA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@ccea1c7':
-    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/build@ccea1c7}
+  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@c5f4664':
+    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/build@c5f4664}
     version: 0.0.8
     hasBin: true
     peerDependencies:
@@ -4212,7 +4212,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@antfu/eslint-config@3.11.2(@typescript-eslint/utils@8.17.0(eslint@9.9.0)(typescript@5.5.4))(@vue/compiler-sfc@3.5.13)(eslint@9.9.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@20.10.0)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5))':
+  '@antfu/eslint-config@3.11.2(@typescript-eslint/utils@8.17.0(eslint@9.9.0)(typescript@5.5.4))(@vue/compiler-sfc@3.5.13)(eslint@9.9.0)(typescript@5.5.4)(vitest@2.0.5)':
     dependencies:
       '@antfu/install-pkg': 0.5.0
       '@clack/prompts': 0.8.2
@@ -4221,7 +4221,7 @@ snapshots:
       '@stylistic/eslint-plugin': 2.11.0(eslint@9.9.0)(typescript@5.5.4)
       '@typescript-eslint/eslint-plugin': 8.17.0(@typescript-eslint/parser@8.17.0(eslint@9.9.0)(typescript@5.5.4))(eslint@9.9.0)(typescript@5.5.4)
       '@typescript-eslint/parser': 8.17.0(eslint@9.9.0)(typescript@5.5.4)
-      '@vitest/eslint-plugin': 1.1.14(@typescript-eslint/utils@8.17.0(eslint@9.9.0)(typescript@5.5.4))(eslint@9.9.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@20.10.0)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5))
+      '@vitest/eslint-plugin': 1.1.14(@typescript-eslint/utils@8.17.0(eslint@9.9.0)(typescript@5.5.4))(eslint@9.9.0)(typescript@5.5.4)(vitest@2.0.5)
       eslint: 9.9.0
       eslint-config-flat-gitignore: 0.3.0(eslint@9.9.0)
       eslint-flat-config-utils: 0.4.0
@@ -4597,7 +4597,7 @@ snapshots:
     dependencies:
       levn: 0.4.1
 
-  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@ccea1c7(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))':
+  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@c5f4664(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0))':
     dependencies:
       '@drizzle-team/brocli': 0.10.2
       '@fuman/fetch': 0.0.8(tough-cookie@4.1.4)(zod@3.23.8)
@@ -4669,6 +4669,13 @@ snapshots:
       '@inquirer/type': 3.0.1(@types/node@20.10.0)
       '@types/node': 20.10.0
 
+  '@inquirer/confirm@5.0.2(@types/node@20.12.14)':
+    dependencies:
+      '@inquirer/core': 10.1.0(@types/node@20.12.14)
+      '@inquirer/type': 3.0.1(@types/node@20.12.14)
+      '@types/node': 20.12.14
+    optional: true
+
   '@inquirer/core@10.1.0(@types/node@20.10.0)':
     dependencies:
       '@inquirer/figures': 1.0.8
@@ -4683,11 +4690,31 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
+  '@inquirer/core@10.1.0(@types/node@20.12.14)':
+    dependencies:
+      '@inquirer/figures': 1.0.8
+      '@inquirer/type': 3.0.1(@types/node@20.12.14)
+      ansi-escapes: 4.3.2
+      cli-width: 4.1.0
+      mute-stream: 2.0.0
+      signal-exit: 4.1.0
+      strip-ansi: 6.0.1
+      wrap-ansi: 6.2.0
+      yoctocolors-cjs: 2.1.2
+    transitivePeerDependencies:
+      - '@types/node'
+    optional: true
+
   '@inquirer/figures@1.0.8': {}
 
   '@inquirer/type@3.0.1(@types/node@20.10.0)':
     dependencies:
       '@types/node': 20.10.0
+
+  '@inquirer/type@3.0.1(@types/node@20.12.14)':
+    dependencies:
+      '@types/node': 20.12.14
+    optional: true
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -5234,7 +5261,26 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@vitest/coverage-v8@2.0.5(vitest@2.0.5(@types/node@20.10.0)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5))':
+  '@vitest/browser@2.0.5(@types/node@20.12.14)(playwright@1.42.1)(typescript@5.5.4)(vitest@2.0.5)':
+    dependencies:
+      '@testing-library/dom': 10.4.0
+      '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
+      '@vitest/utils': 2.0.5
+      magic-string: 0.30.12
+      msw: 2.6.5(@types/node@20.12.14)(typescript@5.5.4)
+      sirv: 2.0.4
+      vitest: 2.0.5(@types/node@20.12.14)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5)
+      ws: 8.18.0
+    optionalDependencies:
+      playwright: 1.42.1
+    transitivePeerDependencies:
+      - '@types/node'
+      - bufferutil
+      - typescript
+      - utf-8-validate
+    optional: true
+
+  '@vitest/coverage-v8@2.0.5(vitest@2.0.5)':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -5252,7 +5298,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/eslint-plugin@1.1.14(@typescript-eslint/utils@8.17.0(eslint@9.9.0)(typescript@5.5.4))(eslint@9.9.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@20.10.0)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5))':
+  '@vitest/eslint-plugin@1.1.14(@typescript-eslint/utils@8.17.0(eslint@9.9.0)(typescript@5.5.4))(eslint@9.9.0)(typescript@5.5.4)(vitest@2.0.5)':
     dependencies:
       '@typescript-eslint/utils': 8.17.0(eslint@9.9.0)(typescript@5.5.4)
       eslint: 9.9.0
@@ -5299,7 +5345,7 @@ snapshots:
       pathe: 1.1.2
       sirv: 2.0.4
       tinyrainbow: 1.2.0
-      vitest: 2.0.5(@types/node@20.10.0)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5)
+      vitest: 2.0.5(@types/node@20.12.14)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5)
 
   '@vitest/utils@2.0.5':
     dependencies:
@@ -7229,6 +7275,32 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
+  msw@2.6.5(@types/node@20.12.14)(typescript@5.5.4):
+    dependencies:
+      '@bundled-es-modules/cookie': 2.0.1
+      '@bundled-es-modules/statuses': 1.0.1
+      '@bundled-es-modules/tough-cookie': 0.1.6
+      '@inquirer/confirm': 5.0.2(@types/node@20.12.14)
+      '@mswjs/interceptors': 0.37.0
+      '@open-draft/deferred-promise': 2.2.0
+      '@open-draft/until': 2.1.0
+      '@types/cookie': 0.6.0
+      '@types/statuses': 2.0.5
+      chalk: 4.1.2
+      graphql: 16.9.0
+      headers-polyfill: 4.0.3
+      is-node-process: 1.2.0
+      outvariant: 1.4.3
+      path-to-regexp: 6.3.0
+      strict-event-emitter: 0.5.1
+      type-fest: 4.27.0
+      yargs: 17.7.2
+    optionalDependencies:
+      typescript: 5.5.4
+    transitivePeerDependencies:
+      - '@types/node'
+    optional: true
+
   muggle-string@0.4.1: {}
 
   mute-stream@1.0.0: {}
@@ -8076,6 +8148,24 @@ snapshots:
       - supports-color
       - terser
 
+  vite-node@2.0.5(@types/node@20.12.14):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.3.7
+      pathe: 1.1.2
+      tinyrainbow: 1.2.0
+      vite: 5.4.2(@types/node@20.12.14)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
   vite-plugin-dts@4.0.3(@types/node@20.10.0)(rollup@4.27.2)(typescript@5.5.4)(vite@5.4.2(@types/node@20.10.0)):
     dependencies:
       '@microsoft/api-extractor': 7.47.4(@types/node@20.10.0)
@@ -8113,6 +8203,15 @@ snapshots:
       '@types/node': 20.10.0
       fsevents: 2.3.3
 
+  vite@5.4.2(@types/node@20.12.14):
+    dependencies:
+      esbuild: 0.21.5
+      postcss: 8.4.49
+      rollup: 4.27.2
+    optionalDependencies:
+      '@types/node': 20.12.14
+      fsevents: 2.3.3
+
   vitest@2.0.5(@types/node@20.10.0)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5):
     dependencies:
       '@ampproject/remapping': 2.3.0
@@ -8137,6 +8236,41 @@ snapshots:
     optionalDependencies:
       '@types/node': 20.10.0
       '@vitest/browser': 2.0.5(@types/node@20.10.0)(playwright@1.42.1)(typescript@5.5.4)(vitest@2.0.5)
+      '@vitest/ui': 2.0.5(vitest@2.0.5)
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vitest@2.0.5(@types/node@20.12.14)(@vitest/browser@2.0.5)(@vitest/ui@2.0.5):
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@vitest/expect': 2.0.5
+      '@vitest/pretty-format': 2.1.5
+      '@vitest/runner': 2.0.5
+      '@vitest/snapshot': 2.0.5
+      '@vitest/spy': 2.0.5
+      '@vitest/utils': 2.0.5
+      chai: 5.1.2
+      debug: 4.3.7
+      execa: 8.0.1
+      magic-string: 0.30.12
+      pathe: 1.1.2
+      std-env: 3.8.0
+      tinybench: 2.9.0
+      tinypool: 1.0.2
+      tinyrainbow: 1.2.0
+      vite: 5.4.2(@types/node@20.12.14)
+      vite-node: 2.0.5(@types/node@20.12.14)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 20.12.14
+      '@vitest/browser': 2.0.5(@types/node@20.12.14)(playwright@1.42.1)(typescript@5.5.4)(vitest@2.0.5)
       '@vitest/ui': 2.0.5(vitest@2.0.5)
     transitivePeerDependencies:
       - less

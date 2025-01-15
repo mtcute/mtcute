@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.19.7",
   "private": true,
-  "packageManager": "pnpm@9.0.6",
+  "packageManager": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b",
   "description": "Type-safe library for MTProto (Telegram API) for browser and NodeJS",
   "author": "alina sireneva <alina@tei.su>",
   "license": "MIT",
@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.11.2",
-    "@fuman/build": "https://pkg.pr.new/teidesu/fuman/@fuman/build@ccea1c7",
+    "@fuman/build": "https://pkg.pr.new/teidesu/fuman/@fuman/build@c5f4664",
     "@fuman/utils": "0.0.4",
     "@types/bun": "1.1.14",
     "@types/deno": "npm:@teidesu/deno-types@1.46.3",
@@ -78,6 +78,7 @@
   "pnpm": {
     "overrides": {
       "typescript": "5.5.4"
-    }
+    },
+    "onlyBuiltDependencies": ["better-sqlite3"]
   }
 }
