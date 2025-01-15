@@ -14,6 +14,14 @@
         "@fuman/net": "0.0.9",
         "@fuman/io": "0.0.8"
     },
+    "peerDependencies": {
+        "@mtcute/node": "workspace:^"
+    },
+    "peerDependenciesMeta": {
+        "@mtcute/node": {
+            "optional": true
+        }
+    },
     "devDependencies": {
         "@mtcute/test": "workspace:^",
         "@mtcute/node": "workspace:^"

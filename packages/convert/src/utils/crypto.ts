@@ -10,9 +10,12 @@ export interface IExtendedCryptoProvider extends ICryptoProvider {
 
 export async function getDefaultCryptoProvider(): Promise<IExtendedCryptoProvider> {
     const crypto = /* @vite-ignore */ await import('node:crypto')
-    const { NodeCryptoProvider } = /* @vite-ignore */ await import('@mtcute/node/utils.js')
+    const nodeModule = '@mtcute/node/utils.js'
+    // eslint-disable-next-line ts/no-unsafe-assignment
+    const { NodeCryptoProvider } = await import(/* @vite-ignore */ nodeModule)
 
-    // <deno-tsignore>
+    // eslint-disable-next-line ts/ban-ts-comment
+    // @ts-ignore typescript complains because of the dynamic import
     return new (class extends NodeCryptoProvider implements IExtendedCryptoProvider {
         createHash(algorithm: 'md5' | 'sha512') {
             const hasher = crypto.createHash(algorithm)
