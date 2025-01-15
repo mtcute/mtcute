@@ -1,7 +1,7 @@
 {
     "imports": {
         "@fuman/utils": "jsr:@fuman/utils@0.0.1",
-        "chai": "https://esm.sh/chai@5.1.2",
+        "chai": "https://esm.sh/chai@5.1.2?pin=v135",
         "node:test": "./tests/deno-shims/node-test.js",
         "mtcute": "../packages/deno/src/index.ts",
         "mtcute/utils.js": "../packages/deno/src/utils.ts",

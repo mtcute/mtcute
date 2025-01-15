@@ -152,6 +152,7 @@
   "remote": {
     "https://deno.land/std@0.223.0/io/write_all.ts": "24aac2312bb21096ae3ae0b102b22c26164d3249dff96dbac130958aa736f038",
     "https://esm.sh/chai@5.1.2": "52c79876382aaf6855c55ea66e2ff88675457f4727bfde37363bb199cdda8488",
+    "https://esm.sh/chai@5.1.2?pin=v135": "52c79876382aaf6855c55ea66e2ff88675457f4727bfde37363bb199cdda8488",
     "https://esm.sh/v135/chai@5.1.2/denonext/chai.mjs": "05cc6071c804cf39d4325a2c93807727623019abedca6ed1cb6534137bd4f65e"
   },
   "workspace": {
