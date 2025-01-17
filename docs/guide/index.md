@@ -60,7 +60,7 @@ no extra steps are required.
 
 ## Bun
 
-Experimental support for Bun is provided in `@mtcute/bun` package, and
+Support for Bun is provided in `@mtcute/bun` package, and
 Bun is also supported in `@mtcute/create-bot`.
 
 ```bash
@@ -71,7 +71,7 @@ bun add @mtcute/bun
 
 ## Deno
 
-Experimental support for Deno is provided in `@mtcute/deno` package, which is published
+Support for Deno is provided in `@mtcute/deno` package, which is published
 to the [jsr.io](https://jsr.io) registry:
 
 ```ts
@@ -137,34 +137,20 @@ See also: [Tree-shaking](/guide/advanced/treeshaking.md)
 
 ## Other runtimes
 
-mtcute strives to be as runtime-agnostic as possible, so it should work in any environment that supports 
-some basic ES2020 features.
+mtcute strives to be as runtime-agnostic as possible, so it should work in any environment that supports some basic ES2020 features (notably, bigints. There's an [unofficial fork](https://github.com/cyan-2048/mtcute) that uses polyfills for bigints, if you're into that).
 
 In case your runtime of choice is not listed above, you can try using `@mtcute/core` directly
 
-You will need to provide your own implementations of storage, networking and crypto - feel free to take a 
-look at web/node implementations for reference (or even extend them to better fit your needs, e.g. if some runtime
-only partially supports some Node.js APIs).
+You will need to provide your own implementations of storage, networking and crypto - feel free to take a look at web/node implementations for reference (or even extend them to better fit your needs, e.g. if some runtime only partially supports some Node.js APIs).
 
 ```ts
 import { TelegramClient } from '@mtcute/core/client.js'
-import { setPlatform } from '@mtcute/core/platform.js'
-
-setPlatform(new MyPlatform())
 
 const tg = new TelegramClient({
   ...,
   storage: new MyStorage(),
   crypto: new MyCrypto()
-  transport: () => new MyTransport(),
+  transport: new MyTransport(),
+  platform: new MyPlatform(),
 })
 ```
-
-::: info 
-You only need to call `setPlatform` once, before creating any clients. 
-Platform is set once globally and cannot be changed afterwards.
-It is safe to call `setPlatform` multiple times, as long as the constructor is the same - it will be ignored if the platform is already set.
-
-A good starting point might be to use [WebPlatform](https://ref.mtcute.dev/classes/_mtcute_web.WebPlatform.html),
-since it implements everything in portable JavaScript.
-:::

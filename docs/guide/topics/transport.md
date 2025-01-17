@@ -15,7 +15,7 @@ import { TcpTransport } from '@mtcute/node'
 
 const tg = new TelegramClient({
     // ...
-    transport: () => new TcpTransport()
+    transport: new TcpTransport()
 })
 ```
 
@@ -35,7 +35,7 @@ import { WebSocketTransport } from '@mtcute/web'
 
 const tg = new TelegramClient({
     // ...
-    transport: () => new WebSocketTransport()
+    transport: new WebSocketTransport()
 })
 ```
 
@@ -46,19 +46,14 @@ In browser, it is used automatically, you don't need to pass this explicitly
 ## HTTP(s) Proxy transport
 
 To access Telegram via HTTP(s) proxy, you can use
-`HttpProxyTcpTransport`, which is provided
-by `@mtcute/http-proxy` (Node.js only):
-
-```bash
-pnpm add @mtcute/http-proxy
-```
+`HttpProxyTcpTransport`, which is provided by runtime-specific packages:
 
 ```ts{5-8}
-import { HttpProxyTcpTransport } from '@mtcute/http-proxy'
+import { HttpProxyTcpTransport } from '@mtcute/node' // or '@mtcute/bun' / '@mtcute/deno'
 
 const tg = new TelegramClient({
     // ...
-    transport: () => new HttpProxyTcpTransport({
+    transport: new HttpProxyTcpTransport({
         host: '127.0.0.1',
         port: 8080
     })
@@ -68,19 +63,14 @@ const tg = new TelegramClient({
 ## SOCKS4/5 Proxy transport
 
 To access Telegram via SOCKS4/5 proxy, you can use
-`SocksTcpTransport`, which is provided
-by `@mtcute/socks-proxy` (Node.js only):
-
-```bash
-pnpm add @mtcute/socks-proxy
-```
+`SocksProxyTcpTransport`, which is provided by runtime-specific packages:
 
 ```ts{5-8}
-import { SocksTcpTransport } from '@mtcute/socks-proxy'
+import { SocksProxyTcpTransport } from '@mtcute/node' // or '@mtcute/bun' / '@mtcute/deno'
 
 const tg = new TelegramClient({
     // ...
-    transport: () => new SocksTcpTransport({
+    transport: new SocksProxyTcpTransport({
         host: '127.0.0.1',
         port: 8080
     })
@@ -90,18 +80,14 @@ const tg = new TelegramClient({
 ## MTProxy transport
 
 To access Telegram via MTProxy (MTProto proxy), you can use
-`MtProxyTcpTransport`, which is provided by `@mtcute/mtproxy` (Node.js only):
-
-```bash
-pnpm add @mtcute/mtproxy
-```
+`MtProxyTcpTransport`, which is provided by runtime-specific packages:
 
 ```ts{5-8}
-import { MtProxyTcpTransport } from '@mtcute/mtproxy'
+import { MtProxyTcpTransport } from '@mtcute/node' // or '@mtcute/bun' / '@mtcute/deno'
 
 const tg = new TelegramClient({
     // ...
-    transport: () => new MtProxyTcpTransport({
+    transport: new MtProxyTcpTransport({
         host: '127.0.0.1',
         port: 8080,
         secret: '0123456789abcdef0123456789abcdef'
@@ -122,8 +108,10 @@ could be used to change proxy used to connect to Telegram.
 To change the transport, simply call `changeTransport`:
 
 ```ts
-tg.changeTransport(() => new MtProxyTcpTransport({...}))
+tg.mt.network.changeTransport(new MtProxyTcpTransport({...}))
 ```
+
+> Note: the `mt` field is only available on `BaseTelegramClient` instances.
 
 ## Implementing custom transport
 
@@ -135,3 +123,7 @@ You can check out source code for the bundled transports
 to get the basic idea
 [here](https://github.com/mtcute/mtcute/tree/master/packages/core/src/network/transports),
 and re-use any packet codecs that are included.
+
+Transports in mtcute are built on top of [`@fuman/net`](https://github.com/teidesu/fuman/tree/main/packages/net), which is an in-house networking abstraction library used by mtcute. 
+It is a very powerful library which makes it super easy to implement custom transports.
+There isn't much documentation, but feel free to check out the source code [here](https://github.com/teidesu/fuman/blob/main/packages/node/src/net/connection.ts).

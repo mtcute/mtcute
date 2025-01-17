@@ -29,15 +29,18 @@ and also caching won't work past a single run.
 
 ## SQLite storage
 
-The preferred storage for a Node.js application is the one using SQLite,
+The preferred storage for a server application is the one using SQLite,
 because it does not require loading the entire thing into memory, and
 is also faster than simply reading/writing a file.
 
-mtcute implements it in a separate package, `@mtcute/sqlite`, and internally
-uses [better-sqlite3](https://www.npmjs.com/package/better-sqlite3)
+mtcute implements sqlite storages in runtime-specific packages,
+using the best libraries available for each runtime:
+ - Node.js: [better-sqlite3](https://www.npmjs.com/package/better-sqlite3)
+ - Bun: `bun:sqlite`
+ - Deno: [@db/sqlite](https://jsr.io/@db/sqlite)
 
 ```ts{4}
-import { SqliteStorage } from '@mtcute/sqlite'
+import { SqliteStorage } from '@mtcute/node' // or '@mtcute/bun' / '@mtcute/deno'
 
 const tg = new TelegramClient({
     storage: new SqliteStorage('my-account.session')
@@ -45,7 +48,7 @@ const tg = new TelegramClient({
 ```
 
 ::: tip
-If you are using `@mtcute/node`, SQLite storage is the default,
+In runtime-specific packages, SQLite storage is the default,
 and you can simply pass a string with file name instead
 of instantiating `SqliteStorage` manually:
 
@@ -56,8 +59,7 @@ const tg = new TelegramClient({
 ```
 :::
 
-To improve performance, `@mtcute/sqlite` by default uses
-WAL mode ([Learn more](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/performance.md)).
+To improve performance, we use WAL mode by default ([Learn more](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/performance.md)).
 
 When using WAL, along with your SQLite file there may also
 be `-shm` and `-wal` files. If you don't like seeing those files,
@@ -81,8 +83,11 @@ const tg = new TelegramClient({
 })
 ```
 
+> Note that the string passed will be used as-is as the database name,
+> so you might want to prefix it to avoid conflicts.
+
 ::: tip
-In the browser, IndexedDB storage is the default,
+In `@mtcute/web`, IndexedDB storage is the default,
 and you can simply pass a string with file name instead
 of instantiating `IdbStorage` manually:
 
@@ -144,14 +149,14 @@ Most of the string is occupied by 256 bytes long
 MTProto authorization key, which, when Base64 encoded,
 results in **344** characters. Additionally, information
 about user (their ID and whether the user is a bot) and their DC
-is included, which results in an average of **407** characters
+is included, which results in an average of ~**400** characters
 :::
 
 ## Implementing custom storage
 
-The easiest way to implement a custom storage would be to make a subclass of `MemoryStorage`,
-or check the [source code of SqliteStorage](https://github.com/mtcute/mtcute/blob/master/packages/sqlite/src/index.ts)
-and implement something similar with your DB of choice.
+The easiest way to implement a custom storage would be to make a subclass of `MemoryStorage`.
+
+Additionaly, mtcute abstracts away the sqlite storage implementation, so you can use the the `BaseSqliteStorage` API to implement sqlite storage using your library of choice (see [Node.js implementation](https://github.com/mtcute/mtcute/tree/master/packages/node/src/sqlite) for reference).
 
 ### Architecture
 
@@ -163,8 +168,7 @@ A storage provider in mtcute is composed of:
   more efficient and organized access to the data. Repositories are registered in the driver and are used to
   access the data in the storage
 
-Such composable architecture allows for custom storages to implement a specific set of repositories,
-and to reuse the same driver for different providers.
+Such composable architecture allows for custom storages to implement a specific set of repositories, and to reuse the same driver for different providers.
 
 In mtcute, these sets of repositories are defined:
 - [IMtStorageProvider](https://ref.mtcute.dev/types/_mtcute_core.index.IMtStorageProvider.html), used by `BaseTelegramClient` for low-level

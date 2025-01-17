@@ -38,29 +38,28 @@ const tg = new TelegramClient({
 
 The updates themselves are dispatched on the client as events (see [reference](https://ref.mtcute.dev/classes/_mtcute_core.index.TelegramClient.html#on)):
 ```ts
-tg.on('new_message', (msg) => {
+tg.onNewMessage.add((msg) => {
   console.log(msg.text)
 })
 
 // You can also handle any supported update at once:
-tg.on('update', (upd) => {
+tg.onUpdate.add((upd) => {
   if (upd.name === 'new_message') {
     console.log(upd.data.text)
   }
 })
 
 // As well as raw MTProto updates:
-tg.on('raw_update', (upd, users, chats) => {
+tg.onRawUpdate.add((upd, users, chats) => {
   console.log(upd._)
 })
 ```
 
 ::: tip
-Client events are based on EventEmitter. It expects handlers to be synchronous,
-so if you want to do something async, make sure to also handle the errors:
+The handlers should be synchronous, so if you want to do something async, make sure to also handle the errors:
 
 ```ts
-tg.on('new_message', async (msg) => {
+tg.onNewMessage.add(async (msg) => {
   try {
     await msg.answerText('test')
   } catch (e) {

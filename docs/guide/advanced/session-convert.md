@@ -43,6 +43,19 @@ const client = new TelegramClient({ ... })
 await client.importSession(convertFromGramjsSession("..."))
 ```
 
+### Store session
+
+In some version GramJS added support for storing session as a directory of files,
+and can be imported like so:
+
+```ts
+import { readGramjsStoreSession, convertFromGramjsSession } from '@mtcute/convert'
+
+const client = new TelegramClient({ ... })
+const session = await readGramjsStoreSession('/path/to/session')
+await client.importSession(convertFromGramjsSession(session))
+```
+
 ## [MTKruto](https://github.com/MTKruto/MTKruto)
 
 ```ts
@@ -50,6 +63,19 @@ import { convertFromMtkrutoSession } from '@mtcute/convert'
 
 const client = new TelegramClient({ ... })
 await client.importSession(convertFromMtkrutoSession("..."))
+```
+
+## [Telegram Desktop](https://github.com/telegramdesktop/tdesktop) (tdata)
+
+```ts
+import { convertFromTdata } from '@mtcute/convert'
+
+const client = new TelegramClient({ ... })
+await client.importSession(convertFromTdata({
+    path: '/path/to/tdata',
+    ignoreVersion: true // note: this might break
+    // passcode: '123456' // if you have a passcode
+}))
 ```
 
 ## Backwards

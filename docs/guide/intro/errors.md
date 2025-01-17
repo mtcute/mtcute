@@ -103,14 +103,7 @@ You can handle these errors using `TelegramClient#onError`:
 ```ts
 const tg = new TelegramClient(...)
 
-tg.onError((err, conn) => {
-  if (conn) {
-    // `err` is the error
-    // `conn` is the connection where the error happened
-    console.log(err, conn)
-  }
-
-  // `err` is not a connection-related error
+tg.onError.add((err) => {
   console.log(err)
 })
 ```
@@ -119,7 +112,8 @@ tg.onError((err, conn) => {
 mtcute handles reconnection and stuff automatically, so you don't need to
 call `.connect()` again!
 
-This should primarily be used for logging and debugging
+This should primarily be used for logging and debugging, as well as some
+edge cases where you might need access to low-level connection state
 :::
 
 ## Dispatcher errors

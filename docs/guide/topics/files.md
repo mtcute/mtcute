@@ -9,7 +9,7 @@ To download a file, just use `downloadIterable`, `downloadStream`,
 `downloadBuffer`or `downloadToFile` method on the object that represents a file, for example:
 
 ```ts
-tg.on('new_message', async (msg) => {
+tg.onNewMessage.add(async (msg) => {
     if (msg.media?.type === 'photo') {
         await tg.downloadToFile('download.jpg', msg.media)
     }
@@ -161,7 +161,7 @@ them you'll need to have some understanding of how files in MTProto work.
 File ID is available in `.fileId` field:
 
 ```ts
-tg.on('new_message', async (msg) => {
+tg.onNewMessage.add(async (msg) => {
     if (msg.media?.type === 'photo') {
         console.log(msg.media.fileId)
     }
@@ -181,7 +181,7 @@ for different users/bots.
 Unique File ID is available in `.uniqueFileId` field:
 
 ```ts
-tg.on('new_message', async (msg) => {
+tg.onNewMessage.add(async (msg) => {
     if (msg.media?.type === 'photo') {
         console.log(msg.media.uniqueFileId)
     }

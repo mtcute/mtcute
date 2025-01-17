@@ -15,7 +15,7 @@ Instead of Dispatcher, you can also use client events (however you will miss
 features that Dispatcher provides):
 
 ```ts
-tg.on('inline_query', async (query) => {
+tg.onInlineQuery.add(async (query) => {
     await query.answer([])
 })
 ```
