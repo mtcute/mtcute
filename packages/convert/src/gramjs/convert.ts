@@ -1,13 +1,13 @@
 import type { StringSessionData } from '@mtcute/core/utils.js'
-import type { TelethonSession } from '../telethon/types.js'
 
+import type { GramjsSession } from './types.js'
 import { readStringSession } from '@mtcute/core/utils.js'
-import { convertFromTelethonSession } from '../telethon/convert.js'
 
+import { convertFromTelethonSession } from '../telethon/convert.js'
 import { parseGramjsSession } from './parse.js'
 import { serializeGramjsSession } from './serialize.js'
 
-export function convertFromGramjsSession(session: TelethonSession | string): StringSessionData {
+export function convertFromGramjsSession(session: GramjsSession | string): StringSessionData {
     if (typeof session === 'string') {
         session = parseGramjsSession(session)
     }
