@@ -1,37 +1,37 @@
-name: Docs
+name: Build and deploy docs
 
 on:
   push:
-    branches:
-      - master
-  pull_request:
-    branches: [ master ]
+    branches: [master]
+    paths:
+      - 'docs/**'
   workflow_dispatch:
 
 concurrency:
-  group: pages
+  group: docs
   cancel-in-progress: false
 
 jobs:
   build:
-    runs-on: node22
+    runs-on: node20
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.forgejo/actions/init
-      - name: Build docs
+      - uses: pnpm/action-setup@v2
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: docs
+      - name: Build with VitePress
+        working-directory: docs
         run: |
-          pnpm run docs
-          touch docs/.nojekyll
-          echo "ref.mtcute.dev" > docs/CNAME
-          echo "ignore-workspace-root-check=true" >> .npmrc
-
-          curl -O https://gist.githubusercontent.com/j0nl1/7f9b5210c9e6ecbabe322baa16dcb5db/raw/760de77327bf83671cfb6bd4e64181299ba26113/typedoc-fix-cf.mjs
-          node typedoc-fix-cf.mjs docs
+          pnpm run build
+          touch .vitepress/dist/.nojekyll
+          echo mtcute.dev > .vitepress/dist/CNAME
+          echo "ignore-workspace-root-check=true" >> ../.npmrc
       - name: Deploy
-        # do not run on forks and releases
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor == 'desu-bot'
+        # do not run on forks
+        if: github.repository == 'teidesu/mtcute'
         uses: https://github.com/cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_PAGES_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy docs --project-name=mtcute-apiref
+          command: pages deploy docs/.vitepress/dist --project-name=mtcute-docs

@@ -7,9 +7,6 @@ private/
 .vscode
 *.log
 
-# docs are generated in ci
-docs
-
 coverage
 .rollup.cache
 *.tsbuildinfo

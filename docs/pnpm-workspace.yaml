@@ -1,0 +1,3 @@
+# empty workspace to prevent pnpm from installing docs deps unnecessarily
+packages:
+  - .

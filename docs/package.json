@@ -1,0 +1,20 @@
+{
+  "name": "@mtcute/docs",
+  "version": "1.0.0",
+  "description": "mtcute documentation",
+  "devDependencies": {
+    "vitepress": "1.0.0-rc.24",
+    "vue": "^3.3.7"
+  },
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "dependencies": {
+    "markdown-it-footnote": "^3.0.3",
+    "medium-zoom": "^1.0.8",
+    "vitepress-plugin-back-to-top": "^1.0.1"
+  },
+  "packageManager": "pnpm@9.5.0"
+}
