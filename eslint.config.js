@@ -9,6 +9,7 @@ export default antfu({
             ignoresTypeAware: [
                 '.config/**/*',
                 'e2e/**',
+                'docs/**',
             ],
             overrides: {
                 'ts/consistent-type-imports': 'off',
