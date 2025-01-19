@@ -1,7 +1,7 @@
 {
   "name": "mtcute-workspace",
   "type": "module",
-  "version": "0.19.7",
+  "version": "0.19.8",
   "private": true,
   "packageManager": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b",
   "description": "Type-safe library for MTProto (Telegram API) for browser and NodeJS",
@@ -79,6 +79,8 @@
     "overrides": {
       "typescript": "5.5.4"
     },
-    "onlyBuiltDependencies": ["better-sqlite3"]
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
   }
 }

@@ -1,20 +1,20 @@
 {
+    "@mtcute/convert": "0.19.8",
     "@mtcute/bun": "0.19.3",
-    "@mtcute/convert": "0.19.4",
+    "@mtcute/deno": "0.19.3",
+    "@mtcute/dispatcher": "0.19.1",
     "@mtcute/crypto-node": "0.19.0",
     "@mtcute/core": "0.19.7",
-    "@mtcute/deno": "0.19.3",
-    "@mtcute/file-id": "0.19.0",
-    "@mtcute/dispatcher": "0.19.1",
     "@mtcute/create-bot": "0.19.0",
+    "@mtcute/file-id": "0.19.0",
     "@mtcute/html-parser": "0.19.0",
     "@mtcute/i18n": "0.19.0",
-    "@mtcute/markdown-parser": "0.19.0",
-    "@mtcute/test": "0.19.3",
     "@mtcute/node": "0.19.3",
+    "@mtcute/markdown-parser": "0.19.0",
+    "@mtcute/tl-runtime": "0.19.0",
     "@mtcute/tl": "196.0.0",
-    "@mtcute/wasm": "0.19.0",
     "@mtcute/tl-utils": "0.19.0",
     "@mtcute/web": "0.19.5",
-    "@mtcute/tl-runtime": "0.19.0"
+    "@mtcute/wasm": "0.19.0",
+    "@mtcute/test": "0.19.3"
 }
