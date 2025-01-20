@@ -4,7 +4,6 @@ import type {
 } from '../../utils/index.js'
 import type { BaseTelegramClient } from '../base.js'
 
-import type { CurrentUserInfo } from '../storage/service/current-user.js'
 import { AsyncLock, ConditionVariable, Deque, timers, unknownToError } from '@fuman/utils'
 import { tl } from '@mtcute/tl'
 import Long from 'long'
@@ -152,7 +151,6 @@ export class UpdatesManager {
     // eslint-disable-next-line ts/no-unsafe-function-type
     private _channelPtsLimit: Extract<UpdatesManagerParams['channelPtsLimit'], Function>
 
-    auth?: CurrentUserInfo | null // todo: do we need a local copy?
     keepAliveInterval?: timers.Interval
 
     constructor(
@@ -181,7 +179,7 @@ export class UpdatesManager {
                 this._channelPtsLimit = () => limit
             }
         } else {
-            this._channelPtsLimit = () => (this.auth?.isBot ? 100000 : 100)
+            this._channelPtsLimit = () => (this.client.storage.self.getCached()?.isBot ? 100000 : 100)
         }
     }
 
@@ -193,8 +191,7 @@ export class UpdatesManager {
         this.stopLoop()
     }
 
-    notifyLoggedIn(self: CurrentUserInfo): void {
-        this.auth = self
+    notifyLoggedIn(): void {
         this.startLoop().catch(err => this.client.onError.emit(unknownToError(err)))
     }
 
@@ -1267,7 +1264,7 @@ export class UpdatesManager {
                 // }
                 break
             case 'updateDeleteChannelMessages':
-                if (!this.auth?.isBot) {
+                if (!client.storage.self.getCached()?.isBot) {
                     await client.storage.refMsgs.delete(toggleChannelIdMark(upd.channelId), upd.messages)
                 }
                 break
@@ -1275,14 +1272,14 @@ export class UpdatesManager {
             case 'updateEditMessage':
             case 'updateNewChannelMessage':
             case 'updateEditChannelMessage':
-                if (!this.auth?.isBot) {
+                if (!client.storage.self.getCached()?.isBot) {
                     await this._storeMessageReferences(upd.message)
                 }
                 break
         }
 
         if (missing?.size) {
-            if (this.auth?.isBot) {
+            if (client.storage.self.getCached()?.isBot) {
                 this.log.warn(
                     'missing peers (%J) after getDifference for %s (pts = %d, cid = %d)',
                     missing,
@@ -1513,6 +1510,11 @@ export class UpdatesManager {
                         }
                         case 'updateShortMessage': {
                             log.debug('received updateShortMessage')
+                            const self = client.storage.self.getCached()
+                            if (!self) {
+                                log.warn('received updateShortMessage without auth')
+                                break
+                            }
 
                             const message: tl.RawMessage = {
                                 _: 'message',
@@ -1523,7 +1525,7 @@ export class UpdatesManager {
                                 id: upd.id,
                                 fromId: {
                                     _: 'peerUser',
-                                    userId: upd.out ? this.auth!.userId : upd.userId,
+                                    userId: upd.out ? self.userId : upd.userId,
                                 },
                                 peerId: {
                                     _: 'peerUser',

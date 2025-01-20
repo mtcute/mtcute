@@ -165,9 +165,9 @@ export class BaseTelegramClient implements ITelegramClient {
         const user = this.mt.network.notifyLoggedIn(auth)
 
         this.log.prefix = `[USER ${user.id}] `
-        const self = await this.storage.self.storeFrom(user)
+        await this.storage.self.storeFrom(user)
 
-        this.updates?.notifyLoggedIn(self)
+        this.updates?.notifyLoggedIn()
 
         return user
     }
