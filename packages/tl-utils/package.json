@@ -13,6 +13,6 @@
     },
     "dependencies": {
         "@mtcute/tl-runtime": "workspace:^",
-        "crc-32": "1.2.0"
+        "crc": "4.3.2"
     }
 }

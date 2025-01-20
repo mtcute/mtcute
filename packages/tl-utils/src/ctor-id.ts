@@ -1,6 +1,6 @@
 import type { TlEntry } from './types.js'
 
-import CRC32 from 'crc-32'
+import crc32 from 'crc/calculators/crc32'
 import { writeTlEntryToString } from './stringify.js'
 
 /**
@@ -11,5 +11,5 @@ import { writeTlEntryToString } from './stringify.js'
 export function computeConstructorIdFromEntry(entry: TlEntry): number {
     const str = writeTlEntryToString(entry, true)
 
-    return CRC32.str(str) >>> 0
+    return crc32(new TextEncoder().encode(str)) >>> 0
 }
