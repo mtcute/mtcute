@@ -12,6 +12,9 @@ hero:
       text: Quick Start →
       link: /guide/
     - theme: alt
+      text: 📝  Try online
+      link: //play.mtcute.dev
+    - theme: alt
       text: API Reference
       link: //ref.mtcute.dev
 

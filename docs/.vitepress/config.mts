@@ -35,6 +35,7 @@ export default ({ mode }) => defineConfig({
     // https://vitepress.dev/reference/default-theme-config
         nav: [
             { text: 'Guide', link: '/guide/' },
+            { text: 'Playground', link: '//play.mtcute.dev' },
             { text: 'Reference', link: '//ref.mtcute.dev' },
         ],
         socialLinks: [
