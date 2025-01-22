@@ -137,7 +137,7 @@ async function fetchWebaSchema(): Promise<Schema> {
     ])
 
     // const LAYER = 174;
-    const version = layerFile.match(/^const LAYER = (\d+);$/m)
+    const version = layerFile.match(/^export const LAYER = (\d+);$/m)
     if (!version) throw new Error('Layer number not found')
 
     return {

@@ -90,6 +90,7 @@ import {
     ReplyMarkup,
     SentCode,
     StarGift,
+    StarGiftUnique,
     StarsStatus,
     StarsTransaction,
     Sticker,

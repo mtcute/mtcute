@@ -22,7 +22,7 @@ export const TDESKTOP_LAYER
 export const TDLIB_SCHEMA = 'https://raw.githubusercontent.com/tdlib/td/master/td/generate/scheme/telegram_api.tl'
 export const WEBK_SCHEMA = 'https://raw.githubusercontent.com/morethanwords/tweb/master/src/scripts/in/schema.json'
 export const WEBA_SCHEMA = 'https://raw.githubusercontent.com/Ajaxy/telegram-tt/master/src/lib/gramjs/tl/static/api.tl'
-export const WEBA_LAYER = 'https://raw.githubusercontent.com/Ajaxy/telegram-tt/master/src/lib/gramjs/tl/AllTLObjects.js'
+export const WEBA_LAYER = 'https://raw.githubusercontent.com/Ajaxy/telegram-tt/master/src/lib/gramjs/tl/AllTLObjects.ts'
 
 export const ESM_PRELUDE = `// This file is auto-generated. Do not edit.
 "use strict";

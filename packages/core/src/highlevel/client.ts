@@ -24,7 +24,7 @@ import type { QuoteParamsFrom } from './methods/messages/send-quote.js'
 import type { CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
 import type { CanSendStoryResult } from './methods/stories/can-send-story.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
-import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, PeerReaction, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SentCode, StarGift, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStarGift, UserStatusUpdate, UserTypingUpdate, WebviewResult } from './types/index.js'
+import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, PeerReaction, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SentCode, StarGift, StarGiftUnique, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStarGift, UserStatusUpdate, UserTypingUpdate, WebviewResult } from './types/index.js'
 import type { ParsedUpdateHandlerParams } from './updates/parsed.js'
 import type { RawUpdateInfo } from './updates/types.js'
 import type { InputStringSessionData } from './utils/string-session.js'
@@ -224,6 +224,7 @@ import { getMyBoostSlots } from './methods/premium/get-my-boost-slots.js'
 import { getStarGiftOptions } from './methods/premium/get-star-gift-options.js'
 import { getStarGifts } from './methods/premium/get-star-gifts.js'
 import { getStarsTransactions } from './methods/premium/get-stars-transactions.js'
+import { getUniqueStarGift } from './methods/premium/get-unique-star-gift.js'
 import { iterBoosters } from './methods/premium/iter-boosters.js'
 import { iterStarGifts } from './methods/premium/iter-star-gifts.js'
 import { iterStarsTransactions } from './methods/premium/iter-stars-transactions.js'
@@ -4747,6 +4748,11 @@ export interface TelegramClient extends ITelegramClient {
             limit?: number
         }): Promise<StarsStatus>
     /**
+     * Get information about a unique star gift by its slug
+     */
+    getUniqueStarGift(
+        slug: string): Promise<StarGiftUnique>
+    /**
      * Iterate over boosters of a channel.
      *
      * Wrapper over {@link getBoosters}
@@ -6787,6 +6793,9 @@ TelegramClient.prototype.getStarGifts = function (...args) {
 }
 TelegramClient.prototype.getStarsTransactions = function (...args) {
     return getStarsTransactions(this._client, ...args)
+}
+TelegramClient.prototype.getUniqueStarGift = function (...args) {
+    return getUniqueStarGift(this._client, ...args)
 }
 TelegramClient.prototype.iterBoosters = function (...args) {
     return iterBoosters(this._client, ...args)

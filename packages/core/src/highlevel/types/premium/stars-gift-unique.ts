@@ -139,9 +139,20 @@ export class StarGiftUnique {
         return this.raw.title
     }
 
-    /** ID of the user who owns this gift */
-    get owner(): User {
+    /** Slug of the gift */
+    get slug(): string {
+        return this.raw.slug
+    }
+
+    /** ID of the user who owns this gift, if available */
+    get owner(): User | null {
+        if (!this.raw.ownerId) return null
         return new User(this._peers.user(this.raw.ownerId))
+    }
+
+    /** Name of the user who owns this gift, if available */
+    get ownerName(): string | null {
+        return this.raw.ownerName ?? null
     }
 
     get availabilityIssued(): number {
