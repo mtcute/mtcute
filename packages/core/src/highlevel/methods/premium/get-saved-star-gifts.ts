@@ -5,7 +5,11 @@ import { SavedStarGift } from '../../types/premium/saved-star-gift.js'
 import { makeArrayPaginated } from '../../utils/misc-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
-/** Get a list of saved star gifts of a user */
+/**
+ * Get a list of saved star gifts of a user/channel
+ *
+ * Note that filters currently only work for channels
+ */
 export async function getSavedStarGifts(
     client: ITelegramClient,
     params: {

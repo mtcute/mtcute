@@ -1,16 +1,14 @@
 import type { ITelegramClient } from '../../client.types.js'
+import type { SavedStarGift } from '../../types/index.js'
 import type { InputPeerLike } from '../../types/peers/peer.js'
 import type { ArrayPaginated } from '../../types/utils.js'
-import { PeersIndex } from '../../types/peers/peers-index.js'
-import { UserStarGift } from '../../types/premium/stars-gift.js'
-import { makeArrayPaginated } from '../../utils/misc-utils.js'
-import { resolveUser } from '../users/resolve-peer.js'
+import { getSavedStarGifts } from './get-saved-star-gifts.js'
 
-// @available=user
 /**
  * Get a list of gifts sent to a user.
  *
  * @param userId  User whose gifts to fetch
+ * @deprecated  Use {@link getSavedStarGifts} instead
  * @returns  Gifts sent to the user
  */
 export async function getStarGifts(
@@ -29,18 +27,9 @@ export async function getStarGifts(
          */
         limit?: number
     },
-): Promise<ArrayPaginated<UserStarGift, string>> {
-    const { offset = '', limit = 100 } = params ?? {}
-
-    const res = await client.call({
-        _: 'payments.getUserStarGifts',
-        userId: await resolveUser(client, userId),
-        offset,
-        limit,
+): Promise<ArrayPaginated<SavedStarGift, string>> {
+    return getSavedStarGifts(client, {
+        owner: userId,
+        ...params,
     })
-
-    const peers = PeersIndex.from(res)
-    const gifts = res.gifts.map(gift => new UserStarGift(gift, peers))
-
-    return makeArrayPaginated(gifts, res.count, res.nextOffset)
 }
