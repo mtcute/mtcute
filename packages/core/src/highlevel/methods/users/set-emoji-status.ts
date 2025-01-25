@@ -46,6 +46,8 @@ export async function setEmojiStatus(
         peerId: InputPeerLike
         /** Custom emoji ID or `null` to remove the emoji */
         emoji: tl.Long | null
+        /** When true, `emoji` is the ID of the collectible emoji */
+        isCollectible?: boolean
         /**
          * Date when the emoji status should expire (only if `emoji` is not `null`)
          */
@@ -56,6 +58,7 @@ export async function setEmojiStatus(
         peerId,
         emoji,
         until,
+        isCollectible,
     } = params
 
     const peer = await resolvePeer(client, peerId)
@@ -68,6 +71,12 @@ export async function setEmojiStatus(
         emojiStatus = {
             _: 'emojiStatusUntil',
             documentId: emoji,
+            until: normalizeDate(until),
+        }
+    } else if (isCollectible) {
+        emojiStatus = {
+            _: 'inputEmojiStatusCollectible',
+            collectibleId: emoji,
             until: normalizeDate(until),
         }
     } else {

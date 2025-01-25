@@ -1,9 +1,11 @@
 import type { tl } from '@mtcute/tl'
 import type { ITelegramClient } from '../../client.types.js'
 
+import type { InputStarGift } from '../../types/index.js'
 import type { Message } from '../../types/messages/message.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
+import { _normalizeInputStarGift } from './_normalize-input-star-gift.js'
 
 /**
  * Upgrades a star gift to a unique gift.
@@ -18,8 +20,7 @@ import { _findMessageInUpdate } from '../messages/find-in-update.js'
 export async function upgradeStarGift(
     client: ITelegramClient,
     params: {
-        /** ID of the message containing the gift */
-        message: number | Message
+        gift: InputStarGift
 
         /**
          * Whether to retain the original details of the gift
@@ -34,12 +35,11 @@ export async function upgradeStarGift(
         shouldDispatch?: true
     },
 ): Promise<Message> {
-    const { message, keepOriginalDetails, shouldDispatch } = params
+    const { gift, keepOriginalDetails, shouldDispatch } = params
 
-    const msgId = typeof message === 'number' ? message : message.id
     const invoice: tl.TypeInputInvoice = {
         _: 'inputInvoiceStarGiftUpgrade',
-        msgId,
+        stargift: await _normalizeInputStarGift(client, gift),
         keepOriginalDetails,
     }
 

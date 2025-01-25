@@ -78,6 +78,9 @@ export interface ForwardMessageOptions {
      * The Stars will be withdrawn from the bot's balance.
      */
     allowPaidFloodskip?: boolean
+
+    /** Video timestamp to use for the forwarded video */
+    videoTimestamp?: number
 }
 
 /**
@@ -110,6 +113,7 @@ export async function forwardMessagesById(
         noAuthor,
         noCaption,
         allowPaidFloodskip,
+        videoTimestamp,
     } = params
 
     // sending more than 100 will not result in a server-sent
@@ -137,6 +141,7 @@ export async function forwardMessagesById(
         sendAs: sendAs ? await resolvePeer(client, sendAs) : undefined,
         quickReplyShortcut: _normalizeQuickReplyShortcut(params.quickReply),
         allowPaidFloodskip,
+        videoTimestamp,
     })
 
     assertIsUpdatesGroup('messages.forwardMessages', res)

@@ -364,6 +364,16 @@ export class FullChat extends Chat {
 
         return new BotVerification(this.full.botVerification)
     }
+
+    /** Whether star gifts are available in this chat */
+    get starGiftsAvailable(): boolean {
+        return this.full._ === 'channelFull' && this.full.stargiftsAvailable!
+    }
+
+    /** Number of star gifts available in this chat */
+    get starGiftsCount(): number {
+        return this.full._ === 'channelFull' ? this.full.stargiftsCount ?? 0 : 0
+    }
 }
 
 memoizeGetters(FullChat, [

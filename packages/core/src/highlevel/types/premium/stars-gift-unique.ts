@@ -1,12 +1,13 @@
 import type { tl } from '@mtcute/tl'
 import type { Sticker } from '../media/sticker.js'
 import type { TextWithEntities } from '../misc/entities.js'
+import type { Peer } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
 import { assert } from '@fuman/utils'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { parseDocument } from '../media/document-utils.js'
-import { User } from '../peers/user.js'
+import { parsePeer } from '../peers/peer.js'
 
 /** An attribute of a unique star gift containing a sticker */
 export class StarGiftUniqueAttribute {
@@ -78,13 +79,13 @@ export class StarGiftUniqueOriginalDetails {
     ) {}
 
     /** ID of the user who sent the original star gift */
-    get sender(): User | null {
-        return this.raw.senderId ? new User(this._peers.user(this.raw.senderId)) : null
+    get sender(): Peer | null {
+        return this.raw.senderId ? parsePeer(this.raw.senderId, this._peers) : null
     }
 
     /** ID of the user who received the original star gift */
-    get recipient(): User {
-        return new User(this._peers.user(this.raw.recipientId))
+    get recipient(): Peer {
+        return parsePeer(this.raw.recipientId, this._peers)
     }
 
     /** Date when the original star gift was sent */
@@ -144,10 +145,10 @@ export class StarGiftUnique {
         return this.raw.slug
     }
 
-    /** ID of the user who owns this gift, if available */
-    get owner(): User | null {
+    /** ID of the peer who owns this gift, if available */
+    get owner(): Peer | null {
         if (!this.raw.ownerId) return null
-        return new User(this._peers.user(this.raw.ownerId))
+        return parsePeer(this.raw.ownerId, this._peers)
     }
 
     /** Name of the user who owns this gift, if available */
@@ -182,6 +183,11 @@ export class StarGiftUnique {
     get originalDetails(): StarGiftUniqueOriginalDetails | null {
         if (!this._originalDetails) return null
         return new StarGiftUniqueOriginalDetails(this._originalDetails, this._peers)
+    }
+
+    /** TON address of the owner of the unique star gift */
+    get ownerAddress(): string | null {
+        return this.raw.ownerAddress ?? null
     }
 }
 

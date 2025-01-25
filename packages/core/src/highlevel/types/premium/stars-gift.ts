@@ -1,7 +1,9 @@
 import type { tl } from '@mtcute/tl'
 
 import type { Sticker } from '../media/sticker.js'
+import type { Message } from '../messages/message.js'
 import type { TextWithEntities } from '../misc/entities.js'
+import type { InputPeerLike } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
 import Long from 'long'
 import { MtTypeAssertionError } from '../../../types/errors.js'
@@ -12,8 +14,20 @@ import { parseDocument } from '../media/document-utils.js'
 import { User } from '../peers/user.js'
 import { StarGiftUnique } from './stars-gift-unique.js'
 
+export type InputStarGift =
+  | {
+      /** ID of the message containing the gift */
+      message: number | Message
+  }
+  | {
+      /** Owner of the gift */
+      owner: InputPeerLike
+      /** ID of the gift */
+      savedId: tl.Long
+  }
+
 /**
- * A gift with stars attached to it.
+ * A gift bought with stars
  */
 export class StarGift {
     constructor(readonly raw: tl.RawStarGift) {}

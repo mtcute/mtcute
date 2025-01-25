@@ -243,6 +243,12 @@ export interface InputMediaVideo extends FileMixin, CaptionMixin {
      * Whether this video should be hidden with a spoiler
      */
     spoiler?: boolean
+
+    /** Cover for the video */
+    cover?: InputMediaPhoto
+
+    /** Timestamp for the auto-generated cover (?) */
+    timestamp?: number
 }
 
 /**

@@ -8,7 +8,7 @@ import Long from 'long'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { type InputText, inputTextToTl } from '../../types/misc/entities.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
-import { resolveUser } from '../users/resolve-peer.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Send a star gift to a user.
@@ -23,8 +23,8 @@ import { resolveUser } from '../users/resolve-peer.js'
 export async function sendStarGift(
     client: ITelegramClient,
     params: {
-        /** ID of the user to send the gift to */
-        userId: InputPeerLike
+        /** ID of the peer to send the gift to */
+        peerId: InputPeerLike
 
         /** ID of the gift to send */
         gift: Long | StarGift
@@ -50,7 +50,7 @@ export async function sendStarGift(
     },
 ): Promise<Message> {
     const {
-        userId,
+        peerId,
         gift,
         anonymous,
         message,
@@ -61,7 +61,7 @@ export async function sendStarGift(
     const invoice: tl.TypeInputInvoice = {
         _: 'inputInvoiceStarGift',
         hideName: anonymous,
-        userId: await resolveUser(client, userId),
+        peer: await resolvePeer(client, peerId),
         giftId: Long.isLong(gift) ? gift : gift.id,
         message: message ? inputTextToTl(message) : undefined,
         includeUpgrade: withUpgrade,

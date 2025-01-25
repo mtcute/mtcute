@@ -24,7 +24,7 @@ import type { QuoteParamsFrom } from './methods/messages/send-quote.js'
 import type { CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
 import type { CanSendStoryResult } from './methods/stories/can-send-story.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
-import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, PeerReaction, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SentCode, StarGift, StarGiftUnique, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStarGift, UserStatusUpdate, UserTypingUpdate, WebviewResult } from './types/index.js'
+import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, PeerReaction, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStarGift, UserStatusUpdate, UserTypingUpdate, WebviewResult } from './types/index.js'
 import type { ParsedUpdateHandlerParams } from './updates/parsed.js'
 import type { RawUpdateInfo } from './updates/types.js'
 import type { InputStringSessionData } from './utils/string-session.js'
@@ -211,6 +211,7 @@ import { changeCloudPassword } from './methods/password/change-cloud-password.js
 import { enableCloudPassword } from './methods/password/enable-cloud-password.js'
 import { cancelPasswordEmail, resendPasswordEmail, verifyPasswordEmail } from './methods/password/password-email.js'
 import { removeCloudPassword } from './methods/password/remove-cloud-password.js'
+import { _normalizeInputStarGift } from './methods/premium/_normalize-input-star-gift.js'
 import { acceptStarGift } from './methods/premium/accept-star-gift.js'
 import { applyBoost } from './methods/premium/apply-boost.js'
 import { canApplyBoost } from './methods/premium/can-apply-boost.js'
@@ -221,11 +222,15 @@ import { getBoosts } from './methods/premium/get-boosts.js'
 import { getBusinessChatLinks } from './methods/premium/get-business-chat-links.js'
 import { getBusinessConnection } from './methods/premium/get-business-connection.js'
 import { getMyBoostSlots } from './methods/premium/get-my-boost-slots.js'
+import { getSavedStarGiftsById } from './methods/premium/get-saved-star-gifts-by-id.js'
+import { getSavedStarGifts } from './methods/premium/get-saved-star-gifts.js'
 import { getStarGiftOptions } from './methods/premium/get-star-gift-options.js'
+import { getStarGiftWithdrawalUrl } from './methods/premium/get-star-gift-withdrawal-url.js'
 import { getStarGifts } from './methods/premium/get-star-gifts.js'
 import { getStarsTransactions } from './methods/premium/get-stars-transactions.js'
 import { getUniqueStarGift } from './methods/premium/get-unique-star-gift.js'
 import { iterBoosters } from './methods/premium/iter-boosters.js'
+import { iterSavedStarGifts } from './methods/premium/iter-saved-star-gifts.js'
 import { iterStarGifts } from './methods/premium/iter-star-gifts.js'
 import { iterStarsTransactions } from './methods/premium/iter-stars-transactions.js'
 import { sendStarGift } from './methods/premium/send-star-gift.js'
@@ -4545,6 +4550,9 @@ export interface TelegramClient extends ITelegramClient {
      */
     removeCloudPassword(password: string): Promise<void>
 
+    _normalizeInputStarGift(
+        gift: InputStarGift): Promise<tl.TypeInputSavedStarGift>
+
     /**
      * Accept, hide or convert a star gift.
      *
@@ -4554,8 +4562,9 @@ export interface TelegramClient extends ITelegramClient {
      */
     acceptStarGift(
         params: {
-        /** ID of the message containing the gift */
-            message: number | Message
+        /** Input star gift to accept */
+            gift: InputStarGift
+
             /**
              * Action to perform on the gift.
              *  - `save` - save the gift to your profile
@@ -4681,6 +4690,34 @@ export interface TelegramClient extends ITelegramClient {
      *
      */
     getMyBoostSlots(): Promise<BoostSlot[]>
+    /** Get one or more saved star gifts by their IDs */
+    getSavedStarGiftsById(
+        gifts: MaybeArray<InputStarGift>): Promise<SavedStarGift[]>
+    /** Get a list of saved star gifts of a user */
+    getSavedStarGifts(
+        params: {
+        /** Peer to get saved gifts from */
+            owner: InputPeerLike
+
+            /** Whether to exclude hidden gifts */
+            excludeHidden?: boolean
+            /** Whether to exclude publicly visible gifts */
+            excludePublic?: boolean
+            /** Whether to exclude gifts with unlimited availability */
+            excludeUnlimited?: boolean
+            /** Whether to exclude gifts with limited availability */
+            excludeLimited?: boolean
+            /** Whether to exclude unique gifts */
+            excludeUnique?: boolean
+
+            /** Whether to sort by value */
+            sortByValue?: boolean
+
+            /** Offset for pagination */
+            offset?: string
+            /** Limit for pagination */
+            limit?: number
+        }): Promise<ArrayPaginated<SavedStarGift, string>>
 
     /**
      * Get the list of available star gifts.
@@ -4688,6 +4725,15 @@ export interface TelegramClient extends ITelegramClient {
      *
      */
     getStarGiftOptions(): Promise<StarGift[]>
+
+    getStarGiftWithdrawalUrl(
+        params: {
+        /** The star gift to withdraw */
+            gift: InputStarGift
+
+            /** 2FA password */
+            password: string
+        }): Promise<string>
 
     /**
      * Get a list of gifts sent to a user.
@@ -4777,6 +4823,34 @@ export interface TelegramClient extends ITelegramClient {
              */
             chunkSize?: number
         }): AsyncIterableIterator<Boost>
+    /**
+     * Iterate over saved star gifts of a user,
+     * wrapper over {@link getSavedStarGifts}
+     */
+    iterSavedStarGifts(
+        params: {
+        /** Peer to get saved gifts from */
+            owner: InputPeerLike
+
+            /** Whether to exclude unsaved gifts */
+            excludeUnsaved?: boolean
+            /** Whether to exclude saved gifts */
+            excludeSaved?: boolean
+            /** Whether to exclude gifts with unlimited availability */
+            excludeUnlimited?: boolean
+            /** Whether to exclude gifts with limited availability */
+            excludeLimited?: boolean
+            /** Whether to exclude unique gifts */
+            excludeUnique?: boolean
+
+            /** Whether to sort by value */
+            sortByValue?: boolean
+
+            /** Offset for pagination */
+            offset?: string
+            /** Limit for pagination */
+            limit?: number
+        }): AsyncIterableIterator<SavedStarGift>
 
     /**
      * Iterate over gifts sent to a given user.
@@ -4851,8 +4925,8 @@ export interface TelegramClient extends ITelegramClient {
      */
     sendStarGift(
         params: {
-        /** ID of the user to send the gift to */
-            userId: InputPeerLike
+        /** ID of the peer to send the gift to */
+            peerId: InputPeerLike
 
             /** ID of the gift to send */
             gift: Long | StarGift
@@ -4939,8 +5013,8 @@ export interface TelegramClient extends ITelegramClient {
      */
     transferStarGift(
         params: {
-        /** ID of the message containing the gift */
-            message: number | Message
+        /** Star gift to transfer */
+            gift: InputStarGift
 
             /** ID of the user to transfer the gift to */
             recepient: InputPeerLike
@@ -4965,8 +5039,7 @@ export interface TelegramClient extends ITelegramClient {
      */
     upgradeStarGift(
         params: {
-        /** ID of the message containing the gift */
-            message: number | Message
+            gift: InputStarGift
 
             /**
              * Whether to retain the original details of the gift
@@ -5879,6 +5952,8 @@ export interface TelegramClient extends ITelegramClient {
             peerId: InputPeerLike
             /** Custom emoji ID or `null` to remove the emoji */
             emoji: tl.Long | null
+            /** When true, `emoji` is the ID of the collectible emoji */
+            isCollectible?: boolean
             /**
              * Date when the emoji status should expire (only if `emoji` is not `null`)
              */
@@ -6752,6 +6827,9 @@ TelegramClient.prototype.cancelPasswordEmail = function (...args) {
 TelegramClient.prototype.removeCloudPassword = function (...args) {
     return removeCloudPassword(this._client, ...args)
 }
+TelegramClient.prototype._normalizeInputStarGift = function (...args) {
+    return _normalizeInputStarGift(this._client, ...args)
+}
 TelegramClient.prototype.acceptStarGift = function (...args) {
     return acceptStarGift(this._client, ...args)
 }
@@ -6785,8 +6863,17 @@ TelegramClient.prototype.getBusinessConnection = function (...args) {
 TelegramClient.prototype.getMyBoostSlots = function (...args) {
     return getMyBoostSlots(this._client, ...args)
 }
+TelegramClient.prototype.getSavedStarGiftsById = function (...args) {
+    return getSavedStarGiftsById(this._client, ...args)
+}
+TelegramClient.prototype.getSavedStarGifts = function (...args) {
+    return getSavedStarGifts(this._client, ...args)
+}
 TelegramClient.prototype.getStarGiftOptions = function (...args) {
     return getStarGiftOptions(this._client, ...args)
+}
+TelegramClient.prototype.getStarGiftWithdrawalUrl = function (...args) {
+    return getStarGiftWithdrawalUrl(this._client, ...args)
 }
 TelegramClient.prototype.getStarGifts = function (...args) {
     return getStarGifts(this._client, ...args)
@@ -6799,6 +6886,9 @@ TelegramClient.prototype.getUniqueStarGift = function (...args) {
 }
 TelegramClient.prototype.iterBoosters = function (...args) {
     return iterBoosters(this._client, ...args)
+}
+TelegramClient.prototype.iterSavedStarGifts = function (...args) {
+    return iterSavedStarGifts(this._client, ...args)
 }
 TelegramClient.prototype.iterStarGifts = function (...args) {
     return iterStarGifts(this._client, ...args)

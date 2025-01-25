@@ -103,8 +103,6 @@
     "requestedPeerChat": ["chat_id"],
     "requestedPeerUser": ["user_id"],
     "starRefProgram": ["bot_id"],
-    "starGiftUnique": ["owner_id"],
-    "starGiftAttributeOriginalDetails": ["sender_id", "recipient_id"],
     "secureFile": ["size"],
     "statsGroupTopAdmin": ["user_id"],
     "statsGroupTopInviter": ["user_id"],

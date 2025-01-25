@@ -263,6 +263,14 @@ export async function _normalizeInputMedia(
         mime = uploaded.mime
     }
 
+    let videoCover: tl.TypeInputPhoto | undefined
+    if (media.type === 'video' && media.cover) {
+        const inputMedia = await _normalizeInputMedia(client, media.cover)
+        assertTypeIs('uploadMediaIfNeeded', inputMedia, 'inputMediaPhoto')
+
+        videoCover = inputMedia.id
+    }
+
     const uploadPeer = params.uploadPeer ?? { _: 'inputPeerSelf' }
 
     const uploadMediaIfNeeded = async (inputMedia: tl.TypeInputMedia, photo: boolean): Promise<tl.TypeInputMedia> => {
@@ -304,6 +312,8 @@ export async function _normalizeInputMedia(
             },
             ttlSeconds: media.ttlSeconds,
             spoiler: media.type === 'video' && media.spoiler,
+            videoCover,
+            videoTimestamp: media.type === 'video' ? media.timestamp : undefined,
         }
     }
 
@@ -431,6 +441,8 @@ export async function _normalizeInputMedia(
             attributes,
             ttlSeconds: media.ttlSeconds,
             spoiler: media.type === 'video' && media.spoiler,
+            videoTimestamp: media.type === 'video' ? media.timestamp : undefined,
+            videoCover,
         },
         false,
     )

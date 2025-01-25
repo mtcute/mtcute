@@ -5,6 +5,7 @@ import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 
 import { RawDocument } from './document.js'
+import { Photo } from './photo.js'
 
 /**
  * A video, round video message or GIF animation.
@@ -93,6 +94,16 @@ export class Video extends RawDocument {
 
     get codec(): string | null {
         return this.attr._ === 'documentAttributeVideo' ? this.attr.videoCodec ?? null : null
+    }
+
+    get videoCover(): Photo | null {
+        if (!this.media || this.media.videoCover?._ !== 'photo') return null
+
+        return new Photo(this.media.videoCover)
+    }
+
+    get videoTimestamp(): number | null {
+        return this.media?.videoTimestamp ?? null
     }
 }
 

@@ -408,7 +408,12 @@ export class User {
      * User's emoji status, if any.
      */
     get emojiStatus(): EmojiStatus | null {
-        if (!this.raw.emojiStatus || this.raw.emojiStatus._ === 'emojiStatusEmpty') return null
+        if (
+            !this.raw.emojiStatus
+            || this.raw.emojiStatus._ === 'emojiStatusEmpty'
+            || this.raw.emojiStatus._ === 'inputEmojiStatusCollectible') {
+            return null
+        }
 
         return new EmojiStatus(this.raw.emojiStatus)
     }

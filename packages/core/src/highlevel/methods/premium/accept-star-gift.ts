@@ -1,5 +1,6 @@
 import type { ITelegramClient } from '../../client.types.js'
-import type { Message } from '../../types/messages/message.js'
+import type { InputStarGift } from '../../types/index.js'
+import { _normalizeInputStarGift } from './_normalize-input-star-gift.js'
 
 // @available=user
 /**
@@ -10,8 +11,9 @@ import type { Message } from '../../types/messages/message.js'
 export async function acceptStarGift(
     client: ITelegramClient,
     params: {
-        /** ID of the message containing the gift */
-        message: number | Message
+        /** Input star gift to accept */
+        gift: InputStarGift
+
         /**
          * Action to perform on the gift.
          *  - `save` - save the gift to your profile
@@ -22,18 +24,17 @@ export async function acceptStarGift(
     },
 ): Promise<boolean> {
     const { action } = params
-    const message = typeof params.message === 'number' ? params.message : params.message.id
-
+    const inputStarGift = await _normalizeInputStarGift(client, params.gift)
     return client.call(
         action === 'convert'
             ? {
                 _: 'payments.convertStarGift',
-                msgId: message,
+                stargift: inputStarGift,
             }
             : {
                 _: 'payments.saveStarGift',
                 unsave: action === 'hide',
-                msgId: message,
+                stargift: inputStarGift,
             },
     )
 }

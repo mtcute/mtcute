@@ -565,6 +565,10 @@ export interface ActionStarGift {
     gift: StarGift | StarGiftUnique
     /** Message attached to the gift */
     message: TextWithEntities | null
+
+    fromId?: number
+    toId?: number
+    savedId?: Long
 }
 
 export type MessageAction =
@@ -924,6 +928,31 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 upgraded: act.upgraded!,
                 upgradeStars: act.upgradeStars ?? Long.ZERO,
                 upgradeMsgId: act.upgradeMsgId ?? null,
+
+                fromId: act.fromId ? getMarkedPeerId(act.fromId) : undefined,
+                toId: act.peer ? getMarkedPeerId(act.peer) : undefined,
+                savedId: act.savedId,
+            }
+        case 'messageActionStarGiftUnique':
+            return {
+                type: 'stars_gift',
+                nameHidden: false,
+                saved: act.saved!,
+                converted: false,
+                convertStars: Long.ZERO,
+                refunded: act.refunded!,
+                gift: act.gift._ === 'starGift'
+                    ? new StarGift(act.gift)
+                    : new StarGiftUnique(act.gift, this._peers),
+                message: null,
+                canUpgrade: false,
+                upgraded: true,
+                upgradeStars: Long.ZERO,
+                upgradeMsgId: null,
+
+                fromId: act.fromId ? getMarkedPeerId(act.fromId) : undefined,
+                toId: act.peer ? getMarkedPeerId(act.peer) : undefined,
+                savedId: act.savedId,
             }
         default:
             return null

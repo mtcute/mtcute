@@ -1,11 +1,12 @@
 import type { tl } from '@mtcute/tl'
 import type { ITelegramClient } from '../../client.types.js'
 
-import type { InputPeerLike } from '../../types/index.js'
+import type { InputPeerLike, InputStarGift } from '../../types/index.js'
 import type { Message } from '../../types/messages/message.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
-import { resolveUser } from '../users/resolve-peer.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { _normalizeInputStarGift } from './_normalize-input-star-gift.js'
 
 /**
  * Transfer a unique star gift.
@@ -20,8 +21,8 @@ import { resolveUser } from '../users/resolve-peer.js'
 export async function transferStarGift(
     client: ITelegramClient,
     params: {
-        /** ID of the message containing the gift */
-        message: number | Message
+        /** Star gift to transfer */
+        gift: InputStarGift
 
         /** ID of the user to transfer the gift to */
         recepient: InputPeerLike
@@ -33,13 +34,12 @@ export async function transferStarGift(
         shouldDispatch?: true
     },
 ): Promise<Message> {
-    const { message, recepient, shouldDispatch } = params
+    const { gift, recepient, shouldDispatch } = params
 
-    const msgId = typeof message === 'number' ? message : message.id
     const invoice: tl.TypeInputInvoice = {
         _: 'inputInvoiceStarGiftTransfer',
-        msgId,
-        toId: await resolveUser(client, recepient),
+        stargift: await _normalizeInputStarGift(client, gift),
+        toId: await resolvePeer(client, recepient),
     }
 
     const form = await client.call({
