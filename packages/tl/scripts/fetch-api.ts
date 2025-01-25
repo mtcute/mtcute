@@ -7,10 +7,12 @@
 import type {
     TlEntry,
     TlFullSchema,
+    TlSchemaDiff,
 } from '@mtcute/tl-utils'
 import type { TlPackedSchema } from './schema.js'
-import { readFile, writeFile } from 'node:fs/promises'
+import { createWriteStream } from 'node:fs'
 
+import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import * as readline from 'node:readline'
 import { ffetchBase as ffetch } from '@fuman/fetch'
@@ -21,21 +23,24 @@ import {
     mergeTlSchemas,
     parseFullTlSchema,
     parseTlToEntries,
+    TL_PRIMITIVES,
     writeTlEntryToString,
 } from '@mtcute/tl-utils'
-import { parseTlEntriesFromJson } from '@mtcute/tl-utils/json.js'
 
+import { parseTlEntriesFromJson } from '@mtcute/tl-utils/json.js'
 import * as cheerio from 'cheerio'
 import {
     __dirname,
     API_SCHEMA_DIFF_JSON_FILE,
     API_SCHEMA_JSON_FILE,
     BLOGFORK_DOMAIN,
+    COMPAT_TL_FILE,
     CORE_DOMAIN,
     COREFORK_DOMAIN,
     TDESKTOP_LAYER,
     TDESKTOP_SCHEMA,
     TDLIB_SCHEMA,
+    TYPES_FOR_COMPAT,
     WEBA_LAYER,
     WEBA_SCHEMA,
     WEBK_SCHEMA,
@@ -225,6 +230,77 @@ async function overrideInt53(schema: TlFullSchema): Promise<void> {
     })
 }
 
+async function generateCompatSchema(oldLayer: number, oldSchema: TlFullSchema, diff: TlSchemaDiff) {
+    // generate list of all types that need to be added to compat.tl
+    const typesToAdd = new Set<string>()
+    const diffedTypes = new Set<string>()
+
+    for (const { name } of diff.classes.removed) {
+        diffedTypes.add(name)
+    }
+    for (const { name, id } of diff.classes.modified) {
+        if (id && id.old !== id.new) {
+            // no point in adding this type if there wasn't a change in constructor ID
+            diffedTypes.add(name)
+        }
+    }
+
+    const processedTypes = new Set<string>()
+    const queue = [...TYPES_FOR_COMPAT]
+
+    while (queue.length) {
+        const it = queue.pop()!
+        processedTypes.add(it)
+
+        const entry = oldSchema.classes[it]
+        if (!entry) {
+            console.log(`[warn] Cannot find ${it} in old schema`)
+            continue
+        }
+
+        if (diffedTypes.has(it)) {
+            typesToAdd.add(it)
+            continue
+        }
+
+        for (const arg of entry.arguments) {
+            const type = arg.type
+            if (type in TL_PRIMITIVES || type === '#') continue
+
+            const typeEntry = oldSchema.unions[type]
+            if (!typeEntry) {
+                console.log(`[warn] Cannot find ${type} in old schema`)
+                continue
+            }
+
+            for (const { name } of typeEntry.classes) {
+                if (!processedTypes.has(name)) {
+                    queue.push(name)
+                }
+            }
+        }
+    }
+
+    const compatWs = createWriteStream(COMPAT_TL_FILE, { flags: 'a' })
+    compatWs.write(`// LAYER ${oldLayer}\n`)
+    for (const type of typesToAdd) {
+        const entry = oldSchema.classes[type]
+        if (!entry) {
+            console.log(`[warn] Cannot find ${type} in old schema`)
+            continue
+        }
+
+        const entryMod: TlEntry = {
+            ...entry,
+            name: `${entry.name}_layer${oldLayer}`,
+        }
+
+        compatWs.write(`${writeTlEntryToString(entryMod)}\n`)
+    }
+
+    compatWs.close()
+}
+
 async function main() {
     console.log('Loading schemas...')
 
@@ -351,17 +427,21 @@ async function main() {
 
     console.log('Writing diff to file...')
     const oldSchema = unpackTlSchema(JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8')) as TlPackedSchema)
+    const diff = generateTlSchemasDifference(oldSchema[0], resultSchema)
     await writeFile(
         API_SCHEMA_DIFF_JSON_FILE,
         JSON.stringify(
             {
                 layer: [oldSchema[1], resultLayer],
-                diff: generateTlSchemasDifference(oldSchema[0], resultSchema),
+                diff,
             },
             null,
             4,
         ),
     )
+
+    console.log('Generating compat.tl...')
+    await generateCompatSchema(oldSchema[1], oldSchema[0], diff)
 
     console.log('Writing result to file...')
     await writeFile(API_SCHEMA_JSON_FILE, JSON.stringify(packTlSchema(resultSchema, resultLayer)))

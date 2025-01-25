@@ -10,6 +10,7 @@ export const API_SCHEMA_DIFF_JSON_FILE: string = join(__dirname, '../diff.json')
 export const MTP_SCHEMA_JSON_FILE: string = join(__dirname, '../mtp-schema.json')
 export const ERRORS_JSON_FILE: string = join(__dirname, '../raw-errors.json')
 export const APP_CONFIG_JSON_FILE: string = join(__dirname, '../app-config.json')
+export const COMPAT_TL_FILE: string = join(__dirname, '../data/compat.tl')
 
 export const CORE_DOMAIN = 'https://core.telegram.org'
 export const COREFORK_DOMAIN = 'https://corefork.telegram.org'
@@ -28,3 +29,14 @@ export const ESM_PRELUDE = `// This file is auto-generated. Do not edit.
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 `
+
+export const TYPES_FOR_COMPAT: string[] = [
+    'message',
+    'messageService',
+    'channel',
+    'channelFull',
+    'chat',
+    'chatFull',
+    'user',
+    'userFull',
+]
