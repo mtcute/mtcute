@@ -37,7 +37,7 @@ const tg = new TelegramClient({
   apiHash: 'API_HASH'
 })
 
-const self = await tg.start({ ... }
+const self = await tg.start({ ... })
 console.log(`Logged in as ${self.displayName}`)
 
 await tg.sendText('self', html`Hello from <b>MTCute</b>!`)
