@@ -227,13 +227,13 @@ function parse(
     const onattribname = parser.onattribname
     const onattribend = parser.onattribend
 
-    parser.onattribname = function (name) {
-        onattribname.call(this, name)
+    parser.onattribname = function (startIdx, endIdx) {
+        onattribname.call(this, startIdx, endIdx)
         isInsideAttrib = true
     }
 
-    parser.onattribend = function (quote) {
-        onattribend.call(this, quote)
+    parser.onattribend = function (quote, endIdx) {
+        onattribend.call(this, quote, endIdx)
         isInsideAttrib = false
     }
 
