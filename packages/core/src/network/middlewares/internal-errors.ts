@@ -31,10 +31,17 @@ export interface InternalErrorsHandlerOptions {
      * @default 1
      */
     waitTime?: number
+
+    /**
+     * List of internal errors that should not be retried and should be thrown immediately.
+     */
+    exceptErrors?: string[]
 }
 
 export function internalErrorsHandler(params: InternalErrorsHandlerOptions): RpcCallMiddleware {
-    const { maxRetries = Infinity, waitTime = 1 } = params
+    const { maxRetries = Infinity, waitTime = 1, exceptErrors } = params
+
+    const exceptErrorsSet = exceptErrors ? new Set(exceptErrors) : undefined
 
     return async (ctx, next) => {
         const numRetries = ctx.params?.maxRetryCount ?? maxRetries
@@ -44,6 +51,8 @@ export function internalErrorsHandler(params: InternalErrorsHandlerOptions): Rpc
             if (!isTlRpcError(res)) return res
 
             if (!CLIENT_ERRORS.has(res.errorCode)) {
+                if (exceptErrorsSet?.has(res.errorMessage)) return res
+
                 if (ctx.params?.throw503 && res.errorCode === -503) {
                     throw new MtTimeoutError()
                 }
