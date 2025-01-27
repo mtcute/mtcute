@@ -103,7 +103,7 @@ jobs:
         run: 'cd e2e && pnpm run test:all'
   e2e-deno:
     runs-on: node22
-    needs: [lint, test-node, test-web, test-bun, test-deno]
+    needs: [e2e]
     permissions:
       contents: read
       actions: write
