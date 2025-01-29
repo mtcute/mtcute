@@ -10,8 +10,8 @@ import { Deferred, Emitter, timers, u8 } from '@fuman/utils'
 import { tl } from '@mtcute/tl'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
 import Long from 'long'
-import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
 
+import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
 import {
     EarlyTimer,
@@ -2050,18 +2050,7 @@ export class SessionConnection extends PersistentConnection {
         )
 
         const enc = this._session.encryptMessage(result)
-        const promise = this.send(enc).catch((err: Error) => {
-            if (this._destroyed) return
-            this.log.error('error while sending pending messages (root msg_id = %l): %e', rootMsgId, err)
-
-            // put acks in the front so they are the first to be sent
-            if (ackMsgIds) {
-                this._session.queuedAcks.splice(0, 0, ...ackMsgIds)
-            }
-            if (rootMsgId) {
-                this._onMessageFailed(rootMsgId, 'unknown error')
-            }
-        })
+        const promise = this.send(enc)
 
         if (this._inactivityPendingFlush && !this._session.hasPendingMessages) {
             void promise.then(() => {

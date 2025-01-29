@@ -5,7 +5,7 @@ import type { IPacketCodec, ITelegramConnection, TelegramTransport } from './tra
 
 import { FramedReader, FramedWriter } from '@fuman/io'
 
-import { PersistentConnection as FumanPersistentConnection } from '@fuman/net'
+import { ConnectionClosedError, PersistentConnection as FumanPersistentConnection } from '@fuman/net'
 import { Emitter, timers } from '@fuman/utils'
 
 export interface PersistentConnectionParams {
@@ -140,7 +140,7 @@ export abstract class PersistentConnection {
         }
     }
 
-    private async _onClose() {
+    private _onClose(): void {
         this.log.debug('connection closed')
         this._updateLogPrefix()
 
@@ -149,9 +149,12 @@ export abstract class PersistentConnection {
         this.onClosed()
     }
 
-    private async _onError(err: Error) {
+    private _onError(err: Error) {
         this._updateLogPrefix()
-        this.handleError(err)
+
+        if (!(err instanceof ConnectionClosedError)) {
+            this.handleError(err)
+        }
 
         return 'reconnect' as const
     }
@@ -231,7 +234,13 @@ export abstract class PersistentConnection {
 
         if (this._writer) {
             this._rescheduleInactivity()
-            await this._writer.write(data)
+            try {
+                await this._writer.write(data)
+            } catch (e: unknown) {
+                this.log.warn('encountered an error closed while sending, reconnecting: %e', e)
+                this._fuman.reconnect(true)
+                this._sendOnceConnected.push(data)
+            }
         } else {
             this._sendOnceConnected.push(data)
         }
