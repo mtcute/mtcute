@@ -433,7 +433,7 @@ export async function _normalizeInputMedia(
     return uploadMediaIfNeeded(
         {
             _: 'inputMediaUploadedDocument',
-            nosoundVideo: media.type === 'video' && media.isAnimated,
+            nosoundVideo: media.type === 'video' && !media.isAnimated,
             forceFile: media.type === 'document',
             file: inputFile,
             thumb,
