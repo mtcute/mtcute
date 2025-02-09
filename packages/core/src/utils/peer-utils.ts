@@ -2,6 +2,7 @@ import type { tl } from '@mtcute/tl'
 
 import type { BasicPeerType } from '../types/peers.js'
 import { MtArgumentError, MtUnsupportedError } from '../types/errors.js'
+import { assertNever } from '../types/utils.js'
 
 // src: https://github.com/tdlib/td/blob/master/td/telegram/DialogId.h
 const ZERO_CHANNEL_ID = -1000000000000
@@ -191,5 +192,55 @@ export function* getAllPeersFrom(obj: tl.TlObject | tl.TlObject[]): Iterable<tl.
                 }
             }
         }
+    }
+}
+
+/** Get the {@link BasicPeerType} of a peer, either by its marked ID or by its TL object */
+export function getBasicPeerType(
+    id: number | tl.TypePeer | tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel,
+): BasicPeerType {
+    // todo: we should probably move it to mtcute
+    if (typeof id === 'number') {
+        // based on parseMarkedPeerId()
+        if (id < 0) {
+            if (MIN_MARKED_CHAT_ID <= id) {
+                return 'chat'
+            }
+            if (MIN_MARKED_CHANNEL_ID <= id && id !== ZERO_CHANNEL_ID) {
+                return 'channel'
+            }
+        } else if (id > 0 && id <= MAX_USER_ID) {
+            return 'user'
+        }
+
+        throw new Error(`Invalid marked peer id: ${id}`)
+    }
+
+    switch (id._) {
+        case 'peerUser':
+        case 'inputUser':
+        case 'inputUserSelf':
+        case 'inputPeerSelf':
+        case 'inputUserFromMessage':
+        case 'inputPeerUser':
+        case 'inputPeerUserFromMessage':
+        case 'inputUserEmpty':
+        case 'mtcute.dummyInputPeerMinUser':
+            return 'user'
+        case 'peerChat':
+        case 'inputPeerChat':
+            return 'chat'
+        case 'peerChannel':
+        case 'inputChannel':
+        case 'inputChannelEmpty':
+        case 'mtcute.dummyInputPeerMinChannel':
+        case 'inputChannelFromMessage':
+        case 'inputPeerChannel':
+        case 'inputPeerChannelFromMessage':
+            return 'channel'
+        case 'inputPeerEmpty':
+            throw new Error('Empty peer')
+        default:
+            assertNever(id)
     }
 }
