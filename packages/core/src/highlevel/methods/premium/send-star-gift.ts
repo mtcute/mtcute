@@ -18,7 +18,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * > For GUI clients, you should refer to the method's source code and
  * > present the payment form to the user.
  *
- * @returns  Service message about the sent gift
+ * @returns  Service message about the sent gift, if one was generated.
  */
 export async function sendStarGift(
     client: ITelegramClient,
@@ -48,7 +48,7 @@ export async function sendStarGift(
          */
         shouldDispatch?: true
     },
-): Promise<Message> {
+): Promise<Message | null> {
     const {
         peerId,
         gift,
@@ -80,5 +80,5 @@ export async function sendStarGift(
 
     assertTypeIs('payments.sendStarsForm', res, 'payments.paymentResult')
 
-    return _findMessageInUpdate(client, res.updates, false, !shouldDispatch)
+    return _findMessageInUpdate(client, res.updates, false, !shouldDispatch, true)
 }

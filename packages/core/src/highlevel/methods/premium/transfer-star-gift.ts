@@ -16,7 +16,7 @@ import { _normalizeInputStarGift } from './_normalize-input-star-gift.js'
  * > For GUI clients, you should refer to the method's source code and
  * > present the payment form to the user.
  *
- * @returns  Service message about the transferred gift
+ * @returns  Service message about the transferred gift, if one was generated.
  */
 export async function transferStarGift(
     client: ITelegramClient,
@@ -33,7 +33,7 @@ export async function transferStarGift(
          */
         shouldDispatch?: true
     },
-): Promise<Message> {
+): Promise<Message | null> {
     const { gift, recepient, shouldDispatch } = params
 
     const invoice: tl.TypeInputInvoice = {
@@ -55,5 +55,5 @@ export async function transferStarGift(
 
     assertTypeIs('payments.sendStarsForm', res, 'payments.paymentResult')
 
-    return _findMessageInUpdate(client, res.updates, false, !shouldDispatch)
+    return _findMessageInUpdate(client, res.updates, false, !shouldDispatch, true)
 }

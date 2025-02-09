@@ -4928,7 +4928,7 @@ export interface TelegramClient extends ITelegramClient {
      *
      * **Available**: 👤 users only
      *
-     * @returns  Service message about the sent gift
+     * @returns  Service message about the sent gift, if one was generated.
      */
     sendStarGift(
         params: {
@@ -4956,7 +4956,7 @@ export interface TelegramClient extends ITelegramClient {
              * to the client's update handler.
              */
             shouldDispatch?: true
-        }): Promise<Message>
+        }): Promise<Message | null>
 
     /**
      * Set current user's business introduction.
@@ -5016,7 +5016,7 @@ export interface TelegramClient extends ITelegramClient {
      *
      * **Available**: 👤 users only
      *
-     * @returns  Service message about the transferred gift
+     * @returns  Service message about the transferred gift, if one was generated.
      */
     transferStarGift(
         params: {
@@ -5031,7 +5031,7 @@ export interface TelegramClient extends ITelegramClient {
              * to the client's update handler.
              */
             shouldDispatch?: true
-        }): Promise<Message>
+        }): Promise<Message | null>
     /**
      * Upgrades a star gift to a unique gift.
      *
@@ -5042,7 +5042,7 @@ export interface TelegramClient extends ITelegramClient {
      *
      * **Available**: 👤 users only
      *
-     * @returns  Service message about the upgraded gift
+     * @returns  Service message about the upgraded gift, if one was generated.
      */
     upgradeStarGift(
         params: {
@@ -5059,7 +5059,7 @@ export interface TelegramClient extends ITelegramClient {
              * to the client's update handler.
              */
             shouldDispatch?: true
-        }): Promise<Message>
+        }): Promise<Message | null>
     /**
      * Add a sticker to a sticker set.
      *
