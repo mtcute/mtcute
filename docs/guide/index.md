@@ -44,20 +44,6 @@ await tg.sendText('self', html`Hello from <b>MTCute</b>!`)
 ```
 4. That's literally it! Happy hacking 🚀
 
-### Native crypto addon
-mtcute also provides `@mtcute/crypto-node` package, that implements
-a native Node.js addon for crypto functions used in MTProto.
-
-Using this addon improves overall library performance (especially when uploading/downloading files), 
-so it is advised that you install it as well:
-
-```bash
-pnpm add @mtcute/crypto-node
-```
-
-When using `@mtcute/node`, native addon is loaded automatically,
-no extra steps are required.
-
 ## Bun
 
 Support for Bun is provided in `@mtcute/bun` package, and

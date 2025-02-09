@@ -48,7 +48,7 @@
     "@fuman/utils": "0.0.4",
     "@types/bun": "1.1.14",
     "@types/deno": "npm:@teidesu/deno-types@1.46.3",
-    "@types/node": "20.10.0",
+    "@types/node": "22.13.1",
     "@types/ws": "8.5.4",
     "@vitest/browser": "2.0.5",
     "@vitest/coverage-v8": "2.0.5",

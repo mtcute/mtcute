@@ -16,7 +16,7 @@ export default defineConfig({
                 : collectTestEntrypoints({
                     // https://github.com/oven-sh/bun/issues/4145 prevents us from using vitest directly
                     // so we have to use bun's native test runner
-                    skipPackages: ['create-bot', 'crypto-node'],
+                    skipPackages: ['create-bot'],
                     // bun:test doesn't support certain features of vitest, so we'll skip them for now
                     // https://github.com/oven-sh/bun/issues/1825
                     skipTests: [

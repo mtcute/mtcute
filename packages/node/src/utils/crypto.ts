@@ -1,4 +1,4 @@
-import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
+import type { IAesCtr, IEncryptionScheme } from '@mtcute/core/utils.js'
 import { createCipheriv, createHash, createHmac, pbkdf2, randomFillSync } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
@@ -7,7 +7,7 @@ import { deflateSync, gunzipSync } from 'node:zlib'
 import { BaseCryptoProvider } from '@mtcute/core/utils.js'
 import { ige256Decrypt, ige256Encrypt, initSync } from '@mtcute/wasm'
 
-export abstract class BaseNodeCryptoProvider extends BaseCryptoProvider {
+export class NodeCryptoProvider extends BaseCryptoProvider {
     createAesCtr(key: Uint8Array, iv: Uint8Array): IAesCtr {
         const cipher = createCipheriv(`aes-${key.length * 8}-ctr`, key, iv)
 
@@ -66,9 +66,7 @@ export abstract class BaseNodeCryptoProvider extends BaseCryptoProvider {
     randomFill(buf: Uint8Array): void {
         randomFillSync(buf)
     }
-}
 
-export class NodeCryptoProvider extends BaseNodeCryptoProvider implements ICryptoProvider {
     async initialize(): Promise<void> {
         const require = createRequire(import.meta.url)
         const wasmFile = require.resolve('@mtcute/wasm/mtcute.wasm')

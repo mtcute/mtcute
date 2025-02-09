@@ -55,8 +55,6 @@ pnpm create @mtcute/bot
 🏭 want to integrate it into your existing nodejs app? use the nodejs package:
 ```bash
 pnpm add @mtcute/node
-# optional, for faster crypto
-pnpm add @mtcute/crypto-node
 ```
 
 ✨ building something for web? use the web package:

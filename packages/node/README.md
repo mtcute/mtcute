@@ -3,7 +3,6 @@
 📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_node.html)
 
 Node.js support package for mtcute. Includes:
-- Support for native crypto addon (must be installed separately, `@mtcute/crypto-node`)
 - Terminal I/O via `readline`
 - SQLite storage (via `better-sqlite3`)
 - TCP transport (via `node:net`)

@@ -22,16 +22,6 @@ import { TcpTransport } from './utils/tcp.js'
 
 export type { TelegramClientOptions }
 
-let nativeCrypto: any
-
-try {
-    /* eslint-disable ts/ban-ts-comment,ts/no-unsafe-assignment */
-
-    // @ts-ignore  not in deps
-    nativeCrypto = (await import('@mtcute/crypto-node')).NodeNativeCryptoProvider
-    /* eslint-enable ts/ban-ts-comment,ts/no-unsafe-assignment */
-} catch {}
-
 export interface BaseTelegramClientOptions
     extends PartialOnly<Omit<BaseTelegramClientOptionsBase, 'storage'>, 'transport' | 'crypto' | 'platform'> {
     /**
@@ -49,8 +39,7 @@ export interface BaseTelegramClientOptions
 export class BaseTelegramClient extends BaseTelegramClientBase {
     constructor(opts: BaseTelegramClientOptions) {
         super({
-            // eslint-disable-next-line
-            crypto: nativeCrypto ? new nativeCrypto() : new NodeCryptoProvider(),
+            crypto: new NodeCryptoProvider(),
             transport: new TcpTransport(),
             platform: new NodePlatform(),
             ...opts,

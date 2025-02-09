@@ -21,7 +21,6 @@ export default mergeConfig(baseConfig, {
         fileParallelism: false, // leads to ERR_INSUFFICIENT_RESOURCES
         // for whatever reason using exclude-s makes the vite never start the browser, so we use skip-s instead.
         // exclude: [
-        //     './packages/crypto-node/**',
         //     './packages/node/**',
         // ],
     },

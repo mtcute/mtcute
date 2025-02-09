@@ -15,7 +15,7 @@ export default defineConfig({
                 ? [process.env.ENTRYPOINT]
                 : collectTestEntrypoints({
                     // these packages rely on node apis and are not meant to be run under deno
-                    skipPackages: ['create-bot', 'crypto-node', 'bun', 'node'],
+                    skipPackages: ['create-bot', 'bun', 'node'],
                     skipTests: [
                         // uses timers
                         'core/src/network/config-manager.test.ts',
