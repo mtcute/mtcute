@@ -32,10 +32,6 @@ export function buildDependenciesList(config: UserConfig): DependenciesList {
         dependencies.push('@mtcute/i18n')
     }
 
-    if (config.features.includes(MtcuteFeature.NativeAddon)) {
-        dependencies.push('@mtcute/crypto-node')
-    }
-
     if (config.features.includes(MtcuteFeature.TypeScript) && config.packageManager !== PackageManager.Deno) {
         devDepdenencies.push('typescript', '@types/node')
 

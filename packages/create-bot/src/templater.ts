@@ -6,7 +6,7 @@ import * as path from 'node:path'
 
 import * as glob from 'glob'
 import Handlebars from 'handlebars'
-import { getPackageManagerVersion, packageManagerToRuntime } from './package-manager.js'
+import { getPackageManager, getPackageManagerVersion, packageManagerToRuntime } from './package-manager.js'
 
 const templater = Handlebars.create()
 
@@ -41,6 +41,7 @@ export async function runTemplaterForFile(file: string, config: UserConfig): Pro
         ...config,
         runtime: packageManagerToRuntime(config.packageManager),
         packageManagerVersion: getPackageManagerVersion()?.join('@'),
+        packageManager: getPackageManager(),
         features: config.features.reduce<Record<MtcuteFeature, boolean>>(
             (acc, f) => {
                 acc[f] = true

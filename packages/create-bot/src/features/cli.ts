@@ -40,15 +40,6 @@ export function getFeatureChoices(packageMananger: PackageManager): CheckboxChoi
         })
     }
 
-    if (packageMananger !== PackageManager.Bun && packageMananger !== PackageManager.Deno) {
-        arr.unshift({
-            name: ' 🚀 Native addon (better performance)',
-            short: 'Native addon',
-            value: MtcuteFeature.NativeAddon,
-            checked: true,
-        })
-    }
-
     if (packageMananger === PackageManager.Pnpm) {
         // todo: add support for dockerfile generation for other package managers
         arr.push({
