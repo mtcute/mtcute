@@ -33,17 +33,26 @@ export class TakeoutSession {
      */
     async call<T extends tl.RpcMethod>(
         message: MustEqual<T, tl.RpcMethod>,
-        params?: RpcCallOptions,
+        params?: RpcCallOptions & {
+            /** If passed, the request will be wrapped in an `invokeWithMessagesRange` */
+            withMessageRange?: tl.TypeMessageRange
+        },
     ): Promise<tl.RpcCallReturn[T['_']]> {
+        let query: tl.RpcMethod = {
+            _: 'invokeWithTakeout',
+            takeoutId: this.id,
+            query: message,
+        }
+        if (params?.withMessageRange) {
+            query = {
+                _: 'invokeWithMessagesRange',
+                range: params.withMessageRange,
+                query,
+            }
+        }
+
         // eslint-disable-next-line ts/no-unsafe-return
-        return this.client.call(
-            {
-                _: 'invokeWithTakeout',
-                takeoutId: this.id,
-                query: message,
-            } as any,
-            params,
-        )
+        return this.client.call(query, params)
     }
 
     /**
@@ -53,21 +62,25 @@ export class TakeoutSession {
      * You can optionally provide a function to check if some
      * RPC method should be called via a takeout session or directly,
      * otherwise all methods are called through the takeout session.
-     *
-     * > **Note**: This will return a `Proxy` object that
-     * > overrides `call` method. Using this method requires
-     * > that your target environment supports `Proxy` and `Reflect` APIs
-     *
-     * @param predicate
-     *     Function that given the RPC call should determine whether
-     *     that call should be called via takeout session or not.
-     *     Returning `true` will use takeout session, `false` will not.
      */
-    createProxy(predicate?: (obj: tl.TlObject) => boolean): ITelegramClient {
-        const boundCall: TakeoutSession['call'] = predicate
-            ? (obj, params) => {
-                if (predicate(obj)) {
-                    return this.call(obj, params)
+    createProxy(params?: RpcCallOptions & {
+        /**
+         * Function that given the RPC call should determine whether
+         * that call should be called via takeout session (and use the rest of the params passed here) or not.
+         * Returning `true` will use takeout session, `false` will call the method directly.
+         *
+         * @default  `undefined`, i.e. all calls are sent via takeout session
+         */
+        predicate?: (obj: tl.TlObject) => boolean
+
+        /** If passed, the request will be wrapped in an `invokeWithMessagesRange` */
+        withMessageRange?: tl.TypeMessageRange
+    }): ITelegramClient {
+        const boundCall: TakeoutSession['call'] = params
+            ? (obj, theirParams) => {
+                const mergedParams = theirParams ? { ...params, ...theirParams } : params
+                if (!params.predicate || params.predicate?.(obj)) {
+                    return this.call(obj, mergedParams)
                 }
 
                 return this.client.call(obj, params)
