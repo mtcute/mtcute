@@ -79,6 +79,7 @@ import {
     MessageReactions,
     ParametersSkip2,
     ParsedUpdate,
+    Peer,
     PeerReaction,
     PeersIndex,
     PeerStories,
