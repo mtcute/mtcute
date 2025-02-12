@@ -180,9 +180,9 @@ export class BaseTelegramClient implements ITelegramClient {
 
         // drop non-primary auth keys because they are no longer valid
         const primaryDc = this.mt.network.getPrimaryDcId()
-        for (const dc of this.mt.network.config.getCached()?.dcOptions ?? []) {
-            if (dc.id === primaryDc) continue
-            await this.mt.storage.provider.authKeys.deleteByDc(dc.id)
+        for (const dcId of [1, 2, 3, 4, 5]) { // lol
+            if (dcId === primaryDc) continue
+            await this.mt.storage.provider.authKeys.deleteByDc(dcId)
         }
     }
 
