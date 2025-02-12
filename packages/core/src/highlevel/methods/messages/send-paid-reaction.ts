@@ -2,6 +2,7 @@ import type { ITelegramClient } from '../../client.types.js'
 
 import type {
     InputMessageId,
+    InputPeerLike,
 } from '../../types/index.js'
 import { tl } from '@mtcute/tl'
 import { MtcuteError } from '../../../types/errors.js'
@@ -27,8 +28,15 @@ import { resolvePeer } from '../users/resolve-peer.js'
 export async function sendPaidReaction(
     client: ITelegramClient,
     params: InputMessageId & {
-        /** Whether to send the reaction anonymously */
+        /**
+         * Whether to send the reaction anonymously
+         */
         anonymous?: boolean
+
+        /**
+         * Peer as which to send the reaction, mutually exclusive with `anonymous`
+         */
+        asPeer?: InputPeerLike
 
         /**
          * Number of reactions to send
@@ -44,10 +52,17 @@ export async function sendPaidReaction(
         shouldDispatch?: true
     },
 ): Promise<MessageReactions> {
-    const { anonymous, count = 1 } = params
+    const { anonymous, asPeer, count = 1 } = params
     const { chatId, message } = normalizeInputMessageId(params)
 
     const peer = await resolvePeer(client, chatId)
+
+    let privacy: tl.TypePaidReactionPrivacy | undefined
+    if (anonymous !== undefined) {
+        privacy = { _: anonymous ? 'paidReactionPrivacyAnonymous' : 'paidReactionPrivacyDefault' }
+    } else if (asPeer) {
+        privacy = { _: 'paidReactionPrivacyPeer', peer: await resolvePeer(client, asPeer) }
+    }
 
     let res
 
@@ -58,7 +73,7 @@ export async function sendPaidReaction(
                 peer,
                 msgId: message,
                 count,
-                private: anonymous,
+                private: privacy,
                 randomId: await client.getMtprotoMessageId(),
             })
             break

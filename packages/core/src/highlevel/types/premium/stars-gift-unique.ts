@@ -189,6 +189,11 @@ export class StarGiftUnique {
     get ownerAddress(): string | null {
         return this.raw.ownerAddress ?? null
     }
+
+    /** TON address of the gift NFT */
+    get giftAddress(): string | null {
+        return this.raw.giftAddress ?? null
+    }
 }
 
 makeInspectable(StarGiftUnique)
