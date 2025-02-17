@@ -6,7 +6,8 @@ import { ConditionVariable } from '@fuman/utils'
 import { parseFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 import { MtArgumentError, MtUnsupportedError } from '../../../types/errors.js'
-import { FileLocation } from '../../types/index.js'
+import { toggleChannelIdMark } from '../../../utils/peer-utils.js'
+import { FileLocation, MtPeerNotFoundError } from '../../types/index.js'
 import { fileIdToInputFileLocation, fileIdToInputWebFileLocation } from '../../utils/convert-file-id.js'
 import { determinePartSize } from '../../utils/file-utils.js'
 
@@ -69,6 +70,36 @@ export async function* downloadAsIterable(
     }
 
     const isWeb = tl.isAnyInputWebFileLocation(location)
+
+    if (location._ === 'inputPeerPhotoFileLocation') {
+        // replace dummy min input peers with input peers with min access hash (we can use it as-is without having to find a ref message)
+        if (location.peer._ === 'mtcute.dummyInputPeerMinUser' || location.peer._ === 'mtcute.dummyInputPeerMinChannel') {
+            const peerId = location.peer._ === 'mtcute.dummyInputPeerMinUser'
+                ? location.peer.userId
+                : toggleChannelIdMark(location.peer.channelId)
+            const accessHash = await client.storage.peers.getMinAccessHash(peerId)
+            if (!accessHash) {
+                throw new MtPeerNotFoundError(`Peer ${peerId} not found`)
+            }
+
+            location = {
+                _: 'inputPeerPhotoFileLocation',
+                peer: location.peer._ === 'mtcute.dummyInputPeerMinUser'
+                    ? {
+                        _: 'inputPeerUser',
+                        userId: location.peer.userId,
+                        accessHash,
+                    }
+                    : {
+                        _: 'inputPeerChannel',
+                        channelId: location.peer.channelId,
+                        accessHash,
+                    },
+                photoId: location.photoId,
+                big: location.big,
+            }
+        }
+    }
 
     // we will receive a FileMigrateError in case this is invalid
     const primaryDcId = await client.getPrimaryDcId()

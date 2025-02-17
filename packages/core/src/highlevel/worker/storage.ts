@@ -66,6 +66,7 @@ class PeersServiceProxy implements PublicPart<PeersService> {
     readonly getByPhone: PeersService['getByPhone']
     readonly getByUsername: PeersService['getByUsername']
     readonly getCompleteById: PeersService['getCompleteById']
+    readonly getMinAccessHash: PeersService['getMinAccessHash']
 
     constructor(private _invoker: WorkerInvoker) {
         const bind = this._invoker.makeBinder<PeersService>('storage-peers')
@@ -76,6 +77,7 @@ class PeersServiceProxy implements PublicPart<PeersService> {
         this.getByPhone = bind('getByPhone')
         this.getByUsername = bind('getByUsername')
         this.getCompleteById = bind('getCompleteById')
+        this.getMinAccessHash = bind('getMinAccessHash')
     }
 }
 

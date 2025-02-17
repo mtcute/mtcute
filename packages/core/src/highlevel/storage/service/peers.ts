@@ -306,6 +306,13 @@ export class PeersService extends BaseService {
         return null
     }
 
+    async getMinAccessHash(id: number): Promise<tl.Long | null> {
+        const dto = await this._peers.getById(id, true)
+        if (!dto) return null
+
+        return longFromFastString(dto.accessHash)
+    }
+
     async getByPhone(phone: string): Promise<tl.TypeInputPeer | null> {
         const dto = await this._peers.getByPhone(phone)
         if (!dto) return null
