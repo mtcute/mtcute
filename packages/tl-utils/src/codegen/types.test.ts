@@ -41,12 +41,14 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
         it('adds usage info comments', () => {
             const entries = parseTlToEntries('---functions---\ntest = Test;\ntestBot = Test;')
             const [result, resultBot] = entries.map(it =>
-                generateTypescriptDefinitionsForTlEntry(it, 'tl.', {
-                    base: {},
-                    errors: {},
-                    throws: { test: ['FOO', 'BAR'] },
-                    userOnly: { test: 1 },
-                    botOnly: { testBot: 1 },
+                generateTypescriptDefinitionsForTlEntry(it, {
+                    errors: {
+                        base: {},
+                        errors: {},
+                        throws: { test: ['FOO', 'BAR'] },
+                        userOnly: { test: 1 },
+                        botOnly: { testBot: 1 },
+                    },
                 }),
             )
 
@@ -82,7 +84,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
 
     it('generates code with raw flags for constructors with flags', () => {
         const entry = parseTlToEntries('test flags:# flags2:# = Test;')[0]
-        expect(generateTypescriptDefinitionsForTlEntry(entry, undefined, undefined, true)).toMatchSnapshot()
+        expect(generateTypescriptDefinitionsForTlEntry(entry, { withFlags: true })).toMatchSnapshot()
     })
 })
 
@@ -91,7 +93,7 @@ describe('generateTypescriptDefinitionsForTlSchema', () => {
         const entries = parseTlToEntries(tl.join('\n'))
         const schema = parseFullTlSchema(entries)
 
-        let [codeTs, codeJs] = generateTypescriptDefinitionsForTlSchema(schema, 0)
+        let [codeTs, codeJs] = generateTypescriptDefinitionsForTlSchema(schema)
 
         // skip prelude
         codeTs = codeTs.substring(codeTs.indexOf('-readonly [P in keyof T]: T[P]') + 37, codeTs.length - 1)

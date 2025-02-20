@@ -29,6 +29,8 @@ export class TlBinaryReader {
 
     pos = 0
 
+    _objectMapper?: (obj: any) => any
+
     /**
      * @param objectsMap  Readers map
      * @param data  Buffer to read from

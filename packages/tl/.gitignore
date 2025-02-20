@@ -2,5 +2,7 @@
 /index.js
 binary/reader.js
 binary/writer.js
+/compat/index.d.ts
+/compat/reader.js
 
 /diff.json

@@ -30,6 +30,8 @@ export const ESM_PRELUDE = `// This file is auto-generated. Do not edit.
 Object.defineProperty(exports, "__esModule", { value: true });
 `
 
+// these types and their descendants are supported for backward compatibility,
+// and will get included into compat.tl on schema bump
 export const TYPES_FOR_COMPAT: string[] = [
     'message',
     'messageService',

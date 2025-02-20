@@ -90,10 +90,17 @@ function entryFullTypeName(entry: TlEntry): string {
  */
 export function generateTypescriptDefinitionsForTlEntry(
     entry: TlEntry,
-    baseNamespace = 'tl.',
-    errors?: TlErrors,
-    withFlags = false,
+    params?: {
+        baseNamespace?: string
+        errors?: TlErrors
+        withFlags?: boolean
+        extends?: {
+            ownSchema: TlFullSchema
+            namespace: string
+        }
+    },
 ): string {
+    const { baseNamespace = 'tl.', errors, withFlags = false, extends: extendsSchema } = params ?? {}
     let ret = ''
 
     let comment = ''
@@ -176,8 +183,19 @@ export function generateTypescriptDefinitionsForTlEntry(
             typeFinal = true
         }
 
+        let typeNamespace = baseNamespace
+
+        if (extendsSchema) {
+            // ensure this type is defined in our schema, otherwise we should use the base schema namespace
+            const { ownSchema, namespace } = extendsSchema
+            const exists = arg.type[0].match(/[A-Z]/) ? arg.type in ownSchema.unions : arg.type in ownSchema.classes
+            if (!exists) {
+                typeNamespace = `${namespace}.`
+            }
+        }
+
         if (!typeFinal) {
-            type = fullTypeName(arg.type, baseNamespace, {
+            type = fullTypeName(arg.type, typeNamespace, {
                 typeModifiers: arg.typeModifiers,
             })
         }
@@ -190,13 +208,42 @@ export function generateTypescriptDefinitionsForTlEntry(
     return ret
 }
 
-const PRELUDE = `
-import _Long from 'long';
+/**
+ * Generate TypeScript definitions for a given TL schema
+ *
+ * @param schema  TL schema to generate definitions for
+ * @returns  Tuple containing `[ts, js]` code
+ */
+export function generateTypescriptDefinitionsForTlSchema(
+    schema: TlFullSchema,
+    params?: {
+        /** Layer of the schema */
+        layer?: number
+        /** Namespace of the schema */
+        namespace?: string
+        /** Errors information object */
+        errors?: TlErrors
+        /** Whether to skip importing _Long */
+        skipLongImport?: boolean
+        /** Whether to only generate typings and don't emit any JS helper functions typings */
+        onlyTypings?: boolean
+        /** Namespace of another schema that this one extends */
+        extends?: string
+    },
+): [string, string] {
+    const {
+        layer = 0,
+        namespace = 'tl',
+        errors,
+        skipLongImport = false,
+        onlyTypings = false,
+        extends: extendsSchema,
+    } = params ?? {}
+    let ts = `${skipLongImport ? '' : 'import _Long from \'long\';'}
+export declare namespace ${namespace} {
+    const LAYER = ${layer};
 
-export declare namespace $NS$ {
-    const LAYER = $LAYER$;
-
-    function $extendTypes(types: Record<string, string>): void
+    ${onlyTypings ? '' : 'function $extendTypes(types: Record<string, string>): void'}
 
     type Long = _Long;
     type RawLong = Uint8Array;
@@ -211,8 +258,7 @@ export declare namespace $NS$ {
     }
 `
 
-const PRELUDE_JS = `
-exports.$NS$ = {};
+    let js = `exports.${namespace} = {};
 (function(ns) {
 var _types = void 0;
 function _isAny(type) {
@@ -225,26 +271,12 @@ ns.$extendTypes = function(types) {
         types.hasOwnProperty(i) && (_types[i] = types[i])
     }
 }
-ns.LAYER = $LAYER$;
+ns.LAYER = ${layer};
 `
 
-/**
- * Generate TypeScript definitions for a given TL schema
- *
- * @param schema  TL schema to generate definitions for
- * @param layer  Layer of the schema
- * @param namespace  namespace of the schema
- * @param errors  Errors information object
- * @returns  Tuple containing `[ts, js]` code
- */
-export function generateTypescriptDefinitionsForTlSchema(
-    schema: TlFullSchema,
-    layer: number,
-    namespace = 'tl',
-    errors?: TlErrors,
-): [string, string] {
-    let ts = PRELUDE.replace('$NS$', namespace).replace('$LAYER$', String(layer))
-    let js = PRELUDE_JS.replace('$NS$', namespace).replace('$LAYER$', String(layer))
+    if (extendsSchema) {
+        ts += '    type AnyToNever<T> = any extends T ? never : T;\n'
+    }
 
     if (errors) {
         const [_ts, _js] = generateCodeForErrors(errors, 'ns.')
@@ -269,7 +301,15 @@ export function generateTypescriptDefinitionsForTlSchema(
                 unions[entry.type] = 1
             }
 
-            ts += `${indent(indentSize, generateTypescriptDefinitionsForTlEntry(entry, `${namespace}.`))}\n`
+            ts += `${indent(indentSize, generateTypescriptDefinitionsForTlEntry(entry, {
+                baseNamespace: `${namespace}.`,
+                extends: extendsSchema
+                    ? {
+                        ownSchema: schema,
+                        namespace: extendsSchema,
+                    }
+                    : undefined,
+            }))}\n`
         })
 
         ts += indent(indentSize, 'interface RpcCallReturn')
@@ -338,10 +378,16 @@ export function generateTypescriptDefinitionsForTlSchema(
                 ts += fullTypeName(entry.name, `${namespace}.`)
             })
 
+            if (extendsSchema) {
+                ts += ` | AnyToNever<${extendsSchema}.${typeName}>`
+            }
+
             ts += '\n'
 
-            ts += `${indent(indentSize, `function isAny${typeWithoutNs}(o: object): o is ${typeName}`)}\n`
-            js += `ns.isAny${typeWithoutNs} = _isAny('${name}');\n`
+            if (!onlyTypings) {
+                ts += `${indent(indentSize, `function isAny${typeWithoutNs}(o: object): o is ${typeName}`)}\n`
+                js += `ns.isAny${typeWithoutNs} = _isAny('${name}');\n`
+            }
         }
 
         if (ns) {
@@ -383,6 +429,9 @@ export function generateTypescriptDefinitionsForTlSchema(
                     })}`,
             )}\n`
     })
+    if (extendsSchema) {
+        ts += `${indent(8, `| ${extendsSchema}.TlObject`)}\n`
+    }
 
     ts += '}'
 

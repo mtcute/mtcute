@@ -6,6 +6,7 @@ export * from '../storage/service/base.js'
 export * from '../storage/service/default-dcs.js'
 // end todo
 export * from './bigint-utils.js'
+export * from './binary/compat.js'
 export * from './binary/serialization.js'
 export * from './crypto/index.js'
 export * from './dcs.js'
