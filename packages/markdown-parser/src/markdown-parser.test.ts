@@ -481,20 +481,42 @@ describe('MarkdownMessageEntityParser', () => {
         })
 
         describe('malformed input', () => {
-            const testThrows = (input: string) => expect(() => md_(input)).throws(Error)
+            it('should treat malformed links as plain text', () => {
+                test(
+                    'plain [link](https://google.com but unclosed',
+                    [],
+                    'plain [link](https://google.com but unclosed',
+                )
 
-            it('should throw an error on malformed links', () => {
-                testThrows('plain [link](https://google.com but unclosed')
+                test(
+                    'plain [**bold link**](https://google.com but __unclosed__',
+                    [createEntity('messageEntityBold', 7, 9), createEntity('messageEntityItalic', 41, 8)],
+                    'plain [bold link](https://google.com but unclosed',
+                )
             })
 
-            it('should throw an error on malformed pres', () => {
-                testThrows('plain ```pre without linebreaks```')
-                testThrows('plain ``` pre without linebreaks but with spaces instead ```')
+            it('should ignore malformed pres', () => {
+                test('plain ```pre without linebreaks```', [], 'plain ```pre without linebreaks```')
+                test('plain ``` pre without linebreaks but with spaces instead ```', [], 'plain ``` pre without linebreaks but with spaces instead ```')
             })
 
-            it('should throw an error on unterminated entity', () => {
-                testThrows('plain **bold but unclosed')
-                testThrows('plain **bold and __also italic but unclosed')
+            it('should ignore unterminated entities', () => {
+                test('plain **bold but unclosed', [], 'plain **bold but unclosed')
+                test('meow**', [], 'meow**')
+                test('meow**__', [], 'meow**__')
+                test('meow`woof', [], 'meow`woof')
+                test('meow```woof', [], 'meow```woof')
+                test(
+                    'meow```woof **bold**',
+                    [createEntity('messageEntityBold', 12, 4)],
+                    'meow```woof bold',
+                )
+                test('plain **bold and __also italic but unclosed', [], 'plain **bold and __also italic but unclosed')
+                test(
+                    'plain **bold and __italic__',
+                    [createEntity('messageEntityItalic', 17, 6)],
+                    'plain **bold and italic',
+                )
             })
         })
     })

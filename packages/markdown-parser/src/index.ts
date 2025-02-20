@@ -308,17 +308,19 @@ function parse(
                     pos += 1
 
                     if (pos > text.length) {
-                        throw new Error('Malformed PRE entity, expected LF after ```')
+                        // malformed pre entity, treat as plain text
+                        result += '```'
+                        feed(language)
+                    } else {
+                        if (!('pre' in stacks)) stacks.pre = []
+                        stacks.pre.push({
+                            _: 'messageEntityPre',
+                            offset: result.length,
+                            length: 0,
+                            language,
+                        })
+                        insidePre = true
                     }
-
-                    if (!('pre' in stacks)) stacks.pre = []
-                    stacks.pre.push({
-                        _: 'messageEntityPre',
-                        offset: result.length,
-                        length: 0,
-                        language,
-                    })
-                    insidePre = true
                 } else {
                     pos += 1
                     if (!('code' in stacks)) stacks.code = []
@@ -442,9 +444,55 @@ function parse(
 
     feed(strings[strings.length - 1])
 
+    function adjustOffsets(from: number, by: number): void {
+        for (const ent of entities) {
+            if (ent.offset >= from) ent.offset += by
+        }
+        for (const stack of Object.values(stacks)) {
+            for (const ent of stack) {
+                if (ent.offset >= from) ent.offset += by
+            }
+        }
+    }
+
     for (const [name, stack] of Object.entries(stacks)) {
+        if (stack.length > 1) {
+            // todo: is this even possible?
+            throw new Error(`Malformed ${name} entity`)
+        }
+
         if (stack.length) {
-            throw new Error(`Unterminated ${name} entity`)
+            // unterminated entity
+            switch (name) {
+                case 'link': {
+                    const startOffset = stack.pop()!.offset
+                    insideLink = false
+                    insideLinkUrl = false
+                    const url = pendingLinkUrl
+                    pendingLinkUrl = ''
+                    result = `${result.substring(0, startOffset)}[${result.substring(startOffset)}](`
+                    adjustOffsets(startOffset, 1)
+                    feed(url)
+                    break
+                }
+                default: {
+                    const startOffset = stack.pop()!.offset
+                    const tag = {
+                        Bold: TAG_BOLD,
+                        Italic: TAG_ITALIC,
+                        Underline: TAG_UNDERLINE,
+                        Strike: TAG_STRIKE,
+                        Spoiler: TAG_SPOILER,
+                        code: TAG_CODE,
+                    }[name]
+                    if (!tag) throw new Error(`invalid tag ${name}`) // should never happen
+                    const remaining = result.substring(startOffset)
+                    result = `${result.substring(0, startOffset)}${tag}`
+                    adjustOffsets(startOffset, tag.length)
+                    feed(remaining)
+                    break
+                }
+            }
         }
     }
 
@@ -453,9 +501,6 @@ function parse(
         entities,
     }
 }
-
-// typedoc doesn't support this yet, so we'll have to do it manually
-// https://github.com/TypeStrong/typedoc/issues/2436
 
 export const md: {
     /**
