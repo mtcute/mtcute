@@ -354,7 +354,7 @@ which checks if the update should be handled by this handler
 
 ```ts
 dp.addUpdateHandler({
-  type: 'new_message',
+  name: 'new_message',
   callback: async (msg) => {
     ...
   },
