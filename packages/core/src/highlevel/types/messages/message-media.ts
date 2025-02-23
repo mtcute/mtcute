@@ -18,7 +18,7 @@ import { Photo } from '../media/photo.js'
 import { Poll } from '../media/poll.js'
 import { MediaStory } from '../media/story.js'
 import { Venue } from '../media/venue.js'
-import { WebPage } from '../media/web-page.js'
+import { WebPageMedia } from '../media/web-page.js'
 
 /** A media inside of a {@link Message} */
 export type MessageMedia =
@@ -33,13 +33,14 @@ export type MessageMedia =
   | Location
   | LiveLocation
   | Game
-  | WebPage
+  | WebPageMedia
   | Venue
   | Poll
   | Invoice
   | MediaStory
   | PaidMedia
   | null
+
 export type MessageMediaType = Exclude<MessageMedia, null>['type']
 
 // todo: successful_payment, connected_website
@@ -72,7 +73,7 @@ export function _messageMediaFromTl(peers: PeersIndex | null, m: tl.TypeMessageM
         case 'messageMediaWebPage':
             if (!(m.webpage._ === 'webPage')) return null
 
-            return new WebPage(m.webpage)
+            return new WebPageMedia(m)
         case 'messageMediaVenue':
             return new Venue(m)
         case 'messageMediaPoll':

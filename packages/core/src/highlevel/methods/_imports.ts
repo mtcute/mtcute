@@ -115,6 +115,7 @@ import {
     UserStarGift,
     UserStatusUpdate,
     UserTypingUpdate,
+    WebPageMedia,
     WebviewResult,
 } from '../types/index.js'
 // @copy

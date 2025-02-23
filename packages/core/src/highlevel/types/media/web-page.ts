@@ -1,9 +1,10 @@
 import type { tl } from '@mtcute/tl'
 
 import type { RawDocument } from './document.js'
+import { assert } from '@fuman/utils'
 import { MtArgumentError } from '../../../types/errors.js'
-import { makeInspectable } from '../../utils/index.js'
 
+import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { parseDocument } from './document-utils.js'
 import { Photo } from './photo.js'
@@ -19,8 +20,6 @@ import { Photo } from './photo.js'
  * of my own observations and experiments.
  */
 export class WebPage {
-    readonly type = 'webpage' as const
-
     constructor(readonly raw: tl.RawWebPage) {}
 
     /**
@@ -195,6 +194,48 @@ export class WebPage {
 
         return parseDocument(this.raw.document)
     }
+}
+
+memoizeGetters(WebPage, ['photo', 'document'])
+makeInspectable(WebPage)
+
+/** Information about a web page preview in a message */
+export class WebPageMedia {
+    readonly type = 'webpage' as const
+
+    constructor(readonly raw: tl.RawMessageMediaWebPage) {}
+
+    /** Web page preview */
+    get preview(): WebPage {
+        assert(this.raw.webpage._ === 'webPage')
+        return new WebPage(this.raw.webpage)
+    }
+
+    /**
+     * Size in which the client should display whatever contained in the webpage
+     *
+     *  - `small`: small square thumbnail on the right
+     *  - `large`: large thumbnail below the webpage content
+     *  - `default`: default behaviour (depending on the og tags)
+     */
+    get displaySize(): 'small' | 'large' | 'default' {
+        if (this.raw.forceLargeMedia) return 'large'
+        if (this.raw.forceSmallMedia) return 'small'
+        return 'default'
+    }
+
+    /**
+     * Whether the webpage was manually set, and the link might not be present
+     * at all in the actual message
+     */
+    get manual(): boolean {
+        return this.raw.manual!
+    }
+
+    /** Whether it's safe to open the URL without the user confirmation */
+    get safe(): boolean {
+        return this.raw.safe!
+    }
 
     /**
      * Input media TL object generated from this object,
@@ -210,5 +251,5 @@ export class WebPage {
     }
 }
 
-memoizeGetters(WebPage, ['photo', 'document'])
-makeInspectable(WebPage, undefined, ['inputMedia'])
+makeInspectable(WebPageMedia, undefined, ['inputMedia'])
+memoizeGetters(WebPageMedia, ['preview'])

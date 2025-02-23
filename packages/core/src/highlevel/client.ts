@@ -24,7 +24,7 @@ import type { QuoteParamsFrom } from './methods/messages/send-quote.js'
 import type { CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
 import type { CanSendStoryResult } from './methods/stories/can-send-story.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
-import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStarGift, UserStatusUpdate, UserTypingUpdate, WebviewResult } from './types/index.js'
+import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStarGift, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
 import type { ParsedUpdateHandlerParams } from './updates/parsed.js'
 import type { RawUpdateInfo } from './updates/types.js'
 import type { InputStringSessionData } from './utils/string-session.js'
@@ -175,6 +175,7 @@ import { getMessages } from './methods/messages/get-messages.js'
 import { getReactionUsers } from './methods/messages/get-reaction-users.js'
 import { getReplyTo } from './methods/messages/get-reply-to.js'
 import { getScheduledMessages } from './methods/messages/get-scheduled-messages.js'
+import { getWebPagePreview } from './methods/messages/get-web-page-preview.js'
 import { iterHistory } from './methods/messages/iter-history.js'
 import { iterReactionUsers } from './methods/messages/iter-reaction-users.js'
 import { iterSearchGlobal } from './methods/messages/iter-search-global.js'
@@ -3641,6 +3642,15 @@ export interface TelegramClient extends ITelegramClient {
         chatId: InputPeerLike,
         messageIds: MaybeArray<number>): Promise<(Message | null)[]>
     /**
+     * Get a preview of a web page contained in the message
+     *
+     * **Available**: 👤 users only
+     *
+     * @param text  Text of the message, or simply the link for which the preview should be retrieved
+     */
+    getWebPagePreview(
+        text: InputText): Promise<WebPageMedia | null>
+    /**
      * Iterate over chat history. Wrapper over {@link getHistory}
      *
      * **Available**: ✅ both users and bots
@@ -4207,8 +4217,15 @@ export interface TelegramClient extends ITelegramClient {
      */
     sendPaidReaction(
         params: InputMessageId & {
-        /** Whether to send the reaction anonymously */
+        /**
+         * Whether to send the reaction anonymously
+         */
             anonymous?: boolean
+
+            /**
+             * Peer as which to send the reaction, mutually exclusive with `anonymous`
+             */
+            asPeer?: InputPeerLike
 
             /**
              * Number of reactions to send
@@ -6695,6 +6712,9 @@ TelegramClient.prototype.getReplyTo = function (...args) {
 }
 TelegramClient.prototype.getScheduledMessages = function (...args) {
     return getScheduledMessages(this._client, ...args)
+}
+TelegramClient.prototype.getWebPagePreview = function (...args) {
+    return getWebPagePreview(this._client, ...args)
 }
 TelegramClient.prototype.iterHistory = function (...args) {
     return iterHistory(this._client, ...args)
