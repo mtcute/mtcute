@@ -1,9 +1,11 @@
-import type { tl } from '@mtcute/tl'
 import type { tlCompat } from '@mtcute/tl/compat'
-import { objectEntries } from '@fuman/utils'
+import { Bytes, read } from '@fuman/io'
+import { assert, objectEntries } from '@fuman/utils'
+import { tl } from '@mtcute/tl'
 import { TlBinaryReader } from '@mtcute/tl-runtime'
 import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlReaderMapCompat } from '@mtcute/tl/compat/reader.js'
+import { PeersIndex } from '../../highlevel/types/peers/peers-index.js'
 
 function replaceType<
     Input extends tlCompat.TlObject,
@@ -87,4 +89,29 @@ const _combinedReaderMap = /* @__PURE__ */ getCombinedReaderMap()
  */
 export function deserializeObjectWithCompat(data: Uint8Array): tl.TlObject {
     return TlBinaryReader.deserializeObject(_combinedReaderMap, data)
+}
+
+/** Helper function to deserialize a {@link PeersIndex} with backwards compatibility */
+export function deserializePeersIndexWithCompat(data: Uint8Array): PeersIndex {
+    const res = new PeersIndex()
+
+    const bytes = Bytes.from(data)
+
+    const userCount = read.int32le(bytes)
+    for (let i = 0; i < userCount; i++) {
+        const len = read.int32le(bytes)
+        const obj = deserializeObjectWithCompat(read.exactly(bytes, len))
+        assert(tl.isAnyUser(obj))
+        res.users.set(obj.id, obj)
+    }
+
+    const chatCount = read.int32le(bytes)
+    for (let i = 0; i < chatCount; i++) {
+        const len = read.int32le(bytes)
+        const obj = deserializeObjectWithCompat(read.exactly(bytes, len))
+        assert(tl.isAnyChat(obj))
+        res.chats.set(obj.id, obj)
+    }
+
+    return res
 }
