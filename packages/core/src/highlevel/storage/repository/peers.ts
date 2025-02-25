@@ -30,10 +30,9 @@ export interface IPeersRepository {
     store: (peer: IPeersRepository.PeerInfo) => MaybePromise<void>
     /**
      * Find a peer by their `id`.
-     *
-     * @param allowMin  Whether to allow "min" peers to be returned
+     * Should return a "min" peer if one is available.
      */
-    getById: (id: number, allowMin: boolean) => MaybePromise<IPeersRepository.PeerInfo | null>
+    getById: (id: number) => MaybePromise<IPeersRepository.PeerInfo | null>
     /**
      * Find a peer by their username (where `usernames` includes `username`).
      * Should never return "min" peers

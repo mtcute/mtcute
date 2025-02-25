@@ -42,9 +42,9 @@ export class MemoryPeersRepository implements IPeersRepository {
         this.state.entities.set(peer.id, peer)
     }
 
-    getById(id: number, allowMin: boolean): IPeersRepository.PeerInfo | null {
+    getById(id: number): IPeersRepository.PeerInfo | null {
         const ent = this.state.entities.get(id)
-        if (!ent || (ent.isMin && !allowMin)) return null
+        if (!ent) return null
 
         return ent
     }

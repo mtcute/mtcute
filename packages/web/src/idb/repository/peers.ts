@@ -28,12 +28,12 @@ export class IdbPeersRepository implements IPeersRepository {
         return this._driver.db.transaction(TABLE, mode).objectStore(TABLE)
     }
 
-    async getById(id: number, allowMin: boolean): Promise<IPeersRepository.PeerInfo | null> {
+    async getById(id: number): Promise<IPeersRepository.PeerInfo | null> {
         const it = await reqToPromise(this.os().get(id) as IDBRequest<IPeersRepository.PeerInfo>)
 
         if (!it) return null
         // NB: older objects might not have isMin field
-        if (it.isMin && !allowMin) return null
+        if (!('isMin' in it)) (it as any).isMin = false
 
         return it
     }

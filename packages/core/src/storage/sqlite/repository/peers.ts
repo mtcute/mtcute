@@ -53,8 +53,7 @@ export class SqlitePeersRepository implements IPeersRepository {
                 'insert or replace into peers (id, hash, isMin, usernames, updated, phone, complete) values (?, ?, ?, ?, ?, ?, ?)',
             )
 
-            this._getById = db.prepare('select * from peers where id = ? and isMin = false')
-            this._getByIdAllowMin = db.prepare('select * from peers where id = ?')
+            this._getById = db.prepare('select * from peers where id = ?')
             this._getByUsername = db.prepare(
                 'select * from peers where exists (select 1 from json_each(usernames) where value = ?) and isMin = false',
             )
@@ -92,10 +91,9 @@ export class SqlitePeersRepository implements IPeersRepository {
     }
 
     private _getById!: ISqliteStatement
-    private _getByIdAllowMin!: ISqliteStatement
-    getById(id: number, allowMin: boolean): IPeersRepository.PeerInfo | null {
+    getById(id: number): IPeersRepository.PeerInfo | null {
         this._ensureLoaded()
-        const row = (allowMin ? this._getByIdAllowMin : this._getById).get(id)
+        const row = this._getById.get(id)
         if (!row) return null
 
         return mapPeerDto(row as PeerDto)
