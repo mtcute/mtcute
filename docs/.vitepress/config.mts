@@ -114,6 +114,7 @@ export default ({ mode }) => defineConfig({
                         { text: 'Workers', link: '/guide/advanced/workers' },
                         { text: 'Converting sessions', link: '/guide/advanced/session-convert' },
                         { text: 'Network middlewares', link: '/guide/advanced/net-middlewares' },
+                        { text: 'Object serialization', link: '/guide/advanced/serialization' },
                     ],
                 },
             ],
