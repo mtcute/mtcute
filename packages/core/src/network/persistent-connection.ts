@@ -237,10 +237,12 @@ export abstract class PersistentConnection {
             try {
                 await this._writer.write(data)
             } catch (e: unknown) {
-                this.log.warn('encountered an error while sending, reconnecting: %e', e)
-                this._writer = undefined
-                this._fuman.reconnect(true)
-                this._sendOnceConnected.push(data)
+                if (!(e instanceof ConnectionClosedError)) {
+                    this.log.warn('encountered an error while sending, reconnecting: %e', e)
+                    this._writer = undefined
+                    this._fuman.reconnect(true)
+                    this._sendOnceConnected.push(data)
+                }
             }
         } else {
             this._sendOnceConnected.push(data)

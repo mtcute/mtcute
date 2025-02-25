@@ -20,6 +20,12 @@ export type TlReaderMap = Record<number, (r: any) => unknown> & {
     _results?: Record<string, (r: any) => unknown>
 }
 
+export class TlUnknownObjectError extends Error {
+    constructor(readonly objectId: number) {
+        super(`Unknown object id: 0x${objectId.toString(16)}`)
+    }
+}
+
 /**
  * Reader for TL objects.
  */
@@ -195,7 +201,7 @@ export class TlBinaryReader {
             // mtproto sucks and there's no way we can just skip it
             this.seek(-4)
             const pos = this.pos
-            const error = new TypeError(`Unknown object id: 0x${id.toString(16)}`)
+            const error = new TlUnknownObjectError(id)
             this.pos = pos
             throw error
         }

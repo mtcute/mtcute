@@ -8,7 +8,7 @@ import type { ServerSaltManager } from './server-salt.js'
 
 import { Deferred, Emitter, timers, u8 } from '@fuman/utils'
 import { tl } from '@mtcute/tl'
-import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
+import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter, TlUnknownObjectError } from '@mtcute/tl-runtime'
 import Long from 'long'
 
 import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
@@ -147,7 +147,7 @@ export class SessionConnection extends PersistentConnection {
             timers.clearTimeout(this._pfsUpdateTimeout)
         }
 
-        this._resetSession()
+        this._resetSession('use pfs changed')
     }
 
     onClosed(): void {
@@ -269,7 +269,7 @@ export class SessionConnection extends PersistentConnection {
                     // maybe this is some mtproto issue? let's try reconnecting and hope for the best
                     this.log.warn('transport error 404. trying to reconnect')
                     this._triedReconnectingOn404 = true
-                    this._resetSession()
+                    this._resetSession('-404 reconnect')
                     return
                 }
 
@@ -277,7 +277,7 @@ export class SessionConnection extends PersistentConnection {
                 this.log.warn('transport error 404, reauthorizing')
                 this.onError.emit(error)
                 this._session.resetAuthKey()
-                this._resetSession()
+                this._resetSession('-404 reconnect + reauth')
                 this.onKeyChange.emit(null)
 
                 return
@@ -571,6 +571,16 @@ export class SessionConnection extends PersistentConnection {
         try {
             this._session.decryptMessage(data, this._handleRawMessage)
         } catch (err) {
+            if (err instanceof TlUnknownObjectError) {
+                // for some reason, the server sometimes downgrades the layer and we start receiving
+                // objects from older ones, which we cannot read. im not sure why, perhaps due to the auth
+                // key being used by multiple clients with different layers.
+                this.log.warn('received unknown object %s, reconnecting...', err.objectId.toString(16))
+                this._resetSession('unknown object')
+
+                return
+            }
+
             this.log.error('failed to decrypt message: %s\ndata: %h', err, data)
         }
     }
@@ -1167,7 +1177,7 @@ export class SessionConnection extends PersistentConnection {
                     msg.badMsgId,
                     msg.errorCode,
                 )
-                this._resetSession()
+                this._resetSession('bad_msg_notification')
                 break
         }
     }
@@ -1349,11 +1359,11 @@ export class SessionConnection extends PersistentConnection {
         }
     }
 
-    _resetSession(): void {
+    _resetSession(reason = 'session reset'): void {
         this._queuedDestroySession.push(this._session._sessionId)
 
         this._session.resetState(true)
-        this._onAllFailed('session reset')
+        this._onAllFailed(reason)
         this.reconnect()
 
         // once we receive new_session_created, all pending messages will be resent.
@@ -1682,7 +1692,7 @@ export class SessionConnection extends PersistentConnection {
         if (now - this._session.lastPingTime > this._pingInterval) {
             if (!this._session.lastPingMsgId.isZero()) {
                 this.log.warn("didn't receive pong for previous ping (msg_id = %l). are we offline?", this._session.lastPingMsgId)
-                this._resetSession()
+                this._resetSession('ping timeout')
                 return
             }
 
