@@ -62,6 +62,7 @@ function _initializeClient(this: TelegramClient, opts: TelegramClientOptions) {
 
     Object.defineProperty(this, 'log', { value: this._client.log })
     Object.defineProperty(this, 'storage', { value: this._client.storage })
+    Object.defineProperty(this, 'timers', { value: this._client.timers })
     Object.defineProperty(this, 'stopSignal', { value: this._client.stopSignal })
     Object.defineProperty(this, 'appConfig', { value: this._client.appConfig })
     Object.defineProperty(this, 'onServerUpdate', { value: this._client.onServerUpdate })
