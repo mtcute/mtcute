@@ -81,6 +81,7 @@ import {
     ParsedUpdate,
     Peer,
     PeerReaction,
+    PeerSettings,
     PeersIndex,
     PeerStories,
     Photo,
