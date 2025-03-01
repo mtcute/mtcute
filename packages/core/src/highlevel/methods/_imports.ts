@@ -112,7 +112,6 @@ import {
     UploadedFile,
     UploadFileLike,
     User,
-    UserStarGift,
     UserStatusUpdate,
     UserTypingUpdate,
     WebPageMedia,

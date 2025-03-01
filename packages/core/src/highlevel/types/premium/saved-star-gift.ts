@@ -91,8 +91,3 @@ export class SavedStarGift {
 
 makeInspectable(SavedStarGift)
 memoizeGetters(SavedStarGift, ['sender', 'gift'])
-
-export {
-    /** @deprecated alias for {@link SavedStarGift} */
-    SavedStarGift as UserStarGift,
-}
