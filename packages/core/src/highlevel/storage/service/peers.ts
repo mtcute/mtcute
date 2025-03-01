@@ -271,13 +271,12 @@ export class PeersService extends BaseService {
         if (cached) return cached.peer
 
         const dto = await this._peers.getById(id)
-        if (!dto) return null
 
-        if (!dto.isMin) {
+        if (dto && !dto.isMin) {
             return this._returnCaching(id, dto)
         }
 
-        if (dto.isMin && allowRefs) {
+        if ((!dto || dto.isMin) && allowRefs) {
             const ref = await this._refs.getForPeer(id)
             if (!ref) return null
 

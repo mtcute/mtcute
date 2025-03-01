@@ -18,6 +18,7 @@
         "@mtcute/tl": "./tests/deno-shims/tl.js",
         "@mtcute/tl/binary/rsa-keys.js": "./tests/deno-shims/tl-rsa.js",
         "@mtcute/tl/binary/reader.js": "./tests/deno-shims/tl-reader.js",
+        "@mtcute/tl/compat/reader.js": "./tests/deno-shims/tl-reader-compat.js",
         "@mtcute/tl/binary/writer.js": "./tests/deno-shims/tl-writer.js"
     },
     "tasks": {

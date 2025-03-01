@@ -24,6 +24,10 @@ const files = [
     'binary/rsa-keys.js',
     'binary/writer.d.ts',
     'binary/writer.js',
+    'compat/reader.js',
+    'compat/index.d.ts',
+    'compat/reader.d.ts',
+    'compat/reader.js',
     'index.d.ts',
     'index.js',
     'raw-errors.json',
@@ -34,6 +38,7 @@ const files = [
 ]
 
 await fsp.mkdir(resolve(outDir, 'binary'), { recursive: true })
+await fsp.mkdir(resolve(outDir, 'compat'), { recursive: true })
 
 for (const f of files) {
     await fsp.copyFile(resolve(packageDir, f), resolve(outDir, f))
@@ -83,6 +88,14 @@ if (process.env.JSR) {
             'export const __publicKeyIndex = exports.__publicKeyIndex;',
         ].join('\n')
     })
+    await transformFile(resolve(outDir, 'compat/reader.js'), (content) => {
+        return [
+            '/// <reference types="./reader.d.ts" />',
+            'const exports = {};',
+            content,
+            'export const __tlReaderMapCompat = exports.__tlReaderMapCompat;',
+        ].join('\n')
+    })
 
     // patch deno.json to add some export maps
     const denoJson = packageJsonToDeno({
@@ -91,7 +104,9 @@ if (process.env.JSR) {
         workspaceVersions: {},
         buildDirName: 'dist',
     })
-    denoJson.exports = {}
+    denoJson.exports = {
+        './compat': './compat/index.d.ts',
+    }
 
     for (const f of files) {
         if (!f.match(/\.js(?:on)?$/)) continue

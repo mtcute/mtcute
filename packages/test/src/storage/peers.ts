@@ -52,7 +52,7 @@ export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriv
 
     describe('peers', () => {
         it('should be empty by default', async () => {
-            expect(await repo.getById(123123, false)).toEqual(null)
+            expect(await repo.getById(123123)).toEqual(null)
             expect(await repo.getByUsername('some_user')).toEqual(null)
             expect(await repo.getByPhone('phone')).toEqual(null)
         })
@@ -62,11 +62,11 @@ export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriv
             await repo.store(stubPeerChannel)
             await driver.save?.()
 
-            expect(fixPeerInfo(await repo.getById(123123, false))).toEqual(stubPeerUser)
+            expect(fixPeerInfo(await repo.getById(123123))).toEqual(stubPeerUser)
             expect(fixPeerInfo(await repo.getByUsername('some_user'))).toEqual(stubPeerUser)
             expect(fixPeerInfo(await repo.getByPhone('78005553535'))).toEqual(stubPeerUser)
 
-            expect(fixPeerInfo(await repo.getById(-1001183945448, false))).toEqual(stubPeerChannel)
+            expect(fixPeerInfo(await repo.getById(-1001183945448))).toEqual(stubPeerChannel)
             expect(fixPeerInfo(await repo.getByUsername('some_channel'))).toEqual(stubPeerChannel)
         })
 
@@ -78,21 +78,20 @@ export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriv
             await repo.store(modUser)
             await driver.save?.()
 
-            expect(fixPeerInfo(await repo.getById(123123, false))).toEqual(modUser)
+            expect(fixPeerInfo(await repo.getById(123123))).toEqual(modUser)
             expect(await repo.getByUsername('some_user')).toEqual(null)
             expect(fixPeerInfo(await repo.getByUsername('some_user2'))).toEqual(modUser)
         })
 
-        it('should not return min peers by default', async () => {
+        it('only getById should return min peers', async () => {
             await repo.deleteAll()
             await repo.store(stupPeerMinUser)
             await driver.save?.()
 
-            expect(await repo.getById(123123, false)).toEqual(null)
             expect(await repo.getByUsername('some_user')).toEqual(null)
             expect(await repo.getByPhone('78005553535')).toEqual(null)
 
-            expect(fixPeerInfo(await repo.getById(123123, true))).toEqual(stupPeerMinUser)
+            expect(fixPeerInfo(await repo.getById(123123))).toEqual(stupPeerMinUser)
         })
     })
 }
