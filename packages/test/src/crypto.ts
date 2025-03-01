@@ -188,6 +188,8 @@ export function testCryptoProvider(c: ICryptoProvider): void {
 
     it(
         'should decompose PQ to prime factors P and Q',
+        // since PQ factorization relies on RNG, it may take a while (or may not!)
+        { timeout: 10000 },
         async () => {
             const testFactorization = async (pq: string, p_: string, q: string) => {
                 const [p1, q1] = await c.factorizePQ(hex.decode(pq))
@@ -200,8 +202,6 @@ export function testCryptoProvider(c: ICryptoProvider): void {
             // random example
             await testFactorization('14fcab4dfc861f45', '494c5c99', '494c778d')
         },
-        // since PQ factorization relies on RNG, it may take a while (or may not!)
-        { timeout: 10000 },
     )
 
     it('should correctly gzip', () => {

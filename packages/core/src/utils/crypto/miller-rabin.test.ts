@@ -5,6 +5,8 @@ import { millerRabin } from './miller-rabin.js'
 
 describe(
     'miller-rabin test',
+    // since miller-rabin factorization relies on RNG, it may take a while (or may not!)
+    { timeout: 10000 },
     () => {
         // miller-rabin factorization relies on RNG, so we should use a real random number generator
         const c = defaultCryptoProvider
@@ -139,5 +141,4 @@ describe(
             testMillerRabin(BigInt(`0x${telegramDhPrime.replace(/ /g, '')}`), true)
         })
     },
-    { timeout: 10000 },
-) // since miller-rabin factorization relies on RNG, it may take a while (or may not!)
+)

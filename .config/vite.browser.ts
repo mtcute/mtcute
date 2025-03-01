@@ -1,7 +1,7 @@
-/// <reference types="vitest" />
-import { mergeConfig } from 'vite'
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
+/// <reference types="@vitest/browser/providers/playwright" />
 
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import { mergeConfig } from 'vitest/config'
 import { fixupCjs } from './vite-utils/fixup-cjs'
 import baseConfig from './vite.js'
 
@@ -9,9 +9,14 @@ export default mergeConfig(baseConfig, {
     test: {
         browser: {
             enabled: true,
-            name: 'chromium',
             provider: 'playwright',
             slowHijackESM: false,
+            headless: Boolean(process.env.CI),
+            instances: [
+                { browser: 'chromium' },
+                { browser: 'firefox' },
+                { browser: 'webkit' },
+            ],
         },
         fakeTimers: {
             toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'],
@@ -30,8 +35,9 @@ export default mergeConfig(baseConfig, {
             include: ['stream', 'path', 'zlib', 'util', 'events'],
             globals: {
                 Buffer: false,
-                global: false,
-                process: false,
+                // for WHATEVER REASON browserify-zlib uses `global` and `process` and it dies in browser lol
+                global: true,
+                process: true,
             },
         }),
     ],
@@ -45,10 +51,7 @@ export default mergeConfig(baseConfig, {
     },
     optimizeDeps: {
         esbuildOptions: {
-            // for WHATEVER REASON browserify-zlib uses `global` and it dies in browser lol
-            define: {
-                global: 'globalThis',
-            },
+            target: 'esnext',
         },
     },
 })

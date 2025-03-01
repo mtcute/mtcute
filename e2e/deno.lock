@@ -156,9 +156,6 @@
     "https://esm.sh/v135/chai@5.1.2/denonext/chai.mjs": "05cc6071c804cf39d4325a2c93807727623019abedca6ed1cb6534137bd4f65e"
   },
   "workspace": {
-    "dependencies": [
-      "jsr:@fuman/utils@0.0.1"
-    ],
     "packageJson": {
       "dependencies": [
         "npm:@fuman/utils@0.0.1",

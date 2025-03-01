@@ -2,4 +2,4 @@ import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
 
-export const { __tlReaderMapCompat } = require('../../../packages/tl/compat/reader.js')
+export const { __tlReaderMap } = require('../../packages/tl/binary/reader.js')
