@@ -374,6 +374,11 @@ export class FullChat extends Chat {
     get starGiftsCount(): number {
         return this.full._ === 'channelFull' ? this.full.stargiftsCount ?? 0 : 0
     }
+
+    /** Whether you can enable paid messages in this chat */
+    get paidMessagesAvailable(): boolean {
+        return this.full._ === 'channelFull' && this.full.paidMessagesAvailable!
+    }
 }
 
 memoizeGetters(FullChat, [

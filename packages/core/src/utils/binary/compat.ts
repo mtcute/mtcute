@@ -15,6 +15,16 @@ function replaceType<
     return Object.assign(obj, { _: type })
 }
 
+function dropFields<T extends tlCompat.TlObject, const Fields extends (keyof T)[]>(
+    obj: T,
+    fields: Fields,
+): Omit<T, Fields[number]> {
+    for (let i = 0; i < fields.length; i++) {
+        delete obj[fields[i]]
+    }
+    return obj
+}
+
 function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
     switch (obj._) {
         case 'starGiftUnique_layer197':
@@ -30,20 +40,30 @@ function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
     }
 }
 
-function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
+function mapCompatEmojiStatus(obj: tlCompat.TypeEmojiStatus): tl.TypeEmojiStatus {
     switch (obj._) {
-        case 'starGiftUnique_layer197':
-        case 'starGiftUnique_layer198':
-            return mapCompatStarGift(obj)
         case 'emojiStatus_layer197':
             return {
+                ...obj,
                 _: 'emojiStatus',
                 documentId: obj.documentId,
             }
+        default:
+            return obj
+    }
+}
+
+function mapCompatMessageMedia(obj: tlCompat.TypeMessageMedia): tl.TypeMessageMedia {
+    switch (obj._) {
         case 'messageMediaDocument_layer197':
             return replaceType(obj, 'messageMediaDocument')
-        case 'channelFull_layer197':
-            return replaceType(obj, 'channelFull')
+        default:
+            return obj
+    }
+}
+
+function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessageAction {
+    switch (obj._) {
         case 'messageActionStarGiftUnique_layer197':
             return {
                 ...obj,
@@ -55,6 +75,45 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
                 ...obj,
                 _: 'messageActionStarGift',
                 gift: mapCompatStarGift(obj.gift),
+            }
+        default:
+            return obj
+    }
+}
+
+function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
+    switch (obj._) {
+        case 'starGiftUnique_layer197':
+        case 'starGiftUnique_layer198':
+            return mapCompatStarGift(obj)
+        case 'emojiStatus_layer197':
+            return mapCompatEmojiStatus(obj)
+        case 'messageMediaDocument_layer197':
+            return mapCompatMessageMedia(obj)
+        case 'channelFull_layer197':
+            return replaceType(obj, 'channelFull')
+        case 'messageActionStarGiftUnique_layer197':
+        case 'messageActionStarGift_layer197':
+            return mapCompatMessageAction(obj)
+        case 'userFull_layer199':
+            return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
+        case 'user_layer199':
+            return {
+                ...obj,
+                _: 'user',
+                emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
+            }
+        case 'channel_layer199':
+            return {
+                ...obj,
+                _: 'channel',
+                emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
+            }
+        case 'message_layer199':
+            return {
+                ...obj,
+                _: 'message',
+                media: obj.media ? mapCompatMessageMedia(obj.media) : undefined,
             }
         default:
             return obj

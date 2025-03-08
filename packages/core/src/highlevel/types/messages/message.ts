@@ -515,6 +515,11 @@ export class Message {
         return this.raw._ === 'message' && this.raw.videoProcessingPending!
     }
 
+    /** If this message was paid, the number of stars spent sending it */
+    get sendPrice(): tl.Long | null {
+        return this.raw._ === 'message' ? this.raw.paidMessageStars ?? null : null
+    }
+
     /**
      * Generated permalink to this message, only for groups and channels
      *

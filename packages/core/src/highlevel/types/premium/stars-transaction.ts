@@ -29,6 +29,8 @@ import { StarGift } from './stars-gift.js'
  *  - `star_gift`: This transaction is either a star gift to a user (if outgoing), or converting a star gift to stars (if incoming)
  *  - `star_gift_upgrade`: This transaction is for a star gift upgrade
  *  - `star_gift_transfer`: This transaction is for a star gift transfer
+ *  - `paid_message`: This transaction is a payment for a paid message
+ *  - `premium_gift`: This transaction is a payment for a premium gift to a user
  *  - `api_*`: This transaction is a payment for paid API features
  *     - `api_floodskip`: This transaction is a payment for a paid bot broadcast
  */
@@ -143,6 +145,20 @@ export type StarsTransactionType =
       gift: StarGiftUnique
   }
   | {
+      type: 'paid_message'
+      /** Related peer */
+      peer: Peer
+      /** The number of messages paid for */
+      count: number
+  }
+  | {
+      type: 'premium_gift'
+      /** Related peer */
+      peer: Peer
+      /** Number of months paid for */
+      months: number
+  }
+  | {
       type: 'api_floodskip'
       /** The number of billed API calls */
       count: number
@@ -245,6 +261,22 @@ export class StarsTransaction {
                         type: 'giveaway',
                         peer,
                         messageId: this.raw.giveawayPostId,
+                    }
+                }
+
+                if (this.raw.paidMessages) {
+                    return {
+                        type: 'paid_message',
+                        peer,
+                        count: this.raw.paidMessages,
+                    }
+                }
+
+                if (this.raw.premiumGiftMonths) {
+                    return {
+                        type: 'premium_gift',
+                        peer,
+                        months: this.raw.premiumGiftMonths,
                     }
                 }
 

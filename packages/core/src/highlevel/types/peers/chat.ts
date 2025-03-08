@@ -491,6 +491,11 @@ export class Chat {
         return getMarkedPeerId(this.raw.migratedTo)
     }
 
+    /** If this chat has paid messages enabled, price of one message in stars */
+    get paidMessagePrice(): tl.Long | null {
+        return this.raw._ === 'channel' ? this.raw.sendPaidMessagesStars ?? null : null
+    }
+
     /**
      * Create a mention for the chat.
      *

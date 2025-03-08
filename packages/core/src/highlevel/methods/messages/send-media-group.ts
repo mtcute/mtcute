@@ -118,6 +118,7 @@ export async function sendMediaGroup(
             quickReplyShortcut,
             effect: params.effect,
             allowPaidFloodskip: params.allowPaidFloodskip,
+            allowPaidStars: params.allowPaidMessages,
         },
         { chainId },
     )

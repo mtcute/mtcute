@@ -453,6 +453,11 @@ export class User {
         return this.raw.profileColor ? new ChatColors(this.raw.id, this.raw.profileColor) : null
     }
 
+    /** If this user has paid messages enabled, price of one message in stars */
+    get paidMessagePrice(): tl.Long | null {
+        return this.raw.sendPaidMessagesStars ?? null
+    }
+
     /**
      * Create a mention for the user.
      *

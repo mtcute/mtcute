@@ -127,6 +127,12 @@ export interface CommonSendParams {
     allowPaidFloodskip?: boolean
 
     /**
+     * Whether to allow payment for messages.
+     * If set, the value represents the maximum number of stars to be paid
+     */
+    allowPaidMessages?: tl.Long
+
+    /**
      * ID of a message effect to use when sending the message
      * (see {@link TelegramClient.getAvailableMessageEffects})
      */

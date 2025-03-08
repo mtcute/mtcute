@@ -233,6 +233,7 @@ import { getUniqueStarGift } from './methods/premium/get-unique-star-gift.js'
 import { iterBoosters } from './methods/premium/iter-boosters.js'
 import { iterSavedStarGifts } from './methods/premium/iter-saved-star-gifts.js'
 import { iterStarsTransactions } from './methods/premium/iter-stars-transactions.js'
+import { togglePinnedStarGifts } from './methods/premium/pin-star-gift.js'
 import { sendStarGift } from './methods/premium/send-star-gift.js'
 import { setBusinessIntro } from './methods/premium/set-business-intro.js'
 import { setBusinessWorkHours } from './methods/premium/set-business-work-hours.js'
@@ -4882,6 +4883,16 @@ export interface TelegramClient extends ITelegramClient {
             chunkSize?: number
         }): AsyncIterableIterator<StarsTransaction>
     /**
+     * Toggles whether one or more star gift is pinned to the top of the list
+     */
+    togglePinnedStarGifts(
+        params: {
+        /** One or more gifts to pin */
+            gifts: MaybeArray<InputStarGift>
+            /** Peer where the gift is sent */
+            peer: InputPeerLike
+        }): Promise<void>
+    /**
      * Send a star gift to a user.
      *
      * > **Note**: this method is not indended to be used by full-fledged clients,
@@ -6869,6 +6880,9 @@ TelegramClient.prototype.iterSavedStarGifts = function (...args) {
 }
 TelegramClient.prototype.iterStarsTransactions = function (...args) {
     return iterStarsTransactions(this._client, ...args)
+}
+TelegramClient.prototype.togglePinnedStarGifts = function (...args) {
+    return togglePinnedStarGifts(this._client, ...args)
 }
 TelegramClient.prototype.sendStarGift = function (...args) {
     return sendStarGift(this._client, ...args)

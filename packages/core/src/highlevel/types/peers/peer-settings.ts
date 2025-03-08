@@ -119,6 +119,48 @@ export class PeerSettings {
     get geoDistance(): number | null {
         return this.raw.geoDistance ?? null
     }
+
+    /**
+     * Price of paid messages to this peer for the current user
+     * (note that this might differ from {@link User.paidMessagePrice},
+     * because the user might have added us to their contacts or wrote first,
+     * in which case the messages are free regardless)
+     */
+    get paidMessagePrice(): tl.Long | null {
+        return this.raw.chargePaidMessageStars ?? null
+    }
+
+    /**
+     * Month and year when the user registered.
+     * Only available for users who contacted us first.
+     */
+    get registrationDate(): string | null {
+        return this.raw.registrationMonth ?? null
+    }
+
+    /**
+     * ISO country code of the user's phone number.
+     * Only available for users who contacted us first.
+     */
+    get phoneCountry(): string | null {
+        return this.raw.phoneCountry ?? null
+    }
+
+    /**
+     * Date when the user has last changed their name.
+     * Only available for users who contacted us first.
+     */
+    get nameChangeDate(): Date | null {
+        return this.raw.nameChangeDate ? new Date(this.raw.nameChangeDate * 1000) : null
+    }
+
+    /**
+     * Date when the user has last changed their photo.
+     * Only available for users who contacted us first.
+     */
+    get photoChangeDate(): Date | null {
+        return this.raw.photoChangeDate ? new Date(this.raw.photoChangeDate * 1000) : null
+    }
 }
 
 makeInspectable(PeerSettings)

@@ -1,3 +1,4 @@
+import type { tl } from '@mtcute/tl'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
 import { MtArgumentError } from '../../../types/errors.js'
@@ -5,8 +6,8 @@ import { randomLong } from '../../../utils/long-utils.js'
 import { Message, PeersIndex } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
 
+import { resolvePeer } from '../users/resolve-peer.js'
 import { _normalizeQuickReplyShortcut } from './send-common.js'
 import { _getTypingTimerId } from './set-typing.js'
 
@@ -79,6 +80,12 @@ export interface ForwardMessageOptions {
      */
     allowPaidFloodskip?: boolean
 
+    /**
+     * Whether to allow payment for messages.
+     * If set, the value represents the maximum number of stars to be paid
+     */
+    allowPaidMessages?: tl.Long
+
     /** Video timestamp to use for the forwarded video */
     videoTimestamp?: number
 }
@@ -142,6 +149,7 @@ export async function forwardMessagesById(
         quickReplyShortcut: _normalizeQuickReplyShortcut(params.quickReply),
         allowPaidFloodskip,
         videoTimestamp,
+        allowPaidStars: params.allowPaidMessages,
     })
 
     assertIsUpdatesGroup('messages.forwardMessages', res)
