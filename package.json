@@ -1,7 +1,7 @@
 {
   "name": "mtcute-workspace",
   "type": "module",
-  "version": "0.21.1",
+  "version": "0.22.0",
   "private": true,
   "packageManager": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b",
   "description": "Type-safe library for MTProto (Telegram API) for browser and NodeJS",
@@ -35,7 +35,7 @@
     "test:browser": "vitest --config .config/vite.browser.ts run",
     "test:browser:dev": "vitest --config .config/vite.browser.ts watch",
     "test:bun": "bun --bun run test",
-    "test:deno": "deno run -A --unstable-ffi --unstable-sloppy-imports --no-check --unstable-detect-cjs --import-map=.config/deno-import-map.json npm:vitest@3.0.7 --config .config/vite.ts", 
+    "test:deno": "deno run -A --unstable-ffi --unstable-sloppy-imports --no-check --unstable-detect-cjs --import-map=.config/deno-import-map.json npm:vitest@3.0.7 --config .config/vite.ts",
     "lint": "eslint",
     "lint:ci": "CI=1 NODE_OPTIONS=\\\"--max_old_space_size=8192\\\" eslint",
     "lint:tsc": "pnpm -r --workspace-concurrency=4 exec tsc",
