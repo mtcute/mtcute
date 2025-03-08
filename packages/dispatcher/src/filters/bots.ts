@@ -67,7 +67,7 @@ export function command(commands: MaybeArray<string | RegExp>, {
                 if (lastGroup) {
                     const self = msg.client.storage.self.getCached()
 
-                    if (self && self.isBot && !self.usernames.includes(lastGroup)) {
+                    if (self && self.isBot && !self.usernames.some(u => u.toLowerCase() === lastGroup.toLowerCase())) {
                         return false
                     }
                 }
