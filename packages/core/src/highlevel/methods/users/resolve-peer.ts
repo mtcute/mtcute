@@ -157,30 +157,38 @@ export async function resolvePeer(
         throw new MtPeerNotFoundError(`Could not find a peer by ${peerId}`)
     }
 
-    // in some cases, the server allows bots to use access_hash=0.
-    // if it's not the case, we'll get an `PEER_ID_INVALID` error anyways
     const [peerType, bareId] = parseMarkedPeerId(peerId)
 
-    if (peerType === 'chat' || client.storage.self.getCached(true)?.isBot) {
-        // bots can use access_hash=0 in most of the cases
-        switch (peerType) {
-            case 'user':
-                return {
-                    _: 'inputPeerUser',
-                    userId: bareId,
-                    accessHash: Long.ZERO,
-                }
-            case 'chat':
-                return {
-                    _: 'inputPeerChat',
-                    chatId: bareId,
-                }
-            case 'channel':
-                return {
-                    _: 'inputPeerChannel',
-                    channelId: bareId,
-                    accessHash: Long.ZERO,
-                }
+    // in some cases, the server allows bots to use access_hash=0.
+    // however in some cases it fails with PEER_ID_INVALID/CHANNEL_INVALID,
+    // and currently we don't have a way to gracefully handle those, so just resolve them right away
+    // (todo: handle those errors)
+    // if (peerType === 'chat' || client.storage.self.getCached(true)?.isBot) {
+    //     // bots can use access_hash=0 in most of the cases
+    //     switch (peerType) {
+    //         case 'user':
+    //             return {
+    //                 _: 'inputPeerUser',
+    //                 userId: bareId,
+    //                 accessHash: Long.ZERO,
+    //             }
+    //         case 'chat':
+    //             return {
+    //                 _: 'inputPeerChat',
+    //                 chatId: bareId,
+    //             }
+    //         case 'channel':
+    //             return {
+    //                 _: 'inputPeerChannel',
+    //                 channelId: bareId,
+    //                 accessHash: Long.ZERO,
+    //             }
+    //     }
+    // }
+    if (peerType === 'chat') {
+        return {
+            _: 'inputPeerChat',
+            chatId: bareId,
         }
     }
 

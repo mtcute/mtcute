@@ -140,7 +140,7 @@ describe('resolvePeer', () => {
                 })
             })
 
-            it('should return with zero hash for bots if not in storage', async () => {
+            it.skip('should return with zero hash for bots if not in storage', async () => {
                 const client = StubTelegramClient.offline()
 
                 await client.storage.self.storeFrom(createStub('user', {
@@ -227,7 +227,7 @@ describe('resolvePeer', () => {
                 })
             })
 
-            it('should return with zero hash for bots if not in storage', async () => {
+            it.skip('should return with zero hash for bots if not in storage', async () => {
                 const client = StubTelegramClient.offline()
 
                 await client.storage.self.storeFrom(createStub('user', {
