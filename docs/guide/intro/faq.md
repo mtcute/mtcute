@@ -187,11 +187,6 @@ If you are planning to implement an active userbot, be extra careful,
 avoid using VOIP numbers and try to minimize server load generated
 (for example, implement local caching and rate limiting).
 
-Anya from [@theyforcedme](https://t.me/theyforcedme) has shared her thoughts on this
-in Pyrogram chat:
-
-<EmbedPost link="PyrogramChat/69424" height="331px" />
-
 ## I was banned, help!
 
 The library only does the things you told it to do. If you abuse Telegram,
