@@ -677,8 +677,10 @@ export class Dispatcher<State extends object = never> {
             if (handler === 'all') {
                 if (group === null) {
                     this._groups = new Map()
+                    this._groupsOrder = []
                 } else {
                     this._groups.delete(group)
+                    this._groupsOrder = this._groupsOrder.filter(g => g !== group)
                 }
             } else if (group !== null) {
                 this._groups.get(group)!.delete(handler)
