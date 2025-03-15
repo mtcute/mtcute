@@ -64,7 +64,8 @@ function parse(
 
             switch (name) {
                 case 'br':
-                    plainText += '\n'
+                    pendingText += '\n'
+                    processPendingText(true, true)
 
                     return
                 case 'b':

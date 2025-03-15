@@ -409,10 +409,18 @@ describe('HtmlMessageEntityParser', () => {
             test(htm`this is some text<br><br>with actual newlines`, [], 'this is some text\n\nwith actual newlines')
             test(
                 htm`<b>this is some text<br><br></b>with actual newlines`,
-                // note that the <br> (i.e. \n) is not included in the entity
-                // this is expected, and the result is the same
-                [createEntity('messageEntityBold', 0, 17)],
+                [createEntity('messageEntityBold', 0, 19)],
                 'this is some text\n\nwith actual newlines',
+            )
+            test(
+                htm`<b>this is some text<br><br>meow</b> with actual newlines`,
+                [createEntity('messageEntityBold', 0, 23)],
+                'this is some text\n\nmeow with actual newlines',
+            )
+            test(
+                htm`<blockquote>3<br>brs<br>hello world!</blockquote>hi`,
+                [createEntity('messageEntityBlockquote', 0, 18, { collapsed: false })],
+                '3\nbrs\nhello world!hi',
             )
         })
 
