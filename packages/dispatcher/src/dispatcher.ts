@@ -330,7 +330,14 @@ export class Dispatcher<State extends object = never> {
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
         this.dispatchRawUpdateNow(update, peers)
-            .catch(err => this._client!.onError.emit(unknownToError(err)))
+            .catch((err) => {
+                err = unknownToError(err)
+                if (this._client!.onError.length > 0) {
+                    this._client!.onError.emit(err)
+                } else {
+                    console.error(err)
+                }
+            })
     }
 
     /**
@@ -403,7 +410,14 @@ export class Dispatcher<State extends object = never> {
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
         this.dispatchUpdateNow(update)
-            .catch(err => this._client!.onError.emit(unknownToError(err)))
+            .catch((err) => {
+                err = unknownToError(err)
+                if (this._client!.onError.length > 0) {
+                    this._client!.onError.emit(err)
+                } else {
+                    console.error(err)
+                }
+            })
     }
 
     /**
