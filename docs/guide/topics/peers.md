@@ -39,7 +39,7 @@ As you may have noticed, in MTProto there are only three types of peers:
 users, chats and channels. However, things are not as simple as you may imagine,
 so let's dive a bit deeper.
 
-**[Chat](https://core.telegram.org/class/chat)** is a legacy group. The one which is
+**[Chat](https://core.telegram.org/class/chat)** is a legacy (aka basic) group. The one which is
 created by default when you use "Create group" button in official clients.
 Official clients refer to them as "Groups"
 
@@ -57,8 +57,8 @@ are all represented in MTProto as a **Channel** with a different set of flags:
 
 Official clients only use "Channel" when referring to *broadcast channels*.
 
-Chats are still used *(probably?)* because they are enough for most people's
-needs, and are also lighter on server resources. However, chats are missing
+Basic groups are still used *(probably?)* because they are enough for most people's
+needs, and are also lighter on server resources. However, they are missing
 many important features for public communities, like: usernames,
 custom admin rights, per-user restrictions, event log and more.
 
@@ -69,16 +69,15 @@ by the Chat, like setting a username. Channel cannot be migrated back to Chat.
 ### Chat in mtcute
 
 In addition to the mess described above, mtcute also has a [Chat](https://ref.mtcute.dev/classes/_mtcute_core.index.Chat.html) type.
-It is used to represent anything where there can be messages,
-including users, legacy groups, supergroups, channels, etc.
+It is used to represent any chat-like entities (i.e. basic groups and channels),
+but **not** users.
 
-It is mostly inspired by [Bot API's Chat](https://core.telegram.org/bots/api#chat)
-type, and works in a very similar way.
+In many mtcute APIs, you'll also encounter `Peer` type, which is essentially `Chat | User`.
 
 ## Fetching peers
 
 Often, you'll need to interact with a peer later, when the respective
-`User` or `Chat` object is no longer available.
+`Peer` object is no longer available.
 
 Of course, manually storing peers along with their access hash is very tedious.
 That is why mtcute handles it for you! Peers and their access hashes are

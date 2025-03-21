@@ -233,8 +233,6 @@ export class Chat {
 
     /**
      * Whether the current user is a member of the chat.
-     *
-     * For users, this is always `true`.
      */
     get isMember(): boolean {
         switch (this.raw._) {
