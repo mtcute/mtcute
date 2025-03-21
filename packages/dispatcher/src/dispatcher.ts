@@ -792,7 +792,7 @@ export class Dispatcher<State extends object = never> {
         return this._parent ?? null
     }
 
-    private _prepareChild(child: Dispatcher<any>): void {
+    private _prepareChild(child: Dispatcher<any> | Dispatcher<never>): void {
         if (child._client) {
             throw new MtArgumentError(
                 `Provided dispatcher is ${
@@ -861,8 +861,8 @@ export class Dispatcher<State extends object = never> {
      * @param scene  Dispatcher representing the scene
      * @param scoped  Whether to use scoped FSM storage for the scene (defaults to `true`)
      */
-    addScene(scene: Dispatcher<any>, scoped?: true): void
-    addScene(scene: Dispatcher<any>, scoped = true): void {
+    addScene(scene: Dispatcher<any> | Dispatcher<never>, scoped?: true): void
+    addScene(scene: Dispatcher<any> | Dispatcher<never>, scoped = true): void {
         if (!this._scenes) this._scenes = new Map()
 
         if (!scene._scene) {
@@ -877,7 +877,7 @@ export class Dispatcher<State extends object = never> {
 
         this._prepareChild(scene)
         scene._sceneScoped = scoped
-        this._scenes.set(scene._scene, scene)
+        this._scenes.set(scene._scene, scene as Dispatcher<any>)
     }
 
     /**
@@ -891,8 +891,8 @@ export class Dispatcher<State extends object = never> {
      *
      * @param child  Other dispatcher
      */
-    removeChild(child: Dispatcher<any>): void {
-        const idx = this._children.indexOf(child)
+    removeChild(child: Dispatcher<any> | Dispatcher<never>): void {
+        const idx = this._children.indexOf(child as Dispatcher<any>)
 
         if (idx > -1) {
             child._unparent()
