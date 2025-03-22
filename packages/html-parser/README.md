@@ -1,6 +1,6 @@
 # @mtcute/html-parser
 
-📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_html_parser.html)
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_html-parser.html)
 
 HTML entities parser for mtcute
 

@@ -99,7 +99,7 @@ You can only use the following button types with inline keyboards:
 | Seamless login | `BotKeyboard.urlAuth`      | [Learn more](https://corefork.telegram.org/constructor/inputKeyboardButtonUrlAuth)  |
 | WebView        | `BotKeyboard.webView`      | [Learn more](https://corefork.telegram.org/api/bots/webapps)                        |
 | Open user      | `BotKeyboard.userProfile`  | When clicked the client will open the given user's profile                          |
-| Request peer   | `BotKeyboard.requestPeer`  | When clicked the client will ask the user to choose a peer and will send a message with [`ActionPeerChosen`](https://ref.mtcute.dev/interfaces/_mtcute_core.index.ActionPeerChosen.html) |
+| Request peer   | `BotKeyboard.requestPeer`  | When clicked the client will ask the user to choose a peer and will send a message with [`ActionPeerChosen`](https://ref.mtcute.dev/interfaces/_mtcute_core.index.ActionPeerChosen) |
 
 Using any other will result in an error by Telegram.
 

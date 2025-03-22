@@ -1,6 +1,6 @@
 # @mtcute/markdown-parser
 
-📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_markdown_parser.html)
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_markdown-parser.html)
 
 Markdown entities parser for mtcute
 

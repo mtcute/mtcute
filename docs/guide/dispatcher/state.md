@@ -235,7 +235,7 @@ const state = await dp.getState<SomeInternalState>(...)
 ## Storage
 
 Storage is the backend used by Dispatcher to store state related information.
-A storage is a class that implements [`IStateStorageProvider`](https://ref.mtcute.dev/types/_mtcute_dispatcher.IStateStorageProvider.html).
+A storage is a class that implements [`IStateStorageProvider`](https://ref.mtcute.dev/types/_mtcute_dispatcher.IStateStorageProvider).
 
 ```ts
 const dp = Dispatcher.for<BotState>(tg, { storage: new MemoryStorage() })

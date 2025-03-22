@@ -156,7 +156,7 @@ const phone = '+7 999 123 4567'
 const code = await tg.sendCode({ phone })
 ```
 
-The `code` object will contain [information about the sent code](https://ref.mtcute.dev/classes/_mtcute_core.index.SentCode.html), 
+The `code` object will contain [information about the sent code](https://ref.mtcute.dev/classes/_mtcute_core.index.SentCode), 
 including the `phoneCodeHash` that you will need to use later.
 
 Now, you need to ask the user for the code and call `.signIn` method:
@@ -202,7 +202,7 @@ code = await tg.resendCode({
 
 ::: tip
 You can know beforehand the type of the next code that will be sent
-using the [`code.nextType`](https://ref.mtcute.dev/classes/_mtcute_core.index.SentCode.html#nextType) field
+using the [`code.nextType`](https://ref.mtcute.dev/classes/_mtcute_core.index.SentCode#nextType) field
 :::
 
 ### Updates

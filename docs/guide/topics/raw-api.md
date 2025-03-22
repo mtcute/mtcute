@@ -195,4 +195,4 @@ const res = await tg.call({
 ```
 
 `bytes` will be send as-is to the server, and the response will be returned as a `Uint8Array`
-for you to handle on your own (it might be useful to look into [`@mtcute/tl-runtime` package](https://ref.mtcute.dev/modules/_mtcute_tl_runtime.html))
+for you to handle on your own (it might be useful to look into [`@mtcute/tl-runtime` package](https://ref.mtcute.dev/modules/_mtcute_tl-runtime))

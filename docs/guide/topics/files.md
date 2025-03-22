@@ -66,7 +66,7 @@ Sending media is incredibly easy with mtcute - you simply
 call `sendMedia` and provide `InputMediaLike`.
 
 `InputMediaLike` can be constructed manually, or using one of the
-builder functions exported in [`InputMedia` namespace](https://ref.mtcute.dev/modules/_mtcute_core.index.InputMedia.html):
+builder functions exported in [`InputMedia` namespace](https://ref.mtcute.dev/modules/_mtcute_core.index.InputMedia):
 
 ```ts
 await tg.sendMedia('me', InputMedia.photo('file:assets/welcome.jpg'))
@@ -120,7 +120,7 @@ which means they are **100% interoperable** with TDLib and Bot API.
 
 They do have some limitations though:
   - You can't get a File ID until you upload a file and use it somewhere, e.g.
-    as a message media (or you can use [uploadMedia](https://ref.mtcute.dev/classes/_mtcute_core.highlevel_client.TelegramClient.html#uploadMedia)).
+    as a message media (or you can use [uploadMedia](https://ref.mtcute.dev/classes/_mtcute_core.highlevel_client.TelegramClient#uploadMedia)).
   - When sending by File ID, you can't change type of the file
     (i.e. if this is a video, you can't send it as a document) or any meta
     information like duration.

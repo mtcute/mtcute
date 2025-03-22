@@ -1,6 +1,6 @@
 # @mtcute/tl-runtime
 
-📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_tl_runtime.html)
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_tl-runtime.html)
 
 This package contains runtime for TL (de-)serialization.
 It only contains binary reader and writer implementations,

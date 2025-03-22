@@ -1,6 +1,6 @@
 # @mtcute/file-id
 
-📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_file_id.html)
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_file-id.html)
 
 This package is used internally by `@mtcute/core` to parse, serialize
 and manipulate TDLib and Bot API compatible File IDs, but can also be used

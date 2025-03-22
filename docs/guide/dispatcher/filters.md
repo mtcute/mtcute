@@ -8,7 +8,7 @@ write your own as well.
 
 ## Common filters
 
-For the full reference, see `filters` namespace in the [API reference](https://ref.mtcute.dev/modules/_mtcute_dispatcher.filters.html)
+For the full reference, see `filters` namespace in the [API reference](https://ref.mtcute.dev/modules/_mtcute_dispatcher.filters)
 
 For many updates, `filters.userId` is supported which filters by user ID(s)
 that issued the update (i.e. message sender, poll voter, etc.):

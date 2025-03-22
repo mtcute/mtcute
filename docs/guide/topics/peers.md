@@ -68,7 +68,7 @@ by the Chat, like setting a username. Channel cannot be migrated back to Chat.
 
 ### Chat in mtcute
 
-In addition to the mess described above, mtcute also has a [Chat](https://ref.mtcute.dev/classes/_mtcute_core.index.Chat.html) type.
+In addition to the mess described above, mtcute also has a [Chat](https://ref.mtcute.dev/classes/_mtcute_core.index.Chat) type.
 It is used to represent any chat-like entities (i.e. basic groups and channels),
 but **not** users.
 
@@ -169,8 +169,8 @@ third-party libraries, including mtcute.
 
 ::: tip
 The concept described below is implemented and exported in utils, 
-see [getBasicPeerType](https://ref.mtcute.dev/functions/_mtcute_core.index.getBasicPeerType.html),
-[getMarkedPeerId](https://ref.mtcute.dev/functions/_mtcute_core.index.getMarkedPeerId.html),
+see [getBasicPeerType](https://ref.mtcute.dev/functions/_mtcute_core.index.getBasicPeerType),
+[getMarkedPeerId](https://ref.mtcute.dev/functions/_mtcute_core.index.getMarkedPeerId),
 :::
 
 It works as follows:
@@ -209,7 +209,7 @@ This currently only seems to happen for `msg.sender` and `msg.chat` fields for n
 so if you're only ever going to work with bots, you can safely ignore this section (for now?). 
 
 ::: tip
-Complete peers ≠ [full peers](https://ref.mtcute.dev/classes/_mtcute_core.highlevel_client.TelegramClient.html#getFullChat)!
+Complete peers ≠ [full peers](https://ref.mtcute.dev/classes/_mtcute_core.highlevel_client.TelegramClient#getFullChat)!
 
 - Incomplete are seen in updates in rare cases, and are missing some fields (e.g. username)
 - Complete peers are pretty much all the other peer objects you get in updates

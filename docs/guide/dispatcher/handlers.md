@@ -8,7 +8,7 @@ For each of the handler types, there are 2 ways you can add
 a handler - either using a specialized method, or
 with `addUpdateHandler` method, as [described below](#addupdatehandler)
 
-See also: [Reference](https://ref.mtcute.dev/classes/_mtcute_dispatcher.Dispatcher.html)
+See also: [Reference](https://ref.mtcute.dev/classes/_mtcute_dispatcher.Dispatcher)
 
 ::: warning
 Do not add or remove handlers inside of another handler,

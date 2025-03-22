@@ -40,7 +40,7 @@ dp.onNewMessage(async (msg) => {
 
 **Note**: the syntax used by this parser is **not** compatible
 with Bot API's Markdown or MarkdownV2 syntax.
-See [documentation](https://ref.mtcute.dev/modules/_mtcute_markdown_parser.html)
+See [documentation](https://ref.mtcute.dev/modules/_mtcute_markdown-parser)
 to learn about the syntax.
 
 ## HTML
@@ -57,7 +57,7 @@ dp.onNewMessage(async (msg) => {
 
 **Note**: the syntax used by this parser is **not** 
 compatible with Bot API's HTML syntax. 
-See [documentation](https://ref.mtcute.dev/modules/_mtcute_html_parser.html)
+See [documentation](https://ref.mtcute.dev/modules/_mtcute_html-parser)
 to learn about the syntax.
 
 ## Interpolation

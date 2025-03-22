@@ -1,6 +1,6 @@
 # @mtcute/tl-utils
 
-📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_tl_utils.html)
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_tl-utils.html)
 
 Utilities for TL schema parsing and manipulation
 

@@ -122,10 +122,10 @@ open them from dialogs, messages, members lists, etc. The same goes for
 mtcute - you need to encounter the user before you can interact with them.
 
 Some ideas on how you can fix this:
-  - Use [`findDialogs`](https://ref.mtcute.dev/classes/_mtcute_core.highlevel_client.TelegramClient.html#findDialogs) method
+  - Use [`findDialogs`](https://ref.mtcute.dev/classes/_mtcute_core.highlevel_client.TelegramClient#findDialogs) method
     to iterate over all dialogs and find the one you need
   - Use a username/phone number instead of ID
-  - Use [`getMessages`](https://ref.mtcute.dev/classes/_mtcute_core.highlevel_client.TelegramClient.html#getMessages) method
+  - Use [`getMessages`](https://ref.mtcute.dev/classes/_mtcute_core.highlevel_client.TelegramClient#getMessages) method
     and fetch some message by the user (so mtcute caches the access hash)
   - ...and a lot more ways to "meet" a user without interacting with them
   
@@ -138,7 +138,7 @@ mtcute tries its best to fill in the missing fields on demand
 (whenever you use `.resolvePeer` or any other method that uses it under the hood), 
 but sometimes it unfortunately fails. There isn't much we can do about it :c
 
-By the way, there's an [`isPeerAvailable`](https://ref.mtcute.dev/classes/_mtcute_core.highlevel_client.TelegramClient.html#isPeerAvailable) 
+By the way, there's an [`isPeerAvailable`](https://ref.mtcute.dev/classes/_mtcute_core.highlevel_client.TelegramClient#isPeerAvailable) 
 method that you can use to check if a peer is available, that *never* does any network requests.
 Do note, however, that it is prone to false negatives, meaning that `resolvePeer` *might* still work
 if that method returns `false`, but should always work if it returns `true`.

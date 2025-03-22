@@ -171,8 +171,8 @@ A storage provider in mtcute is composed of:
 Such composable architecture allows for custom storages to implement a specific set of repositories, and to reuse the same driver for different providers.
 
 In mtcute, these sets of repositories are defined:
-- [IMtStorageProvider](https://ref.mtcute.dev/types/_mtcute_core.index.IMtStorageProvider.html), used by `BaseTelegramClient` for low-level
+- [IMtStorageProvider](https://ref.mtcute.dev/types/_mtcute_core.index.IMtStorageProvider), used by `BaseTelegramClient` for low-level
   MTProto data storage
-- [ITelegramStorageProvider](https://ref.mtcute.dev/interfaces/_mtcute_core.index.ITelegramStorageProvider.html), used by `TelegramClient` for basic caching
+- [ITelegramStorageProvider](https://ref.mtcute.dev/interfaces/_mtcute_core.index.ITelegramStorageProvider), used by `TelegramClient` for basic caching
   and update handling operations required for the client to work
-- [IStateStorageProvider](https://ref.mtcute.dev/types/_mtcute_dispatcher.IStateStorageProvider.html), used by `Dispatcher` for FSM and Scenes storage
+- [IStateStorageProvider](https://ref.mtcute.dev/types/_mtcute_dispatcher.IStateStorageProvider), used by `Dispatcher` for FSM and Scenes storage
