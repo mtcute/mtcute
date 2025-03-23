@@ -71,7 +71,7 @@ await client.importSession(convertFromMtkrutoSession("..."))
 import { convertFromTdata } from '@mtcute/convert'
 
 const client = new TelegramClient({ ... })
-await client.importSession(convertFromTdata({
+await client.importSession(await convertFromTdata({
     path: '/path/to/tdata',
     ignoreVersion: true // note: this might break
     // passcode: '123456' // if you have a passcode
