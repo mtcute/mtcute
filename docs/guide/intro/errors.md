@@ -124,7 +124,7 @@ Unhandled errors that had happened inside dispatcher's handlers
 can be handled as well:
 
 ```ts
-const dp = new Dispatcher()
+const dp = Dispatcher.child()
 
 dp.onError((error, update, state) => {
   console.log(error)

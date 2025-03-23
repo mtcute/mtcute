@@ -138,7 +138,7 @@ a separate section. For now, let's just register a dispatcher and add a simple h
 
 ```ts
 const tg = new TelegramClient(...)
-const dp = new Dispatcher(tg)
+const dp = Dispatcher.for(tg)
 
 dp.onNewMessage(async (msg) => {
   await msg.forwardTo('me')

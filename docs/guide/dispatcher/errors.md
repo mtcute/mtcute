@@ -96,9 +96,9 @@ Errors are **not** propagated to parent dispatcher or to any of the children
 dispatchers:
 
 ```ts
-const dp = new Dispatcher(tg)
-const dp1 = new Dispatcher()
-const dp2 = new Dispatcher()
+const dp = Dispatcher.for(tg)
+const dp1 = Dispatcher.child()
+const dp2 = Dispatcher.child()
 
 dp.addChild(dp1)
 dp1.addChild(dp2)
@@ -117,9 +117,9 @@ dp1.onNewMessage(() => { throw new Error() })
 However, if you need that behaviour, you can use `propagateErrorToParent`:
 
 ```ts
-const dp = new Dispatcher(tg)
-const dp1 = new Dispatcher()
-const dp2 = new Dispatcher()
+const dp = Dispatcher.for(tg)
+const dp1 = Dispatcher.child()
+const dp2 = Dispatcher.child()
 
 dp.addChild(dp1)
 dp1.addChild(dp2)

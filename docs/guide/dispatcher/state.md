@@ -180,9 +180,9 @@ keying mechanism too, if you want:
 ```ts
 const customKey = (upd) => ...
 
-const dp = new Dispatcher<BotState>(tg, storage, customKey)
+const dp = Dispatcher.for<BotState>(tg, { storage, key: customKey })
 // or, locally for a child dispatcher:
-const dp = new Dispatcher<BotState>(customKey)
+const dp = Dispatcher.child<BotState>({ key: customKey })
 ```
 
 

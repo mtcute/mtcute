@@ -128,7 +128,7 @@ dp.onNewMessage(
   }
 )
 
-const dp1 = new Dispatcher()
+const dp1 = Dispatcher.child()
 dp.addChild(dp1)
 
 dp1.onNewMessage(

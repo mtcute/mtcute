@@ -30,7 +30,7 @@ dp.addScene(SomeScene)
 If you don't use state within your scene, just don't pass anything:
 
 ```ts
-const scene = new Dispatcher()
+const scene = Dispatcher.scene()
 ```
 
 ::: tip
@@ -115,7 +115,7 @@ Alternatively, you can disable isolated storage for FSM altogether and use
 global state directly:
 
 ```ts
-const dp = new Dispatcher<BotState>()
+const dp = Dispatcher.scene<BotState>()
 // add handlers to `dp`
 
 export const SomeScene = dp
