@@ -2,7 +2,7 @@ import type { tl } from '@mtcute/tl'
 import type { ITelegramClient } from '../../client.types.js'
 
 import type { InputPeerLike } from '../../types/peers/index.js'
-import { ConditionVariable } from '@fuman/utils'
+import { parallelMap } from '@fuman/utils'
 import { MtPeerNotFoundError } from '../../types/errors.js'
 
 import { resolvePeer } from './resolve-peer.js'
@@ -78,65 +78,18 @@ export async function resolvePeerMany(
         return ret
     }
 
-    const cv = new ConditionVariable()
-    const buffer: Record<number, tl.TypeInputPeer | null> = {}
-
-    let nextIdx = 0
-    let nextWorkerIdx = 0
-
-    const fetchNext = async (idx = nextWorkerIdx++): Promise<void> => {
+    return parallelMap(peerIds, async (it) => {
+        let peer
         try {
-            const result = await resolvePeer(client, peerIds[idx])
-            buffer[idx] = result
+            peer = await resolvePeer(client, it)
         } catch (e) {
             if (e instanceof MtPeerNotFoundError) {
-                buffer[idx] = null
-            } else {
-                throw e
+                return null
             }
+            throw e
         }
 
-        if (nextIdx === idx) {
-            cv.notify()
-        }
-
-        if (nextWorkerIdx < peerIds.length) {
-            await fetchNext(nextWorkerIdx++)
-        }
-    }
-
-    let error: unknown
-    void Promise.all(Array.from({ length: limit }, (_, i) => fetchNext(i))).catch((e) => {
-        client.log.debug('resolvePeerMany errored: %e', e)
-        error = e
-        cv.notify()
-    })
-
-    while (nextIdx < peerIds.length) {
-        await cv.wait()
-
-        if (error) throw error
-
-        while (nextIdx in buffer) {
-            const buf = buffer[nextIdx]
-            delete buffer[nextIdx]
-
-            nextIdx++
-
-            if (!normalizer) {
-                ret.push(buf)
-                continue
-            }
-
-            if (buf !== null) {
-                const norm = normalizer(buf)
-
-                if (norm) {
-                    ret.push(norm)
-                }
-            }
-        }
-    }
-
-    return ret
+        if (normalizer) return normalizer(peer)
+        return peer
+    }, { limit })
 }
