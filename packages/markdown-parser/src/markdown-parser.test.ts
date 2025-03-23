@@ -620,6 +620,20 @@ ${'meowww'}
             )
         })
 
+        it('should handle quotes', () => {
+            test(
+                md_`
+some text :3
+> btw i like ${'quotes'}
+> and also **formatting**
+>   :3
+some more text
+`,
+                [createEntity('messageEntityBold', 40, 10), createEntity('messageEntityBlockquote', 13, 40)],
+                'some text :3\nbtw i like quotes\nand also formatting\n:3\nsome more text',
+            )
+        })
+
         it('should interpolate inside links', () => {
             test(
                 md_`[${'link'}](${'https'}://example.com/\\)${'foo'}/bar/${'baz'}?foo=bar&baz=${'egg'})`,

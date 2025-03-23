@@ -144,6 +144,8 @@ function parse(
     let insideCode = false
     let insidePre = false
     let insideLink = false
+    let currentBlockquoteStart: number | null = null
+    let prevBlockquote: tl.Mutable<tl.RawMessageEntityBlockquote> | null = null
 
     let insideLinkUrl = false
     let pendingLinkUrl = ''
@@ -392,6 +394,34 @@ function parse(
                 } else {
                     pos = len
                 }
+
+                if (currentBlockquoteStart != null) {
+                    const prevEnd = prevBlockquote ? prevBlockquote.offset + prevBlockquote.length : Number.NaN
+                    if (currentBlockquoteStart - 1 === prevEnd) {
+                        // extend the previous entity
+                        prevBlockquote!.length += result.length - currentBlockquoteStart
+                    } else {
+                        if (prevBlockquote) entities.push(prevBlockquote)
+                        prevBlockquote = {
+                            _: 'messageEntityBlockquote',
+                            offset: currentBlockquoteStart,
+                            length: result.length - currentBlockquoteStart - 1,
+                        }
+                    }
+                    currentBlockquoteStart = null
+                }
+                continue
+            }
+
+            if (c === '>' && (result.length === 0 || result[result.length - 1] === '\n')) {
+                currentBlockquoteStart = result.length
+                pos += 1
+                continue
+            }
+
+            if (c === ' ' && currentBlockquoteStart === result.length) {
+                // ignore spaces after `>`
+                pos += 1
                 continue
             }
 
@@ -442,6 +472,8 @@ function parse(
     })
 
     feed(strings[strings.length - 1])
+
+    if (prevBlockquote) entities.push(prevBlockquote)
 
     function adjustOffsets(from: number, by: number): void {
         for (const ent of entities) {
