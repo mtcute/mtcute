@@ -381,7 +381,7 @@ function parse(
             }
 
             if (c === '\n') {
-                if (pos !== 0) {
+                if (result.length !== 0) {
                     result += '\n'
                 }
 

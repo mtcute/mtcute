@@ -531,6 +531,14 @@ describe('MarkdownMessageEntityParser', () => {
             test(md_`${'**plain**'}`, [], '**plain**')
         })
 
+        it('should handle strings at line breaks', () => {
+            test(md_`
+some text ${'meow'}
+some more ${'text'}
+meow
+`, [], 'some text meow\nsome more text\nmeow')
+        })
+
         it('should handle numbers/Longs', () => {
             test(md_`${1234567890}`, [], '1234567890')
             test(md_`${Long.fromString('1234567890')}`, [], '1234567890')
