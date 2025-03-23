@@ -391,7 +391,6 @@ function parse(
                     pos += nonWhitespace + 1
                 } else {
                     pos = len
-                    result = result.trimEnd()
                 }
                 continue
             }
@@ -496,9 +495,23 @@ function parse(
         }
     }
 
+    // trim text on both sides and adjust offsets
+    const resultTrimmed = result.trimStart()
+    const numCharsTrimmed = result.length - resultTrimmed.length
+    result = resultTrimmed
+    adjustOffsets(0, -numCharsTrimmed)
+
+    result = result.trimEnd()
+    const finalEntities: tl.TypeMessageEntity[] = []
+    for (const ent of entities) {
+        const end = ent.offset + ent.length
+        if (end > result.length) ent.length = result.length - ent.offset
+        if (ent.length > 0) finalEntities.push(ent)
+    }
+
     return {
         text: result,
-        entities,
+        entities: finalEntities,
     }
 }
 

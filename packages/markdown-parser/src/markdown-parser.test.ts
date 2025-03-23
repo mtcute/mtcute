@@ -537,6 +537,11 @@ some text ${'meow'}
 some more ${'text'}
 meow
 `, [], 'some text meow\nsome more text\nmeow')
+            test(md_`
+some ${'text'}
+
+${'meowww'}
+`, [], 'some text\n\nmeowww')
         })
 
         it('should handle numbers/Longs', () => {
@@ -545,7 +550,7 @@ meow
         })
 
         it('should skip falsy values', () => {
-            test(md_`some text ${null} more text ${false}`, [], 'some text  more text ')
+            test(md_`some text ${null} more text ${false}`, [], 'some text  more text')
         })
 
         it('should properly dedent', () => {
