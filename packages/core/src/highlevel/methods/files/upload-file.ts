@@ -351,8 +351,6 @@ export async function uploadFile(
             }
 
             fileName = `${fileName}.${extFromMime}`
-        } else if (extFromMime && extFromName !== extFromMime) {
-            throw new MtArgumentError(`File name has ${extFromName} extension (${fileName}), but the mime type (${fileMime}) expects it to be ${extFromMime}`)
         }
     }
 
