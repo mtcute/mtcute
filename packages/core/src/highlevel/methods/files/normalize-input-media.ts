@@ -397,14 +397,24 @@ export async function _normalizeInputMedia(
     }
 
     if (media.type === 'video') {
-        attributes.push({
+        const attr: tl.RawDocumentAttributeVideo = {
             _: 'documentAttributeVideo',
             duration: media.duration || 0,
             w: media.width || 0,
             h: media.height || 0,
             supportsStreaming: media.supportsStreaming,
             roundMessage: media.isRound,
-        })
+        }
+
+        if (media.isRound) {
+            // for whatever reason, telegram won't accept round messages if w/h/duration are 0,
+            // but will accept them (and fix the values) if they're not 0. :woozy:
+            if (attr.w === 0) attr.w = 1
+            if (attr.h === 0) attr.h = 1
+            if (attr.duration === 0) attr.duration = 1
+        }
+
+        attributes.push(attr)
 
         if (media.isAnimated) {
             attributes.push({ _: 'documentAttributeAnimated' })
