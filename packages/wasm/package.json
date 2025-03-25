@@ -9,7 +9,8 @@
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
-    "./mtcute.wasm": "./src/mtcute.wasm"
+    "./mtcute.wasm": "./src/mtcute.wasm",
+    "./mtcute-simd.wasm": "./src/mtcute-simd.wasm"
   },
   "scripts": {
     "build:wasm": "docker build --output=lib --target=binaries lib"

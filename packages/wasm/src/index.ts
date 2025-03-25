@@ -2,12 +2,19 @@ import type { MtcuteWasmModule, SyncInitInput } from './types.js'
 
 export * from './types.js'
 
+export const SIMD_AVAILABLE: boolean = /* @__PURE__ */ WebAssembly.validate(new Uint8Array(
+    [0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11],
+))
+
 export function getWasmUrl(): URL {
     // would be nice if we could just use `new URL('@mtcute/wasm/mtcute.wasm', import.meta.url)`
     // wherever this is used, but vite does some funky stuff with transitive dependencies
     // making it not work. probably related to https://github.com/vitejs/vite/issues/8427,
     // but asking the user to deoptimize the entire @mtcute/web is definitely not a good idea
     // so we'll just use this hack for now
+    if (SIMD_AVAILABLE) {
+        return new URL(/* @vite-ignore */ './mtcute-simd.wasm', import.meta.url)
+    }
     return new URL(/* @vite-ignore */ './mtcute.wasm', import.meta.url)
 }
 

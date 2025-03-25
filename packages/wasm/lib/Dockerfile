@@ -13,3 +13,4 @@ RUN make
 
 FROM scratch AS binaries
 COPY --from=build /src/mtcute.wasm ../
+COPY --from=build /src/mtcute-simd.wasm ../

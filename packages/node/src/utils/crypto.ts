@@ -5,7 +5,7 @@ import { createRequire } from 'node:module'
 
 import { deflateSync, gunzipSync } from 'node:zlib'
 import { BaseCryptoProvider } from '@mtcute/core/utils.js'
-import { ige256Decrypt, ige256Encrypt, initSync } from '@mtcute/wasm'
+import { ige256Decrypt, ige256Encrypt, initSync, SIMD_AVAILABLE } from '@mtcute/wasm'
 
 export class NodeCryptoProvider extends BaseCryptoProvider {
     createAesCtr(key: Uint8Array, iv: Uint8Array): IAesCtr {
@@ -69,7 +69,8 @@ export class NodeCryptoProvider extends BaseCryptoProvider {
 
     async initialize(): Promise<void> {
         const require = createRequire(import.meta.url)
-        const wasmFile = require.resolve('@mtcute/wasm/mtcute.wasm')
+        const file = SIMD_AVAILABLE ? 'mtcute-simd.wasm' : 'mtcute.wasm'
+        const wasmFile = require.resolve(`@mtcute/wasm/${file}`)
         const wasm = await readFile(wasmFile)
         initSync(wasm)
     }
