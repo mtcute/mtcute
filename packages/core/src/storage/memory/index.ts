@@ -8,6 +8,10 @@ import { MemoryPeersRepository } from './repository/peers.js'
 import { MemoryRefMessagesRepository } from './repository/ref-messages.js'
 
 export { MemoryStorageDriver } from './driver.js'
+export { MemoryAuthKeysRepository } from './repository/auth-keys.js'
+export { MemoryKeyValueRepository } from './repository/kv.js'
+export { MemoryPeersRepository } from './repository/peers.js'
+export { MemoryRefMessagesRepository } from './repository/ref-messages.js'
 
 /**
  * In-memory storage driver implementation for mtcute.
