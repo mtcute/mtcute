@@ -24,7 +24,7 @@ export async function openChat(client: ITelegramClient, chat: InputPeerLike): Pr
         let pts: number | undefined
         if (!client.storage.self.getCached()?.isBot) {
             const [dialog] = await getPeerDialogs(client, peer)
-            pts = dialog.raw.pts
+            pts = dialog?.raw.pts
         } else {
             pts = await client.storage.updates.getChannelPts(peer.channelId) ?? undefined
         }

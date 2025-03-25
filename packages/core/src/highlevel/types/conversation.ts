@@ -523,7 +523,7 @@ export class Conversation {
 
         // check if the message is already read
         const [dialog] = await getPeerDialogs(this.client, this._inputPeer)
-        if (dialog.lastRead >= msgId) return
+        if (!dialog || dialog.lastRead >= msgId) return
 
         const promise = new Deferred<void>()
 

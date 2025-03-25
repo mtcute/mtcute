@@ -2306,7 +2306,8 @@ export interface TelegramClient extends ITelegramClient {
      *
      * @param peers  Peers for which to fetch dialogs.
      */
-    getPeerDialogs(peers: MaybeArray<InputPeerLike>): Promise<Dialog[]>
+    getPeerDialogs(
+        peers: MaybeArray<InputPeerLike>): Promise<(Dialog | null)[]>
     /**
      * Iterate over dialogs.
      *

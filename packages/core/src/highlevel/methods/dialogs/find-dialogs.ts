@@ -3,9 +3,10 @@ import type { tl } from '@mtcute/tl'
 import type { MaybeArray } from '../../../types/utils.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { Dialog } from '../../types/messages/dialog.js'
+import { isPresent } from '../../../utils/type-assertions.js'
 import { MtPeerNotFoundError } from '../../types/errors.js'
-import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
+import { resolvePeerMany } from '../users/resolve-peer-many.js'
 import { getPeerDialogs } from './get-peer-dialogs.js'
 import { iterDialogs } from './iter-dialogs.js'
 
@@ -61,12 +62,13 @@ export async function findDialogs(client: ITelegramClient, peers: MaybeArray<str
         // we have some input peers, try to fetch them
         const dialogs = await getPeerDialogs(client, foundInputPeers)
 
-        if (foundInputPeers.length === peers.length) {
+        if (foundInputPeers.length === peers.length && dialogs.every(isPresent)) {
             return dialogs
         }
 
         // populate found dialogs
         for (const [idx, origIdx] of foundIdxToOriginalIdx) {
+            if (!dialogs[idx]) continue
             ret[origIdx] = dialogs[idx]
         }
     }

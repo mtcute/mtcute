@@ -1,9 +1,18 @@
 import type { mtp } from '@mtcute/tl'
 
-import type { RpcCallMiddleware } from '../network-manager.js'
+import type { RpcCallMiddleware, RpcCallMiddlewareContext } from '../network-manager.js'
 import { combineAbortSignals } from '../../utils/abort-signal.js'
 import { sleepWithAbort } from '../../utils/misc-utils.js'
 import { isTlRpcError } from '../../utils/type-assertions.js'
+
+const SILENTLY_SLEEP_METHODS = /* @__PURE__ */ new Set([
+    'upload.getFile',
+    'upload.saveFilePart',
+    'upload.saveBigFilePart',
+    'updates.getDifference',
+    'updates.getChannelDifference',
+])
+const SILENTLY_SLEEP_THRESHOLD = 5
 
 export interface FloodWaiterOptions {
     /**
@@ -39,13 +48,27 @@ export interface FloodWaiterOptions {
      * If the stored wait time is less than this value,
      * the request will not be delayed
      *
-     * @default  3_000
+     * @default  2_000
      */
     minStoredWait?: number
+
+    /**
+     * Function that will be called before we are about to wait for `seconds`
+     * seconds before retrying the request.
+     *
+     * @default  print a warning to the console, except some methods that often result in flood waits
+     */
+    onBeforeWait?: (ctx: RpcCallMiddlewareContext, seconds: number) => void
 }
 
 export function floodWaiter(options: FloodWaiterOptions): RpcCallMiddleware {
-    const { maxWait = 10_000, maxRetries = 5, store = true, minStoredWait = 3_000 } = options
+    const {
+        maxWait = 10_000,
+        maxRetries = 5,
+        store = true,
+        minStoredWait = 2_000,
+        onBeforeWait,
+    } = options
 
     const storage = new Map<string, number>()
 
@@ -59,7 +82,7 @@ export function floodWaiter(options: FloodWaiterOptions): RpcCallMiddleware {
             const delta = storedWaitUntil - Date.now()
 
             if (delta <= minStoredWait) {
-                // flood waits below 3 seconds are "ignored"
+                // flood waits below 2 seconds are "ignored"
                 storage.delete(method)
             } else if (delta <= floodSleepThreshold) {
                 await sleepWithAbort(delta, combineAbortSignals(ctx.manager.params.stopSignal, ctx.params?.abortSignal))
@@ -114,8 +137,9 @@ export function floodWaiter(options: FloodWaiterOptions): RpcCallMiddleware {
                 const ms = seconds * 1000
 
                 if (ms <= floodSleepThreshold) {
-                    if (ctx.request._ !== 'upload.getFile') {
-                        // upload.getFile often results in flood waits, so we don't want to spam the log
+                    if (onBeforeWait) {
+                        onBeforeWait(ctx, seconds)
+                    } else if (!(seconds < SILENTLY_SLEEP_THRESHOLD && SILENTLY_SLEEP_METHODS.has(method))) {
                         ctx.manager._log.warn('%s resulted in a flood wait, will retry in %d seconds', method, seconds)
                     }
 
