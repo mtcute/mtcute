@@ -8,7 +8,7 @@ export default () => {
             {
                 name: 'remove-vite-ignore',
                 renderChunk(code) {
-                    return code.replace('/* @vite-ignore */', '')
+                    return code.replace('/* @vite-ignore */', '').replace('/* @vite-ignore */', '')
                 },
             },
         ],
