@@ -56,6 +56,10 @@ export class TelegramStorageManager {
         )
     }
 
+    async close(): Promise<void> {
+        await this.peers.close()
+    }
+
     async clear(withAuthKeys = false): Promise<void> {
         await this.provider.peers.deleteAll()
         await this.provider.refMessages.deleteAll()

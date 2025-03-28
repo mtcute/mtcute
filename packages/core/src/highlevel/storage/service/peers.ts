@@ -3,7 +3,7 @@ import type { ServiceOptions } from '../../../storage/service/base.js'
 import type { IPeersRepository } from '../repository/peers.js'
 
 import type { RefMessagesService } from './ref-messages.js'
-import { LruMap } from '@fuman/utils'
+import { asyncPool, LruMap, timers } from '@fuman/utils'
 import Long from 'long'
 import { BaseService } from '../../../storage/service/base.js'
 import { longFromFastString, longToFastString } from '../../../utils/long-utils.js'
@@ -50,7 +50,7 @@ function getInputPeer(dto: IPeersRepository.PeerInfo): tl.TypeInputPeer {
 export class PeersService extends BaseService {
     private _cache: LruMap<number, CacheItem>
     private _pendingWrites = new Map<number, IPeersRepository.PeerInfo>()
-
+    private _pendingWritesTimer: timers.Timer | null = null
     constructor(
         private options: PeersServiceOptions,
         private _peers: IPeersRepository,
@@ -60,6 +60,24 @@ export class PeersService extends BaseService {
         super(common)
 
         this._cache = new LruMap(options.cacheSize ?? 100)
+        this._writePending = this._writePending.bind(this)
+    }
+
+    async close(): Promise<void> {
+        if (this._pendingWritesTimer) {
+            timers.clearTimeout(this._pendingWritesTimer)
+            this._pendingWritesTimer = null
+        }
+        await this._writePending()
+    }
+
+    private _writePendingLater() {
+        if (this._pendingWritesTimer) return
+
+        this._pendingWritesTimer = timers.setTimeout(
+            this._writePending,
+            this.options.updatesWriteInterval ?? 30_000,
+        )
     }
 
     async updatePeersFrom(obj: tl.TlObject | tl.TlObject[]): Promise<boolean> {
@@ -148,33 +166,13 @@ export class PeersService extends BaseService {
 
         const cached = this._cache.get(peer.id)
 
-        if (cached && this.options.updatesWriteInterval !== 0) {
-            const oldAccessHash = (cached.peer as Extract<tl.TypeInputPeer, { accessHash?: unknown }>).accessHash
-
-            if (oldAccessHash?.eq(accessHash)) {
-                // when entity is cached and hash is the same, an update query is needed,
-                // since some field in the full entity might have changed, or the username/phone
-                //
-                // to avoid too many DB calls, and since these updates are pretty common,
-                // they are grouped and applied in batches no more than once every 30sec (or user-defined).
-                //
-                // until then, they are either served from in-memory cache,
-                // or an older version is fetched from DB
-
-                this._pendingWrites.set(peer.id, dto)
-                cached.complete = peer
-
-                return
-            }
-        }
-
         let newComplete = peer
 
         if ((peer as Extract<typeof peer, { min?: unknown }>).min) {
             // we need to be careful with saving min peers,
             // as we only need to update *some* fields of the `complete` object.
 
-            const existing = this._cache.get(peer.id)?.complete ?? await this.getCompleteById(peer.id)
+            const existing = cached?.complete ?? await this.getCompleteById(peer.id)
             if (existing && !(existing as Extract<typeof existing, { min?: unknown }>).min) {
                 if (existing._ === 'channel' && peer._ === 'channel') {
                     // ref: https://corefork.telegram.org/constructor/channel
@@ -240,6 +238,27 @@ export class PeersService extends BaseService {
             }
         }
 
+        if (cached && this.options.updatesWriteInterval !== 0) {
+            const oldAccessHash = (cached.peer as Extract<tl.TypeInputPeer, { accessHash?: unknown }>).accessHash
+
+            if (oldAccessHash?.eq(accessHash)) {
+                // when entity is cached and hash is the same, an update query is needed,
+                // since some field in the full entity might have changed, or the username/phone
+                //
+                // to avoid too many DB calls, and since these updates are pretty common,
+                // they are grouped and applied in batches no more than once every 30sec (or user-defined).
+                //
+                // until then, they are either served from in-memory cache,
+                // or an older version is fetched from DB
+
+                this._pendingWrites.set(peer.id, dto)
+                this._writePendingLater()
+                cached.complete = newComplete
+
+                return
+            }
+        }
+
         // entity is not cached in memory, or the access hash has changed
         // we need to update it in the DB asap, and also update the in-memory cache
         await this._peers.store(dto)
@@ -252,6 +271,19 @@ export class PeersService extends BaseService {
         // we have the full peer, we no longer need the references
         // we can skip this in the other branch, since in that case it would've already been deleted
         await this._refs.deleteByPeer(peer.id)
+    }
+
+    private async _writePending() {
+        try {
+            await asyncPool(this._pendingWrites.values(), async (dto) => {
+                await this._peers.store(dto)
+                await this._refs.deleteByPeer(dto.id)
+            })
+
+            this._pendingWrites.clear()
+        } catch (err) {
+            this._log.warn('failed to write pending updates: %e', err)
+        }
     }
 
     private _returnCaching(id: number, dto: IPeersRepository.PeerInfo) {

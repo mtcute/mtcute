@@ -67,6 +67,7 @@ class PeersServiceProxy implements PublicPart<PeersService> {
     readonly getByUsername: PeersService['getByUsername']
     readonly getCompleteById: PeersService['getCompleteById']
     readonly getMinAccessHash: PeersService['getMinAccessHash']
+    readonly close: PeersService['close']
 
     constructor(private _invoker: WorkerInvoker) {
         const bind = this._invoker.makeBinder<PeersService>('storage-peers')
@@ -78,6 +79,7 @@ class PeersServiceProxy implements PublicPart<PeersService> {
         this.getByUsername = bind('getByUsername')
         this.getCompleteById = bind('getCompleteById')
         this.getMinAccessHash = bind('getMinAccessHash')
+        this.close = bind('close')
     }
 }
 
@@ -86,6 +88,7 @@ export class TelegramStorageProxy implements PublicPart<TelegramStorageManager> 
     readonly peers: PeersServiceProxy
 
     readonly clear: TelegramStorageManager['clear']
+    readonly close: TelegramStorageManager['close']
 
     constructor(private _invoker: WorkerInvoker) {
         const bind = this._invoker.makeBinder<TelegramStorageManager>('storage')
@@ -94,6 +97,7 @@ export class TelegramStorageProxy implements PublicPart<TelegramStorageManager> 
         this.peers = new PeersServiceProxy(this._invoker)
 
         this.clear = bind('clear')
+        this.close = bind('close')
     }
 
     // todo - remove once we move these to updates manager

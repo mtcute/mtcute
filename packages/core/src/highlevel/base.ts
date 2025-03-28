@@ -157,6 +157,7 @@ export class BaseTelegramClient implements ITelegramClient {
         this._connected = false
         await this.mt.close()
         this.updates?.stopLoop()
+        await this.storage.close()
         this._prepare.reset()
         this._connect.reset()
     }
