@@ -48,8 +48,13 @@ export class EarlyTimer {
     emitBefore(ts: number): void {
         if (!this._timeoutTs || ts < this._timeoutTs) {
             this.reset()
-            this._timeout = timers.setTimeout(this.emitNow, ts - Date.now())
-            this._timeoutTs = ts
+            const diff = ts - Date.now()
+            if (diff > 0) {
+                this._timeout = timers.setTimeout(this.emitNow, diff)
+                this._timeoutTs = ts
+            } else {
+                this._handler()
+            }
         }
     }
 
