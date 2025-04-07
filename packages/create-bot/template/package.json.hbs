@@ -14,17 +14,18 @@
         {{/if}}
         {{#if (eq runtime "bun")}}
         {{#if features.typescript}}
-        "start": "bun ./src/main.ts",
-        "build": "tsc && bun build src/main.ts --target=bun --outdir=dist"
+        "dev": "bun --watch ./src/main.ts",
+        "start": "bun ./src/main.ts"
         {{else}}
-        "start": "bun ./src/main.js"
+        "dev": "bun ./src/main.js"
         {{/if}}
         {{else}}
         {{#if features.typescript}}
-        "start": "dotenv tsx ./src/main.ts",
-        "build": "tsc"
+        "dev": "dotenv tsx watch ./src/main.ts",
+        "start": "tsx ./src/main.ts"
         {{else}}
-        "start": "dotenv node ./src/main.js"
+        "dev": "dotenv node --watch ./src/main.js",
+        "start": "node ./src/main.js"
         {{/if}}
         {{/if}}
     }{{#if (eq packageManager "pnpm")}},

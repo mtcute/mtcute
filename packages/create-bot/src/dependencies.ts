@@ -8,12 +8,12 @@ import { exec } from './utils.js'
 
 export interface DependenciesList {
     dependencies: string[]
-    devDepdenencies: string[]
+    devDependencies: string[]
 }
 
 export function buildDependenciesList(config: UserConfig): DependenciesList {
     const dependencies = []
-    const devDepdenencies = []
+    const devDependencies = []
 
     if (config.packageManager === PackageManager.Bun) {
         dependencies.push('@mtcute/bun')
@@ -33,28 +33,28 @@ export function buildDependenciesList(config: UserConfig): DependenciesList {
     }
 
     if (config.features.includes(MtcuteFeature.TypeScript) && config.packageManager !== PackageManager.Deno) {
-        devDepdenencies.push('typescript', '@types/node')
+        devDependencies.push('typescript', '@types/node')
 
         if (config.packageManager === PackageManager.Bun) {
-            devDepdenencies.push('@types/bun')
+            devDependencies.push('@types/bun')
         } else {
             // node can't handle typescript natively
-            devDepdenencies.push('tsx')
+            dependencies.push('tsx')
         }
     }
 
     if (config.features.includes(MtcuteFeature.Linters)) {
-        devDepdenencies.push('@antfu/eslint-config')
+        devDependencies.push('@antfu/eslint-config')
     }
 
     return {
         dependencies,
-        devDepdenencies,
+        devDependencies,
     }
 }
 
 export async function installDependencies(cwd: string, config: UserConfig): Promise<void> {
-    const { dependencies, devDepdenencies } = buildDependenciesList(config)
+    const { dependencies, devDependencies } = buildDependenciesList(config)
 
     if (config.packageManager === PackageManager.Deno) {
         // deno doesn't have a package manager per se, but we can generate an import map
@@ -64,7 +64,7 @@ export async function installDependencies(cwd: string, config: UserConfig): Prom
         // additionally, there's no notion of "dev" dependencies is deno. though fairly enough,
         // there should be no dev deps in our deno template (but let's just keep it for consistency)
 
-        const allDeps = [...dependencies, ...devDepdenencies]
+        const allDeps = [...dependencies, ...devDependencies]
         const versions = await fetchAllLatestVersionsJsr(allDeps)
 
         const denoJson = {
@@ -87,7 +87,7 @@ export async function installDependencies(cwd: string, config: UserConfig): Prom
 
     await exec(cwd, ...getInstallCommand({ mgr: config.packageManager, packages: dependencies }))
 
-    if (devDepdenencies.length) {
-        await exec(cwd, ...getInstallCommand({ mgr: config.packageManager, packages: devDepdenencies, dev: true }))
+    if (devDependencies.length) {
+        await exec(cwd, ...getInstallCommand({ mgr: config.packageManager, packages: devDependencies, dev: true }))
     }
 }
