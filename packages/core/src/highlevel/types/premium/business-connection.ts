@@ -34,9 +34,9 @@ export class BusinessConnection {
         return new Date(this.raw.date * 1000)
     }
 
-    /** Whether the bot can reply on behalf of the user */
-    get canReply(): boolean {
-        return this.raw.canReply!
+    /** What can the connected bot do on behalf of the user */
+    get rights(): tl.TypeBusinessBotRights | null {
+        return this.raw.rights ?? null
     }
 
     /** Business account user that created the business connection */

@@ -1,14 +1,16 @@
 import type { tl } from '@mtcute/tl'
 
 import type { ITelegramClient } from '../../client.types.js'
-import { assertTypeIs } from '../../../utils/type-assertions.js'
+import { MtArgumentError } from '../../../types/errors.js'
 import { SentCode } from '../../types/auth/sent-code.js'
+import { User } from '../../types/index.js'
 import { normalizePhoneNumber } from '../../utils/misc-utils.js'
 
 /**
  * Send the confirmation code to the given phone number
  *
- * @returns  An object containing information about the sent confirmation code
+ * @returns  An object containing information about the sent confirmation code,
+ *     or a user if the user was already logged in
  */
 export async function sendCode(
     client: ITelegramClient,
@@ -25,7 +27,7 @@ export async function sendCode(
         /** Abort signal */
         abortSignal?: AbortSignal
     },
-): Promise<SentCode> {
+): Promise<SentCode | User> {
     const phone = normalizePhoneNumber(params.phone)
 
     const { id, hash } = await client.getApiCredentials()
@@ -45,7 +47,14 @@ export async function sendCode(
         { abortSignal: params.abortSignal },
     )
 
-    assertTypeIs('sendCode', res, 'auth.sentCode')
+    if (res._ === 'auth.sentCodeSuccess') {
+        return new User(await client.notifyLoggedIn(res.authorization))
+    }
+
+    if (res._ === 'auth.sentCodePaymentRequired') {
+        // explicitly not supported, if you need this please implement the logic yourself
+        throw new MtArgumentError('Payment is required to sign in, please log in with a first-party client first')
+    }
 
     return new SentCode(res)
 }

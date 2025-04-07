@@ -3,11 +3,11 @@ import type { MaybePromise } from '../../../types/utils.js'
 
 import type { ITelegramClient } from '../../client.types.js'
 import type { SentCode } from '../../types/auth/sent-code.js'
-import type { User } from '../../types/peers/user.js'
 import type { MaybeDynamic } from '../../types/utils.js'
 import type { InputStringSessionData } from '../../utils/string-session.js'
 import { tl } from '@mtcute/tl'
 import { MtArgumentError, MtcuteError } from '../../../types/errors.js'
+import { User } from '../../types/peers/user.js'
 import { normalizePhoneNumber, resolveMaybeDynamic } from '../../utils/misc-utils.js'
 
 import { getMe } from '../users/get-me.js'
@@ -179,12 +179,16 @@ export async function start(
         }
 
         try {
-            sentCode = await sendCode(client, {
+            const res = await sendCode(client, {
                 phone,
                 futureAuthTokens: params.futureAuthTokens,
                 codeSettings: params.codeSettings,
                 abortSignal,
             })
+            if (res instanceof User) {
+                return res
+            }
+            sentCode = res
         } catch (e) {
             if (tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED')) {
                 has2fa = true

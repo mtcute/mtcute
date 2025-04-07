@@ -362,6 +362,11 @@ export class StarsTransaction {
                 return { type: 'unsupported' }
         }
     }
+
+    /** Whether this transaction was made by a business bot */
+    get viaBusinessBot(): boolean {
+        return this.raw.businessTransfer!
+    }
 }
 
 makeInspectable(StarsTransaction)

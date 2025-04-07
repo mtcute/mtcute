@@ -2,7 +2,7 @@
 
 TL schema and related utils used for mtcute.
 
-Generated from TL layer **200** (last updated on 08.03.2025).
+Generated from TL layer **201** (last updated on 07.04.2025).
 
 ## About
 

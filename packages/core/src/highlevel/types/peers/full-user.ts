@@ -237,6 +237,16 @@ export class FullUser extends User {
         return this.full?.ttlPeriod ?? null
     }
 
+    /** Whether the "Gifts" tab should be shown */
+    get showGifts(): boolean {
+        return this.full.displayGiftsButton!
+    }
+
+    /** Information about the user's gift receive settings */
+    get disallowedGifts(): tl.TypeDisallowedGiftsSettings | null {
+        return this.full.disallowedGifts ?? null
+    }
+
     /**
      * If this is a business account, information about the business.
      */

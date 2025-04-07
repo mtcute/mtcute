@@ -571,6 +571,25 @@ export interface ActionStarGift {
     savedId?: Long
 }
 
+/** Paid messages were paid for */
+export interface ActionPaidMessagesPaid {
+    readonly type: 'messages_paid'
+
+    /** Amount of Telegram Stars paid */
+    stars: tl.Long
+}
+
+/** Paid messages were refunded */
+export interface ActionPaidMessagesRefunded {
+    readonly type: 'messages_refunded'
+
+    /** Amount of Telegram Stars refunded */
+    stars: tl.Long
+
+    /** Count of messages refunded */
+    count: number
+}
+
 export type MessageAction =
   | ActionChatCreated
   | ActionChannelCreated
@@ -618,6 +637,8 @@ export type MessageAction =
   | ActionStarGifted
   | ActionStarsPrize
   | ActionStarGift
+  | ActionPaidMessagesPaid
+  | ActionPaidMessagesRefunded
   | null
 
 /** @internal */
@@ -953,6 +974,17 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 fromId: act.fromId ? getMarkedPeerId(act.fromId) : undefined,
                 toId: act.peer ? getMarkedPeerId(act.peer) : undefined,
                 savedId: act.savedId,
+            }
+        case 'messageActionPaidMessagesPrice':
+            return {
+                type: 'messages_paid',
+                stars: act.stars,
+            }
+        case 'messageActionPaidMessagesRefunded':
+            return {
+                type: 'messages_refunded',
+                stars: act.stars,
+                count: act.count,
             }
         default:
             return null

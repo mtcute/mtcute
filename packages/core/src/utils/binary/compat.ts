@@ -97,6 +97,8 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
             return mapCompatMessageAction(obj)
         case 'userFull_layer199':
             return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
+        case 'userFull_layer200':
+            return replaceType(obj, 'userFull')
         case 'user_layer199':
             return {
                 ...obj,

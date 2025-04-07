@@ -73,12 +73,12 @@ export class SavedStarGift {
         return this.raw.savedId ?? null
     }
 
-    /** Amount of stars the gift can be converted to by the recipient */
+    /** Amount of stars the gift can be converted to */
     get convertStars(): tl.Long | null {
         return this.raw.convertStars ?? null
     }
 
-    /** Amount of stars needed to upgrade the gift to a unique gift */
+    /** Amount of stars **already paid** to upgrade the gift (e.g. by the sender) */
     get upgradeStars(): tl.Long | null {
         return this.raw.upgradeStars ?? null
     }
