@@ -74,4 +74,15 @@ export class PeersIndex {
                 return this.chat(peer.channelId)
         }
     }
+
+    has(peer: tl.TypePeer): boolean {
+        switch (peer._) {
+            case 'peerUser':
+                return this.users.has(peer.userId)
+            case 'peerChat':
+                return this.chats.has(peer.chatId)
+            case 'peerChannel':
+                return this.chats.has(peer.channelId)
+        }
+    }
 }

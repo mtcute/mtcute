@@ -4,6 +4,7 @@ import type { TextWithEntities } from '../misc/entities.js'
 import type { Peer } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
 import { assert } from '@fuman/utils'
+import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { parseDocument } from '../media/document-utils.js'
@@ -145,10 +146,20 @@ export class StarGiftUnique {
         return this.raw.slug
     }
 
-    /** ID of the peer who owns this gift, if available */
+    /**
+     * ID of the peer who owns this gift, if available
+     * > Note: in some cases, only {@link ownerId} is available, and not {@link owner},
+     * > in which cases please use `tg.getPeer(ownerId)` manually
+     */
     get owner(): Peer | null {
         if (!this.raw.ownerId) return null
+        if (!this._peers.has(this.raw.ownerId)) return null
         return parsePeer(this.raw.ownerId, this._peers)
+    }
+
+    /** ID of the peer who owns this gift, if available */
+    get ownerId(): number | null {
+        return this.raw.ownerId ? getMarkedPeerId(this.raw.ownerId) : null
     }
 
     /** Name of the user who owns this gift, if available */
