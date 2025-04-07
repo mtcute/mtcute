@@ -1692,7 +1692,9 @@ export class SessionConnection extends PersistentConnection {
         if (now - this._session.lastPingTime > this._pingInterval) {
             if (!this._session.lastPingMsgId.isZero()) {
                 this.log.warn("didn't receive pong for previous ping (msg_id = %l). are we offline?", this._session.lastPingMsgId)
-                this._resetSession('ping timeout')
+                if (!this._disconnectedManually) {
+                    this._resetSession('ping timeout')
+                }
                 return
             }
 
