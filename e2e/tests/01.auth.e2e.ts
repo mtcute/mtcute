@@ -8,7 +8,7 @@ describe('1. authorization', () => {
     it('should authorize in default dc', async () => {
         const tg = new TelegramClient(getApiParams('dc2.session'))
 
-        await tg.importSession(process.env.SESSION_DC2!)
+        await tg.importSession(process.env.SESSION_DC2!, true)
 
         expect(await tg.getMe()).to.be.instanceOf(User)
 
@@ -18,7 +18,7 @@ describe('1. authorization', () => {
     it('should authorize in dc 1', async () => {
         const tg = new TelegramClient(getApiParams('dc1.session'))
 
-        await tg.importSession(process.env.SESSION_DC1!)
+        await tg.importSession(process.env.SESSION_DC1!, true)
 
         expect(await tg.getMe()).to.be.instanceOf(User)
 

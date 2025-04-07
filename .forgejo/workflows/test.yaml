@@ -105,7 +105,7 @@ jobs:
       - uses: ./.forgejo/actions/init
       - uses: https://github.com/denoland/setup-deno@v1
         with:
-          deno-version: '2.0'
+          deno-version: '2'
       - name: Run end-to-end tests under Deno
         env:
           API_ID: ${{ secrets.TELEGRAM_API_ID }}
