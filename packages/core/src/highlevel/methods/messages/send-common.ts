@@ -132,6 +132,8 @@ export interface CommonSendParams {
      */
     allowPaidMessages?: tl.Long
 
+    abortSignal?: AbortSignal
+
     /**
      * ID of a message effect to use when sending the message
      * (see {@link TelegramClient.getAvailableMessageEffects})

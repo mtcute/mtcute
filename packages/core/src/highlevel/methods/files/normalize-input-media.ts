@@ -27,6 +27,7 @@ export async function _normalizeInputMedia(
     params: {
         progressCallback?: (uploaded: number, total: number) => void
         uploadPeer?: tl.TypeInputPeer
+        abortSignal?: AbortSignal
         businessConnectionId?: string
     } = {},
     uploadMedia = false,
@@ -258,6 +259,7 @@ export async function _normalizeInputMedia(
             fileSize: media.fileSize,
             requireFileSize: media.type === 'photo',
             requireExtension: media.type === 'photo',
+            abortSignal: params.abortSignal,
         })
         inputFile = uploaded.inputFile
         mime = uploaded.mime
@@ -265,7 +267,7 @@ export async function _normalizeInputMedia(
 
     let videoCover: tl.TypeInputPhoto | undefined
     if (media.type === 'video' && media.cover) {
-        const inputMedia = await _normalizeInputMedia(client, media.cover)
+        const inputMedia = await _normalizeInputMedia(client, media.cover, params)
         assertTypeIs('uploadMediaIfNeeded', inputMedia, 'inputMediaPhoto')
 
         videoCover = inputMedia.id
@@ -281,7 +283,7 @@ export async function _normalizeInputMedia(
             peer: uploadPeer,
             media: inputMedia,
             businessConnectionId: params.businessConnectionId,
-        })
+        }, { abortSignal: params.abortSignal })
 
         if (photo) {
             assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaPhoto')
@@ -382,7 +384,7 @@ export async function _normalizeInputMedia(
     }
 
     if ('thumb' in media && media.thumb) {
-        thumb = await _normalizeInputFile(client, media.thumb, {})
+        thumb = await _normalizeInputFile(client, media.thumb, { abortSignal: params.abortSignal })
     }
 
     const attributes: tl.TypeDocumentAttribute[] = []

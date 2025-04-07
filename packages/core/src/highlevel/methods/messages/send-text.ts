@@ -88,7 +88,7 @@ export async function sendText(
             allowPaidFloodskip: params.allowPaidFloodskip,
             allowPaidStars: params.allowPaidMessages,
         },
-        { chainId },
+        { chainId, abortSignal: params.abortSignal },
     )
 
     if (res._ === 'updateShortSentMessage') {

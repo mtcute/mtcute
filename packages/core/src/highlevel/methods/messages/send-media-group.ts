@@ -81,6 +81,7 @@ export async function sendMediaGroup(
                 // fuck my life
                 uploadPeer: peer,
                 businessConnectionId: params.businessConnectionId,
+                abortSignal: params.abortSignal,
             },
             true,
         )
@@ -120,7 +121,7 @@ export async function sendMediaGroup(
             allowPaidFloodskip: params.allowPaidFloodskip,
             allowPaidStars: params.allowPaidMessages,
         },
-        { chainId },
+        { chainId, abortSignal: params.abortSignal },
     )
 
     assertIsUpdatesGroup('sendMediaGroup', res)

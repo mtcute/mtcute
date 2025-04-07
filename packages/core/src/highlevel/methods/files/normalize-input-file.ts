@@ -17,6 +17,7 @@ export async function _normalizeInputFile(
     input: InputFileLike,
     params: {
         progressCallback?: (uploaded: number, total: number) => void
+        abortSignal?: AbortSignal
         fileName?: string
         fileSize?: number
         fileMime?: string

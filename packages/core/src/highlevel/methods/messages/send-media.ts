@@ -81,6 +81,7 @@ export async function sendMedia(
     const inputMedia = await _normalizeInputMedia(client, media, {
         progressCallback: params.progressCallback,
         uploadPeer: peer,
+        abortSignal: params.abortSignal,
     })
 
     const [message, entities] = await _normalizeInputText(
@@ -116,7 +117,7 @@ export async function sendMedia(
             allowPaidFloodskip: params.allowPaidFloodskip,
             allowPaidStars: params.allowPaidMessages,
         },
-        { chainId },
+        { chainId, abortSignal: params.abortSignal },
     )
 
     const msg = _findMessageInUpdate(client, res, false, !params.shouldDispatch, false, randomId)

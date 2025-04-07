@@ -110,6 +110,8 @@ export async function uploadFile(
          * or throw an error if it cannot be guessed.
          */
         requireExtension?: boolean
+
+        abortSignal?: AbortSignal
     },
 ): Promise<UploadedFile> {
     // normalize params
@@ -117,6 +119,7 @@ export async function uploadFile(
     let fileSize = -1 // unknown
     let fileName = params.fileName
     let fileMime = params.fileMime
+    const abortSignal = params.abortSignal
 
     if (client.platform.normalizeFile) {
         const res = await client.platform.normalizeFile(file)
@@ -247,6 +250,7 @@ export async function uploadFile(
     let readableEnded = false
 
     const uploadNextPart = async (): Promise<void> => {
+        if (abortSignal?.aborted) return
         const thisIdx = idx++
 
         await lock.acquire()
@@ -262,6 +266,8 @@ export async function uploadFile(
         } finally {
             lock.release()
         }
+
+        if (abortSignal?.aborted) return
 
         const ended = part.length < partSize
         if (ended) {
@@ -308,8 +314,9 @@ export async function uploadFile(
                 bytes: part,
             } satisfies tl.upload.RawSaveFilePartRequest)
 
-        const result = await client.call(request, { kind: connectionKind })
+        const result = await client.call(request, { kind: connectionKind, abortSignal })
         if (!result) throw new Error(`Failed to upload part ${idx}`)
+        if (abortSignal?.aborted) return
 
         pos += part.length
 
@@ -324,6 +331,8 @@ export async function uploadFile(
     if (partCount !== -1 && poolSize > partCount) poolSize = partCount
 
     await Promise.all(Array.from({ length: poolSize }, uploadNextPart))
+
+    abortSignal?.throwIfAborted()
 
     if (fileName === undefined) {
         // infer file extension from mime type. for some media types,
