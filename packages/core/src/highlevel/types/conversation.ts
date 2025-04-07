@@ -626,11 +626,9 @@ export class Conversation {
     private _processRecentEdits() {
         if (!this._recentEdits.length) return
 
-        const iter = this._recentEdits[Symbol.iterator]()
         let it
-
-        while (!(it = iter.next()).done) {
-            this._onEditMessage(it.value, true)
+        while ((it = this._recentEdits.popFront())) {
+            this._onEditMessage(it, true)
         }
     }
 }
