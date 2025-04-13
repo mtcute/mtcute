@@ -156,7 +156,7 @@ export async function* downloadAsIterable(
                     _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
                     // eslint-disable-next-line
                     location: location as any,
-                    offset: chunkSize * chunk,
+                    offset: offset + chunkSize * chunk,
                     limit: chunkSize,
                 },
                 {
