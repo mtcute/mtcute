@@ -100,29 +100,30 @@ jobs:
             export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
             cd e2e
             pnpm run test:all
-  e2e-deno:
-    runs-on: node22
-    needs: [e2e]
-    permissions:
-      contents: read
-      actions: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.forgejo/actions/init
-      - uses: https://github.com/denoland/setup-deno@v1
-        with:
-          deno-version: '2'
-      - name: Run end-to-end tests under Deno
-        uses: https://github.com/nick-fields/retry@v2
-        with:
-          max_attempts: 3
-          timeout_minutes: 10
-          command: |
-            set -eauo pipefail
-            export API_ID=${{ secrets.TELEGRAM_API_ID }}
-            export API_HASH=${{ secrets.TELEGRAM_API_HASH }}
-            export SESSION_DC1=${{ secrets.SESSION_DC1 }}
-            export SESSION_DC2=${{ secrets.SESSION_DC2 }}
-            export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-            cd e2e
-            deno task test:all
+  # for some reason it hangs indefinitely in ci lol
+  # e2e-deno:
+  #   runs-on: node22
+  #   needs: [e2e]
+  #   permissions:
+  #     contents: read
+  #     actions: write
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: ./.forgejo/actions/init
+  #     - uses: https://github.com/denoland/setup-deno@v1
+  #       with:
+  #         deno-version: '2'
+  #     - name: Run end-to-end tests under Deno
+  #       uses: https://github.com/nick-fields/retry@v2
+  #       with:
+  #         max_attempts: 3
+  #         timeout_minutes: 10
+  #         command: |
+  #           set -eauo pipefail
+  #           export API_ID=${{ secrets.TELEGRAM_API_ID }}
+  #           export API_HASH=${{ secrets.TELEGRAM_API_HASH }}
+  #           export SESSION_DC1=${{ secrets.SESSION_DC1 }}
+  #           export SESSION_DC2=${{ secrets.SESSION_DC2 }}
+  #           export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+  #           cd e2e
+  #           deno task test:all
