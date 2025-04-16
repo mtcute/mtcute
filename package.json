@@ -26,7 +26,7 @@
     "packages/*"
   ],
   "scripts": {
-    "postinstall": "fuman-build validate-workspace-deps && node scripts/remove-jsr-sourcefiles.js",
+    "postinstall": "fuman-build lint && node scripts/remove-jsr-sourcefiles.js",
     "test": "vitest --config .config/vite.ts run",
     "test:dev": "vitest --config .config/vite.ts watch",
     "test:ui": "vitest --config .config/vite.ts --ui",
@@ -46,8 +46,8 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.11.2",
-    "@fuman/build": "https://pkg.pr.new/teidesu/fuman/@fuman/build@0b7fee1",
-    "@fuman/utils": "0.0.4",
+    "@fuman/build": "0.0.14",
+    "@fuman/utils": "0.0.14",
     "@types/bun": "1.1.14",
     "@types/deno": "npm:@teidesu/deno-types@1.46.3",
     "@types/node": "22.13.1",

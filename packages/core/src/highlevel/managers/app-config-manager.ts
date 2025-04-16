@@ -35,7 +35,7 @@ export class AppConfigManager {
     async get(): Promise<AppConfigSchema> {
         if (!this._resource.isStale && this._object) return this._object
 
-        const obj = tlJsonToJson((await this._resource.get()).config)
+        const obj = tlJsonToJson((await this._resource.get())!.config)
 
         if (!obj || typeof obj !== 'object') {
             throw new MtTypeAssertionError('appConfig', 'object', typeof obj)

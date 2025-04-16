@@ -1,40 +1,40 @@
 {
-    "name": "@mtcute/test",
-    "type": "module",
-    "version": "0.22.0",
-    "private": true,
-    "description": "Test utilities for mtcute",
-    "author": "alina sireneva <alina@tei.su>",
-    "license": "MIT",
-    "sideEffects": false,
-    "exports": "./src/index.ts",
-    "peerDependencies": {
-        "@mtcute/core": "workspace:^",
-        "@mtcute/node": "workspace:^",
-        "@mtcute/tl": "workspace:*",
-        "@mtcute/web": "workspace:^",
-        "vitest": "*"
+  "name": "@mtcute/test",
+  "type": "module",
+  "version": "0.22.0",
+  "private": true,
+  "description": "Test utilities for mtcute",
+  "author": "alina sireneva <alina@tei.su>",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": "./src/index.ts",
+  "peerDependencies": {
+    "@mtcute/core": "workspace:^",
+    "@mtcute/node": "workspace:^",
+    "@mtcute/tl": "workspace:*",
+    "@mtcute/web": "workspace:^",
+    "vitest": "*"
+  },
+  "peerDependenciesMeta": {
+    "@mtcute/node": {
+      "optional": true
     },
-    "peerDependenciesMeta": {
-        "@mtcute/node": {
-            "optional": true
-        },
-        "@mtcute/web": {
-            "optional": true
-        }
-    },
-    "dependencies": {
-        "long": "5.2.3",
-        "@fuman/utils": "0.0.4",
-        "@fuman/net": "0.0.9"
-    },
-    "devDependencies": {
-        "@mtcute/tl-utils": "workspace:^"
-    },
-    "browser": {
-        "./src/platform.js": "./src/platform.web.js"
-    },
-    "fuman": {
-        "jsr": "skip"
+    "@mtcute/web": {
+      "optional": true
     }
+  },
+  "dependencies": {
+    "long": "5.2.3",
+    "@fuman/utils": "0.0.14",
+    "@fuman/net": "0.0.14"
+  },
+  "devDependencies": {
+    "@mtcute/tl-utils": "workspace:^"
+  },
+  "browser": {
+    "./src/platform.js": "./src/platform.web.js"
+  },
+  "fuman": {
+    "jsr": "skip"
+  }
 }

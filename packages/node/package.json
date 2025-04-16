@@ -1,32 +1,32 @@
 {
-    "name": "@mtcute/node",
-    "type": "module",
-    "version": "0.22.3",
-    "private": true,
-    "description": "Meta-package for Node.js",
-    "author": "alina sireneva <alina@tei.su>",
-    "license": "MIT",
-    "sideEffects": false,
-    "exports": {
-        ".": "./src/index.ts",
-        "./utils.js": "./src/utils.ts",
-        "./methods.js": "./src/methods.ts"
-    },
-    "dependencies": {
-        "@mtcute/core": "workspace:^",
-        "@mtcute/html-parser": "workspace:^",
-        "@mtcute/markdown-parser": "workspace:^",
-        "@mtcute/wasm": "workspace:^",
-        "@fuman/utils": "0.0.4",
-        "@fuman/net": "0.0.9",
-        "@fuman/node": "0.0.9",
-        "better-sqlite3": "11.3.0"
-    },
-    "devDependencies": {
-        "@mtcute/test": "workspace:^",
-        "@types/better-sqlite3": "7.6.4"
-    },
-    "fuman": {
-        "jsr": "skip"
-    }
+  "name": "@mtcute/node",
+  "type": "module",
+  "version": "0.22.3",
+  "private": true,
+  "description": "Meta-package for Node.js",
+  "author": "alina sireneva <alina@tei.su>",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./utils.js": "./src/utils.ts",
+    "./methods.js": "./src/methods.ts"
+  },
+  "dependencies": {
+    "@mtcute/core": "workspace:^",
+    "@mtcute/html-parser": "workspace:^",
+    "@mtcute/markdown-parser": "workspace:^",
+    "@mtcute/wasm": "workspace:^",
+    "@fuman/utils": "0.0.14",
+    "@fuman/net": "0.0.14",
+    "@fuman/node": "0.0.14",
+    "better-sqlite3": "11.3.0"
+  },
+  "devDependencies": {
+    "@mtcute/test": "workspace:^",
+    "@types/better-sqlite3": "7.6.4"
+  },
+  "fuman": {
+    "jsr": "skip"
+  }
 }
