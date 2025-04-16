@@ -66,7 +66,7 @@ function _initializeClient(this: TelegramClient, opts: TelegramClientOptions) {
     Object.defineProperty(this, 'stopSignal', { value: this._client.stopSignal })
     Object.defineProperty(this, 'appConfig', { value: this._client.appConfig })
     Object.defineProperty(this, 'onServerUpdate', { value: this._client.onServerUpdate })
-    Object.defineProperty(this, 'onRawUpdate', { value: this._client.onServerUpdate })
+    Object.defineProperty(this, 'onRawUpdate', { value: this._client.onRawUpdate })
     Object.defineProperty(this, 'onConnectionState', { value: this._client.onConnectionState })
     Object.defineProperty(this, 'onError', { value: this._client.onError })
 

@@ -43,7 +43,7 @@ export interface NetworkManagerParams {
     writerMap: TlWriterMap
     isPremium: boolean
     emitError: (err: Error) => void
-    onUpdate: (upd: tl.TypeUpdates) => void
+    onUpdate: (upd: tl.TypeUpdates, fromClient: boolean) => void
     onUsable: () => void
     onConnecting: () => void
     onNetworkChanged: (connected: boolean) => void
