@@ -429,7 +429,7 @@ export class DcConnectionManager {
         }
 
         if (this.manager.params.usePfs || forcePfs) {
-            const now = Date.now()
+            const now = performance.now()
             await Promise.all(
                 Array.from({ length: this.main.getCount() }, async (_, i) => {
                     const temp = await this.manager._storage.provider.authKeys.getTemp(this.dcId, i, now)
@@ -849,7 +849,7 @@ export class NetworkManager {
             }
         } else if (err === 'AUTH_KEY_UNREGISTERED') {
             // we can try re-exporting auth from the primary connection
-            this._log.warn('exported auth key error, trying re-exporting..')
+            this._log.debug('exported auth key error, trying re-exporting..')
 
             await this._exportAuthTo(manager)
 

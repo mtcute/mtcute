@@ -79,7 +79,7 @@ export function floodWaiter(options: FloodWaiterOptions): RpcCallMiddleware {
         const floodSleepThreshold = ctx.params?.floodSleepThreshold ?? maxWait
 
         if (storedWaitUntil !== undefined) {
-            const delta = storedWaitUntil - Date.now()
+            const delta = storedWaitUntil - performance.now()
 
             if (delta <= minStoredWait) {
                 // flood waits below 2 seconds are "ignored"
@@ -125,7 +125,7 @@ export function floodWaiter(options: FloodWaiterOptions): RpcCallMiddleware {
 
                 if (store && !err.startsWith('SLOWMODE_WAIT_')) {
                     // SLOW_MODE_WAIT is per-chat, not per-request
-                    storage.set(method, Date.now() + seconds * 1000)
+                    storage.set(method, performance.now() + seconds * 1000)
                 }
 
                 // In test servers, FLOOD_WAIT_0 has been observed, and sleeping for

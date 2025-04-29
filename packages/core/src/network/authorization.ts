@@ -329,7 +329,7 @@ export async function doAuthorization(
     }
 
     const dhPrime = bigint.fromBytes(serverDhInner.dhPrime)
-    const timeOffset = Math.floor(Date.now() / 1000) - serverDhInner.serverTime
+    const timeOffset = serverDhInner.serverTime - Math.floor(performance.now() / 1000)
     session.updateTimeOffset(timeOffset)
 
     const g = BigInt(serverDhInner.g)

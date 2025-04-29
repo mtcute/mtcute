@@ -16,6 +16,7 @@ export class ServerSaltManager {
     setFutureSalts(salts: mtp.RawMt_future_salt[]): void {
         this._futureSalts = salts
 
+        // todo: we should use adjusted monotonic clock here
         const now = Date.now() / 1000
 
         while (salts.length > 0 && now > salts[0].validSince) {

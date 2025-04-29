@@ -1134,7 +1134,7 @@ export class SessionConnection extends PersistentConnection {
             this.log.warn('received pong to %l, but expected ping_id = %l (got %l)', msgId, info.pingId, pingId)
         }
 
-        const rtt = Date.now() - this._session.lastPingTime
+        const rtt = performance.now() - this._session.lastPingTime
         this._session.lastPingRtt = rtt
 
         if (info.containerId.neq(msgId)) {
@@ -1161,7 +1161,7 @@ export class SessionConnection extends PersistentConnection {
                     // code 20 means msg_id is too old,
                     // we just need to resend the message
                     const serverTime = msgId.high >>> 0
-                    const timeOffset = Math.floor(Date.now() / 1000) - serverTime
+                    const timeOffset = serverTime - Math.floor(performance.now() / 1000)
 
                     this._session.updateTimeOffset(timeOffset)
                     this.log.debug('server time: %d, corrected offset to %d', serverTime, timeOffset)
@@ -1666,7 +1666,7 @@ export class SessionConnection extends PersistentConnection {
         let destroySessions: Long[] | null = null
         let rootMsgId: Long | null = null
 
-        const now = Date.now()
+        const now = performance.now()
 
         if (this._session.queuedAcks.length) {
             let acks = this._session.queuedAcks
@@ -1706,7 +1706,7 @@ export class SessionConnection extends PersistentConnection {
                 disconnectDelay: Math.round(this._pingInterval * 0.00125),
             }
 
-            this._session.lastPingTime = Date.now()
+            this._session.lastPingTime = now
 
             pingRequest = TlBinaryWriter.serializeObject(this._writerMap, obj)
             containerSize += pingRequest.length + 16

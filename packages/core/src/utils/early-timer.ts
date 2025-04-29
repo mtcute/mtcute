@@ -16,11 +16,11 @@ export class EarlyTimer {
 
     /**
      * Emit the timer when the event loop is idle
-     * (basically `setImmediate()`)
+     * (basically `queueMicrotask()`)
      */
     emitWhenIdle(): void {
         timers.clearTimeout(this._timeout)
-        this._timeoutTs = Date.now()
+        this._timeoutTs = performance.now()
 
         if (typeof queueMicrotask !== 'undefined') {
             queueMicrotask(this.emitNow)
@@ -32,23 +32,23 @@ export class EarlyTimer {
     /**
      * Emit the timer before the next given milliseconds
      *
-     * Shorthand for `emitBefore(Date.now() + ms)`
+     * Shorthand for `emitBefore(performance.now() + ms)`
      *
      * @param ms  Milliseconds to schedule for
      */
     emitBeforeNext(ms: number): void {
-        return this.emitBefore(Date.now() + ms)
+        return this.emitBefore(performance.now() + ms)
     }
 
     /**
      * Emit the timer before the given time
      *
-     * @param ts  Unix time in MS
+     * @param ts  timestamp in ms relative to `performance.timeOrigin`
      */
     emitBefore(ts: number): void {
         if (!this._timeoutTs || ts < this._timeoutTs) {
             this.reset()
-            const diff = ts - Date.now()
+            const diff = ts - performance.now()
             if (diff > 0) {
                 this._timeout = timers.setTimeout(this.emitNow, diff)
                 this._timeoutTs = ts

@@ -98,7 +98,7 @@ export class MtprotoSession {
     _authKeyTemp: AuthKey
     _authKeyTempSecondary: AuthKey
 
-    _timeOffset = 0
+    _timeOffset: number = performance.timeOrigin
     _lastMessageId: Long = Long.ZERO
     _seqNo = 0
 
@@ -246,8 +246,8 @@ export class MtprotoSession {
     }
 
     getMessageId(): Long {
-        const timeTicks = Date.now()
-        const timeSec = Math.floor(timeTicks / 1000) - this._timeOffset
+        const timeTicks = performance.now()
+        const timeSec = Math.floor(timeTicks / 1000) + this._timeOffset
         const timeMSec = timeTicks % 1000
         const random = getRandomInt(0xFFFF)
 
@@ -330,7 +330,7 @@ export class MtprotoSession {
         return messageId
     }
 
-    onTransportFlood(callback: () => void): number | undefined {
+    onTransportFlood(callback: () => void): void {
         if (this.current429Timeout) return // already waiting
 
         // all active queries must be resent after a timeout
@@ -352,8 +352,6 @@ export class MtprotoSession {
         }, 60000)
 
         this.log.debug('transport flood, waiting for %d ms before proceeding', timeout)
-
-        return Date.now() + timeout
     }
 
     resetLastPing(withTime = false): void {

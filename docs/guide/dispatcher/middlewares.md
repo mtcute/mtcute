@@ -49,17 +49,17 @@ interface TimerContext {
 }
 
 dp.onPreUpdate<TimerContext>((upd) => {
-  upd.start = Date.now()
+  upd.start = performance.now()
 })
 
 dp.onPostUpdate<TimerContext>((handled, upd) => {
   if (handled) {
-    console.log(`handled ${upd.name} in ${Date.now() - upd.start} ms`)
+    console.log(`handled ${upd.name} in ${performance.now() - upd.start} ms`)
   }
 })
 
 dp.onError<TimerContext>((err, upd) => {
-  console.log(`error for ${upd.name} after ${Date.now() - upd.start} ms`)
+  console.log(`error for ${upd.name} after ${performance.now() - upd.start} ms`)
 })
 ```
 

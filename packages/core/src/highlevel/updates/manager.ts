@@ -1670,7 +1670,7 @@ export class UpdatesManager {
                                     pending.ptsBefore,
                                     diff,
                                 )
-                                pending.timeout = Date.now() + 500
+                                pending.timeout = performance.now() + 500
                                 pendingPtsUpdatesPostponed.add(pending)
                                 postponedTimer.emitBefore(pending.timeout)
                             } else if (diff > -1000000) {
@@ -1757,7 +1757,7 @@ export class UpdatesManager {
                         // "there's an update gap that must be filled"
                         // if the timeout has not expired yet, keep the update in the queue
                         // otherwise, fetch diff
-                        const now = Date.now()
+                        const now = performance.now()
 
                         if (now < pending.timeout!) {
                             log.debug(
@@ -1823,7 +1823,7 @@ export class UpdatesManager {
                                 pending.qtsBefore,
                                 diff,
                             )
-                            pending.timeout = Date.now() + 500
+                            pending.timeout = performance.now() + 500
                             pendingQtsUpdatesPostponed.add(pending)
                             postponedTimer.emitBefore(pending.timeout)
                         } else {
@@ -1868,7 +1868,7 @@ export class UpdatesManager {
                         // "there's an update gap that must be filled"
                         // if the timeout has not expired yet, keep the update in the queue
                         // otherwise, fetch diff
-                        const now = Date.now()
+                        const now = performance.now()
 
                         if (now < pending.timeout!) {
                             log.debug(
