@@ -69,6 +69,7 @@ export abstract class PersistentConnection {
                 this.log.debug('connecting to %j', dc)
                 return params.transport.connect(dc)
             },
+            strategy: params.reconnectionStrategy,
             onOpen: this._onOpen.bind(this),
             onClose: this._onClose.bind(this),
             onError: this._onError.bind(this),
