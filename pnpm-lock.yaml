@@ -24,8 +24,8 @@ importers:
         specifier: 1.1.14
         version: 1.1.14
       '@types/deno':
-        specifier: npm:@teidesu/deno-types@1.46.3
-        version: '@teidesu/deno-types@1.46.3'
+        specifier: 2.2.0
+        version: 2.2.0
       '@types/node':
         specifier: 22.13.1
         version: 22.13.1
@@ -1725,9 +1725,6 @@ packages:
     peerDependencies:
       eslint: '>=8.40.0'
 
-  '@teidesu/deno-types@1.46.3':
-    resolution: {integrity: sha512-JHuzaoYCjsYqcMoewjdCbnHGqN91puqit00m3Q3FbTETqbnreBNHirLhNbCgqNomAYMRTvGuHC7/HIh9jmBM2A==}
-
   '@testing-library/dom@10.4.0':
     resolution: {integrity: sha512-pemlzrSESWbdAloYml3bAJMEfNh1Z7EduzqPKprCH5S341frlpYnUEW0H72dLxa6IsYr+mPno20GiSm+h9dEdQ==}
     engines: {node: '>=18'}
@@ -1761,6 +1758,9 @@ packages:
 
   '@types/debug@4.1.12':
     resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
+
+  '@types/deno@2.2.0':
+    resolution: {integrity: sha512-4x6M/ZSyoQy6fJeMArP0dvvNT4IOolfySyukuqqKhsLmSXDV4wGanqXIZ+xFihw3TlReS6JTa4hRG9nAZInpmw==}
 
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
@@ -5611,8 +5611,6 @@ snapshots:
       - supports-color
       - typescript
 
-  '@teidesu/deno-types@1.46.3': {}
-
   '@testing-library/dom@10.4.0':
     dependencies:
       '@babel/code-frame': 7.26.2
@@ -5651,6 +5649,8 @@ snapshots:
   '@types/debug@4.1.12':
     dependencies:
       '@types/ms': 0.7.34
+
+  '@types/deno@2.2.0': {}
 
   '@types/estree@1.0.6': {}
 
