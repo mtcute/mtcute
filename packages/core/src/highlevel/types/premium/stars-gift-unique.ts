@@ -79,14 +79,37 @@ export class StarGiftUniqueOriginalDetails {
         readonly _peers: PeersIndex,
     ) {}
 
-    /** ID of the user who sent the original star gift */
+    /**
+     * Peer who sent the original star gift, if available
+     *
+     * > Note: in some cases, {@link senderId} might be available, but not this field.
+     * > In such cases, you should try fetching the peer manually using {@link getPeer})
+     */
     get sender(): Peer | null {
-        return this.raw.senderId ? parsePeer(this.raw.senderId, this._peers) : null
+        if (!this.raw.senderId) return null
+        if (!this._peers.has(this.raw.senderId)) return null
+        return parsePeer(this.raw.senderId, this._peers)
     }
 
-    /** ID of the user who received the original star gift */
+    /** ID of the peer who sent the original star gift */
+    get senderId(): number | null {
+        return this.raw.senderId ? getMarkedPeerId(this.raw.senderId) : null
+    }
+
+    /**
+     * Peer who received the original star gift, if available
+     *
+     * > Note: {@link recipientId} is always available. If ID is available, but this field throws an error,
+     * > you should try fetching the peer manually using {@link getPeer})
+     */
     get recipient(): Peer {
+        // todo: return null in the next breaking release
         return parsePeer(this.raw.recipientId, this._peers)
+    }
+
+    /** ID of the peer who received the original star gift */
+    get recipientId(): number {
+        return getMarkedPeerId(this.raw.recipientId)
     }
 
     /** Date when the original star gift was sent */
