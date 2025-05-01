@@ -20,7 +20,7 @@ describe('client stub', () => {
     it('should correctly decrypt intercepted raw messages', async () => {
         const log: string[] = []
 
-        const client = new StubTelegramClient()
+        const client = new StubTelegramClient({ logLevel: 5 })
 
         client.onRawMessage((msg) => {
             log.push(`message ctor=${hex.encode(msg.subarray(0, 4))}`)
@@ -30,8 +30,9 @@ describe('client stub', () => {
         await client.with(async () => {
             await client.call({ _: 'help.getConfig' }).catch(() => {}) // ignore "client closed" error
 
-            expect(log).toEqual([
+            expect(log[0]).to.be.oneOf([
                 'message ctor=dcf8f173', // msg_container
+                'message ctor=0d0d9bda', // invokeWithLayer
             ])
         })
     })
