@@ -807,17 +807,24 @@ export class SessionConnection extends PersistentConnection {
             // we need to handle this before anything else because otherwise we might
             // try to use customReader on an error which will inevitably fail or break
             result = message.object()
-        } else if (customReader) {
-            result = customReader(message)
         } else {
-            const objectId = message.uint()
+            const objectId = message.peekUint()
 
+            // bruh
             if (objectId === GZIP_PACKED_ID) {
+                // skip 4 bytes
+                message.pos += 4
                 const inner = this._crypto.gunzip(message.bytes())
-                // eslint-disable-next-line ts/no-unsafe-assignment
-                result = TlBinaryReader.deserializeObject(this._readerMap, inner)
+                if (customReader) {
+                    result = customReader(new TlBinaryReader(this._readerMap, inner))
+                } else {
+                    // eslint-disable-next-line ts/no-unsafe-assignment
+                    result = TlBinaryReader.deserializeObject(this._readerMap, inner)
+                }
+            } else if (customReader) {
+                result = customReader(message)
             } else {
-                result = message.object(objectId)
+                result = message.object()
             }
         }
 
