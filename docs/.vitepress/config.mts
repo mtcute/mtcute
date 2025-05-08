@@ -115,6 +115,7 @@ export default ({ mode }) => defineConfig({
                         { text: 'Converting sessions', link: '/guide/advanced/session-convert' },
                         { text: 'Network middlewares', link: '/guide/advanced/net-middlewares' },
                         { text: 'Object serialization', link: '/guide/advanced/serialization' },
+                        { text: 'Custom schema', link: '/guide/advanced/custom-schema' },
                     ],
                 },
             ],

@@ -50,8 +50,8 @@ tg.onUpdate.add((upd) => {
 })
 
 // As well as raw MTProto updates:
-tg.onRawUpdate.add((upd, users, chats) => {
-  console.log(upd._)
+tg.onRawUpdate.add(({ update, peers }) => {
+  console.log(update._)
 })
 ```
 
