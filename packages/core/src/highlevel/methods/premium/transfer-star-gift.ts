@@ -1,8 +1,8 @@
-import type { tl } from '@mtcute/tl'
 import type { ITelegramClient } from '../../client.types.js'
-
 import type { InputPeerLike, InputStarGift } from '../../types/index.js'
+
 import type { Message } from '../../types/messages/message.js'
+import { tl } from '@mtcute/tl'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -42,18 +42,33 @@ export async function transferStarGift(
         toId: await resolvePeer(client, recepient),
     }
 
-    const form = await client.call({
-        _: 'payments.getPaymentForm',
-        invoice,
-    })
+    let updates: tl.TypeUpdates
+    try {
+        const form = await client.call({
+            _: 'payments.getPaymentForm',
+            invoice,
+        })
 
-    const res = await client.call({
-        _: 'payments.sendStarsForm',
-        invoice,
-        formId: form.formId,
-    })
+        const res = await client.call({
+            _: 'payments.sendStarsForm',
+            invoice,
+            formId: form.formId,
+        })
 
-    assertTypeIs('payments.sendStarsForm', res, 'payments.paymentResult')
+        assertTypeIs('payments.sendStarsForm', res, 'payments.paymentResult')
 
-    return _findMessageInUpdate(client, res.updates, false, !shouldDispatch, true)
+        updates = res.updates
+    } catch (e) {
+        if (tl.RpcError.is(e, 'NO_PAYMENT_NEEDED')) {
+            updates = await client.call({
+                _: 'payments.transferStarGift',
+                stargift: invoice.stargift,
+                toId: invoice.toId,
+            })
+        } else {
+            throw e
+        }
+    }
+
+    return _findMessageInUpdate(client, updates, false, !shouldDispatch, true)
 }
