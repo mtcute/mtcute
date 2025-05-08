@@ -34,7 +34,10 @@ function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
                 ownerId: obj.ownerId ? { _: 'peerUser', userId: obj.ownerId } : undefined,
             }
         case 'starGiftUnique_layer198':
+        case 'starGiftUnique_layer202':
             return replaceType(obj, 'starGiftUnique')
+        case 'starGift_layer202':
+            return replaceType(obj, 'starGift')
         default:
             return obj
     }
@@ -65,6 +68,7 @@ function mapCompatMessageMedia(obj: tlCompat.TypeMessageMedia): tl.TypeMessageMe
 function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessageAction {
     switch (obj._) {
         case 'messageActionStarGiftUnique_layer197':
+        case 'messageActionStarGiftUnique_layer202':
             return {
                 ...obj,
                 _: 'messageActionStarGiftUnique',
@@ -85,6 +89,8 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     switch (obj._) {
         case 'starGiftUnique_layer197':
         case 'starGiftUnique_layer198':
+        case 'starGiftUnique_layer202':
+        case 'starGift_layer202':
             return mapCompatStarGift(obj)
         case 'emojiStatus_layer197':
             return mapCompatEmojiStatus(obj)
@@ -94,6 +100,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
             return replaceType(obj, 'channelFull')
         case 'messageActionStarGiftUnique_layer197':
         case 'messageActionStarGift_layer197':
+        case 'messageActionStarGiftUnique_layer202':
             return mapCompatMessageAction(obj)
         case 'userFull_layer199':
             return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
@@ -117,6 +124,10 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
                 _: 'message',
                 media: obj.media ? mapCompatMessageMedia(obj.media) : undefined,
             }
+        case 'phoneCallDiscardReasonAllowGroupCall_layer202':
+            // removed constructor in favor of phoneCallDiscardReasonMigrateConferenceCall,
+            // which requires extra info we don't have
+            return { _: 'phoneCallDiscardReasonMissed' }
         default:
             return obj
     }

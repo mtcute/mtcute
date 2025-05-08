@@ -1,4 +1,4 @@
-import type { ArrayPaginated, ArrayWithTotal, MaybeDynamic, Message } from '../types/index.js'
+import type { ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, MaybeDynamic, Message } from '../types/index.js'
 import { MtArgumentError } from '../../types/errors.js'
 
 /**
@@ -28,6 +28,20 @@ export function makeArrayPaginated<T, Offset>(arr: T[], total: number, next?: Of
     const a = arr as ArrayPaginated<T, Offset>
     a.total = total
     a.next = next
+
+    return a
+}
+
+export function makeArrayPaginatedWithMeta<T, Offset, Meta>(
+    arr: T[],
+    total: number,
+    meta: Meta,
+    next?: Offset,
+): ArrayPaginatedWithMeta<T, Offset, Meta> {
+    const a = arr as ArrayPaginatedWithMeta<T, Offset, Meta>
+    a.total = total
+    a.next = next
+    Object.assign(a, meta)
 
     return a
 }

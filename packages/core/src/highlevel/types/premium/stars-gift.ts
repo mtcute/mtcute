@@ -3,6 +3,7 @@ import type { tl } from '@mtcute/tl'
 import type { Sticker } from '../media/sticker.js'
 import type { Message } from '../messages/message.js'
 import type { InputPeerLike } from '../peers/peer.js'
+import Long from 'long'
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/inspectable.js'
@@ -20,6 +21,7 @@ export type InputStarGift =
       /** ID of the gift */
       savedId: tl.Long
   }
+  | string // slug
 
 /**
  * A gift bought with stars
@@ -97,7 +99,13 @@ export class StarGift {
      * For limited availability gifts,
      * the number of remaining and total gifts available
      */
-    get availability(): { remains: number, total: number } | null {
+    get availability(): {
+        remains: number
+        total: number
+
+        /** Number of gifts available on the secondary market */
+        resale: Long
+    } | null {
         if (this.raw.availabilityRemains == null || this.raw.availabilityTotal == null) {
             return null
         }
@@ -105,7 +113,18 @@ export class StarGift {
         return {
             remains: this.raw.availabilityRemains,
             total: this.raw.availabilityTotal,
+            resale: this.raw.availabilityResale ?? Long.ZERO,
         }
+    }
+
+    /** Floor price for the gift on the secondary market */
+    get resaleFloorPrice(): tl.Long | null {
+        return this.raw.resellMinStars ?? null
+    }
+
+    /** Title of the gift */
+    get title(): string | null {
+        return this.raw.title ?? null
     }
 }
 

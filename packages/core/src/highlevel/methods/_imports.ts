@@ -17,6 +17,7 @@ import { ITelegramClient } from '../client.types.js'
 import {
     AllStories,
     ArrayPaginated,
+    ArrayPaginatedWithMeta,
     ArrayWithTotal,
     Boost,
     BoostSlot,

@@ -3,10 +3,11 @@ import type { tl } from '@mtcute/tl'
 import type { TextWithEntities } from '../misc/entities.js'
 import type { Peer } from '../peers/peer.js'
 import type { Message } from './message.js'
+import { assert } from '@fuman/utils'
 import Long from 'long'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
-import { Photo } from '../media/photo.js'
 
+import { Photo } from '../media/photo.js'
 import { parsePeer } from '../peers/peer.js'
 import { StarGiftUnique } from '../premium/stars-gift-unique.js'
 import { StarGift } from '../premium/stars-gift.js'
@@ -561,6 +562,13 @@ export interface ActionStarGift {
     /** If the gift was upgraded, ID of the message where this happened */
     upgradeMsgId: number | null
 
+    /** If the gift can be transferred, date when it can be re-sold */
+    canTransferSince?: Date
+    /** Number of stars this gift is up for resell for */
+    resaleStars?: tl.Long
+    /** If the gift can be re-sold, date when it will become available */
+    canResellAt?: Date
+
     /** The gift itself */
     gift: StarGift | StarGiftUnique
     /** Message attached to the gift */
@@ -934,6 +942,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 giveawayMessageId: act.giveawayMsgId,
             }
         case 'messageActionStarGift':
+            assert(act.gift._ === 'starGift')
             return {
                 type: 'stars_gift',
                 nameHidden: act.nameHidden!,
@@ -941,9 +950,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 converted: act.converted!,
                 convertStars: act.convertStars ?? Long.ZERO,
                 refunded: act.refunded!,
-                gift: act.gift._ === 'starGift'
-                    ? new StarGift(act.gift)
-                    : new StarGiftUnique(act.gift, this._peers),
+                gift: new StarGift(act.gift),
                 message: act.message ?? null,
                 canUpgrade: act.canUpgrade!,
                 upgraded: act.upgraded!,
@@ -955,6 +962,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 savedId: act.savedId,
             }
         case 'messageActionStarGiftUnique':
+            assert(act.gift._ === 'starGiftUnique')
             return {
                 type: 'stars_gift',
                 nameHidden: false,
@@ -962,14 +970,15 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 converted: false,
                 convertStars: Long.ZERO,
                 refunded: act.refunded!,
-                gift: act.gift._ === 'starGift'
-                    ? new StarGift(act.gift)
-                    : new StarGiftUnique(act.gift, this._peers),
+                gift: new StarGiftUnique(act.gift, this._peers),
                 message: null,
                 canUpgrade: false,
                 upgraded: true,
                 upgradeStars: Long.ZERO,
                 upgradeMsgId: null,
+                canTransferSince: act.canTransferAt ? new Date(act.canTransferAt * 1000) : undefined,
+                resaleStars: act.resaleStars,
+                canResellAt: act.canResellAt ? new Date(act.canResellAt * 1000) : undefined,
 
                 fromId: act.fromId ? getMarkedPeerId(act.fromId) : undefined,
                 toId: act.peer ? getMarkedPeerId(act.peer) : undefined,

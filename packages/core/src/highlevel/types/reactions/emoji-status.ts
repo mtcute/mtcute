@@ -51,6 +51,17 @@ export class EmojiStatus {
         readonly raw: Exclude<tl.TypeEmojiStatus, tl.RawEmojiStatusEmpty | tl.RawInputEmojiStatusCollectible>,
     ) {}
 
+    static fromTl(status?: tl.TypeEmojiStatus): EmojiStatus | null {
+        if (
+            !status
+            || status._ === 'emojiStatusEmpty'
+            || status._ === 'inputEmojiStatusCollectible'
+        ) {
+            return null
+        }
+        return new EmojiStatus(status)
+    }
+
     /** ID of the custom emoji */
     get emoji(): tl.Long {
         return this.raw.documentId

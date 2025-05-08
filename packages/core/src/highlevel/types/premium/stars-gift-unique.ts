@@ -44,6 +44,11 @@ export class StarGiftUniqueBackdrop {
         readonly raw: tl.RawStarGiftAttributeBackdrop,
     ) {}
 
+    /** ID of the backdrop */
+    get id(): number {
+        return this.raw.backdropId
+    }
+
     /** Rarity permille of the attribute */
     get permille(): number {
         return this.raw.rarityPermille
@@ -123,6 +128,8 @@ export class StarGiftUniqueOriginalDetails {
     }
 }
 
+makeInspectable(StarGiftUniqueOriginalDetails)
+
 /** A unique star gift */
 export class StarGiftUnique {
     readonly _model!: tl.RawStarGiftAttributeModel
@@ -190,12 +197,18 @@ export class StarGiftUnique {
         return this.raw.ownerName ?? null
     }
 
+    // todo: merge into one property
     get availabilityIssued(): number {
         return this.raw.availabilityIssued
     }
 
     get availabilityTotal(): number {
         return this.raw.availabilityTotal
+    }
+
+    /** Number of stars this gift is up for resell for */
+    get resellPrice(): tl.Long | null {
+        return this.raw.resellStars ?? null
     }
 
     /** Model (i.e. the gift itself) of the unique star gift */

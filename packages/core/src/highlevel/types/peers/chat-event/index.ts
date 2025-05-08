@@ -15,6 +15,7 @@ export class ChatEvent {
     constructor(
         readonly raw: tl.TypeChannelAdminLogEvent,
         readonly _peers: PeersIndex,
+        readonly _chatId: number,
     ) {}
 
     /**
@@ -42,7 +43,7 @@ export class ChatEvent {
     }
 
     get action(): ChatAction {
-        return _actionFromTl(this.raw.action, this._peers)
+        return _actionFromTl(this.raw.action, this._peers, this._chatId)
     }
 }
 

@@ -107,6 +107,15 @@ export function normalizeChatEventFilters(input: InputChatEventFilters): ChatEve
                     serverFilter.forums = true
                     break
                 case 'sub_extend':
+                case 'available_reactions_changed':
+                case 'emoji_status_changed':
+                case 'emoji_stickerset_changed':
+                case 'msg_sent':
+                case 'peer_color_changed':
+                case 'profile_peer_color_changed':
+                case 'wallpaper_changed':
+                case 'toggle_anti_spam':
+                case 'toggle_autotranslation':
                     // not documented so idk, enable all
                     serverFilter.invite = true
                     serverFilter.invites = true

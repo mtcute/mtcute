@@ -7,6 +7,13 @@ export async function _normalizeInputStarGift(
     client: ITelegramClient,
     gift: InputStarGift,
 ): Promise<tl.TypeInputSavedStarGift> {
+    if (typeof gift === 'string') {
+        return {
+            _: 'inputSavedStarGiftSlug',
+            slug: gift,
+        }
+    }
+
     if ('message' in gift) {
         return {
             _: 'inputSavedStarGiftUser',

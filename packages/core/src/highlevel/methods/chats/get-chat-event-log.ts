@@ -4,6 +4,7 @@ import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
 import type { InputChatEventFilters } from '../../types/peers/chat-event/filters.js'
 import Long from 'long'
+import { getMarkedPeerId, toggleChannelIdMark } from '../../../utils/peer-utils.js'
 import { ChatEvent, PeersIndex } from '../../types/index.js'
 import { normalizeChatEventFilters } from '../../types/peers/chat-event/filters.js'
 import { toInputUser } from '../../utils/peer-utils.js'
@@ -101,8 +102,10 @@ export async function getChatEventLog(
 
     const results: ChatEvent[] = []
 
+    const chatIdNum = toggleChannelIdMark(getMarkedPeerId(channel))
+
     for (const evt of res.events) {
-        const parsed = new ChatEvent(evt, peers)
+        const parsed = new ChatEvent(evt, peers, chatIdNum)
 
         if (localFilter && (!parsed.action || !localFilter[parsed.action.type])) {
             continue

@@ -29,6 +29,7 @@ import { StarGift } from './stars-gift.js'
  *  - `star_gift`: This transaction is either a star gift to a user (if outgoing), or converting a star gift to stars (if incoming)
  *  - `star_gift_upgrade`: This transaction is for a star gift upgrade
  *  - `star_gift_transfer`: This transaction is for a star gift transfer
+ *  - `star_gift_resale`: This transaction is for a star gift resale
  *  - `paid_message`: This transaction is a payment for a paid message
  *  - `premium_gift`: This transaction is a payment for a premium gift to a user
  *  - `api_*`: This transaction is a payment for paid API features
@@ -135,6 +136,13 @@ export type StarsTransactionType =
       /** Related peer */
       peer: Peer
       /** The upgraded gift */
+      gift: StarGiftUnique
+  }
+  | {
+      type: 'star_gift_resale'
+      /** Related peer */
+      peer: Peer
+      /** The resold gift */
       gift: StarGiftUnique
   }
   | {
@@ -290,6 +298,12 @@ export class StarsTransaction {
                     } else if (this.raw.stargiftUpgrade) {
                         return {
                             type: 'star_gift_upgrade',
+                            peer,
+                            gift: new StarGiftUnique(this.raw.stargift, this.peers),
+                        }
+                    } else if (this.raw.stargiftResale) {
+                        return {
+                            type: 'star_gift_resale',
                             peer,
                             gift: new StarGiftUnique(this.raw.stargift, this.peers),
                         }

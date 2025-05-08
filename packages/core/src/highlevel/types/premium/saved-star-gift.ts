@@ -92,6 +92,16 @@ export class SavedStarGift {
     get canExportAt(): Date | null {
         return this.raw.canExportAt ? new Date(this.raw.canExportAt * 1000) : null
     }
+
+    /** Date when the gift can be transferred */
+    get canTransferAt(): Date | null {
+        return this.raw.canTransferAt ? new Date(this.raw.canTransferAt * 1000) : null
+    }
+
+    /** Date when the gift can be resold */
+    get canResellAt(): Date | null {
+        return this.raw.canResellAt ? new Date(this.raw.canResellAt * 1000) : null
+    }
 }
 
 makeInspectable(SavedStarGift)

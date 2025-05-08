@@ -5,6 +5,8 @@ import { toggleChannelIdMark } from '../../../../utils/peer-utils.js'
 import { assertTypeIs } from '../../../../utils/type-assertions.js'
 import { Photo } from '../../media/photo.js'
 import { Message } from '../../messages/message.js'
+import { EmojiStatus } from '../../reactions/emoji-status.js'
+import { ChatColors } from '../chat-colors.js'
 import { ChatInviteLink } from '../chat-invite-link.js'
 import { ChatLocation } from '../chat-location.js'
 import { ChatMember } from '../chat-member.js'
@@ -372,6 +374,82 @@ export interface ChatActionSubscriptionExtended {
     new: ChatMember
 }
 
+export interface ChatActionAvailableReactionsChanged {
+    type: 'available_reactions_changed'
+
+    /** Previous available reactions */
+    prev: tl.TypeChatReactions
+
+    /** New available reactions */
+    new: tl.TypeChatReactions
+}
+
+export interface ChatActionEmojiStatusChanged {
+    type: 'emoji_status_changed'
+
+    /** Previous emoji status */
+    prev: EmojiStatus | null
+
+    /** New emoji status */
+    new: EmojiStatus | null
+}
+
+/** Group emoji stickerset has been changed */
+export interface ChatActionEmojiStickersetChanged {
+    type: 'emoji_stickerset_changed'
+
+    /** Old emoji stickerset */
+    old: tl.TypeInputStickerSet
+
+    /** New emoji stickerset */
+    new: tl.TypeInputStickerSet
+}
+
+/** Group peer color has been changed */
+export interface ChatActionPeerColorChanged {
+    type: 'peer_color_changed' | 'profile_peer_color_changed'
+
+    /** Previous colors */
+    prev: ChatColors
+    /** New colors */
+    new: ChatColors
+}
+
+/** Group wallpaper has been changed */
+export interface ChatActionWallpaperChanged {
+    type: 'wallpaper_changed'
+
+    /** Old wallpaper */
+    old: tl.TypeWallPaper
+
+    /** New wallpaper */
+    new: tl.TypeWallPaper
+}
+
+/** A message has been sent */
+export interface ChatActionMessageSent {
+    type: 'msg_sent'
+
+    /** Message that was sent */
+    message: Message
+}
+
+/** Aggressive anti-spam has been toggled */
+export interface ChatActionToggleAntiSpam {
+    type: 'toggle_anti_spam'
+
+    /** Whether the chat now has aggressive anti-spam enabled */
+    enabled: boolean
+}
+
+/** Auto-translation has been toggled */
+export interface ChatActionToggleAutotranslation {
+    type: 'toggle_autotranslation'
+
+    /** Whether the chat is now in autotranslation mode */
+    enabled: boolean
+}
+
 /** Chat event action (`null` if unsupported) */
 export type ChatAction =
   | ChatActionUserJoined
@@ -412,15 +490,22 @@ export type ChatAction =
   | ChatActionTopicDeleted
   | ChatActionSignatureProfilesToggled
   | ChatActionSubscriptionExtended
+  | ChatActionAvailableReactionsChanged
+  | ChatActionEmojiStatusChanged
+  | ChatActionEmojiStickersetChanged
+  | ChatActionPeerColorChanged
+  | ChatActionWallpaperChanged
+  | ChatActionMessageSent
+  | ChatActionToggleAntiSpam
+  | ChatActionToggleAutotranslation
   | null
 
 /** @internal */
-export function _actionFromTl(e: tl.TypeChannelAdminLogEventAction, peers: PeersIndex): ChatAction {
-    // todo - MTQ-72
-    // channelAdminLogEventActionSendMessage#278f2868 message:Message = ChannelAdminLogEventAction;
-    // channelAdminLogEventActionChangeAvailableReactions#be4e0ef8 prev_value:ChatReactions new_value:ChatReactions
-    // channelAdminLogEventActionToggleAntiSpam#64f36dfc new_value:Bool = ChannelAdminLogEventAction;
-
+export function _actionFromTl(
+    e: tl.TypeChannelAdminLogEventAction,
+    peers: PeersIndex,
+    peerId: number,
+): ChatAction {
     switch (e._) {
         case 'channelAdminLogEventActionParticipantJoin':
             return { type: 'user_joined' }
@@ -643,6 +728,54 @@ export function _actionFromTl(e: tl.TypeChannelAdminLogEventAction, peers: Peers
                 type: 'sub_extend',
                 prev: new ChatMember(e.prevParticipant, peers),
                 new: new ChatMember(e.newParticipant, peers),
+            }
+        case 'channelAdminLogEventActionChangeAvailableReactions':
+            return {
+                type: 'available_reactions_changed',
+                prev: e.prevValue,
+                new: e.newValue,
+            }
+        case 'channelAdminLogEventActionChangeEmojiStatus':
+            return {
+                type: 'emoji_status_changed',
+                prev: EmojiStatus.fromTl(e.prevValue),
+                new: EmojiStatus.fromTl(e.newValue),
+            }
+        case 'channelAdminLogEventActionChangeEmojiStickerSet':
+            return {
+                type: 'emoji_stickerset_changed',
+                old: e.prevStickerset,
+                new: e.newStickerset,
+            }
+        case 'channelAdminLogEventActionChangePeerColor':
+        case 'channelAdminLogEventActionChangeProfilePeerColor':
+            return {
+                type: e._ === 'channelAdminLogEventActionChangePeerColor'
+                    ? 'peer_color_changed'
+                    : 'profile_peer_color_changed',
+                prev: new ChatColors(peerId, e.prevValue),
+                new: new ChatColors(peerId, e.newValue),
+            }
+        case 'channelAdminLogEventActionChangeWallpaper':
+            return {
+                type: 'wallpaper_changed',
+                old: e.prevValue,
+                new: e.newValue,
+            }
+        case 'channelAdminLogEventActionSendMessage':
+            return {
+                type: 'msg_sent',
+                message: new Message(e.message, peers),
+            }
+        case 'channelAdminLogEventActionToggleAntiSpam':
+            return {
+                type: 'toggle_anti_spam',
+                enabled: e.newValue,
+            }
+        case 'channelAdminLogEventActionToggleAutotranslation':
+            return {
+                type: 'toggle_autotranslation',
+                enabled: e.newValue,
             }
         default:
             return null

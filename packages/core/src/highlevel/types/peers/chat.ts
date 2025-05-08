@@ -288,6 +288,11 @@ export class Chat {
         return this.raw._ === 'channel' && this.raw.signatures!
     }
 
+    /** Whether this chat/channel has auto-translation enabled */
+    get hasAutoTranslation(): boolean {
+        return this.raw._ === 'channel' && this.raw.autotranslation!
+    }
+
     /** Chat title */
     get title(): string {
         return this.raw.title
@@ -402,14 +407,8 @@ export class Chat {
      */
     get emojiStatus(): EmojiStatus | null {
         if (this.raw._ !== 'channel') return null
-        if (
-            !this.raw.emojiStatus
-            || this.raw.emojiStatus._ === 'emojiStatusEmpty'
-            || this.raw.emojiStatus._ === 'inputEmojiStatusCollectible') {
-            return null
-        }
 
-        return new EmojiStatus(this.raw.emojiStatus)
+        return EmojiStatus.fromTl(this.raw.emojiStatus)
     }
 
     /**
