@@ -180,6 +180,10 @@ export class SessionConnection extends PersistentConnection {
         this._flushTimer.reset()
         this._salts.isFetching = false
 
+        // we can normally keep the same session across reconnects,
+        // but we do need to reset ping info because we can't be sure it was received
+        this._session.resetLastPing(true)
+
         if (forever) {
             timers.clearTimeout(this._pfsUpdateTimeout)
             this.onDisconnect.clear()
