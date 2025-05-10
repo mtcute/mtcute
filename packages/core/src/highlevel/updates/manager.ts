@@ -85,6 +85,8 @@ import {
 //     return state.rpsProcessing.getRps()
 // }
 
+const WARN_EVERY = 100
+
 const KEEP_ALIVE_INTERVAL = 15 * 60 * 1000 // 15 minutes
 const UPDATES_TOO_LONG = { _: 'updatesTooLong' } as const
 
@@ -328,6 +330,10 @@ export class UpdatesManager {
                 break
             default:
                 assertNever(update)
+        }
+
+        if (this.pendingUpdateContainers.length % WARN_EVERY === 0) {
+            this.log.warn('%d pending update containers, updatesLoopActive = %b. possible memory leak', this.pendingUpdateContainers.length, this.updatesLoopActive)
         }
 
         this.updatesLoopCv.notify()
