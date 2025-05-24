@@ -7171,8 +7171,11 @@ TelegramClient.prototype.prepare = function (...args) {
 TelegramClient.prototype.connect = function (...args) {
     return this._client.connect(...args)
 }
-TelegramClient.prototype.close = function (...args) {
-    return this._client.close(...args)
+TelegramClient.prototype.disconnect = function (...args) {
+    return this._client.disconnect(...args)
+}
+TelegramClient.prototype.destroy = function (...args) {
+    return this._client.destroy(...args)
 }
 TelegramClient.prototype.notifyLoggedIn = function (...args) {
     return this._client.notifyLoggedIn(...args)

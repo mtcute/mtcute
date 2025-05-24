@@ -2,6 +2,14 @@ import type { BasicDcOption } from '@mtcute/core/utils.js'
 import { FakeConnection } from '@fuman/net'
 import { IntermediatePacketCodec, type IPacketCodec, type ITelegramConnection, type TelegramTransport } from '@mtcute/core'
 
+// todo: fix this in fuman
+class FakeConnectionFixed<T> extends FakeConnection<T> {
+    override async write(data: Uint8Array): Promise<void> {
+        // eslint-disable-next-line ts/no-unsafe-call
+        await this['tx'].write(data)
+    }
+}
+
 export class StubTelegramTransport implements TelegramTransport {
     constructor(
         readonly params: {
@@ -16,7 +24,7 @@ export class StubTelegramTransport implements TelegramTransport {
     async connect(dc: BasicDcOption): Promise<ITelegramConnection> {
         this.params.onConnect?.(dc)
         this._dcId = dc.id
-        return new FakeConnection<BasicDcOption>(dc)
+        return new FakeConnectionFixed<BasicDcOption>(dc)
     }
 
     packetCodec(): IPacketCodec {

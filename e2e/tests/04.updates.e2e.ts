@@ -18,8 +18,8 @@ describe('4. handling updates', () => {
         await tg2.connect()
     })
     after(async () => {
-        await tg1.close()
-        await tg2.close()
+        await tg1.destroy()
+        await tg2.destroy()
     })
 
     it('should send and receive messages', async () => {

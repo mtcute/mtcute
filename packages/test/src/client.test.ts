@@ -24,11 +24,11 @@ describe('client stub', () => {
 
         client.onRawMessage((msg) => {
             log.push(`message ctor=${hex.encode(msg.subarray(0, 4))}`)
-            client.close().catch(() => {})
+            client.destroy().catch(console.error)
         })
 
         await client.with(async () => {
-            await client.call({ _: 'help.getConfig' }).catch(() => {}) // ignore "client closed" error
+            await client.call({ _: 'help.getConfig' }).catch(console.error) // ignore "client closed" error
 
             expect(log[0]).to.be.oneOf([
                 'message ctor=dcf8f173', // msg_container

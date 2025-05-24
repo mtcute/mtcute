@@ -715,7 +715,8 @@ withParams(params: RpcCallOptions): this\n`)
     ;[
         'prepare',
         'connect',
-        'close',
+        'disconnect',
+        'destroy',
         'notifyLoggedIn',
         'notifyLoggedOut',
         'notifyChannelOpened',

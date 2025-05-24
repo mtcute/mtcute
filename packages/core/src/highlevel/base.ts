@@ -133,6 +133,7 @@ export class BaseTelegramClient implements ITelegramClient {
     // used in a hot path, avoid extra function calls
     private _connected = false
     private _connect = asyncResettable(async () => {
+        if (this.#destroyed) throw new Error('Client is destroyed')
         await this._prepare.run()
         await this.mt.connect()
         this._connected = true
@@ -152,14 +153,26 @@ export class BaseTelegramClient implements ITelegramClient {
         return this._connected
     }
 
-    async close(): Promise<void> {
-        this.timers.destroy()
+    async disconnect(): Promise<void> {
         this._connected = false
-        await this.mt.close()
+        this.timers.destroy()
         this.updates?.stopLoop()
         await this.storage.close()
         this._prepare.reset()
         this._connect.reset()
+        await this.mt.disconnect()
+    }
+
+    #destroyed = false
+    async destroy(): Promise<void> {
+        if (this.#destroyed) return
+        this.#destroyed = true
+        await this.disconnect()
+        await this.mt.destroy()
+    }
+
+    [Symbol.asyncDispose](): Promise<void> {
+        return this.destroy()
     }
 
     async notifyLoggedIn(auth: tl.auth.TypeAuthorization | tl.RawUser): Promise<tl.RawUser> {

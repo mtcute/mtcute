@@ -41,7 +41,8 @@ export interface ITelegramClient {
 
     prepare(): Promise<void>
     connect(): Promise<void>
-    close(): Promise<void>
+    disconnect(): Promise<void>
+    destroy(): Promise<void>
     notifyLoggedIn(auth: tl.auth.TypeAuthorization | tl.RawUser): Promise<tl.RawUser>
     notifyLoggedOut(): Promise<void>
     notifyChannelOpened(channelId: number, pts?: number): Promise<boolean>

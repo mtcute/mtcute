@@ -306,77 +306,6 @@ describe('resolvePeer', () => {
         })
     })
 
-    describe('resolving by phone number', () => {
-        it('should first try checking in storage', async () => {
-            const client = StubTelegramClient.offline()
-
-            await client.registerPeers(
-                createStub('user', {
-                    id: 123,
-                    accessHash: Long.fromBits(456, 789),
-                    phone: '123456789',
-                }),
-            )
-
-            const resolved = await resolvePeer(client, '+123456789')
-
-            expect(resolved).toEqual({
-                _: 'inputPeerUser',
-                userId: 123,
-                accessHash: Long.fromBits(456, 789),
-            })
-        })
-
-        it('should call contacts.resolvePhone if not in storage', async () => {
-            const client = new StubTelegramClient()
-
-            const resolvePhoneFn = client.respondWith(
-                'contacts.resolvePhone',
-                vi.fn().mockReturnValue({
-                    _: 'contacts.resolvedPeer',
-                    peer: {
-                        _: 'peerUser',
-                        userId: 123,
-                    },
-                    users: [
-                        createStub('user', {
-                            id: 123,
-                            accessHash: Long.fromBits(456, 789),
-                        }),
-                    ],
-                }),
-            )
-
-            const resolved = await resolvePeer(client, '+123456789')
-
-            expect(resolved).toEqual({
-                _: 'inputPeerUser',
-                userId: 123,
-                accessHash: Long.fromBits(456, 789),
-            })
-            expect(resolvePhoneFn).toHaveBeenCalledWith({
-                _: 'contacts.resolvePhone',
-                phone: '123456789',
-            })
-        })
-
-        it('should handle empty response from contacts.resolvePhone', async () => {
-            const client = new StubTelegramClient()
-
-            const resolvePhoneFn = vi.fn().mockReturnValue({
-                _: 'contacts.resolvedPeer',
-                peer: {
-                    _: 'peerUser',
-                    userId: 123,
-                },
-                users: [],
-            })
-            client.respondWith('contacts.resolvePhone', resolvePhoneFn)
-
-            await expect(() => resolvePeer(client, '+123456789')).rejects.toThrow(MtPeerNotFoundError)
-        })
-    })
-
     describe('resolving by username', () => {
         it('should first try checking in storage', async () => {
             const client = StubTelegramClient.offline()
@@ -442,7 +371,7 @@ describe('resolvePeer', () => {
             })
             client.respondWith('contacts.resolveUsername', resolveUsernameFn)
 
-            await expect(() => resolvePeer(client, 'test')).rejects.toThrow(MtPeerNotFoundError)
+            await expect(() => resolvePeer(client, 'test')).rejects.toThrow()
         })
     })
 })

@@ -328,23 +328,25 @@ export class MtClient {
         return this._connect.run()
     }
 
-    /**
-     * Close all connections and finalize the client.
-     */
-    async close(): Promise<void> {
-        this.log.debug('closing client')
-
-        this._config.destroy()
+    async disconnect(): Promise<void> {
         await this.network.destroy()
-
         await this.storage.save()
-        await this.storage.destroy?.()
-
+        this._config.destroy()
         this._prepare.reset()
         this._connect.reset()
         this._abortController.abort()
+        this.log.debug('client disconnected')
+    }
 
-        this.log.debug('client closed successfully')
+    /**
+     * Close all connections and finalize the client.
+     *
+     * **Note**: must be called *after* {@link disconnect}
+     */
+    async destroy(): Promise<void> {
+        await this.storage.destroy()
+
+        this.log.debug('client destroyed')
     }
 
     /**

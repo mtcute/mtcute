@@ -26,7 +26,7 @@ export class StubTelegramClient extends BaseTelegramClient {
         super({
             apiId: 0,
             apiHash: '',
-            logLevel: 9,
+            logLevel: 0,
             storage,
             disableUpdates: true,
             transport: new StubTelegramTransport({
@@ -300,7 +300,7 @@ export class StubTelegramClient extends BaseTelegramClient {
             error = e
         }
 
-        await this.close()
+        await this.destroy()
 
         this.onError.remove(handler)
 

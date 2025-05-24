@@ -38,7 +38,7 @@ describe('3. working with files', () => {
         const tg = new TelegramClient(getApiParams('dc2.session'))
 
         before(() => tg.connect())
-        after(() => tg.close())
+        after(() => tg.destroy())
 
         it('should download pfp thumbs', async () => {
             const chat = await tg.getChat(CINNAMOROLL_PFP_CHAT)
@@ -125,7 +125,7 @@ describe('3. working with files', () => {
         const tg = new TelegramClient(getApiParams('dc1.session'))
 
         before(() => tg.connect())
-        after(() => tg.close())
+        after(() => tg.destroy())
 
         it('should download pfp thumbs', async () => {
             const chat = await tg.getChat(CINNAMOROLL_PFP_CHAT)

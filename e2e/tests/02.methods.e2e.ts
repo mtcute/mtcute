@@ -8,7 +8,7 @@ describe('2. calling methods', () => {
     const tg = new TelegramClient(getApiParams('dc2.session'))
 
     before(() => tg.connect())
-    after(() => tg.close())
+    after(() => tg.destroy())
 
     it('getUsers(@BotFather)', async () => {
         const [user] = await tg.getUsers('botfather')

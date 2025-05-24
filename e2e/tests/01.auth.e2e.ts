@@ -12,7 +12,7 @@ describe('1. authorization', () => {
 
         expect(await tg.getMe()).to.be.instanceOf(User)
 
-        await tg.close()
+        await tg.destroy()
     })
 
     it('should authorize in dc 1', async () => {
@@ -22,6 +22,6 @@ describe('1. authorization', () => {
 
         expect(await tg.getMe()).to.be.instanceOf(User)
 
-        await tg.close()
+        await tg.destroy()
     })
 })

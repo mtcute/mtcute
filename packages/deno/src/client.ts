@@ -92,10 +92,10 @@ export class TelegramClient extends TelegramClientBase {
         return new Promise(res => this._rl?.question(text, res))
     }
 
-    override close(): Promise<void> {
+    override destroy(): Promise<void> {
         this._rl?.close()
 
-        return super.close()
+        return super.destroy()
     }
 
     override start(params: Parameters<TelegramClientBase['start']>[0] = {}): Promise<User> {

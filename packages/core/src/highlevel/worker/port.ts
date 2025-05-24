@@ -39,7 +39,8 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     // bound methods
     readonly prepare: ITelegramClient['prepare']
     private _connect
-    readonly close: ITelegramClient['close']
+    readonly disconnect: ITelegramClient['disconnect']
+    readonly destroy_: ITelegramClient['destroy']
     readonly notifyLoggedIn: ITelegramClient['notifyLoggedIn']
     readonly notifyLoggedOut: ITelegramClient['notifyLoggedOut']
     readonly notifyChannelOpened: ITelegramClient['notifyChannelOpened']
@@ -76,7 +77,8 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
         this.prepare = bind('prepare')
         this._connect = bind('connect')
 
-        this.close = bind('close')
+        this.disconnect = bind('disconnect')
+        this.destroy_ = bind('destroy')
         this.notifyLoggedIn = bind('notifyLoggedIn')
         this.notifyLoggedOut = bind('notifyLoggedOut')
         this.notifyChannelOpened = bind('notifyChannelOpened')
@@ -151,14 +153,15 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     }
 
     private _destroyed = false
-    destroy(terminate = false): void {
+    async destroy(terminate = false): Promise<void> {
         if (this._destroyed) return
+        await this.destroy_()
         this.timers.destroy()
         this._connection[1]()
         this._destroyed = true
 
         if (terminate && 'terminate' in this.options.worker) {
-            Promise.resolve(this.options.worker.terminate()).catch(() => {})
+            await Promise.resolve(this.options.worker.terminate())
         }
     }
 

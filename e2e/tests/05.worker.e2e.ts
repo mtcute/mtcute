@@ -113,15 +113,15 @@ describe('5. worker', () => {
                 expect(msgs[0].text).to.equal(testText)
             })
         } catch (e) {
-            await client2.close()
+            await client2.destroy()
             throw e
         }
 
-        await client2.close()
+        await client2.destroy()
     })
 
     after(async () => {
-        await port.close()
+        await port.destroy()
         void worker.terminate()
     })
 })
