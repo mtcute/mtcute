@@ -25,7 +25,7 @@ export async function transferStarGift(
         gift: InputStarGift
 
         /** ID of the user to transfer the gift to */
-        recepient: InputPeerLike
+        recipient: InputPeerLike
 
         /**
          * Whether to dispatch the new message event
@@ -34,12 +34,12 @@ export async function transferStarGift(
         shouldDispatch?: true
     },
 ): Promise<Message | null> {
-    const { gift, recepient, shouldDispatch } = params
+    const { gift, recipient, shouldDispatch } = params
 
     const invoice: tl.TypeInputInvoice = {
         _: 'inputInvoiceStarGiftTransfer',
         stargift: await _normalizeInputStarGift(client, gift),
-        toId: await resolvePeer(client, recepient),
+        toId: await resolvePeer(client, recipient),
     }
 
     let updates: tl.TypeUpdates

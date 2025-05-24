@@ -5060,7 +5060,7 @@ export interface TelegramClient extends ITelegramClient {
             gift: InputStarGift
 
             /** ID of the user to transfer the gift to */
-            recepient: InputPeerLike
+            recipient: InputPeerLike
 
             /**
              * Whether to dispatch the new message event

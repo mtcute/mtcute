@@ -147,8 +147,8 @@ export type StarsTransactionType =
   }
   | {
       type: 'star_gift_transfer'
-      /** Recepient peer */
-      recepient: Peer
+      /** Recipient peer */
+      recipient: Peer
       /** The upgraded gift */
       gift: StarGiftUnique
   }
@@ -310,7 +310,7 @@ export class StarsTransaction {
                     } else {
                         return {
                             type: 'star_gift_transfer',
-                            recepient: peer,
+                            recipient: peer,
                             gift: new StarGiftUnique(this.raw.stargift, this.peers),
                         }
                     }
