@@ -104,11 +104,11 @@ export class StarGiftUniqueOriginalDetails {
     /**
      * Peer who received the original star gift, if available
      *
-     * > Note: {@link recipientId} is always available. If ID is available, but this field throws an error,
+     * > Note: {@link recipientId} is always available. If ID is available, but this field is null,
      * > you should try fetching the peer manually using {@link getPeer})
      */
-    get recipient(): Peer {
-        // todo: return null in the next breaking release
+    get recipient(): Peer | null {
+        if (!this._peers.has(this.raw.recipientId)) return null
         return parsePeer(this.raw.recipientId, this._peers)
     }
 
