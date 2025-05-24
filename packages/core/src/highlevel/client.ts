@@ -289,6 +289,7 @@ import { isPeerAvailable } from './methods/users/is-peer-available.js'
 import { iterProfilePhotos } from './methods/users/iter-profile-photos.js'
 import { resolvePeerMany } from './methods/users/resolve-peer-many.js'
 import { resolveChannel, resolvePeer, resolveUser } from './methods/users/resolve-peer.js'
+import { resolvePhoneNumber } from './methods/users/resolve-phone-number.js'
 import { setEmojiStatus, setMyEmojiStatus } from './methods/users/set-emoji-status.js'
 import { setGlobalTtl } from './methods/users/set-global-ttl.js'
 import { setMyBirthday } from './methods/users/set-my-birthday.js'
@@ -5948,7 +5949,7 @@ export interface TelegramClient extends ITelegramClient {
      * **Available**: ✅ both users and bots
      *
      * @param peerId  The peer identifier that you want to extract the `InputPeer` from.
-     * @param [force=false]  Whether to force re-fetch the peer from the server (only for usernames and phone numbers)
+     * @param [force=false]  Whether to force re-fetch the peer from the server
      */
     resolvePeer(
         peerId: InputPeerLike, force?: boolean): Promise<tl.TypeInputPeer>
@@ -5966,6 +5967,18 @@ export interface TelegramClient extends ITelegramClient {
      */
     resolveChannel(
         peerId: InputPeerLike, force?: boolean): Promise<tl.TypeInputChannel>
+
+    /**
+     * Get the `InputPeer` by user's phone number.
+     * Useful when an `InputPeer` is needed in Raw API.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param phone  Phone number of the user
+     * @param [force=false]  Whether to force re-fetch the peer from the server
+     */
+    resolvePhoneNumber(
+        phone: string, force?: boolean): Promise<tl.TypeInputPeer>
     /**
      * Set an emoji status for the current user
      *
@@ -7118,6 +7131,9 @@ TelegramClient.prototype.resolveUser = function (...args) {
 }
 TelegramClient.prototype.resolveChannel = function (...args) {
     return resolveChannel(this._client, ...args)
+}
+TelegramClient.prototype.resolvePhoneNumber = function (...args) {
+    return resolvePhoneNumber(this._client, ...args)
 }
 TelegramClient.prototype.setMyEmojiStatus = function (...args) {
     return setMyEmojiStatus(this._client, ...args)

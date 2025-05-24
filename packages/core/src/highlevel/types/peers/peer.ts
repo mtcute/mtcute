@@ -13,8 +13,7 @@ export type PeerType = 'user' | 'bot' | 'group' | 'channel' | 'supergroup'
 /**
  * Type that can be used as an input peer to most of the high-level methods. Can be:
  *  - `number`, representing peer's marked ID*
- *  - `string`, representing peer's username (without preceding `@`)
- *  - `string`, representing user's phone number
+ *  - `string`, representing user's username
  *  - `"me"` and `"self"` which will be replaced with the current user/bot
  *  - Any object with `inputPeer: tl.TypeInputPeer` property
  *  - Raw TL object
@@ -23,7 +22,8 @@ export type PeerType = 'user' | 'bot' | 'group' | 'channel' | 'supergroup'
  * > that new IDs *will* still fit into int53, meaning JS integers are fine.
  */
 export type InputPeerLike =
-  | string
+  | 'me' | 'self'
+  | (string & {})
   | number
   | tl.TypePeer
   | tl.TypeInputPeer
