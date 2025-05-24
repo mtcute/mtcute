@@ -84,6 +84,10 @@ export class SortedArray<T> {
         this.raw.splice(idx, 1)
     }
 
+    removeIndex(idx: number): void {
+        this.raw.splice(idx, 1)
+    }
+
     includes(item: T): boolean {
         return this.index(item) !== -1
     }
@@ -96,5 +100,9 @@ export class SortedArray<T> {
 
     clear(): void {
         this.raw.length = 0
+    }
+
+    popFront(): T | undefined {
+        return this.raw.shift()
     }
 }

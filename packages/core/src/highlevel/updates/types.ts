@@ -1,7 +1,7 @@
 import type { AsyncLock, ConditionVariable, Deque, timers } from '@fuman/utils'
 import type { tl } from '@mtcute/tl'
 
-import type { EarlyTimer, Logger, SortedLinkedList } from '../../utils/index.js'
+import type { EarlyTimer, Logger, SortedArray } from '../../utils/index.js'
 import type { CurrentUserInfo } from '../storage/service/current-user.js'
 import type { PeersIndex } from '../types/peers/peers-index.js'
 
@@ -123,11 +123,11 @@ export interface UpdatesState {
     postponedTimer: EarlyTimer
     hasTimedoutPostponed: boolean
 
-    pendingUpdateContainers: SortedLinkedList<PendingUpdateContainer>
-    pendingPtsUpdates: SortedLinkedList<PendingUpdate>
-    pendingPtsUpdatesPostponed: SortedLinkedList<PendingUpdate>
-    pendingQtsUpdates: SortedLinkedList<PendingUpdate>
-    pendingQtsUpdatesPostponed: SortedLinkedList<PendingUpdate>
+    pendingUpdateContainers: SortedArray<PendingUpdateContainer>
+    pendingPtsUpdates: SortedArray<PendingUpdate>
+    pendingPtsUpdatesPostponed: SortedArray<PendingUpdate>
+    pendingQtsUpdates: SortedArray<PendingUpdate>
+    pendingQtsUpdatesPostponed: SortedArray<PendingUpdate>
     pendingUnorderedUpdates: Deque<PendingUpdate>
 
     noDispatchEnabled: boolean
