@@ -287,6 +287,7 @@ export class BaseTelegramClient implements ITelegramClient {
             await this.storage.self.store(data.self)
         }
 
+        await this.mt.storage.provider.authKeys.deleteAll()
         await this.mt.storage.provider.authKeys.set(data.primaryDcs.main.id, data.authKey)
 
         await this.mt.storage.save()
