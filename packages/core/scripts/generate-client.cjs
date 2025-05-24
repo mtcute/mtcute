@@ -192,7 +192,7 @@ function runEslint(targetFile) {
     })
 }
 
-async function addSingleMethod(state, fileName) {
+async function processFile(state, fileName) {
     const fileFullText = await fs.promises.readFile(fileName, 'utf-8')
     const program = ts.createSourceFile(path.basename(fileName), fileFullText, ts.ScriptTarget.ES2018, true)
     const relPath = path.relative(targetDir, fileName).replace(/\\/g, '/') // replace path delim to unix
@@ -457,7 +457,7 @@ async function main() {
 
     for await (const file of getFiles(path.join(__dirname, '../src/highlevel/methods'))) {
         if (!file.startsWith('.') && file.endsWith('.ts') && !file.endsWith('.web.ts') && !file.endsWith('.test.ts')) {
-            await addSingleMethod(state, file)
+            await processFile(state, file)
         }
     }
 
@@ -751,12 +751,11 @@ withParams(params: RpcCallOptions): this\n`)
     state.methods.list.forEach(({ module, name, overload, isDeclare }) => {
         if (overload || isDeclare) return
         outputMethods.write(`export { ${name} } from '${module}'\n`)
-
-        if (state.exported[module]) {
-            outputMethods.write(`export type { ${[...state.exported[module]].join(', ')} } from '${module}'\n`)
-            delete state.exported[module]
-        }
     })
+
+    for (const [module, items] of Object.entries(state.exported)) {
+        outputMethods.write(`export type { ${[...items].join(', ')} } from '${module}'\n`)
+    }
 
     await new Promise((resolve) => { outputMethods.end(resolve) })
     await new Promise((resolve) => { output.end(resolve) })
