@@ -60,6 +60,7 @@ export class WorkerInvoker {
         const promise = this._pending.get(msg.id)
         if (!promise) return
 
+        this._pending.delete(msg.id)
         if (msg.error) {
             promise.reject(deserializeError(msg.error))
         } else {
