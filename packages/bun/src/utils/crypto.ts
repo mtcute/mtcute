@@ -12,6 +12,7 @@ import {
     ige256Decrypt,
     ige256Encrypt,
     initSync,
+    SIMD_AVAILABLE,
 } from '@mtcute/wasm'
 
 // we currently prefer wasm for ctr because bun mostly uses browserify polyfills for node:crypto
@@ -19,7 +20,7 @@ import {
 
 export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
     async initialize(): Promise<void> {
-        const wasmFile = require.resolve('@mtcute/wasm/mtcute-simd.wasm')
+        const wasmFile = require.resolve(SIMD_AVAILABLE ? "@mtcute/wasm/mtcute-simd.wasm" : "@mtcute/wasm/mtcute.wasm")
         const wasm = await readFile(wasmFile)
         initSync(wasm)
     }
