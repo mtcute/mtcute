@@ -125,8 +125,6 @@ import { DC_MAPPING_PROD } from '@mtcute/convert'
 const dc = DC_MAPPING_PROD[2]
 ```
 
-If you don't know such information at all, you can just always use the DC 2 (as above), and mtcute will handle the rest
-
 ### User information
 
 If you happen to know some information about the user logged in, it might help to provide it as well:
