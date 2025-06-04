@@ -42,6 +42,7 @@ export const defaultStateKeyDelegate: StateKeyDelegate = (upd): string | null =>
             case 'group':
             case 'supergroup':
             case 'gigagroup':
+            case 'monoforum':
                 return `${upd.chat.id}_${upd.sender.id}`
             default:
                 assertNever(upd.chat.chatType)

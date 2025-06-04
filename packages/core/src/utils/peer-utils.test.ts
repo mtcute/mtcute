@@ -75,9 +75,6 @@ describe('parseMarkedPeerId', () => {
 
     it('should throw for invalid marked ids', () => {
         expect(() => parseMarkedPeerId(0)).toThrow('Invalid marked peer id')
-
-        // secret chats are not supported yet
-        expect(() => parseMarkedPeerId(-1997852516400)).toThrow('Secret chats are not supported')
     })
 })
 

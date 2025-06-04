@@ -80,6 +80,8 @@ function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessage
                 _: 'messageActionStarGift',
                 gift: mapCompatStarGift(obj.gift),
             }
+        case 'messageActionPaidMessagesPrice_layer203':
+            return replaceType(obj, 'messageActionPaidMessagesPrice')
         default:
             return obj
     }
@@ -101,6 +103,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
         case 'messageActionStarGiftUnique_layer197':
         case 'messageActionStarGift_layer197':
         case 'messageActionStarGiftUnique_layer202':
+        case 'messageActionPaidMessagesPrice_layer203':
             return mapCompatMessageAction(obj)
         case 'userFull_layer199':
             return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
@@ -113,6 +116,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
                 emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
             }
         case 'channel_layer199':
+        case 'channel_layer203':
             return {
                 ...obj,
                 _: 'channel',

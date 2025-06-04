@@ -308,6 +308,18 @@ export class FullChat extends Chat {
     }
 
     /**
+     * Information about a linked monoforum chat:
+     * - for channels: the linked monoforum
+     * - for monoforums: the channel this monoforum is linked to
+     */
+    get monoforumLinkedChat(): Chat | null {
+        if (this.raw._ !== 'channel') return null
+        if (!this.raw.linkedMonoforumId) return null
+
+        return new Chat(this.peers.chat(this.raw.linkedMonoforumId))
+    }
+
+    /**
      * TTL of all messages in this chat, in seconds
      */
     get ttlPeriod(): number | null {

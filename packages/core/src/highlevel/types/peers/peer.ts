@@ -22,7 +22,7 @@ export type PeerType = 'user' | 'bot' | 'group' | 'channel' | 'supergroup'
  * > that new IDs *will* still fit into int53, meaning JS integers are fine.
  */
 export type InputPeerLike =
-  | 'me' | 'self'
+  | 'me' | 'self' | 'some_username'
   | (string & {})
   | number
   | tl.TypePeer

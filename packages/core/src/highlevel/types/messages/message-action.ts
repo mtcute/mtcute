@@ -585,6 +585,9 @@ export interface ActionPaidMessagesPaid {
 
     /** Amount of Telegram Stars paid */
     stars: tl.Long
+
+    /** Whether the stars were paid for a direct message to channel administrators */
+    broadcastDirect?: boolean
 }
 
 /** Paid messages were refunded */

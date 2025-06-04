@@ -17,8 +17,9 @@ import { ChatPhoto } from './chat-photo.js'
  *  - `supergroup`: Supergroup
  *  - `channel`: Broadcast channel
  *  - `gigagroup`: Gigagroup aka Broadcast group
+ *  - `monoforum`: Monoforum (chat for direct messages to channel administrators)
  */
-export type ChatType = 'group' | 'supergroup' | 'channel' | 'gigagroup'
+export type ChatType = 'group' | 'supergroup' | 'channel' | 'gigagroup' | 'monoforum'
 
 /**
  * A chat.
@@ -127,6 +128,8 @@ export class Chat {
             case 'channelForbidden':
                 if (this.raw._ === 'channel' && this.raw.gigagroup) {
                     return 'gigagroup'
+                } else if (this.raw._ === 'channel' && this.raw.monoforum) {
+                    return 'monoforum'
                 } else if (this.raw.broadcast) {
                     return 'channel'
                 } else if (this.raw.megagroup) {
@@ -291,6 +294,26 @@ export class Chat {
     /** Whether this chat/channel has auto-translation enabled */
     get hasAutoTranslation(): boolean {
         return this.raw._ === 'channel' && this.raw.autotranslation!
+    }
+
+    /** Whether this forum should display threads as tabs instead of a list */
+    get hasForumTabs(): boolean {
+        return this.raw._ === 'channel' && this.raw.forumTabs!
+    }
+
+    /** Whether this broadcast channel has direct messages to channel administrators enabled */
+    get hasBroadcastDirect(): boolean {
+        return this.raw._ === 'channel' && this.raw.broadcastMessagesAllowed!
+    }
+
+    /**
+     * Depending on {@link chatType}:
+     *   - `channel`: this field might contain the ID of the linked monoforum,
+     *     if this broadcast channel has a linked monoforum
+     *   - `monoforum`: this field contains the ID of the channel that this monoforum is linked to
+     */
+    get monoforumLinkedChatId(): number | null {
+        return this.raw._ === 'channel' ? this.raw.linkedMonoforumId ?? null : null
     }
 
     /** Chat title */

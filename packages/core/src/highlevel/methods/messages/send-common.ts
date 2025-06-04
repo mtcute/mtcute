@@ -9,8 +9,8 @@ import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { MtMessageNotFoundError } from '../../types/errors.js'
 import { normalizeDate, normalizeMessageId } from '../../utils/index.js'
 import { _getPeerChainId } from '../misc/chain-id.js'
-import { resolvePeer } from '../users/resolve-peer.js'
 
+import { resolvePeer } from '../users/resolve-peer.js'
 import { _getDiscussionMessage } from './get-discussion-message.js'
 import { getMessages } from './get-messages.js'
 import { _getTypingTimerId } from './set-typing.js'
@@ -25,6 +25,14 @@ export interface CommonSendParams {
      * Can also be a message from another chat, in which case a quote will be sent.
      */
     replyTo?: number | Message
+
+    /**
+     * When the chat is a monoforum you are an admin of, you **must** pass an
+     * ID of a peer you are sending the message to.
+     *
+     * Otherwise, you will get a `REPLY_TO_MONOFORUM_PEER_INVALID` error.
+     */
+    toMonoforumPeer?: InputPeerLike
 
     /**
      * Whether to throw an error if {@link replyTo}
@@ -216,6 +224,12 @@ export async function _processCommonSendParameters(
             quoteText: params.quote?.text,
             quoteEntities: params.quote?.entities as tl.TypeMessageEntity[],
             quoteOffset: params.quoteOffset,
+            monoforumPeerId: params.toMonoforumPeer ? await resolvePeer(client, params.toMonoforumPeer) : undefined,
+        }
+    } else if (params.toMonoforumPeer) {
+        tlReplyTo = {
+            _: 'inputReplyToMonoForum',
+            monoforumPeerId: await resolvePeer(client, params.toMonoforumPeer),
         }
     } else if (params.replyToStory) {
         tlReplyTo = {

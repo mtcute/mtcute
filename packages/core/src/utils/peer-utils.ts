@@ -1,13 +1,11 @@
 import type { tl } from '@mtcute/tl'
 
 import type { BasicPeerType } from '../types/peers.js'
-import { MtArgumentError, MtUnsupportedError } from '../types/errors.js'
+import { MtArgumentError } from '../types/errors.js'
 import { assertNever } from '../types/utils.js'
 
 // src: https://github.com/tdlib/td/blob/master/td/telegram/DialogId.h
 const ZERO_CHANNEL_ID = -1000000000000
-const ZERO_SECRET_CHAT_ID = -2000000000000
-const MAX_SECRET_CHAT_ID = -1997852516353 // ZERO_SECRET_CHAT_ID + 0x7fffffff
 // src: https://github.com/tdlib/td/blob/master/td/telegram/ChatId.h
 // const MAX_CHAT_ID = 999999999999
 const MIN_MARKED_CHAT_ID = -999999999999 // -MAX_CHAT_ID
@@ -15,10 +13,6 @@ const MIN_MARKED_CHAT_ID = -999999999999 // -MAX_CHAT_ID
 // MAX_USER_ID = (1ll << 40) - 1
 const MAX_USER_ID = 1099511627775
 // src: https://github.com/tdlib/td/blob/master/td/telegram/ChannelId.h
-// the last (1 << 31) - 1 identifiers will be used for secret chat dialog identifiers
-// MAX_CHANNEL_ID = 1000000000000ll - (1ll << 31)
-// const MAX_CHANNEL_ID = 997852516352
-const MIN_MARKED_CHANNEL_ID = -1997852516352 // ZERO_CHANNEL_ID - MAX_CHANNEL_ID
 
 /**
  * Add or remove channel marker from ID
@@ -102,13 +96,8 @@ export function parseMarkedPeerId(id: number): [BasicPeerType, number] {
             return ['chat', -id]
         }
 
-        if (MIN_MARKED_CHANNEL_ID <= id && id !== ZERO_CHANNEL_ID) {
+        if (id !== ZERO_CHANNEL_ID) {
             return ['channel', ZERO_CHANNEL_ID - id]
-        }
-
-        if (MAX_SECRET_CHAT_ID >= id && id !== ZERO_SECRET_CHAT_ID) {
-            // return 'secret'
-            throw new MtUnsupportedError('Secret chats are not supported')
         }
     } else if (id > 0 && id <= MAX_USER_ID) {
         return ['user', id]
@@ -206,7 +195,7 @@ export function getBasicPeerType(
             if (MIN_MARKED_CHAT_ID <= id) {
                 return 'chat'
             }
-            if (MIN_MARKED_CHANNEL_ID <= id && id !== ZERO_CHANNEL_ID) {
+            if (id !== ZERO_CHANNEL_ID) {
                 return 'channel'
             }
         } else if (id > 0 && id <= MAX_USER_ID) {

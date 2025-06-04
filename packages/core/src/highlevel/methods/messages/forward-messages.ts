@@ -16,6 +16,15 @@ export interface ForwardMessageOptions {
     /** Destination chat ID, username, phone, `"me"` or `"self"` */
     toChatId: InputPeerLike
 
+    /** When forwarding to forums, ID of the thread to forward to */
+    toThreadId?: number
+
+    /**
+     * When forwarding to a monoforum you are an admin of,
+     * you **must** pass an ID of a peer you are sending the message to.
+     */
+    toMonoforumPeer?: InputPeerLike
+
     /**
      * Whether to forward silently (also applies to caption message).
      */
@@ -121,6 +130,8 @@ export async function forwardMessagesById(
         noCaption,
         allowPaidFloodskip,
         videoTimestamp,
+        toThreadId,
+        toMonoforumPeer,
     } = params
 
     // sending more than 100 will not result in a server-sent
@@ -150,6 +161,13 @@ export async function forwardMessagesById(
         allowPaidFloodskip,
         videoTimestamp,
         allowPaidStars: params.allowPaidMessages,
+        topMsgId: toThreadId,
+        replyTo: toMonoforumPeer
+            ? {
+                _: 'inputReplyToMonoForum',
+                monoforumPeerId: await resolvePeer(client, toMonoforumPeer),
+            }
+            : undefined,
     })
 
     assertIsUpdatesGroup('messages.forwardMessages', res)

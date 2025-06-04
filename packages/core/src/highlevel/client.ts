@@ -83,6 +83,7 @@ import { getChatPreview } from './methods/chats/get-chat-preview.js'
 import { getChat } from './methods/chats/get-chat.js'
 import { getFullChat } from './methods/chats/get-full-chat.js'
 import { getFullUser } from './methods/chats/get-full-user.js'
+import { getMessageAuthor } from './methods/chats/get-message-author.js'
 import { getNearbyChats } from './methods/chats/get-nearby-chats.js'
 import { getPeer } from './methods/chats/get-peer.js'
 import { getSimilarChannels } from './methods/chats/get-similar-channels.js'
@@ -142,7 +143,7 @@ import { iterForumTopics } from './methods/forums/iter-forum-topics.js'
 import { reorderPinnedForumTopics } from './methods/forums/reorder-pinned-forum-topics.js'
 import { toggleForumTopicClosed } from './methods/forums/toggle-forum-topic-closed.js'
 import { toggleForumTopicPinned } from './methods/forums/toggle-forum-topic-pinned.js'
-import { toggleForum } from './methods/forums/toggle-forum.js'
+import { toggleForum, updateForumSettings } from './methods/forums/toggle-forum.js'
 import { toggleGeneralTopicHidden } from './methods/forums/toggle-general-topic-hidden.js'
 import { createInviteLink } from './methods/invite-links/create-invite-link.js'
 import { editInviteLink } from './methods/invite-links/edit-invite-link.js'
@@ -1695,6 +1696,9 @@ export interface TelegramClient extends ITelegramClient {
      * @param userId  ID of the user or their username
      */
     getFullUser(userId: InputPeerLike): Promise<FullUser>
+
+    getMessageAuthor(
+        message: InputMessageId): Promise<User>
     /**
      * Get nearby chats
      *
@@ -2867,8 +2871,26 @@ export interface TelegramClient extends ITelegramClient {
      *
      * @param chatId  Chat ID or username
      * @param [enabled=false]  Whether the supergroup should be a forum
+     * @deprecated Use {@link updateForumSettings} instead
      */
     toggleForum(chatId: InputPeerLike, enabled?: boolean): Promise<void>
+    /**
+     * Update forum settings of a supergroup.
+     *
+     * Only owner of the supergroup can change this setting.
+     *
+     * **Available**: 👤 users only
+     *
+     * @param chatId  Chat ID or username
+     * @param settings  New settings. `null` is a shorthand for `{ isForum: false }`
+     */
+    updateForumSettings(
+        chatId: InputPeerLike,
+        settings: null | {
+        /** Whether the supergroup should be a forum */
+            isForum: boolean
+            threadsMode: 'list' | 'tabs'
+        }): Promise<void>
     /**
      * Toggle whether "General" topic in a forum is hidden or not
      *
@@ -6452,6 +6474,9 @@ TelegramClient.prototype.getFullChat = function (...args) {
 TelegramClient.prototype.getFullUser = function (...args) {
     return getFullUser(this._client, ...args)
 }
+TelegramClient.prototype.getMessageAuthor = function (...args) {
+    return getMessageAuthor(this._client, ...args)
+}
 TelegramClient.prototype.getNearbyChats = function (...args) {
     return getNearbyChats(this._client, ...args)
 }
@@ -6637,6 +6662,9 @@ TelegramClient.prototype.toggleForumTopicPinned = function (...args) {
 }
 TelegramClient.prototype.toggleForum = function (...args) {
     return toggleForum(this._client, ...args)
+}
+TelegramClient.prototype.updateForumSettings = function (...args) {
+    return updateForumSettings(this._client, ...args)
 }
 TelegramClient.prototype.toggleGeneralTopicHidden = function (...args) {
     return toggleGeneralTopicHidden(this._client, ...args)

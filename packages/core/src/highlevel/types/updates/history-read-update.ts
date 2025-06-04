@@ -11,7 +11,9 @@ export class HistoryReadUpdate {
           | tl.RawUpdateReadChannelInbox
           | tl.RawUpdateReadChannelOutbox
           | tl.RawUpdateReadChannelDiscussionInbox
-          | tl.RawUpdateReadChannelDiscussionOutbox,
+          | tl.RawUpdateReadChannelDiscussionOutbox
+          | tl.RawUpdateReadMonoForumInbox
+          | tl.RawUpdateReadMonoForumOutbox,
     ) {}
 
     /**
@@ -44,6 +46,20 @@ export class HistoryReadUpdate {
     }
 
     /**
+     * Whether this update is about messages in a "monoforum"
+     * (i.e. a chat used for "direct channel messages")
+     */
+    get isMonoForum(): boolean {
+        switch (this.raw._) {
+            case 'updateReadMonoForumOutbox':
+            case 'updateReadMonoForumInbox':
+                return true
+            default:
+                return false
+        }
+    }
+
+    /**
      * Marked peer ID of the chat where the messages were read.
      */
     get chatId(): number {
@@ -55,6 +71,8 @@ export class HistoryReadUpdate {
             case 'updateReadChannelInbox':
             case 'updateReadChannelDiscussionOutbox':
             case 'updateReadChannelDiscussionInbox':
+            case 'updateReadMonoForumOutbox':
+            case 'updateReadMonoForumInbox':
                 return toggleChannelIdMark(this.raw.channelId)
         }
     }
@@ -75,6 +93,8 @@ export class HistoryReadUpdate {
             case 'updateReadHistoryOutbox':
             case 'updateReadChannelOutbox':
             case 'updateReadChannelDiscussionOutbox':
+            case 'updateReadMonoForumOutbox':
+            case 'updateReadMonoForumInbox':
                 return 0
         }
     }
@@ -94,6 +114,8 @@ export class HistoryReadUpdate {
                 return this.raw.maxId
             case 'updateReadChannelDiscussionOutbox':
             case 'updateReadChannelDiscussionInbox':
+            case 'updateReadMonoForumInbox':
+            case 'updateReadMonoForumOutbox':
                 return this.raw.readMaxId
         }
     }
@@ -109,6 +131,8 @@ export class HistoryReadUpdate {
             case 'updateReadHistoryInbox':
             case 'updateReadChannelOutbox':
             case 'updateReadChannelInbox':
+            case 'updateReadMonoForumInbox':
+            case 'updateReadMonoForumOutbox':
                 return 0
             case 'updateReadChannelDiscussionOutbox':
             case 'updateReadChannelDiscussionInbox':
