@@ -192,6 +192,7 @@ export function geoLive(
 export function dice(emoji: string, params: CaptionMixin): InputMediaDice {
     const ret = params as tl.Mutable<InputMediaDice>
     ret.type = 'dice'
+    ret.emoji = emoji
 
     return ret
 }
