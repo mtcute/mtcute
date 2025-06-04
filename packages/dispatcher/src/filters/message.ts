@@ -25,7 +25,7 @@ import type {
     Venue,
     Video,
     Voice,
-    WebPage,
+    WebPageMedia,
 } from '@mtcute/core'
 import type { BusinessMessageContext } from '../context/business-message.js'
 
@@ -113,7 +113,7 @@ export const liveLocation: UpdateFilter<Message, { media: LiveLocation }> = medi
 /** Filter messages containing a game */
 export const game: UpdateFilter<Message, { media: Game }> = mediaOf('game')
 /** Filter messages containing a web page */
-export const webpage: UpdateFilter<Message, { media: WebPage }> = mediaOf('webpage')
+export const webpage: UpdateFilter<Message, { media: WebPageMedia }> = mediaOf('webpage')
 /** Filter messages containing a venue */
 export const venue: UpdateFilter<Message, { media: Venue }> = mediaOf('venue')
 /** Filter messages containing a poll */
