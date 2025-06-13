@@ -19,9 +19,9 @@
     "gen-updates": "node ./scripts/generate-updates.cjs"
   },
   "dependencies": {
-    "@fuman/io": "0.0.14",
-    "@fuman/net": "0.0.14",
-    "@fuman/utils": "0.0.14",
+    "@fuman/io": "0.0.15",
+    "@fuman/net": "0.0.15",
+    "@fuman/utils": "0.0.15",
     "@mtcute/file-id": "workspace:^",
     "@mtcute/tl": "workspace:^",
     "@mtcute/tl-runtime": "workspace:^",

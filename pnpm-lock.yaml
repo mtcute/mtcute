@@ -15,11 +15,11 @@ importers:
         specifier: ^3.11.2
         version: 3.11.2(@typescript-eslint/utils@8.17.0(eslint@9.9.0)(typescript@5.5.4))(@vue/compiler-sfc@3.5.13)(eslint@9.9.0)(typescript@5.5.4)(vitest@3.0.7)
       '@fuman/build':
-        specifier: https://pkg.pr.new/teidesu/fuman/@fuman/build@1d4b30b
-        version: https://pkg.pr.new/teidesu/fuman/@fuman/build@1d4b30b(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@6.2.0(@types/node@22.13.1)(tsx@4.17.0)(yaml@2.6.1))(ws@8.18.1)
+        specifier: 0.0.15
+        version: 0.0.15(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@6.2.0(@types/node@22.13.1)(tsx@4.17.0)(yaml@2.6.1))(ws@8.18.1)
       '@fuman/utils':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@types/bun':
         specifier: 1.1.14
         version: 1.1.14
@@ -145,17 +145,17 @@ importers:
   packages/bun:
     dependencies:
       '@fuman/bun':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@fuman/io':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@fuman/net':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@fuman/utils':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -176,14 +176,14 @@ importers:
   packages/convert:
     dependencies:
       '@fuman/io':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@fuman/net':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@fuman/utils':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -198,14 +198,14 @@ importers:
   packages/core:
     dependencies:
       '@fuman/io':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@fuman/net':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@fuman/utils':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@mtcute/file-id':
         specifier: workspace:^
         version: link:../file-id
@@ -269,17 +269,17 @@ importers:
         specifier: npm:@jsr/db__sqlite@0.12.0
         version: '@jsr/db__sqlite@0.12.0'
       '@fuman/deno':
-        specifier: npm:@jsr/fuman__deno@0.0.14
-        version: '@jsr/fuman__deno@0.0.14'
+        specifier: npm:@jsr/fuman__deno@0.0.15
+        version: '@jsr/fuman__deno@0.0.15'
       '@fuman/io':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@fuman/net':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@fuman/utils':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -303,8 +303,8 @@ importers:
   packages/dispatcher:
     dependencies:
       '@fuman/utils':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -316,8 +316,8 @@ importers:
   packages/file-id:
     dependencies:
       '@fuman/utils':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@mtcute/tl-runtime':
         specifier: workspace:^
         version: link:../tl-runtime
@@ -358,14 +358,14 @@ importers:
   packages/node:
     dependencies:
       '@fuman/net':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@fuman/node':
-        specifier: 0.0.14
-        version: 0.0.14(ws@8.18.1)
+        specifier: 0.0.15
+        version: 0.0.15(ws@8.18.1)
       '@fuman/utils':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -392,11 +392,11 @@ importers:
   packages/test:
     dependencies:
       '@fuman/net':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@fuman/utils':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -430,8 +430,8 @@ importers:
         specifier: 0.1.0
         version: 0.1.0(tough-cookie@4.1.4)(zod@3.23.8)
       '@fuman/utils':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -457,8 +457,8 @@ importers:
   packages/tl-runtime:
     dependencies:
       '@fuman/utils':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       long:
         specifier: 5.2.3
         version: 5.2.3
@@ -475,8 +475,8 @@ importers:
   packages/wasm:
     devDependencies:
       '@fuman/utils':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -490,8 +490,8 @@ importers:
   packages/web:
     dependencies:
       '@fuman/net':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
@@ -1241,9 +1241,8 @@ packages:
     resolution: {integrity: sha512-2b/g5hRmpbb1o4GnTZax9N9m0FXzz9OV42ZzI4rDDMDuHUqigAiQCEWChBWCY4ztAGVRjoWT19v0yMmc5/L5kA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@1d4b30b':
-    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/build@1d4b30b}
-    version: 0.0.14
+  '@fuman/build@0.0.15':
+    resolution: {integrity: sha512-BGohy+SzlPQt2jWXh1xei30iKGZmKsgCIcTWM6fultymQd+IAw8QTeVV/WTxpXexTccx9ScWnTTCExL0ARm+XA==}
     hasBin: true
     peerDependencies:
       typedoc: '>=0.24.0'
@@ -1253,8 +1252,28 @@ packages:
       typedoc:
         optional: true
 
-  '@fuman/bun@0.0.14':
-    resolution: {integrity: sha512-4SDWTTQAkpF5zHun0Awxoh7zDFtkTT0Xn1uBlM8g5uZa5y79c31w9SgW+zPn+a4Lt7UAETDAeCx7UEEM+xbnAQ==}
+  '@fuman/bun@0.0.15':
+    resolution: {integrity: sha512-+NpJgXPVMsGf7t78PXTIA84a/DBCiN+/E51fEJUcI/JYr9wNn4LPlLZilIvFXluTWowgOXveC+AMg0dtCdsFAQ==}
+
+  '@fuman/fetch@0.0.13':
+    resolution: {integrity: sha512-sNi2ruU6P7VAR9Kjvwqv0mJC2TCDL9pqae4dToJ1djaYeUQCRD1l8oIVQZe7WMVpbG18brn5iDdLniKELMHMxw==}
+    peerDependencies:
+      '@badrap/valita': '>=0.4.0'
+      tough-cookie: ^5.0.0 || ^4.0.0
+      valibot: ^0.42.0
+      yup: ^1.0.0
+      zod: ^3.0.0
+    peerDependenciesMeta:
+      '@badrap/valita':
+        optional: true
+      tough-cookie:
+        optional: true
+      valibot:
+        optional: true
+      yup:
+        optional: true
+      zod:
+        optional: true
 
   '@fuman/fetch@0.1.0':
     resolution: {integrity: sha512-q3CWQJ939Kcmrp/9/dUOCRqQi2og4uweSy7QrzeIxKRsz3jYSca1q2mwTQtTnA+9AAq2WNMlcZtgOA9qVJkXJw==}
@@ -1276,52 +1295,14 @@ packages:
       zod:
         optional: true
 
-  '@fuman/fetch@https://pkg.pr.new/teidesu/fuman/@fuman/fetch@1d4b30b8ef84d710a3169acb6300cf619766c12b':
-    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/fetch@1d4b30b8ef84d710a3169acb6300cf619766c12b}
-    version: 0.1.0
-    peerDependencies:
-      '@badrap/valita': '>=0.4.0'
-      tough-cookie: ^5.0.0 || ^4.0.0
-      valibot: ^0.42.0
-      yup: ^1.0.0
-      zod: ^3.0.0
-    peerDependenciesMeta:
-      '@badrap/valita':
-        optional: true
-      tough-cookie:
-        optional: true
-      valibot:
-        optional: true
-      yup:
-        optional: true
-      zod:
-        optional: true
+  '@fuman/io@0.0.15':
+    resolution: {integrity: sha512-e/WbbWKXUp5NUIP4uMx3u9tr2leXnLoo8tCu0HopgoWcdydS5Y4U/75hhm5MqBSZQXWgICzJuvz21O5J6/kTPA==}
 
-  '@fuman/io@0.0.14':
-    resolution: {integrity: sha512-upZlnaLguCsMg1JHpbp/L96uwu8JyO/DRKNbwGFg3PoJRjsjutasduWX23HV2W3Ts/BKgMc5XQpMgezbJ3OsYQ==}
+  '@fuman/net@0.0.15':
+    resolution: {integrity: sha512-lo2TvyoUlBiIvkc4CMMlpTU9OCVyaVWOHj9vTgQbmy7iE3XCVGsID5yr7huF2tXG7QkOex0s55NznRYYGeLPSQ==}
 
-  '@fuman/io@https://pkg.pr.new/teidesu/fuman/@fuman/io@1d4b30b8ef84d710a3169acb6300cf619766c12b':
-    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/io@1d4b30b8ef84d710a3169acb6300cf619766c12b}
-    version: 0.0.14
-
-  '@fuman/net@0.0.14':
-    resolution: {integrity: sha512-FD3+TWHYoc5nSOy4VMHEadP7psPhtgLD+XI9zFszapzaK4wgM3kd3KqzXc+gMe7LltY7h0jtupxoskVxtB9uuw==}
-
-  '@fuman/net@https://pkg.pr.new/teidesu/fuman/@fuman/net@1d4b30b8ef84d710a3169acb6300cf619766c12b':
-    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/net@1d4b30b8ef84d710a3169acb6300cf619766c12b}
-    version: 0.0.14
-
-  '@fuman/node@0.0.14':
-    resolution: {integrity: sha512-z62BG9G4+fZ6PzStU/hmBbqT/8IimoDPGLU/w9uwhhRtEQhlTGb2VE9OegnYL0Rne4USHx+RRAUVZDeIlrGNTw==}
-    peerDependencies:
-      ws: ^8.18.1
-    peerDependenciesMeta:
-      ws:
-        optional: true
-
-  '@fuman/node@https://pkg.pr.new/teidesu/fuman/@fuman/node@1d4b30b8ef84d710a3169acb6300cf619766c12b':
-    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/node@1d4b30b8ef84d710a3169acb6300cf619766c12b}
-    version: 0.0.14
+  '@fuman/node@0.0.15':
+    resolution: {integrity: sha512-MmhKgSiufArPNahEObIOEm8UBgxL4eRA8I3AoujfecWh31bs4u9er7UWqxvNvQd0wFiINTC1KjoK3U2NE6nkhg==}
     peerDependencies:
       ws: ^8.18.1
     peerDependenciesMeta:
@@ -1331,12 +1312,14 @@ packages:
   '@fuman/utils@0.0.1':
     resolution: {integrity: sha512-9zT7TiQEm2leoXVoN1Fs7m0d6bZcJXWDWQl9MhoySb+z0+iXb05PcDuTxTfCAvpGK1XVFf3n+MyN0w1yCKHc7Q==}
 
+  '@fuman/utils@0.0.11':
+    resolution: {integrity: sha512-hrQhduD3gMXRq1Xz1OMS/6l+Ta8ZUr2hr4d2LLI0JdoSJW31TbvE+QfTuQYvLiQ9pkvYPu1MGnW3Ta3irw16Bw==}
+
   '@fuman/utils@0.0.14':
     resolution: {integrity: sha512-HmQo6DXoYBtkN12rZsMSZRTUynByioOHpMZjfrePwUwXuKBYm9F1Rm4R7tGLTNJTG1zMXBJw1Xwy/cRqwzrujw==}
 
-  '@fuman/utils@https://pkg.pr.new/teidesu/fuman/@fuman/utils@1d4b30b8ef84d710a3169acb6300cf619766c12b':
-    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/utils@1d4b30b8ef84d710a3169acb6300cf619766c12b}
-    version: 0.0.14
+  '@fuman/utils@0.0.15':
+    resolution: {integrity: sha512-3H3WzkfG7iLKCa/yNV4s80lYD4yr5hgiNzU13ysLY2BcDqFjM08XGYuLd5wFVp4V8+DA/fe8gIDW96To/JwDyA==}
 
   '@gerrit0/mini-shiki@1.24.4':
     resolution: {integrity: sha512-YEHW1QeAg6UmxEmswiQbOVEg1CW22b1XUD/lNTliOsu0LD0wqoyleFMnmbTp697QE0pcadQiR5cVtbbAPncvpw==}
@@ -1401,17 +1384,17 @@ packages:
   '@jsr/denosaurs__plug@1.0.6':
     resolution: {integrity: sha512-3sRBjWs6Str1+5w8Lj5t4dDNxUJB6RWJaxAf1e04CHwbbPBbyzrzKs2iammkGlEra8yL2RO70+c8x0/52as6XA==, tarball: https://npm.jsr.io/~/11/@jsr/denosaurs__plug/1.0.6.tgz}
 
-  '@jsr/fuman__deno@0.0.14':
-    resolution: {integrity: sha512-DK/11zoNC4/vp8YhIRjpcRDu8YPAV0P0ApF2HT6RsMxLW/8Q93LHuCUNom6zBJzCNBolljYWIHBwQoDVMWc5pQ==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__deno/0.0.14.tgz}
+  '@jsr/fuman__deno@0.0.15':
+    resolution: {integrity: sha512-Z1dMbfeQrTocCXuan92zo/4BiVimkjPfefJcIFAA98L0QFHy1cPS123s3HJPnkxJa2yMqTIny4ovE4floK6iNA==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__deno/0.0.15.tgz}
 
-  '@jsr/fuman__io@0.0.14':
-    resolution: {integrity: sha512-PkR9xm5951uOxoykZ10RzWo7cFF3S5yj1fzstqZLXZvROiB/AW1QMRkf5FiD+jRB48OO6FTVyR4RjN8SmHNECQ==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__io/0.0.14.tgz}
+  '@jsr/fuman__io@0.0.15':
+    resolution: {integrity: sha512-UK0MMNxlYJ77YfiXHQXbPWnN8IVeJUIKiSXVWAUogy44quCUb8brBKqYSr7d3cGFSp4VoMquyPPt7CQQUTeBuw==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__io/0.0.15.tgz}
 
-  '@jsr/fuman__net@0.0.14':
-    resolution: {integrity: sha512-Rn3bxlBxNNWqvXlrUEvF3dod1a75vmQ2M8lInLsHdqwiKyMIi4S7aKgpESVc/xJSF7CqAaQv8zKRCMFRXK/ULg==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__net/0.0.14.tgz}
+  '@jsr/fuman__net@0.0.15':
+    resolution: {integrity: sha512-FupSQDi26PYvL8qMX/oymgY/fY4ZspoSfsEksjBBRZLtFpYj4P3T6vH1PvBKgNReYxLQCx93jzvnzPz35bL/Mw==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__net/0.0.15.tgz}
 
-  '@jsr/fuman__utils@0.0.14':
-    resolution: {integrity: sha512-ZXiDOzPgDtIOR117pQQjXeFJGxJ55rfbBcoP5UlIdwNbtwWzr9+BY4zINrmh2gh/x2A6aFv5x2Wr4/UyuWaTgQ==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__utils/0.0.14.tgz}
+  '@jsr/fuman__utils@0.0.15':
+    resolution: {integrity: sha512-JjlyZK5MVJRt6PbS9M6xqke9p2CGmbOZOEmAZiNh4nnnJ6v/XUlbipcc28KdqAsiY+oduE3QxskNYsG3ICLtmQ==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__utils/0.0.15.tgz}
 
   '@jsr/std__assert@0.217.0':
     resolution: {integrity: sha512-kCGfcXX8lMcZHWrCgFhbdpNloB50MkLwHdRZvZKjZK424F9g+M742jkTDLMOJmwkDoEqFKyNVrGhPtspS4+NvQ==, tarball: https://npm.jsr.io/~/11/@jsr/std__assert/0.217.0.tgz}
@@ -5156,13 +5139,13 @@ snapshots:
     dependencies:
       levn: 0.4.1
 
-  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@1d4b30b(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@6.2.0(@types/node@22.13.1)(tsx@4.17.0)(yaml@2.6.1))(ws@8.18.1)':
+  '@fuman/build@0.0.15(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@6.2.0(@types/node@22.13.1)(tsx@4.17.0)(yaml@2.6.1))(ws@8.18.1)':
     dependencies:
       '@drizzle-team/brocli': 0.10.2
-      '@fuman/fetch': https://pkg.pr.new/teidesu/fuman/@fuman/fetch@1d4b30b8ef84d710a3169acb6300cf619766c12b(tough-cookie@4.1.4)(zod@3.23.8)
-      '@fuman/io': https://pkg.pr.new/teidesu/fuman/@fuman/io@1d4b30b8ef84d710a3169acb6300cf619766c12b
-      '@fuman/node': https://pkg.pr.new/teidesu/fuman/@fuman/node@1d4b30b8ef84d710a3169acb6300cf619766c12b(ws@8.18.1)
-      '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@1d4b30b8ef84d710a3169acb6300cf619766c12b
+      '@fuman/fetch': 0.0.13(tough-cookie@4.1.4)(zod@3.23.8)
+      '@fuman/io': 0.0.15
+      '@fuman/node': 0.0.15(ws@8.18.1)
+      '@fuman/utils': 0.0.15
       cross-spawn: 7.0.6
       detect-indent: 7.0.1
       js-yaml: 4.1.0
@@ -5182,11 +5165,18 @@ snapshots:
       - ws
       - yup
 
-  '@fuman/bun@0.0.14':
+  '@fuman/bun@0.0.15':
     dependencies:
-      '@fuman/io': 0.0.14
-      '@fuman/net': 0.0.14
-      '@fuman/utils': 0.0.14
+      '@fuman/io': 0.0.15
+      '@fuman/net': 0.0.15
+      '@fuman/utils': 0.0.15
+
+  '@fuman/fetch@0.0.13(tough-cookie@4.1.4)(zod@3.23.8)':
+    dependencies:
+      '@fuman/utils': 0.0.11
+    optionalDependencies:
+      tough-cookie: 4.1.4
+      zod: 3.23.8
 
   '@fuman/fetch@0.1.0(tough-cookie@4.1.4)(zod@3.23.8)':
     dependencies:
@@ -5195,52 +5185,30 @@ snapshots:
       tough-cookie: 4.1.4
       zod: 3.23.8
 
-  '@fuman/fetch@https://pkg.pr.new/teidesu/fuman/@fuman/fetch@1d4b30b8ef84d710a3169acb6300cf619766c12b(tough-cookie@4.1.4)(zod@3.23.8)':
+  '@fuman/io@0.0.15':
     dependencies:
-      '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@1d4b30b8ef84d710a3169acb6300cf619766c12b
-    optionalDependencies:
-      tough-cookie: 4.1.4
-      zod: 3.23.8
+      '@fuman/utils': 0.0.15
 
-  '@fuman/io@0.0.14':
+  '@fuman/net@0.0.15':
     dependencies:
-      '@fuman/utils': 0.0.14
+      '@fuman/io': 0.0.15
+      '@fuman/utils': 0.0.15
 
-  '@fuman/io@https://pkg.pr.new/teidesu/fuman/@fuman/io@1d4b30b8ef84d710a3169acb6300cf619766c12b':
+  '@fuman/node@0.0.15(ws@8.18.1)':
     dependencies:
-      '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@1d4b30b8ef84d710a3169acb6300cf619766c12b
-
-  '@fuman/net@0.0.14':
-    dependencies:
-      '@fuman/io': 0.0.14
-      '@fuman/utils': 0.0.14
-
-  '@fuman/net@https://pkg.pr.new/teidesu/fuman/@fuman/net@1d4b30b8ef84d710a3169acb6300cf619766c12b':
-    dependencies:
-      '@fuman/io': https://pkg.pr.new/teidesu/fuman/@fuman/io@1d4b30b8ef84d710a3169acb6300cf619766c12b
-      '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@1d4b30b8ef84d710a3169acb6300cf619766c12b
-
-  '@fuman/node@0.0.14(ws@8.18.1)':
-    dependencies:
-      '@fuman/io': 0.0.14
-      '@fuman/net': 0.0.14
-      '@fuman/utils': 0.0.14
-    optionalDependencies:
-      ws: 8.18.1
-
-  '@fuman/node@https://pkg.pr.new/teidesu/fuman/@fuman/node@1d4b30b8ef84d710a3169acb6300cf619766c12b(ws@8.18.1)':
-    dependencies:
-      '@fuman/io': https://pkg.pr.new/teidesu/fuman/@fuman/io@1d4b30b8ef84d710a3169acb6300cf619766c12b
-      '@fuman/net': https://pkg.pr.new/teidesu/fuman/@fuman/net@1d4b30b8ef84d710a3169acb6300cf619766c12b
-      '@fuman/utils': https://pkg.pr.new/teidesu/fuman/@fuman/utils@1d4b30b8ef84d710a3169acb6300cf619766c12b
+      '@fuman/io': 0.0.15
+      '@fuman/net': 0.0.15
+      '@fuman/utils': 0.0.15
     optionalDependencies:
       ws: 8.18.1
 
   '@fuman/utils@0.0.1': {}
 
+  '@fuman/utils@0.0.11': {}
+
   '@fuman/utils@0.0.14': {}
 
-  '@fuman/utils@https://pkg.pr.new/teidesu/fuman/@fuman/utils@1d4b30b8ef84d710a3169acb6300cf619766c12b': {}
+  '@fuman/utils@0.0.15': {}
 
   '@gerrit0/mini-shiki@1.24.4':
     dependencies:
@@ -5318,21 +5286,21 @@ snapshots:
       '@jsr/std__fs': 0.221.0
       '@jsr/std__path': 0.221.0
 
-  '@jsr/fuman__deno@0.0.14':
+  '@jsr/fuman__deno@0.0.15':
     dependencies:
-      '@jsr/fuman__io': 0.0.14
-      '@jsr/fuman__net': 0.0.14
+      '@jsr/fuman__io': 0.0.15
+      '@jsr/fuman__net': 0.0.15
 
-  '@jsr/fuman__io@0.0.14':
+  '@jsr/fuman__io@0.0.15':
     dependencies:
-      '@jsr/fuman__utils': 0.0.14
+      '@jsr/fuman__utils': 0.0.15
 
-  '@jsr/fuman__net@0.0.14':
+  '@jsr/fuman__net@0.0.15':
     dependencies:
-      '@jsr/fuman__io': 0.0.14
-      '@jsr/fuman__utils': 0.0.14
+      '@jsr/fuman__io': 0.0.15
+      '@jsr/fuman__utils': 0.0.15
 
-  '@jsr/fuman__utils@0.0.14': {}
+  '@jsr/fuman__utils@0.0.15': {}
 
   '@jsr/std__assert@0.217.0':
     dependencies:
@@ -5424,9 +5392,9 @@ snapshots:
 
   '@mtcute/node@file:packages/node(ws@8.18.1)':
     dependencies:
-      '@fuman/net': 0.0.14
-      '@fuman/node': 0.0.14(ws@8.18.1)
-      '@fuman/utils': 0.0.14
+      '@fuman/net': 0.0.15
+      '@fuman/node': 0.0.15(ws@8.18.1)
+      '@fuman/utils': 0.0.15
       '@mtcute/core': link:packages/core
       '@mtcute/html-parser': link:packages/html-parser
       '@mtcute/markdown-parser': link:packages/markdown-parser

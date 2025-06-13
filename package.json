@@ -46,8 +46,8 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.11.2",
-    "@fuman/build": "https://pkg.pr.new/teidesu/fuman/@fuman/build@1d4b30b",
-    "@fuman/utils": "0.0.14",
+    "@fuman/build": "0.0.15",
+    "@fuman/utils": "0.0.15",
     "@types/bun": "1.1.14",
     "@types/deno": "2.2.0",
     "@types/node": "22.13.1",
