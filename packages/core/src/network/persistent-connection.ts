@@ -5,7 +5,7 @@ import type { IPacketCodec, ITelegramConnection, TelegramTransport } from './tra
 
 import { FramedReader, FramedWriter } from '@fuman/io'
 
-import { ConnectionClosedError, PersistentConnection as FumanPersistentConnection } from '@fuman/net'
+import { ConnectionClosedError, PersistentConnection as FumanPersistentConnection, ip } from '@fuman/net'
 import { Emitter, timers } from '@fuman/utils'
 
 export interface PersistentConnectionParams {
@@ -87,7 +87,8 @@ export abstract class PersistentConnection {
         const uidPrefix = `[UID ${this._uid}] `
         if (this._fuman.isConnected) {
             const dc = this.params.dc
-            this.log.prefix = `${uidPrefix}[DC ${dc.id} @ ${dc.ipAddress}:${dc.port}] `
+            const prettifiedIp = ip.prettify(dc.ipAddress, { encloseIpv6: true })
+            this.log.prefix = `${uidPrefix}[DC ${dc.id} @ ${prettifiedIp}:${dc.port}] `
         } else if (this._fuman.isConnecting) {
             this.log.prefix = `${uidPrefix}[connecting] `
         } else {
