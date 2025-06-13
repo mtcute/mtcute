@@ -337,7 +337,11 @@ export class UpdatesManager {
         }
 
         if (this.pendingUpdateContainers.length % WARN_EVERY === 0) {
-            this.log.warn('%d pending update containers, updatesLoopActive = %b. possible memory leak', this.pendingUpdateContainers.length, this.updatesLoopActive)
+            if (this.updatesLoopActive) {
+                this.log.warn('%d pending update containers, but the updates loop is not active. did you forget to start it?', this.pendingUpdateContainers.length)
+            } else {
+                this.log.warn('%d pending update containers, can\'t keep up!', this.pendingUpdateContainers.length)
+            }
         }
 
         this.updatesLoopCv.notify()
