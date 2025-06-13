@@ -87,7 +87,7 @@ export abstract class PersistentConnection {
         const uidPrefix = `[UID ${this._uid}] `
         if (this._fuman.isConnected) {
             const dc = this.params.dc
-            this.log.prefix = `${uidPrefix}[DC ${dc.id}:${dc.ipAddress}:${dc.port}] `
+            this.log.prefix = `${uidPrefix}[DC ${dc.id} @ ${dc.ipAddress}:${dc.port}] `
         } else if (this._fuman.isConnecting) {
             this.log.prefix = `${uidPrefix}[connecting] `
         } else {
