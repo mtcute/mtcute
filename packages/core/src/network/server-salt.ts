@@ -32,9 +32,23 @@ export class ServerSaltManager {
 
     private _scheduleNext(): void {
         if (this._timer) timers.clearTimeout(this._timer)
-        if (this._futureSalts.length === 0) return
 
-        const next = this._futureSalts.shift()!
+        const now = Date.now() / 1000
+
+        // find the first valid salt from the stored ones
+        let next: mtp.RawMt_future_salt | undefined
+        while (this._futureSalts.length !== 0) {
+            const salt = this._futureSalts.shift()!
+            if (salt.validSince <= now && now <= salt.validUntil) {
+                next = salt
+                break
+            }
+        }
+
+        if (!next) {
+            // no valid salts left, nothing to schedule
+            return
+        }
 
         this._timer = timers.setTimeout(
             () => {
