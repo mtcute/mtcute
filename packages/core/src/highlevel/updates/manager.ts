@@ -13,12 +13,15 @@ import {
     EarlyTimer,
     getBarePeerId,
     getMarkedPeerId,
+    isInputPeerChannel,
+    isInputPeerUser,
     parseMarkedPeerId,
     SortedArray,
     toggleChannelIdMark,
     toInputChannel,
+    toInputUser,
 } from '../../utils/index.js'
-import { _getChannelsBatched } from '../methods/chats/batched-queries.js'
+import { _getChannelsBatched, _getUsersBatched } from '../methods/chats/batched-queries.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
 
 import { type PendingUpdate, type PendingUpdateContainer, RawUpdateInfo, type UpdatesManagerParams } from './types.js'
@@ -1315,12 +1318,11 @@ export class UpdatesManager {
                             }
 
                             // the peer will be automatically cached by the `.call()`, we don't have to do anything
-                            // todo
-                            // if (isInputPeerChannel(peer)) {
-                            //     return _getChannelsBatched(client, toInputChannel(peer))
-                            // } else if (isInputPeerUser(peer)) {
-                            //     return _getUsersBatched(client, toInputUser(peer))
-                            // }
+                            if (isInputPeerChannel(peer)) {
+                                return _getChannelsBatched(client, toInputChannel(peer))
+                            } else if (isInputPeerUser(peer)) {
+                                return _getUsersBatched(client, toInputUser(peer))
+                            }
 
                             log.warn('cannot fetch full peer %d - unknown peer type %s', id, peer._)
                         })
