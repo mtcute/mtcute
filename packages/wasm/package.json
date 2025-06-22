@@ -1,7 +1,7 @@
 {
   "name": "@mtcute/wasm",
   "type": "module",
-  "version": "0.23.0",
+  "version": "0.24.3",
   "private": true,
   "description": "WASM implementation of common algorithms used in Telegram",
   "author": "alina sireneva <alina@tei.su>",

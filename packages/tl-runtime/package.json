@@ -1,7 +1,7 @@
 {
   "name": "@mtcute/tl-runtime",
   "type": "module",
-  "version": "0.23.0",
+  "version": "0.24.3",
   "private": true,
   "description": "Runtime for TL",
   "author": "alina sireneva <alina@tei.su>",
