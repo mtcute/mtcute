@@ -1,5 +1,6 @@
-import type { RpcCallMiddleware } from '../network-manager.js'
+import type { mtp } from '@mtcute/tl'
 
+import type { RpcCallMiddleware } from '../network-manager.js'
 import { tl } from '@mtcute/tl'
 import { MtTimeoutError } from '../../types/errors.js'
 import { combineAbortSignals } from '../../utils/abort-signal.js'
@@ -45,6 +46,7 @@ export function internalErrorsHandler(params: InternalErrorsHandlerOptions): Rpc
 
     return async (ctx, next) => {
         const numRetries = ctx.params?.maxRetryCount ?? maxRetries
+        let lastError!: mtp.RawMt_rpc_error
 
         for (let i = 0; i <= numRetries; i++) {
             const res = await next(ctx)
@@ -52,6 +54,8 @@ export function internalErrorsHandler(params: InternalErrorsHandlerOptions): Rpc
 
             if (!CLIENT_ERRORS.has(res.errorCode)) {
                 if (exceptErrorsSet?.has(res.errorMessage)) return res
+
+                lastError = res
 
                 if (ctx.params?.throw503 && res.errorCode === -503) {
                     throw new MtTimeoutError()
@@ -78,5 +82,7 @@ export function internalErrorsHandler(params: InternalErrorsHandlerOptions): Rpc
 
             return res
         }
+
+        return lastError
     }
 }
