@@ -94,5 +94,5 @@ export async function sendCopy(
         )
     }
 
-    return sendText(client, toChatId, msg.raw.message, rest)
+    return sendText(client, toChatId, msg.textWithEntities, rest)
 }
