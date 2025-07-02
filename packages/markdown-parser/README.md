@@ -75,6 +75,20 @@ followed with a line break, and ends with <code>\`\`\`</code> (triple backtick),
 | <pre><code>\`\`\`<br>hello\`\`\`</code></pre>                      | `hello`                   | `<pre>hello</pre>`                                                                          |
 | <pre><code>\`\`\`javascript<br>const a = ``<br>\`\`\`</code></pre> | <code>const a = ``</code> | <pre><code>&lt;pre language="javascript"&gt;<br>  const a = ``<br>&lt;/pre&gt;</code></pre> |
 
+### Blockquote
+
+Blockquote is a block of text formatted as a quote.
+
+Every line in a blockquote is prefixed with `>` character. Due to limitations of markdown,
+it is not possible to define expandable blockquotes, prefer using HTML instead.
+
+```
+> This is a blockquote.
+> Some more text.
+> And some more.
+And this is no longer a blockquote.
+```
+
 ### Links
 
 Links are parsed exactly the same as standard markdown (except references are not supported).

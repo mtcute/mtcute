@@ -47,17 +47,15 @@ Inline entities are entities that are in-line with other text. We support these 
 
 | Name             | Code                                                             | Result (visual)              |
 | ---------------- | ---------------------------------------------------------------- | ---------------------------- |
-| Bold             | `<b>text</b>`                                                    | **text**                     |
-| Italic           | `<b>text</b>`                                                    | _text_                       |
+| Bold             | `<b>text</b>`, `<strong>text</strong>`                           | **text**                     |
+| Italic           | `<i>text</i>`, `<em>text</em>`                                   | _text_                       |
 | Underline        | `<u>text</u>`                                                    | <u>text</u>                  |
-| Strikethrough    | `<s>text</s>`                                                    | ~~text~~                     |
+| Strikethrough    | `<s>text</s>`, `<del>text</del>`, `<strike>text</strike>`        | ~~text~~                     |
 | Spoiler          | `<spoiler>text</spoiler>` (or `tg-spoiler`)                      | N/A                          |
 | Monospace (code) | `<code>text</code>`                                              | `text`                       |
 | Text link        | `<a href="https://google.com">Google</a>`                        | [Google](https://google.com) |
 | Text mention     | `<a href="tg://user?id=1234567">Name</a>`                        | N/A                          |
-| Custom emoji     | `<emoji id="12345">😄</emoji>` (or `<tg-emoji emoji-id="...">`) | N/A                          |
-
-> **Note**: `<strong>`, `<em>`, `<ins>`, `<strike>`, `<del>` are not supported because they are redundant
+| Custom emoji     | `<emoji id="12345">😄</emoji>` (or `<tg-emoji emoji-id="...">`)  | N/A                          |
 
 > **Note**: It is up to the client to look up user's input entity by ID for text mentions.
 > In most cases, you can only use IDs of users that were seen by the client while using given storage.
@@ -69,7 +67,9 @@ Inline entities are entities that are in-line with other text. We support these 
 
 ## Block entities
 
-The only block entity that Telegram supports is `<pre>`, therefore it is the only tag we support too.
+The only block entity that Telegram supports are `<pre>` and `<blockquote>`, therefore it is the only tags we support too.
+
+## `<pre>`
 
 Optionally, language for `<pre>` block can be specified like this:
 
@@ -81,6 +81,20 @@ Optionally, language for `<pre>` block can be specified like this:
 | ----------------------------------------------------------------------------------- | ---------------------------- |
 | <pre>&lt;pre&gt;multiline\ntext&lt;/pre&gt;</pre>                                   | <pre>multiline<br>text</pre> |
 | <pre>&lt;pre language="javascript"&gt;<br>  export default 42<br>&lt;/pre&gt;</pre> | <pre>export default 42</pre> |
+
+## `<blockquote>`
+
+`<blockquote>` can be "expandable", in which case clients will only render the first three lines of the blockquote,
+and the rest will only be shown when the user clicks on the blockquote.
+
+```html
+<blockquote expandable>
+  This is a blockquote that will be collapsed by default.<br/>
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit.<br/>
+  Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.<br/>
+  This text is not shown until the blockquote is expanded.
+</blockquote>
+```
 
 ## Nested and overlapped entities
 

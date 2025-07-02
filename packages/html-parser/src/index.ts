@@ -105,7 +105,7 @@ function parse(
                         _: 'messageEntityBlockquote',
                         offset: plainText.length,
                         length: 0,
-                        collapsed: 'collapsible' in attribs,
+                        collapsed: 'collapsible' in attribs || 'expandable' in attribs,
                     }
                     break
                 case 'code':
