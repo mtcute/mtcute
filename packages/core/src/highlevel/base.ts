@@ -188,6 +188,7 @@ export class BaseTelegramClient implements ITelegramClient {
 
     async notifyLoggedOut(): Promise<void> {
         this.mt.network.notifyLoggedOut()
+        this.updates?.notifyLoggedOut()
 
         this.log.prefix = '[USER n/a] '
         await this.storage.self.store(null)

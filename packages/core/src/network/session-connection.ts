@@ -797,6 +797,8 @@ export class SessionConnection extends PersistentConnection {
             return
         }
 
+        removeFromLongArray(this._session.queuedStateReq, reqMsgId)
+
         const rpc = msg.rpc
 
         rpc.resetAbortSignal?.()
@@ -996,8 +998,9 @@ export class SessionConnection extends PersistentConnection {
                     this._onMessageAcked(rpc.containerId)
                 }
 
-                // this message could also already be in some queue,
-                removeFromLongArray(this._session.queuedStateReq, msgId)
+                // this message could also already be in resend queue
+                // note: we DO NOT remove it from state queue because the server might forget
+                // about the message and we'll end up with an infinite promise
                 removeFromLongArray(this._session.queuedResendReq, msgId)
 
                 // if resend/state was already requested, it will simply be ignored
