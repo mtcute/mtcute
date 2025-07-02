@@ -53,7 +53,8 @@ export async function uploadMedia(
         case 'inputMediaPoll':
         case 'inputMediaDice':
         case 'inputMediaPaidMedia':
-            throw new MtArgumentError("This media can't be uploaded")
+        case 'inputMediaTodo':
+            throw new MtArgumentError(`This media (${normMedia._}) can't be uploaded`)
     }
 
     const res = await client.call({

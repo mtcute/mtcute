@@ -15,7 +15,7 @@ export class StarsStatus {
     }
 
     /** Current Telegram Stars balance */
-    get balance(): tl.RawStarsAmount {
+    get balance(): tl.TypeStarsAmount {
         return this.raw.balance
     }
 

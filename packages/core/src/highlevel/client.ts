@@ -157,6 +157,7 @@ import { hideJoinRequest } from './methods/invite-links/hide-join-request.js'
 import { iterInviteLinkMembers } from './methods/invite-links/iter-invite-link-members.js'
 import { iterInviteLinks } from './methods/invite-links/iter-invite-links.js'
 import { revokeInviteLink } from './methods/invite-links/revoke-invite-link.js'
+import { appendTodoList } from './methods/messages/append-todo-list.js'
 import { closePoll } from './methods/messages/close-poll.js'
 import { deleteMessages, deleteMessagesById } from './methods/messages/delete-messages.js'
 import { deleteScheduledMessages } from './methods/messages/delete-scheduled-messages.js'
@@ -203,6 +204,7 @@ import { sendText } from './methods/messages/send-text.js'
 import { sendTyping } from './methods/messages/send-typing.js'
 import { sendVote } from './methods/messages/send-vote.js'
 import { setTyping } from './methods/messages/set-typing.js'
+import { toggleTodoCompleted } from './methods/messages/toggle-todo-completed.js'
 import { translateMessage } from './methods/messages/translate-message.js'
 import { translateText } from './methods/messages/translate-text.js'
 import { unpinAllMessages } from './methods/messages/unpin-all-messages.js'
@@ -3215,6 +3217,22 @@ export interface TelegramClient extends ITelegramClient {
         chatId: InputPeerLike,
         link: string | ChatInviteLink): Promise<ChatInviteLink>
     /**
+     * Append item(s) to a todo list
+     *
+     * @returns  Service message about the appended todo item(s), if any.
+     */
+    appendTodoList(
+        params: InputMessageId & {
+        /** Items to append */
+            items: MaybeArray<InputText>
+
+            /**
+             * Whether to dispatch the new message event
+             * to the client's update handler.
+             */
+            shouldDispatch?: true
+        }): Promise<Message | null>
+    /**
      * Close a poll sent by you.
      *
      * Once closed, poll can't be re-opened, and nobody
@@ -4459,6 +4477,24 @@ export interface TelegramClient extends ITelegramClient {
              */
             threadId?: number
         }): Promise<void>
+    /**
+     * Toggle the completion status of a todo list item(s)
+     *
+     * @returns  Service message about the toggled items, if any.
+     */
+    toggleTodoCompleted(
+        params: InputMessageId & {
+        /** Items to mark as completed */
+            completed: MaybeArray<number>
+            /** Items to mark as uncompleted */
+            uncompleted: MaybeArray<number>
+
+            /**
+             * Whether to dispatch the new message event
+             * to the client's update handler.
+             */
+            shouldDispatch?: true
+        }): Promise<Message | null>
     /**
      * Translate message text to a given language.
      *
@@ -6705,6 +6741,9 @@ TelegramClient.prototype.iterInviteLinks = function (...args) {
 TelegramClient.prototype.revokeInviteLink = function (...args) {
     return revokeInviteLink(this._client, ...args)
 }
+TelegramClient.prototype.appendTodoList = function (...args) {
+    return appendTodoList(this._client, ...args)
+}
 TelegramClient.prototype.closePoll = function (...args) {
     return closePoll(this._client, ...args)
 }
@@ -6878,6 +6917,9 @@ TelegramClient.prototype.sendVote = function (...args) {
 }
 TelegramClient.prototype.setTyping = function (...args) {
     return setTyping(this._client, ...args)
+}
+TelegramClient.prototype.toggleTodoCompleted = function (...args) {
+    return toggleTodoCompleted(this._client, ...args)
 }
 TelegramClient.prototype.translateMessage = function (...args) {
     return translateMessage(this._client, ...args)

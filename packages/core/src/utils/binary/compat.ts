@@ -87,6 +87,26 @@ function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessage
     }
 }
 
+function mapCompatMessage(obj: tlCompat.TypeMessage): tl.TypeMessage {
+    switch (obj._) {
+        case 'message_layer199':
+        case 'message_layer204':
+            return {
+                ...obj,
+                _: 'message',
+                media: obj.media ? mapCompatMessageMedia(obj.media) : undefined,
+            }
+        case 'messageService_layer204':
+            return {
+                ...obj,
+                _: 'messageService',
+                action: mapCompatMessageAction(obj.action),
+            }
+        default:
+            return obj
+    }
+}
+
 function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     switch (obj._) {
         case 'starGiftUnique_layer197':
@@ -99,6 +119,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
         case 'messageMediaDocument_layer197':
             return mapCompatMessageMedia(obj)
         case 'channelFull_layer197':
+        case 'channelFull_layer204':
             return replaceType(obj, 'channelFull')
         case 'messageActionStarGiftUnique_layer197':
         case 'messageActionStarGift_layer197':
@@ -122,16 +143,14 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
                 _: 'channel',
                 emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
             }
-        case 'message_layer199':
-            return {
-                ...obj,
-                _: 'message',
-                media: obj.media ? mapCompatMessageMedia(obj.media) : undefined,
-            }
         case 'phoneCallDiscardReasonAllowGroupCall_layer202':
             // removed constructor in favor of phoneCallDiscardReasonMigrateConferenceCall,
             // which requires extra info we don't have
             return { _: 'phoneCallDiscardReasonMissed' }
+        case 'message_layer199':
+        case 'message_layer204':
+        case 'messageService_layer204':
+            return mapCompatMessage(obj)
         default:
             return obj
     }

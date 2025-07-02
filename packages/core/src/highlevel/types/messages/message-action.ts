@@ -601,6 +601,45 @@ export interface ActionPaidMessagesRefunded {
     count: number
 }
 
+/** One or more items in a todo list were completed or uncompleted */
+export interface ActionTodoCompletions {
+    readonly type: 'todo_completions'
+
+    /** IDs of items that were marked as completed */
+    completed: number[]
+
+    /** IDs of items that were marked as non-completed */
+    uncompleted: number[]
+}
+
+/** One or more items were added to a todo list */
+export interface ActionTodoAppendTasks {
+    readonly type: 'todo_append_tasks'
+
+    /** Items that were added to the list */
+    list: tl.RawTodoItem[]
+}
+
+/** A TON gift was sent */
+export interface ActionTonGift {
+    readonly type: 'ton_gift'
+
+    /** Currency for {@link amount} */
+    currency: string
+
+    /** Amount of the gift in fiat currency */
+    amount: tl.Long
+
+    /** Crypto currency in which it was paid for */
+    cryptoCurrency: string
+
+    /** Amount of the gift in the crypto currency */
+    cryptoAmount: tl.Long
+
+    /** Transaction ID */
+    transactionId?: string
+}
+
 export type MessageAction =
   | ActionChatCreated
   | ActionChannelCreated
@@ -650,6 +689,9 @@ export type MessageAction =
   | ActionStarGift
   | ActionPaidMessagesPaid
   | ActionPaidMessagesRefunded
+  | ActionTodoCompletions
+  | ActionTodoAppendTasks
+  | ActionTonGift
   | null
 
 /** @internal */
@@ -657,6 +699,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
     // todo - passport
     // messageActionSecureValuesSentMe#1b287353 values:Vector<SecureValue> credentials:SecureCredentialsEncrypted
     // messageActionSecureValuesSent#d95c6154 types:Vector<SecureValueType>
+    // todo: suggested posts
 
     switch (act._) {
         case 'messageActionChatCreate':
@@ -997,6 +1040,26 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 type: 'messages_refunded',
                 stars: act.stars,
                 count: act.count,
+            }
+        case 'messageActionTodoCompletions':
+            return {
+                type: 'todo_completions',
+                completed: act.completed,
+                uncompleted: act.incompleted,
+            }
+        case 'messageActionTodoAppendTasks':
+            return {
+                type: 'todo_append_tasks',
+                list: act.list,
+            }
+        case 'messageActionGiftTon':
+            return {
+                type: 'ton_gift',
+                currency: act.currency,
+                amount: act.amount,
+                cryptoCurrency: act.cryptoCurrency,
+                cryptoAmount: act.cryptoAmount,
+                transactionId: act.transactionId,
             }
         default:
             return null

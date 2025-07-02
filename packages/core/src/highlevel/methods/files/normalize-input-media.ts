@@ -238,6 +238,23 @@ export async function _normalizeInputMedia(
         }
     }
 
+    if (media.type === 'todo') {
+        return {
+            _: 'inputMediaTodo',
+            todo: {
+                _: 'todoList',
+                othersCanAppend: media.othersCanAppend,
+                othersCanComplete: media.othersCanComplete,
+                title: inputTextToTl(media.title),
+                list: media.items.map((it, idx) => ({
+                    _: 'todoItem',
+                    id: idx,
+                    title: inputTextToTl(it),
+                })),
+            },
+        }
+    }
+
     let inputFile: tl.TypeInputFile | undefined
     let thumb: tl.TypeInputFile | undefined
     let mime = 'application/octet-stream'

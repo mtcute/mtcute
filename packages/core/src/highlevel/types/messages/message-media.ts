@@ -17,6 +17,7 @@ import { PaidMedia } from '../media/paid-media.js'
 import { Photo } from '../media/photo.js'
 import { Poll } from '../media/poll.js'
 import { MediaStory } from '../media/story.js'
+import { TodoList } from '../media/todo.js'
 import { Venue } from '../media/venue.js'
 import { WebPageMedia } from '../media/web-page.js'
 
@@ -39,6 +40,7 @@ export type MessageMedia =
   | Invoice
   | MediaStory
   | PaidMedia
+  | TodoList
   | null
 
 export type MessageMediaType = Exclude<MessageMedia, null>['type']
@@ -110,6 +112,12 @@ export function _messageMediaFromTl(peers: PeersIndex | null, m: tl.TypeMessageM
 
             return new PaidMedia(m, extended)
         }
+        case 'messageMediaToDo':
+            if (!peers) {
+                throw new MtTypeAssertionError("can't create todo without peers index", 'PeersIndex', 'null')
+            }
+
+            return new TodoList(m, peers)
         default:
             return null
     }

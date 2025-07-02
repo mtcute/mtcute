@@ -25,6 +25,7 @@ import { _messageMediaFromTl } from './message-media.js'
 import { MessageReactions } from './message-reactions.js'
 import { MessageRepliesInfo } from './message-replies.js'
 import { RepliedMessageInfo } from './replied-message.js'
+import { SuggestedPostInfo } from './suggested-post.js'
 
 /**
  * A Telegram message.
@@ -521,6 +522,24 @@ export class Message {
     }
 
     /**
+     * If this message was a paid suggested post, the type of payment
+     * (either `stars` or `ton`)
+     */
+    get suggestedPaid(): 'ton' | 'stars' | null {
+        if (this.raw._ !== 'message') return null
+        if (this.raw.paidSuggestedPostStars) return 'stars'
+        if (this.raw.paidSuggestedPostTon) return 'ton'
+        return null
+    }
+
+    /** If this is/was a suggested post, information about it */
+    get suggestedPost(): SuggestedPostInfo | null {
+        if (this.raw._ !== 'message') return null
+        if (!this.raw.suggestedPost) return null
+        return new SuggestedPostInfo(this.raw.suggestedPost)
+    }
+
+    /**
      * Generated permalink to this message, only for groups and channels
      *
      * @throws MtArgumentError  In case the chat does not support message links
@@ -550,5 +569,6 @@ memoizeGetters(Message, [
     'markup',
     'reactions',
     'factCheck',
+    'suggestedPost',
 ])
 makeInspectable(Message, ['isScheduled'], ['link'])

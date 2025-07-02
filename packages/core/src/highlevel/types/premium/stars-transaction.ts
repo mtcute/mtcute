@@ -34,6 +34,8 @@ import { StarGift } from './stars-gift.js'
  *  - `premium_gift`: This transaction is a payment for a premium gift to a user
  *  - `api_*`: This transaction is a payment for paid API features
  *     - `api_floodskip`: This transaction is a payment for a paid bot broadcast
+ *  - `bot_referral`: This transaction is proceeds from a bot referral program
+ *  - `ads_proceeds`: This transaction is proceeds from Telegram Ads
  */
 export type StarsTransactionType =
   | { type: 'unsupported' }
@@ -171,6 +173,22 @@ export type StarsTransactionType =
       /** The number of billed API calls */
       count: number
   }
+  | {
+      type: 'bot_referral'
+      /** Related bot */
+      peer: Peer
+      /** Commission in permille */
+      commission: number
+  }
+  | {
+      type: 'ads_proceeds'
+      /** Related peer */
+      peer: Peer
+      /** Start of the period */
+      fromDate: Date
+      /** End of the period */
+      toDate: Date
+  }
 
 export class StarsTransaction {
     constructor(
@@ -192,22 +210,27 @@ export class StarsTransaction {
      * Whether this transaction is outgoing or incoming
      */
     get direction(): 'incoming' | 'outgoing' {
-        let isNegative = this.raw.stars.amount.isNegative()
+        let isNegative = this.raw.amount.amount.isNegative()
         if (this.raw.refund) isNegative = !isNegative
 
         return isNegative ? 'outgoing' : 'incoming'
     }
 
-    /** Absolute amount of stars in the transaction */
-    get amount(): tl.RawStarsAmount {
-        let res = this.raw.stars
+    /** Absolute amount of stars/TON in the transaction */
+    get amount(): tl.TypeStarsAmount {
+        let res = this.raw.amount
 
         if (res.amount.isNegative()) {
-            res = {
-                ...res,
-                nanos: Math.abs(res.nanos),
-                amount: res.amount.negate(),
-            }
+            res = res._ === 'starsAmount'
+                ? {
+                    ...res,
+                    nanos: Math.abs(res.nanos),
+                    amount: res.amount.negate(),
+                }
+                : {
+                    _: 'starsTonAmount',
+                    amount: res.amount.negate(),
+                }
         }
 
         return res
@@ -342,6 +365,23 @@ export class StarsTransaction {
                         type: 'channel_subscription',
                         peer,
                         period: this.raw.subscriptionPeriod,
+                    }
+                }
+
+                if (this.raw.starrefCommissionPermille) {
+                    return {
+                        type: 'bot_referral',
+                        peer,
+                        commission: this.raw.starrefCommissionPermille,
+                    }
+                }
+
+                if (this.raw.adsProceedsFromDate && this.raw.adsProceedsToDate) {
+                    return {
+                        type: 'ads_proceeds',
+                        peer,
+                        fromDate: new Date(this.raw.adsProceedsFromDate * 1000),
+                        toDate: new Date(this.raw.adsProceedsToDate * 1000),
                     }
                 }
 

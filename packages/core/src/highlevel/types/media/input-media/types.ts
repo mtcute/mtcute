@@ -603,6 +603,22 @@ export interface InputMediaPaidMedia extends CaptionMixin {
     payload?: string
 }
 
+export interface InputMediaTodoList {
+    type: 'todo'
+
+    /** Whether other people in the chat can add items to the list */
+    othersCanAppend?: boolean
+
+    /** Whether other people in the chat can mark items as completed in the list */
+    othersCanComplete?: boolean
+
+    /** Title of the list */
+    title: InputText
+
+    /** Items in the list */
+    items: InputText[]
+}
+
 /**
  * Input media that can be sent somewhere.
  *
@@ -632,4 +648,5 @@ export type InputMediaLike =
   | InputMediaStory
   | InputMediaWebpage
   | InputMediaPaidMedia
+  | InputMediaTodoList
   | tl.TypeInputMedia

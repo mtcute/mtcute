@@ -20,6 +20,7 @@ import type {
     InputMediaQuiz,
     InputMediaSticker,
     InputMediaStory,
+    InputMediaTodoList,
     InputMediaVenue,
     InputMediaVideo,
     InputMediaVoice,
@@ -286,6 +287,13 @@ export function webpage(url: string, params: OmitTypeAndFile<InputMediaWebpage, 
 export function paid(params: OmitTypeAndFile<InputMediaPaidMedia>): InputMediaPaidMedia {
     const ret = params as tl.Mutable<InputMediaPaidMedia>
     ret.type = 'paid'
+
+    return ret
+}
+
+export function todo(params: OmitTypeAndFile<InputMediaTodoList>): InputMediaTodoList {
+    const ret = params as tl.Mutable<InputMediaTodoList>
+    ret.type = 'todo'
 
     return ret
 }
