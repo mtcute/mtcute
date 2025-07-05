@@ -98,7 +98,7 @@ export class MtprotoSession {
     _authKeyTemp: AuthKey
     _authKeyTempSecondary: AuthKey
 
-    _timeOffset: number = performance.timeOrigin
+    _timeOffset: number = Math.floor(performance.timeOrigin / 1000)
     _lastMessageId: Long = Long.ZERO
     _seqNo = 0
 
