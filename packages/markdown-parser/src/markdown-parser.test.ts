@@ -248,6 +248,29 @@ describe('MarkdownMessageEntityParser', () => {
             )
         })
 
+        it('should trim whitespaces', () => {
+            test(
+                '  || spoiler || :3',
+                [createEntity('messageEntitySpoiler', 0, 8)],
+                'spoiler  :3',
+            )
+            test(
+                'meow || spoiler ||',
+                [createEntity('messageEntitySpoiler', 5, 8)],
+                'meow  spoiler',
+            )
+            test(
+                '|| spoiler ||',
+                [createEntity('messageEntitySpoiler', 0, 7)],
+                'spoiler',
+            )
+            test(
+                ' || spoiler || ',
+                [createEntity('messageEntitySpoiler', 0, 7)],
+                'spoiler',
+            )
+        })
+
         it('should handle code and pre', () => {
             test(
                 [

@@ -477,7 +477,16 @@ function parse(
 
     function adjustOffsets(from: number, by: number): void {
         for (const ent of entities) {
-            if (ent.offset >= from) ent.offset += by
+            if (ent.offset < from) continue
+            if (by >= 0) {
+                ent.offset += by
+                continue
+            }
+
+            const adjustTotal = Math.min(ent.offset, Math.abs(by))
+            const adjustInternal = Math.max(Math.abs(by) - ent.offset, 0)
+            ent.offset -= adjustTotal
+            ent.length -= adjustInternal
         }
         for (const stack of Object.values(stacks)) {
             for (const ent of stack) {
