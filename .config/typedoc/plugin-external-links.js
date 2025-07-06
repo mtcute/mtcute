@@ -25,9 +25,9 @@ export function load(app) {
             } else if (name.startsWith('Raw')) {
                 name = name[3].toLowerCase() + name.slice(4)
 
-                if (name.endsWith('Method')) {
+                if (name.endsWith('Request')) {
                     kind = 'method'
-                    name = name.slice(0, -6)
+                    name = name.slice(0, -7)
                 } else {
                     kind = 'class'
                 }
