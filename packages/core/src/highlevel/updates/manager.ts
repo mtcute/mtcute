@@ -197,6 +197,7 @@ export class UpdatesManager {
     }
 
     destroy(): void {
+        this.log.debug('destroyed, stopping updates loop')
         this.stopLoop()
     }
 
@@ -205,6 +206,7 @@ export class UpdatesManager {
     }
 
     notifyLoggedOut(): void {
+        this.log.debug('notifyLoggedOut, stopping updates loop')
         this.stopLoop()
         this.cpts.clear()
         this.cptsMod.clear()
@@ -468,6 +470,7 @@ export class UpdatesManager {
             if (tl.RpcError.is(e, 'AUTH_KEY_UNREGISTERED')) {
                 // we are logged out, stop updates loop
                 lock.release()
+                this.log.debug('received AUTH_KEY_UNREGISTERED, stopping updates loop')
                 this.stopLoop()
 
                 return
@@ -1130,6 +1133,7 @@ export class UpdatesManager {
                         if (tl.RpcError.is(err, 'AUTH_KEY_UNREGISTERED')) {
                             // for some reason, when logging out telegram may send updatesTooLong
                             // in any case, we need to stop updates loop
+                            this.log.debug('received AUTH_KEY_UNREGISTERED, stopping updates loop')
                             this.stopLoop()
 
                             return
