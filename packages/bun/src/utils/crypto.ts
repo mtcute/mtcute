@@ -1,25 +1,21 @@
 import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
-import { pbkdf2 } from 'node:crypto'
+import { createCipheriv, createHmac, pbkdf2 } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 
 import { deflateSync, gunzipSync } from 'node:zlib'
 import { u8 } from '@fuman/utils'
 import { BaseCryptoProvider } from '@mtcute/core/utils.js'
 import {
-    createCtr256,
-    ctr256,
-    freeCtr256,
     ige256Decrypt,
     ige256Encrypt,
     initSync,
+    SIMD_AVAILABLE,
 } from '@mtcute/wasm'
-
-// we currently prefer wasm for ctr because bun mostly uses browserify polyfills for node:crypto
-// which are slow AND semi-broken
 
 export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
     async initialize(): Promise<void> {
-        const wasmFile = require.resolve('@mtcute/wasm/mtcute-simd.wasm')
+        const file = SIMD_AVAILABLE ? 'mtcute-simd.wasm' : 'mtcute.wasm'
+        const wasmFile = require.resolve(`@mtcute/wasm/${file}`)
         const wasm = await readFile(wasmFile)
         initSync(wasm)
     }
@@ -36,11 +32,12 @@ export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProv
     }
 
     createAesCtr(key: Uint8Array, iv: Uint8Array): IAesCtr {
-        const ctx = createCtr256(key, iv)
+        const cipher = createCipheriv(`aes-${key.length * 8}-ctr`, key, iv)
+
+        const update = (data: Uint8Array) => cipher.update(data)
 
         return {
-            process: data => ctr256(ctx, data),
-            close: () => freeCtr256(ctx),
+            process: update,
         }
     }
 
@@ -72,17 +69,7 @@ export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProv
     }
 
     async hmacSha256(data: Uint8Array, key: Uint8Array): Promise<Uint8Array> {
-        const keyMaterial = await crypto.subtle.importKey(
-            'raw',
-            key,
-            { name: 'HMAC', hash: { name: 'SHA-256' } },
-            false,
-            ['sign'],
-        )
-
-        const res = await crypto.subtle.sign({ name: 'HMAC' }, keyMaterial, data)
-
-        return new Uint8Array(res)
+        return createHmac('sha256', key).update(data).digest()
     }
 
     gzip(data: Uint8Array, maxSize: number): Uint8Array | null {
