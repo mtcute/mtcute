@@ -243,25 +243,28 @@ export class DcConnectionManager {
         this._log = this.manager._log.create('dc-manager')
         this._log.prefix = `[DC ${dcId}] `
 
+        const managerParams = this.manager.params
+
         const baseConnectionParams = (): SessionConnectionParams => ({
-            crypto: this.manager.params.crypto,
+            crypto: managerParams.crypto,
             initConnection: this.manager._initConnectionParams,
             transport: this.manager._transport,
             dc: this._dcs.media,
-            testMode: this.manager.params.testMode,
+            testMode: managerParams.testMode,
             reconnectionStrategy: this.manager._reconnectionStrategy,
-            layer: this.manager.params.layer,
-            disableUpdates: this.manager.params.disableUpdates,
-            readerMap: this.manager.params.readerMap,
-            writerMap: this.manager.params.writerMap,
-            usePfs: this.manager.params.usePfs,
+            layer: managerParams.layer,
+            disableUpdates: managerParams.disableUpdates,
+            readerMap: managerParams.readerMap,
+            writerMap: managerParams.writerMap,
+            usePfs: managerParams.usePfs,
             isMainConnection: false,
             isMainDcConnection: this.isPrimary,
-            inactivityTimeout: this.manager.params.inactivityTimeout ?? 60_000,
-            enableErrorReporting: this.manager.params.enableErrorReporting,
-            salts: this._salts,
-            platform: this.manager.params.platform,
-            pingInterval: this.manager.params.pingInterval ?? 60_000,
+            inactivityTimeout: managerParams.inactivityTimeout ?? 60_000,
+            enableErrorReporting: managerParams.enableErrorReporting,
+            // NB: we need a separate salts manager for each pfs connection, because server salts are auth_key-bound
+            salts: managerParams.usePfs ? new ServerSaltManager() : this._salts,
+            platform: managerParams.platform,
+            pingInterval: managerParams.pingInterval ?? 60_000,
         })
 
         const mainParams = baseConnectionParams()
@@ -287,19 +290,19 @@ export class DcConnectionManager {
         this.main = new MultiSessionConnection(mainParams, mainCount, this._log, 'MAIN')
         this.upload = new MultiSessionConnection(
             baseConnectionParams(),
-            this.manager._connectionCount('upload', this.dcId, this.manager.params.isPremium),
+            this.manager._connectionCount('upload', this.dcId, managerParams.isPremium),
             this._log,
             'UPLOAD',
         )
         this.download = new MultiSessionConnection(
             baseConnectionParams(),
-            this.manager._connectionCount('download', this.dcId, this.manager.params.isPremium),
+            this.manager._connectionCount('download', this.dcId, managerParams.isPremium),
             this._log,
             'DOWNLOAD',
         )
         this.downloadSmall = new MultiSessionConnection(
             baseConnectionParams(),
-            this.manager._connectionCount('downloadSmall', this.dcId, this.manager.params.isPremium),
+            this.manager._connectionCount('downloadSmall', this.dcId, managerParams.isPremium),
             this._log,
             'DOWNLOAD_SMALL',
         )
@@ -354,6 +357,10 @@ export class DcConnectionManager {
                 })
         })
         connection.onFutureSalts.add((salts: mtp.RawMt_future_salt[]) => {
+            if (this.manager.params.usePfs && kind !== 'main') {
+                // for pfs, only store server salts for main connections because they are auth_key-bound
+                return
+            }
             Promise.resolve(this.manager._storage.salts.store(this.dcId, salts)).catch((e: Error) =>
                 this.manager.params.emitError(e),
             )
@@ -567,9 +574,7 @@ export class NetworkManager {
     async _getOtherDc(dcId: number): Promise<DcConnectionManager> {
         if (!this._dcConnections.has(dcId)) {
             if (this._dcCreationPromise.has(dcId)) {
-                this._log.debug('waiting for dc %d to be created', dcId)
                 await this._dcCreationPromise.get(dcId)
-                this._log.debug('dc %d was created', dcId)
 
                 return asNonNull(this._dcConnections.get(dcId))
             }
@@ -591,7 +596,9 @@ export class NetworkManager {
                 this._dcConnections.set(dcId, dc)
                 promise.resolve()
                 this._dcCreationPromise.delete(dcId)
+                this._log.debug('dc %d was created', dcId)
             } catch (e) {
+                this._log.debug('dc %d was not created: %e', dcId, e)
                 promise.reject(e)
                 this._dcCreationPromise.delete(dcId)
                 return this._getOtherDc(dcId)
