@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/deno",
     "type": "module",
-    "version": "0.25.0",
+    "version": "0.25.2",
     "private": true,
     "description": "Meta-package for Deno",
     "author": "alina sireneva <alina@tei.su>",
