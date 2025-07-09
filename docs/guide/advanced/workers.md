@@ -98,6 +98,54 @@ const tg = new TelegramClient({ client: port })
 await tg.sendText('me', 'Hello from worker!')
 ```
 
+## Multiple clients in a single worker
+
+If you want to use multiple clients in a single worker, you can set per-worker unique `workerId` option
+when creating the worker:
+
+```ts
+new TelegramWorker({
+    client: tg,
+    workerId: '1',
+})
+new TelegramWorker({
+    client: tg2,
+    workerId: '2',
+})
+```
+
+Then, you can pass the worker id to the port constructor:
+
+```ts
+const worker = new Worker(
+    new URL('./worker.js', import.meta.url), 
+    { type: 'module' },
+)
+const port1 = new TelegramWorkerPort({
+    worker,
+    workerId: '1',
+})
+const port2 = new TelegramWorkerPort({
+    worker,
+    workerId: '2',
+})
+```
+
+If you want, you can even have custom message handler that will not interfere with mtcute workers:
+
+```ts
+self.addEventListener('message', message => {
+    if ('_mtcuteWorkerId' in message) return // ignore mtcute workers messages
+
+    // do whatever
+})
+```
+
+::: tip
+`workerId` does not need to be unique across the entire application,
+just within the same worker.
+:::
+
 ## Other runtimes
 
 In other runtimes it may also make sense to use workers.

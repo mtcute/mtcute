@@ -7,7 +7,7 @@ import { deserializeResult, serializeResult } from './protocol.js'
 export type InvokeTarget = Extract<WorkerInboundMessage, { type: 'invoke' }>['target']
 
 export class WorkerInvoker {
-    constructor(private send: SendFn) {}
+    constructor(private send: SendFn, private readonly workerId: string) {}
 
     private _nextId = 0
     private _pending = new Map<number, Deferred<unknown>>()
@@ -16,6 +16,7 @@ export class WorkerInvoker {
         const id = this._nextId++
 
         this.send({
+            _mtcuteWorkerId: this.workerId,
             type: 'invoke',
             id,
             target,
@@ -27,6 +28,7 @@ export class WorkerInvoker {
 
         abortSignal?.addEventListener('abort', () => {
             this.send({
+                _mtcuteWorkerId: this.workerId,
                 type: 'abort',
                 id,
             })

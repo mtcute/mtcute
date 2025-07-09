@@ -22,27 +22,23 @@ export interface TelegramWorkerPortOptions {
     worker: SomeWorker
 }
 
-let _registered = false
+let _respond: RespondFn | undefined
 
 export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorkerBase<T> {
-    registerWorker(handler: WorkerMessageHandler): RespondFn {
+    registerWorker(handler: WorkerMessageHandler): [RespondFn, VoidFunction] {
         if (!parentPort) {
             throw new Error('TelegramWorker must be created from a worker thread')
         }
-        if (_registered) {
-            throw new Error('TelegramWorker must be created only once')
-        }
-
-        _registered = true
 
         const port = parentPort
 
         const respond: RespondFn = port.postMessage.bind(port)
 
         // eslint-disable-next-line ts/no-unsafe-argument
-        parentPort.on('message', message => handler(message, respond))
+        const messageHandler = (message: any) => handler(message, respond)
+        port.on('message', messageHandler)
 
-        return respond
+        return [respond, () => port.off('message', messageHandler)]
     }
 }
 

@@ -14,11 +14,12 @@ import { PeersIndex } from '../types/peers/peers-index.js'
 import { AppConfigManagerProxy } from './app-config.js'
 import { deserializeError } from './errors.js'
 import { WorkerInvoker } from './invoker.js'
-import { deserializeResult } from './protocol.js'
+import { DEFAULT_WORKER_ID, deserializeResult } from './protocol.js'
 import { TelegramStorageProxy } from './storage.js'
 
 export interface TelegramWorkerPortOptions {
     worker: SomeWorker
+    workerId?: string
     platform: ICorePlatform
 }
 
@@ -61,13 +62,16 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
 
     private _abortController = new AbortController()
     readonly stopSignal: AbortSignal = this._abortController.signal
+    readonly workerId: string
 
     constructor(readonly options: TelegramWorkerPortOptions) {
         this.log = new LogManager('worker', options.platform)
         this.platform = options.platform
 
+        this.workerId = options.workerId ?? DEFAULT_WORKER_ID
+
         this._connection = this.connectToWorker(this.options.worker, this._onMessage)
-        this._invoker = new WorkerInvoker(this._connection[0])
+        this._invoker = new WorkerInvoker(this._connection[0], this.workerId)
 
         this.storage = new TelegramStorageProxy(this._invoker)
         this.appConfig = new AppConfigManagerProxy(this._invoker)
@@ -124,6 +128,7 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     onError: Emitter<Error> = new Emitter()
 
     private _onMessage: ClientMessageHandler = (message) => {
+        if (message._mtcuteWorkerId !== this.workerId) return
         switch (message.type) {
             case 'log':
                 this.log.handler(message.color, message.level, message.tag, message.fmt, message.args)

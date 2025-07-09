@@ -9,6 +9,7 @@ import Long from 'long'
 
 export type WorkerInboundMessage =
   | {
+      _mtcuteWorkerId: string
       type: 'invoke'
       id: number
       target: 'custom' | 'client' | 'storage' | 'storage-self' | 'storage-peers' | 'app-config'
@@ -18,23 +19,41 @@ export type WorkerInboundMessage =
       withAbort: boolean
   }
   | {
+      _mtcuteWorkerId: string
       type: 'abort'
       id: number
   }
 
 export type WorkerOutboundMessage =
-  | { type: 'server_update', update: SerializedResult<tl.TypeUpdates> }
   | {
+      _mtcuteWorkerId: string
+      type: 'server_update'
+      update: SerializedResult<tl.TypeUpdates>
+  }
+  | {
+      _mtcuteWorkerId: string
       type: 'update'
       update: SerializedResult<tl.TypeUpdate>
       users: SerializedResult<Map<number, tl.TypeUser>>
       chats: SerializedResult<Map<number, tl.TypeChat>>
       hasMin: boolean
   }
-  | { type: 'error', error: SerializedError }
-  | { type: 'stop' }
-  | { type: 'conn_state', state: ConnectionState }
   | {
+      _mtcuteWorkerId: string
+      type: 'error'
+      error: SerializedError
+  }
+  | {
+      _mtcuteWorkerId: string
+      type: 'stop'
+  }
+  | {
+      _mtcuteWorkerId: string
+      type: 'conn_state'
+      state: ConnectionState
+  }
+  | {
+      _mtcuteWorkerId: string
       type: 'log'
       color: number
       level: number
@@ -43,11 +62,14 @@ export type WorkerOutboundMessage =
       args: unknown[]
   }
   | {
+      _mtcuteWorkerId: string
       type: 'result'
       id: number
       result?: SerializedResult<unknown>
       error?: SerializedError
   }
+
+export const DEFAULT_WORKER_ID = 'default'
 
 // <deno-insert>
 // declare type SharedWorker = never
