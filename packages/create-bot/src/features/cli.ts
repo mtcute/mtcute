@@ -38,6 +38,12 @@ export function getFeatureChoices(packageMananger: PackageManager): CheckboxChoi
             value: MtcuteFeature.Linters,
             checked: true,
         })
+        arr.unshift({
+            name: ' 🧼 Use Envalid',
+            short: 'Envalid',
+            value: MtcuteFeature.Envalid,
+            checked: true,
+        })
     }
 
     if (packageMananger === PackageManager.Pnpm) {

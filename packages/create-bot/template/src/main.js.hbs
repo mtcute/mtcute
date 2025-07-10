@@ -10,7 +10,11 @@ import { TelegramClient } from '@mtcute/deno'
 import { TelegramClient } from '@mtcute/node'
 {{/if}}
 
+{{#if features.envalid}}
+import env from './env.js'
+{{else}}
 import * as env from './env.js'
+{{/if}}
 {{#if features.i18n}}
 import { tr } from './i18n/index.js'
 {{/if}}

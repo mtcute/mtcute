@@ -43,6 +43,10 @@ export function buildDependenciesList(config: UserConfig): DependenciesList {
         }
     }
 
+    if (config.features.includes(MtcuteFeature.Envalid)) {
+        dependencies.push('dotenv', 'envalid')
+    }
+
     if (config.features.includes(MtcuteFeature.Linters)) {
         devDependencies.push('@antfu/eslint-config')
     }
