@@ -996,7 +996,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 converted: act.converted!,
                 convertStars: act.convertStars ?? Long.ZERO,
                 refunded: act.refunded!,
-                gift: new StarGift(act.gift),
+                gift: new StarGift(act.gift, this._peers),
                 message: act.message ?? null,
                 canUpgrade: act.canUpgrade!,
                 upgraded: act.upgraded!,

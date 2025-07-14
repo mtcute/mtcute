@@ -316,7 +316,7 @@ export class StarsTransaction {
                         return {
                             type: 'star_gift',
                             peer,
-                            gift: new StarGift(this.raw.stargift),
+                            gift: new StarGift(this.raw.stargift, this.peers),
                         }
                     } else if (this.raw.stargiftUpgrade) {
                         return {

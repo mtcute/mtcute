@@ -52,7 +52,7 @@ export class SavedStarGift {
     /** The gift itself */
     get gift(): StarGift | StarGiftUnique {
         if (this.raw.gift._ === 'starGift') {
-            return new StarGift(this.raw.gift)
+            return new StarGift(this.raw.gift, this._peers)
         }
 
         return new StarGiftUnique(this.raw.gift, this._peers)

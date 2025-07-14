@@ -241,6 +241,14 @@ export class StarGiftUnique {
     get giftAddress(): string | null {
         return this.raw.giftAddress ?? null
     }
+
+    /**
+     * User/channel who released this collection
+     */
+    get releasedBy(): Peer | null {
+        if (!this.raw.releasedBy) return null
+        return parsePeer(this.raw.releasedBy, this._peers)
+    }
 }
 
 makeInspectable(StarGiftUnique)

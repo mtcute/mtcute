@@ -113,6 +113,11 @@ export class RepliedMessageInfo {
         return this.raw.replyToTopId ?? null
     }
 
+    /** If this is a reply to a specific todo item, ID of that item */
+    get todoItemId(): number | null {
+        return this.raw.todoItemId ?? null
+    }
+
     /**
      * If replied-to message is available, chat where the message was sent.
      *

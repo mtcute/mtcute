@@ -35,8 +35,10 @@ function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
             }
         case 'starGiftUnique_layer198':
         case 'starGiftUnique_layer202':
+        case 'starGiftUnique_layer206':
             return replaceType(obj, 'starGiftUnique')
         case 'starGift_layer202':
+        case 'starGift_layer206':
             return replaceType(obj, 'starGift')
         default:
             return obj
@@ -87,6 +89,19 @@ function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessage
     }
 }
 
+function mapMessageReplyHeader(obj: tlCompat.TypeMessageReplyHeader): tl.TypeMessageReplyHeader {
+    switch (obj._) {
+        case 'messageReplyHeader_layer206':
+            return {
+                ...obj,
+                _: 'messageReplyHeader',
+                replyMedia: obj.replyMedia ? mapCompatMessageMedia(obj.replyMedia) : undefined,
+            }
+        default:
+            return obj
+    }
+}
+
 function mapCompatMessage(obj: tlCompat.TypeMessage): tl.TypeMessage {
     switch (obj._) {
         case 'message_layer199':
@@ -95,12 +110,14 @@ function mapCompatMessage(obj: tlCompat.TypeMessage): tl.TypeMessage {
                 ...obj,
                 _: 'message',
                 media: obj.media ? mapCompatMessageMedia(obj.media) : undefined,
+                replyTo: obj.replyTo ? mapMessageReplyHeader(obj.replyTo) : undefined,
             }
         case 'messageService_layer204':
             return {
                 ...obj,
                 _: 'messageService',
                 action: mapCompatMessageAction(obj.action),
+                replyTo: obj.replyTo ? mapMessageReplyHeader(obj.replyTo) : undefined,
             }
         default:
             return obj
@@ -112,7 +129,9 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
         case 'starGiftUnique_layer197':
         case 'starGiftUnique_layer198':
         case 'starGiftUnique_layer202':
+        case 'starGiftUnique_layer206':
         case 'starGift_layer202':
+        case 'starGift_layer206':
             return mapCompatStarGift(obj)
         case 'emojiStatus_layer197':
             return mapCompatEmojiStatus(obj)
@@ -151,6 +170,8 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
         case 'message_layer204':
         case 'messageService_layer204':
             return mapCompatMessage(obj)
+        case 'messageReplyHeader_layer206':
+            return mapMessageReplyHeader(obj)
         default:
             return obj
     }

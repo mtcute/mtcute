@@ -27,6 +27,11 @@ export interface CommonSendParams {
     replyTo?: number | Message
 
     /**
+     * If this is a reply to a specific todo item, ID of that item
+     */
+    replyToTodoItem?: number
+
+    /**
      * When the chat is a monoforum you are an admin of, you **must** pass an
      * ID of a peer you are sending the message to.
      *
@@ -225,6 +230,7 @@ export async function _processCommonSendParameters(
             quoteEntities: params.quote?.entities as tl.TypeMessageEntity[],
             quoteOffset: params.quoteOffset,
             monoforumPeerId: params.toMonoforumPeer ? await resolvePeer(client, params.toMonoforumPeer) : undefined,
+            todoItemId: params.replyToTodoItem,
         }
     } else if (params.toMonoforumPeer) {
         tlReplyTo = {

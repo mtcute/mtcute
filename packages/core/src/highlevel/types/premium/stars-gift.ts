@@ -2,13 +2,14 @@ import type { tl } from '@mtcute/tl'
 
 import type { Sticker } from '../media/sticker.js'
 import type { Message } from '../messages/message.js'
-import type { InputPeerLike } from '../peers/peer.js'
+import type { PeersIndex } from '../peers/peers-index.js'
 import Long from 'long'
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { parseDocument } from '../media/document-utils.js'
+import { type InputPeerLike, parsePeer, type Peer } from '../peers/peer.js'
 
 export type InputStarGift =
   | {
@@ -27,7 +28,10 @@ export type InputStarGift =
  * A gift bought with stars
  */
 export class StarGift {
-    constructor(readonly raw: tl.RawStarGift) {}
+    constructor(
+        readonly raw: tl.RawStarGift,
+        readonly _peers: PeersIndex,
+    ) {}
 
     /** ID of the gift */
     get id(): tl.Long {
@@ -125,6 +129,14 @@ export class StarGift {
     /** Title of the gift */
     get title(): string | null {
         return this.raw.title ?? null
+    }
+
+    /**
+     * User/channel who released this collection
+     */
+    get releasedBy(): Peer | null {
+        if (!this.raw.releasedBy) return null
+        return parsePeer(this.raw.releasedBy, this._peers)
     }
 }
 
