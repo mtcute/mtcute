@@ -36,7 +36,7 @@ const tg = new TelegramClient({
 })
 ```
 
-The updates themselves are dispatched on the client as events (see [reference](https://ref.mtcute.dev/classes/_mtcute_core.index.TelegramClient)):
+The updates themselves are dispatched on the client as events (see [reference](https://ref.mtcute.dev/classes/_mtcute_core.highlevel_client.TelegramClient)):
 ```ts
 tg.onNewMessage.add((msg) => {
   console.log(msg.text)
