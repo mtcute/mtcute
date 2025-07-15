@@ -797,10 +797,11 @@ export class SessionConnection extends PersistentConnection {
             return
         }
 
-        removeFromLongArray(this._session.queuedStateReq, reqMsgId)
-
         const rpc = msg.rpc
 
+        // cleanup
+        removeFromLongArray(this._session.queuedStateReq, reqMsgId)
+        this._session.getStateSchedule.remove(rpc)
         rpc.resetAbortSignal?.()
 
         const resultConstructorId = message.peekUint()
@@ -1004,8 +1005,6 @@ export class SessionConnection extends PersistentConnection {
                 removeFromLongArray(this._session.queuedResendReq, msgId)
 
                 // if resend/state was already requested, it will simply be ignored
-
-                this._session.getStateSchedule.remove(rpc)
                 break
             }
             case 'bind':
@@ -1082,11 +1081,9 @@ export class SessionConnection extends PersistentConnection {
                 // this message could also already be in some queue,
                 removeFromLongArray(this._session.queuedStateReq, msgId)
                 removeFromLongArray(this._session.queuedResendReq, msgId)
-
-                // if resend/state was already requested, it will simply be ignored
-
                 this._session.getStateSchedule.remove(rpc)
 
+                // if resend/state was already requested, it will simply be ignored
                 break
             }
             case 'resend':
