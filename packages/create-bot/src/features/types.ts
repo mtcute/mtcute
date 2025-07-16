@@ -3,7 +3,7 @@ export enum MtcuteFeature {
     Dispatcher = 'dispatcher',
     Docker = 'docker',
     TypeScript = 'typescript',
-    Envalid = 'envalid',
+    Zod = 'zod',
     Linters = 'linters',
     Git = 'git',
 }
