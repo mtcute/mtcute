@@ -188,34 +188,42 @@ export async function resolvePeer(
     // finally let's try resolving by access_hash=0
     switch (peerType) {
         case 'user': {
-            const res = await _getUsersBatched(client, {
-                _: 'inputUser',
-                userId: bareId,
-                accessHash: Long.ZERO,
-            })
-
-            if (res != null && res._ === 'user' && res.accessHash != null) {
-                return {
-                    _: 'inputPeerUser',
+            try {
+                const res = await _getUsersBatched(client, {
+                    _: 'inputUser',
                     userId: bareId,
-                    accessHash: res.accessHash,
+                    accessHash: Long.ZERO,
+                })
+
+                if (res != null && res._ === 'user' && res.accessHash != null) {
+                    return {
+                        _: 'inputPeerUser',
+                        userId: bareId,
+                        accessHash: res.accessHash,
+                    }
                 }
+            } catch (e) {
+                if (!tl.RpcError.is(e, 'USER_INVALID')) throw e
             }
             break
         }
         case 'channel': {
-            const res = await _getChannelsBatched(client, {
-                _: 'inputChannel',
-                channelId: bareId,
-                accessHash: Long.ZERO,
-            })
-
-            if (res != null && res._ === 'channel' && res.accessHash != null) {
-                return {
-                    _: 'inputPeerChannel',
+            try {
+                const res = await _getChannelsBatched(client, {
+                    _: 'inputChannel',
                     channelId: bareId,
-                    accessHash: res.accessHash,
+                    accessHash: Long.ZERO,
+                })
+
+                if (res != null && res._ === 'channel' && res.accessHash != null) {
+                    return {
+                        _: 'inputPeerChannel',
+                        channelId: bareId,
+                        accessHash: res.accessHash,
+                    }
                 }
+            } catch (e) {
+                if (!tl.RpcError.is(e, 'CHANNEL_INVALID')) throw e
             }
             break
         }
