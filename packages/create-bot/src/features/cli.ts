@@ -7,6 +7,12 @@ import { MtcuteFeature } from './types.js'
 export function getFeatureChoices(packageMananger: PackageManager): CheckboxChoiceOptions[] {
     const arr: CheckboxChoiceOptions[] = [
         {
+            name: ' 🧪 Use Zod for env validation',
+            short: 'Zod',
+            value: MtcuteFeature.Zod,
+            checked: true,
+        },
+        {
             name: ' 🌐 Internationalization',
             short: 'i18n',
             value: MtcuteFeature.I18n,

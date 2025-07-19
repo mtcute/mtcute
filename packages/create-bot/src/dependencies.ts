@@ -43,6 +43,14 @@ export function buildDependenciesList(config: UserConfig): DependenciesList {
         }
     }
 
+    if (config.features.includes(MtcuteFeature.Zod)) {
+        if (config.packageManager === PackageManager.Deno) {
+            dependencies.push('@zod/zod')
+        } else {
+            dependencies.push('zod')
+        }
+    }
+
     if (config.features.includes(MtcuteFeature.Linters)) {
         devDependencies.push('@antfu/eslint-config')
     }
