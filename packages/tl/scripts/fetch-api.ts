@@ -281,6 +281,8 @@ async function generateCompatSchema(oldLayer: number, oldSchema: TlFullSchema, d
         }
     }
 
+    if (!typesToAdd.size) return
+
     const compatWs = createWriteStream(COMPAT_TL_FILE, { flags: 'a' })
     compatWs.write(`// LAYER ${oldLayer}\n`)
     for (const type of typesToAdd) {
