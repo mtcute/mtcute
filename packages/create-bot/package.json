@@ -1,7 +1,7 @@
 {
   "name": "@mtcute/create-bot",
   "type": "module",
-  "version": "0.23.0",
+  "version": "0.25.5",
   "private": true,
   "description": "Bot starter kit for mtcute",
   "author": "alina sireneva <alina@tei.su>",
