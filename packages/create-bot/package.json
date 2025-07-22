@@ -9,6 +9,7 @@
   "bin": {
     "create-bot": "./src/main.ts"
   },
+  "exports": {},
   "scripts": {
     "run": "tsx src/main.ts",
     "run:deno": "node scripts/generate-import-map.js && deno run --import-map=./scripts/import-map.json -A --unstable-sloppy-imports src/main.ts"
