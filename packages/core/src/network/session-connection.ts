@@ -548,6 +548,8 @@ export class SessionConnection extends PersistentConnection {
         return promise.promise
     }
 
+    private _warnedAboutUpdates = false
+
     protected onMessage(data: Uint8Array): void {
         if (this._pendingWaitForUnencrypted.length) {
             const int32 = new Int32Array(data.buffer, data.byteOffset, 2)
@@ -706,7 +708,10 @@ export class SessionConnection extends PersistentConnection {
                     this.log.verbose('<<< %j', message)
 
                     if (this.params.disableUpdates) {
-                        this.log.warn('received updates, but updates are disabled')
+                        if (!this._warnedAboutUpdates) {
+                            this.log.warn('received updates, but updates are disabled')
+                            this._warnedAboutUpdates = true
+                        }
                         // likely due to some request in the session missing invokeWithoutUpdates
                         break
                     }
