@@ -15,8 +15,8 @@ importers:
         specifier: ^3.11.2
         version: 3.11.2(@typescript-eslint/utils@8.17.0(eslint@9.9.0)(typescript@5.5.4))(@vue/compiler-sfc@3.5.13)(eslint@9.9.0)(typescript@5.5.4)(vitest@3.0.7)
       '@fuman/build':
-        specifier: 0.0.15
-        version: 0.0.15(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@6.2.0(@types/node@22.13.1)(tsx@4.17.0)(yaml@2.6.1))(ws@8.18.1)
+        specifier: https://pkg.pr.new/teidesu/fuman/@fuman/build@be046f0
+        version: https://pkg.pr.new/teidesu/fuman/@fuman/build@be046f0(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@6.2.0(@types/node@22.13.1)(tsx@4.17.0)(yaml@2.6.1))(ws@8.18.1)
       '@fuman/utils':
         specifier: 0.0.15
         version: 0.0.15
@@ -1241,8 +1241,9 @@ packages:
     resolution: {integrity: sha512-2b/g5hRmpbb1o4GnTZax9N9m0FXzz9OV42ZzI4rDDMDuHUqigAiQCEWChBWCY4ztAGVRjoWT19v0yMmc5/L5kA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@fuman/build@0.0.15':
-    resolution: {integrity: sha512-BGohy+SzlPQt2jWXh1xei30iKGZmKsgCIcTWM6fultymQd+IAw8QTeVV/WTxpXexTccx9ScWnTTCExL0ARm+XA==}
+  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@be046f0':
+    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/build@be046f0}
+    version: 0.0.15
     hasBin: true
     peerDependencies:
       typedoc: '>=0.24.0'
@@ -5139,7 +5140,7 @@ snapshots:
     dependencies:
       levn: 0.4.1
 
-  '@fuman/build@0.0.15(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@6.2.0(@types/node@22.13.1)(tsx@4.17.0)(yaml@2.6.1))(ws@8.18.1)':
+  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@be046f0(tough-cookie@4.1.4)(typedoc@0.27.6(typescript@5.5.4))(typescript@5.5.4)(vite@6.2.0(@types/node@22.13.1)(tsx@4.17.0)(yaml@2.6.1))(ws@8.18.1)':
     dependencies:
       '@drizzle-team/brocli': 0.10.2
       '@fuman/fetch': 0.0.13(tough-cookie@4.1.4)(zod@3.23.8)

@@ -54,6 +54,7 @@ export default {
             'typedoc.cjs',
             '{scripts,dist,tests,private}/**',
         ],
+        bumpWithDependants: true,
         beforeReleaseCommit: async (packages) => {
             const OUT_FILE = fileURLToPath(new URL('./scripts/latest-versions.json', import.meta.url))
 
