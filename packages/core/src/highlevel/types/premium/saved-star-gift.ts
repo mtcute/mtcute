@@ -102,6 +102,11 @@ export class SavedStarGift {
     get canResellAt(): Date | null {
         return this.raw.canResellAt ? new Date(this.raw.canResellAt * 1000) : null
     }
+
+    /** IDs of the collections this gift belongs to */
+    get collectionIds(): number[] {
+        return this.raw.collectionId ?? []
+    }
 }
 
 makeInspectable(SavedStarGift)

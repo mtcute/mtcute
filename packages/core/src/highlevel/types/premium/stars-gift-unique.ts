@@ -161,6 +161,11 @@ export class StarGiftUnique {
         assert(this._backdrop !== undefined)
     }
 
+    /** Whether this gift is available only to premium users */
+    get isPremiumOnly(): boolean {
+        return this.raw.requirePremium!
+    }
+
     /** Number of the NFT */
     get num(): number {
         return this.raw.num
