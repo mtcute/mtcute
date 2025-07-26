@@ -39,6 +39,7 @@ function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
             return replaceType(obj, 'starGiftUnique')
         case 'starGift_layer202':
         case 'starGift_layer206':
+        case 'starGift_layer209':
             return replaceType(obj, 'starGift')
         default:
             return obj
@@ -132,6 +133,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
         case 'starGiftUnique_layer206':
         case 'starGift_layer202':
         case 'starGift_layer206':
+        case 'starGift_layer209':
             return mapCompatStarGift(obj)
         case 'emojiStatus_layer197':
             return mapCompatEmojiStatus(obj)
@@ -148,6 +150,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
         case 'userFull_layer199':
             return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
         case 'userFull_layer200':
+        case 'userFull_layer209':
             return replaceType(obj, 'userFull')
         case 'user_layer199':
             return {

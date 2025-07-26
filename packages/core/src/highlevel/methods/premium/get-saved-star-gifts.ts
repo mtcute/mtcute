@@ -27,6 +27,9 @@ export async function getSavedStarGifts(
         /** Whether to exclude unique gifts */
         excludeUnique?: boolean
 
+        /** ID of the collection to get gifts from */
+        collectionId?: number
+
         /** Whether to sort by value */
         sortByValue?: boolean
 
@@ -45,6 +48,7 @@ export async function getSavedStarGifts(
         excludeLimited: params.excludeLimited,
         excludeUnique: params.excludeUnique,
         sortByValue: params.sortByValue,
+        collectionId: params.collectionId,
         offset: params.offset ?? '',
         limit: params.limit ?? 100,
     })

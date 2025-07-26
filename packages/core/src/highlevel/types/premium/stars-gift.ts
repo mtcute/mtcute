@@ -48,6 +48,11 @@ export class StarGift {
         return this.raw.limited!
     }
 
+    /** Whether this gift is available only to premium users */
+    get isPremiumOnly(): boolean {
+        return this.raw.requirePremium!
+    }
+
     /** Whether this gift is a unique gift */
     readonly isUnique = false as const
 
@@ -118,6 +123,23 @@ export class StarGift {
             remains: this.raw.availabilityRemains,
             total: this.raw.availabilityTotal,
             resale: this.raw.availabilityResale ?? Long.ZERO,
+        }
+    }
+
+    /**
+     * For gifts with limited availability per user,
+     * the number of remaining and total gifts available
+     */
+    get perUserAvailability(): {
+        remains: number
+        total: number
+    } | null {
+        if (!this.raw.limitedPerUser) return null
+
+        return {
+            // they share the same flag so they must be present
+            remains: this.raw.perUserRemains!,
+            total: this.raw.perUserTotal!,
         }
     }
 

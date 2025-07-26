@@ -269,6 +269,13 @@ export class FullUser extends User {
 
         return new BotVerification(this.full.botVerification)
     }
+
+    /**
+     * Information about the user's stars rating
+     */
+    get starsRating(): tl.RawStarsRating | null {
+        return this.full.starsRating ?? null
+    }
 }
 
 memoizeGetters(FullUser, [
