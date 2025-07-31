@@ -17,6 +17,7 @@ import type { GetReactionUsersOffset } from './methods/messages/get-reaction-use
 import type { SearchGlobalOffset } from './methods/messages/search-global.js'
 import type { SearchHashtagOffset } from './methods/messages/search-hashtag.js'
 import type { SearchMessagesOffset } from './methods/messages/search-messages.js'
+import type { SearchPostsGlobalOffset } from './methods/messages/search-posts-global.js'
 import type { CommonSendParams } from './methods/messages/send-common.js'
 import type { SendCopyGroupParams } from './methods/messages/send-copy-group.js'
 import type { SendCopyParams } from './methods/messages/send-copy.js'
@@ -189,6 +190,7 @@ import { readReactions } from './methods/messages/read-reactions.js'
 import { searchGlobal } from './methods/messages/search-global.js'
 import { iterSearchHashtag, searchHashtag } from './methods/messages/search-hashtag.js'
 import { searchMessages } from './methods/messages/search-messages.js'
+import { searchPostsGlobal } from './methods/messages/search-posts-global.js'
 import { answerMedia, answerMediaGroup, answerText } from './methods/messages/send-answer.js'
 import { commentMedia, commentMediaGroup, commentText } from './methods/messages/send-comment.js'
 import { sendCopyGroup } from './methods/messages/send-copy-group.js'
@@ -3219,6 +3221,8 @@ export interface TelegramClient extends ITelegramClient {
     /**
      * Append item(s) to a todo list
      *
+     * **Available**: ✅ both users and bots
+     *
      * @returns  Service message about the appended todo item(s), if any.
      */
     appendTodoList(
@@ -4075,6 +4079,27 @@ export interface TelegramClient extends ITelegramClient {
              */
             fromUser?: InputPeerLike
         }): Promise<ArrayPaginated<Message, SearchMessagesOffset>>
+
+    /**
+     * Search for posts globally across all public channels in Telegram
+     *
+     * **Available**: 👤 users only
+     *
+     * @param query  Keyword to search for
+     * @param params  Additional parameters
+     */
+    searchPostsGlobal(
+        query: string,
+        params?: {
+        /** Offset for the search */
+            offset?: SearchPostsGlobalOffset
+            /** Limit the number of results */
+            limit?: number
+            /**
+             * The amount of stars you are willing to pay for the search
+             */
+            payStars?: tl.Long
+        }): Promise<ArrayPaginatedWithMeta<Message, SearchPostsGlobalOffset, { limits?: tl.TypeSearchPostsFlood }>>
     /** Send a text to the same chat (and topic, if applicable) as a given message */
     answerText(
         message: Message,
@@ -4480,6 +4505,8 @@ export interface TelegramClient extends ITelegramClient {
     /**
      * Toggle the completion status of a todo list item(s)
      *
+     * **Available**: ✅ both users and bots
+     *
      * @returns  Service message about the toggled items, if any.
      */
     toggleTodoCompleted(
@@ -4796,6 +4823,8 @@ export interface TelegramClient extends ITelegramClient {
     getMyBoostSlots(): Promise<BoostSlot[]>
     /**
      * Get a list of star gifts up for resale
+     * **Available**: ✅ both users and bots
+     *
      */
     getResaleOptions(
         params: {
@@ -4830,6 +4859,8 @@ export interface TelegramClient extends ITelegramClient {
      * Get a list of saved star gifts of a user/channel
      *
      * Note that filters currently only work for channels
+     * **Available**: ✅ both users and bots
+     *
      */
     getSavedStarGifts(
         params: {
@@ -4846,6 +4877,9 @@ export interface TelegramClient extends ITelegramClient {
             excludeLimited?: boolean
             /** Whether to exclude unique gifts */
             excludeUnique?: boolean
+
+            /** ID of the collection to get gifts from */
+            collectionId?: number
 
             /** Whether to sort by value */
             sortByValue?: boolean
@@ -4908,6 +4942,8 @@ export interface TelegramClient extends ITelegramClient {
         }): Promise<StarsStatus>
     /**
      * Get information about a unique star gift by its slug
+     * **Available**: ✅ both users and bots
+     *
      */
     getUniqueStarGift(
         slug: string): Promise<StarGiftUnique>
@@ -4939,6 +4975,8 @@ export interface TelegramClient extends ITelegramClient {
     /**
      * Iterate over saved star gifts of a user,
      * wrapper over {@link getSavedStarGifts}
+     * **Available**: ✅ both users and bots
+     *
      */
     iterSavedStarGifts(
         params: {
@@ -4997,6 +5035,8 @@ export interface TelegramClient extends ITelegramClient {
         }): AsyncIterableIterator<StarsTransaction>
     /**
      * Toggles whether one or more star gift is pinned to the top of the list
+     * **Available**: ✅ both users and bots
+     *
      */
     togglePinnedStarGifts(
         params: {
@@ -5099,8 +5139,10 @@ export interface TelegramClient extends ITelegramClient {
         /** Star gift to update the price of */
             gift: InputStarGift
 
-            /** New price of the gift (in stars), or `null` to unlist */
-            price: number | null
+            /**
+             * New price of the gift (in stars), or `null` to unlist
+             */
+            price: tl.Long | number | tl.TypeStarsAmount | null
         }): Promise<void>
     /**
      * Transfer a unique star gift.
@@ -5109,6 +5151,8 @@ export interface TelegramClient extends ITelegramClient {
      * > as this method hides the actual invoice and payment form from the user.
      * > For GUI clients, you should refer to the method's source code and
      * > present the payment form to the user.
+     *
+     * **Available**: 👤 users only
      *
      * @returns  Service message about the transferred gift, if one was generated.
      */
@@ -5133,6 +5177,8 @@ export interface TelegramClient extends ITelegramClient {
      * > as this method hides the actual invoice and payment form from the user.
      * > For GUI clients, you should refer to the method's source code and
      * > present the payment form to the user.
+     *
+     * **Available**: 👤 users only
      *
      * @returns  Service message about the upgraded gift, if one was generated.
      */
@@ -5776,6 +5822,11 @@ export interface TelegramClient extends ITelegramClient {
              * @default  86400
              */
             period?: number
+
+            /**
+             * IDs of albums to add the story to
+             */
+            addToAlbums?: number[]
         }): Promise<Story>
     /**
      * Toggle whether peer's stories are archived (hidden) or not.
@@ -6848,6 +6899,9 @@ TelegramClient.prototype.iterSearchHashtag = function (...args) {
 }
 TelegramClient.prototype.searchMessages = function (...args) {
     return searchMessages(this._client, ...args)
+}
+TelegramClient.prototype.searchPostsGlobal = function (...args) {
+    return searchPostsGlobal(this._client, ...args)
 }
 TelegramClient.prototype.answerText = function (...args) {
     return answerText(this._client, ...args)

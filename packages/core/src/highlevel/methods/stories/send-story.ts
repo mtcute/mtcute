@@ -66,9 +66,14 @@ export async function sendStory(
          * @default  86400
          */
         period?: number
+
+        /**
+         * IDs of albums to add the story to
+         */
+        addToAlbums?: number[]
     },
 ): Promise<Story> {
-    const { peer = 'me', pinned, forbidForwards, interactiveElements, period } = params
+    const { peer = 'me', pinned, forbidForwards, interactiveElements, period, addToAlbums } = params
     let { media } = params
 
     if (typeof media === 'string') {
@@ -102,6 +107,7 @@ export async function sendStory(
         privacyRules,
         randomId: randomLong(),
         period,
+        albums: addToAlbums,
     })
 
     return _findStoryInUpdate(client, res)

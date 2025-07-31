@@ -1,3 +1,4 @@
+import type { tl } from '@mtcute/tl'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputStarGift } from '../../types/index.js'
 import Long from 'long'
@@ -10,16 +11,30 @@ export async function setResaleStarGiftPrice(
         /** Star gift to update the price of */
         gift: InputStarGift
 
-        /** New price of the gift (in stars), or `null` to unlist */
-        price: number | null
+        /**
+         * New price of the gift (in stars), or `null` to unlist
+         */
+        price: tl.Long | number | tl.TypeStarsAmount | null
     },
 ): Promise<void> {
     const { gift, price } = params
 
+    let starsAmount: tl.TypeStarsAmount
+
+    if (price === null) {
+        starsAmount = { _: 'starsAmount', amount: Long.ZERO, nanos: 0 }
+    } else if (typeof price === 'number') {
+        starsAmount = { _: 'starsAmount', amount: Long.fromNumber(price), nanos: 0 }
+    } else if (Long.isLong(price)) {
+        starsAmount = { _: 'starsAmount', amount: price, nanos: 0 }
+    } else {
+        starsAmount = price
+    }
+
     const r = await client.call({
         _: 'payments.updateStarGiftPrice',
         stargift: await _normalizeInputStarGift(client, gift),
-        resellStars: price === null ? Long.ZERO : Long.fromNumber(price),
+        resellAmount: starsAmount,
     })
 
     client.handleClientUpdate(r)

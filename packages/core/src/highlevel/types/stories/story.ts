@@ -175,6 +175,13 @@ export class Story {
 
         return toReactionEmoji(this.raw.sentReaction, true)
     }
+
+    /**
+     * Albums this story belongs to
+     */
+    get albums(): number[] {
+        return this.raw.albums ?? []
+    }
 }
 
 memoizeGetters(Story, ['entities', 'media', 'interactiveElements', 'interactions'])

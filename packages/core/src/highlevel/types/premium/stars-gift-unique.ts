@@ -211,9 +211,18 @@ export class StarGiftUnique {
         return this.raw.availabilityTotal
     }
 
+    // todo for breaking: rename to resellPriceStars
+
     /** Number of stars this gift is up for resell for */
     get resellPrice(): tl.Long | null {
-        return this.raw.resellStars ?? null
+        const resellPriceStars = this.raw.resellAmount?.find(it => it._ === 'starsAmount')
+        return resellPriceStars?.amount ?? null
+    }
+
+    /** Number of nanoton this gift is up for resell for */
+    get resellPriceTon(): tl.Long | null {
+        const resellPriceTon = this.raw.resellAmount?.find(it => it._ === 'starsTonAmount')
+        return resellPriceTon?.amount ?? null
     }
 
     /** Model (i.e. the gift itself) of the unique star gift */

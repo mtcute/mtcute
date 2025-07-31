@@ -276,6 +276,23 @@ export class FullUser extends User {
     get starsRating(): tl.RawStarsRating | null {
         return this.full.starsRating ?? null
     }
+
+    /**
+     * Information about the user's stars rating
+     *
+     * Only available for the current user
+     */
+    get starsRatingPending(): {
+        rating: tl.RawStarsRating
+        date: Date
+    } | null {
+        if (!this.full.starsMyPendingRating) return null
+
+        return {
+            rating: this.full.starsMyPendingRating,
+            date: new Date(this.full.starsMyPendingRatingDate! * 1000),
+        }
+    }
 }
 
 memoizeGetters(FullUser, [
@@ -286,5 +303,6 @@ memoizeGetters(FullUser, [
     'personalChannel',
     'business',
     'botVerification',
+    'starsRatingPending',
 ])
 makeInspectable(FullUser)

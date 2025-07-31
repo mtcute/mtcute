@@ -566,6 +566,8 @@ export interface ActionStarGift {
     canTransferSince?: Date
     /** Number of stars this gift is up for resell for */
     resaleStars?: tl.Long
+    /** Number of nanoton this gift is up for resell for */
+    resaleTon?: tl.Long
     /** If the gift can be re-sold, date when it will become available */
     canResellAt?: Date
 
@@ -1023,7 +1025,8 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 upgradeStars: Long.ZERO,
                 upgradeMsgId: null,
                 canTransferSince: act.canTransferAt ? new Date(act.canTransferAt * 1000) : undefined,
-                resaleStars: act.resaleStars,
+                resaleStars: act.resaleAmount?._ === 'starsAmount' ? act.resaleAmount.amount : undefined,
+                resaleTon: act.resaleAmount?._ === 'starsTonAmount' ? act.resaleAmount.amount : undefined,
                 canResellAt: act.canResellAt ? new Date(act.canResellAt * 1000) : undefined,
 
                 fromId: act.fromId ? getMarkedPeerId(act.fromId) : undefined,

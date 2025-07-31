@@ -37,6 +37,18 @@ function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
         case 'starGiftUnique_layer202':
         case 'starGiftUnique_layer206':
             return replaceType(obj, 'starGiftUnique')
+        case 'starGiftUnique_layer210':
+            return {
+                ...obj,
+                _: 'starGiftUnique',
+                resellAmount: obj.resellStars
+                    ? [{
+                        _: 'starsAmount',
+                        amount: obj.resellStars,
+                        nanos: 0,
+                    }]
+                    : undefined,
+            }
         case 'starGift_layer202':
         case 'starGift_layer206':
         case 'starGift_layer209':
@@ -76,6 +88,19 @@ function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessage
                 ...obj,
                 _: 'messageActionStarGiftUnique',
                 gift: mapCompatStarGift(obj.gift),
+            }
+        case 'messageActionStarGiftUnique_layer210':
+            return {
+                ...obj,
+                _: 'messageActionStarGiftUnique',
+                gift: mapCompatStarGift(obj.gift),
+                resaleAmount: obj.resaleStars
+                    ? {
+                        _: 'starsAmount',
+                        amount: obj.resaleStars,
+                        nanos: 0,
+                    }
+                    : undefined,
             }
         case 'messageActionStarGift_layer197':
             return {
@@ -134,6 +159,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
         case 'starGift_layer202':
         case 'starGift_layer206':
         case 'starGift_layer209':
+        case 'starGiftUnique_layer210':
             return mapCompatStarGift(obj)
         case 'emojiStatus_layer197':
             return mapCompatEmojiStatus(obj)
@@ -146,11 +172,13 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
         case 'messageActionStarGift_layer197':
         case 'messageActionStarGiftUnique_layer202':
         case 'messageActionPaidMessagesPrice_layer203':
+        case 'messageActionStarGiftUnique_layer210':
             return mapCompatMessageAction(obj)
         case 'userFull_layer199':
             return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
         case 'userFull_layer200':
         case 'userFull_layer209':
+        case 'userFull_layer210':
             return replaceType(obj, 'userFull')
         case 'user_layer199':
             return {
@@ -175,6 +203,12 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
             return mapCompatMessage(obj)
         case 'messageReplyHeader_layer206':
             return mapMessageReplyHeader(obj)
+        case 'storyItem_layer210':
+            return {
+                ...obj,
+                _: 'storyItem',
+                media: mapCompatMessageMedia(obj.media),
+            }
         default:
             return obj
     }
