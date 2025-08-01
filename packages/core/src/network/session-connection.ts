@@ -45,6 +45,7 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
 
 const TEMP_AUTH_KEY_EXPIRY = 86400 // 24 hours
 const GET_STATE_INTERVAL = 1500 // 1.5 seconds
+const GET_STATE_TIMEOUT = 2000 // 2 seconds
 
 // destroy_auth_key#d1435160 = DestroyAuthKeyRes;
 // const DESTROY_AUTH_KEY = Buffer.from('605134d1', 'hex')
@@ -157,12 +158,8 @@ export class SessionConnection extends PersistentConnection {
         })
 
         // resend pending state_req-s
-        for (const msgId of this._session.pendingMessages.keys()) {
-            const pending = this._session.pendingMessages.get(msgId)!
-
-            if (pending._ === 'state') {
-                this._onMessageFailed(msgId, 'connection loss', true)
-            }
+        for (const msgId of this._session.pendingGetStateTimeouts.keys()) {
+            this._onMessageFailed(msgId, 'connection loss', true)
         }
 
         this.onDisconnect.emit()
@@ -183,6 +180,11 @@ export class SessionConnection extends PersistentConnection {
         // we can normally keep the same session across reconnects,
         // but we do need to reset ping info because we can't be sure it was received
         this._session.resetLastPing(true)
+
+        for (const timeout of this._session.pendingGetStateTimeouts.values()) {
+            timers.clearTimeout(timeout)
+        }
+        this._session.pendingGetStateTimeouts.clear()
 
         if (forever) {
             timers.clearTimeout(this._pfsUpdateTimeout)
@@ -1101,16 +1103,24 @@ export class SessionConnection extends PersistentConnection {
                 this._session.queuedResendReq.splice(0, 0, ...msgInfo.msgIds)
                 this._flushTimer.emitWhenIdle()
                 break
-            case 'state':
+            case 'state': {
                 this.log.debug(
                     'state request %l (size = %d) failed because of %s',
                     msgId,
                     msgInfo.msgIds.length,
                     reason,
                 )
+
+                const timer = this._session.pendingGetStateTimeouts.get(msgId)
+                if (timer) {
+                    timers.clearTimeout(timer)
+                    this._session.pendingGetStateTimeouts.delete(msgId)
+                }
+
                 this._session.queuedStateReq.splice(0, 0, ...msgInfo.msgIds)
                 this._flushTimer.emitWhenIdle()
                 break
+            }
             case 'bind':
                 this.log.debug('temp key binding request %l failed because of %s, retrying', msgId, reason)
                 msgInfo.promise.reject(new Error(reason))
@@ -1327,6 +1337,7 @@ export class SessionConnection extends PersistentConnection {
         }
 
         this._session.pendingMessages.delete(msg.reqMsgId)
+        this._session.pendingGetStateTimeouts.delete(msg.reqMsgId)
 
         this._onMessagesInfo(info.msgIds, msg.info)
     }
@@ -1604,6 +1615,18 @@ export class SessionConnection extends PersistentConnection {
 
     flushWhenIdle(): void {
         this._flushTimer.emitWhenIdle()
+    }
+
+    private _handleGetStateTimeout = (msgId: Long): void => {
+        const pending = this._session.pendingGetStateTimeouts.get(msgId)
+
+        if (!pending) {
+            this.log.warn('get_state timed out for unknown msg_id %l', msgId)
+
+            return
+        }
+
+        this._onMessageFailed(msgId, 'timeout')
     }
 
     private _flush(): void {
@@ -1890,6 +1913,9 @@ export class SessionConnection extends PersistentConnection {
             }
             this._session.pendingMessages.set(getStateMsgId, getStatePending)
             otherPendings.push(getStatePending)
+
+            const timeout = timers.setTimeout(this._handleGetStateTimeout, GET_STATE_TIMEOUT, getStateMsgId)
+            this._session.pendingGetStateTimeouts.set(getStateMsgId, timeout)
         }
 
         if (resendRequest) {
@@ -1981,14 +2007,12 @@ export class SessionConnection extends PersistentConnection {
                 this.log.debug('%s: msg_id already assigned, reusing %l, seqno: %d', msg.method, msg.msgId, msg.seqNo)
             }
 
-            // (re-)schedule get_state if needed
+            // (re-)schedule get_state
             if (msg.getState) {
                 this._session.getStateSchedule.remove(msg)
             }
-            if (!msg.acked) {
-                msg.getState = getStateTime
-                this._session.getStateSchedule.insert(msg)
-            }
+            msg.getState = getStateTime
+            this._session.getStateSchedule.insert(msg)
 
             if (rootMsgId === null) rootMsgId = msg.msgId
             writer.long(this._registerOutgoingMsgId(msg.msgId))

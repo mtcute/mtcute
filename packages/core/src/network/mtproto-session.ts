@@ -114,6 +114,7 @@ export class MtprotoSession {
     queuedResendReq: Long[] = []
     queuedCancelReq: Long[] = []
     getStateSchedule: SortedArray<PendingRpc> = new SortedArray<PendingRpc>([], (a, b) => a.getState! - b.getState!)
+    pendingGetStateTimeouts: LongMap<timers.Timer> = new LongMap()
 
     chains: Map<string | number, Long> = new Map()
     chainsPendingFails: Map<string | number, SortedArray<PendingRpc>> = new Map()
