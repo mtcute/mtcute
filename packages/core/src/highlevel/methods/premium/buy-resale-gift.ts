@@ -19,14 +19,18 @@ export async function buyResaleGift(
          * to the client's update handler.
          */
         shouldDispatch?: true
+
+        /** Whether to use TON currency for payment */
+        ton?: false
     },
 ): Promise<Message | null> {
-    const { slug, recipient, shouldDispatch } = params
+    const { slug, recipient, shouldDispatch, ton } = params
 
     const invoice: tl.TypeInputInvoice = {
         _: 'inputInvoiceStarGiftResale',
         slug,
         toId: await resolvePeer(client, recipient),
+        ton,
     }
 
     const form = await client.call({
