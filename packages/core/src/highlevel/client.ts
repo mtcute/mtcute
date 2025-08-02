@@ -4666,9 +4666,6 @@ export interface TelegramClient extends ITelegramClient {
      */
     removeCloudPassword(password: string): Promise<void>
 
-    _normalizeInputStarGift(
-        gift: InputStarGift): Promise<tl.TypeInputSavedStarGift>
-
     /**
      * Accept, hide or convert a star gift.
      *
@@ -4711,6 +4708,9 @@ export interface TelegramClient extends ITelegramClient {
              * to the client's update handler.
              */
             shouldDispatch?: true
+
+            /** Whether to use TON currency for payment */
+            ton?: false
         }): Promise<Message | null>
     /**
      * Check if the current user can apply boost to some channel
@@ -5198,6 +5198,9 @@ export interface TelegramClient extends ITelegramClient {
              */
             shouldDispatch?: true
         }): Promise<Message | null>
+
+    _normalizeInputStarGift(
+        gift: InputStarGift): Promise<tl.TypeInputSavedStarGift>
     /**
      * Add a sticker to a sticker set.
      *
@@ -7014,9 +7017,6 @@ TelegramClient.prototype.cancelPasswordEmail = function (...args) {
 TelegramClient.prototype.removeCloudPassword = function (...args) {
     return removeCloudPassword(this._client, ...args)
 }
-TelegramClient.prototype._normalizeInputStarGift = function (...args) {
-    return _normalizeInputStarGift(this._client, ...args)
-}
 TelegramClient.prototype.acceptStarGift = function (...args) {
     return acceptStarGift(this._client, ...args)
 }
@@ -7103,6 +7103,9 @@ TelegramClient.prototype.transferStarGift = function (...args) {
 }
 TelegramClient.prototype.upgradeStarGift = function (...args) {
     return upgradeStarGift(this._client, ...args)
+}
+TelegramClient.prototype._normalizeInputStarGift = function (...args) {
+    return _normalizeInputStarGift(this._client, ...args)
 }
 TelegramClient.prototype.addStickerToSet = function (...args) {
     return addStickerToSet(this._client, ...args)
