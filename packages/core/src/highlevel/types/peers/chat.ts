@@ -487,7 +487,11 @@ export class Chat {
         return new Date(this.raw.untilDate * 1000)
     }
 
-    /** Number of members in this chat (if available) */
+    /**
+     * Number of members in this chat (if available)
+     *
+     * If not available, try fetching a full chat info with {@link TelegramClient.getFullChat}
+     */
     get membersCount(): number | null {
         return 'participantsCount' in this.raw ? this.raw.participantsCount ?? null : null
     }
