@@ -1,4 +1,4 @@
-/* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument */
+/* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument, style/max-len */
 import type { tdFileId } from '@mtcute/file-id'
 import type { tl } from '@mtcute/tl'
 import type Long from 'long'
@@ -231,7 +231,7 @@ import { getBoosts } from './methods/premium/get-boosts.js'
 import { getBusinessChatLinks } from './methods/premium/get-business-chat-links.js'
 import { getBusinessConnection } from './methods/premium/get-business-connection.js'
 import { getMyBoostSlots } from './methods/premium/get-my-boost-slots.js'
-import { getResaleOptions } from './methods/premium/get-resale-star-gifts.js'
+import { getResaleOptions, getStarGiftResaleOptions } from './methods/premium/get-resale-star-gifts.js'
 import { getSavedStarGiftsById } from './methods/premium/get-saved-star-gifts-by-id.js'
 import { getSavedStarGifts } from './methods/premium/get-saved-star-gifts.js'
 import { getStarGiftOptions } from './methods/premium/get-star-gift-options.js'
@@ -4829,7 +4829,7 @@ export interface TelegramClient extends ITelegramClient {
      * **Available**: ✅ both users and bots
      *
      */
-    getResaleOptions(
+    getStarGiftResaleOptions(
         params: {
         /** ID of the gift to get resale options for */
             giftId: tl.Long
@@ -4855,6 +4855,16 @@ export interface TelegramClient extends ITelegramClient {
             /** Limit for pagination */
             limit?: number
         }): Promise<ArrayPaginatedWithMeta<StarGiftUnique, string, ResaleStarGiftsMeta>>
+    // todo remove in next major version
+    /**
+     * Get a list of star gifts up for resale
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @deprecated Deprecated alias, use `getStarGiftResaleOptions` instead
+     */
+    getResaleOptions(
+        params: Parameters<typeof getStarGiftResaleOptions>[1]): Promise<ArrayPaginatedWithMeta<StarGiftUnique, string, ResaleStarGiftsMeta>>
     /** Get one or more saved star gifts by their IDs */
     getSavedStarGiftsById(
         gifts: MaybeArray<InputStarGift>): Promise<SavedStarGift[]>
@@ -7055,6 +7065,9 @@ TelegramClient.prototype.getBusinessConnection = function (...args) {
 }
 TelegramClient.prototype.getMyBoostSlots = function (...args) {
     return getMyBoostSlots(this._client, ...args)
+}
+TelegramClient.prototype.getStarGiftResaleOptions = function (...args) {
+    return getStarGiftResaleOptions(this._client, ...args)
 }
 TelegramClient.prototype.getResaleOptions = function (...args) {
     return getResaleOptions(this._client, ...args)
