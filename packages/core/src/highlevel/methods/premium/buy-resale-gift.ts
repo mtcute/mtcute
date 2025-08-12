@@ -21,7 +21,7 @@ export async function buyResaleGift(
         shouldDispatch?: true
 
         /** Whether to use TON currency for payment */
-        ton?: false
+        ton?: boolean
     },
 ): Promise<Message | null> {
     const { slug, recipient, shouldDispatch, ton } = params
