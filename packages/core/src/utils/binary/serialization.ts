@@ -1,3 +1,4 @@
+import type { mtp } from '@mtcute/tl'
 import { Bytes, read, write } from '@fuman/io'
 import { assert } from '@fuman/utils'
 import { tl } from '@mtcute/tl'
@@ -7,12 +8,12 @@ import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 import { PeersIndex } from '../../highlevel/index.js'
 
 /** Serialize a raw TL object to binary */
-export function serializeObject(obj: tl.TlObject): Uint8Array {
+export function serializeObject(obj: tl.TlObject | mtp.TlObject): Uint8Array {
     return TlBinaryWriter.serializeObject(__tlWriterMap, obj)
 }
 
 /** Deserialize a binary TL object */
-export function deserializeObject(data: Uint8Array): tl.TlObject {
+export function deserializeObject(data: Uint8Array): tl.TlObject | mtp.TlObject {
     return TlBinaryReader.deserializeObject(__tlReaderMap, data)
 }
 
