@@ -215,6 +215,11 @@ export class FullChat extends Chat {
         return this.full._ === 'channelFull' && this.full.canViewRevenue!
     }
 
+    /** Number of members in the chat (0 if not available) */
+    override get membersCount(): number {
+        return this.full._ === 'channelFull' ? this.full.participantsCount ?? 0 : 0
+    }
+
     /** Number of admins in the chat (0 if not available) */
     get adminsCount(): number {
         return this.full._ === 'channelFull' ? this.full.adminsCount ?? 0 : 0

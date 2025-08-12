@@ -79,6 +79,10 @@ export class DenoCryptoProvider extends BaseCryptoProvider implements ICryptoPro
         } catch (e: any) {
             if (e.code === 'ERR_BUFFER_TOO_LARGE') {
                 return null
+            } else if (e instanceof TypeError && e.message.includes('ERR_BUFFER_TOO_LARGE')) {
+                // temporary workaround for https://github.com/denoland/deno/issues/30310
+                // todo: remove after a few months
+                return null
             }
 
             throw e

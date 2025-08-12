@@ -462,7 +462,7 @@ async function main() {
     }
 
     output.write(
-        '/* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument */\n'
+        '/* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument, style/max-len */\n'
         + '/* THIS FILE WAS AUTO-GENERATED */\n'
         + "import { Emitter } from '@fuman/utils'\n"
         + "import Long from 'long'\n",
