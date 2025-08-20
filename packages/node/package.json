@@ -1,7 +1,7 @@
 {
   "name": "@mtcute/node",
   "type": "module",
-  "version": "0.25.7",
+  "version": "0.25.8",
   "private": true,
   "description": "Meta-package for Node.js",
   "author": "alina sireneva <alina@tei.su>",
