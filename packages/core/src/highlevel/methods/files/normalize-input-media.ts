@@ -339,11 +339,14 @@ export async function _normalizeInputMedia(
     const input = media.file
 
     if (tdFileId.isFileIdLike(input)) {
+        const spoiler = (media.type === 'video' || media.type === 'photo') && media.spoiler
         if (typeof input === 'string' && input.match(/^https?:\/\//)) {
             return uploadMediaIfNeeded(
                 {
                     _: media.type === 'photo' ? 'inputMediaPhotoExternal' : 'inputMediaDocumentExternal',
                     url: input,
+                    ttlSeconds: media.ttlSeconds,
+                    spoiler,
                 },
                 media.type === 'photo',
             )
@@ -356,6 +359,8 @@ export async function _normalizeInputMedia(
                 return {
                     _: 'inputMediaPhoto',
                     id: fileIdToInputPhoto(parsed),
+                    ttlSeconds: media.ttlSeconds,
+                    spoiler,
                 }
             } else if (parsed.location._ === 'web') {
                 return uploadMediaIfNeeded(
@@ -365,6 +370,8 @@ export async function _normalizeInputMedia(
                                 ? 'inputMediaPhotoExternal'
                                 : 'inputMediaDocumentExternal',
                         url: parsed.location.url,
+                        ttlSeconds: media.ttlSeconds,
+                        spoiler,
                     },
                     parsed.type === tdFileId.FileType.Photo,
                 )
@@ -373,6 +380,8 @@ export async function _normalizeInputMedia(
             return {
                 _: 'inputMediaDocument',
                 id: fileIdToInputDocument(parsed),
+                ttlSeconds: media.ttlSeconds,
+                spoiler,
             }
         }
     } else if (typeof input === 'object' && tl.isAnyInputMedia(input)) {
