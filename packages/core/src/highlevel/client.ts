@@ -243,6 +243,7 @@ import { iterBoosters } from './methods/premium/iter-boosters.js'
 import { iterSavedStarGifts } from './methods/premium/iter-saved-star-gifts.js'
 import { iterStarsTransactions } from './methods/premium/iter-stars-transactions.js'
 import { togglePinnedStarGifts } from './methods/premium/pin-star-gift.js'
+import { prepayStarGiftUpgrade } from './methods/premium/prepay-star-gift-upgrade.js'
 import { sendStarGift } from './methods/premium/send-star-gift.js'
 import { setBusinessIntro } from './methods/premium/set-business-intro.js'
 import { setBusinessWorkHours } from './methods/premium/set-business-work-hours.js'
@@ -5070,6 +5071,30 @@ export interface TelegramClient extends ITelegramClient {
             peer: InputPeerLike
         }): Promise<void>
     /**
+     * Pay for other user's star gift upgrade.
+     *
+     * > **Note**: this method is not indended to be used by full-fledged clients,
+     * > as this method hides the actual invoice and payment form from the user.
+     * > For GUI clients, you should refer to the method's source code and
+     * > present the payment form to the user.
+     *
+     * **Available**: 👤 users only
+     *
+     * @returns  Service message about the payment for the upgrade, if one was generated.
+     */
+    prepayStarGiftUpgrade(
+        params: {
+            peer: InputPeerLike
+            /** Prepaid upgrade hash, taken from `SavedStarGift.prepaidUpgradeHash` */
+            hash: string
+
+            /**
+             * Whether to dispatch the new message event
+             * to the client's update handler.
+             */
+            shouldDispatch?: true
+        }): Promise<Message | null>
+    /**
      * Send a star gift to a user.
      *
      * > **Note**: this method is not indended to be used by full-fledged clients,
@@ -7115,6 +7140,9 @@ TelegramClient.prototype.iterStarsTransactions = function (...args) {
 }
 TelegramClient.prototype.togglePinnedStarGifts = function (...args) {
     return togglePinnedStarGifts(this._client, ...args)
+}
+TelegramClient.prototype.prepayStarGiftUpgrade = function (...args) {
+    return prepayStarGiftUpgrade(this._client, ...args)
 }
 TelegramClient.prototype.sendStarGift = function (...args) {
     return sendStarGift(this._client, ...args)

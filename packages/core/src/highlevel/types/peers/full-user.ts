@@ -1,11 +1,13 @@
 import type { tl } from '@mtcute/tl'
 
+import type { Audio } from '../media/audio.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
+
+import { parseDocument } from '../media/document-utils.js'
+
 import { Photo } from '../media/photo.js'
-
 import { BusinessAccount } from '../premium/business-account.js'
-
 import { BotVerification } from './bot-verification.js'
 import { Chat } from './chat.js'
 import { PeersIndex } from './peers-index.js'
@@ -293,6 +295,14 @@ export class FullUser extends User {
             date: new Date(this.full.starsMyPendingRatingDate! * 1000),
         }
     }
+
+    /** User's last saved audio file, to be displayed in the profile under their name */
+    get lastSavedMusic(): Audio | null {
+        if (this.full.savedMusic?._ !== 'document') return null
+        const doc = parseDocument(this.full.savedMusic)
+        if (doc.type !== 'audio') return null
+        return doc
+    }
 }
 
 memoizeGetters(FullUser, [
@@ -304,5 +314,6 @@ memoizeGetters(FullUser, [
     'business',
     'botVerification',
     'starsRatingPending',
+    'lastSavedMusic',
 ])
 makeInspectable(FullUser)

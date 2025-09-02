@@ -573,7 +573,7 @@ export interface ActionStarGift {
     /** If the gift was upgraded, ID of the message where this happened */
     upgradeMsgId: number | null
 
-    /** If the gift can be transferred, date when it can be re-sold */
+    /** If the gift can be transferred, date when it can be transferred */
     canTransferSince?: Date
     /** Number of stars this gift is up for resell for */
     resaleStars?: tl.Long
@@ -586,6 +586,14 @@ export interface ActionStarGift {
     gift: StarGift | StarGiftUnique
     /** Message attached to the gift */
     message: TextWithEntities | null
+
+    /** Whether this action signifies that an upgrade for this gift was paid for */
+    prepaidUpgrade: boolean
+    /** If available, you can pay for this gift's upgrade by passing this hash to `prepayStarGiftUpgrade` */
+    prepaidUpgradeHash?: string
+
+    /** ID of the message containing the original gift, if available */
+    giftMsgId?: number
 
     fromId?: number
     toId?: number
@@ -1010,6 +1018,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 boostPeer: parsePeer(act.boostPeer, this._peers),
                 giveawayMessageId: act.giveawayMsgId,
             }
+        // todo: cleanup in the next breaking update
         case 'messageActionStarGift':
             assert(act.gift._ === 'starGift')
             return {
@@ -1029,6 +1038,9 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 fromId: act.fromId ? getMarkedPeerId(act.fromId) : undefined,
                 toId: act.peer ? getMarkedPeerId(act.peer) : undefined,
                 savedId: act.savedId,
+                prepaidUpgrade: act.prepaidUpgrade!,
+                prepaidUpgradeHash: act.prepaidUpgradeHash ?? undefined,
+                giftMsgId: act.giftMsgId ?? undefined,
             }
         case 'messageActionStarGiftUnique':
             assert(act.gift._ === 'starGiftUnique')
@@ -1053,6 +1065,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 fromId: act.fromId ? getMarkedPeerId(act.fromId) : undefined,
                 toId: act.peer ? getMarkedPeerId(act.peer) : undefined,
                 savedId: act.savedId,
+                prepaidUpgrade: false,
             }
         case 'messageActionPaidMessagesPrice':
             return {
