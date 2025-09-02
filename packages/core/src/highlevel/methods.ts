@@ -238,6 +238,7 @@ export type { InputStarGiftAttributeIds, ResaleStarGiftsMeta } from './methods/p
 export { getSavedStarGiftsById } from './methods/premium/get-saved-star-gifts-by-id.js'
 export { getSavedStarGifts } from './methods/premium/get-saved-star-gifts.js'
 export { getStarGiftOptions } from './methods/premium/get-star-gift-options.js'
+export { getStarGiftValue } from './methods/premium/get-star-gift-value.js'
 export { getStarGiftWithdrawalUrl } from './methods/premium/get-star-gift-withdrawal-url.js'
 export { getStarsTransactions } from './methods/premium/get-stars-transactions.js'
 export { getUniqueStarGift } from './methods/premium/get-unique-star-gift.js'
