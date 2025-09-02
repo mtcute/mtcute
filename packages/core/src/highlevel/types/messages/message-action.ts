@@ -329,6 +329,17 @@ export interface ActionThemeChanged {
     emoji: string
 }
 
+/** Chat theme was changed to a unique star gift based one */
+export interface ActionThemeChangedUnique {
+    readonly type: 'theme_changed_unique'
+
+    /** Unique star gift */
+    gift: StarGiftUnique
+
+    /** Theme settings */
+    themeSettings: tl.TypeThemeSettings[]
+}
+
 /** Data was sent from a WebView (user-side action) */
 export interface ActionWebviewDataSent {
     readonly type: 'webview_sent'
@@ -673,6 +684,7 @@ export type MessageAction =
   | ActionTopicEdited
   | ActionCustom
   | ActionThemeChanged
+  | ActionThemeChangedUnique
   | ActionUserJoinedApproved
   | ActionWebviewDataSent
   | ActionWebviewDataReceived
@@ -884,9 +896,18 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 action: act.message,
             }
         case 'messageActionSetChatTheme':
+            if (act.theme._ === 'chatThemeUniqueGift') {
+                assert(act.theme.gift._ === 'starGiftUnique')
+                return {
+                    type: 'theme_changed_unique',
+                    gift: new StarGiftUnique(act.theme.gift, this._peers),
+                    themeSettings: act.theme.themeSettings,
+                }
+            }
+
             return {
                 type: 'theme_changed',
-                emoji: act.emoticon,
+                emoji: act.theme.emoticon,
             }
         case 'messageActionChatJoinedByRequest':
             return {
