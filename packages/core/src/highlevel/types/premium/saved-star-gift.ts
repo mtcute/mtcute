@@ -107,6 +107,13 @@ export class SavedStarGift {
     get collectionIds(): number[] {
         return this.raw.collectionId ?? []
     }
+
+    /**
+     * If available, you can pay for this gift's upgrade by passing this hash to `prepayStarGiftUpgrade`
+     */
+    get prepaidUpgradeHash(): string | null {
+        return this.raw.prepaidUpgradeHash ?? null
+    }
 }
 
 makeInspectable(SavedStarGift)
