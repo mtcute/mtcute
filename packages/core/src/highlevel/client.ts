@@ -38,7 +38,6 @@ import { getPasswordHint } from './methods/auth/get-password-hint.js'
 import { logOut } from './methods/auth/log-out.js'
 import { recoverPassword } from './methods/auth/recover-password.js'
 import { resendCode } from './methods/auth/resend-code.js'
-import { run } from './methods/auth/run.js'
 import { sendCode } from './methods/auth/send-code.js'
 import { sendRecoveryCode } from './methods/auth/send-recovery-code.js'
 import { signInBot } from './methods/auth/sign-in-bot.js'
@@ -143,7 +142,7 @@ import { iterForumTopics } from './methods/forums/iter-forum-topics.js'
 import { reorderPinnedForumTopics } from './methods/forums/reorder-pinned-forum-topics.js'
 import { toggleForumTopicClosed } from './methods/forums/toggle-forum-topic-closed.js'
 import { toggleForumTopicPinned } from './methods/forums/toggle-forum-topic-pinned.js'
-import { toggleForum, updateForumSettings } from './methods/forums/toggle-forum.js'
+import { updateForumSettings } from './methods/forums/toggle-forum.js'
 import { toggleGeneralTopicHidden } from './methods/forums/toggle-general-topic-hidden.js'
 import { createInviteLink } from './methods/invite-links/create-invite-link.js'
 import { editInviteLink } from './methods/invite-links/edit-invite-link.js'
@@ -230,7 +229,7 @@ import { getBoosts } from './methods/premium/get-boosts.js'
 import { getBusinessChatLinks } from './methods/premium/get-business-chat-links.js'
 import { getBusinessConnection } from './methods/premium/get-business-connection.js'
 import { getMyBoostSlots } from './methods/premium/get-my-boost-slots.js'
-import { getResaleOptions, getStarGiftResaleOptions } from './methods/premium/get-resale-star-gifts.js'
+import { getStarGiftResaleOptions } from './methods/premium/get-resale-star-gifts.js'
 import { getSavedStarGiftsById } from './methods/premium/get-saved-star-gifts-by-id.js'
 import { getSavedStarGifts } from './methods/premium/get-saved-star-gifts.js'
 import { getStarGiftOptions } from './methods/premium/get-star-gift-options.js'
@@ -298,7 +297,7 @@ import { resolvePeerMany } from './methods/users/resolve-peer-many.js'
 import { resolveChannel, resolvePeer, resolveUser } from './methods/users/resolve-peer.js'
 import { resolvePhoneNumber } from './methods/users/resolve-phone-number.js'
 import { saveMusicToProfile, unsaveMusicFromProfile } from './methods/users/save-music-to-profile.js'
-import { setEmojiStatus, setMyEmojiStatus } from './methods/users/set-emoji-status.js'
+import { setEmojiStatus } from './methods/users/set-emoji-status.js'
 import { setGlobalTtl } from './methods/users/set-global-ttl.js'
 import { setMyBirthday } from './methods/users/set-my-birthday.js'
 import { setMyProfilePhoto } from './methods/users/set-my-profile-photo.js'
@@ -479,23 +478,6 @@ export interface TelegramClient extends ITelegramClient {
             /** Abort signal */
             abortSignal?: AbortSignal
         }): Promise<SentCode>
-    /**
-     * Simple wrapper that calls {@link start} and then
-     * provided callback function (if any) without the
-     * need to introduce a `main()` function manually.
-     *
-     * Errors that were encountered while calling {@link start}
-     * and `then` will be emitted as usual, and can be caught with {@link onError}
-     *
-     * **Available**: ✅ both users and bots
-     *
-     * @param params  Parameters to be passed to {@link start}
-     * @param then  Function to be called after {@link start} returns
-     * @deprecated  This method provides no real value over {@link start}, please use it instead
-     */
-    run(
-        params: Parameters<typeof start>[1],
-        then?: (user: User) => void | Promise<void>): void
     /**
      * Send the confirmation code to the given phone number
      *
@@ -2870,18 +2852,6 @@ export interface TelegramClient extends ITelegramClient {
             pinned: boolean
         }): Promise<void>
     /**
-     * Set whether a supergroup is a forum.
-     *
-     * Only owner of the supergroup can change this setting.
-     *
-     * **Available**: 👤 users only
-     *
-     * @param chatId  Chat ID or username
-     * @param [enabled=false]  Whether the supergroup should be a forum
-     * @deprecated Use {@link updateForumSettings} instead
-     */
-    toggleForum(chatId: InputPeerLike, enabled?: boolean): Promise<void>
-    /**
      * Update forum settings of a supergroup.
      *
      * Only owner of the supergroup can change this setting.
@@ -4858,16 +4828,6 @@ export interface TelegramClient extends ITelegramClient {
             /** Limit for pagination */
             limit?: number
         }): Promise<ArrayPaginatedWithMeta<StarGiftUnique, string, ResaleStarGiftsMeta>>
-    // todo remove in next major version
-    /**
-     * Get a list of star gifts up for resale
-     *
-     * **Available**: ✅ both users and bots
-     *
-     * @deprecated Deprecated alias, use `getStarGiftResaleOptions` instead
-     */
-    getResaleOptions(
-        params: Parameters<typeof getStarGiftResaleOptions>[1]): Promise<ArrayPaginatedWithMeta<StarGiftUnique, string, ResaleStarGiftsMeta>>
     /** Get one or more saved star gifts by their IDs */
     getSavedStarGiftsById(
         gifts: MaybeArray<InputStarGift>): Promise<SavedStarGift[]>
@@ -4889,10 +4849,12 @@ export interface TelegramClient extends ITelegramClient {
             excludePublic?: boolean
             /** Whether to exclude gifts with unlimited availability */
             excludeUnlimited?: boolean
-            /** Whether to exclude gifts with limited availability */
-            excludeLimited?: boolean
             /** Whether to exclude unique gifts */
             excludeUnique?: boolean
+            /** Whether to exclude gifts that cannot be upgraded (either not limited or already upgraded) */
+            excludeUnupgradable?: boolean
+            /** Whether to exclude gifts that can be upgraded */
+            excludeUpgradable?: boolean
 
             /** ID of the collection to get gifts from */
             collectionId?: number
@@ -6166,21 +6128,6 @@ export interface TelegramClient extends ITelegramClient {
             audio: InputDocumentId
         }): Promise<void>
     /**
-     * Set an emoji status for the current user
-     *
-     * **Available**: ✅ both users and bots
-     *
-     * @deprecated – use {@link setEmojiStatus} with `self` instead
-     */
-    setMyEmojiStatus(
-        emoji: tl.Long | null,
-        params?: {
-        /**
-         * Date when the emoji status should expire (only if `emoji` is not `null`)
-         */
-            until?: number | Date
-        }): Promise<void>
-    /**
      * Set an emoji status for the given user/chat
      *
      * You can change emoji status of:
@@ -6490,9 +6437,6 @@ TelegramClient.prototype.recoverPassword = function (...args) {
 }
 TelegramClient.prototype.resendCode = function (...args) {
     return resendCode(this._client, ...args)
-}
-TelegramClient.prototype.run = function (...args) {
-    return run(this._client, ...args)
 }
 TelegramClient.prototype.sendCode = function (...args) {
     return sendCode(this._client, ...args)
@@ -6824,9 +6768,6 @@ TelegramClient.prototype.toggleForumTopicClosed = function (...args) {
 TelegramClient.prototype.toggleForumTopicPinned = function (...args) {
     return toggleForumTopicPinned(this._client, ...args)
 }
-TelegramClient.prototype.toggleForum = function (...args) {
-    return toggleForum(this._client, ...args)
-}
 TelegramClient.prototype.updateForumSettings = function (...args) {
     return updateForumSettings(this._client, ...args)
 }
@@ -7133,9 +7074,6 @@ TelegramClient.prototype.getMyBoostSlots = function (...args) {
 TelegramClient.prototype.getStarGiftResaleOptions = function (...args) {
     return getStarGiftResaleOptions(this._client, ...args)
 }
-TelegramClient.prototype.getResaleOptions = function (...args) {
-    return getResaleOptions(this._client, ...args)
-}
 TelegramClient.prototype.getSavedStarGiftsById = function (...args) {
     return getSavedStarGiftsById(this._client, ...args)
 }
@@ -7353,9 +7291,6 @@ TelegramClient.prototype.saveMusicToProfile = function (...args) {
 }
 TelegramClient.prototype.unsaveMusicFromProfile = function (...args) {
     return unsaveMusicFromProfile(this._client, ...args)
-}
-TelegramClient.prototype.setMyEmojiStatus = function (...args) {
-    return setMyEmojiStatus(this._client, ...args)
 }
 TelegramClient.prototype.setEmojiStatus = function (...args) {
     return setEmojiStatus(this._client, ...args)

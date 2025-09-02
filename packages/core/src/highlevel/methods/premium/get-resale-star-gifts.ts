@@ -159,17 +159,3 @@ export async function getStarGiftResaleOptions(
         res.nextOffset,
     )
 }
-
-// todo remove in next major version
-
-/**
- * Get a list of star gifts up for resale
- *
- * @deprecated Deprecated alias, use `getStarGiftResaleOptions` instead
- */
-export async function getResaleOptions(
-    client: ITelegramClient,
-    params: Parameters<typeof getStarGiftResaleOptions>[1],
-): Promise<ArrayPaginatedWithMeta<StarGiftUnique, string, ResaleStarGiftsMeta>> {
-    return getStarGiftResaleOptions(client, params)
-}

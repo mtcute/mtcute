@@ -7,7 +7,6 @@ import type { Interface as RlInterface } from 'node:readline'
 
 import type { Readable } from 'node:stream'
 import { createInterface } from 'node:readline'
-import { unknownToError } from '@fuman/utils'
 import {
     BaseTelegramClient as BaseTelegramClientBase,
     TelegramClient as TelegramClientBase,
@@ -115,20 +114,6 @@ export class TelegramClient extends TelegramClientBase {
 
             return user
         })
-    }
-
-    override run(
-        params: Parameters<TelegramClient['start']>[0] | ((user: User) => void | Promise<void>),
-        then?: (user: User) => void | Promise<void>,
-    ): void {
-        if (typeof params === 'function') {
-            then = params
-            params = {}
-        }
-
-        this.start(params)
-            .then(then)
-            .catch(err => this.onError.emit(unknownToError(err)))
     }
 
     override downloadToFile(

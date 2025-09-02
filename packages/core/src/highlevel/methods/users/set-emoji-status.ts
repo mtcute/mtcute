@@ -10,28 +10,6 @@ import { isSelfPeer } from '../auth/utils.js'
 import { resolvePeer } from './resolve-peer.js'
 
 /**
- * Set an emoji status for the current user
- *
- * @deprecated – use {@link setEmojiStatus} with `self` instead
- */
-export async function setMyEmojiStatus(
-    client: ITelegramClient,
-    emoji: tl.Long | null,
-    params?: {
-        /**
-         * Date when the emoji status should expire (only if `emoji` is not `null`)
-         */
-        until?: number | Date
-    },
-): Promise<void> {
-    return setEmojiStatus(client, {
-        peerId: 'self',
-        emoji,
-        until: params?.until,
-    })
-}
-
-/**
  * Set an emoji status for the given user/chat
  *
  * You can change emoji status of:
