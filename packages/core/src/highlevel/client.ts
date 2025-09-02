@@ -5005,27 +5005,19 @@ export interface TelegramClient extends ITelegramClient {
      *
      */
     iterSavedStarGifts(
-        params: {
-        /** Peer to get saved gifts from */
-            owner: InputPeerLike
+        params: Parameters<typeof getSavedStarGifts>[1] & {
+        /**
+         * Number of gifts to fetch per request
+         *
+         * @default 100
+         */
+            chunkSize?: number
 
-            /** Whether to exclude unsaved gifts */
-            excludeUnsaved?: boolean
-            /** Whether to exclude saved gifts */
-            excludeSaved?: boolean
-            /** Whether to exclude gifts with unlimited availability */
-            excludeUnlimited?: boolean
-            /** Whether to exclude gifts with limited availability */
-            excludeLimited?: boolean
-            /** Whether to exclude unique gifts */
-            excludeUnique?: boolean
-
-            /** Whether to sort by value */
-            sortByValue?: boolean
-
-            /** Offset for pagination */
-            offset?: string
-            /** Limit for pagination */
+            /**
+             * Total number of gifts to fetch
+             *
+             * @default Infinity
+             */
             limit?: number
         }): AsyncIterableIterator<SavedStarGift>
     /**
