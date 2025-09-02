@@ -1,7 +1,7 @@
 {
   "name": "@mtcute/bun",
   "type": "module",
-  "version": "0.25.8",
+  "version": "0.26.0",
   "private": true,
   "description": "Meta-package for Bun",
   "author": "alina sireneva <alina@tei.su>",
