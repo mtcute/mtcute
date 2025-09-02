@@ -30,6 +30,8 @@ export async function getStarsTransactions(
         subscriptionId?: string
         /** Pagination offset */
         offset?: string
+        /** Whether to return transactions made in TON */
+        ton?: boolean
         /**
          * Pagination limit
          *
@@ -38,7 +40,7 @@ export async function getStarsTransactions(
         limit?: number
     },
 ): Promise<StarsStatus> {
-    const { direction, sort, subscriptionId, offset = '', limit = 100 } = params ?? {}
+    const { direction, sort, subscriptionId, offset = '', limit = 100, ton } = params ?? {}
 
     const res = await client.call({
         _: 'payments.getStarsTransactions',
@@ -49,6 +51,7 @@ export async function getStarsTransactions(
         inbound: direction === 'incoming',
         ascending: sort === 'asc',
         subscriptionId,
+        ton,
     })
 
     return new StarsStatus(res)
