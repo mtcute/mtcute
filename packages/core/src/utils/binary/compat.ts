@@ -5,6 +5,7 @@ import { tl } from '@mtcute/tl'
 import { TlBinaryReader } from '@mtcute/tl-runtime'
 import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlReaderMapCompat } from '@mtcute/tl/compat/reader.js'
+import Long from 'long'
 import { PeersIndex } from '../../highlevel/types/peers/peers-index.js'
 
 function replaceType<
@@ -31,16 +32,22 @@ function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
             return {
                 ...obj,
                 _: 'starGiftUnique',
+                giftId: Long.ZERO,
                 ownerId: obj.ownerId ? { _: 'peerUser', userId: obj.ownerId } : undefined,
             }
         case 'starGiftUnique_layer198':
         case 'starGiftUnique_layer202':
         case 'starGiftUnique_layer206':
-            return replaceType(obj, 'starGiftUnique')
+            return {
+                ...obj,
+                _: 'starGiftUnique',
+                giftId: Long.ZERO,
+            }
         case 'starGiftUnique_layer210':
             return {
                 ...obj,
                 _: 'starGiftUnique',
+                giftId: Long.ZERO,
                 resellAmount: obj.resellStars
                     ? [{
                         _: 'starsAmount',
@@ -49,9 +56,16 @@ function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
                     }]
                     : undefined,
             }
+        case 'starGiftUnique_layer211':
+            return {
+                ...obj,
+                _: 'starGiftUnique',
+                giftId: Long.ZERO,
+            }
         case 'starGift_layer202':
         case 'starGift_layer206':
         case 'starGift_layer209':
+        case 'starGift_layer211':
             return replaceType(obj, 'starGift')
         default:
             return obj
@@ -103,6 +117,7 @@ function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessage
                     : undefined,
             }
         case 'messageActionStarGift_layer197':
+        case 'messageActionStarGift_layer211':
             return {
                 ...obj,
                 _: 'messageActionStarGift',
@@ -110,6 +125,14 @@ function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessage
             }
         case 'messageActionPaidMessagesPrice_layer203':
             return replaceType(obj, 'messageActionPaidMessagesPrice')
+        case 'messageActionSetChatTheme_layer211':
+            return {
+                _: 'messageActionSetChatTheme',
+                theme: {
+                    _: 'chatTheme',
+                    emoticon: obj.emoticon,
+                },
+            }
         default:
             return obj
     }
@@ -156,10 +179,12 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
         case 'starGiftUnique_layer198':
         case 'starGiftUnique_layer202':
         case 'starGiftUnique_layer206':
+        case 'starGiftUnique_layer210':
+        case 'starGiftUnique_layer211':
         case 'starGift_layer202':
         case 'starGift_layer206':
         case 'starGift_layer209':
-        case 'starGiftUnique_layer210':
+        case 'starGift_layer211':
             return mapCompatStarGift(obj)
         case 'emojiStatus_layer197':
             return mapCompatEmojiStatus(obj)
@@ -168,14 +193,18 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
         case 'channelFull_layer197':
         case 'channelFull_layer204':
             return replaceType(obj, 'channelFull')
-        case 'messageActionStarGiftUnique_layer197':
         case 'messageActionStarGift_layer197':
+        case 'messageActionStarGift_layer211':
+        case 'messageActionStarGiftUnique_layer197':
         case 'messageActionStarGiftUnique_layer202':
-        case 'messageActionPaidMessagesPrice_layer203':
         case 'messageActionStarGiftUnique_layer210':
+        case 'messageActionPaidMessagesPrice_layer203':
+        case 'messageActionSetChatTheme_layer211':
             return mapCompatMessageAction(obj)
         case 'userFull_layer199':
             return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
+        case 'userFull_layer211':
+            return replaceType(obj, 'userFull')
         case 'userFull_layer200':
         case 'userFull_layer209':
         case 'userFull_layer210':
@@ -193,6 +222,8 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
                 _: 'channel',
                 emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
             }
+        case 'channelFull_layer211':
+            return replaceType(obj, 'channelFull')
         case 'phoneCallDiscardReasonAllowGroupCall_layer202':
             // removed constructor in favor of phoneCallDiscardReasonMigrateConferenceCall,
             // which requires extra info we don't have
