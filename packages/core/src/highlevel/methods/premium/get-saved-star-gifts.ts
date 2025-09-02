@@ -22,10 +22,12 @@ export async function getSavedStarGifts(
         excludePublic?: boolean
         /** Whether to exclude gifts with unlimited availability */
         excludeUnlimited?: boolean
-        /** Whether to exclude gifts with limited availability */
-        excludeLimited?: boolean
         /** Whether to exclude unique gifts */
         excludeUnique?: boolean
+        /** Whether to exclude gifts that cannot be upgraded (either not limited or already upgraded) */
+        excludeUnupgradable?: boolean
+        /** Whether to exclude gifts that can be upgraded */
+        excludeUpgradable?: boolean
 
         /** ID of the collection to get gifts from */
         collectionId?: number
@@ -45,7 +47,8 @@ export async function getSavedStarGifts(
         excludeUnsaved: params.excludeHidden,
         excludeSaved: params.excludePublic,
         excludeUnlimited: params.excludeUnlimited,
-        excludeLimited: params.excludeLimited,
+        excludeUnupgradable: params.excludeUnupgradable,
+        excludeUpgradable: params.excludeUpgradable,
         excludeUnique: params.excludeUnique,
         sortByValue: params.sortByValue,
         collectionId: params.collectionId,
