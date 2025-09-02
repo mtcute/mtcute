@@ -94,7 +94,7 @@ export abstract class RawDocument extends FileLocation {
      * Input document TL object generated from this object,
      * to be used with methods that use it
      */
-    get inputDocument(): tl.TypeInputDocument {
+    get inputDocument(): tl.RawInputDocument {
         return {
             _: 'inputDocument',
             id: this.raw.id,
