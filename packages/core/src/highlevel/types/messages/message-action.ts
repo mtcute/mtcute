@@ -546,8 +546,8 @@ export interface ActionStarsPrize {
 }
 
 /** A star gift was sent */
-export interface ActionStarGift {
-    readonly type: 'stars_gift'
+export interface ActionStarGiftSent {
+    readonly type: 'star_gift_sent'
 
     /** Whether the sender chose to send the gift anonymously */
     nameHidden: boolean
@@ -564,6 +564,11 @@ export interface ActionStarGift {
      */
     convertStars: tl.Long
 
+    /** The gift itself */
+    gift: StarGift
+    /** Message attached to the gift */
+    message: TextWithEntities | null
+
     /** Whether this gift can be upgraded to a unique gift */
     canUpgrade: boolean
     /** Whether this gift was upgraded to a unique gift */
@@ -573,31 +578,63 @@ export interface ActionStarGift {
     /** If the gift was upgraded, ID of the message where this happened */
     upgradeMsgId: number | null
 
-    /** If the gift can be transferred, date when it can be transferred */
-    canTransferSince?: Date
-    /** Number of stars this gift is up for resell for */
-    resaleStars?: tl.Long
-    /** Number of nanoton this gift is up for resell for */
-    resaleTon?: tl.Long
-    /** If the gift can be re-sold, date when it will become available */
-    canResellAt?: Date
+    /** ID of the related saved profile gift */
+    savedId?: tl.Long
 
-    /** The gift itself */
-    gift: StarGift | StarGiftUnique
-    /** Message attached to the gift */
-    message: TextWithEntities | null
-
-    /** Whether this action signifies that an upgrade for this gift was paid for */
-    prepaidUpgrade: boolean
     /** If available, you can pay for this gift's upgrade by passing this hash to `prepayStarGiftUpgrade` */
     prepaidUpgradeHash?: string
+}
 
-    /** ID of the message containing the original gift, if available */
+/** A star gift upgrade was paid for */
+export interface ActionStarGiftUpgradePaid {
+    readonly type: 'star_gift_upgrade_paid'
+
+    /** The gift itself */
+    gift: StarGift
+
+    /** ID of the message where the gift was upgraded */
+    upgradeMsgId: number | null
+
+    /** ID of the message containing the originally sent gift, if available */
     giftMsgId?: number
+}
 
-    fromId?: number
-    toId?: number
-    savedId?: Long
+interface StarGiftUniqueCommon {
+    /** Whether this gift was saved to the recipient's profile */
+    saved: boolean
+    /** Whether this gift was refunded */
+    refunded: boolean
+
+    /** The gift itself */
+    gift: StarGiftUnique
+
+    /** If the gift can be transferred, date when it will become available */
+    canTransferAt?: Date
+    /** If the gift can be re-sold, date when it will become available */
+    canResellAt?: Date
+    /** If the gift can be exported to blockchain, date when it will become available */
+    canExportAt?: Date
+
+    /** ID of the related saved profile gift */
+    savedId?: tl.Long
+}
+
+/** A star gift was upgraded to a unique one */
+export interface ActionStarGiftUpgraded extends StarGiftUniqueCommon {
+    readonly type: 'star_gift_upgraded'
+}
+
+/** A star gift was bought from a resale listing */
+export interface ActionStarGiftBoughtResale extends StarGiftUniqueCommon {
+    readonly type: 'star_gift_bought_resale'
+
+    /** Number of stars/TON that were paid for the gift */
+    amount: tl.TypeStarsAmount
+}
+
+/** A star gift was transferred */
+export interface ActionStarGiftTransferred extends StarGiftUniqueCommon {
+    readonly type: 'star_gift_transferred'
 }
 
 /** Paid messages were paid for */
@@ -708,7 +745,11 @@ export type MessageAction =
   | ActionPaymentRefunded
   | ActionStarGifted
   | ActionStarsPrize
-  | ActionStarGift
+  | ActionStarGiftSent
+  | ActionStarGiftUpgradePaid
+  | ActionStarGiftUpgraded
+  | ActionStarGiftBoughtResale
+  | ActionStarGiftTransferred
   | ActionPaidMessagesPaid
   | ActionPaidMessagesRefunded
   | ActionTodoCompletions
@@ -1021,8 +1062,17 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         // todo: cleanup in the next breaking update
         case 'messageActionStarGift':
             assert(act.gift._ === 'starGift')
+            if (act.prepaidUpgrade) {
+                return {
+                    type: 'star_gift_upgrade_paid',
+                    gift: new StarGift(act.gift, this._peers),
+                    giftMsgId: act.giftMsgId ?? undefined,
+                    upgradeMsgId: act.upgradeMsgId ?? null,
+                }
+            }
+
             return {
-                type: 'stars_gift',
+                type: 'star_gift_sent',
                 nameHidden: act.nameHidden!,
                 saved: act.saved!,
                 converted: act.converted!,
@@ -1035,38 +1085,41 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 upgradeStars: act.upgradeStars ?? Long.ZERO,
                 upgradeMsgId: act.upgradeMsgId ?? null,
 
-                fromId: act.fromId ? getMarkedPeerId(act.fromId) : undefined,
-                toId: act.peer ? getMarkedPeerId(act.peer) : undefined,
                 savedId: act.savedId,
-                prepaidUpgrade: act.prepaidUpgrade!,
                 prepaidUpgradeHash: act.prepaidUpgradeHash ?? undefined,
-                giftMsgId: act.giftMsgId ?? undefined,
             }
-        case 'messageActionStarGiftUnique':
+        case 'messageActionStarGiftUnique': {
             assert(act.gift._ === 'starGiftUnique')
-            return {
-                type: 'stars_gift',
-                nameHidden: false,
+            const common = {
                 saved: act.saved!,
-                converted: false,
-                convertStars: Long.ZERO,
                 refunded: act.refunded!,
                 gift: new StarGiftUnique(act.gift, this._peers),
-                message: null,
-                canUpgrade: false,
-                upgraded: true,
-                upgradeStars: Long.ZERO,
-                upgradeMsgId: null,
-                canTransferSince: act.canTransferAt ? new Date(act.canTransferAt * 1000) : undefined,
-                resaleStars: act.resaleAmount?._ === 'starsAmount' ? act.resaleAmount.amount : undefined,
-                resaleTon: act.resaleAmount?._ === 'starsTonAmount' ? act.resaleAmount.amount : undefined,
+                canTransferAt: act.canTransferAt ? new Date(act.canTransferAt * 1000) : undefined,
                 canResellAt: act.canResellAt ? new Date(act.canResellAt * 1000) : undefined,
-
-                fromId: act.fromId ? getMarkedPeerId(act.fromId) : undefined,
-                toId: act.peer ? getMarkedPeerId(act.peer) : undefined,
+                canExportAt: act.canExportAt ? new Date(act.canExportAt * 1000) : undefined,
                 savedId: act.savedId,
-                prepaidUpgrade: false,
             }
+
+            if (act.resaleAmount) {
+                return {
+                    type: 'star_gift_bought_resale',
+                    ...common,
+                    amount: act.resaleAmount,
+                }
+            }
+
+            if (act.upgrade) {
+                return {
+                    type: 'star_gift_upgraded',
+                    ...common,
+                }
+            }
+
+            return {
+                type: 'star_gift_transferred',
+                ...common,
+            }
+        }
         case 'messageActionPaidMessagesPrice':
             return {
                 type: 'messages_paid',
