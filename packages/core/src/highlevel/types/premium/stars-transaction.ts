@@ -36,6 +36,8 @@ import { StarGift } from './stars-gift.js'
  *     - `api_floodskip`: This transaction is a payment for a paid bot broadcast
  *  - `bot_referral`: This transaction is proceeds from a bot referral program
  *  - `ads_proceeds`: This transaction is proceeds from Telegram Ads
+ *  - `paid_search`: This transaction is a payment for a paid search
+ *  - `star_gift_prepaid_upgrade`: This transaction is for a star gift prepaid upgrade
  */
 export type StarsTransactionType =
   | { type: 'unsupported' }
@@ -189,7 +191,14 @@ export type StarsTransactionType =
       /** End of the period */
       toDate: Date
   }
-
+  | { type: 'paid_search' }
+  | {
+      type: 'star_gift_prepaid_upgrade'
+      /** Related peer */
+      peer: Peer
+      /** The upgraded gift */
+      gift: StarGiftUnique
+  }
 export class StarsTransaction {
     constructor(
         readonly raw: tl.RawStarsTransaction,
@@ -287,6 +296,10 @@ export class StarsTransaction {
             case 'starsTransactionPeer': {
                 const peer = parsePeer(this.raw.peer.peer, this.peers)
 
+                if (this.raw.postsSearch) {
+                    return { type: 'paid_search' }
+                }
+
                 if (this.raw.giveawayPostId) {
                     return {
                         type: 'giveaway',
@@ -329,6 +342,12 @@ export class StarsTransaction {
                             type: 'star_gift_resale',
                             peer,
                             gift: new StarGiftUnique(this.raw.stargift, this.peers),
+                        }
+                    } else if (this.raw.stargiftPrepaidUpgrade) {
+                        return {
+                            peer,
+                            gift: new StarGiftUnique(this.raw.stargift, this.peers),
+                            type: 'star_gift_prepaid_upgrade',
                         }
                     } else {
                         return {

@@ -4955,6 +4955,8 @@ export interface TelegramClient extends ITelegramClient {
             subscriptionId?: string
             /** Pagination offset */
             offset?: string
+            /** Whether to return transactions made in TON */
+            ton?: boolean
             /**
              * Pagination limit
              *
