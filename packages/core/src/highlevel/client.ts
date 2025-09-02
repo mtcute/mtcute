@@ -1,5 +1,4 @@
 /* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument, style/max-len */
-import type { tdFileId } from '@mtcute/file-id'
 import type { tl } from '@mtcute/tl'
 import type Long from 'long'
 import type { RpcCallOptions } from '../network/index.js'
@@ -26,7 +25,7 @@ import type { CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
 import type { InputStarGiftAttributeIds, ResaleStarGiftsMeta } from './methods/premium/get-resale-star-gifts.js'
 import type { CanSendStoryResult } from './methods/stories/can-send-story.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
-import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
+import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
 import type { ParsedUpdateHandlerParams } from './updates/parsed.js'
 import type { RawUpdateInfo } from './updates/types.js'
 import type { InputStringSessionData } from './utils/string-session.js'
@@ -291,12 +290,14 @@ import { getMyUsername } from './methods/users/get-my-username.js'
 import { getPeerSettings } from './methods/users/get-peer-settings.js'
 import { getProfilePhoto } from './methods/users/get-profile-photo.js'
 import { getProfilePhotos } from './methods/users/get-profile-photos.js'
+import { getSavedMusic } from './methods/users/get-saved-music.js'
 import { getUsers } from './methods/users/get-users.js'
 import { isPeerAvailable } from './methods/users/is-peer-available.js'
 import { iterProfilePhotos } from './methods/users/iter-profile-photos.js'
 import { resolvePeerMany } from './methods/users/resolve-peer-many.js'
 import { resolveChannel, resolvePeer, resolveUser } from './methods/users/resolve-peer.js'
 import { resolvePhoneNumber } from './methods/users/resolve-phone-number.js'
+import { saveMusicToProfile, unsaveMusicFromProfile } from './methods/users/save-music-to-profile.js'
 import { setEmojiStatus, setMyEmojiStatus } from './methods/users/set-emoji-status.js'
 import { setGlobalTtl } from './methods/users/set-global-ttl.js'
 import { setMyBirthday } from './methods/users/set-my-birthday.js'
@@ -5358,7 +5359,7 @@ export interface TelegramClient extends ITelegramClient {
      * @returns  Modfiied sticker set
      */
     deleteStickerFromSet(
-        sticker: string | tdFileId.RawFullRemoteFileLocation | tl.TypeInputDocument): Promise<StickerSet>
+        sticker: InputDocumentId): Promise<StickerSet>
     /**
      * Get custom emoji stickers by their IDs
      *
@@ -5420,7 +5421,7 @@ export interface TelegramClient extends ITelegramClient {
      * @returns  Modified sticker set
      */
     moveStickerInSet(
-        sticker: string | tdFileId.RawFullRemoteFileLocation | tl.TypeInputDocument,
+        sticker: InputDocumentId,
         position: number): Promise<StickerSet>
 
     /**
@@ -5437,7 +5438,7 @@ export interface TelegramClient extends ITelegramClient {
      * @returns  Modfiied sticker set
      */
     replaceStickerInSet(
-        sticker: string | tdFileId.RawFullRemoteFileLocation | tl.TypeInputDocument,
+        sticker: InputDocumentId,
         newSticker: InputStickerSetItem,
         params?: {
         /**
@@ -6017,6 +6018,19 @@ export interface TelegramClient extends ITelegramClient {
             limit?: number
         }): Promise<ArrayPaginated<Photo, number>>
     /**
+     * Get music files saved to the user's profile
+     */
+    getSavedMusic(
+        params: {
+        /** User ID, username, phone number, `"me"` or `"self"` */
+            userId: InputPeerLike
+
+            /** Offset for pagination */
+            offset?: number
+            /** Limit for pagination */
+            limit?: number
+        }): Promise<ArrayPaginated<Audio, number>>
+    /**
      * Get information about multiple users.
      * You can retrieve up to 200 users at once.
      *
@@ -6137,6 +6151,28 @@ export interface TelegramClient extends ITelegramClient {
      */
     resolvePhoneNumber(
         phone: string, force?: boolean): Promise<tl.TypeInputPeer>
+
+    saveMusicToProfile(
+        params: {
+        /** Audio file to save (or its ID) */
+            audio: InputMediaAudio | InputDocumentId
+            /** Optionally, document ID after which we should insert the music */
+            after?: InputDocumentId
+
+            /**
+             * Upload progress callback
+             *
+             * @param uploaded  Number of bytes uploaded
+             * @param total  Total file size
+             */
+            progressCallback?: (uploaded: number, total: number) => void
+        }): Promise<void>
+
+    unsaveMusicFromProfile(
+        params: {
+        /** ID of the Audio file to unsave */
+            audio: InputDocumentId
+        }): Promise<void>
     /**
      * Set an emoji status for the current user
      *
@@ -7291,6 +7327,9 @@ TelegramClient.prototype.getProfilePhoto = function (...args) {
 TelegramClient.prototype.getProfilePhotos = function (...args) {
     return getProfilePhotos(this._client, ...args)
 }
+TelegramClient.prototype.getSavedMusic = function (...args) {
+    return getSavedMusic(this._client, ...args)
+}
 TelegramClient.prototype.getUsers = function (...args) {
     return getUsers(this._client, ...args)
 }
@@ -7316,6 +7355,12 @@ TelegramClient.prototype.resolveChannel = function (...args) {
 }
 TelegramClient.prototype.resolvePhoneNumber = function (...args) {
     return resolvePhoneNumber(this._client, ...args)
+}
+TelegramClient.prototype.saveMusicToProfile = function (...args) {
+    return saveMusicToProfile(this._client, ...args)
+}
+TelegramClient.prototype.unsaveMusicFromProfile = function (...args) {
+    return unsaveMusicFromProfile(this._client, ...args)
 }
 TelegramClient.prototype.setMyEmojiStatus = function (...args) {
     return setMyEmojiStatus(this._client, ...args)

@@ -66,6 +66,14 @@ export type InputFileLike =
   | tdFileId.RawFullRemoteFileLocation
 
 /**
+ * ID of an already uploaded document. Can be a:
+ *  - `string` with a TDLib and Bot API compatible File ID
+ *  - `td.RawFullRemoteFileLocation` (parsed File ID)
+ *  - `tl.TypeInputDocument` (raw TL object)
+ */
+export type InputDocumentId = string | tdFileId.RawFullRemoteFileLocation | tl.RawInputDocument
+
+/**
  * File location which should be downloaded.
  * You can also provide TDLib and Bot API compatible File ID
  */
