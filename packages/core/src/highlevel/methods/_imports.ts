@@ -96,6 +96,7 @@ import {
     SentCode,
     StarGift,
     StarGiftUnique,
+    StarGiftValue,
     StarsStatus,
     StarsTransaction,
     Sticker,
