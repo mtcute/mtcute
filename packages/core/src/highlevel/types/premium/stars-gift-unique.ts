@@ -211,10 +211,8 @@ export class StarGiftUnique {
         return this.raw.availabilityTotal
     }
 
-    // todo for breaking: rename to resellPriceStars
-
     /** Number of stars this gift is up for resell for */
-    get resellPrice(): tl.Long | null {
+    get resellPriceStars(): tl.Long | null {
         const resellPriceStars = this.raw.resellAmount?.find(it => it._ === 'starsAmount')
         return resellPriceStars?.amount ?? null
     }
@@ -266,4 +264,12 @@ export class StarGiftUnique {
 }
 
 makeInspectable(StarGiftUnique)
-memoizeGetters(StarGiftUnique, ['model', 'pattern', 'backdrop', 'originalDetails'])
+memoizeGetters(StarGiftUnique, [
+    'model',
+    'pattern',
+    'backdrop',
+    'originalDetails',
+    'resellPriceStars',
+    'resellPriceTon',
+    'releasedBy',
+])
