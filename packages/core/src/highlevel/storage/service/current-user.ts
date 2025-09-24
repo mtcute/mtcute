@@ -10,6 +10,7 @@ import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { extractUsernames } from '../../utils/peer-utils.js'
 
 export interface CurrentUserInfo {
+    // NB: when adding fields, remember to update the store() method to update this._cached
     userId: number
     isBot: boolean
     isPremium: boolean
@@ -95,12 +96,10 @@ export class CurrentUserService extends BaseService {
     async store(info: CurrentUserInfo | null): Promise<void> {
         if (info && this._cached) {
             // update the existing object so the references to it are still valid
-            if (this._cached.userId === info.userId) {
-                return
-            }
-
             this._cached.userId = info.userId
             this._cached.isBot = info.isBot
+            this._cached.isPremium = info.isPremium
+            this._cached.usernames = info.usernames
         } else {
             this._cached = info
         }
@@ -124,7 +123,9 @@ export class CurrentUserService extends BaseService {
     }
 
     async fetch(): Promise<CurrentUserInfo | null> {
-        if (this._cached) return this._cached
+        if (this._cached) {
+            return this._cached
+        }
 
         const data = await this._kv.get(KV_CURRENT_USER)
         if (!data) return null
