@@ -12,7 +12,7 @@ import { Message, PeersIndex } from '../../types/index.js'
  * Unlike {@link getMessages}, this method does not
  * check if the message belongs to some chat.
  *
- * Fot messages that were not found, `null` will be
+ * For messages that were not found, `null` will be
  * returned at that position.
  *
  * @param messageIds  Messages IDs

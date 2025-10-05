@@ -3589,7 +3589,7 @@ export interface TelegramClient extends ITelegramClient {
      * Unlike {@link getMessages}, this method does not
      * check if the message belongs to some chat.
      *
-     * Fot messages that were not found, `null` will be
+     * For messages that were not found, `null` will be
      * returned at that position.
      *
      * **Available**: ✅ both users and bots
@@ -3605,7 +3605,7 @@ export interface TelegramClient extends ITelegramClient {
     /**
      * Get messages in chat by their IDs
      *
-     * Fot messages that were not found, `null` will be
+     * For messages that were not found, `null` will be
      * returned at that position.
      *
      * **Available**: ✅ both users and bots
@@ -3658,7 +3658,7 @@ export interface TelegramClient extends ITelegramClient {
     /**
      * Get scheduled messages in chat by their IDs
      *
-     * Fot messages that were not found, `null` will be
+     * For messages that were not found, `null` will be
      * returned at that position.
      *
      * **Available**: 👤 users only

@@ -8,7 +8,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
 /**
  * Get scheduled messages in chat by their IDs
  *
- * Fot messages that were not found, `null` will be
+ * For messages that were not found, `null` will be
  * returned at that position.
  *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
