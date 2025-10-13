@@ -4,7 +4,7 @@ import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike, Message } from '../../types/index.js'
 import { randomLong } from '../../../utils/long-utils.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
-import { resolveChannel, resolvePeer } from '../users/resolve-peer.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Create a topic in a forum
@@ -49,8 +49,8 @@ export async function createForumTopic(
     const { chatId, title, icon, sendAs, shouldDispatch } = params
 
     const res = await client.call({
-        _: 'channels.createForumTopic',
-        channel: await resolveChannel(client, chatId),
+        _: 'messages.createForumTopic',
+        peer: await resolvePeer(client, chatId),
         title,
         iconColor: typeof icon === 'number' ? icon : undefined,
         iconEmojiId: typeof icon !== 'number' ? icon : undefined,

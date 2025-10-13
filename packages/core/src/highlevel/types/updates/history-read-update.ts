@@ -128,12 +128,13 @@ export class HistoryReadUpdate {
     get threadId(): number {
         switch (this.raw._) {
             case 'updateReadHistoryOutbox':
-            case 'updateReadHistoryInbox':
             case 'updateReadChannelOutbox':
             case 'updateReadChannelInbox':
             case 'updateReadMonoForumInbox':
             case 'updateReadMonoForumOutbox':
                 return 0
+            case 'updateReadHistoryInbox':
+                return this.raw.topMsgId ?? 0
             case 'updateReadChannelDiscussionOutbox':
             case 'updateReadChannelDiscussionInbox':
                 return this.raw.topMsgId

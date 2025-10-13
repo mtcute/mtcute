@@ -88,6 +88,11 @@ export class SavedStarGift {
         return this.raw.transferStars ?? null
     }
 
+    /** Amount of stars needed to drop the original details */
+    get dropDetailsStars(): tl.Long | null {
+        return this.raw.dropOriginalDetailsStars ?? null
+    }
+
     /** Date when the gift can be exported to blockchain */
     get canExportAt(): Date | null {
         return this.raw.canExportAt ? new Date(this.raw.canExportAt * 1000) : null

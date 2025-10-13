@@ -2,7 +2,7 @@ import type { ITelegramClient } from '../../client.types.js'
 import type { ArrayPaginated, InputPeerLike } from '../../types/index.js'
 import { ForumTopic } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/index.js'
-import { resolveChannel } from '../users/resolve-peer.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 // @exported
 export interface GetForumTopicsOffset {
@@ -53,8 +53,8 @@ export async function getForumTopics(
     } = params
 
     const res = await client.call({
-        _: 'channels.getForumTopics',
-        channel: await resolveChannel(client, chatId),
+        _: 'messages.getForumTopics',
+        peer: await resolvePeer(client, chatId),
         q: query,
         offsetDate,
         offsetId,

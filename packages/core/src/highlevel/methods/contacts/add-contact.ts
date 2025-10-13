@@ -1,6 +1,6 @@
 import type { ITelegramClient } from '../../client.types.js'
-import type { InputPeerLike } from '../../types/index.js'
-import { User } from '../../types/index.js'
+import type { InputPeerLike, InputText } from '../../types/index.js'
+import { inputTextToTl, User } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { resolveUser } from '../users/resolve-peer.js'
 
@@ -35,9 +35,14 @@ export async function addContact(
          * @default false
          */
         sharePhone?: boolean
+
+        /**
+         * Note to the contact
+         */
+        note?: InputText
     },
 ): Promise<User> {
-    const { userId, firstName, lastName = '', phone = '', sharePhone = false } = params
+    const { userId, firstName, lastName = '', phone = '', sharePhone = false, note } = params
     const peer = await resolveUser(client, userId)
 
     const res = await client.call({
@@ -47,6 +52,7 @@ export async function addContact(
         lastName,
         phone,
         addPhonePrivacyException: sharePhone,
+        note: note ? inputTextToTl(note) : undefined,
     })
 
     assertIsUpdatesGroup('contacts.addContact', res)

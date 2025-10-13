@@ -38,6 +38,7 @@ import { StarGift } from './stars-gift.js'
  *  - `ads_proceeds`: This transaction is proceeds from Telegram Ads
  *  - `paid_search`: This transaction is a payment for a paid search
  *  - `star_gift_prepaid_upgrade`: This transaction is for a star gift prepaid upgrade
+ *  - `star_gift_drop_details`: This transaction is for dropping the original details of a star gift
  */
 export type StarsTransactionType =
   | { type: 'unsupported' }
@@ -199,6 +200,14 @@ export type StarsTransactionType =
       /** The upgraded gift */
       gift: StarGiftUnique
   }
+  | {
+      type: 'star_gift_drop_details'
+      /** Related peer */
+      peer: Peer
+      /** The dropped gift */
+      gift: StarGiftUnique
+  }
+
 export class StarsTransaction {
     constructor(
         readonly raw: tl.RawStarsTransaction,
@@ -348,6 +357,12 @@ export class StarsTransaction {
                             peer,
                             gift: new StarGiftUnique(this.raw.stargift, this.peers),
                             type: 'star_gift_prepaid_upgrade',
+                        }
+                    } else if (this.raw.stargiftDropOriginalDetails) {
+                        return {
+                            type: 'star_gift_drop_details',
+                            peer,
+                            gift: new StarGiftUnique(this.raw.stargift, this.peers),
                         }
                     } else {
                         return {

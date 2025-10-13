@@ -28,6 +28,11 @@ export async function getSavedStarGifts(
         excludeUnupgradable?: boolean
         /** Whether to exclude gifts that can be upgraded */
         excludeUpgradable?: boolean
+        /** Whether to exclude "hosted" gifts (i.e. those that are actually stored on the TON blockchain) */
+        excludeHosted?: boolean
+
+        /** Whether to only return gifts with peer color available */
+        peerColorAvailable?: boolean
 
         /** ID of the collection to get gifts from */
         collectionId?: number
@@ -50,6 +55,7 @@ export async function getSavedStarGifts(
         excludeUnupgradable: params.excludeUnupgradable,
         excludeUpgradable: params.excludeUpgradable,
         excludeUnique: params.excludeUnique,
+        peerColorAvailable: params.peerColorAvailable,
         sortByValue: params.sortByValue,
         collectionId: params.collectionId,
         offset: params.offset ?? '',

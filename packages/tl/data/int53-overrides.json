@@ -164,7 +164,6 @@
     "user": ["id"],
     "userEmpty": ["id"],
     "userFull": ["id", "personal_channel_id"],
-    "userStarGift": ["from_id"],
     "userStories": ["user_id"],
     "webAuthorization": ["bot_id"],
     "_": "Dummy line teehee~"

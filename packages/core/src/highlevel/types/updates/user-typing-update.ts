@@ -38,6 +38,18 @@ export class UserTypingUpdate {
         }
     }
 
+    /** ID of the thread/topic where the user is typing, if applicable */
+    get threadId(): number | null {
+        switch (this.raw._) {
+            case 'updateUserTyping':
+                return this.raw.topMsgId ?? null
+            case 'updateChatUserTyping':
+                return null
+            case 'updateChannelUserTyping':
+                return this.raw.topMsgId ?? null
+        }
+    }
+
     /**
      * Type of the chat where this event has occurred
      */
@@ -58,6 +70,7 @@ export class UserTypingUpdate {
     get status(): TypingStatus {
         switch (this.raw.action._) {
             case 'sendMessageTypingAction':
+            case 'sendMessageTextDraftAction':
                 return 'typing'
             case 'sendMessageCancelAction':
                 return 'cancel'

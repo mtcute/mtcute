@@ -749,6 +749,9 @@ export function _actionFromTl(
             }
         case 'channelAdminLogEventActionChangePeerColor':
         case 'channelAdminLogEventActionChangeProfilePeerColor':
+            // currently this is only available for the current user
+            if (e.prevValue._ !== 'peerColor' || e.newValue._ !== 'peerColor') return null
+
             return {
                 type: e._ === 'channelAdminLogEventActionChangePeerColor'
                     ? 'peer_color_changed'

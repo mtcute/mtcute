@@ -45,12 +45,6 @@ export async function setEmojiStatus(
 
     if (emoji === null) {
         emojiStatus = { _: 'emojiStatusEmpty' }
-    } else if (until) {
-        emojiStatus = {
-            _: 'emojiStatusUntil',
-            documentId: emoji,
-            until: normalizeDate(until),
-        }
     } else if (isCollectible) {
         emojiStatus = {
             _: 'inputEmojiStatusCollectible',
@@ -61,6 +55,7 @@ export async function setEmojiStatus(
         emojiStatus = {
             _: 'emojiStatus',
             documentId: emoji,
+            until: normalizeDate(until),
         }
     }
 

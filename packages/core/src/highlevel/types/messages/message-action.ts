@@ -294,6 +294,9 @@ export interface ActionTopicCreated {
 
     /** Icon emoji of the topic */
     iconCustomEmoji?: tl.Long
+
+    /** Whether the title is not set yet */
+    titleMissing?: boolean
 }
 
 /** Forum topic was modified */
@@ -615,6 +618,9 @@ interface StarGiftUniqueCommon {
     /** If the gift can be exported to blockchain, date when it will become available */
     canExportAt?: Date
 
+    /** Amount of stars needed to drop the original details */
+    dropDetailsStars?: tl.Long
+
     /** ID of the related saved profile gift */
     savedId?: tl.Long
 }
@@ -630,6 +636,11 @@ export interface ActionStarGiftBoughtResale extends StarGiftUniqueCommon {
 
     /** Number of stars/TON that were paid for the gift */
     amount: tl.TypeStarsAmount
+}
+
+/** A star gift previously exported to the blockchain was assigned to your profile */
+export interface ActionStarGiftAssigned extends StarGiftUniqueCommon {
+    readonly type: 'star_gift_assigned'
 }
 
 /** A star gift was transferred */
@@ -698,6 +709,13 @@ export interface ActionTonGift {
     transactionId?: string
 }
 
+export interface ActionSuggestBirthday {
+    readonly type: 'suggest_birthday'
+
+    /** Birthday */
+    birthday: tl.RawBirthday
+}
+
 export type MessageAction =
   | ActionChatCreated
   | ActionChannelCreated
@@ -750,11 +768,13 @@ export type MessageAction =
   | ActionStarGiftUpgraded
   | ActionStarGiftBoughtResale
   | ActionStarGiftTransferred
+  | ActionStarGiftAssigned
   | ActionPaidMessagesPaid
   | ActionPaidMessagesRefunded
   | ActionTodoCompletions
   | ActionTodoAppendTasks
   | ActionTonGift
+  | ActionSuggestBirthday
   | null
 
 /** @internal */
@@ -930,6 +950,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 title: act.title,
                 iconColor: act.iconColor,
                 iconCustomEmoji: act.iconEmojiId,
+                titleMissing: act.titleMissing,
             }
         case 'messageActionTopicEdit':
             return {
@@ -1098,6 +1119,14 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 canResellAt: act.canResellAt ? new Date(act.canResellAt * 1000) : undefined,
                 canExportAt: act.canExportAt ? new Date(act.canExportAt * 1000) : undefined,
                 savedId: act.savedId,
+                dropDetailsStars: act.dropOriginalDetailsStars,
+            }
+
+            if (act.assigned) {
+                return {
+                    type: 'star_gift_assigned',
+                    ...common,
+                }
             }
 
             if (act.resaleAmount) {
@@ -1150,6 +1179,11 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 cryptoCurrency: act.cryptoCurrency,
                 cryptoAmount: act.cryptoAmount,
                 transactionId: act.transactionId,
+            }
+        case 'messageActionSuggestBirthday':
+            return {
+                type: 'suggest_birthday',
+                birthday: act.birthday,
             }
         default:
             return null

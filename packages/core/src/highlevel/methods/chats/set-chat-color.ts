@@ -45,8 +45,6 @@ export async function setChatColor(
         /**
          * Whether to set this color for the profile
          * header instead of chat name/replies.
-         *
-         * Currently only available for the current user.
          */
         forProfile?: boolean
     },
@@ -74,8 +72,11 @@ export async function setChatColor(
 
         const r = await client.call({
             _: 'account.updateColor',
-            color,
-            backgroundEmojiId,
+            color: {
+                _: 'peerColor',
+                color,
+                backgroundEmojiId,
+            },
             forProfile,
         })
 

@@ -1,11 +1,12 @@
 import type { tl } from '@mtcute/tl'
 
 import type { Audio } from '../media/audio.js'
+import type { TextWithEntities } from '../misc/entities.js'
 import { makeInspectable } from '../../utils/inspectable.js'
+
 import { memoizeGetters } from '../../utils/memoize.js'
 
 import { parseDocument } from '../media/document-utils.js'
-
 import { Photo } from '../media/photo.js'
 import { BusinessAccount } from '../premium/business-account.js'
 import { BotVerification } from './bot-verification.js'
@@ -167,6 +168,11 @@ export class FullUser extends User {
      */
     get bio(): string {
         return this.full.about ?? ''
+    }
+
+    /** Note about the user, only visible to you */
+    get note(): TextWithEntities | null {
+        return this.full.note ?? null
     }
 
     /** Number of star gifts the user has chosen to display on their profile */

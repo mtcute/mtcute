@@ -1,8 +1,8 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { ForumTopic, InputPeerLike } from '../../types/index.js'
-import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import { createDummyUpdate } from '../../updates/utils.js'
-import { resolveChannel } from '../users/resolve-peer.js'
+import { isInputPeerChannel } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Delete a forum topic and all its history
@@ -24,16 +24,18 @@ export async function deleteForumTopicHistory(
 ): Promise<void> {
     const { shouldDispatch } = params ?? {}
 
-    const channel = await resolveChannel(client, chat)
-    assertTypeIsNot('deleteForumTopicHistory', channel, 'inputChannelEmpty')
-
+    const peer = await resolvePeer(client, chat)
     const res = await client.call({
-        _: 'channels.deleteTopicHistory',
-        channel,
+        _: 'messages.deleteTopicHistory',
+        peer,
         topMsgId: typeof topicId === 'number' ? topicId : topicId.id,
     })
 
     if (!shouldDispatch) {
-        client.handleClientUpdate(createDummyUpdate(res.pts, res.ptsCount, channel.channelId))
+        client.handleClientUpdate(createDummyUpdate(
+            res.pts,
+            res.ptsCount,
+            isInputPeerChannel(peer) ? peer.channelId : undefined,
+        ))
     }
 }

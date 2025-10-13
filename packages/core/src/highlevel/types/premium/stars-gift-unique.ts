@@ -223,6 +223,33 @@ export class StarGiftUnique {
         return resellPriceTon?.amount ?? null
     }
 
+    /** Profile colors associated with this gift */
+    get peerColor(): tl.RawPeerColorCollectible | null {
+        if (this.raw.peerColor?._ !== 'peerColorCollectible') return null
+        return this.raw.peerColor
+    }
+
+    /**
+     * ID of the user who "hosts" this gift (i.e. this gift is actually stored on the TON blockchain,
+     * but is displayed as a gift on this peer's profile)
+     */
+    get hostId(): number | null {
+        if (!this.raw.hostId) return null
+        return getMarkedPeerId(this.raw.hostId)
+    }
+
+    /**
+     * ID of the peer who "hosts" this gift (i.e. this gift is actually stored on the TON blockchain,
+     * but is displayed as a gift on this peer's profile), if available
+     * > Note: in some cases, only {@link hostId} is available, and not {@link host},
+     * > in which cases please use `tg.getPeer(ownerId)` manually
+     */
+    get host(): Peer | null {
+        if (!this.raw.hostId) return null
+        if (!this._peers.has(this.raw.hostId)) return null
+        return parsePeer(this.raw.hostId, this._peers)
+    }
+
     /** Model (i.e. the gift itself) of the unique star gift */
     get model(): StarGiftUniqueAttribute {
         return new StarGiftUniqueAttribute(this._model)

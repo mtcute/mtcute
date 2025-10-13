@@ -91,6 +91,13 @@ export class ForumTopic {
     }
 
     /**
+     * Whether the title is not set yet
+     */
+    get titleMissing(): boolean {
+        return this.raw.titleMissing!
+    }
+
+    /**
      * Color of the topic's icon, used as a fallback
      * in case {@link iconEmoji} is not set.
      *
@@ -112,6 +119,11 @@ export class ForumTopic {
      */
     get creator(): Peer {
         return parsePeer(this.raw.fromId, this._peers)
+    }
+
+    // idk???
+    get peer(): Peer {
+        return parsePeer(this.raw.peer, this._peers)
     }
 
     /**

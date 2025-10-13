@@ -422,7 +422,10 @@ export class Chat {
      * as well as to render the chat title
      */
     get color(): ChatColors {
-        return new ChatColors(this.raw.id, this.raw._ === 'channel' ? this.raw.color : undefined)
+        return new ChatColors(
+            this.raw.id,
+            this.raw._ === 'channel' && this.raw.color?._ === 'peerColor' ? this.raw.color : undefined,
+        )
     }
 
     /**
@@ -448,7 +451,10 @@ export class Chat {
      * the user's profile
      */
     get profileColors(): ChatColors {
-        return new ChatColors(this.raw.id, this.raw._ === 'channel' ? this.raw.profileColor : undefined)
+        return new ChatColors(
+            this.raw.id,
+            this.raw._ === 'channel' && this.raw.profileColor?._ === 'peerColor' ? this.raw.profileColor : undefined,
+        )
     }
 
     /** Boosts level this chat has (0 if none or is not a channel) */

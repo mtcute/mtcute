@@ -53,6 +53,11 @@ export class StarGift {
         return this.raw.requirePremium!
     }
 
+    /** Whether this gift includes a peer color that can be applied to user's profile */
+    get hasPeerColor(): boolean {
+        return this.raw.peerColorAvailable!
+    }
+
     /** Whether this gift is a unique gift */
     readonly isUnique = false as const
 

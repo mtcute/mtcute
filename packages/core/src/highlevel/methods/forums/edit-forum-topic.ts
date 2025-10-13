@@ -4,7 +4,7 @@ import type { ITelegramClient } from '../../client.types.js'
 import type { ForumTopic, InputPeerLike, Message } from '../../types/index.js'
 import Long from 'long'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
-import { resolveChannel } from '../users/resolve-peer.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Modify a topic in a forum
@@ -42,16 +42,24 @@ export async function editForumTopic(
          * to the client's update handler.
          */
         shouldDispatch?: true
+
+        /** Whether to (un)close the topic */
+        closed?: boolean
+
+        /** Whether to (un)hide the topic */
+        hidden?: boolean
     },
 ): Promise<Message> {
-    const { chatId, topicId, title, icon, shouldDispatch } = params
+    const { chatId, topicId, title, icon, shouldDispatch, closed, hidden } = params
 
     const res = await client.call({
-        _: 'channels.editForumTopic',
-        channel: await resolveChannel(client, chatId),
+        _: 'messages.editForumTopic',
+        peer: await resolvePeer(client, chatId),
         topicId: typeof topicId === 'number' ? topicId : topicId.id,
         title,
         iconEmojiId: icon ? icon ?? Long.ZERO : undefined,
+        closed,
+        hidden,
     })
 
     return _findMessageInUpdate(client, res, false, shouldDispatch)

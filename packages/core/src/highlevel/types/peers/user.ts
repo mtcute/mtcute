@@ -143,6 +143,11 @@ export class User {
         return this.raw.botCanEdit!
     }
 
+    /** Whether this bot is forum-like (i.e. supports threads) */
+    get isBotWithForumView(): boolean {
+        return this.raw.botForumView!
+    }
+
     /** Whether this user has been verified by Telegram */
     get isVerified(): boolean {
         return this.raw.verified!
@@ -433,7 +438,10 @@ export class User {
      * as well as to render the chat title
      */
     get color(): ChatColors {
-        return new ChatColors(this.raw.id, this.raw.color)
+        return new ChatColors(
+            this.raw.id,
+            this.raw.color?._ === 'peerColor' ? this.raw.color : undefined,
+        )
     }
 
     /**
@@ -443,7 +451,12 @@ export class User {
      * If `null`, a generic header should be used instead
      */
     get profileColors(): ChatColors | null {
-        return this.raw.profileColor ? new ChatColors(this.raw.id, this.raw.profileColor) : null
+        return this.raw.profileColor
+            ? new ChatColors(
+                this.raw.id,
+                this.raw.profileColor?._ === 'peerColor' ? this.raw.profileColor : undefined,
+            )
+            : null
     }
 
     /** If this user has paid messages enabled, price of one message in stars */
