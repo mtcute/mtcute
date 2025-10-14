@@ -1100,7 +1100,7 @@ export class SessionConnection extends PersistentConnection {
                     msgInfo.msgIds.length,
                     reason,
                 )
-                this._session.queuedResendReq.splice(0, 0, ...msgInfo.msgIds)
+                this._session.queuedResendReq.unshift(...msgInfo.msgIds)
                 this._flushTimer.emitWhenIdle()
                 break
             case 'state': {
@@ -1117,7 +1117,7 @@ export class SessionConnection extends PersistentConnection {
                     this._session.pendingGetStateTimeouts.delete(msgId)
                 }
 
-                this._session.queuedStateReq.splice(0, 0, ...msgInfo.msgIds)
+                this._session.queuedStateReq.unshift(...msgInfo.msgIds)
                 this._flushTimer.emitWhenIdle()
                 break
             }
@@ -1303,7 +1303,15 @@ export class SessionConnection extends PersistentConnection {
         }
 
         if (answerMsgId.isZero()) {
-            this.log.debug('received message info for %l: message is still pending (status = %d)', msgId, status)
+            if (status & 64 && this._session.pendingMessages.has(msgId)) {
+                // +64 = content-related response to message already generated
+                // since we have not received the message yet, and we don't know the answer_msg_id,
+                // our only option is to resend the rpc request
+                this.log.debug('received message info for %l: response is generated, but we have not received it yet! (status = %d)', msgId, status)
+                this._onMessageFailed(msgId, 'response not received')
+            } else {
+                this.log.debug('received message info for %l: message is still pending (status = %d)', msgId, status)
+            }
 
             return
         }
@@ -1325,6 +1333,11 @@ export class SessionConnection extends PersistentConnection {
         const info = this._session.pendingMessages.get(msg.reqMsgId)
 
         if (!info) {
+            if (this._session.recentOutgoingMsgIds.has(msg.reqMsgId)) {
+                // it probably timed out or was cancelled, ignore
+                return
+            }
+
             this.log.warn('received msgs_state_info to unknown request %l', msg.reqMsgId)
 
             return
@@ -1337,7 +1350,12 @@ export class SessionConnection extends PersistentConnection {
         }
 
         this._session.pendingMessages.delete(msg.reqMsgId)
-        this._session.pendingGetStateTimeouts.delete(msg.reqMsgId)
+
+        let timer: timers.Timer | undefined
+        if (timer = this._session.pendingGetStateTimeouts.get(msg.reqMsgId)) {
+            timers.clearTimeout(timer)
+            this._session.pendingGetStateTimeouts.delete(msg.reqMsgId)
+        }
 
         this._onMessagesInfo(info.msgIds, msg.info)
     }
