@@ -229,6 +229,8 @@ export function generateTypescriptDefinitionsForTlSchema(
         onlyTypings?: boolean
         /** Namespace of another schema that this one extends */
         extends?: string
+        /** Schema that this one extends */
+        extendsSchema?: TlFullSchema
     },
 ): [string, string] {
     const {
@@ -237,7 +239,8 @@ export function generateTypescriptDefinitionsForTlSchema(
         errors,
         skipLongImport = false,
         onlyTypings = false,
-        extends: extendsSchema,
+        extends: extendsNamespace,
+        extendsSchema,
     } = params ?? {}
     let ts = `${skipLongImport ? '' : 'import _Long from \'long\';'}
 export declare namespace ${namespace} {
@@ -274,7 +277,7 @@ ns.$extendTypes = function(types) {
 ns.LAYER = ${layer};
 `
 
-    if (extendsSchema) {
+    if (extendsNamespace && !extendsSchema) {
         ts += '    type AnyToNever<T> = any extends T ? never : T;\n'
     }
 
@@ -303,10 +306,10 @@ ns.LAYER = ${layer};
 
             ts += `${indent(indentSize, generateTypescriptDefinitionsForTlEntry(entry, {
                 baseNamespace: `${namespace}.`,
-                extends: extendsSchema
+                extends: extendsNamespace
                     ? {
                         ownSchema: schema,
-                        namespace: extendsSchema,
+                        namespace: extendsNamespace,
                     }
                     : undefined,
             }))}\n`
@@ -378,8 +381,10 @@ ns.LAYER = ${layer};
                 ts += fullTypeName(entry.name, `${namespace}.`)
             })
 
-            if (extendsSchema) {
-                ts += ` | AnyToNever<${extendsSchema}.${typeName}>`
+            if (extendsNamespace && !extendsSchema) {
+                ts += ` | AnyToNever<${extendsNamespace}.${typeName}>`
+            } else if (extendsSchema && name in extendsSchema.unions) {
+                ts += ` | ${extendsNamespace}.${typeName}`
             }
 
             ts += '\n'
@@ -429,8 +434,8 @@ ns.LAYER = ${layer};
                     })}`,
             )}\n`
     })
-    if (extendsSchema) {
-        ts += `${indent(8, `| ${extendsSchema}.TlObject`)}\n`
+    if (extendsNamespace) {
+        ts += `${indent(8, `| ${extendsNamespace}.TlObject`)}\n`
     }
 
     ts += '}'

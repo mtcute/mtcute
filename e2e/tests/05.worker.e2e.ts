@@ -80,7 +80,10 @@ describe('5. worker', () => {
 
     it('should throw errors', async () => {
         try {
-            await port.call({ _: 'test.useConfigSimple' })
+            await port.call({
+                _: 'mtcute.customMethod',
+                bytes: new Uint8Array([0xDE, 0xAD, 0xBE, 0xEF]),
+            })
             throw new Error('should have thrown')
         } catch (e) {
             expect(e).to.be.an.instanceOf(tl.RpcError)

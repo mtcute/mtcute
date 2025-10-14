@@ -51,12 +51,17 @@ import { packTlSchema, unpackTlSchema } from './schema.js'
 const README_MD_FILE = join(__dirname, '../README.md')
 const PACKAGE_JSON_FILE = join(__dirname, '../package.json')
 
-function tlToFullSchema(tl: string): TlFullSchema {
-    return parseFullTlSchema(
-        parseTlToEntries(tl, {
-            parseMethodTypes: true,
-        }),
-    )
+function tlToFullSchema(
+    tl: string,
+    filterConstructors?: Set<string>,
+): TlFullSchema {
+    let entries = parseTlToEntries(tl, {
+        parseMethodTypes: true,
+    })
+    if (filterConstructors) {
+        entries = entries.filter(it => !filterConstructors.has(it.name))
+    }
+    return parseFullTlSchema(entries)
 }
 
 interface Schema {
@@ -75,7 +80,19 @@ async function fetchTdlibSchema(): Promise<Schema> {
     return {
         name: 'TDLib',
         layer: Number.parseInt(layer[1]),
-        content: tlToFullSchema(schema),
+        content: tlToFullSchema(schema, new Set([
+            // tdlib schema includes some methods that are only used internally by tdlib
+            'ipPort',
+            'ipPortSecret',
+            'accessPointRule',
+            'help.configSimple',
+            'test.useConfigSimple',
+            'test.parseInputAppEvent',
+            'invokeWithBusinessConnectionPrefix',
+            'invokeWithGooglePlayIntegrityPrefix',
+            'invokeWithApnsSecretPrefix',
+            'invokeWithReCaptchaPrefix',
+        ])),
     }
 }
 
@@ -258,9 +275,8 @@ async function generateCompatSchema(oldLayer: number, oldSchema: TlFullSchema, d
             continue
         }
 
-        if (diffedTypes.has(it)) {
+        if (diffedTypes.has(it) && !processedTypes.has(it)) {
             typesToAdd.add(it)
-            continue
         }
 
         for (const arg of entry.arguments) {
@@ -406,6 +422,30 @@ async function main() {
     )
 
     console.log('Done! Final schema contains %d entries', resultSchema.entries.length)
+
+    // find methods that were removed in the latest layer, but still present in older ones,
+    // so we can avoid using them
+    const latestLayerCtors = new Set<string>()
+    for (const schema of schemas) {
+        if (schema.layer !== resultLayer) continue
+        for (const entry of schema.content.entries) {
+            latestLayerCtors.add(entry.name)
+        }
+    }
+
+    // some ctors are only available in some schemas, avoid spamming
+    const warned = new Set<string>(['inputPeerPhotoFileLocationLegacy', 'inputStickerSetThumbLegacy'])
+    for (const schema of schemas) {
+        if (schema.layer === resultLayer) continue
+        if (schema.name === 'Custom') continue
+
+        for (const entry of schema.content.entries) {
+            if (!latestLayerCtors.has(entry.name) && !warned.has(entry.name)) {
+                console.log(`[warn] Constructor ${entry.name} was seemingly removed in layer ${resultLayer}, but still present in ${schema.name}`)
+                warned.add(entry.name)
+            }
+        }
+    }
 
     let docs = await getCachedDocumentation()
 

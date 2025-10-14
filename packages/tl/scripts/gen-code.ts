@@ -152,6 +152,7 @@ async function generateCompatCode(compatSchema: TlFullSchema, currentSchema: TlF
             namespace: 'tlCompat',
             onlyTypings: true,
             extends: 'tl',
+            extendsSchema: currentSchema,
         })
         await writeFile(OUT_TYPINGS_COMPAT_FILE, `import { tl } from '../index.d.ts';\n${codeTs}`)
     }
