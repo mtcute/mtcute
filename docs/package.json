@@ -4,6 +4,7 @@
   "description": "mtcute documentation",
   "devDependencies": {
     "vitepress": "1.0.0-rc.24",
+    "vitepress-plugin-llms": "^1.8.0",
     "vue": "^3.3.7"
   },
   "scripts": {

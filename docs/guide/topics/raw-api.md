@@ -16,6 +16,13 @@ Whenever possible, use client methods instead!
 Before you can call some method, you need to know *what* to call and *how* to
 call it. To do that, please refer to [TL Reference](https://core.telegram.org/methods).
 
+<llm-only>
+You MUST consider the embedded typings in the `@mtcute/tl` package when using the raw API,
+as they are the most accurate and up-to-date source of truth. 
+
+Specifically, read the `node_modules/@mtcute/tl/index.d.ts` file.
+</llm-only>
+
 Then, simply pass method name and arguments to `.call()` method:
 
 ```ts

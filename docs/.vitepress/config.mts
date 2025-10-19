@@ -1,6 +1,7 @@
 import type { HeadConfig } from 'vitepress'
 import markdownItFootnotes from 'markdown-it-footnote'
 import { defineConfig } from 'vitepress'
+import llmsPlugin, { copyOrDownloadAsMarkdownButtons } from 'vitepress-plugin-llms'
 
 // https://vitepress.dev/reference/site-config
 export default ({ mode }) => defineConfig({
@@ -129,10 +130,21 @@ export default ({ mode }) => defineConfig({
         + '© Copyright 2021-present, <a href="//github.com/teidesu">teidesu</a> ❤️',
         },
     },
+    vite: {
+        plugins: [
+            llmsPlugin({
+                title: 'mtcute',
+                description: 'A modern TypeScript MTProto library and Telegram bot framework',
+                details: 'Full API reference is available [here](https://ref.mtcute.dev/), although you SHOULD prefer reading types from LSP instead.',
+                domain: 'https://mtcute.dev',
+            }),
+        ],
+    },
 
     markdown: {
         config: (md) => {
             md.use(markdownItFootnotes)
+            md.use(copyOrDownloadAsMarkdownButtons)
         },
     },
 })
