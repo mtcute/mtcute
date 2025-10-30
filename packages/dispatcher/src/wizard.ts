@@ -85,11 +85,14 @@ export class WizardScene<State extends object> extends Dispatcher<State & Wizard
      */
     // eslint-disable-next-line ts/no-empty-object-type
     static onNthStep(step: number): UpdateFilter<any, {}, WizardInternalState> {
-        const filter = filters.state<WizardInternalState>(it => it.$step === step)
+        if (step === 0) {
+            return filters.or(
+                filters.stateEmpty,
+                filters.state<WizardInternalState>(it => it.$step === undefined || it.$step === 0),
+            )
+        }
 
-        if (step === 0) return filters.or(filters.stateEmpty, filter)
-
-        return filter
+        return filters.state<WizardInternalState>(it => it.$step === step)
     }
 
     /**
