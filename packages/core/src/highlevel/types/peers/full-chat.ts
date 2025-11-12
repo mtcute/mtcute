@@ -41,7 +41,7 @@ export class FullChat extends Chat {
 
     /** Whether this channel has hidden participants */
     get hasHiddenParticipants(): boolean {
-        return this.full._ === 'channelFull' && !this.full.participantsHidden!
+        return this.full._ === 'channelFull' && this.full.participantsHidden!
     }
 
     /** Whether the current user can change the chat's username */

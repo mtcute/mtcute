@@ -1080,7 +1080,6 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 boostPeer: parsePeer(act.boostPeer, this._peers),
                 giveawayMessageId: act.giveawayMsgId,
             }
-        // todo: cleanup in the next breaking update
         case 'messageActionStarGift':
             assert(act.gift._ === 'starGift')
             if (act.prepaidUpgrade) {
