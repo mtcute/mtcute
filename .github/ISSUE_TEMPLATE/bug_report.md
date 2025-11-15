@@ -20,8 +20,8 @@ a clear and concise description of what the bug is.
 <!-- if applicable, include logs (level 4 or 5). make sure they don't contain personal information! -->
 
 ## Environment
- - OS: [e.g. windows]
- - Runtime: [e.g. Node 18.12.1, Chrome 97.0.0]
+ - os: [e.g. windows]
+ - runtime: [e.g. Node 20.15.1, Chrome 141.0.0]
  - mtcute version: [e.g. 0.1.0]
 
 **Additional context**

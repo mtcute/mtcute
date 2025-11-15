@@ -30,7 +30,7 @@ jobs:
   test-node:
     strategy:
       matrix:
-        node-version: [node18, node20, node22]
+        node-version: [node20, node22, node24]
     runs-on: ${{ matrix.node-version }}
     steps:
       - uses: actions/checkout@v4

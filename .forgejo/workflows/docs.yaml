@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: node20
+    runs-on: node22
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
