@@ -1,18 +1,18 @@
 import {
-    testAuthKeysRepository,
-    testKeyValueRepository,
-    testPeersRepository,
-    testRefMessagesRepository,
+  testAuthKeysRepository,
+  testKeyValueRepository,
+  testPeersRepository,
+  testRefMessagesRepository,
 } from '@mtcute/test'
 import { describe } from 'vitest'
 
 import { MemoryStorage } from './index.js'
 
 describe('memory storage', () => {
-    const storage = new MemoryStorage()
+  const storage = new MemoryStorage()
 
-    testAuthKeysRepository(storage.authKeys)
-    testKeyValueRepository(storage.kv, storage.driver)
-    testPeersRepository(storage.peers, storage.driver)
-    testRefMessagesRepository(storage.refMessages, storage.driver)
+  testAuthKeysRepository(storage.authKeys)
+  testKeyValueRepository(storage.kv, storage.driver)
+  testPeersRepository(storage.peers, storage.driver)
+  testRefMessagesRepository(storage.refMessages, storage.driver)
 })

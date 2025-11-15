@@ -20,118 +20,118 @@ export const any: UpdateFilter<any> = () => true
  * @param fn  Filter to negate
  */
 export function not<Base, Mod, State extends object>(
-    fn: UpdateFilter<Base, Mod, State>,
+  fn: UpdateFilter<Base, Mod, State>,
 ): UpdateFilter<Base, Invert<Base, Mod>, State> {
-    return (upd, state) => {
-        const res = fn(upd, state)
+  return (upd, state) => {
+    const res = fn(upd, state)
 
-        if (typeof res === 'boolean') return !res
+    if (typeof res === 'boolean') return !res
 
-        return res.then(r => !r)
-    }
+    return res.then(r => !r)
+  }
 }
 
 // i couldn't come up with proper types for these 😭
 // if you know how to do this better - PRs are welcome!
 
 export function and<Base1, Mod1, State1 extends object, Base2, Mod2, State2 extends object>(
-    fn1: UpdateFilter<Base1, Mod1, State1>,
-    fn2: UpdateFilter<Base2, Mod2, State2>,
+  fn1: UpdateFilter<Base1, Mod1, State1>,
+  fn2: UpdateFilter<Base2, Mod2, State2>,
 ): UpdateFilter<Base1 & Base2, Mod1 & Mod2, State1 | State2>
 export function and<
-    Base1,
-    Mod1,
-    State1 extends object,
-    Base2,
-    Mod2,
-    State2 extends object,
-    Base3,
-    Mod3,
-    State3 extends object,
+  Base1,
+  Mod1,
+  State1 extends object,
+  Base2,
+  Mod2,
+  State2 extends object,
+  Base3,
+  Mod3,
+  State3 extends object,
 >(
-    fn1: UpdateFilter<Base1, Mod1, State1>,
-    fn2: UpdateFilter<Base2, Mod2, State2>,
-    fn3: UpdateFilter<Base3, Mod3, State3>,
+  fn1: UpdateFilter<Base1, Mod1, State1>,
+  fn2: UpdateFilter<Base2, Mod2, State2>,
+  fn3: UpdateFilter<Base3, Mod3, State3>,
 ): UpdateFilter<Base1 & Base2 & Base3, Mod1 & Mod2 & Mod3, State1 | State2 | State3>
 export function and<
-    Base1,
-    Mod1,
-    State1 extends object,
-    Base2,
-    Mod2,
-    State2 extends object,
-    Base3,
-    Mod3,
-    State3 extends object,
-    Base4,
-    Mod4,
-    State4 extends object,
+  Base1,
+  Mod1,
+  State1 extends object,
+  Base2,
+  Mod2,
+  State2 extends object,
+  Base3,
+  Mod3,
+  State3 extends object,
+  Base4,
+  Mod4,
+  State4 extends object,
 >(
-    fn1: UpdateFilter<Base1, Mod1, State1>,
-    fn2: UpdateFilter<Base2, Mod2, State2>,
-    fn3: UpdateFilter<Base3, Mod3, State3>,
-    fn4: UpdateFilter<Base4, Mod4, State4>,
+  fn1: UpdateFilter<Base1, Mod1, State1>,
+  fn2: UpdateFilter<Base2, Mod2, State2>,
+  fn3: UpdateFilter<Base3, Mod3, State3>,
+  fn4: UpdateFilter<Base4, Mod4, State4>,
 ): UpdateFilter<Base1 & Base2 & Base3 & Base4, Mod1 & Mod2 & Mod3 & Mod4, State1 | State2 | State3 | State4>
 export function and<
-    Base1,
-    Mod1,
-    State1 extends object,
-    Base2,
-    Mod2,
-    State2 extends object,
-    Base3,
-    Mod3,
-    State3 extends object,
-    Base4,
-    Mod4,
-    State4 extends object,
-    Base5,
-    Mod5,
-    State5 extends object,
+  Base1,
+  Mod1,
+  State1 extends object,
+  Base2,
+  Mod2,
+  State2 extends object,
+  Base3,
+  Mod3,
+  State3 extends object,
+  Base4,
+  Mod4,
+  State4 extends object,
+  Base5,
+  Mod5,
+  State5 extends object,
 >(
-    fn1: UpdateFilter<Base1, Mod1, State1>,
-    fn2: UpdateFilter<Base2, Mod2, State2>,
-    fn3: UpdateFilter<Base3, Mod3, State3>,
-    fn4: UpdateFilter<Base4, Mod4, State4>,
-    fn5: UpdateFilter<Base5, Mod5, State5>,
+  fn1: UpdateFilter<Base1, Mod1, State1>,
+  fn2: UpdateFilter<Base2, Mod2, State2>,
+  fn3: UpdateFilter<Base3, Mod3, State3>,
+  fn4: UpdateFilter<Base4, Mod4, State4>,
+  fn5: UpdateFilter<Base5, Mod5, State5>,
 ): UpdateFilter<
     Base1 & Base2 & Base3 & Base4 & Base5,
     Mod1 & Mod2 & Mod3 & Mod4 & Mod5,
     State1 | State2 | State3 | State4 | State5
 >
 export function and<
-    Base1,
-    Mod1,
-    State1 extends object,
-    Base2,
-    Mod2,
-    State2 extends object,
-    Base3,
-    Mod3,
-    State3 extends object,
-    Base4,
-    Mod4,
-    State4 extends object,
-    Base5,
-    Mod5,
-    State5 extends object,
-    Base6,
-    Mod6,
-    State6 extends object,
+  Base1,
+  Mod1,
+  State1 extends object,
+  Base2,
+  Mod2,
+  State2 extends object,
+  Base3,
+  Mod3,
+  State3 extends object,
+  Base4,
+  Mod4,
+  State4 extends object,
+  Base5,
+  Mod5,
+  State5 extends object,
+  Base6,
+  Mod6,
+  State6 extends object,
 >(
-    fn1: UpdateFilter<Base1, Mod1, State1>,
-    fn2: UpdateFilter<Base2, Mod2, State2>,
-    fn3: UpdateFilter<Base3, Mod3, State3>,
-    fn4: UpdateFilter<Base4, Mod4, State4>,
-    fn5: UpdateFilter<Base5, Mod5, State5>,
-    fn6: UpdateFilter<Base6, Mod6, State6>,
+  fn1: UpdateFilter<Base1, Mod1, State1>,
+  fn2: UpdateFilter<Base2, Mod2, State2>,
+  fn3: UpdateFilter<Base3, Mod3, State3>,
+  fn4: UpdateFilter<Base4, Mod4, State4>,
+  fn5: UpdateFilter<Base5, Mod5, State5>,
+  fn6: UpdateFilter<Base6, Mod6, State6>,
 ): UpdateFilter<
     Base1 & Base2 & Base3 & Base4 & Base5 & Base6,
     Mod1 & Mod2 & Mod3 & Mod4 & Mod5 & Mod6,
     State1 | State2 | State3 | State4 | State5 | State6
 >
 export function and<Filters extends UpdateFilter<any, any>[]>(
-    ...fns: Filters
+  ...fns: Filters
 ): UpdateFilter<ExtractBaseMany<Filters>, UnionToIntersection<ExtractMod<Filters[number]>>>
 
 /**
@@ -153,95 +153,95 @@ export function and<Filters extends UpdateFilter<any, any>[]>(
  * @param fns  Filters to combine
  */
 export function and(...fns: UpdateFilter<any, any, any>[]): UpdateFilter<any, any, any> {
-    return (upd, state) => {
-        let i = 0
-        const max = fns.length
+  return (upd, state) => {
+    let i = 0
+    const max = fns.length
 
-        const next = (): MaybePromise<boolean> => {
-            if (i === max) return true
+    const next = (): MaybePromise<boolean> => {
+      if (i === max) return true
 
-            const res = fns[i++](upd, state)
+      const res = fns[i++](upd, state)
 
-            if (typeof res === 'boolean') {
-                if (!res) return false
-
-                return next()
-            }
-
-            return res.then((r: boolean) => {
-                if (!r) return false
-
-                return next()
-            })
-        }
+      if (typeof res === 'boolean') {
+        if (!res) return false
 
         return next()
+      }
+
+      return res.then((r: boolean) => {
+        if (!r) return false
+
+        return next()
+      })
     }
+
+    return next()
+  }
 }
 
 export function or<Base1, Mod1, State1 extends object, Base2, Mod2, State2 extends object>(
-    fn1: UpdateFilter<Base1, Mod1, State1>,
-    fn2: UpdateFilter<Base2, Mod2, State2>,
+  fn1: UpdateFilter<Base1, Mod1, State1>,
+  fn2: UpdateFilter<Base2, Mod2, State2>,
 ): UpdateFilter<Base1 & Base2, Mod1 | Mod2, State1 | State2>
 
 export function or<
-    Base1,
-    Mod1,
-    State1 extends object,
-    Base2,
-    Mod2,
-    State2 extends object,
-    Base3,
-    Mod3,
-    State3 extends object,
+  Base1,
+  Mod1,
+  State1 extends object,
+  Base2,
+  Mod2,
+  State2 extends object,
+  Base3,
+  Mod3,
+  State3 extends object,
 >(
-    fn1: UpdateFilter<Base1, Mod1, State1>,
-    fn2: UpdateFilter<Base2, Mod2, State2>,
-    fn3: UpdateFilter<Base3, Mod3, State3>,
+  fn1: UpdateFilter<Base1, Mod1, State1>,
+  fn2: UpdateFilter<Base2, Mod2, State2>,
+  fn3: UpdateFilter<Base3, Mod3, State3>,
 ): UpdateFilter<Base1 & Base2 & Base3, Mod1 | Mod2 | Mod3, State1 | State2 | State3>
 
 export function or<
-    Base1,
-    Mod1,
-    State1 extends object,
-    Base2,
-    Mod2,
-    State2 extends object,
-    Base3,
-    Mod3,
-    State3 extends object,
-    Base4,
-    Mod4,
-    State4 extends object,
+  Base1,
+  Mod1,
+  State1 extends object,
+  Base2,
+  Mod2,
+  State2 extends object,
+  Base3,
+  Mod3,
+  State3 extends object,
+  Base4,
+  Mod4,
+  State4 extends object,
 >(
-    fn1: UpdateFilter<Base1, Mod1, State1>,
-    fn2: UpdateFilter<Base2, Mod2, State2>,
-    fn3: UpdateFilter<Base3, Mod3, State3>,
-    fn4: UpdateFilter<Base4, Mod4, State4>,
+  fn1: UpdateFilter<Base1, Mod1, State1>,
+  fn2: UpdateFilter<Base2, Mod2, State2>,
+  fn3: UpdateFilter<Base3, Mod3, State3>,
+  fn4: UpdateFilter<Base4, Mod4, State4>,
 ): UpdateFilter<Base1 & Base2 & Base3 & Base4, Mod1 | Mod2 | Mod3 | Mod4, State1 | State2 | State3 | State4>
 
 export function or<
-    Base1,
-    Mod1,
-    State1 extends object,
-    Base2,
-    Mod2,
-    State2 extends object,
-    Base3,
-    Mod3,
-    State3 extends object,
-    Base4,
-    Mod4,
-    State4 extends object,
-    Base5,
-    Mod5,
-    State5 extends object,
+  Base1,
+  Mod1,
+  State1 extends object,
+  Base2,
+  Mod2,
+  State2 extends object,
+  Base3,
+  Mod3,
+  State3 extends object,
+  Base4,
+  Mod4,
+  State4 extends object,
+  Base5,
+  Mod5,
+  State5 extends object,
 >(
-    fn1: UpdateFilter<Base1, Mod1, State1>,
-    fn2: UpdateFilter<Base2, Mod2, State2>,
-    fn3: UpdateFilter<Base3, Mod3, State3>,
-    fn4: UpdateFilter<Base4, Mod4, State4>,
-    fn5: UpdateFilter<Base5, Mod5, State5>,
+  fn1: UpdateFilter<Base1, Mod1, State1>,
+  fn2: UpdateFilter<Base2, Mod2, State2>,
+  fn3: UpdateFilter<Base3, Mod3, State3>,
+  fn4: UpdateFilter<Base4, Mod4, State4>,
+  fn5: UpdateFilter<Base5, Mod5, State5>,
 ): UpdateFilter<
     Base1 & Base2 & Base3 & Base4 & Base5,
     Mod1 | Mod2 | Mod3 | Mod4 | Mod5,
@@ -249,31 +249,31 @@ export function or<
 >
 
 export function or<
-    Base1,
-    Mod1,
-    State1 extends object,
-    Base2,
-    Mod2,
-    State2 extends object,
-    Base3,
-    Mod3,
-    State3 extends object,
-    Base4,
-    Mod4,
-    State4 extends object,
-    Base5,
-    Mod5,
-    State5 extends object,
-    Base6,
-    Mod6,
-    State6 extends object,
+  Base1,
+  Mod1,
+  State1 extends object,
+  Base2,
+  Mod2,
+  State2 extends object,
+  Base3,
+  Mod3,
+  State3 extends object,
+  Base4,
+  Mod4,
+  State4 extends object,
+  Base5,
+  Mod5,
+  State5 extends object,
+  Base6,
+  Mod6,
+  State6 extends object,
 >(
-    fn1: UpdateFilter<Base1, Mod1, State1>,
-    fn2: UpdateFilter<Base2, Mod2, State2>,
-    fn3: UpdateFilter<Base3, Mod3, State3>,
-    fn4: UpdateFilter<Base4, Mod4, State4>,
-    fn5: UpdateFilter<Base5, Mod5, State5>,
-    fn6: UpdateFilter<Base6, Mod6, State6>,
+  fn1: UpdateFilter<Base1, Mod1, State1>,
+  fn2: UpdateFilter<Base2, Mod2, State2>,
+  fn3: UpdateFilter<Base3, Mod3, State3>,
+  fn4: UpdateFilter<Base4, Mod4, State4>,
+  fn5: UpdateFilter<Base5, Mod5, State5>,
+  fn6: UpdateFilter<Base6, Mod6, State6>,
 ): UpdateFilter<
     Base1 & Base2 & Base3 & Base4 & Base5 & Base6,
     Mod1 | Mod2 | Mod3 | Mod4 | Mod5 | Mod6,
@@ -299,28 +299,28 @@ export function or<
  * @param fns  Filters to combine
  */
 export function or(...fns: UpdateFilter<any, any, any>[]): UpdateFilter<any, any, any> {
-    return (upd, state) => {
-        let i = 0
-        const max = fns.length
+  return (upd, state) => {
+    let i = 0
+    const max = fns.length
 
-        const next = (): MaybePromise<boolean> => {
-            if (i === max) return false
+    const next = (): MaybePromise<boolean> => {
+      if (i === max) return false
 
-            const res = fns[i++](upd, state)
+      const res = fns[i++](upd, state)
 
-            if (typeof res === 'boolean') {
-                if (res) return true
-
-                return next()
-            }
-
-            return res.then((r: boolean) => {
-                if (r) return true
-
-                return next()
-            })
-        }
+      if (typeof res === 'boolean') {
+        if (res) return true
 
         return next()
+      }
+
+      return res.then((r: boolean) => {
+        if (r) return true
+
+        return next()
+      })
     }
+
+    return next()
+  }
 }

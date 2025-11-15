@@ -7,7 +7,7 @@ import { bigint } from '@fuman/utils'
  * @param size  Size in bytes
  */
 export function randomBigInt(crypto: ICryptoProvider, size: number): bigint {
-    return bigint.fromBytes(crypto.randomBytes(size))
+  return bigint.fromBytes(crypto.randomBytes(size))
 }
 
 /**
@@ -15,16 +15,16 @@ export function randomBigInt(crypto: ICryptoProvider, size: number): bigint {
  * @param bits
  */
 export function randomBigIntBits(crypto: ICryptoProvider, bits: number): bigint {
-    let num = randomBigInt(crypto, Math.ceil(bits / 8))
+  let num = randomBigInt(crypto, Math.ceil(bits / 8))
 
-    const bitLength = bigint.bitLength(num)
+  const bitLength = bigint.bitLength(num)
 
-    if (bitLength > bits) {
-        const toTrim = bitLength - bits
-        num >>= BigInt(toTrim)
-    }
+  if (bitLength > bits) {
+    const toTrim = bitLength - bits
+    num >>= BigInt(toTrim)
+  }
 
-    return num
+  return num
 }
 
 /**
@@ -34,13 +34,13 @@ export function randomBigIntBits(crypto: ICryptoProvider, bits: number): bigint 
  * @param min  Minimum value (inclusive)
  */
 export function randomBigIntInRange(crypto: ICryptoProvider, max: bigint, min = 1n): bigint {
-    const interval = max - min
-    if (interval < 0n) throw new Error('expected min < max')
+  const interval = max - min
+  if (interval < 0n) throw new Error('expected min < max')
 
-    const byteSize = Math.ceil(bigint.bitLength(interval) / 8)
+  const byteSize = Math.ceil(bigint.bitLength(interval) / 8)
 
-    let result = randomBigInt(crypto, byteSize)
-    while (result > interval) result -= interval
+  let result = randomBigInt(crypto, byteSize)
+  while (result > interval) result -= interval
 
-    return min + result
+  return min + result
 }

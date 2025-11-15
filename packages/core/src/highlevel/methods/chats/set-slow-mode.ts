@@ -12,10 +12,10 @@ import { resolveChannel } from '../users/resolve-peer.js'
  *   Valid values are: `0 (off), 10, 30, 60 (1m), 300 (5m), 900 (15m) or 3600 (1h)`
  */
 export async function setSlowMode(client: ITelegramClient, chatId: InputPeerLike, seconds = 0): Promise<void> {
-    const res = await client.call({
-        _: 'channels.toggleSlowMode',
-        channel: await resolveChannel(client, chatId),
-        seconds,
-    })
-    client.handleClientUpdate(res)
+  const res = await client.call({
+    _: 'channels.toggleSlowMode',
+    channel: await resolveChannel(client, chatId),
+    seconds,
+  })
+  client.handleClientUpdate(res)
 }

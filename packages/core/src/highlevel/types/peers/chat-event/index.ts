@@ -12,39 +12,39 @@ export * from './actions.js'
 export type { ChatEventFilters, InputChatEventFilters } from './filters.js'
 
 export class ChatEvent {
-    constructor(
-        readonly raw: tl.TypeChannelAdminLogEvent,
-        readonly _peers: PeersIndex,
-        readonly _chatId: number,
-    ) {}
+  constructor(
+    readonly raw: tl.TypeChannelAdminLogEvent,
+    readonly _peers: PeersIndex,
+    readonly _chatId: number,
+  ) {}
 
-    /**
-     * Event ID.
-     *
-     * Event IDs are generated in direct chronological order
-     * (i.e. newer events have bigger event ID)
-     */
-    get id(): tl.Long {
-        return this.raw.id
-    }
+  /**
+   * Event ID.
+   *
+   * Event IDs are generated in direct chronological order
+   * (i.e. newer events have bigger event ID)
+   */
+  get id(): tl.Long {
+    return this.raw.id
+  }
 
-    /**
-     * Date of the event
-     */
-    get date(): Date {
-        return new Date(this.raw.date * 1000)
-    }
+  /**
+   * Date of the event
+   */
+  get date(): Date {
+    return new Date(this.raw.date * 1000)
+  }
 
-    /**
-     * Actor of the event
-     */
-    get actor(): User {
-        return new User(this._peers.user(this.raw.userId))
-    }
+  /**
+   * Actor of the event
+   */
+  get actor(): User {
+    return new User(this._peers.user(this.raw.userId))
+  }
 
-    get action(): ChatAction {
-        return _actionFromTl(this.raw.action, this._peers, this._chatId)
-    }
+  get action(): ChatAction {
+    return _actionFromTl(this.raw.action, this._peers, this._chatId)
+  }
 }
 
 memoizeGetters(ChatEvent, ['actor', 'action'])

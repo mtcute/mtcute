@@ -12,11 +12,11 @@ import { _getUsersBatched } from './batched-queries.js'
  * @param userId  ID of the user or their username or invite link
  */
 export async function getUser(client: ITelegramClient, userId: InputPeerLike): Promise<User> {
-    const peer = await resolveUser(client, userId)
+  const peer = await resolveUser(client, userId)
 
-    const res = await _getUsersBatched(client, peer)
+  const res = await _getUsersBatched(client, peer)
 
-    if (!res) throw new MtPeerNotFoundError(`User ${JSON.stringify(userId)} was not found`)
+  if (!res) throw new MtPeerNotFoundError(`User ${JSON.stringify(userId)} was not found`)
 
-    return new User(res)
+  return new User(res)
 }

@@ -3,19 +3,19 @@ import type { tl } from '@mtcute/tl'
 import type { InputInlineMessage } from '../inline-message/types.js'
 
 export interface BaseInputInlineResult {
-    /**
-     * Unique ID of the result
-     */
-    id: string
+  /**
+   * Unique ID of the result
+   */
+  id: string
 
-    /**
-     * Message to send when the result is selected.
-     *
-     * By default, is automatically generated,
-     * and details about how it is generated can be found
-     * in subclasses' description
-     */
-    message?: InputInlineMessage
+  /**
+   * Message to send when the result is selected.
+   *
+   * By default, is automatically generated,
+   * and details about how it is generated can be found
+   * in subclasses' description
+   */
+  message?: InputInlineMessage
 }
 
 /**
@@ -37,35 +37,35 @@ export interface BaseInputInlineResult {
  * > but in fact raw TL entity objects are created
  */
 export interface InputInlineResultArticle extends BaseInputInlineResult {
-    type: 'article'
+  type: 'article'
 
-    /**
-     * Title of the result (must not be empty)
-     */
-    title: string
+  /**
+   * Title of the result (must not be empty)
+   */
+  title: string
 
-    /**
-     * Description of the result
-     */
-    description?: string
+  /**
+   * Description of the result
+   */
+  description?: string
 
-    /**
-     * URL of the article
-     */
-    url?: string
+  /**
+   * URL of the article
+   */
+  url?: string
 
-    /**
-     * Whether to prevent article URL from
-     * displaying by the client
-     *
-     * @default  `false`
-     */
-    hideUrl?: boolean
+  /**
+   * Whether to prevent article URL from
+   * displaying by the client
+   *
+   * @default  `false`
+   */
+  hideUrl?: boolean
 
-    /**
-     * Article thumbnail URL (must be jpeg).
-     */
-    thumb?: string | tl.RawInputWebDocument
+  /**
+   * Article thumbnail URL (must be jpeg).
+   */
+  thumb?: string | tl.RawInputWebDocument
 }
 
 /**
@@ -75,63 +75,63 @@ export interface InputInlineResultArticle extends BaseInputInlineResult {
  * with empty caption
  */
 export interface InputInlineResultGif extends BaseInputInlineResult {
-    type: 'gif'
+  type: 'gif'
 
-    /**
-     * The animation itself.
-     *
-     * Can be a URL, a TDLib and Bot API compatible File ID,
-     * or a TL object representing either of them.
-     */
-    media: string | tl.RawInputWebDocument | tl.RawInputDocument
+  /**
+   * The animation itself.
+   *
+   * Can be a URL, a TDLib and Bot API compatible File ID,
+   * or a TL object representing either of them.
+   */
+  media: string | tl.RawInputWebDocument | tl.RawInputDocument
 
-    /**
-     * Media MIME type, only applicable to URLs.
-     *
-     * Usually unnecessary, since Telegram automatically infers it.
-     *
-     * @default `video/mp4`
-     */
-    mime?: string
+  /**
+   * Media MIME type, only applicable to URLs.
+   *
+   * Usually unnecessary, since Telegram automatically infers it.
+   *
+   * @default `video/mp4`
+   */
+  mime?: string
 
-    /**
-     * Title of the result
-     */
-    title?: string
+  /**
+   * Title of the result
+   */
+  title?: string
 
-    /**
-     * Title of the result
-     */
-    description?: string
+  /**
+   * Title of the result
+   */
+  description?: string
 
-    /**
-     * Animation thumbnail URL, only applicable in case `media` is a URL
-     *
-     * @default  `media`
-     */
-    thumb?: string | tl.RawInputWebDocument
+  /**
+   * Animation thumbnail URL, only applicable in case `media` is a URL
+   *
+   * @default  `media`
+   */
+  thumb?: string | tl.RawInputWebDocument
 
-    /**
-     * Thumbnail MIME type
-     *
-     * @default  `image/jpeg`
-     */
-    thumbMime?: string
+  /**
+   * Thumbnail MIME type
+   *
+   * @default  `image/jpeg`
+   */
+  thumbMime?: string
 
-    /**
-     * Width of the animation in pixels
-     */
-    width?: number
+  /**
+   * Width of the animation in pixels
+   */
+  width?: number
 
-    /**
-     * Height of the animation in pixels
-     */
-    height?: number
+  /**
+   * Height of the animation in pixels
+   */
+  height?: number
 
-    /**
-     * Duration of the animation in seconds
-     */
-    duration?: number
+  /**
+   * Duration of the animation in seconds
+   */
+  duration?: number
 }
 
 /**
@@ -142,55 +142,55 @@ export interface InputInlineResultGif extends BaseInputInlineResult {
  * is used with text containing the URL for embed videos.
  */
 export interface InputInlineResultVideo extends BaseInputInlineResult {
-    type: 'video'
+  type: 'video'
 
-    /**
-     * The video itself, or a page containing an embedded video
-     *
-     * Can be a URL, a TDLib and Bot API compatible File ID,
-     * or a TL object representing either of them.
-     */
-    media: string | tl.RawInputWebDocument | tl.RawInputDocument
+  /**
+   * The video itself, or a page containing an embedded video
+   *
+   * Can be a URL, a TDLib and Bot API compatible File ID,
+   * or a TL object representing either of them.
+   */
+  media: string | tl.RawInputWebDocument | tl.RawInputDocument
 
-    /**
-     * In case `media` is a URL, whether that URL is a link
-     * to an embedded video player.
-     */
-    isEmbed?: boolean
+  /**
+   * In case `media` is a URL, whether that URL is a link
+   * to an embedded video player.
+   */
+  isEmbed?: boolean
 
-    /**
-     * Title of the result
-     */
-    title: string
+  /**
+   * Title of the result
+   */
+  title: string
 
-    /**
-     * Description of the result
-     */
-    description?: string
+  /**
+   * Description of the result
+   */
+  description?: string
 
-    /**
-     * Video thumbnail URL (must be jpeg), only applicable in case `media` is a URL.
-     *
-     * Must be provided explicitly if this is a video loaded by URL.
-     *
-     * @default  `media`
-     */
-    thumb?: string | tl.RawInputWebDocument
+  /**
+   * Video thumbnail URL (must be jpeg), only applicable in case `media` is a URL.
+   *
+   * Must be provided explicitly if this is a video loaded by URL.
+   *
+   * @default  `media`
+   */
+  thumb?: string | tl.RawInputWebDocument
 
-    /**
-     * Width of the video in pixels
-     */
-    width?: number
+  /**
+   * Width of the video in pixels
+   */
+  width?: number
 
-    /**
-     * Height of the video in pixels
-     */
-    height?: number
+  /**
+   * Height of the video in pixels
+   */
+  height?: number
 
-    /**
-     * Duration of the video in seconds
-     */
-    duration?: number
+  /**
+   * Duration of the video in seconds
+   */
+  duration?: number
 }
 
 /**
@@ -200,39 +200,39 @@ export interface InputInlineResultVideo extends BaseInputInlineResult {
  * with empty caption.
  */
 export interface InputInlineResultAudio extends BaseInputInlineResult {
-    type: 'audio'
+  type: 'audio'
 
-    /**
-     * The audio itself
-     *
-     * Can be a URL, a TDLib and Bot API compatible File ID,
-     * or a TL object representing either of them.
-     */
-    media: string | tl.RawInputWebDocument | tl.RawInputDocument
+  /**
+   * The audio itself
+   *
+   * Can be a URL, a TDLib and Bot API compatible File ID,
+   * or a TL object representing either of them.
+   */
+  media: string | tl.RawInputWebDocument | tl.RawInputDocument
 
-    /**
-     * MIME type of the audio file
-     *
-     * Usually unnecessary, since Telegram infers it automatically.
-     *
-     * @default  `audio/mpeg`
-     */
-    mime?: string
+  /**
+   * MIME type of the audio file
+   *
+   * Usually unnecessary, since Telegram infers it automatically.
+   *
+   * @default  `audio/mpeg`
+   */
+  mime?: string
 
-    /**
-     * Title of the audio track
-     */
-    title: string
+  /**
+   * Title of the audio track
+   */
+  title: string
 
-    /**
-     * Performer of the audio track
-     */
-    performer?: string
+  /**
+   * Performer of the audio track
+   */
+  performer?: string
 
-    /**
-     * Duration of the audio in seconds
-     */
-    duration?: number
+  /**
+   * Duration of the audio in seconds
+   */
+  duration?: number
 }
 
 /**
@@ -242,25 +242,25 @@ export interface InputInlineResultAudio extends BaseInputInlineResult {
  * with empty caption.
  */
 export interface InputInlineResultVoice extends BaseInputInlineResult {
-    type: 'voice'
+  type: 'voice'
 
-    /**
-     * The voice itself (.ogg, preferably encoded with OPUS)
-     *
-     * Can be a URL, a TDLib and Bot API compatible File ID,
-     * or a TL object representing either of them.
-     */
-    media: string | tl.RawInputWebDocument | tl.RawInputDocument
+  /**
+   * The voice itself (.ogg, preferably encoded with OPUS)
+   *
+   * Can be a URL, a TDLib and Bot API compatible File ID,
+   * or a TL object representing either of them.
+   */
+  media: string | tl.RawInputWebDocument | tl.RawInputDocument
 
-    /**
-     * Title of the result
-     */
-    title: string
+  /**
+   * Title of the result
+   */
+  title: string
 
-    /**
-     * Duration of the voice note in seconds
-     */
-    duration?: number
+  /**
+   * Duration of the voice note in seconds
+   */
+  duration?: number
 }
 
 /**
@@ -270,42 +270,42 @@ export interface InputInlineResultVoice extends BaseInputInlineResult {
  * with empty caption.
  */
 export interface InputInlineResultPhoto extends BaseInputInlineResult {
-    type: 'photo'
+  type: 'photo'
 
-    /**
-     * The photo itself
-     *
-     * Can be a URL, a TDLib and Bot API compatible File ID,
-     * or a TL object representing either of them.
-     */
-    media: string | tl.RawInputWebDocument | tl.RawInputPhoto
+  /**
+   * The photo itself
+   *
+   * Can be a URL, a TDLib and Bot API compatible File ID,
+   * or a TL object representing either of them.
+   */
+  media: string | tl.RawInputWebDocument | tl.RawInputPhoto
 
-    /**
-     * Title of the result
-     */
-    title?: string
+  /**
+   * Title of the result
+   */
+  title?: string
 
-    /**
-     * Description of the result
-     */
-    description?: string
+  /**
+   * Description of the result
+   */
+  description?: string
 
-    /**
-     * Width of the photo in pixels
-     */
-    width?: number
+  /**
+   * Width of the photo in pixels
+   */
+  width?: number
 
-    /**
-     * Height of the photo in pixels
-     */
-    height?: number
+  /**
+   * Height of the photo in pixels
+   */
+  height?: number
 
-    /**
-     * Photo thumbnail URL (must be jpeg), only applicable in case `media` is a URL
-     *
-     * @default  `media`
-     */
-    thumb?: string | tl.RawInputWebDocument
+  /**
+   * Photo thumbnail URL (must be jpeg), only applicable in case `media` is a URL
+   *
+   * @default  `media`
+   */
+  thumb?: string | tl.RawInputWebDocument
 }
 
 /**
@@ -314,12 +314,12 @@ export interface InputInlineResultPhoto extends BaseInputInlineResult {
  * If `message` is not provided, {@link InputInlineMessageMedia} is used.
  */
 export interface InputInlineResultSticker extends BaseInputInlineResult {
-    type: 'sticker'
+  type: 'sticker'
 
-    /**
-     * The sticker itself. Can't be a URL.
-     */
-    media: string | tl.RawInputDocument
+  /**
+   * The sticker itself. Can't be a URL.
+   */
+  media: string | tl.RawInputDocument
 }
 
 /**
@@ -329,43 +329,43 @@ export interface InputInlineResultSticker extends BaseInputInlineResult {
  * with empty caption.
  */
 export interface InputInlineResultFile extends BaseInputInlineResult {
-    type: 'file'
+  type: 'file'
 
-    /**
-     * The file itself. When using URL, only PDF and ZIP are supported.
-     *
-     * Can be a URL, a TDLib and Bot API compatible File ID,
-     * or a TL object representing either of them.
-     */
-    media: string | tl.RawInputWebDocument | tl.RawInputDocument
+  /**
+   * The file itself. When using URL, only PDF and ZIP are supported.
+   *
+   * Can be a URL, a TDLib and Bot API compatible File ID,
+   * or a TL object representing either of them.
+   */
+  media: string | tl.RawInputWebDocument | tl.RawInputDocument
 
-    /**
-     * MIME type of the file.
-     *
-     * Due to some Telegram limitation, you can only send
-     * PDF and ZIP files from URL
-     * (`application/pdf` and `application/zip` MIMEs respectively).
-     *
-     * Must be provided if `media` is a URL
-     */
-    mime?: string
+  /**
+   * MIME type of the file.
+   *
+   * Due to some Telegram limitation, you can only send
+   * PDF and ZIP files from URL
+   * (`application/pdf` and `application/zip` MIMEs respectively).
+   *
+   * Must be provided if `media` is a URL
+   */
+  mime?: string
 
-    /**
-     * Title of the result
-     */
-    title: string
+  /**
+   * Title of the result
+   */
+  title: string
 
-    /**
-     * Description of the result
-     */
-    description?: string
+  /**
+   * Description of the result
+   */
+  description?: string
 
-    /**
-     * Photo thumbnail URL (must be jpeg), only applicable in case `media` is a URL
-     *
-     * @default  `media`
-     */
-    thumb?: string | tl.RawInputWebDocument
+  /**
+   * Photo thumbnail URL (must be jpeg), only applicable in case `media` is a URL
+   *
+   * @default  `media`
+   */
+  thumb?: string | tl.RawInputWebDocument
 }
 
 /**
@@ -376,30 +376,30 @@ export interface InputInlineResultFile extends BaseInputInlineResult {
  * accordingly
  */
 export interface InputInlineResultGeo extends BaseInputInlineResult {
-    type: 'geo'
+  type: 'geo'
 
-    /**
-     * Title of the result
-     */
-    title: string
+  /**
+   * Title of the result
+   */
+  title: string
 
-    /**
-     * Latitude of the geolocation
-     */
-    latitude: number
+  /**
+   * Latitude of the geolocation
+   */
+  latitude: number
 
-    /**
-     * Longitude of the geolocation
-     */
-    longitude: number
+  /**
+   * Longitude of the geolocation
+   */
+  longitude: number
 
-    /**
-     * Location thumbnail URL (must be jpeg).
-     *
-     * By default, Telegram generates one based on
-     * the location set by `latitude` and `longitude`
-     */
-    thumb?: string | tl.RawInputWebDocument
+  /**
+   * Location thumbnail URL (must be jpeg).
+   *
+   * By default, Telegram generates one based on
+   * the location set by `latitude` and `longitude`
+   */
+  thumb?: string | tl.RawInputWebDocument
 }
 
 /**
@@ -410,35 +410,35 @@ export interface InputInlineResultGeo extends BaseInputInlineResult {
  * If they weren't passed either, an error is thrown.
  */
 export interface InputInlineResultVenue extends BaseInputInlineResult {
-    type: 'venue'
+  type: 'venue'
 
-    /**
-     * Title of the venue
-     */
-    title: string
+  /**
+   * Title of the venue
+   */
+  title: string
 
-    /**
-     * Address of the venue
-     */
-    address: string
+  /**
+   * Address of the venue
+   */
+  address: string
 
-    /**
-     * Latitude of the geolocation
-     */
-    latitude?: number
+  /**
+   * Latitude of the geolocation
+   */
+  latitude?: number
 
-    /**
-     * Longitude of the geolocation
-     */
-    longitude?: number
+  /**
+   * Longitude of the geolocation
+   */
+  longitude?: number
 
-    /**
-     * Venue thumbnail URL (must be jpeg).
-     *
-     * By default, Telegram generates one based on
-     * the location in the `message`
-     */
-    thumb?: string | tl.RawInputWebDocument
+  /**
+   * Venue thumbnail URL (must be jpeg).
+   *
+   * By default, Telegram generates one based on
+   * the location in the `message`
+   */
+  thumb?: string | tl.RawInputWebDocument
 }
 
 /**
@@ -449,12 +449,12 @@ export interface InputInlineResultVenue extends BaseInputInlineResult {
  * Note that `message` can only be {@link InputInlineMessageGame}
  */
 export interface InputInlineResultGame extends BaseInputInlineResult {
-    type: 'game'
+  type: 'game'
 
-    /**
-     * Short name of the game
-     */
-    shortName: string
+  /**
+   * Short name of the game
+   */
+  shortName: string
 }
 
 /**
@@ -463,39 +463,39 @@ export interface InputInlineResultGame extends BaseInputInlineResult {
  * If `message` is not passed, {@link InputInlineMessageContact} is used.
  */
 export interface InputInlineResultContact extends BaseInputInlineResult {
-    type: 'contact'
+  type: 'contact'
 
-    /**
-     * First name of the contact
-     */
-    firstName: string
+  /**
+   * First name of the contact
+   */
+  firstName: string
 
-    /**
-     * Last name of the contact
-     */
-    lastName?: string
+  /**
+   * Last name of the contact
+   */
+  lastName?: string
 
-    /**
-     * Phone number of the contact
-     */
-    phone: string
+  /**
+   * Phone number of the contact
+   */
+  phone: string
 
-    /**
-     * Contact thumbnail URL (i.e. their avatar) (must be jpeg)
-     */
-    thumb?: string | tl.RawInputWebDocument
+  /**
+   * Contact thumbnail URL (i.e. their avatar) (must be jpeg)
+   */
+  thumb?: string | tl.RawInputWebDocument
 }
 
-export type InputInlineResult =
-  | InputInlineResultArticle
-  | InputInlineResultGif
-  | InputInlineResultVideo
-  | InputInlineResultAudio
-  | InputInlineResultVoice
-  | InputInlineResultPhoto
-  | InputInlineResultSticker
-  | InputInlineResultFile
-  | InputInlineResultGeo
-  | InputInlineResultVenue
-  | InputInlineResultGame
-  | InputInlineResultContact
+export type InputInlineResult
+  = | InputInlineResultArticle
+    | InputInlineResultGif
+    | InputInlineResultVideo
+    | InputInlineResultAudio
+    | InputInlineResultVoice
+    | InputInlineResultPhoto
+    | InputInlineResultSticker
+    | InputInlineResultFile
+    | InputInlineResultGeo
+    | InputInlineResultVenue
+    | InputInlineResultGame
+    | InputInlineResultContact

@@ -9,5 +9,5 @@ export type MustEqual<T, V> = (() => T) extends () => V ? ((() => V) extends () 
 export type PublicPart<T> = { [K in keyof T]: T[K] }
 
 export function assertNever(_: never): never {
-    throw new Error('Illegal state')
+  throw new Error('Illegal state')
 }

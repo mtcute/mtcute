@@ -21,9 +21,9 @@ export { MemoryRefMessagesRepository } from './repository/ref-messages.js'
  * or if you know exactly what you're doing.
  */
 export class MemoryStorage implements IMtStorageProvider, ITelegramStorageProvider {
-    readonly driver: MemoryStorageDriver = new MemoryStorageDriver()
-    readonly kv: MemoryKeyValueRepository = new MemoryKeyValueRepository(this.driver)
-    readonly authKeys: MemoryAuthKeysRepository = new MemoryAuthKeysRepository(this.driver)
-    readonly peers: MemoryPeersRepository = new MemoryPeersRepository(this.driver)
-    readonly refMessages: MemoryRefMessagesRepository = new MemoryRefMessagesRepository(this.driver)
+  readonly driver: MemoryStorageDriver = new MemoryStorageDriver()
+  readonly kv: MemoryKeyValueRepository = new MemoryKeyValueRepository(this.driver)
+  readonly authKeys: MemoryAuthKeysRepository = new MemoryAuthKeysRepository(this.driver)
+  readonly peers: MemoryPeersRepository = new MemoryPeersRepository(this.driver)
+  readonly refMessages: MemoryRefMessagesRepository = new MemoryRefMessagesRepository(this.driver)
 }

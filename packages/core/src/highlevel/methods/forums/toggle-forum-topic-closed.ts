@@ -11,32 +11,32 @@ import { resolveChannel } from '../users/resolve-peer.js'
  * @returns  Service message about the modification
  */
 export async function toggleForumTopicClosed(
-    client: ITelegramClient,
-    parmas: {
-        /** Chat ID or username */
-        chatId: InputPeerLike
+  client: ITelegramClient,
+  parmas: {
+    /** Chat ID or username */
+    chatId: InputPeerLike
 
-        /** ID of the topic (i.e. its top message ID) */
-        topicId: number | ForumTopic
+    /** ID of the topic (i.e. its top message ID) */
+    topicId: number | ForumTopic
 
-        /** Whether the topic should be closed */
-        closed: boolean
+    /** Whether the topic should be closed */
+    closed: boolean
 
-        /**
-         * Whether to dispatch the returned service message (if any)
-         * to the client's update handler.
-         */
-        shouldDispatch?: true
-    },
+    /**
+     * Whether to dispatch the returned service message (if any)
+     * to the client's update handler.
+     */
+    shouldDispatch?: true
+  },
 ): Promise<Message> {
-    const { chatId, topicId, closed, shouldDispatch } = parmas
+  const { chatId, topicId, closed, shouldDispatch } = parmas
 
-    const res = await client.call({
-        _: 'channels.editForumTopic',
-        channel: await resolveChannel(client, chatId),
-        topicId: typeof topicId === 'number' ? topicId : topicId.id,
-        closed,
-    })
+  const res = await client.call({
+    _: 'channels.editForumTopic',
+    channel: await resolveChannel(client, chatId),
+    topicId: typeof topicId === 'number' ? topicId : topicId.id,
+    closed,
+  })
 
-    return _findMessageInUpdate(client, res, false, shouldDispatch)
+  return _findMessageInUpdate(client, res, false, shouldDispatch)
 }

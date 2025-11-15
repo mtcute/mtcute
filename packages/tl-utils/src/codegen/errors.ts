@@ -68,42 +68,42 @@ export class RpcError extends Error {
 `.trimStart()
 
 function template(str: string, params: Record<string, string | number>): string {
-    return str.replace(/\{([a-z]+)\}/gi, (_, name) => String(params[name] ?? ''))
+  return str.replace(/\{([a-z]+)\}/gi, (_, name) => String(params[name] ?? ''))
 }
 
 function parseCode(err: string, placeholders_?: string[]): [string, string[]] {
-    let addPlaceholders = false
+  let addPlaceholders = false
 
-    if (!placeholders_) {
-        placeholders_ = []
-        addPlaceholders = true
-    } else {
-        placeholders_ = placeholders_.map(snakeToCamel)
+  if (!placeholders_) {
+    placeholders_ = []
+    addPlaceholders = true
+  } else {
+    placeholders_ = placeholders_.map(snakeToCamel)
+  }
+
+  const placeholders = placeholders_
+
+  err = err.replace(/%[a-z]/g, (placeholder) => {
+    if (placeholder !== '%d') {
+      throw new Error(`Unsupported placeholder: ${placeholder}`)
     }
 
-    const placeholders = placeholders_
+    if (addPlaceholders) {
+      const idx = placeholders.length
+      placeholders.push(`duration${idx === 0 ? '' : idx}`)
+    }
 
-    err = err.replace(/%[a-z]/g, (placeholder) => {
-        if (placeholder !== '%d') {
-            throw new Error(`Unsupported placeholder: ${placeholder}`)
-        }
+    return placeholder
+  })
 
-        if (addPlaceholders) {
-            const idx = placeholders.length
-            placeholders.push(`duration${idx === 0 ? '' : idx}`)
-        }
-
-        return placeholder
-    })
-
-    return [err, placeholders]
+  return [err, placeholders]
 }
 
 function placeholderType(_name: string): string {
-    // if (!name.startsWith('duration')) {
-    //     throw new Error('Invalid placeholder name')
-    // }
-    return 'number'
+  // if (!name.startsWith('duration')) {
+  //     throw new Error('Invalid placeholder name')
+  // }
+  return 'number'
 }
 
 /**
@@ -114,50 +114,50 @@ function placeholderType(_name: string): string {
  * @returns  Tuple containing `[ts, js]` code
  */
 export function generateCodeForErrors(errors: TlErrors, exports = 'exports.'): [string, string] {
-    const descriptionsMap: Record<string, string> = {}
-    let texts = ''
-    let argMap = ''
-    let matchers = ''
-    let staticsJs = ''
-    let staticsTs = ''
+  const descriptionsMap: Record<string, string> = {}
+  let texts = ''
+  let argMap = ''
+  let matchers = ''
+  let staticsJs = ''
+  let staticsTs = ''
 
-    for (const [name, code] of Object.entries(errors.base)) {
-        staticsJs += `RpcError.${name} = ${code};\n`
-        staticsTs += `    static ${name}: ${code};\n`
+  for (const [name, code] of Object.entries(errors.base)) {
+    staticsJs += `RpcError.${name} = ${code};\n`
+    staticsTs += `    static ${name}: ${code};\n`
+  }
+
+  let first = true
+
+  for (const error of Object.values(errors.errors)) {
+    const [name, placeholders] = parseCode(error.name, error._paramNames)
+
+    if (error.description) {
+      descriptionsMap[name] = error.description
     }
 
-    let first = true
+    texts += `    | '${name}'\n`
 
-    for (const error of Object.values(errors.errors)) {
-        const [name, placeholders] = parseCode(error.name, error._paramNames)
+    if (placeholders.length) {
+      const placeholderTypes = placeholders.map(placeholderType)
+      argMap
+        += `    '${name}': { ${placeholders.map((it, i) => `${it}: ${placeholderTypes[i]}`).join(', ')} },\n`
 
-        if (error.description) {
-            descriptionsMap[name] = error.description
-        }
-
-        texts += `    | '${name}'\n`
-
-        if (placeholders.length) {
-            const placeholderTypes = placeholders.map(placeholderType)
-            argMap
-                += `    '${name}': { ${placeholders.map((it, i) => `${it}: ${placeholderTypes[i]}`).join(', ')} },\n`
-
-            const regex = name.replace('%d', '(\\d+)')
-            const setters = placeholders.map((it, i) => `param = err.${it} = parseInt(match[${i + 1}])`).join('; ')
-            matchers += `    ${
-                first ? '' : 'else '
-            }if ((match=err.text.match(/^${regex}$/))!=null){ err.text = '${name}'; ${setters} }\n`
-            first = false
-        }
+      const regex = name.replace('%d', '(\\d+)')
+      const setters = placeholders.map((it, i) => `param = err.${it} = parseInt(match[${i + 1}])`).join('; ')
+      matchers += `    ${
+        first ? '' : 'else '
+      }if ((match=err.text.match(/^${regex}$/))!=null){ err.text = '${name}'; ${setters} }\n`
+      first = false
     }
+  }
 
-    return [
-        template(TEMPLATE_TS, { statics: staticsTs, texts, argMap }),
-        template(TEMPLATE_JS, {
-            exports,
-            statics: staticsJs,
-            descriptionsMap: JSON.stringify(descriptionsMap).replace(/'/g, "\\'"),
-            matchers,
-        }),
-    ]
+  return [
+    template(TEMPLATE_TS, { statics: staticsTs, texts, argMap }),
+    template(TEMPLATE_JS, {
+      exports,
+      statics: staticsJs,
+      descriptionsMap: JSON.stringify(descriptionsMap).replace(/'/g, "\\'"),
+      matchers,
+    }),
+  ]
 }

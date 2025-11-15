@@ -15,50 +15,50 @@ import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
  * @returns  The modified message
  */
 export async function setGameScore(
-    client: ITelegramClient,
-    params: InputMessageId & {
-        /** ID of the user who has scored */
-        userId: InputPeerLike
+  client: ITelegramClient,
+  params: InputMessageId & {
+    /** ID of the user who has scored */
+    userId: InputPeerLike
 
-        /** The new score (must be >0) */
-        score: number
+    /** The new score (must be >0) */
+    score: number
 
-        /**
-         * When `true`, the game message will not be modified
-         * to include the new score
-         */
-        noEdit?: boolean
+    /**
+     * When `true`, the game message will not be modified
+     * to include the new score
+     */
+    noEdit?: boolean
 
-        /**
-         * Whether to allow user's score to decrease.
-         * This can be useful when fixing mistakes or banning cheaters
-         */
-        force?: boolean
+    /**
+     * Whether to allow user's score to decrease.
+     * This can be useful when fixing mistakes or banning cheaters
+     */
+    force?: boolean
 
-        /**
-         * Whether to dispatch the edit message event
-         * to the client's update handler.
-         */
-        shouldDispatch?: true
-    },
+    /**
+     * Whether to dispatch the edit message event
+     * to the client's update handler.
+     */
+    shouldDispatch?: true
+  },
 ): Promise<Message> {
-    const { userId, score, noEdit, force, shouldDispatch } = params
-    const { chatId, message } = normalizeInputMessageId(params)
+  const { userId, score, noEdit, force, shouldDispatch } = params
+  const { chatId, message } = normalizeInputMessageId(params)
 
-    const user = await resolveUser(client, userId)
-    const chat = await resolvePeer(client, chatId)
+  const user = await resolveUser(client, userId)
+  const chat = await resolvePeer(client, chatId)
 
-    const res = await client.call({
-        _: 'messages.setGameScore',
-        peer: chat,
-        id: message,
-        userId: user,
-        score,
-        editMessage: !noEdit,
-        force,
-    })
+  const res = await client.call({
+    _: 'messages.setGameScore',
+    peer: chat,
+    id: message,
+    userId: user,
+    score,
+    editMessage: !noEdit,
+    force,
+  })
 
-    return _findMessageInUpdate(client, res, true, !shouldDispatch)
+  return _findMessageInUpdate(client, res, true, !shouldDispatch)
 }
 
 /**
@@ -68,44 +68,44 @@ export async function setGameScore(
  * @param params
  */
 export async function setInlineGameScore(
-    client: ITelegramClient,
-    params: {
-        /** ID of the inline message */
-        messageId: string | tl.TypeInputBotInlineMessageID
-        /** ID of the user who has scored */
-        userId: InputPeerLike
-        /** The new score (must be >0) */
-        score: number
-        /**
-         * When `true`, the game message will not be modified
-         * to include the new score
-         */
-        noEdit?: boolean
+  client: ITelegramClient,
+  params: {
+    /** ID of the inline message */
+    messageId: string | tl.TypeInputBotInlineMessageID
+    /** ID of the user who has scored */
+    userId: InputPeerLike
+    /** The new score (must be >0) */
+    score: number
+    /**
+     * When `true`, the game message will not be modified
+     * to include the new score
+     */
+    noEdit?: boolean
 
-        /**
-         * Whether to allow user's score to decrease.
-         * This can be useful when fixing mistakes or banning cheaters
-         */
-        force?: boolean
-    },
+    /**
+     * Whether to allow user's score to decrease.
+     * This can be useful when fixing mistakes or banning cheaters
+     */
+    force?: boolean
+  },
 ): Promise<void> {
-    const { messageId, userId, score, noEdit, force } = params
+  const { messageId, userId, score, noEdit, force } = params
 
-    const user = await resolveUser(client, userId)
+  const user = await resolveUser(client, userId)
 
-    const id = normalizeInlineId(messageId)
+  const id = normalizeInlineId(messageId)
 
-    const r = await client.call(
-        {
-            _: 'messages.setInlineGameScore',
-            id,
-            userId: user,
-            score,
-            editMessage: !noEdit,
-            force,
-        },
-        { dcId: id.dcId },
-    )
+  const r = await client.call(
+    {
+      _: 'messages.setInlineGameScore',
+      id,
+      userId: user,
+      score,
+      editMessage: !noEdit,
+      force,
+    },
+    { dcId: id.dcId },
+  )
 
-    assertTrue('messages.setInlineGameScore', r)
+  assertTrue('messages.setInlineGameScore', r)
 }

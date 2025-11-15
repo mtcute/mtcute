@@ -9,10 +9,10 @@ import { getRandomInt } from './misc-utils.js'
  * @param unsigned  Whether the number should be unsigned
  */
 export function randomLong(unsigned = false): Long {
-    const lo = getRandomInt(0xFFFFFFFF)
-    const hi = getRandomInt(0xFFFFFFFF)
+  const lo = getRandomInt(0xFFFFFFFF)
+  const hi = getRandomInt(0xFFFFFFFF)
 
-    return new Long(lo, hi, unsigned)
+  return new Long(lo, hi, unsigned)
 }
 
 /**
@@ -23,13 +23,13 @@ export function randomLong(unsigned = false): Long {
  * @param le  Whether the number is little-endian
  */
 export function longFromBuffer(buf: Uint8Array, unsigned = false, le = true): Long {
-    const dv = typed.toDataView(buf)
+  const dv = typed.toDataView(buf)
 
-    if (le) {
-        return new Long(dv.getInt32(0, true), dv.getInt32(4, true), unsigned)
-    }
+  if (le) {
+    return new Long(dv.getInt32(0, true), dv.getInt32(4, true), unsigned)
+  }
 
-    return new Long(dv.getInt32(4, false), dv.getInt32(0, false), unsigned)
+  return new Long(dv.getInt32(4, false), dv.getInt32(0, false), unsigned)
 }
 
 /**
@@ -39,18 +39,18 @@ export function longFromBuffer(buf: Uint8Array, unsigned = false, le = true): Lo
  * @param val  Value to remove
  */
 export function removeFromLongArray(arr: Long[], val: Long): boolean {
-    for (let i = 0; i < arr.length; i++) {
-        const v = arr[i]
+  for (let i = 0; i < arr.length; i++) {
+    const v = arr[i]
 
-        // v === val for the case when the exact same object was passed
-        if (v === val || v.eq(val)) {
-            arr.splice(i, 1)
+    // v === val for the case when the exact same object was passed
+    if (v === val || v.eq(val)) {
+      arr.splice(i, 1)
 
-            return true
-        }
+      return true
     }
+  }
 
-    return false
+  return false
 }
 
 /**
@@ -58,11 +58,11 @@ export function removeFromLongArray(arr: Long[], val: Long): boolean {
  * to be used as a comparator function.
  */
 export function compareLongs(a: Long, b: Long): number {
-    if (a.eq(b)) return 0
+  if (a.eq(b)) return 0
 
-    if (a.gt(b)) return 1
+  if (a.gt(b)) return 1
 
-    return -1
+  return -1
 }
 
 /**
@@ -78,7 +78,7 @@ export function compareLongs(a: Long, b: Long): number {
  * @param val
  */
 export function longToFastString(val: Long): string {
-    return `${val.low}|${val.high}`
+  return `${val.low}|${val.high}`
 }
 
 /**
@@ -91,17 +91,17 @@ export function longToFastString(val: Long): string {
  * @param unsigned
  */
 export function longFromFastString(val: string, unsigned = false): Long {
-    const parts = val.split('|')
+  const parts = val.split('|')
 
-    if (parts.length !== 2) throw new Error(`Invalid long fast string: ${val}`)
-    const low = Number.parseInt(parts[0])
-    const high = Number.parseInt(parts[1])
+  if (parts.length !== 2) throw new Error(`Invalid long fast string: ${val}`)
+  const low = Number.parseInt(parts[0])
+  const high = Number.parseInt(parts[1])
 
-    if (Number.isNaN(low) || Number.isNaN(high)) {
-        throw new TypeError(`Invalid long fast string: ${val}`)
-    }
+  if (Number.isNaN(low) || Number.isNaN(high)) {
+    throw new TypeError(`Invalid long fast string: ${val}`)
+  }
 
-    return new Long(low, high, unsigned)
+  return new Long(low, high, unsigned)
 }
 
 /**
@@ -110,9 +110,9 @@ export function longFromFastString(val: string, unsigned = false): Long {
  * Uses fast string representation internally.
  */
 export class LongMap<V> extends CustomMap<Long, string, V> {
-    constructor() {
-        super(longToFastString, longFromFastString)
-    }
+  constructor() {
+    super(longToFastString, longFromFastString)
+  }
 }
 
 /**
@@ -121,7 +121,7 @@ export class LongMap<V> extends CustomMap<Long, string, V> {
  * Uses fast string representation internally
  */
 export class LongSet extends CustomSet<Long, string> {
-    constructor() {
-        super(longToFastString, longFromFastString)
-    }
+  constructor() {
+    super(longToFastString, longFromFastString)
+  }
 }

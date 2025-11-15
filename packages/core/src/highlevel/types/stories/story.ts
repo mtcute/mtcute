@@ -28,160 +28,160 @@ export type StoryVisibility = 'public' | 'contacts' | 'selected_contacts' | 'clo
 export type StoryMedia = Photo | Video
 
 export class Story {
-    constructor(
-        readonly raw: tl.RawStoryItem,
-        readonly _peers: PeersIndex,
-    ) {}
+  constructor(
+    readonly raw: tl.RawStoryItem,
+    readonly _peers: PeersIndex,
+  ) {}
 
-    /** Whether this story is pinned */
-    get isPinned(): boolean {
-        return this.raw.pinned!
+  /** Whether this story is pinned */
+  get isPinned(): boolean {
+    return this.raw.pinned!
+  }
+
+  /**
+   * Whether this object contains reduced set of fields.
+   *
+   * When `true`, these field will not contain correct data:
+   * {@link privacyRules}, {@link interactiveAreas}
+   *
+   */
+  get isShort(): boolean {
+    return this.raw.min!
+  }
+
+  /** Whether this story is content-protected, i.e. can't be forwarded */
+  get isContentProtected(): boolean {
+    return this.raw.noforwards!
+  }
+
+  /** Whether this story has been edited */
+  get isEdited(): boolean {
+    return this.raw.edited!
+  }
+
+  /** Whether this story has been posted by the current user */
+  get isMy(): boolean {
+    return this.raw.out!
+  }
+
+  /** ID of the story */
+  get id(): number {
+    return this.raw.id
+  }
+
+  /** Date when this story was posted */
+  get date(): Date {
+    return new Date(this.raw.date * 1000)
+  }
+
+  /** Date when this story will expire */
+  get expireDate(): Date {
+    return new Date(this.raw.expireDate * 1000)
+  }
+
+  /** Whether the story is active (i.e. not expired yet) */
+  get isActive(): boolean {
+    return Date.now() < this.expireDate.getTime()
+  }
+
+  /** Story visibility */
+  get visibility(): StoryVisibility {
+    if (this.raw.public) return 'public'
+    if (this.raw.contacts) return 'contacts'
+    if (this.raw.closeFriends) return 'close_friends'
+    if (this.raw.selectedContacts) return 'selected_contacts'
+
+    throw new MtUnsupportedError('Unknown story visibility')
+  }
+
+  /** Caption of the story */
+  get caption(): string | null {
+    return this.raw.caption ?? null
+  }
+
+  /**
+   * Caption entities (may be empty)
+   */
+  get entities(): ReadonlyArray<MessageEntity> {
+    const entities = []
+
+    if (this.raw.entities?.length) {
+      for (const ent of this.raw.entities) {
+        entities.push(new MessageEntity(ent, this.raw.caption))
+      }
     }
 
-    /**
-     * Whether this object contains reduced set of fields.
-     *
-     * When `true`, these field will not contain correct data:
-     * {@link privacyRules}, {@link interactiveAreas}
-     *
-     */
-    get isShort(): boolean {
-        return this.raw.min!
-    }
+    return entities
+  }
 
-    /** Whether this story is content-protected, i.e. can't be forwarded */
-    get isContentProtected(): boolean {
-        return this.raw.noforwards!
-    }
+  /**
+   * Story media.
+   *
+   * Currently, can only be {@link Photo} or {@link Video}.
+   */
+  get media(): StoryMedia {
+    switch (this.raw.media._) {
+      case 'messageMediaPhoto':
+        if (this.raw.media.photo?._ !== 'photo') throw new MtUnsupportedError('Unsupported story media type')
 
-    /** Whether this story has been edited */
-    get isEdited(): boolean {
-        return this.raw.edited!
-    }
-
-    /** Whether this story has been posted by the current user */
-    get isMy(): boolean {
-        return this.raw.out!
-    }
-
-    /** ID of the story */
-    get id(): number {
-        return this.raw.id
-    }
-
-    /** Date when this story was posted */
-    get date(): Date {
-        return new Date(this.raw.date * 1000)
-    }
-
-    /** Date when this story will expire */
-    get expireDate(): Date {
-        return new Date(this.raw.expireDate * 1000)
-    }
-
-    /** Whether the story is active (i.e. not expired yet) */
-    get isActive(): boolean {
-        return Date.now() < this.expireDate.getTime()
-    }
-
-    /** Story visibility */
-    get visibility(): StoryVisibility {
-        if (this.raw.public) return 'public'
-        if (this.raw.contacts) return 'contacts'
-        if (this.raw.closeFriends) return 'close_friends'
-        if (this.raw.selectedContacts) return 'selected_contacts'
-
-        throw new MtUnsupportedError('Unknown story visibility')
-    }
-
-    /** Caption of the story */
-    get caption(): string | null {
-        return this.raw.caption ?? null
-    }
-
-    /**
-     * Caption entities (may be empty)
-     */
-    get entities(): ReadonlyArray<MessageEntity> {
-        const entities = []
-
-        if (this.raw.entities?.length) {
-            for (const ent of this.raw.entities) {
-                entities.push(new MessageEntity(ent, this.raw.caption))
-            }
+        return new Photo(this.raw.media.photo, this.raw.media)
+      case 'messageMediaDocument': {
+        if (this.raw.media.document?._ !== 'document') {
+          throw new MtUnsupportedError('Unsupported story media type')
         }
 
-        return entities
+        const doc = parseDocument(this.raw.media.document, this.raw.media)
+        if (doc.type === 'video') return doc
+      }
     }
 
-    /**
-     * Story media.
-     *
-     * Currently, can only be {@link Photo} or {@link Video}.
-     */
-    get media(): StoryMedia {
-        switch (this.raw.media._) {
-            case 'messageMediaPhoto':
-                if (this.raw.media.photo?._ !== 'photo') throw new MtUnsupportedError('Unsupported story media type')
+    throw new MtUnsupportedError('Unsupported story media type')
+  }
 
-                return new Photo(this.raw.media.photo, this.raw.media)
-            case 'messageMediaDocument': {
-                if (this.raw.media.document?._ !== 'document') {
-                    throw new MtUnsupportedError('Unsupported story media type')
-                }
+  /**
+   * Interactive elements of the story
+   */
+  get interactiveElements(): StoryInteractiveElement[] {
+    if (!this.raw.mediaAreas) return []
 
-                const doc = parseDocument(this.raw.media.document, this.raw.media)
-                if (doc.type === 'video') return doc
-            }
-        }
+    return this.raw.mediaAreas.map(it => _storyInteractiveElementFromTl(it, this._peers))
+  }
 
-        throw new MtUnsupportedError('Unsupported story media type')
-    }
+  /**
+   * Privacy rules of the story.
+   *
+   * Only available when {@link isMy} is `true`.
+   */
+  get privacyRules(): tl.TypePrivacyRule[] | null {
+    if (!this.raw.privacy) return null
 
-    /**
-     * Interactive elements of the story
-     */
-    get interactiveElements(): StoryInteractiveElement[] {
-        if (!this.raw.mediaAreas) return []
+    return this.raw.privacy
+  }
 
-        return this.raw.mediaAreas.map(it => _storyInteractiveElementFromTl(it, this._peers))
-    }
+  /**
+   * Information about story interactions
+   */
+  get interactions(): StoryInteractions | null {
+    if (!this.raw.views) return null
 
-    /**
-     * Privacy rules of the story.
-     *
-     * Only available when {@link isMy} is `true`.
-     */
-    get privacyRules(): tl.TypePrivacyRule[] | null {
-        if (!this.raw.privacy) return null
+    return new StoryInteractions(this.raw.views, this._peers)
+  }
 
-        return this.raw.privacy
-    }
+  /**
+   * Emoji representing a reaction sent by the current user, if any
+   */
+  get sentReactionEmoji(): ReactionEmoji | null {
+    if (!this.raw.sentReaction) return null
 
-    /**
-     * Information about story interactions
-     */
-    get interactions(): StoryInteractions | null {
-        if (!this.raw.views) return null
+    return toReactionEmoji(this.raw.sentReaction, true)
+  }
 
-        return new StoryInteractions(this.raw.views, this._peers)
-    }
-
-    /**
-     * Emoji representing a reaction sent by the current user, if any
-     */
-    get sentReactionEmoji(): ReactionEmoji | null {
-        if (!this.raw.sentReaction) return null
-
-        return toReactionEmoji(this.raw.sentReaction, true)
-    }
-
-    /**
-     * Albums this story belongs to
-     */
-    get albums(): number[] {
-        return this.raw.albums ?? []
-    }
+  /**
+   * Albums this story belongs to
+   */
+  get albums(): number[] {
+    return this.raw.albums ?? []
+  }
 }
 
 memoizeGetters(Story, ['entities', 'media', 'interactiveElements', 'interactions'])

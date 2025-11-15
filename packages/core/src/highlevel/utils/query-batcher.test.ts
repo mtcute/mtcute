@@ -7,50 +7,50 @@ import { describe, expect, it } from 'vitest'
 import { batchedQuery } from './query-batcher.js'
 
 describe('batchedQuery', () => {
-    const client = new StubTelegramClient()
-    client.log.prefix = '[1]'
+  const client = new StubTelegramClient()
+  client.log.prefix = '[1]'
 
-    it('should correctly batch requests', async () => {
-        const log: string[] = []
+  it('should correctly batch requests', async () => {
+    const log: string[] = []
 
-        const fetch = async (client: ITelegramClient, items: number[]) => {
-            log.push(`[start] fetch() ${items.join(', ')}`)
+    const fetch = async (client: ITelegramClient, items: number[]) => {
+      log.push(`[start] fetch() ${items.join(', ')}`)
 
-            await sleep(10)
+      await sleep(10)
 
-            log.push(`[end] fetch() ${items.join(', ')}`)
+      log.push(`[end] fetch() ${items.join(', ')}`)
 
-            return items.map(it => it * 2)
-        }
+      return items.map(it => it * 2)
+    }
 
-        const batched = batchedQuery({
-            fetch,
-            inputKey: it => it,
-            outputKey: it => it / 2,
-        })
+    const batched = batchedQuery({
+      fetch,
+      inputKey: it => it,
+      outputKey: it => it / 2,
+    })
 
-        const batchedWrapped = async (item: number) => {
-            log.push(`[start] batched() ${item}`)
+    const batchedWrapped = async (item: number) => {
+      log.push(`[start] batched() ${item}`)
 
-            const res = await batched(client, item)
+      const res = await batched(client, item)
 
-            log.push(`[end] batched() ${item} => ${res}`)
+      log.push(`[end] batched() ${item} => ${res}`)
 
-            return res
-        }
+      return res
+    }
 
-        const results = await Promise.all([
-            batchedWrapped(1),
-            batchedWrapped(2),
-            batchedWrapped(3),
-            batchedWrapped(3),
-            batchedWrapped(4),
-        ])
-        const results2 = await Promise.all([batchedWrapped(4), batchedWrapped(5), batchedWrapped(6)])
+    const results = await Promise.all([
+      batchedWrapped(1),
+      batchedWrapped(2),
+      batchedWrapped(3),
+      batchedWrapped(3),
+      batchedWrapped(4),
+    ])
+    const results2 = await Promise.all([batchedWrapped(4), batchedWrapped(5), batchedWrapped(6)])
 
-        expect(results).toEqual([2, 4, 6, 6, 8])
-        expect(results2).toEqual([8, 10, 12])
-        expect(log).toMatchInlineSnapshot(`
+    expect(results).toEqual([2, 4, 6, 6, 8])
+    expect(results2).toEqual([8, 10, 12])
+    expect(log).toMatchInlineSnapshot(`
           [
             "[start] batched() 1",
             "[start] fetch() 1",
@@ -78,52 +78,52 @@ describe('batchedQuery', () => {
             "[end] batched() 6 => 12",
           ]
         `)
+  })
+
+  it('should correctly limit batch size', async () => {
+    const log: string[] = []
+
+    const fetch = async (client: ITelegramClient, items: number[]) => {
+      log.push(`[start] fetch() ${items.join(', ')}`)
+
+      await sleep(10)
+
+      log.push(`[end] fetch() ${items.join(', ')}`)
+
+      return items.map(it => it * 2)
+    }
+
+    const batched = batchedQuery({
+      fetch,
+      inputKey: it => it,
+      outputKey: it => it / 2,
+      maxBatchSize: 2,
     })
 
-    it('should correctly limit batch size', async () => {
-        const log: string[] = []
+    const batchedWrapped = async (item: number) => {
+      log.push(`[start] batched() ${item}`)
 
-        const fetch = async (client: ITelegramClient, items: number[]) => {
-            log.push(`[start] fetch() ${items.join(', ')}`)
+      const res = await batched(client, item)
 
-            await sleep(10)
+      log.push(`[end] batched() ${item} => ${res}`)
 
-            log.push(`[end] fetch() ${items.join(', ')}`)
+      return res
+    }
 
-            return items.map(it => it * 2)
-        }
+    const results = await Promise.all([
+      batchedWrapped(1),
+      batchedWrapped(2),
+      batchedWrapped(3),
+      batchedWrapped(3),
+      batchedWrapped(4),
+      batchedWrapped(5),
+      batchedWrapped(6),
+    ])
+    const results2 = await Promise.all([batchedWrapped(6), batchedWrapped(7), batchedWrapped(8)])
 
-        const batched = batchedQuery({
-            fetch,
-            inputKey: it => it,
-            outputKey: it => it / 2,
-            maxBatchSize: 2,
-        })
-
-        const batchedWrapped = async (item: number) => {
-            log.push(`[start] batched() ${item}`)
-
-            const res = await batched(client, item)
-
-            log.push(`[end] batched() ${item} => ${res}`)
-
-            return res
-        }
-
-        const results = await Promise.all([
-            batchedWrapped(1),
-            batchedWrapped(2),
-            batchedWrapped(3),
-            batchedWrapped(3),
-            batchedWrapped(4),
-            batchedWrapped(5),
-            batchedWrapped(6),
-        ])
-        const results2 = await Promise.all([batchedWrapped(6), batchedWrapped(7), batchedWrapped(8)])
-
-        expect(results).toEqual([2, 4, 6, 6, 8, 10, 12])
-        expect(results2).toEqual([12, 14, 16])
-        expect(log).toMatchInlineSnapshot(`
+    expect(results).toEqual([2, 4, 6, 6, 8, 10, 12])
+    expect(results2).toEqual([12, 14, 16])
+    expect(log).toMatchInlineSnapshot(`
           [
             "[start] batched() 1",
             "[start] fetch() 1",
@@ -159,53 +159,53 @@ describe('batchedQuery', () => {
             "[end] batched() 8 => 16",
           ]
         `)
+  })
+
+  it('should correctly do concurrent requests', async () => {
+    const log: string[] = []
+
+    const fetch = async (client: ITelegramClient, items: number[]) => {
+      log.push(`[start] fetch() ${items.join(', ')}`)
+
+      await sleep(10)
+
+      log.push(`[end] fetch() ${items.join(', ')}`)
+
+      return items.map(it => it * 2)
+    }
+
+    const batched = batchedQuery({
+      fetch,
+      inputKey: it => it,
+      outputKey: it => it / 2,
+      maxBatchSize: 2,
+      maxConcurrent: 2,
     })
 
-    it('should correctly do concurrent requests', async () => {
-        const log: string[] = []
+    const batchedWrapped = async (item: number) => {
+      log.push(`[start] batched() ${item}`)
 
-        const fetch = async (client: ITelegramClient, items: number[]) => {
-            log.push(`[start] fetch() ${items.join(', ')}`)
+      const res = await batched(client, item)
 
-            await sleep(10)
+      log.push(`[end] batched() ${item} => ${res}`)
 
-            log.push(`[end] fetch() ${items.join(', ')}`)
+      return res
+    }
 
-            return items.map(it => it * 2)
-        }
+    const results = await Promise.all([
+      batchedWrapped(1),
+      batchedWrapped(2),
+      batchedWrapped(3),
+      batchedWrapped(3),
+      batchedWrapped(4),
+      batchedWrapped(5),
+      batchedWrapped(6),
+    ])
+    const results2 = await Promise.all([batchedWrapped(6), batchedWrapped(7), batchedWrapped(8)])
 
-        const batched = batchedQuery({
-            fetch,
-            inputKey: it => it,
-            outputKey: it => it / 2,
-            maxBatchSize: 2,
-            maxConcurrent: 2,
-        })
-
-        const batchedWrapped = async (item: number) => {
-            log.push(`[start] batched() ${item}`)
-
-            const res = await batched(client, item)
-
-            log.push(`[end] batched() ${item} => ${res}`)
-
-            return res
-        }
-
-        const results = await Promise.all([
-            batchedWrapped(1),
-            batchedWrapped(2),
-            batchedWrapped(3),
-            batchedWrapped(3),
-            batchedWrapped(4),
-            batchedWrapped(5),
-            batchedWrapped(6),
-        ])
-        const results2 = await Promise.all([batchedWrapped(6), batchedWrapped(7), batchedWrapped(8)])
-
-        expect(results).toEqual([2, 4, 6, 6, 8, 10, 12])
-        expect(results2).toEqual([12, 14, 16])
-        expect(log).toMatchInlineSnapshot(`
+    expect(results).toEqual([2, 4, 6, 6, 8, 10, 12])
+    expect(results2).toEqual([12, 14, 16])
+    expect(log).toMatchInlineSnapshot(`
           [
             "[start] batched() 1",
             "[start] fetch() 1",
@@ -243,56 +243,56 @@ describe('batchedQuery', () => {
             "[end] batched() 8 => 16",
           ]
         `)
+  })
+
+  it('should correctly handle errors', async () => {
+    const log: string[] = []
+
+    const fetch = async (client: ITelegramClient, items: number[]) => {
+      log.push(`[start] fetch() ${items.join(', ')}`)
+
+      await sleep(10)
+
+      if (items.includes(2)) {
+        log.push(`[error] fetch() ${items.join(', ')}`)
+        throw new Error('test')
+      }
+
+      log.push(`[end] fetch() ${items.join(', ')}`)
+
+      return items.map(it => it * 2)
+    }
+
+    const batched = batchedQuery({
+      fetch,
+      inputKey: it => it,
+      outputKey: it => it / 2,
+      maxBatchSize: 2,
     })
 
-    it('should correctly handle errors', async () => {
-        const log: string[] = []
+    const batchedWrapped = async (item: number) => {
+      log.push(`[start] batched() ${item}`)
 
-        const fetch = async (client: ITelegramClient, items: number[]) => {
-            log.push(`[start] fetch() ${items.join(', ')}`)
+      let res
 
-            await sleep(10)
+      try {
+        res = await batched(client, item)
+      } catch (e) {
+        log.push(`[error] batched() ${item} => ${(e as Error).message}`)
 
-            if (items.includes(2)) {
-                log.push(`[error] fetch() ${items.join(', ')}`)
-                throw new Error('test')
-            }
+        return null
+      }
 
-            log.push(`[end] fetch() ${items.join(', ')}`)
+      log.push(`[end] batched() ${item} => ${res}`)
 
-            return items.map(it => it * 2)
-        }
+      return res
+    }
 
-        const batched = batchedQuery({
-            fetch,
-            inputKey: it => it,
-            outputKey: it => it / 2,
-            maxBatchSize: 2,
-        })
+    const res = await Promise.all([batchedWrapped(1), batchedWrapped(2), batchedWrapped(3)])
 
-        const batchedWrapped = async (item: number) => {
-            log.push(`[start] batched() ${item}`)
-
-            let res
-
-            try {
-                res = await batched(client, item)
-            } catch (e) {
-                log.push(`[error] batched() ${item} => ${(e as Error).message}`)
-
-                return null
-            }
-
-            log.push(`[end] batched() ${item} => ${res}`)
-
-            return res
-        }
-
-        const res = await Promise.all([batchedWrapped(1), batchedWrapped(2), batchedWrapped(3)])
-
-        // second batch will fail entirely because of an error in one of the items.
-        expect(res).toEqual([2, null, null])
-        expect(log).toMatchInlineSnapshot(`
+    // second batch will fail entirely because of an error in one of the items.
+    expect(res).toEqual([2, null, null])
+    expect(log).toMatchInlineSnapshot(`
           [
             "[start] batched() 1",
             "[start] fetch() 1",
@@ -306,55 +306,55 @@ describe('batchedQuery', () => {
             "[error] batched() 3 => test",
           ]
         `)
+  })
+
+  it('should not share state across clients', async () => {
+    const client2 = new StubTelegramClient()
+    client2.log.prefix = '[2]'
+
+    const log: string[] = []
+
+    const fetch = async (client: ITelegramClient, items: number[]) => {
+      log.push(`[start] ${client.log.prefix} fetch() ${items.join(', ')}`)
+
+      await sleep(10)
+
+      log.push(`[end] ${client.log.prefix} fetch() ${items.join(', ')}`)
+
+      return items.map(it => it * 2)
+    }
+
+    const batched = batchedQuery({
+      fetch,
+      inputKey: it => it,
+      outputKey: it => it / 2,
     })
 
-    it('should not share state across clients', async () => {
-        const client2 = new StubTelegramClient()
-        client2.log.prefix = '[2]'
+    const batchedWrapped = async (item: number, client_ = client) => {
+      log.push(`[start] ${client_.log.prefix} batched() ${item}`)
 
-        const log: string[] = []
+      const res = await batched(client_, item)
 
-        const fetch = async (client: ITelegramClient, items: number[]) => {
-            log.push(`[start] ${client.log.prefix} fetch() ${items.join(', ')}`)
+      log.push(`[end] ${client_.log.prefix} batched() ${item} => ${res}`)
 
-            await sleep(10)
+      return res
+    }
 
-            log.push(`[end] ${client.log.prefix} fetch() ${items.join(', ')}`)
+    const results = await Promise.all([
+      batchedWrapped(1),
+      batchedWrapped(2),
+      batchedWrapped(3),
+      batchedWrapped(3, client2),
+      batchedWrapped(4, client2),
+      batchedWrapped(5),
+      batchedWrapped(6, client2),
+    ])
+    const results2 = await Promise.all([batchedWrapped(6, client2), batchedWrapped(7), batchedWrapped(8, client2)])
 
-            return items.map(it => it * 2)
-        }
+    expect(results).toEqual([2, 4, 6, 6, 8, 10, 12])
+    expect(results2).toEqual([12, 14, 16])
 
-        const batched = batchedQuery({
-            fetch,
-            inputKey: it => it,
-            outputKey: it => it / 2,
-        })
-
-        const batchedWrapped = async (item: number, client_ = client) => {
-            log.push(`[start] ${client_.log.prefix} batched() ${item}`)
-
-            const res = await batched(client_, item)
-
-            log.push(`[end] ${client_.log.prefix} batched() ${item} => ${res}`)
-
-            return res
-        }
-
-        const results = await Promise.all([
-            batchedWrapped(1),
-            batchedWrapped(2),
-            batchedWrapped(3),
-            batchedWrapped(3, client2),
-            batchedWrapped(4, client2),
-            batchedWrapped(5),
-            batchedWrapped(6, client2),
-        ])
-        const results2 = await Promise.all([batchedWrapped(6, client2), batchedWrapped(7), batchedWrapped(8, client2)])
-
-        expect(results).toEqual([2, 4, 6, 6, 8, 10, 12])
-        expect(results2).toEqual([12, 14, 16])
-
-        expect(log).toMatchInlineSnapshot(`
+    expect(log).toMatchInlineSnapshot(`
           [
             "[start] [1] batched() 1",
             "[start] [1] fetch() 1",
@@ -392,51 +392,51 @@ describe('batchedQuery', () => {
             "[end] [2] batched() 8 => 16",
           ]
         `)
+  })
+
+  it('should correctly handle fetcher omitting some items', async () => {
+    const log: string[] = []
+
+    const fetch = async (client: ITelegramClient, items: number[]) => {
+      log.push(`[start] fetch() ${items.join(', ')}`)
+
+      await sleep(10)
+
+      log.push(`[end] fetch() ${items.join(', ')}`)
+
+      return items.filter(it => it !== 6).map(it => it * 2)
+    }
+
+    const batched = batchedQuery({
+      fetch,
+      inputKey: it => it,
+      outputKey: it => it / 2,
     })
 
-    it('should correctly handle fetcher omitting some items', async () => {
-        const log: string[] = []
+    const batchedWrapped = async (item: number) => {
+      log.push(`[start] batched() ${item}`)
 
-        const fetch = async (client: ITelegramClient, items: number[]) => {
-            log.push(`[start] fetch() ${items.join(', ')}`)
+      const res = await batched(client, item)
 
-            await sleep(10)
+      log.push(`[end] batched() ${item} => ${res}`)
 
-            log.push(`[end] fetch() ${items.join(', ')}`)
+      return res
+    }
 
-            return items.filter(it => it !== 6).map(it => it * 2)
-        }
+    const results = await Promise.all([
+      batchedWrapped(1),
+      batchedWrapped(2),
+      batchedWrapped(3),
+      batchedWrapped(3),
+      batchedWrapped(4),
+      batchedWrapped(5),
+      batchedWrapped(6),
+    ])
+    const results2 = await Promise.all([batchedWrapped(6), batchedWrapped(7), batchedWrapped(8)])
 
-        const batched = batchedQuery({
-            fetch,
-            inputKey: it => it,
-            outputKey: it => it / 2,
-        })
-
-        const batchedWrapped = async (item: number) => {
-            log.push(`[start] batched() ${item}`)
-
-            const res = await batched(client, item)
-
-            log.push(`[end] batched() ${item} => ${res}`)
-
-            return res
-        }
-
-        const results = await Promise.all([
-            batchedWrapped(1),
-            batchedWrapped(2),
-            batchedWrapped(3),
-            batchedWrapped(3),
-            batchedWrapped(4),
-            batchedWrapped(5),
-            batchedWrapped(6),
-        ])
-        const results2 = await Promise.all([batchedWrapped(6), batchedWrapped(7), batchedWrapped(8)])
-
-        expect(results).toEqual([2, 4, 6, 6, 8, 10, null])
-        expect(results2).toEqual([null, 14, 16])
-        expect(log).toMatchInlineSnapshot(`
+    expect(results).toEqual([2, 4, 6, 6, 8, 10, null])
+    expect(results2).toEqual([null, 14, 16])
+    expect(log).toMatchInlineSnapshot(`
           [
             "[start] batched() 1",
             "[start] fetch() 1",
@@ -468,56 +468,56 @@ describe('batchedQuery', () => {
             "[end] batched() 8 => 16",
           ]
         `)
+  })
+
+  it('should correctly retry failed batches one by one entirely', async () => {
+    const log: string[] = []
+
+    const fetch = async (client: ITelegramClient, items: number[]) => {
+      log.push(`[start] fetch() ${items.join(', ')}`)
+
+      await sleep(10)
+
+      if (items.includes(2)) {
+        log.push(`[error] fetch() ${items.join(', ')}`)
+        throw new Error('test')
+      }
+
+      log.push(`[end] fetch() ${items.join(', ')}`)
+
+      return items.map(it => it * 2)
+    }
+
+    const batched = batchedQuery({
+      fetch,
+      inputKey: it => it,
+      outputKey: it => it / 2,
+      maxBatchSize: 2,
+      retrySingleOnError: () => true,
     })
 
-    it('should correctly retry failed batches one by one entirely', async () => {
-        const log: string[] = []
+    const batchedWrapped = async (item: number) => {
+      log.push(`[start] batched() ${item}`)
 
-        const fetch = async (client: ITelegramClient, items: number[]) => {
-            log.push(`[start] fetch() ${items.join(', ')}`)
+      let res
 
-            await sleep(10)
+      try {
+        res = await batched(client, item)
+      } catch (e) {
+        log.push(`[error] batched() ${item} => ${(e as Error).message}`)
 
-            if (items.includes(2)) {
-                log.push(`[error] fetch() ${items.join(', ')}`)
-                throw new Error('test')
-            }
+        return null
+      }
 
-            log.push(`[end] fetch() ${items.join(', ')}`)
+      log.push(`[end] batched() ${item} => ${res}`)
 
-            return items.map(it => it * 2)
-        }
+      return res
+    }
 
-        const batched = batchedQuery({
-            fetch,
-            inputKey: it => it,
-            outputKey: it => it / 2,
-            maxBatchSize: 2,
-            retrySingleOnError: () => true,
-        })
+    const res = await Promise.all([batchedWrapped(1), batchedWrapped(2), batchedWrapped(3)])
 
-        const batchedWrapped = async (item: number) => {
-            log.push(`[start] batched() ${item}`)
-
-            let res
-
-            try {
-                res = await batched(client, item)
-            } catch (e) {
-                log.push(`[error] batched() ${item} => ${(e as Error).message}`)
-
-                return null
-            }
-
-            log.push(`[end] batched() ${item} => ${res}`)
-
-            return res
-        }
-
-        const res = await Promise.all([batchedWrapped(1), batchedWrapped(2), batchedWrapped(3)])
-
-        expect(res).toEqual([2, null, 6])
-        expect(log).toMatchInlineSnapshot(`
+    expect(res).toEqual([2, null, 6])
+    expect(log).toMatchInlineSnapshot(`
           [
             "[start] batched() 1",
             "[start] fetch() 1",
@@ -535,55 +535,55 @@ describe('batchedQuery', () => {
             "[end] batched() 3 => 6",
           ]
         `)
+  })
+
+  it('should correctly retry failed batches one by one partially', async () => {
+    const log: string[] = []
+
+    const fetch = async (client: ITelegramClient, items: number[]) => {
+      log.push(`[start] fetch() ${items.join(', ')}`)
+
+      await sleep(10)
+
+      if (items.includes(2) || items.includes(4)) {
+        log.push(`[error] fetch() ${items.join(', ')}`)
+        throw new Error('test')
+      }
+
+      log.push(`[end] fetch() ${items.join(', ')}`)
+
+      return items.map(it => it * 2)
+    }
+
+    const batched = batchedQuery({
+      fetch,
+      inputKey: it => it,
+      outputKey: it => it / 2,
+      retrySingleOnError: () => [3, 4],
     })
 
-    it('should correctly retry failed batches one by one partially', async () => {
-        const log: string[] = []
+    const batchedWrapped = async (item: number) => {
+      log.push(`[start] batched() ${item}`)
 
-        const fetch = async (client: ITelegramClient, items: number[]) => {
-            log.push(`[start] fetch() ${items.join(', ')}`)
+      let res
 
-            await sleep(10)
+      try {
+        res = await batched(client, item)
+      } catch (e) {
+        log.push(`[error] batched() ${item} => ${(e as Error).message}`)
 
-            if (items.includes(2) || items.includes(4)) {
-                log.push(`[error] fetch() ${items.join(', ')}`)
-                throw new Error('test')
-            }
+        return null
+      }
 
-            log.push(`[end] fetch() ${items.join(', ')}`)
+      log.push(`[end] batched() ${item} => ${res}`)
 
-            return items.map(it => it * 2)
-        }
+      return res
+    }
 
-        const batched = batchedQuery({
-            fetch,
-            inputKey: it => it,
-            outputKey: it => it / 2,
-            retrySingleOnError: () => [3, 4],
-        })
+    const res = await Promise.all([batchedWrapped(1), batchedWrapped(2), batchedWrapped(3), batchedWrapped(4)])
 
-        const batchedWrapped = async (item: number) => {
-            log.push(`[start] batched() ${item}`)
-
-            let res
-
-            try {
-                res = await batched(client, item)
-            } catch (e) {
-                log.push(`[error] batched() ${item} => ${(e as Error).message}`)
-
-                return null
-            }
-
-            log.push(`[end] batched() ${item} => ${res}`)
-
-            return res
-        }
-
-        const res = await Promise.all([batchedWrapped(1), batchedWrapped(2), batchedWrapped(3), batchedWrapped(4)])
-
-        expect(res).toEqual([2, null, 6, null])
-        expect(log).toMatchInlineSnapshot(`
+    expect(res).toEqual([2, null, 6, null])
+    expect(log).toMatchInlineSnapshot(`
           [
             "[start] batched() 1",
             "[start] fetch() 1",
@@ -603,5 +603,5 @@ describe('batchedQuery', () => {
             "[error] batched() 4 => test",
           ]
         `)
-    })
+  })
 })

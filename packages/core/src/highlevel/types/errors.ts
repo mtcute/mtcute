@@ -11,13 +11,13 @@ export class MtPeerNotFoundError extends MtcuteError {}
  * Could not find a message by the provided information
  */
 export class MtMessageNotFoundError extends MtcuteError {
-    constructor(
-        readonly peerId: number,
-        readonly messageId: number,
-        readonly context?: string,
-    ) {
-        super(`Message${context ? ` ${context}` : ''} ${messageId} not found in ${peerId}`)
-    }
+  constructor(
+    readonly peerId: number,
+    readonly messageId: number,
+    readonly context?: string,
+  ) {
+    super(`Message${context ? ` ${context}` : ''} ${messageId} not found in ${peerId}`)
+  }
 }
 
 /**
@@ -28,9 +28,9 @@ export class MtMessageNotFoundError extends MtcuteError {
  * while providing another chat as `userId`
  */
 export class MtInvalidPeerTypeError extends MtcuteError {
-    constructor(peer: InputPeerLike, expected: string) {
-        super(`Provided identifier ${JSON.stringify(peer)} is not a ${expected}`)
-    }
+  constructor(peer: InputPeerLike, expected: string) {
+    super(`Provided identifier ${JSON.stringify(peer)} is not a ${expected}`)
+  }
 }
 
 /**
@@ -38,7 +38,7 @@ export class MtInvalidPeerTypeError extends MtcuteError {
  * contain that information.
  */
 export class MtEmptyError extends MtcuteError {
-    constructor() {
-        super('Property is not available on an empty object')
-    }
+  constructor() {
+    super('Property is not available on an empty object')
+  }
 }

@@ -19,25 +19,25 @@ import { resolvePeer } from '../users/resolve-peer.js'
  *     and passing `{}` (empty object) will lift any restrictions
  */
 export async function setChatDefaultPermissions(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    restrictions: Omit<tl.RawChatBannedRights, '_' | 'untilDate'>,
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  restrictions: Omit<tl.RawChatBannedRights, '_' | 'untilDate'>,
 ): Promise<Chat> {
-    const peer = await resolvePeer(client, chatId)
+  const peer = await resolvePeer(client, chatId)
 
-    const res = await client.call({
-        _: 'messages.editChatDefaultBannedRights',
-        peer,
-        bannedRights: {
-            _: 'chatBannedRights',
-            untilDate: 0,
-            ...restrictions,
-        },
-    })
+  const res = await client.call({
+    _: 'messages.editChatDefaultBannedRights',
+    peer,
+    bannedRights: {
+      _: 'chatBannedRights',
+      untilDate: 0,
+      ...restrictions,
+    },
+  })
 
-    assertIsUpdatesGroup('messages.editChatDefaultBannedRights', res)
+  assertIsUpdatesGroup('messages.editChatDefaultBannedRights', res)
 
-    client.handleClientUpdate(res)
+  client.handleClientUpdate(res)
 
-    return new Chat(res.chats[0])
+  return new Chat(res.chats[0])
 }

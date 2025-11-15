@@ -9,15 +9,15 @@ import { resolveUser } from '../users/resolve-peer.js'
  * Sets a menu button for the given user.
  */
 export async function setBotMenuButton(
-    client: ITelegramClient,
-    user: InputPeerLike,
-    button: tl.TypeBotMenuButton,
+  client: ITelegramClient,
+  user: InputPeerLike,
+  button: tl.TypeBotMenuButton,
 ): Promise<void> {
-    const r = await client.call({
-        _: 'bots.setBotMenuButton',
-        userId: await resolveUser(client, user),
-        button,
-    })
+  const r = await client.call({
+    _: 'bots.setBotMenuButton',
+    userId: await resolveUser(client, user),
+    button,
+  })
 
-    assertTrue('bots.setBotMenuButton', r)
+  assertTrue('bots.setBotMenuButton', r)
 }

@@ -9,32 +9,32 @@ import { BotChatJoinRequestUpdate } from '@mtcute/core'
  * This is a subclass of {@link BotChatJoinRequestUpdate}, so all its fields are also available.
  */
 export class ChatJoinRequestUpdateContext
-    extends BotChatJoinRequestUpdate
-    implements UpdateContext<BotChatJoinRequestUpdate> {
-    readonly _name = 'bot_chat_join_request' as const
+  extends BotChatJoinRequestUpdate
+  implements UpdateContext<BotChatJoinRequestUpdate> {
+  readonly _name = 'bot_chat_join_request' as const
 
-    constructor(
-        readonly client: TelegramClient,
-        update: BotChatJoinRequestUpdate,
-    ) {
-        super(update.raw, update._peers)
-    }
+  constructor(
+    readonly client: TelegramClient,
+    update: BotChatJoinRequestUpdate,
+  ) {
+    super(update.raw, update._peers)
+  }
 
-    /** Approve the request */
-    approve(): Promise<void> {
-        return this.client.hideJoinRequest({
-            action: 'approve',
-            user: this.user.inputPeer,
-            chatId: this.chat.inputPeer,
-        })
-    }
+  /** Approve the request */
+  approve(): Promise<void> {
+    return this.client.hideJoinRequest({
+      action: 'approve',
+      user: this.user.inputPeer,
+      chatId: this.chat.inputPeer,
+    })
+  }
 
-    /** Decline the request */
-    decline(): Promise<void> {
-        return this.client.hideJoinRequest({
-            action: 'decline',
-            user: this.user.inputPeer,
-            chatId: this.chat.inputPeer,
-        })
-    }
+  /** Decline the request */
+  decline(): Promise<void> {
+    return this.client.hideJoinRequest({
+      action: 'decline',
+      user: this.user.inputPeer,
+      chatId: this.chat.inputPeer,
+    })
+  }
 }

@@ -18,36 +18,36 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @returns  Reactions to corresponding messages, or `null` if there are none
  */
 export async function getMessageReactionsById(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    messages: number[],
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  messages: number[],
 ): Promise<(MessageReactions | null)[]> {
-    const res = await client.call({
-        _: 'messages.getMessagesReactions',
-        peer: await resolvePeer(client, chatId),
-        id: messages,
-    })
+  const res = await client.call({
+    _: 'messages.getMessagesReactions',
+    peer: await resolvePeer(client, chatId),
+    id: messages,
+  })
 
-    assertIsUpdatesGroup('messages.getMessagesReactions', res)
-    client.handleClientUpdate(res)
+  assertIsUpdatesGroup('messages.getMessagesReactions', res)
+  client.handleClientUpdate(res)
 
-    // normally the group contains updateMessageReactions
-    // for each message requested that has reactions
-    //
-    // these updates are not ordered in any way, so
-    // we don't need to pass them to updates engine
+  // normally the group contains updateMessageReactions
+  // for each message requested that has reactions
+  //
+  // these updates are not ordered in any way, so
+  // we don't need to pass them to updates engine
 
-    const index: Record<number, MessageReactions> = {}
+  const index: Record<number, MessageReactions> = {}
 
-    const peers = PeersIndex.from(res)
+  const peers = PeersIndex.from(res)
 
-    for (const update of res.updates) {
-        assertTypeIs('messages.getMessagesReactions', update, 'updateMessageReactions')
+  for (const update of res.updates) {
+    assertTypeIs('messages.getMessagesReactions', update, 'updateMessageReactions')
 
-        index[update.msgId] = new MessageReactions(update.msgId, getMarkedPeerId(update.peer), update.reactions, peers)
-    }
+    index[update.msgId] = new MessageReactions(update.msgId, getMarkedPeerId(update.peer), update.reactions, peers)
+  }
 
-    return messages.map(messageId => index[messageId] ?? null)
+  return messages.map(messageId => index[messageId] ?? null)
 }
 
 /**
@@ -64,12 +64,12 @@ export async function getMessageReactionsById(
  * @returns  Reactions to corresponding messages, or `null` if there are none
  */
 export async function getMessageReactions(
-    client: ITelegramClient,
-    messages: Message[],
+  client: ITelegramClient,
+  messages: Message[],
 ): Promise<(MessageReactions | null)[]> {
-    return getMessageReactionsById(
-        client,
-        messages[0].chat.inputPeer,
-        messages.map(it => it.id),
-    )
+  return getMessageReactionsById(
+    client,
+    messages[0].chat.inputPeer,
+    messages.map(it => it.id),
+  )
 }

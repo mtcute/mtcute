@@ -3,28 +3,28 @@ import type { tl } from '@mtcute/tl'
 import type { InputFileLike } from '../../files/utils.js'
 
 import type {
-    CaptionMixin,
-    InputMediaAudio,
-    InputMediaAuto,
-    InputMediaContact,
-    InputMediaDice,
-    InputMediaDocument,
-    InputMediaGame,
-    InputMediaGeo,
-    InputMediaGeoLive,
-    InputMediaInvoice,
-    InputMediaLike,
-    InputMediaPaidMedia,
-    InputMediaPhoto,
-    InputMediaPoll,
-    InputMediaQuiz,
-    InputMediaSticker,
-    InputMediaStory,
-    InputMediaTodoList,
-    InputMediaVenue,
-    InputMediaVideo,
-    InputMediaVoice,
-    InputMediaWebpage,
+  CaptionMixin,
+  InputMediaAudio,
+  InputMediaAuto,
+  InputMediaContact,
+  InputMediaDice,
+  InputMediaDocument,
+  InputMediaGame,
+  InputMediaGeo,
+  InputMediaGeoLive,
+  InputMediaInvoice,
+  InputMediaLike,
+  InputMediaPaidMedia,
+  InputMediaPhoto,
+  InputMediaPoll,
+  InputMediaQuiz,
+  InputMediaSticker,
+  InputMediaStory,
+  InputMediaTodoList,
+  InputMediaVenue,
+  InputMediaVideo,
+  InputMediaVoice,
+  InputMediaWebpage,
 } from './types.js'
 
 /** Omit `type` and `file` from the given type */
@@ -37,12 +37,12 @@ export type OmitTypeAndFile<T extends InputMediaLike, K extends keyof T = never>
  * @param params  Additional parameters
  */
 export function animation(file: InputFileLike, params: OmitTypeAndFile<InputMediaVideo> = {}): InputMediaVideo {
-    const ret = params as tl.Mutable<InputMediaVideo>
-    ret.type = 'video'
-    ret.file = file
-    ret.isAnimated = true
+  const ret = params as tl.Mutable<InputMediaVideo>
+  ret.type = 'video'
+  ret.file = file
+  ret.isAnimated = true
 
-    return ret
+  return ret
 }
 
 /**
@@ -52,11 +52,11 @@ export function animation(file: InputFileLike, params: OmitTypeAndFile<InputMedi
  * @param params  Additional parameters
  */
 export function audio(file: InputFileLike, params: OmitTypeAndFile<InputMediaAudio> = {}): InputMediaAudio {
-    const ret = params as tl.Mutable<InputMediaAudio>
-    ret.type = 'audio'
-    ret.file = file
+  const ret = params as tl.Mutable<InputMediaAudio>
+  ret.type = 'audio'
+  ret.file = file
 
-    return ret
+  return ret
 }
 
 /**
@@ -66,11 +66,11 @@ export function audio(file: InputFileLike, params: OmitTypeAndFile<InputMediaAud
  * @param params  Additional parameters
  */
 export function document(file: InputFileLike, params: OmitTypeAndFile<InputMediaDocument> = {}): InputMediaDocument {
-    const ret = params as tl.Mutable<InputMediaDocument>
-    ret.type = 'document'
-    ret.file = file
+  const ret = params as tl.Mutable<InputMediaDocument>
+  ret.type = 'document'
+  ret.file = file
 
-    return ret
+  return ret
 }
 
 /**
@@ -80,11 +80,11 @@ export function document(file: InputFileLike, params: OmitTypeAndFile<InputMedia
  * @param params  Additional parameters
  */
 export function photo(file: InputFileLike, params: OmitTypeAndFile<InputMediaPhoto> = {}): InputMediaPhoto {
-    const ret = params as tl.Mutable<InputMediaPhoto>
-    ret.type = 'photo'
-    ret.file = file
+  const ret = params as tl.Mutable<InputMediaPhoto>
+  ret.type = 'photo'
+  ret.file = file
 
-    return ret
+  return ret
 }
 
 /**
@@ -94,11 +94,11 @@ export function photo(file: InputFileLike, params: OmitTypeAndFile<InputMediaPho
  * @param params  Additional parameters
  */
 export function video(file: InputFileLike, params: OmitTypeAndFile<InputMediaVideo> = {}): InputMediaVideo {
-    const ret = params as tl.Mutable<InputMediaVideo>
-    ret.type = 'video'
-    ret.file = file
+  const ret = params as tl.Mutable<InputMediaVideo>
+  ret.type = 'video'
+  ret.file = file
 
-    return ret
+  return ret
 }
 
 /**
@@ -108,11 +108,11 @@ export function video(file: InputFileLike, params: OmitTypeAndFile<InputMediaVid
  * @param params  Additional parameters
  */
 export function voice(file: InputFileLike, params: OmitTypeAndFile<InputMediaVoice> = {}): InputMediaVoice {
-    const ret = params as tl.Mutable<InputMediaVoice>
-    ret.type = 'voice'
-    ret.file = file
+  const ret = params as tl.Mutable<InputMediaVoice>
+  ret.type = 'voice'
+  ret.file = file
 
-    return ret
+  return ret
 }
 
 /**
@@ -122,11 +122,11 @@ export function voice(file: InputFileLike, params: OmitTypeAndFile<InputMediaVoi
  * @param params  Additional parameters
  */
 export function sticker(file: InputFileLike, params: OmitTypeAndFile<InputMediaSticker> = {}): InputMediaSticker {
-    const ret = params as tl.Mutable<InputMediaSticker>
-    ret.type = 'sticker'
-    ret.file = file
+  const ret = params as tl.Mutable<InputMediaSticker>
+  ret.type = 'sticker'
+  ret.file = file
 
-    return ret
+  return ret
 }
 
 /**
@@ -135,10 +135,10 @@ export function sticker(file: InputFileLike, params: OmitTypeAndFile<InputMediaS
  * @param params  Venue parameters
  */
 export function venue(params: OmitTypeAndFile<InputMediaVenue>): InputMediaVenue {
-    const ret = params as tl.Mutable<InputMediaVenue>
-    ret.type = 'venue'
+  const ret = params as tl.Mutable<InputMediaVenue>
+  ret.type = 'venue'
 
-    return ret
+  return ret
 }
 
 /**
@@ -149,16 +149,16 @@ export function venue(params: OmitTypeAndFile<InputMediaVenue>): InputMediaVenue
  * @param params  Additional parameters
  */
 export function geo(
-    latitude: number,
-    longitude: number,
-    params: OmitTypeAndFile<InputMediaGeo, 'latitude' | 'longitude'> = {},
+  latitude: number,
+  longitude: number,
+  params: OmitTypeAndFile<InputMediaGeo, 'latitude' | 'longitude'> = {},
 ): InputMediaGeo {
-    const ret = params as tl.Mutable<InputMediaGeo>
-    ret.type = 'geo'
-    ret.latitude = latitude
-    ret.longitude = longitude
+  const ret = params as tl.Mutable<InputMediaGeo>
+  ret.type = 'geo'
+  ret.latitude = latitude
+  ret.longitude = longitude
 
-    return ret
+  return ret
 }
 
 /**
@@ -169,16 +169,16 @@ export function geo(
  * @param params  Additional parameters
  */
 export function geoLive(
-    latitude: number,
-    longitude: number,
-    params: OmitTypeAndFile<InputMediaGeoLive, 'latitude' | 'longitude'> = {},
+  latitude: number,
+  longitude: number,
+  params: OmitTypeAndFile<InputMediaGeoLive, 'latitude' | 'longitude'> = {},
 ): InputMediaGeoLive {
-    const ret = params as tl.Mutable<InputMediaGeoLive>
-    ret.type = 'geo_live'
-    ret.latitude = latitude
-    ret.longitude = longitude
+  const ret = params as tl.Mutable<InputMediaGeoLive>
+  ret.type = 'geo_live'
+  ret.latitude = latitude
+  ret.longitude = longitude
 
-    return ret
+  return ret
 }
 
 /**
@@ -191,11 +191,11 @@ export function geoLive(
  * @param params  Additional parameters
  */
 export function dice(emoji: string, params: CaptionMixin): InputMediaDice {
-    const ret = params as tl.Mutable<InputMediaDice>
-    ret.type = 'dice'
-    ret.emoji = emoji
+  const ret = params as tl.Mutable<InputMediaDice>
+  ret.type = 'dice'
+  ret.emoji = emoji
 
-    return ret
+  return ret
 }
 
 /**
@@ -204,10 +204,10 @@ export function dice(emoji: string, params: CaptionMixin): InputMediaDice {
  * @param params  Contact parameters
  */
 export function contact(params: OmitTypeAndFile<InputMediaContact>): InputMediaContact {
-    const ret = params as tl.Mutable<InputMediaContact>
-    ret.type = 'contact'
+  const ret = params as tl.Mutable<InputMediaContact>
+  ret.type = 'contact'
 
-    return ret
+  return ret
 }
 
 /**
@@ -216,10 +216,10 @@ export function contact(params: OmitTypeAndFile<InputMediaContact>): InputMediaC
  * @param game  Game short name or TL object representing one
  */
 export function game(game: string | tl.TypeInputGame): InputMediaGame {
-    return {
-        type: 'game',
-        game,
-    }
+  return {
+    type: 'game',
+    game,
+  }
 }
 
 /**
@@ -228,10 +228,10 @@ export function game(game: string | tl.TypeInputGame): InputMediaGame {
  * @param params  Invoice parameters
  */
 export function invoice(params: OmitTypeAndFile<InputMediaInvoice>): InputMediaInvoice {
-    const ret = params as tl.Mutable<InputMediaInvoice>
-    ret.type = 'invoice'
+  const ret = params as tl.Mutable<InputMediaInvoice>
+  ret.type = 'invoice'
 
-    return ret
+  return ret
 }
 
 /**
@@ -240,10 +240,10 @@ export function invoice(params: OmitTypeAndFile<InputMediaInvoice>): InputMediaI
  * @param params  Poll parameters
  */
 export function poll(params: OmitTypeAndFile<InputMediaPoll>): InputMediaPoll {
-    const ret = params as tl.Mutable<InputMediaPoll>
-    ret.type = 'poll'
+  const ret = params as tl.Mutable<InputMediaPoll>
+  ret.type = 'poll'
 
-    return ret
+  return ret
 }
 
 /**
@@ -252,10 +252,10 @@ export function poll(params: OmitTypeAndFile<InputMediaPoll>): InputMediaPoll {
  * @param params  Quiz parameters
  */
 export function quiz(params: OmitTypeAndFile<InputMediaQuiz>): InputMediaQuiz {
-    const ret = params as tl.Mutable<InputMediaQuiz>
-    ret.type = 'quiz'
+  const ret = params as tl.Mutable<InputMediaQuiz>
+  ret.type = 'quiz'
 
-    return ret
+  return ret
 }
 
 /**
@@ -264,10 +264,10 @@ export function quiz(params: OmitTypeAndFile<InputMediaQuiz>): InputMediaQuiz {
  * @param params  Story parameters
  */
 export function story(params: OmitTypeAndFile<InputMediaStory>): InputMediaStory {
-    const ret = params as tl.Mutable<InputMediaStory>
-    ret.type = 'story'
+  const ret = params as tl.Mutable<InputMediaStory>
+  ret.type = 'story'
 
-    return ret
+  return ret
 }
 
 /**
@@ -277,25 +277,25 @@ export function story(params: OmitTypeAndFile<InputMediaStory>): InputMediaStory
  * @param params  Additional parameters
  */
 export function webpage(url: string, params: OmitTypeAndFile<InputMediaWebpage, 'url'> = {}): InputMediaWebpage {
-    const ret = params as tl.Mutable<InputMediaWebpage>
-    ret.type = 'webpage'
-    ret.url = url
+  const ret = params as tl.Mutable<InputMediaWebpage>
+  ret.type = 'webpage'
+  ret.url = url
 
-    return ret
+  return ret
 }
 
 export function paid(params: OmitTypeAndFile<InputMediaPaidMedia>): InputMediaPaidMedia {
-    const ret = params as tl.Mutable<InputMediaPaidMedia>
-    ret.type = 'paid'
+  const ret = params as tl.Mutable<InputMediaPaidMedia>
+  ret.type = 'paid'
 
-    return ret
+  return ret
 }
 
 export function todo(params: OmitTypeAndFile<InputMediaTodoList>): InputMediaTodoList {
-    const ret = params as tl.Mutable<InputMediaTodoList>
-    ret.type = 'todo'
+  const ret = params as tl.Mutable<InputMediaTodoList>
+  ret.type = 'todo'
 
-    return ret
+  return ret
 }
 
 /**
@@ -310,9 +310,9 @@ export function todo(params: OmitTypeAndFile<InputMediaTodoList>): InputMediaTod
  * @param params  Additional parameters
  */
 export function auto(file: InputFileLike, params: OmitTypeAndFile<InputMediaAuto> = {}): InputMediaAuto {
-    const ret = params as tl.Mutable<InputMediaAuto>
-    ret.type = 'auto'
-    ret.file = file
+  const ret = params as tl.Mutable<InputMediaAuto>
+  ret.type = 'auto'
+  ret.file = file
 
-    return ret
+  return ret
 }

@@ -9,11 +9,11 @@ import { BoostSlot } from '../../types/premium/boost-slot.js'
  * as well as the slots that can be used to boost other channels.
  */
 export async function getMyBoostSlots(client: ITelegramClient): Promise<BoostSlot[]> {
-    const res = await client.call({
-        _: 'premium.getMyBoosts',
-    })
+  const res = await client.call({
+    _: 'premium.getMyBoosts',
+  })
 
-    const peers = PeersIndex.from(res)
+  const peers = PeersIndex.from(res)
 
-    return res.myBoosts.map(it => new BoostSlot(it, peers))
+  return res.myBoosts.map(it => new BoostSlot(it, peers))
 }

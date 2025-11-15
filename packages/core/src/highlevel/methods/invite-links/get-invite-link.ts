@@ -10,17 +10,17 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param link  The invite link
  */
 export async function getInviteLink(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    link: string,
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  link: string,
 ): Promise<ChatInviteLink> {
-    const res = await client.call({
-        _: 'messages.getExportedChatInvite',
-        peer: await resolvePeer(client, chatId),
-        link,
-    })
+  const res = await client.call({
+    _: 'messages.getExportedChatInvite',
+    peer: await resolvePeer(client, chatId),
+    link,
+  })
 
-    const peers = PeersIndex.from(res)
+  const peers = PeersIndex.from(res)
 
-    return new ChatInviteLink(res.invite, peers)
+  return new ChatInviteLink(res.invite, peers)
 }

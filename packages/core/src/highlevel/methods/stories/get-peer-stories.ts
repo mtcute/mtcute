@@ -9,12 +9,12 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param peerId  Peer ID whose stories to fetch
  */
 export async function getPeerStories(client: ITelegramClient, peerId: InputPeerLike): Promise<PeerStories> {
-    const res = await client.call({
-        _: 'stories.getPeerStories',
-        peer: await resolvePeer(client, peerId),
-    })
+  const res = await client.call({
+    _: 'stories.getPeerStories',
+    peer: await resolvePeer(client, peerId),
+  })
 
-    const peers = PeersIndex.from(res)
+  const peers = PeersIndex.from(res)
 
-    return new PeerStories(res.stories, peers)
+  return new PeerStories(res.stories, peers)
 }

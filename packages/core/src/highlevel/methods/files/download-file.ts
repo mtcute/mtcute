@@ -12,8 +12,8 @@ import type { FileDownloadLocation, FileDownloadParameters } from '../../types/i
  * @param params  File download parameters
  */
 declare function downloadToFile(
-    client: ITelegramClient,
-    filename: string,
-    location: FileDownloadLocation,
-    params?: FileDownloadParameters,
+  client: ITelegramClient,
+  filename: string,
+  location: FileDownloadLocation,
+  params?: FileDownloadParameters,
 ): Promise<void>

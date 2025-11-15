@@ -12,29 +12,29 @@ import { downloadAsIterable } from '@mtcute/core/methods.js'
  * @param params  File download parameters
  */
 export async function downloadToFile(
-    client: ITelegramClient,
-    filename: string,
-    location: FileDownloadLocation,
-    params?: FileDownloadParameters,
+  client: ITelegramClient,
+  filename: string,
+  location: FileDownloadLocation,
+  params?: FileDownloadParameters,
 ): Promise<void> {
-    if (location instanceof FileLocation && ArrayBuffer.isView(location.location)) {
-        // early return for inline files
-        await Bun.write(filename, location.location)
-    }
+  if (location instanceof FileLocation && ArrayBuffer.isView(location.location)) {
+    // early return for inline files
+    await Bun.write(filename, location.location)
+  }
 
-    const output = Bun.file(filename).writer()
+  const output = Bun.file(filename).writer()
 
-    if (params?.abortSignal) {
-        params.abortSignal.addEventListener('abort', () => {
-            client.log.debug('aborting file download %s - cleaning up', filename)
-            Promise.resolve(output.end()).catch(() => {})
-            unlinkSync(filename)
-        })
-    }
+  if (params?.abortSignal) {
+    params.abortSignal.addEventListener('abort', () => {
+      client.log.debug('aborting file download %s - cleaning up', filename)
+      Promise.resolve(output.end()).catch(() => {})
+      unlinkSync(filename)
+    })
+  }
 
-    for await (const chunk of downloadAsIterable(client, location, params)) {
-        output.write(chunk)
-    }
+  for await (const chunk of downloadAsIterable(client, location, params)) {
+    output.write(chunk)
+  }
 
-    await output.end()
+  await output.end()
 }

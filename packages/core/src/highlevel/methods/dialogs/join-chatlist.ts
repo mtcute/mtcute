@@ -18,40 +18,40 @@ import { getChatlistPreview } from './get-chatlist-preview.js'
  * @returns  Folder representing the chatlist
  */
 export async function joinChatlist(
-    client: ITelegramClient,
-    link: string,
-    params?: {
-        /** Chats to join from the chatlist (all by default) */
-        peers?: MaybeArray<InputPeerLike>
-    },
+  client: ITelegramClient,
+  link: string,
+  params?: {
+    /** Chats to join from the chatlist (all by default) */
+    peers?: MaybeArray<InputPeerLike>
+  },
 ): Promise<tl.RawDialogFilterChatlist> {
-    let peers: tl.TypeInputPeer[]
+  let peers: tl.TypeInputPeer[]
 
-    if (params?.peers) {
-        const inputs = Array.isArray(params.peers) ? params.peers : [params.peers]
-        const all = await resolvePeerMany(client, inputs)
-        peers = all.filter(isPresent)
-    } else {
-        const preview = await getChatlistPreview(client, link)
-        peers = preview.chats.filter(it => !(it.type === 'chat' && it.isBanned)).map(it => it.inputPeer)
-    }
+  if (params?.peers) {
+    const inputs = Array.isArray(params.peers) ? params.peers : [params.peers]
+    const all = await resolvePeerMany(client, inputs)
+    peers = all.filter(isPresent)
+  } else {
+    const preview = await getChatlistPreview(client, link)
+    peers = preview.chats.filter(it => !(it.type === 'chat' && it.isBanned)).map(it => it.inputPeer)
+  }
 
-    const res = await client.call({
-        _: 'chatlists.joinChatlistInvite',
-        slug: link,
-        peers,
-    })
+  const res = await client.call({
+    _: 'chatlists.joinChatlistInvite',
+    slug: link,
+    peers,
+  })
 
-    assertIsUpdatesGroup('joinChatlist', res)
-    client.handleClientUpdate(res)
+  assertIsUpdatesGroup('joinChatlist', res)
+  client.handleClientUpdate(res)
 
-    const filter = res.updates.find(it => it._ === 'updateDialogFilter') as tl.RawUpdateDialogFilter
+  const filter = res.updates.find(it => it._ === 'updateDialogFilter') as tl.RawUpdateDialogFilter
 
-    if (!filter?.filter) {
-        throw new MtTypeAssertionError('joinChatlist', 'updateDialogFilter', 'nothing')
-    }
+  if (!filter?.filter) {
+    throw new MtTypeAssertionError('joinChatlist', 'updateDialogFilter', 'nothing')
+  }
 
-    assertTypeIs('joinChatlist', filter.filter, 'dialogFilterChatlist')
+  assertTypeIs('joinChatlist', filter.filter, 'dialogFilterChatlist')
 
-    return filter.filter
+  return filter.filter
 }

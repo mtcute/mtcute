@@ -13,156 +13,156 @@ create table if not exists ${MIGRATIONS_TABLE_NAME} (
 type MigrationFunction = (db: ISqliteDatabase) => void
 
 export abstract class BaseSqliteStorageDriver extends BaseStorageDriver {
-    db!: ISqliteDatabase
+  db!: ISqliteDatabase
 
-    private _pending: [ISqliteStatement, unknown[]][] = []
-    private _runMany!: (stmts: [ISqliteStatement, unknown[]][]) => void
-    private _cleanup?: () => void
+  private _pending: [ISqliteStatement, unknown[]][] = []
+  private _runMany!: (stmts: [ISqliteStatement, unknown[]][]) => void
+  private _cleanup?: () => void
 
-    private _migrations: Map<string, Map<number, MigrationFunction>> = new Map()
-    private _maxVersion: Map<string, number> = new Map()
+  private _migrations: Map<string, Map<number, MigrationFunction>> = new Map()
+  private _maxVersion: Map<string, number> = new Map()
 
-    // todo: remove in 1.0.0
-    private _legacyMigrations: Map<string, MigrationFunction> = new Map()
+  // todo: remove in 1.0.0
+  private _legacyMigrations: Map<string, MigrationFunction> = new Map()
 
-    registerLegacyMigration(repo: string, migration: MigrationFunction): void {
-        if (this.loaded) {
-            throw new Error('Cannot register migrations after loading')
-        }
-
-        this._legacyMigrations.set(repo, migration)
+  registerLegacyMigration(repo: string, migration: MigrationFunction): void {
+    if (this.loaded) {
+      throw new Error('Cannot register migrations after loading')
     }
 
-    registerMigration(repo: string, version: number, migration: MigrationFunction): void {
-        if (this.loaded) {
-            throw new Error('Cannot register migrations after loading')
-        }
+    this._legacyMigrations.set(repo, migration)
+  }
 
-        let map = this._migrations.get(repo)
-
-        if (!map) {
-            map = new Map()
-            this._migrations.set(repo, map)
-        }
-
-        if (map.has(version)) {
-            throw new Error(`Migration for ${repo} version ${version} is already registered`)
-        }
-
-        map.set(version, migration)
-
-        const prevMax = this._maxVersion.get(repo) ?? 0
-
-        if (version > prevMax) {
-            this._maxVersion.set(repo, version)
-        }
+  registerMigration(repo: string, version: number, migration: MigrationFunction): void {
+    if (this.loaded) {
+      throw new Error('Cannot register migrations after loading')
     }
 
-    private _onLoad = new Set<(db: ISqliteDatabase) => void>()
+    let map = this._migrations.get(repo)
 
-    onLoad(cb: (db: ISqliteDatabase) => void): void {
-        if (this.loaded) {
-            cb(this.db)
-        } else {
-            this._onLoad.add(cb)
-        }
+    if (!map) {
+      map = new Map()
+      this._migrations.set(repo, map)
     }
 
-    _writeLater(stmt: ISqliteStatement, params: unknown[]): void {
-        this._pending.push([stmt, params])
+    if (map.has(version)) {
+      throw new Error(`Migration for ${repo} version ${version} is already registered`)
     }
 
-    private _runLegacyMigrations = false
+    map.set(version, migration)
 
-    _initialize(): void {
-        const hasLegacyTables = this.db
-            .prepare("select name from sqlite_master where type = 'table' and name = 'kv'")
-            .get()
+    const prevMax = this._maxVersion.get(repo) ?? 0
 
-        if (hasLegacyTables) {
-            this._log.info('legacy tables detected, will run migrations')
-            this._runLegacyMigrations = true
-        }
+    if (version > prevMax) {
+      this._maxVersion.set(repo, version)
+    }
+  }
 
-        this.db.exec(MIGRATIONS_TABLE_SQL)
+  private _onLoad = new Set<(db: ISqliteDatabase) => void>()
 
-        const writeVersion = this.db.prepare(
-            `insert or replace into ${MIGRATIONS_TABLE_NAME} (repo, version) values (?, ?)`,
-        )
-        const getVersion = this.db.prepare(`select version from ${MIGRATIONS_TABLE_NAME} where repo = ?`)
+  onLoad(cb: (db: ISqliteDatabase) => void): void {
+    if (this.loaded) {
+      cb(this.db)
+    } else {
+      this._onLoad.add(cb)
+    }
+  }
 
-        const didUpgrade = new Set<string>()
+  _writeLater(stmt: ISqliteStatement, params: unknown[]): void {
+    this._pending.push([stmt, params])
+  }
 
-        for (const repo of this._migrations.keys()) {
-            const res = getVersion.get(repo) as { version: number } | undefined
+  private _runLegacyMigrations = false
 
-            const startVersion = res?.version ?? 0
-            let fromVersion = startVersion
+  _initialize(): void {
+    const hasLegacyTables = this.db
+      .prepare("select name from sqlite_master where type = 'table' and name = 'kv'")
+      .get()
 
-            const migrations = this._migrations.get(repo)!
-            const targetVer = this._maxVersion.get(repo)!
-
-            while (fromVersion < targetVer) {
-                const nextVersion = fromVersion + 1
-                const migration = migrations.get(nextVersion)
-
-                if (!migration) {
-                    throw new Error(`No migration for ${repo} to version ${nextVersion}`)
-                }
-
-                migration(this.db)
-
-                fromVersion = nextVersion
-                didUpgrade.add(repo)
-            }
-
-            if (fromVersion !== startVersion) {
-                writeVersion.run(repo, targetVer)
-            }
-        }
+    if (hasLegacyTables) {
+      this._log.info('legacy tables detected, will run migrations')
+      this._runLegacyMigrations = true
     }
 
-    abstract _createDatabase(): ISqliteDatabase
+    this.db.exec(MIGRATIONS_TABLE_SQL)
 
-    async _load(): Promise<void> {
-        this.db = this._createDatabase()
+    const writeVersion = this.db.prepare(
+      `insert or replace into ${MIGRATIONS_TABLE_NAME} (repo, version) values (?, ?)`,
+    )
+    const getVersion = this.db.prepare(`select version from ${MIGRATIONS_TABLE_NAME} where repo = ?`)
 
-        this._runMany = this.db.transaction((stmts: [ISqliteStatement, unknown[]][]) => {
-            stmts.forEach((stmt) => {
-                stmt[0].run(stmt[1])
-            })
-        })
+    const didUpgrade = new Set<string>()
 
-        this.db.transaction(() => this._initialize())()
+    for (const repo of this._migrations.keys()) {
+      const res = getVersion.get(repo) as { version: number } | undefined
 
-        this._cleanup = this._platform.beforeExit(() => {
-            this._save()
-            this._destroy()
-        })
-        for (const cb of this._onLoad) cb(this.db)
+      const startVersion = res?.version ?? 0
+      let fromVersion = startVersion
 
-        if (this._runLegacyMigrations) {
-            this.db.transaction(() => {
-                for (const migration of this._legacyMigrations.values()) {
-                    migration(this.db)
-                }
+      const migrations = this._migrations.get(repo)!
+      const targetVer = this._maxVersion.get(repo)!
 
-                // in case _writeLater was used
-                this._runMany(this._pending)
-            })()
+      while (fromVersion < targetVer) {
+        const nextVersion = fromVersion + 1
+        const migration = migrations.get(nextVersion)
+
+        if (!migration) {
+          throw new Error(`No migration for ${repo} to version ${nextVersion}`)
         }
+
+        migration(this.db)
+
+        fromVersion = nextVersion
+        didUpgrade.add(repo)
+      }
+
+      if (fromVersion !== startVersion) {
+        writeVersion.run(repo, targetVer)
+      }
     }
+  }
 
-    _save(): void {
-        if (!this._pending.length) return
+  abstract _createDatabase(): ISqliteDatabase
 
+  async _load(): Promise<void> {
+    this.db = this._createDatabase()
+
+    this._runMany = this.db.transaction((stmts: [ISqliteStatement, unknown[]][]) => {
+      stmts.forEach((stmt) => {
+        stmt[0].run(stmt[1])
+      })
+    })
+
+    this.db.transaction(() => this._initialize())()
+
+    this._cleanup = this._platform.beforeExit(() => {
+      this._save()
+      this._destroy()
+    })
+    for (const cb of this._onLoad) cb(this.db)
+
+    if (this._runLegacyMigrations) {
+      this.db.transaction(() => {
+        for (const migration of this._legacyMigrations.values()) {
+          migration(this.db)
+        }
+
+        // in case _writeLater was used
         this._runMany(this._pending)
-        this._pending = []
+      })()
     }
+  }
 
-    _destroy(): void {
-        this.db.close()
-        this._cleanup?.()
-        this._cleanup = undefined
-    }
+  _save(): void {
+    if (!this._pending.length) return
+
+    this._runMany(this._pending)
+    this._pending = []
+  }
+
+  _destroy(): void {
+    this.db.close()
+    this._cleanup?.()
+    this._cleanup = undefined
+  }
 }

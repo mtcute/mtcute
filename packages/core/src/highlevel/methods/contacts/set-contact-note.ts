@@ -1,7 +1,8 @@
 import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike, InputText } from '../../types/index.js'
 import { assertTrue } from '../../../utils/index.js'
 import { resolveUser } from '../../methods.js'
-import { type InputPeerLike, type InputText, inputTextToTl } from '../../types/index.js'
+import { inputTextToTl } from '../../types/index.js'
 
 /**
  * Set a note for a contact
@@ -10,17 +11,17 @@ import { type InputPeerLike, type InputText, inputTextToTl } from '../../types/i
  * @param note  Note text
  */
 export async function setContactNote(
-    client: ITelegramClient,
-    userId: InputPeerLike,
-    note: InputText,
+  client: ITelegramClient,
+  userId: InputPeerLike,
+  note: InputText,
 ): Promise<void> {
-    const peer = await resolveUser(client, userId)
+  const peer = await resolveUser(client, userId)
 
-    const r = await client.call({
-        _: 'contacts.updateContactNote',
-        id: peer,
-        note: inputTextToTl(note),
-    })
+  const r = await client.call({
+    _: 'contacts.updateContactNote',
+    id: peer,
+    note: inputTextToTl(note),
+  })
 
-    assertTrue('contacts.updateContactNote', r)
+  assertTrue('contacts.updateContactNote', r)
 }

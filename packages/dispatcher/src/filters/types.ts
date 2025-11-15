@@ -72,13 +72,13 @@ import type { UpdateState } from '../state/update-state.js'
 // we need the second parameter because it carries meta information
 // eslint-disable-next-line unused-imports/no-unused-vars, ts/no-empty-object-type
 export type UpdateFilter<Base, Mod = {}, State extends object = never> = (
-    update: Base,
-    state?: UpdateState<State>,
+  update: Base,
+  state?: UpdateState<State>,
 ) => MaybePromise<boolean>
 
 export type Modify<Base, Mod> = Omit<Base, keyof Mod> & Mod
 export type Invert<Base, Mod> = {
-    [P in keyof Mod & keyof Base]: Exclude<Base[P], Mod[P]>
+  [P in keyof Mod & keyof Base]: Exclude<Base[P], Mod[P]>
 }
 
 export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never
@@ -91,7 +91,7 @@ export type ExtractState<Filter> = Filter extends UpdateFilter<any, any, infer I
 
 export type TupleKeys<T extends any[]> = Exclude<keyof T, keyof []>
 export type WrapBase<T extends any[]> = {
-    [K in TupleKeys<T>]: { base: ExtractBase<T[K]> }
+  [K in TupleKeys<T>]: { base: ExtractBase<T[K]> }
 }
 export type Values<T> = T[keyof T]
 export type UnwrapBase<T> = T extends { base: any } ? T['base'] : never

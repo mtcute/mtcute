@@ -8,23 +8,23 @@ import { parseGramjsSession } from './parse.js'
 import { serializeGramjsSession } from './serialize.js'
 
 export function convertFromGramjsSession(session: GramjsSession | string): StringSessionData {
-    if (typeof session === 'string') {
-        session = parseGramjsSession(session)
-    }
+  if (typeof session === 'string') {
+    session = parseGramjsSession(session)
+  }
 
-    return convertFromTelethonSession(session)
+  return convertFromTelethonSession(session)
 }
 
 export function convertToGramjsSession(session: StringSessionData | string): string {
-    if (typeof session === 'string') {
-        session = readStringSession(session)
-    }
+  if (typeof session === 'string') {
+    session = readStringSession(session)
+  }
 
-    return serializeGramjsSession({
-        dcId: session.primaryDcs.main.id,
-        ipAddress: session.primaryDcs.main.ipAddress,
-        port: session.primaryDcs.main.port,
-        ipv6: session.primaryDcs.main.ipv6 ?? false,
-        authKey: session.authKey,
-    })
+  return serializeGramjsSession({
+    dcId: session.primaryDcs.main.id,
+    ipAddress: session.primaryDcs.main.ipAddress,
+    port: session.primaryDcs.main.port,
+    ipv6: session.primaryDcs.main.ipv6 ?? false,
+    authKey: session.authKey,
+  })
 }

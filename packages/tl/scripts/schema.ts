@@ -13,40 +13,40 @@ import { parseFullTlSchema } from '@mtcute/tl-utils'
 // }
 
 export interface TlPackedSchema {
-    // layer
-    l: number
-    // entries
-    e: TlEntry[]
-    // unions (only comments)
-    u: Record<string, string>
+  // layer
+  l: number
+  // entries
+  e: TlEntry[]
+  // unions (only comments)
+  u: Record<string, string>
 }
 
 export function packTlSchema(schema: TlFullSchema, layer: number): TlPackedSchema {
-    const ret: TlPackedSchema = {
-        l: layer,
-        e: schema.entries,
-        u: {},
+  const ret: TlPackedSchema = {
+    l: layer,
+    e: schema.entries,
+    u: {},
+  }
+
+  for (const name in schema.unions) {
+    const union = schema.unions[name]
+
+    if (union.comment) {
+      ret.u[name] = union.comment
     }
+  }
 
-    for (const name in schema.unions) {
-        const union = schema.unions[name]
-
-        if (union.comment) {
-            ret.u[name] = union.comment
-        }
-    }
-
-    return ret
+  return ret
 }
 
 export function unpackTlSchema(schema: TlPackedSchema): [TlFullSchema, number] {
-    const res = parseFullTlSchema(schema.e)
+  const res = parseFullTlSchema(schema.e)
 
-    for (const name in schema.u) {
-        if (!res.unions[name]) continue
+  for (const name in schema.u) {
+    if (!res.unions[name]) continue
 
-        res.unions[name].comment = schema.u[name]
-    }
+    res.unions[name].comment = schema.u[name]
+  }
 
-    return [res, schema.l]
+  return [res, schema.l]
 }

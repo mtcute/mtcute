@@ -18,58 +18,58 @@ import { _normalizeInputStarGift } from './_normalize-input-star-gift.js'
  * @returns  Service message about the upgraded gift, if one was generated.
  */
 export async function upgradeStarGift(
-    client: ITelegramClient,
-    params: {
-        gift: InputStarGift
+  client: ITelegramClient,
+  params: {
+    gift: InputStarGift
 
-        /**
-         * Whether to retain the original details of the gift
-         * (like sender, recipient, date, message)
-         */
-        keepOriginalDetails?: boolean
+    /**
+     * Whether to retain the original details of the gift
+     * (like sender, recipient, date, message)
+     */
+    keepOriginalDetails?: boolean
 
-        /**
-         * Whether to dispatch the new message event
-         * to the client's update handler.
-         */
-        shouldDispatch?: true
-    },
+    /**
+     * Whether to dispatch the new message event
+     * to the client's update handler.
+     */
+    shouldDispatch?: true
+  },
 ): Promise<Message | null> {
-    const { gift, keepOriginalDetails, shouldDispatch } = params
+  const { gift, keepOriginalDetails, shouldDispatch } = params
 
-    const invoice: tl.TypeInputInvoice = {
-        _: 'inputInvoiceStarGiftUpgrade',
-        stargift: await _normalizeInputStarGift(client, gift),
-        keepOriginalDetails,
+  const invoice: tl.TypeInputInvoice = {
+    _: 'inputInvoiceStarGiftUpgrade',
+    stargift: await _normalizeInputStarGift(client, gift),
+    keepOriginalDetails,
+  }
+
+  let updates: tl.TypeUpdates
+  try {
+    const form = await client.call({
+      _: 'payments.getPaymentForm',
+      invoice,
+    })
+
+    const res = await client.call({
+      _: 'payments.sendStarsForm',
+      invoice,
+      formId: form.formId,
+    })
+
+    assertTypeIs('payments.sendStarsForm', res, 'payments.paymentResult')
+
+    updates = res.updates
+  } catch (e) {
+    if (tl.RpcError.is(e, 'NO_PAYMENT_NEEDED')) {
+      updates = await client.call({
+        _: 'payments.upgradeStarGift',
+        stargift: invoice.stargift,
+        keepOriginalDetails: invoice.keepOriginalDetails,
+      })
+    } else {
+      throw e
     }
+  }
 
-    let updates: tl.TypeUpdates
-    try {
-        const form = await client.call({
-            _: 'payments.getPaymentForm',
-            invoice,
-        })
-
-        const res = await client.call({
-            _: 'payments.sendStarsForm',
-            invoice,
-            formId: form.formId,
-        })
-
-        assertTypeIs('payments.sendStarsForm', res, 'payments.paymentResult')
-
-        updates = res.updates
-    } catch (e) {
-        if (tl.RpcError.is(e, 'NO_PAYMENT_NEEDED')) {
-            updates = await client.call({
-                _: 'payments.upgradeStarGift',
-                stargift: invoice.stargift,
-                keepOriginalDetails: invoice.keepOriginalDetails,
-            })
-        } else {
-            throw e
-        }
-    }
-
-    return _findMessageInUpdate(client, updates, false, !shouldDispatch, true)
+  return _findMessageInUpdate(client, updates, false, !shouldDispatch, true)
 }

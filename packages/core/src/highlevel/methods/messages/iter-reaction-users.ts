@@ -15,48 +15,48 @@ import { getReactionUsers } from './get-reaction-users.js'
  * @param params
  */
 export async function* iterReactionUsers(
-    client: ITelegramClient,
-    params: Parameters<typeof getReactionUsers>[1] & {
-        /**
-         * Limit the number of events returned.
-         *
-         * @default  `Infinity`, i.e. all events are returned
-         */
-        limit?: number
+  client: ITelegramClient,
+  params: Parameters<typeof getReactionUsers>[1] & {
+    /**
+     * Limit the number of events returned.
+     *
+     * @default  `Infinity`, i.e. all events are returned
+     */
+    limit?: number
 
-        /**
-         * Chunk size, usually not needed.
-         *
-         * @default  100
-         */
-        chunkSize?: number
-    },
+    /**
+     * Chunk size, usually not needed.
+     *
+     * @default  100
+     */
+    chunkSize?: number
+  },
 ): AsyncIterableIterator<PeerReaction> {
-    const { chatId, message } = normalizeInputMessageId(params)
-    const peer = await resolvePeer(client, chatId)
+  const { chatId, message } = normalizeInputMessageId(params)
+  const peer = await resolvePeer(client, chatId)
 
-    const { limit = Infinity, chunkSize = 100 } = params
+  const { limit = Infinity, chunkSize = 100 } = params
 
-    let current = 0
-    let { offset } = params
+  let current = 0
+  let { offset } = params
 
-    const reaction = normalizeInputReaction(params.emoji)
+  const reaction = normalizeInputReaction(params.emoji)
 
-    for (;;) {
-        const res = await getReactionUsers(client, {
-            chatId: peer,
-            message,
-            emoji: reaction,
-            limit: Math.min(chunkSize, limit - current),
-            offset,
-        })
+  for (;;) {
+    const res = await getReactionUsers(client, {
+      chatId: peer,
+      message,
+      emoji: reaction,
+      limit: Math.min(chunkSize, limit - current),
+      offset,
+    })
 
-        offset = res.next
+    offset = res.next
 
-        for (const reaction of res) {
-            yield reaction
+    for (const reaction of res) {
+      yield reaction
 
-            if (++current >= limit) break
-        }
+      if (++current >= limit) break
     }
+  }
 }

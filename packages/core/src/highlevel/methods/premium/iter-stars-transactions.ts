@@ -16,46 +16,46 @@ import { getStarsTransactions } from './get-stars-transactions.js'
  * @param params  Additional parameters
  */
 export async function* iterStarsTransactions(
-    client: ITelegramClient,
-    peerId: InputPeerLike,
-    params?: Parameters<typeof getStarsTransactions>[2] & {
-        /**
-         * Total number of boosters to fetch
-         *
-         * @default  Infinity, i.e. fetch all boosters
-         */
-        limit?: number
+  client: ITelegramClient,
+  peerId: InputPeerLike,
+  params?: Parameters<typeof getStarsTransactions>[2] & {
+    /**
+     * Total number of boosters to fetch
+     *
+     * @default  Infinity, i.e. fetch all boosters
+     */
+    limit?: number
 
-        /**
-         * Number of boosters to fetch per request
-         * Usually you don't need to change this
-         *
-         * @default  100
-         */
-        chunkSize?: number
-    },
+    /**
+     * Number of boosters to fetch per request
+     * Usually you don't need to change this
+     *
+     * @default  100
+     */
+    chunkSize?: number
+  },
 ): AsyncIterableIterator<StarsTransaction> {
-    if (!params) params = {}
-    const { limit = Infinity, chunkSize = 100 } = params
+  if (!params) params = {}
+  const { limit = Infinity, chunkSize = 100 } = params
 
-    let { offset } = params
-    let current = 0
+  let { offset } = params
+  let current = 0
 
-    const peer = await resolvePeer(client, peerId)
+  const peer = await resolvePeer(client, peerId)
 
-    for (;;) {
-        const res = await getStarsTransactions(client, peer, {
-            offset,
-            limit: Math.min(limit - current, chunkSize),
-        })
+  for (;;) {
+    const res = await getStarsTransactions(client, peer, {
+      offset,
+      limit: Math.min(limit - current, chunkSize),
+    })
 
-        for (const transaction of res.transactions) {
-            yield transaction
+    for (const transaction of res.transactions) {
+      yield transaction
 
-            if (++current >= limit) return
-        }
-
-        if (!res.transactionsNextOffset) return
-        offset = res.transactionsNextOffset
+      if (++current >= limit) return
     }
+
+    if (!res.transactionsNextOffset) return
+    offset = res.transactionsNextOffset
+  }
 }

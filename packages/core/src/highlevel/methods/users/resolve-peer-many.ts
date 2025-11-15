@@ -20,9 +20,9 @@ import { resolvePeer } from './resolve-peer.js'
  * @param normalizer  Normalization function
  */
 export async function resolvePeerMany<T extends tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel>(
-    client: ITelegramClient,
-    peerIds: InputPeerLike[],
-    normalizer: (obj: tl.TypeInputPeer) => T | null,
+  client: ITelegramClient,
+  peerIds: InputPeerLike[],
+  normalizer: (obj: tl.TypeInputPeer) => T | null,
 ): Promise<T[]>
 
 /**
@@ -35,61 +35,61 @@ export async function resolvePeerMany<T extends tl.TypeInputPeer | tl.TypeInputU
  * @param peerIds  Peer Ids
  */
 export async function resolvePeerMany(
-    client: ITelegramClient,
-    peerIds: InputPeerLike[],
+  client: ITelegramClient,
+  peerIds: InputPeerLike[],
 ): Promise<(tl.TypeInputPeer | null)[]>
 
 /**
  * @internal
  */
 export async function resolvePeerMany(
-    client: ITelegramClient,
-    peerIds: InputPeerLike[],
-    normalizer?: (obj: tl.TypeInputPeer) => tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | null,
+  client: ITelegramClient,
+  peerIds: InputPeerLike[],
+  normalizer?: (obj: tl.TypeInputPeer) => tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | null,
 ): Promise<(tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | null)[]> {
-    const ret: (tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | null)[] = []
+  const ret: (tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | null)[] = []
 
-    const limit = 8
+  const limit = 8
 
-    if (peerIds.length < limit) {
-        // no point in using async pool for <limit peers
-        const res = await Promise.all(
-            peerIds.map(it =>
-                resolvePeer(client, it).catch((e) => {
-                    if (e instanceof MtPeerNotFoundError) {
-                        return null
-                    }
-                    throw e
-                }),
-            ),
-        )
+  if (peerIds.length < limit) {
+    // no point in using async pool for <limit peers
+    const res = await Promise.all(
+      peerIds.map(it =>
+        resolvePeer(client, it).catch((e) => {
+          if (e instanceof MtPeerNotFoundError) {
+            return null
+          }
+          throw e
+        }),
+      ),
+    )
 
-        if (!normalizer) return res
+    if (!normalizer) return res
 
-        for (const value of res) {
-            if (!value) continue
-            const norm = normalizer(value)
+    for (const value of res) {
+      if (!value) continue
+      const norm = normalizer(value)
 
-            if (norm) {
-                ret.push(norm)
-            }
-        }
-
-        return ret
+      if (norm) {
+        ret.push(norm)
+      }
     }
 
-    return parallelMap(peerIds, async (it) => {
-        let peer
-        try {
-            peer = await resolvePeer(client, it)
-        } catch (e) {
-            if (e instanceof MtPeerNotFoundError) {
-                return null
-            }
-            throw e
-        }
+    return ret
+  }
 
-        if (normalizer) return normalizer(peer)
-        return peer
-    }, { limit })
+  return parallelMap(peerIds, async (it) => {
+    let peer
+    try {
+      peer = await resolvePeer(client, it)
+    } catch (e) {
+      if (e instanceof MtPeerNotFoundError) {
+        return null
+      }
+      throw e
+    }
+
+    if (normalizer) return normalizer(peer)
+    return peer
+  }, { limit })
 }

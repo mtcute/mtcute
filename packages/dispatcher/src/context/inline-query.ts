@@ -10,17 +10,17 @@ import { InlineQuery } from '@mtcute/core'
  * This is a subclass of {@link InlineQuery}, so all its fields are also available.
  */
 export class InlineQueryContext extends InlineQuery implements UpdateContext<InlineQuery> {
-    readonly _name = 'inline_query' as const
+  readonly _name = 'inline_query' as const
 
-    constructor(
-        readonly client: TelegramClient,
-        query: InlineQuery,
-    ) {
-        super(query.raw, query._peers)
-    }
+  constructor(
+    readonly client: TelegramClient,
+    query: InlineQuery,
+  ) {
+    super(query.raw, query._peers)
+  }
 
-    /** Answer to this inline query */
-    answer(...params: ParametersSkip1<TelegramClient['answerInlineQuery']>): Promise<void> {
-        return this.client.answerInlineQuery(this.id, ...params)
-    }
+  /** Answer to this inline query */
+  answer(...params: ParametersSkip1<TelegramClient['answerInlineQuery']>): Promise<void> {
+    return this.client.answerInlineQuery(this.id, ...params)
+  }
 }

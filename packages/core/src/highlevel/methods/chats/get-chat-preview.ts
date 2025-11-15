@@ -13,17 +13,17 @@ import { INVITE_LINK_REGEX } from '../../utils/peer-utils.js'
  *   Use {@link getChat} or {@link getFullChat} instead.
  */
 export async function getChatPreview(client: ITelegramClient, inviteLink: string): Promise<ChatPreview> {
-    const m = inviteLink.match(INVITE_LINK_REGEX)
-    if (!m) throw new MtArgumentError('Invalid invite link')
+  const m = inviteLink.match(INVITE_LINK_REGEX)
+  if (!m) throw new MtArgumentError('Invalid invite link')
 
-    const res = await client.call({
-        _: 'messages.checkChatInvite',
-        hash: m[1],
-    })
+  const res = await client.call({
+    _: 'messages.checkChatInvite',
+    hash: m[1],
+  })
 
-    if (res._ !== 'chatInvite') {
-        throw new MtPeerNotFoundError('You have already joined this chat!')
-    }
+  if (res._ !== 'chatInvite') {
+    throw new MtPeerNotFoundError('You have already joined this chat!')
+  }
 
-    return new ChatPreview(res, inviteLink)
+  return new ChatPreview(res, inviteLink)
 }

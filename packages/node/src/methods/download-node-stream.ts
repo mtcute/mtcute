@@ -10,9 +10,9 @@ import { downloadAsStream } from '@mtcute/core/methods.js'
  * @param params  File download parameters
  */
 export function downloadAsNodeStream(
-    client: ITelegramClient,
-    location: FileDownloadLocation,
-    params?: FileDownloadParameters,
+  client: ITelegramClient,
+  location: FileDownloadLocation,
+  params?: FileDownloadParameters,
 ): Readable {
-    return webReadableToNode(downloadAsStream(client, location, params))
+  return webReadableToNode(downloadAsStream(client, location, params))
 }

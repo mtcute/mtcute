@@ -9,9 +9,9 @@ import { resolveChannel } from '../users/resolve-peer.js'
  * @param chatId  Chat ID or username
  */
 export async function deleteChannel(client: ITelegramClient, chatId: InputPeerLike): Promise<void> {
-    const res = await client.call({
-        _: 'channels.deleteChannel',
-        channel: await resolveChannel(client, chatId),
-    })
-    client.handleClientUpdate(res)
+  const res = await client.call({
+    _: 'channels.deleteChannel',
+    channel: await resolveChannel(client, chatId),
+  })
+  client.handleClientUpdate(res)
 }

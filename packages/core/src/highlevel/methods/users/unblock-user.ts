@@ -10,10 +10,10 @@ import { resolvePeer } from './resolve-peer.js'
  * @param id  User ID, username or phone number
  */
 export async function unblockUser(client: ITelegramClient, id: InputPeerLike): Promise<void> {
-    const r = await client.call({
-        _: 'contacts.unblock',
-        id: await resolvePeer(client, id),
-    })
+  const r = await client.call({
+    _: 'contacts.unblock',
+    id: await resolvePeer(client, id),
+  })
 
-    assertTrue('contacts.unblock', r)
+  assertTrue('contacts.unblock', r)
 }

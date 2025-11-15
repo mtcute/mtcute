@@ -16,10 +16,10 @@ export const contacts: tl.RawInputPrivacyValueDisallowContacts = { _: 'inputPriv
  * @param users  Users to disallow
  */
 export function users(users: MaybeArray<InputPeerLike>): InputPrivacyRuleUsers {
-    return {
-        allow: false,
-        users: Array.isArray(users) ? users : [users],
-    }
+  return {
+    allow: false,
+    users: Array.isArray(users) ? users : [users],
+  }
 }
 
 /**
@@ -28,8 +28,8 @@ export function users(users: MaybeArray<InputPeerLike>): InputPrivacyRuleUsers {
  * @param chats  Chats to disallow
  */
 export function chatParticipants(chats: MaybeArray<InputPeerLike>): InputPrivacyRuleChatParticipants {
-    return {
-        allow: false,
-        chats: Array.isArray(chats) ? chats : [chats],
-    }
+  return {
+    allow: false,
+    chats: Array.isArray(chats) ? chats : [chats],
+  }
 }

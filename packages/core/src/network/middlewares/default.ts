@@ -6,10 +6,10 @@ import { floodWaiter } from './flood-waiter.js'
 import { internalErrorsHandler } from './internal-errors.js'
 
 export interface BasicMiddlewaresOptions {
-    floodWaiter?: FloodWaiterOptions
-    internalErrors?: InternalErrorsHandlerOptions
+  floodWaiter?: FloodWaiterOptions
+  internalErrors?: InternalErrorsHandlerOptions
 }
 
 export function basic(options?: BasicMiddlewaresOptions): RpcCallMiddleware[] {
-    return [floodWaiter(options?.floodWaiter ?? {}), internalErrorsHandler(options?.internalErrors ?? {})]
+  return [floodWaiter(options?.floodWaiter ?? {}), internalErrorsHandler(options?.internalErrors ?? {})]
 }

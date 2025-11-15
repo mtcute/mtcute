@@ -9,30 +9,30 @@ import { User } from '../../types/index.js'
  * @param params
  */
 export async function updateProfile(
-    client: ITelegramClient,
-    params: {
-        /**
-         * New first name
-         */
-        firstName?: string
+  client: ITelegramClient,
+  params: {
+    /**
+     * New first name
+     */
+    firstName?: string
 
-        /**
-         * New last name. Pass `''` (empty string) to remove it
-         */
-        lastName?: string
+    /**
+     * New last name. Pass `''` (empty string) to remove it
+     */
+    lastName?: string
 
-        /**
-         * New bio (max 70 chars). Pass `''` (empty string) to remove it
-         */
-        bio?: string
-    },
+    /**
+     * New bio (max 70 chars). Pass `''` (empty string) to remove it
+     */
+    bio?: string
+  },
 ): Promise<User> {
-    const res = await client.call({
-        _: 'account.updateProfile',
-        firstName: params.firstName,
-        lastName: params.lastName,
-        about: params.bio,
-    })
+  const res = await client.call({
+    _: 'account.updateProfile',
+    firstName: params.firstName,
+    lastName: params.lastName,
+    about: params.bio,
+  })
 
-    return new User(res)
+  return new User(res)
 }

@@ -2,11 +2,11 @@ import type { TlEntry } from './types.js'
 import { stringifyArgumentType } from './utils.js'
 
 function normalizeType(s: string): string {
-    return s
-        .replace(/(?<=^|\?)bytes/, 'string')
-        .replace(/</g, ' ')
-        .replace(/>/g, '')
-        .replace('int53', 'long')
+  return s
+    .replace(/(?<=^|\?)bytes/, 'string')
+    .replace(/</g, ' ')
+    .replace(/>/g, '')
+    .replace('int53', 'long')
 }
 
 /**
@@ -18,47 +18,47 @@ function normalizeType(s: string): string {
  *   (it has slightly different syntax, will not contain `true` flags, etc.)
  */
 export function writeTlEntryToString(entry: TlEntry, forIdComputation = false): string {
-    let str = entry.name
+  let str = entry.name
 
-    if (!forIdComputation && entry.id) {
-        str += `#${entry.id.toString(16)}`
+  if (!forIdComputation && entry.id) {
+    str += `#${entry.id.toString(16)}`
+  }
+
+  str += ' '
+
+  if (entry.generics) {
+    for (const g of entry.generics) {
+      if (forIdComputation) {
+        str += `${g.name}:${g.type} `
+      } else {
+        str += `{${g.name}:${g.type}} `
+      }
+    }
+  }
+
+  for (const arg of entry.arguments) {
+    if (forIdComputation && arg.typeModifiers?.predicate && arg.type === 'true') {
+      continue
     }
 
-    str += ' '
+    str += `${arg.name}:`
 
-    if (entry.generics) {
-        for (const g of entry.generics) {
-            if (forIdComputation) {
-                str += `${g.name}:${g.type} `
-            } else {
-                str += `{${g.name}:${g.type}} `
-            }
-        }
-    }
-
-    for (const arg of entry.arguments) {
-        if (forIdComputation && arg.typeModifiers?.predicate && arg.type === 'true') {
-            continue
-        }
-
-        str += `${arg.name}:`
-
-        const type = stringifyArgumentType(arg.type, arg.typeModifiers)
-
-        if (forIdComputation) {
-            str += `${normalizeType(type)} `
-        } else {
-            str += `${type} `
-        }
-    }
-
-    const type = entry.typeModifiers ? stringifyArgumentType(entry.type, entry.typeModifiers) : entry.type
+    const type = stringifyArgumentType(arg.type, arg.typeModifiers)
 
     if (forIdComputation) {
-        str += `= ${normalizeType(type)}`
+      str += `${normalizeType(type)} `
     } else {
-        str += `= ${type};`
+      str += `${type} `
     }
+  }
 
-    return str
+  const type = entry.typeModifiers ? stringifyArgumentType(entry.type, entry.typeModifiers) : entry.type
+
+  if (forIdComputation) {
+    str += `= ${normalizeType(type)}`
+  } else {
+    str += `= ${type};`
+  }
+
+  return str
 }

@@ -16,17 +16,17 @@ import { fileIdToInputDocument } from '../../utils/convert-file-id.js'
  * @returns  Modfiied sticker set
  */
 export async function deleteStickerFromSet(
-    client: ITelegramClient,
-    sticker: InputDocumentId,
+  client: ITelegramClient,
+  sticker: InputDocumentId,
 ): Promise<StickerSet> {
-    if (tdFileId.isFileIdLike(sticker)) {
-        sticker = fileIdToInputDocument(sticker)
-    }
+  if (tdFileId.isFileIdLike(sticker)) {
+    sticker = fileIdToInputDocument(sticker)
+  }
 
-    const res = await client.call({
-        _: 'stickers.removeStickerFromSet',
-        sticker,
-    })
+  const res = await client.call({
+    _: 'stickers.removeStickerFromSet',
+    sticker,
+  })
 
-    return new StickerSet(res)
+  return new StickerSet(res)
 }

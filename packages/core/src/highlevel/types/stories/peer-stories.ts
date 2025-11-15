@@ -9,35 +9,35 @@ import { parsePeer } from '../peers/index.js'
 import { Story } from './story.js'
 
 export class PeerStories {
-    constructor(
-        readonly raw: tl.RawPeerStories,
-        readonly _peers: PeersIndex,
-    ) {}
+  constructor(
+    readonly raw: tl.RawPeerStories,
+    readonly _peers: PeersIndex,
+  ) {}
 
-    /**
-     * Peer that owns these stories.
-     */
-    get peer(): Peer {
-        return parsePeer(this.raw.peer, this._peers)
-    }
+  /**
+   * Peer that owns these stories.
+   */
+  get peer(): Peer {
+    return parsePeer(this.raw.peer, this._peers)
+  }
 
-    /**
-     * ID of the last read story of this peer.
-     */
-    get maxReadId(): number {
-        return this.raw.maxReadId ?? 0
-    }
+  /**
+   * ID of the last read story of this peer.
+   */
+  get maxReadId(): number {
+    return this.raw.maxReadId ?? 0
+  }
 
-    /**
-     * List of peer stories.
-     */
-    get stories(): Story[] {
-        return this.raw.stories.map((it) => {
-            assertTypeIs('PeerStories#stories', it, 'storyItem')
+  /**
+   * List of peer stories.
+   */
+  get stories(): Story[] {
+    return this.raw.stories.map((it) => {
+      assertTypeIs('PeerStories#stories', it, 'storyItem')
 
-            return new Story(it, this._peers)
-        })
-    }
+      return new Story(it, this._peers)
+    })
+  }
 }
 
 memoizeGetters(PeerStories, ['peer', 'stories'])

@@ -10,21 +10,21 @@ import { makeArrayPaginated } from '../../utils/misc-utils.js'
  * Get the list of sticker sets that were created by the current user
  */
 export async function getMyStickerSets(
-    client: ITelegramClient,
-    params?: {
-        /** Offset for pagination */
-        offset?: Long
-        /** Limit for pagination */
-        limit?: number
-    },
+  client: ITelegramClient,
+  params?: {
+    /** Offset for pagination */
+    offset?: Long
+    /** Limit for pagination */
+    limit?: number
+  },
 ): Promise<ArrayPaginated<StickerSet, Long>> {
-    const res = await client.call({
-        _: 'messages.getMyStickers',
-        offsetId: params?.offset ?? Long.ZERO,
-        limit: params?.limit ?? 100,
-    })
+  const res = await client.call({
+    _: 'messages.getMyStickers',
+    offsetId: params?.offset ?? Long.ZERO,
+    limit: params?.limit ?? 100,
+  })
 
-    const items = res.sets.map(x => new StickerSet(x))
+  const items = res.sets.map(x => new StickerSet(x))
 
-    return makeArrayPaginated(items, res.count, items[items.length - 1]?.brief.id)
+  return makeArrayPaginated(items, res.count, items[items.length - 1]?.brief.id)
 }

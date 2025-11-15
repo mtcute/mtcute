@@ -7,28 +7,28 @@ import { deeplinkBuilder } from './common.js'
  * Used to share a prepared message and URL into a chosen chat's text field.
  */
 export const share: Deeplink<{ url: string, text?: string }> = /* #__PURE__ */ deeplinkBuilder({
-    internalBuild: ({ url, text }) => ['msg_url', { url, text }],
-    internalParse: (path, query) => {
-        if (path !== 'msg_url') return null
+  internalBuild: ({ url, text }) => ['msg_url', { url, text }],
+  internalParse: (path, query) => {
+    if (path !== 'msg_url') return null
 
-        const url = query.get('url')
-        if (!url) return null
+    const url = query.get('url')
+    if (!url) return null
 
-        const text = query.get('text')
+    const text = query.get('text')
 
-        return { url, text: text || undefined }
-    },
-    externalBuild: ({ url, text }) => ['share', { url, text }],
-    externalParse: (path, query) => {
-        if (path !== 'share') return null
+    return { url, text: text || undefined }
+  },
+  externalBuild: ({ url, text }) => ['share', { url, text }],
+  externalParse: (path, query) => {
+    if (path !== 'share') return null
 
-        const url = query.get('url')
-        if (!url) return null
+    const url = query.get('url')
+    if (!url) return null
 
-        const text = query.get('text')
+    const text = query.get('text')
 
-        return { url, text: text || undefined }
-    },
+    return { url, text: text || undefined }
+  },
 })
 
 /**
@@ -37,74 +37,74 @@ export const share: Deeplink<{ url: string, text?: string }> = /* #__PURE__ */ d
  * Used by users to boost channels, granting them the ability to post stories.
  */
 export const boost: Deeplink<{ username: string } | { channelId: number }> = /* #__PURE__ */ deeplinkBuilder({
-    internalBuild: (params) => {
-        if ('username' in params) {
-            return ['boost', { domain: params.username }]
-        }
+  internalBuild: (params) => {
+    if ('username' in params) {
+      return ['boost', { domain: params.username }]
+    }
 
-        return ['boost', { channel: params.channelId }]
-    },
-    internalParse: (path, query) => {
-        if (path !== 'boost') return null
+    return ['boost', { channel: params.channelId }]
+  },
+  internalParse: (path, query) => {
+    if (path !== 'boost') return null
 
-        const username = query.get('domain')
+    const username = query.get('domain')
 
-        if (username) {
-            return { username }
-        }
+    if (username) {
+      return { username }
+    }
 
-        const channelId = Number(query.get('channel'))
+    const channelId = Number(query.get('channel'))
 
-        if (!Number.isNaN(channelId)) {
-            return { channelId: Number(channelId) }
-        }
+    if (!Number.isNaN(channelId)) {
+      return { channelId: Number(channelId) }
+    }
 
-        return null
-    },
-    externalBuild: (params) => {
-        if ('username' in params) {
-            return [params.username, { boost: true }]
-        }
+    return null
+  },
+  externalBuild: (params) => {
+    if ('username' in params) {
+      return [params.username, { boost: true }]
+    }
 
-        return [`c/${params.channelId}`, { boost: true }]
-    },
-    externalParse: (path, query) => {
-        if (!query.has('boost')) return null
+    return [`c/${params.channelId}`, { boost: true }]
+  },
+  externalParse: (path, query) => {
+    if (!query.has('boost')) return null
 
-        if (path.startsWith('c/')) {
-            const channelId = Number(path.slice(2))
-            if (Number.isNaN(channelId)) return null
+    if (path.startsWith('c/')) {
+      const channelId = Number(path.slice(2))
+      if (Number.isNaN(channelId)) return null
 
-            return { channelId }
-        }
+      return { channelId }
+    }
 
-        if (path.includes('/')) return null
+    if (path.includes('/')) return null
 
-        return { username: path }
-    },
+    return { username: path }
+  },
 })
 
 /**
  * Link to a shared folder (chat list)
  */
 export const folder: Deeplink<{ slug: string }> = /* #__PURE__ */ deeplinkBuilder({
-    // tg://addlist?slug=XXX
-    internalBuild: ({ slug }) => ['addlist', { slug }],
-    internalParse: (path, query) => {
-        if (path !== 'addlist') return null
+  // tg://addlist?slug=XXX
+  internalBuild: ({ slug }) => ['addlist', { slug }],
+  internalParse: (path, query) => {
+    if (path !== 'addlist') return null
 
-        const slug = query.get('slug')
-        if (!slug) return null
+    const slug = query.get('slug')
+    if (!slug) return null
 
-        return { slug }
-    },
+    return { slug }
+  },
 
-    // https://t.me/addlist/XXX
-    externalBuild: ({ slug }) => [`addlist/${slug}`, null],
-    externalParse: (path) => {
-        const [prefix, slug] = path.split('/')
-        if (prefix !== 'addlist') return null
+  // https://t.me/addlist/XXX
+  externalBuild: ({ slug }) => [`addlist/${slug}`, null],
+  externalParse: (path) => {
+    const [prefix, slug] = path.split('/')
+    if (prefix !== 'addlist') return null
 
-        return { slug }
-    },
+    return { slug }
+  },
 })

@@ -1,9 +1,9 @@
 import type {
-    InlineKeyboardMarkup,
-    ReplyKeyboardForceReply,
-    ReplyKeyboardHide,
-    ReplyKeyboardMarkup,
-    ReplyMarkup,
+  InlineKeyboardMarkup,
+  ReplyKeyboardForceReply,
+  ReplyKeyboardHide,
+  ReplyKeyboardMarkup,
+  ReplyMarkup,
 } from './types.js'
 import { utf8 } from '@fuman/utils'
 
@@ -15,7 +15,7 @@ import { BotKeyboardBuilder } from './builder.js'
 
 /** Create a keyboard builder */
 export function builder(maxRowWidth?: number | null): BotKeyboardBuilder {
-    return new BotKeyboardBuilder(maxRowWidth)
+  return new BotKeyboardBuilder(maxRowWidth)
 }
 
 /**
@@ -24,10 +24,10 @@ export function builder(maxRowWidth?: number | null): BotKeyboardBuilder {
  * @param buttons  Two-dimensional array of buttons
  */
 export function inline(buttons: tl.TypeKeyboardButton[][]): InlineKeyboardMarkup {
-    return {
-        type: 'inline',
-        buttons,
-    }
+  return {
+    type: 'inline',
+    buttons,
+  }
 }
 
 /**
@@ -37,14 +37,14 @@ export function inline(buttons: tl.TypeKeyboardButton[][]): InlineKeyboardMarkup
  * @param params  Additional parameters for the keyboard
  */
 export function reply(
-    buttons: tl.TypeKeyboardButton[][],
-    params: Omit<ReplyKeyboardMarkup, 'type' | 'buttons'> = {},
+  buttons: tl.TypeKeyboardButton[][],
+  params: Omit<ReplyKeyboardMarkup, 'type' | 'buttons'> = {},
 ): ReplyKeyboardMarkup {
-    const ret = params as tl.Mutable<ReplyKeyboardMarkup>
-    ret.type = 'reply'
-    ret.buttons = buttons
+  const ret = params as tl.Mutable<ReplyKeyboardMarkup>
+  ret.type = 'reply'
+  ret.buttons = buttons
 
-    return ret
+  return ret
 }
 
 /**
@@ -56,20 +56,20 @@ export function reply(
  *      - in case this is a reply, sender of the original message
  */
 export function hideReply(selective?: boolean): ReplyKeyboardHide {
-    return {
-        type: 'reply_hide',
-        selective,
-    }
+  return {
+    type: 'reply_hide',
+    selective,
+  }
 }
 
 /**
  * Force the user to send a reply
  */
 export function forceReply(params: Omit<ReplyKeyboardForceReply, 'type'> = {}): ReplyKeyboardForceReply {
-    const ret = params as tl.Mutable<ReplyKeyboardForceReply>
-    ret.type = 'force_reply'
+  const ret = params as tl.Mutable<ReplyKeyboardForceReply>
+  ret.type = 'force_reply'
 
-    return ret
+  return ret
 }
 
 /**
@@ -80,10 +80,10 @@ export function forceReply(params: Omit<ReplyKeyboardForceReply, 'type'> = {}): 
  * @param text  Button text
  */
 export function text(text: string): tl.RawKeyboardButton {
-    return {
-        _: 'keyboardButton',
-        text,
-    }
+  return {
+    _: 'keyboardButton',
+    text,
+  }
 }
 
 /**
@@ -95,10 +95,10 @@ export function text(text: string): tl.RawKeyboardButton {
  * @param text  Button text
  */
 export function requestContact(text: string): tl.RawKeyboardButtonRequestPhone {
-    return {
-        _: 'keyboardButtonRequestPhone',
-        text,
-    }
+  return {
+    _: 'keyboardButtonRequestPhone',
+    text,
+  }
 }
 
 /**
@@ -110,10 +110,10 @@ export function requestContact(text: string): tl.RawKeyboardButtonRequestPhone {
  * @param text  Button text
  */
 export function requestGeo(text: string): tl.RawKeyboardButtonRequestGeoLocation {
-    return {
-        _: 'keyboardButtonRequestGeoLocation',
-        text,
-    }
+  return {
+    _: 'keyboardButtonRequestGeoLocation',
+    text,
+  }
 }
 
 /**
@@ -126,11 +126,11 @@ export function requestGeo(text: string): tl.RawKeyboardButtonRequestGeoLocation
  * @param quiz  If set, only quiz polls can be sent
  */
 export function requestPoll(text: string, quiz?: boolean): tl.RawKeyboardButtonRequestPoll {
-    return {
-        _: 'keyboardButtonRequestPoll',
-        text,
-        quiz,
-    }
+  return {
+    _: 'keyboardButtonRequestPoll',
+    text,
+    quiz,
+  }
 }
 
 /**
@@ -142,11 +142,11 @@ export function requestPoll(text: string, quiz?: boolean): tl.RawKeyboardButtonR
  * @param url  URL
  */
 export function url(text: string, url: string): tl.RawKeyboardButtonUrl {
-    return {
-        _: 'keyboardButtonUrl',
-        text,
-        url,
-    }
+  return {
+    _: 'keyboardButtonUrl',
+    text,
+    url,
+  }
 }
 
 /**
@@ -161,16 +161,16 @@ export function url(text: string, url: string): tl.RawKeyboardButtonUrl {
  *   See more: {@link tl.RawKeyboardButtonCallback#requiresPassword}
  */
 export function callback(
-    text: string,
-    data: string | Uint8Array,
-    requiresPassword?: boolean,
+  text: string,
+  data: string | Uint8Array,
+  requiresPassword?: boolean,
 ): tl.RawKeyboardButtonCallback {
-    return {
-        _: 'keyboardButtonCallback',
-        text,
-        requiresPassword,
-        data: typeof data === 'string' ? utf8.encoder.encode(data) : data,
-    }
+  return {
+    _: 'keyboardButtonCallback',
+    text,
+    requiresPassword,
+    data: typeof data === 'string' ? utf8.encoder.encode(data) : data,
+  }
 }
 
 /**
@@ -189,12 +189,12 @@ export function callback(
  *     and the specified inline query in the current chat's input field
  */
 export function switchInline(text: string, query = '', currentChat?: boolean): tl.RawKeyboardButtonSwitchInline {
-    return {
-        _: 'keyboardButtonSwitchInline',
-        samePeer: currentChat,
-        text,
-        query,
-    }
+  return {
+    _: 'keyboardButtonSwitchInline',
+    samePeer: currentChat,
+    text,
+    query,
+  }
 }
 
 /**
@@ -208,7 +208,7 @@ export function switchInline(text: string, query = '', currentChat?: boolean): t
  * thus this button should only be used with it.
  */
 export function game(text: string): tl.RawKeyboardButtonGame {
-    return { _: 'keyboardButtonGame', text }
+  return { _: 'keyboardButtonGame', text }
 }
 
 /**
@@ -222,7 +222,7 @@ export function game(text: string): tl.RawKeyboardButtonGame {
  * thus this button should only be used with it.
  */
 export function pay(text: string): tl.RawKeyboardButtonBuy {
-    return { _: 'keyboardButtonBuy', text }
+  return { _: 'keyboardButtonBuy', text }
 }
 
 /**
@@ -235,40 +235,40 @@ export function pay(text: string): tl.RawKeyboardButtonBuy {
  * @param params
  */
 export function urlAuth(
-    text: string,
-    url: string,
-    params: {
-        /**
-         * Button label when forwarded
-         */
-        fwdText?: string
+  text: string,
+  url: string,
+  params: {
+    /**
+     * Button label when forwarded
+     */
+    fwdText?: string
 
-        /**
-         * Whether to request the permission for
-         * your bot to send messages to the user
-         */
-        requestWriteAccess?: boolean
+    /**
+     * Whether to request the permission for
+     * your bot to send messages to the user
+     */
+    requestWriteAccess?: boolean
 
-        /**
-         * Bot, which will be used for user authorization.
-         * `url` domain must be the same as the domain linked
-         * with the bot.
-         *
-         * @default  current bot
-         */
-        bot?: tl.TypeInputUser
-    } = {},
+    /**
+     * Bot, which will be used for user authorization.
+     * `url` domain must be the same as the domain linked
+     * with the bot.
+     *
+     * @default  current bot
+     */
+    bot?: tl.TypeInputUser
+  } = {},
 ): tl.RawInputKeyboardButtonUrlAuth {
-    return {
-        _: 'inputKeyboardButtonUrlAuth',
-        text,
-        url,
-        bot: params.bot ?? {
-            _: 'inputUserSelf',
-        },
-        fwdText: params.fwdText,
-        requestWriteAccess: params.requestWriteAccess,
-    }
+  return {
+    _: 'inputKeyboardButtonUrlAuth',
+    text,
+    url,
+    bot: params.bot ?? {
+      _: 'inputUserSelf',
+    },
+    fwdText: params.fwdText,
+    requestWriteAccess: params.requestWriteAccess,
+  }
 }
 
 /**
@@ -280,11 +280,11 @@ export function urlAuth(
  * @param url  WebView URL
  */
 export function webView(text: string, url: string): tl.RawKeyboardButtonWebView {
-    return {
-        _: 'keyboardButtonWebView',
-        text,
-        url,
-    }
+  return {
+    _: 'keyboardButtonWebView',
+    text,
+    url,
+  }
 }
 
 /**
@@ -294,11 +294,11 @@ export function webView(text: string, url: string): tl.RawKeyboardButtonWebView 
  * @param user  User to be opened (use {@link TelegramClient.resolvePeer})
  */
 export function userProfile(text: string, user: tl.TypeInputPeer): tl.RawInputKeyboardButtonUserProfile {
-    return {
-        _: 'inputKeyboardButtonUserProfile',
-        text,
-        userId: toInputUser(user),
-    }
+  return {
+    _: 'inputKeyboardButtonUserProfile',
+    text,
+    userId: toInputUser(user),
+  }
 }
 
 /**
@@ -308,43 +308,43 @@ export function userProfile(text: string, user: tl.TypeInputPeer): tl.RawInputKe
  * @param buttonId  ID of the button that will later be passed to the service message
  */
 export function requestPeer(
-    text: string,
-    buttonId: number,
-    params: {
-        /**
-         * Peer type, along with filters
-         */
-        peerType: tl.TypeRequestPeerType
+  text: string,
+  buttonId: number,
+  params: {
+    /**
+     * Peer type, along with filters
+     */
+    peerType: tl.TypeRequestPeerType
 
-        /**
-         * Maximum number of peers to be selected
-         *
-         * @default  1
-         */
-        count?: number
-    },
+    /**
+     * Maximum number of peers to be selected
+     *
+     * @default  1
+     */
+    count?: number
+  },
 ): tl.RawKeyboardButtonRequestPeer {
-    return {
-        _: 'keyboardButtonRequestPeer',
-        text,
-        buttonId,
-        peerType: params.peerType,
-        maxQuantity: params.count ?? 1,
-    }
+  return {
+    _: 'keyboardButtonRequestPeer',
+    text,
+    buttonId,
+    peerType: params.peerType,
+    maxQuantity: params.count ?? 1,
+  }
 }
 
 /**
  * Button to copy text to the user's clipboard
  */
 export function copy(params: {
-    text: string
-    copyText?: string
+  text: string
+  copyText?: string
 }): tl.RawKeyboardButtonCopy {
-    return {
-        _: 'keyboardButtonCopy',
-        text: params.text,
-        copyText: params?.copyText ?? params.text,
-    }
+  return {
+    _: 'keyboardButtonCopy',
+    text: params.text,
+    copyText: params?.copyText ?? params.text,
+  }
 }
 
 /**
@@ -354,89 +354,89 @@ export function copy(params: {
  * @param predicate  Button text or predicate function
  */
 export function findButton(
-    buttons: tl.TypeKeyboardButton[][],
-    predicate: string | ((btn: tl.TypeKeyboardButton) => boolean),
+  buttons: tl.TypeKeyboardButton[][],
+  predicate: string | ((btn: tl.TypeKeyboardButton) => boolean),
 ): tl.TypeKeyboardButton | null {
-    if (typeof predicate === 'string') {
-        const text = predicate
+  if (typeof predicate === 'string') {
+    const text = predicate
 
-        predicate = (btn) => {
-            return 'text' in btn && btn.text === text
-        }
+    predicate = (btn) => {
+      return 'text' in btn && btn.text === text
     }
+  }
 
-    for (const row of buttons) {
-        for (const btn of row) {
-            if (predicate(btn)) {
-                return btn
-            }
-        }
+  for (const row of buttons) {
+    for (const btn of row) {
+      if (predicate(btn)) {
+        return btn
+      }
     }
+  }
 
-    return null
+  return null
 }
 
 /** @internal */
 export function _rowsTo2d(rows: tl.RawKeyboardButtonRow[]): tl.TypeKeyboardButton[][] {
-    return rows.map(it => it.buttons)
+  return rows.map(it => it.buttons)
 }
 
 /** @internal */
 export function _2dToRows(arr: tl.TypeKeyboardButton[][], inline: boolean): tl.RawKeyboardButtonRow[] {
-    return arr.map((row) => {
-        if (!inline) {
-            // le cringe
-            row = row.map(btn =>
-                btn._ === 'keyboardButtonWebView'
-                    ? {
-                        ...btn,
-                        _: 'keyboardButtonSimpleWebView',
-                    }
-                    : btn,
-            )
-        }
+  return arr.map((row) => {
+    if (!inline) {
+      // le cringe
+      row = row.map(btn =>
+        btn._ === 'keyboardButtonWebView'
+          ? {
+              ...btn,
+              _: 'keyboardButtonSimpleWebView',
+            }
+          : btn,
+      )
+    }
 
-        return {
-            _: 'keyboardButtonRow',
-            buttons: row,
-        }
-    })
+    return {
+      _: 'keyboardButtonRow',
+      buttons: row,
+    }
+  })
 }
 
 /** @internal */
 export function _convertToTl(obj?: ReplyMarkup): tl.TypeReplyMarkup | undefined {
-    if (!obj) return obj
-    if (tl.isAnyReplyMarkup(obj)) return obj
+  if (!obj) return obj
+  if (tl.isAnyReplyMarkup(obj)) return obj
 
-    switch (obj.type) {
-        case 'reply':
-            return {
-                _: 'replyKeyboardMarkup',
-                resize: obj.resize,
-                singleUse: obj.singleUse,
-                selective: obj.selective,
-                persistent: obj.persistent,
-                placeholder: obj.placeholder,
-                rows: _2dToRows(obj.buttons, false),
-            }
-        case 'reply_hide':
-            return {
-                _: 'replyKeyboardHide',
-                selective: obj.selective,
-            }
-        case 'force_reply':
-            return {
-                _: 'replyKeyboardForceReply',
-                singleUse: obj.singleUse,
-                selective: obj.selective,
-                placeholder: obj.placeholder,
-            }
-        case 'inline':
-            return {
-                _: 'replyInlineMarkup',
-                rows: _2dToRows(obj.buttons, true),
-            }
-        default:
-            assertNever(obj)
-    }
+  switch (obj.type) {
+    case 'reply':
+      return {
+        _: 'replyKeyboardMarkup',
+        resize: obj.resize,
+        singleUse: obj.singleUse,
+        selective: obj.selective,
+        persistent: obj.persistent,
+        placeholder: obj.placeholder,
+        rows: _2dToRows(obj.buttons, false),
+      }
+    case 'reply_hide':
+      return {
+        _: 'replyKeyboardHide',
+        selective: obj.selective,
+      }
+    case 'force_reply':
+      return {
+        _: 'replyKeyboardForceReply',
+        singleUse: obj.singleUse,
+        selective: obj.selective,
+        placeholder: obj.placeholder,
+      }
+    case 'inline':
+      return {
+        _: 'replyInlineMarkup',
+        rows: _2dToRows(obj.buttons, true),
+      }
+    default:
+      assertNever(obj)
+  }
 }

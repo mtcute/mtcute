@@ -15,19 +15,19 @@ import { downloadAsIterable } from './download-iterable.js'
  * @param params  File download parameters
  */
 export async function downloadAsBuffer(
-    client: ITelegramClient,
-    location: FileDownloadLocation,
-    params?: FileDownloadParameters,
+  client: ITelegramClient,
+  location: FileDownloadLocation,
+  params?: FileDownloadParameters,
 ): Promise<Uint8Array> {
-    if (location instanceof FileLocation && ArrayBuffer.isView(location.location)) {
-        return location.location
-    }
+  if (location instanceof FileLocation && ArrayBuffer.isView(location.location)) {
+    return location.location
+  }
 
-    const chunks = []
+  const chunks = []
 
-    for await (const chunk of downloadAsIterable(client, location, params)) {
-        chunks.push(chunk)
-    }
+  for await (const chunk of downloadAsIterable(client, location, params)) {
+    chunks.push(chunk)
+  }
 
-    return u8.concat(chunks)
+  return u8.concat(chunks)
 }

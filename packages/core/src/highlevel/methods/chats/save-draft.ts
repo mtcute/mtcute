@@ -11,23 +11,23 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param draft  Draft message, or `null` to delete.
  */
 export async function saveDraft(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    draft: null | Omit<tl.RawDraftMessage, '_' | 'date'>,
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  draft: null | Omit<tl.RawDraftMessage, '_' | 'date'>,
 ): Promise<void> {
-    const peer = await resolvePeer(client, chatId)
+  const peer = await resolvePeer(client, chatId)
 
-    if (draft) {
-        await client.call({
-            _: 'messages.saveDraft',
-            peer,
-            ...draft,
-        })
-    } else {
-        await client.call({
-            _: 'messages.saveDraft',
-            peer,
-            message: '',
-        })
-    }
+  if (draft) {
+    await client.call({
+      _: 'messages.saveDraft',
+      peer,
+      ...draft,
+    })
+  } else {
+    await client.call({
+      _: 'messages.saveDraft',
+      peer,
+      message: '',
+    })
+  }
 }

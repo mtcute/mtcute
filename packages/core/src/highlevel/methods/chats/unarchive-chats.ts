@@ -11,21 +11,21 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param chats  Chat ID(s), username(s), phone number(s), `"me"` or `"self"`
  */
 export async function unarchiveChats(client: ITelegramClient, chats: MaybeArray<InputPeerLike>): Promise<void> {
-    if (!Array.isArray(chats)) chats = [chats]
+  if (!Array.isArray(chats)) chats = [chats]
 
-    const folderPeers: tl.TypeInputFolderPeer[] = []
+  const folderPeers: tl.TypeInputFolderPeer[] = []
 
-    for (const chat of chats) {
-        folderPeers.push({
-            _: 'inputFolderPeer',
-            peer: await resolvePeer(client, chat),
-            folderId: 0,
-        })
-    }
-
-    const res = await client.call({
-        _: 'folders.editPeerFolders',
-        folderPeers,
+  for (const chat of chats) {
+    folderPeers.push({
+      _: 'inputFolderPeer',
+      peer: await resolvePeer(client, chat),
+      folderId: 0,
     })
-    client.handleClientUpdate(res)
+  }
+
+  const res = await client.call({
+    _: 'folders.editPeerFolders',
+    folderPeers,
+  })
+  client.handleClientUpdate(res)
 }

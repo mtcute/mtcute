@@ -4,8 +4,8 @@ import type { tl } from '@mtcute/tl'
  * Formatted text with entities
  */
 export interface TextWithEntities {
-    readonly text: string
-    readonly entities?: tl.TypeMessageEntity[]
+  readonly text: string
+  readonly entities?: tl.TypeMessageEntity[]
 }
 
 /**
@@ -23,9 +23,9 @@ export type InputText = string | TextWithEntities
  * @returns  TL object
  */
 export function inputTextToTl(text: InputText): tl.RawTextWithEntities {
-    return {
-        _: 'textWithEntities',
-        text: typeof text === 'string' ? text : text.text,
-        entities: typeof text === 'string' ? [] : text.entities ?? [],
-    }
+  return {
+    _: 'textWithEntities',
+    text: typeof text === 'string' ? text : text.text,
+    entities: typeof text === 'string' ? [] : text.entities ?? [],
+  }
 }

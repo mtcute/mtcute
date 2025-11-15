@@ -9,35 +9,35 @@ import { toReactionEmoji } from './types.js'
  * Reaction count
  */
 export class ReactionCount {
-    constructor(readonly raw: tl.RawReactionCount) {}
+  constructor(readonly raw: tl.RawReactionCount) {}
 
-    /**
-     * Emoji representing the reaction
-     */
-    get emoji(): ReactionEmoji {
-        return toReactionEmoji(this.raw.reaction)
-    }
+  /**
+   * Emoji representing the reaction
+   */
+  get emoji(): ReactionEmoji {
+    return toReactionEmoji(this.raw.reaction)
+  }
 
-    /** Whether this is a paid reaction */
-    get isPaid(): boolean {
-        return this.raw.reaction._ === 'reactionPaid'
-    }
+  /** Whether this is a paid reaction */
+  get isPaid(): boolean {
+    return this.raw.reaction._ === 'reactionPaid'
+  }
 
-    /**
-     * Number of users who reacted with this emoji
-     */
-    get count(): number {
-        return this.raw.count
-    }
+  /**
+   * Number of users who reacted with this emoji
+   */
+  get count(): number {
+    return this.raw.count
+  }
 
-    /**
-     * If the current user has reacted with this emoji,
-     * this field will contain the order in which the
-     * reaction was added.
-     */
-    get order(): number | null {
-        return this.raw.chosenOrder ?? null
-    }
+  /**
+   * If the current user has reacted with this emoji,
+   * this field will contain the order in which the
+   * reaction was added.
+   */
+  get order(): number | null {
+    return this.raw.chosenOrder ?? null
+  }
 }
 
 makeInspectable(ReactionCount)

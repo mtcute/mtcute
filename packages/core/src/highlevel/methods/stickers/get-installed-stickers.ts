@@ -12,12 +12,12 @@ import { StickerSet } from '../../types/index.js'
  * > Use {@link getStickerSet} to get a stickerset that will include the stickers
  */
 export async function getInstalledStickers(client: ITelegramClient): Promise<StickerSet[]> {
-    const res = await client.call({
-        _: 'messages.getAllStickers',
-        hash: Long.ZERO,
-    })
+  const res = await client.call({
+    _: 'messages.getAllStickers',
+    hash: Long.ZERO,
+  })
 
-    assertTypeIs('getInstalledStickers', res, 'messages.allStickers')
+  assertTypeIs('getInstalledStickers', res, 'messages.allStickers')
 
-    return res.sets.map(set => new StickerSet(set))
+  return res.sets.map(set => new StickerSet(set))
 }

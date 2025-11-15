@@ -19,22 +19,22 @@ import { sendText } from './send-text.js'
  *     To check if a post has comments, use {@link Message#replies}.hasComments
  */
 export function commentText(
-    client: ITelegramClient,
-    message: Message,
-    ...params: ParametersSkip2<typeof sendText>
+  client: ITelegramClient,
+  message: Message,
+  ...params: ParametersSkip2<typeof sendText>
 ): ReturnType<typeof sendText> {
-    if (message.chat.type !== 'chat' || message.chat.chatType !== 'channel') {
-        return replyText(client, message, ...params)
-    }
+  if (message.chat.type !== 'chat' || message.chat.chatType !== 'channel') {
+    return replyText(client, message, ...params)
+  }
 
-    if (!message.replies || !message.replies.hasComments) {
-        throw new MtArgumentError('This message does not have comments section')
-    }
+  if (!message.replies || !message.replies.hasComments) {
+    throw new MtArgumentError('This message does not have comments section')
+  }
 
-    const [text, params_ = {}] = params
-    params_.commentTo = message.id
+  const [text, params_ = {}] = params
+  params_.commentTo = message.id
 
-    return sendText(client, message.chat.inputPeer, text, params_)
+  return sendText(client, message.chat.inputPeer, text, params_)
 }
 
 /**
@@ -48,22 +48,22 @@ export function commentText(
  *     To check if a post has comments, use {@link Message#replies}.hasComments
  */
 export function commentMedia(
-    client: ITelegramClient,
-    message: Message,
-    ...params: ParametersSkip2<typeof sendMedia>
+  client: ITelegramClient,
+  message: Message,
+  ...params: ParametersSkip2<typeof sendMedia>
 ): ReturnType<typeof sendMedia> {
-    if (message.chat.type !== 'chat' || message.chat.chatType !== 'channel') {
-        return replyMedia(client, message, ...params)
-    }
+  if (message.chat.type !== 'chat' || message.chat.chatType !== 'channel') {
+    return replyMedia(client, message, ...params)
+  }
 
-    if (!message.replies || !message.replies.hasComments) {
-        throw new MtArgumentError('This message does not have comments section')
-    }
+  if (!message.replies || !message.replies.hasComments) {
+    throw new MtArgumentError('This message does not have comments section')
+  }
 
-    const [media, params_ = {}] = params
-    params_.commentTo = message.id
+  const [media, params_ = {}] = params
+  params_.commentTo = message.id
 
-    return sendMedia(client, message.chat.inputPeer, media, params_)
+  return sendMedia(client, message.chat.inputPeer, media, params_)
 }
 
 /**
@@ -77,20 +77,20 @@ export function commentMedia(
  *     To check if a post has comments, use {@link Message#replies}.hasComments
  */
 export function commentMediaGroup(
-    client: ITelegramClient,
-    message: Message,
-    ...params: ParametersSkip2<typeof sendMediaGroup>
+  client: ITelegramClient,
+  message: Message,
+  ...params: ParametersSkip2<typeof sendMediaGroup>
 ): ReturnType<typeof sendMediaGroup> {
-    if (message.chat.type !== 'chat' || message.chat.chatType !== 'channel') {
-        return replyMediaGroup(client, message, ...params)
-    }
+  if (message.chat.type !== 'chat' || message.chat.chatType !== 'channel') {
+    return replyMediaGroup(client, message, ...params)
+  }
 
-    if (!message.replies || !message.replies.hasComments) {
-        throw new MtArgumentError('This message does not have comments section')
-    }
+  if (!message.replies || !message.replies.hasComments) {
+    throw new MtArgumentError('This message does not have comments section')
+  }
 
-    const [media, params_ = {}] = params
-    params_.commentTo = message.id
+  const [media, params_ = {}] = params
+  params_.commentTo = message.id
 
-    return sendMediaGroup(client, message.chat.inputPeer, media, params_)
+  return sendMediaGroup(client, message.chat.inputPeer, media, params_)
 }

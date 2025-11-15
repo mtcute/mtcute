@@ -9,7 +9,7 @@ import { writeTlEntryToString } from './stringify.js'
  * @param entry  TL entry
  */
 export function computeConstructorIdFromEntry(entry: TlEntry): number {
-    const str = writeTlEntryToString(entry, true)
+  const str = writeTlEntryToString(entry, true)
 
-    return crc32(new TextEncoder().encode(str)) >>> 0
+  return crc32(new TextEncoder().encode(str)) >>> 0
 }

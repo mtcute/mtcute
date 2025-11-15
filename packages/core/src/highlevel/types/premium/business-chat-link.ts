@@ -8,32 +8,32 @@ import { MessageEntity } from '../messages/message-entity.js'
  * A business chat link, i.e. a link to start a chat with a pre-filled message.
  */
 export class BusinessChatLink {
-    constructor(readonly raw: tl.RawBusinessChatLink) {}
+  constructor(readonly raw: tl.RawBusinessChatLink) {}
 
-    /** The link itself */
-    get link(): string {
-        return this.raw.link
-    }
+  /** The link itself */
+  get link(): string {
+    return this.raw.link
+  }
 
-    /** Text to be inserted into the message input */
-    get text(): string {
-        return this.raw.message
-    }
+  /** Text to be inserted into the message input */
+  get text(): string {
+    return this.raw.message
+  }
 
-    /** Entities for the text */
-    get entities(): MessageEntity[] {
-        return this.raw.entities?.map(x => new MessageEntity(x)) ?? []
-    }
+  /** Entities for the text */
+  get entities(): MessageEntity[] {
+    return this.raw.entities?.map(x => new MessageEntity(x)) ?? []
+  }
 
-    /** Custom title for the link */
-    get title(): string | null {
-        return this.raw.title ?? null
-    }
+  /** Custom title for the link */
+  get title(): string | null {
+    return this.raw.title ?? null
+  }
 
-    /** Number of clicks on the link */
-    get clicks(): number {
-        return this.raw.views
-    }
+  /** Number of clicks on the link */
+  get clicks(): number {
+    return this.raw.views
+  }
 }
 
 makeInspectable(BusinessChatLink)

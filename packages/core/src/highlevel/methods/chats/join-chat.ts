@@ -17,30 +17,30 @@ import { resolveChannel } from '../users/resolve-peer.js'
  *   or ID of the linked supergroup or channel.
  */
 export async function joinChat(client: ITelegramClient, chatId: InputPeerLike): Promise<Chat> {
-    if (typeof chatId === 'string') {
-        const m = chatId.match(INVITE_LINK_REGEX)
+  if (typeof chatId === 'string') {
+    const m = chatId.match(INVITE_LINK_REGEX)
 
-        if (m) {
-            const res = await client.call({
-                _: 'messages.importChatInvite',
-                hash: m[1],
-            })
-            assertIsUpdatesGroup('messages.importChatInvite', res)
+    if (m) {
+      const res = await client.call({
+        _: 'messages.importChatInvite',
+        hash: m[1],
+      })
+      assertIsUpdatesGroup('messages.importChatInvite', res)
 
-            client.handleClientUpdate(res)
+      client.handleClientUpdate(res)
 
-            return new Chat(res.chats[0])
-        }
+      return new Chat(res.chats[0])
     }
+  }
 
-    const res = await client.call({
-        _: 'channels.joinChannel',
-        channel: await resolveChannel(client, chatId),
-    })
+  const res = await client.call({
+    _: 'channels.joinChannel',
+    channel: await resolveChannel(client, chatId),
+  })
 
-    assertIsUpdatesGroup('channels.joinChannel', res)
+  assertIsUpdatesGroup('channels.joinChannel', res)
 
-    client.handleClientUpdate(res)
+  client.handleClientUpdate(res)
 
-    return new Chat(res.chats[0])
+  return new Chat(res.chats[0])
 }

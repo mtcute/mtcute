@@ -13,36 +13,36 @@ import { assertIsUpdatesGroup } from '../../updates/utils.js'
  * @param longitude  Longitude of the location
  */
 export async function getNearbyChats(client: ITelegramClient, latitude: number, longitude: number): Promise<Chat[]> {
-    const res = await client.call({
-        _: 'contacts.getLocated',
-        geoPoint: {
-            _: 'inputGeoPoint',
-            lat: latitude,
-            long: longitude,
-        },
-    })
+  const res = await client.call({
+    _: 'contacts.getLocated',
+    geoPoint: {
+      _: 'inputGeoPoint',
+      lat: latitude,
+      long: longitude,
+    },
+  })
 
-    assertIsUpdatesGroup('contacts.getLocated', res)
-    client.handleClientUpdate(res, true)
+  assertIsUpdatesGroup('contacts.getLocated', res)
+  client.handleClientUpdate(res, true)
 
-    if (!res.updates.length) return []
+  if (!res.updates.length) return []
 
-    assertTypeIs('contacts.getLocated (@ .updates[0])', res.updates[0], 'updatePeerLocated')
+  assertTypeIs('contacts.getLocated (@ .updates[0])', res.updates[0], 'updatePeerLocated')
 
-    const chats = res.chats.map(it => new Chat(it))
+  const chats = res.chats.map(it => new Chat(it))
 
-    const index: Record<number, Chat> = {}
-    chats.forEach(c => (index[c.id] = c))
+  const index: Record<number, Chat> = {}
+  chats.forEach(c => (index[c.id] = c))
 
-    res.updates[0].peers.forEach((peer) => {
-        if (peer._ === 'peerSelfLocated') return
+  res.updates[0].peers.forEach((peer) => {
+    if (peer._ === 'peerSelfLocated') return
 
-        const id = getMarkedPeerId(peer.peer)
+    const id = getMarkedPeerId(peer.peer)
 
-        if (index[id]) {
-            (index[id] as tl.Mutable<Chat>).distance = peer.distance
-        }
-    })
+    if (index[id]) {
+      (index[id] as tl.Mutable<Chat>).distance = peer.distance
+    }
+  })
 
-    return chats
+  return chats
 }

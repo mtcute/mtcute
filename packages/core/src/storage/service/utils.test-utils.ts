@@ -8,13 +8,13 @@ import { LogManager } from '../../utils/logger.js'
 import { MemoryStorageDriver } from '../memory/driver.js'
 
 export function testServiceOptions(): ServiceOptions {
-    const logger = new LogManager(undefined, defaultPlatform)
-    logger.level = 0
+  const logger = new LogManager(undefined, defaultPlatform)
+  logger.level = 0
 
-    return {
-        driver: new MemoryStorageDriver(),
-        readerMap: __tlReaderMap,
-        writerMap: __tlWriterMap,
-        log: logger,
-    }
+  return {
+    driver: new MemoryStorageDriver(),
+    readerMap: __tlReaderMap,
+    writerMap: __tlWriterMap,
+    log: logger,
+  }
 }

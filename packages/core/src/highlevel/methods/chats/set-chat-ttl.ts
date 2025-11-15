@@ -9,9 +9,9 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param period  New TTL period, in seconds (or 0 to disable)
  */
 export async function setChatTtl(client: ITelegramClient, chatId: InputPeerLike, period: number): Promise<void> {
-    await client.call({
-        _: 'messages.setHistoryTTL',
-        peer: await resolvePeer(client, chatId),
-        period,
-    })
+  await client.call({
+    _: 'messages.setHistoryTTL',
+    peer: await resolvePeer(client, chatId),
+    period,
+  })
 }

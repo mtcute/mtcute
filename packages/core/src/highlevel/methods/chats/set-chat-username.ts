@@ -12,15 +12,15 @@ import { resolveChannel } from '../users/resolve-peer.js'
  * @param username  New username, or `null` to remove
  */
 export async function setChatUsername(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    username: string | null,
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  username: string | null,
 ): Promise<void> {
-    const r = await client.call({
-        _: 'channels.updateUsername',
-        channel: await resolveChannel(client, chatId),
-        username: username || '',
-    })
+  const r = await client.call({
+    _: 'channels.updateUsername',
+    channel: await resolveChannel(client, chatId),
+    username: username || '',
+  })
 
-    assertTrue('channels.updateUsername', r)
+  assertTrue('channels.updateUsername', r)
 }

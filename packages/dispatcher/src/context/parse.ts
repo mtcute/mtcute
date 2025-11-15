@@ -1,20 +1,20 @@
 import type {
-    BotReactionCountUpdate,
-    BotReactionUpdate,
-    BotStoppedUpdate,
-    BusinessConnection,
-    ChatJoinRequestUpdate,
-    ChatMemberUpdate,
-    DeleteBusinessMessageUpdate,
-    DeleteMessageUpdate,
-    DeleteStoryUpdate,
-    HistoryReadUpdate,
-    ParsedUpdate,
-    PollUpdate,
-    PollVoteUpdate,
-    StoryUpdate,
-    UserStatusUpdate,
-    UserTypingUpdate,
+  BotReactionCountUpdate,
+  BotReactionUpdate,
+  BotStoppedUpdate,
+  BusinessConnection,
+  ChatJoinRequestUpdate,
+  ChatMemberUpdate,
+  DeleteBusinessMessageUpdate,
+  DeleteMessageUpdate,
+  DeleteStoryUpdate,
+  HistoryReadUpdate,
+  ParsedUpdate,
+  PollUpdate,
+  PollVoteUpdate,
+  StoryUpdate,
+  UserStatusUpdate,
+  UserTypingUpdate,
 } from '@mtcute/core'
 import type { TelegramClient } from '@mtcute/core/client.js'
 
@@ -27,64 +27,64 @@ import { InlineQueryContext } from './inline-query.js'
 import { MessageContext } from './message.js'
 import { PreCheckoutQueryContext } from './pre-checkout-query.js'
 
-export type UpdateContextType =
-  | MessageContext
-  | InlineQueryContext
-  | ChosenInlineResultContext
-  | CallbackQueryContext
-  | InlineCallbackQueryContext
-  | BusinessCallbackQueryContext
-  | ChatJoinRequestUpdateContext
-  | PreCheckoutQueryContext
-  | BusinessMessageContext
-  | UpdateContextDistributed<
-    | DeleteMessageUpdate
-    | ChatMemberUpdate
-    | PollUpdate
-    | PollVoteUpdate
-    | UserStatusUpdate
-    | UserTypingUpdate
-    | HistoryReadUpdate
-    | BotStoppedUpdate
-    | ChatJoinRequestUpdate
-    | StoryUpdate
-    | DeleteStoryUpdate
-    | BotReactionUpdate
-    | BotReactionCountUpdate
-    | BusinessConnection
-    | DeleteBusinessMessageUpdate
-  >
+export type UpdateContextType
+  = | MessageContext
+    | InlineQueryContext
+    | ChosenInlineResultContext
+    | CallbackQueryContext
+    | InlineCallbackQueryContext
+    | BusinessCallbackQueryContext
+    | ChatJoinRequestUpdateContext
+    | PreCheckoutQueryContext
+    | BusinessMessageContext
+    | UpdateContextDistributed<
+      | DeleteMessageUpdate
+      | ChatMemberUpdate
+      | PollUpdate
+      | PollVoteUpdate
+      | UserStatusUpdate
+      | UserTypingUpdate
+      | HistoryReadUpdate
+      | BotStoppedUpdate
+      | ChatJoinRequestUpdate
+      | StoryUpdate
+      | DeleteStoryUpdate
+      | BotReactionUpdate
+      | BotReactionCountUpdate
+      | BusinessConnection
+      | DeleteBusinessMessageUpdate
+    >
 
 /** @internal */
 export function _parsedUpdateToContext(client: TelegramClient, update: ParsedUpdate): UpdateContextType {
-    switch (update.name) {
-        case 'new_message':
-        case 'edit_message':
-        case 'message_group':
-            return new MessageContext(client, update.data)
-        case 'inline_query':
-            return new InlineQueryContext(client, update.data)
-        case 'chosen_inline_result':
-            return new ChosenInlineResultContext(client, update.data)
-        case 'callback_query':
-            return new CallbackQueryContext(client, update.data)
-        case 'inline_callback_query':
-            return new InlineCallbackQueryContext(client, update.data)
-        case 'business_callback_query':
-            return new BusinessCallbackQueryContext(client, update.data)
-        case 'bot_chat_join_request':
-            return new ChatJoinRequestUpdateContext(client, update.data)
-        case 'pre_checkout_query':
-            return new PreCheckoutQueryContext(client, update.data)
-        case 'new_business_message':
-        case 'edit_business_message':
-        case 'business_message_group':
-            return new BusinessMessageContext(client, update.data)
-    }
+  switch (update.name) {
+    case 'new_message':
+    case 'edit_message':
+    case 'message_group':
+      return new MessageContext(client, update.data)
+    case 'inline_query':
+      return new InlineQueryContext(client, update.data)
+    case 'chosen_inline_result':
+      return new ChosenInlineResultContext(client, update.data)
+    case 'callback_query':
+      return new CallbackQueryContext(client, update.data)
+    case 'inline_callback_query':
+      return new InlineCallbackQueryContext(client, update.data)
+    case 'business_callback_query':
+      return new BusinessCallbackQueryContext(client, update.data)
+    case 'bot_chat_join_request':
+      return new ChatJoinRequestUpdateContext(client, update.data)
+    case 'pre_checkout_query':
+      return new PreCheckoutQueryContext(client, update.data)
+    case 'new_business_message':
+    case 'edit_business_message':
+    case 'business_message_group':
+      return new BusinessMessageContext(client, update.data)
+  }
 
-    const _update = update.data as UpdateContextDistributed<typeof update.data>
-    _update.client = client
-    _update._name = update.name
+  const _update = update.data as UpdateContextDistributed<typeof update.data>
+  _update.client = client
+  _update._name = update.name
 
-    return _update
+  return _update
 }

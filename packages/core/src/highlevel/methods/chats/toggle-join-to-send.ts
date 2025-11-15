@@ -12,10 +12,10 @@ import { resolveChannel } from '../users/resolve-peer.js'
  * @param enabled  Whether join-to-send setting should be enabled
  */
 export async function toggleJoinToSend(client: ITelegramClient, chatId: InputPeerLike, enabled = false): Promise<void> {
-    const res = await client.call({
-        _: 'channels.toggleJoinToSend',
-        channel: await resolveChannel(client, chatId),
-        enabled,
-    })
-    client.handleClientUpdate(res)
+  const res = await client.call({
+    _: 'channels.toggleJoinToSend',
+    channel: await resolveChannel(client, chatId),
+    enabled,
+  })
+  client.handleClientUpdate(res)
 }

@@ -12,27 +12,27 @@ import { parsePeer } from '../peers/peer.js'
 
 /** An attribute of a unique star gift containing a sticker */
 export class StarGiftUniqueAttribute {
-    constructor(
-        readonly raw: tl.RawStarGiftAttributeModel | tl.RawStarGiftAttributePattern,
-    ) {}
+  constructor(
+    readonly raw: tl.RawStarGiftAttributeModel | tl.RawStarGiftAttributePattern,
+  ) {}
 
-    /** Rarity permille of the attribute */
-    get permille(): number {
-        return this.raw.rarityPermille
-    }
+  /** Rarity permille of the attribute */
+  get permille(): number {
+    return this.raw.rarityPermille
+  }
 
-    /** Display name of the attribute */
-    get name(): string {
-        return this.raw.name
-    }
+  /** Display name of the attribute */
+  get name(): string {
+    return this.raw.name
+  }
 
-    get sticker(): Sticker {
-        assert(this.raw.document._ === 'document')
-        const parsed = parseDocument(this.raw.document)
-        assert(parsed.type === 'sticker')
+  get sticker(): Sticker {
+    assert(this.raw.document._ === 'document')
+    const parsed = parseDocument(this.raw.document)
+    assert(parsed.type === 'sticker')
 
-        return parsed
-    }
+    return parsed
+  }
 }
 
 makeInspectable(StarGiftUniqueAttribute)
@@ -40,263 +40,263 @@ memoizeGetters(StarGiftUniqueAttribute, ['sticker'])
 
 /** Information about a unique star gift's backdrop */
 export class StarGiftUniqueBackdrop {
-    constructor(
-        readonly raw: tl.RawStarGiftAttributeBackdrop,
-    ) {}
+  constructor(
+    readonly raw: tl.RawStarGiftAttributeBackdrop,
+  ) {}
 
-    /** ID of the backdrop */
-    get id(): number {
-        return this.raw.backdropId
-    }
+  /** ID of the backdrop */
+  get id(): number {
+    return this.raw.backdropId
+  }
 
-    /** Rarity permille of the attribute */
-    get permille(): number {
-        return this.raw.rarityPermille
-    }
+  /** Rarity permille of the attribute */
+  get permille(): number {
+    return this.raw.rarityPermille
+  }
 
-    /** Display name of the attribute */
-    get name(): string {
-        return this.raw.name
-    }
+  /** Display name of the attribute */
+  get name(): string {
+    return this.raw.name
+  }
 
-    get centerColor(): number {
-        return this.raw.centerColor
-    }
+  get centerColor(): number {
+    return this.raw.centerColor
+  }
 
-    get edgeColor(): number {
-        return this.raw.edgeColor
-    }
+  get edgeColor(): number {
+    return this.raw.edgeColor
+  }
 
-    get patternColor(): number {
-        return this.raw.patternColor
-    }
+  get patternColor(): number {
+    return this.raw.patternColor
+  }
 
-    get textColor(): number {
-        return this.raw.textColor
-    }
+  get textColor(): number {
+    return this.raw.textColor
+  }
 }
 makeInspectable(StarGiftUniqueBackdrop)
 
 /** Details about the original star gift */
 export class StarGiftUniqueOriginalDetails {
-    constructor(
-        readonly raw: tl.RawStarGiftAttributeOriginalDetails,
-        readonly _peers: PeersIndex,
-    ) {}
+  constructor(
+    readonly raw: tl.RawStarGiftAttributeOriginalDetails,
+    readonly _peers: PeersIndex,
+  ) {}
 
-    /**
-     * Peer who sent the original star gift, if available
-     *
-     * > Note: in some cases, {@link senderId} might be available, but not this field.
-     * > In such cases, you should try fetching the peer manually using {@link getPeer})
-     */
-    get sender(): Peer | null {
-        if (!this.raw.senderId) return null
-        if (!this._peers.has(this.raw.senderId)) return null
-        return parsePeer(this.raw.senderId, this._peers)
-    }
+  /**
+   * Peer who sent the original star gift, if available
+   *
+   * > Note: in some cases, {@link senderId} might be available, but not this field.
+   * > In such cases, you should try fetching the peer manually using {@link getPeer})
+   */
+  get sender(): Peer | null {
+    if (!this.raw.senderId) return null
+    if (!this._peers.has(this.raw.senderId)) return null
+    return parsePeer(this.raw.senderId, this._peers)
+  }
 
-    /** ID of the peer who sent the original star gift */
-    get senderId(): number | null {
-        return this.raw.senderId ? getMarkedPeerId(this.raw.senderId) : null
-    }
+  /** ID of the peer who sent the original star gift */
+  get senderId(): number | null {
+    return this.raw.senderId ? getMarkedPeerId(this.raw.senderId) : null
+  }
 
-    /**
-     * Peer who received the original star gift, if available
-     *
-     * > Note: {@link recipientId} is always available. If ID is available, but this field is null,
-     * > you should try fetching the peer manually using {@link getPeer})
-     */
-    get recipient(): Peer | null {
-        if (!this._peers.has(this.raw.recipientId)) return null
-        return parsePeer(this.raw.recipientId, this._peers)
-    }
+  /**
+   * Peer who received the original star gift, if available
+   *
+   * > Note: {@link recipientId} is always available. If ID is available, but this field is null,
+   * > you should try fetching the peer manually using {@link getPeer})
+   */
+  get recipient(): Peer | null {
+    if (!this._peers.has(this.raw.recipientId)) return null
+    return parsePeer(this.raw.recipientId, this._peers)
+  }
 
-    /** ID of the peer who received the original star gift */
-    get recipientId(): number {
-        return getMarkedPeerId(this.raw.recipientId)
-    }
+  /** ID of the peer who received the original star gift */
+  get recipientId(): number {
+    return getMarkedPeerId(this.raw.recipientId)
+  }
 
-    /** Date when the original star gift was sent */
-    get date(): Date {
-        return new Date(this.raw.date * 1000)
-    }
+  /** Date when the original star gift was sent */
+  get date(): Date {
+    return new Date(this.raw.date * 1000)
+  }
 
-    /** Message attached to the original star gift */
-    get message(): TextWithEntities | null {
-        return this.raw.message ?? null
-    }
+  /** Message attached to the original star gift */
+  get message(): TextWithEntities | null {
+    return this.raw.message ?? null
+  }
 }
 
 makeInspectable(StarGiftUniqueOriginalDetails)
 
 /** A unique star gift */
 export class StarGiftUnique {
-    readonly _model!: tl.RawStarGiftAttributeModel
-    readonly _pattern!: tl.RawStarGiftAttributePattern
-    readonly _backdrop!: tl.RawStarGiftAttributeBackdrop
-    readonly _originalDetails: tl.RawStarGiftAttributeOriginalDetails | undefined
+  readonly _model!: tl.RawStarGiftAttributeModel
+  readonly _pattern!: tl.RawStarGiftAttributePattern
+  readonly _backdrop!: tl.RawStarGiftAttributeBackdrop
+  readonly _originalDetails: tl.RawStarGiftAttributeOriginalDetails | undefined
 
-    /** Whether this gift is a unique gift */
-    readonly isUnique = true as const
+  /** Whether this gift is a unique gift */
+  readonly isUnique = true as const
 
-    constructor(
-        readonly raw: tl.RawStarGiftUnique,
-        readonly _peers: PeersIndex,
-    ) {
-        for (const attr of this.raw.attributes) {
-            if (attr._ === 'starGiftAttributeModel') {
-                this._model = attr
-            } else if (attr._ === 'starGiftAttributePattern') {
-                this._pattern = attr
-            } else if (attr._ === 'starGiftAttributeBackdrop') {
-                this._backdrop = attr
-            } else if (attr._ === 'starGiftAttributeOriginalDetails') {
-                this._originalDetails = attr
-            }
-        }
-
-        assert(this._model !== undefined)
-        assert(this._pattern !== undefined)
-        assert(this._backdrop !== undefined)
+  constructor(
+    readonly raw: tl.RawStarGiftUnique,
+    readonly _peers: PeersIndex,
+  ) {
+    for (const attr of this.raw.attributes) {
+      if (attr._ === 'starGiftAttributeModel') {
+        this._model = attr
+      } else if (attr._ === 'starGiftAttributePattern') {
+        this._pattern = attr
+      } else if (attr._ === 'starGiftAttributeBackdrop') {
+        this._backdrop = attr
+      } else if (attr._ === 'starGiftAttributeOriginalDetails') {
+        this._originalDetails = attr
+      }
     }
 
-    /** Whether this gift is available only to premium users */
-    get isPremiumOnly(): boolean {
-        return this.raw.requirePremium!
-    }
+    assert(this._model !== undefined)
+    assert(this._pattern !== undefined)
+    assert(this._backdrop !== undefined)
+  }
 
-    /** Number of the NFT */
-    get num(): number {
-        return this.raw.num
-    }
+  /** Whether this gift is available only to premium users */
+  get isPremiumOnly(): boolean {
+    return this.raw.requirePremium!
+  }
 
-    /** Title of the NFT */
-    get title(): string {
-        return this.raw.title
-    }
+  /** Number of the NFT */
+  get num(): number {
+    return this.raw.num
+  }
 
-    /** Slug of the gift */
-    get slug(): string {
-        return this.raw.slug
-    }
+  /** Title of the NFT */
+  get title(): string {
+    return this.raw.title
+  }
 
-    /**
-     * ID of the peer who owns this gift, if available
-     * > Note: in some cases, only {@link ownerId} is available, and not {@link owner},
-     * > in which cases please use `tg.getPeer(ownerId)` manually
-     */
-    get owner(): Peer | null {
-        if (!this.raw.ownerId) return null
-        if (!this._peers.has(this.raw.ownerId)) return null
-        return parsePeer(this.raw.ownerId, this._peers)
-    }
+  /** Slug of the gift */
+  get slug(): string {
+    return this.raw.slug
+  }
 
-    /** ID of the peer who owns this gift, if available */
-    get ownerId(): number | null {
-        return this.raw.ownerId ? getMarkedPeerId(this.raw.ownerId) : null
-    }
+  /**
+   * ID of the peer who owns this gift, if available
+   * > Note: in some cases, only {@link ownerId} is available, and not {@link owner},
+   * > in which cases please use `tg.getPeer(ownerId)` manually
+   */
+  get owner(): Peer | null {
+    if (!this.raw.ownerId) return null
+    if (!this._peers.has(this.raw.ownerId)) return null
+    return parsePeer(this.raw.ownerId, this._peers)
+  }
 
-    /** Name of the user who owns this gift, if available */
-    get ownerName(): string | null {
-        return this.raw.ownerName ?? null
-    }
+  /** ID of the peer who owns this gift, if available */
+  get ownerId(): number | null {
+    return this.raw.ownerId ? getMarkedPeerId(this.raw.ownerId) : null
+  }
 
-    // todo: merge into one property
-    get availabilityIssued(): number {
-        return this.raw.availabilityIssued
-    }
+  /** Name of the user who owns this gift, if available */
+  get ownerName(): string | null {
+    return this.raw.ownerName ?? null
+  }
 
-    get availabilityTotal(): number {
-        return this.raw.availabilityTotal
-    }
+  // todo: merge into one property
+  get availabilityIssued(): number {
+    return this.raw.availabilityIssued
+  }
 
-    /** Number of stars this gift is up for resell for */
-    get resellPriceStars(): tl.Long | null {
-        const resellPriceStars = this.raw.resellAmount?.find(it => it._ === 'starsAmount')
-        return resellPriceStars?.amount ?? null
-    }
+  get availabilityTotal(): number {
+    return this.raw.availabilityTotal
+  }
 
-    /** Number of nanoton this gift is up for resell for */
-    get resellPriceTon(): tl.Long | null {
-        const resellPriceTon = this.raw.resellAmount?.find(it => it._ === 'starsTonAmount')
-        return resellPriceTon?.amount ?? null
-    }
+  /** Number of stars this gift is up for resell for */
+  get resellPriceStars(): tl.Long | null {
+    const resellPriceStars = this.raw.resellAmount?.find(it => it._ === 'starsAmount')
+    return resellPriceStars?.amount ?? null
+  }
 
-    /** Profile colors associated with this gift */
-    get peerColor(): tl.RawPeerColorCollectible | null {
-        if (this.raw.peerColor?._ !== 'peerColorCollectible') return null
-        return this.raw.peerColor
-    }
+  /** Number of nanoton this gift is up for resell for */
+  get resellPriceTon(): tl.Long | null {
+    const resellPriceTon = this.raw.resellAmount?.find(it => it._ === 'starsTonAmount')
+    return resellPriceTon?.amount ?? null
+  }
 
-    /**
-     * ID of the user who "hosts" this gift (i.e. this gift is actually stored on the TON blockchain,
-     * but is displayed as a gift on this peer's profile)
-     */
-    get hostId(): number | null {
-        if (!this.raw.hostId) return null
-        return getMarkedPeerId(this.raw.hostId)
-    }
+  /** Profile colors associated with this gift */
+  get peerColor(): tl.RawPeerColorCollectible | null {
+    if (this.raw.peerColor?._ !== 'peerColorCollectible') return null
+    return this.raw.peerColor
+  }
 
-    /**
-     * ID of the peer who "hosts" this gift (i.e. this gift is actually stored on the TON blockchain,
-     * but is displayed as a gift on this peer's profile), if available
-     * > Note: in some cases, only {@link hostId} is available, and not {@link host},
-     * > in which cases please use `tg.getPeer(ownerId)` manually
-     */
-    get host(): Peer | null {
-        if (!this.raw.hostId) return null
-        if (!this._peers.has(this.raw.hostId)) return null
-        return parsePeer(this.raw.hostId, this._peers)
-    }
+  /**
+   * ID of the user who "hosts" this gift (i.e. this gift is actually stored on the TON blockchain,
+   * but is displayed as a gift on this peer's profile)
+   */
+  get hostId(): number | null {
+    if (!this.raw.hostId) return null
+    return getMarkedPeerId(this.raw.hostId)
+  }
 
-    /** Model (i.e. the gift itself) of the unique star gift */
-    get model(): StarGiftUniqueAttribute {
-        return new StarGiftUniqueAttribute(this._model)
-    }
+  /**
+   * ID of the peer who "hosts" this gift (i.e. this gift is actually stored on the TON blockchain,
+   * but is displayed as a gift on this peer's profile), if available
+   * > Note: in some cases, only {@link hostId} is available, and not {@link host},
+   * > in which cases please use `tg.getPeer(ownerId)` manually
+   */
+  get host(): Peer | null {
+    if (!this.raw.hostId) return null
+    if (!this._peers.has(this.raw.hostId)) return null
+    return parsePeer(this.raw.hostId, this._peers)
+  }
 
-    /** Pattern of the unique star gift */
-    get pattern(): StarGiftUniqueAttribute {
-        return new StarGiftUniqueAttribute(this._pattern)
-    }
+  /** Model (i.e. the gift itself) of the unique star gift */
+  get model(): StarGiftUniqueAttribute {
+    return new StarGiftUniqueAttribute(this._model)
+  }
 
-    /** Backdrop of the unique star gift */
-    get backdrop(): StarGiftUniqueBackdrop {
-        return new StarGiftUniqueBackdrop(this._backdrop)
-    }
+  /** Pattern of the unique star gift */
+  get pattern(): StarGiftUniqueAttribute {
+    return new StarGiftUniqueAttribute(this._pattern)
+  }
 
-    /** Details about the original star gift (if they were retained when minting) */
-    get originalDetails(): StarGiftUniqueOriginalDetails | null {
-        if (!this._originalDetails) return null
-        return new StarGiftUniqueOriginalDetails(this._originalDetails, this._peers)
-    }
+  /** Backdrop of the unique star gift */
+  get backdrop(): StarGiftUniqueBackdrop {
+    return new StarGiftUniqueBackdrop(this._backdrop)
+  }
 
-    /** TON address of the owner of the unique star gift */
-    get ownerAddress(): string | null {
-        return this.raw.ownerAddress ?? null
-    }
+  /** Details about the original star gift (if they were retained when minting) */
+  get originalDetails(): StarGiftUniqueOriginalDetails | null {
+    if (!this._originalDetails) return null
+    return new StarGiftUniqueOriginalDetails(this._originalDetails, this._peers)
+  }
 
-    /** TON address of the gift NFT */
-    get giftAddress(): string | null {
-        return this.raw.giftAddress ?? null
-    }
+  /** TON address of the owner of the unique star gift */
+  get ownerAddress(): string | null {
+    return this.raw.ownerAddress ?? null
+  }
 
-    /**
-     * User/channel who released this collection
-     */
-    get releasedBy(): Peer | null {
-        if (!this.raw.releasedBy) return null
-        return parsePeer(this.raw.releasedBy, this._peers)
-    }
+  /** TON address of the gift NFT */
+  get giftAddress(): string | null {
+    return this.raw.giftAddress ?? null
+  }
+
+  /**
+   * User/channel who released this collection
+   */
+  get releasedBy(): Peer | null {
+    if (!this.raw.releasedBy) return null
+    return parsePeer(this.raw.releasedBy, this._peers)
+  }
 }
 
 makeInspectable(StarGiftUnique)
 memoizeGetters(StarGiftUnique, [
-    'model',
-    'pattern',
-    'backdrop',
-    'originalDetails',
-    'resellPriceStars',
-    'resellPriceTon',
-    'releasedBy',
+  'model',
+  'pattern',
+  'backdrop',
+  'originalDetails',
+  'resellPriceStars',
+  'resellPriceTon',
+  'releasedBy',
 ])

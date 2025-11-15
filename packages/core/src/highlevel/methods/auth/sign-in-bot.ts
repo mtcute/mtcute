@@ -11,15 +11,15 @@ import { _onAuthorization } from './utils.js'
  * @throws BadRequestError  In case the bot token is invalid
  */
 export async function signInBot(client: ITelegramClient, token: string): Promise<User> {
-    const { id, hash } = await client.getApiCredentials()
+  const { id, hash } = await client.getApiCredentials()
 
-    const res = await client.call({
-        _: 'auth.importBotAuthorization',
-        flags: 0,
-        apiId: id,
-        apiHash: hash,
-        botAuthToken: token,
-    })
+  const res = await client.call({
+    _: 'auth.importBotAuthorization',
+    flags: 0,
+    apiId: id,
+    apiHash: hash,
+    botAuthToken: token,
+  })
 
-    return _onAuthorization(client, res)
+  return _onAuthorization(client, res)
 }

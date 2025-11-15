@@ -23,69 +23,69 @@ import { resolvePeer } from '../users/resolve-peer.js'
  *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
  */
 export async function getMessages(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    messageIds: MaybeArray<number>,
-    fromReply = false,
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  messageIds: MaybeArray<number>,
+  fromReply = false,
 ): Promise<(Message | null)[]> {
-    const peer = await resolvePeer(client, chatId)
-    if (!Array.isArray(messageIds)) messageIds = [messageIds]
+  const peer = await resolvePeer(client, chatId)
+  if (!Array.isArray(messageIds)) messageIds = [messageIds]
 
-    const type = fromReply ? 'inputMessageReplyTo' : 'inputMessageID'
-    const ids: tl.TypeInputMessage[] = messageIds.map(it => ({
-        _: type,
-        id: it,
-    }))
+  const type = fromReply ? 'inputMessageReplyTo' : 'inputMessageID'
+  const ids: tl.TypeInputMessage[] = messageIds.map(it => ({
+    _: type,
+    id: it,
+  }))
 
-    const isChannel = isInputPeerChannel(peer)
+  const isChannel = isInputPeerChannel(peer)
 
-    const res = await client.call(
-        isChannel
-            ? {
-                _: 'channels.getMessages',
-                id: ids,
-                channel: toInputChannel(peer),
-            }
-            : {
-                _: 'messages.getMessages',
-                id: ids,
-            },
-    )
-
-    assertTypeIsNot('getMessages', res, 'messages.messagesNotModified')
-
-    const peers = PeersIndex.from(res)
-
-    let selfId: number | null | undefined
-
-    return res.messages.map((msg) => {
-        if (msg._ === 'messageEmpty') return null
-
-        if (!isChannel) {
-            // make sure that the messages belong to the given chat
-            // (channels have their own message numbering)
-            switch (peer._) {
-                case 'inputPeerSelf':
-                    if (selfId === undefined) selfId = client.storage.self.getCached()?.userId ?? null
-
-                    if (!(msg.peerId._ === 'peerUser' && msg.peerId.userId === selfId)) {
-                        return null
-                    }
-                    break
-                case 'inputPeerUser':
-                case 'inputPeerUserFromMessage':
-                    if (!(msg.peerId._ === 'peerUser' && msg.peerId.userId === peer.userId)) {
-                        return null
-                    }
-                    break
-                case 'inputPeerChat':
-                    if (!(msg.peerId._ === 'peerChat' && msg.peerId.chatId === peer.chatId)) {
-                        return null
-                    }
-                    break
-            }
+  const res = await client.call(
+    isChannel
+      ? {
+          _: 'channels.getMessages',
+          id: ids,
+          channel: toInputChannel(peer),
         }
+      : {
+          _: 'messages.getMessages',
+          id: ids,
+        },
+  )
 
-        return new Message(msg, peers)
-    })
+  assertTypeIsNot('getMessages', res, 'messages.messagesNotModified')
+
+  const peers = PeersIndex.from(res)
+
+  let selfId: number | null | undefined
+
+  return res.messages.map((msg) => {
+    if (msg._ === 'messageEmpty') return null
+
+    if (!isChannel) {
+      // make sure that the messages belong to the given chat
+      // (channels have their own message numbering)
+      switch (peer._) {
+        case 'inputPeerSelf':
+          if (selfId === undefined) selfId = client.storage.self.getCached()?.userId ?? null
+
+          if (!(msg.peerId._ === 'peerUser' && msg.peerId.userId === selfId)) {
+            return null
+          }
+          break
+        case 'inputPeerUser':
+        case 'inputPeerUserFromMessage':
+          if (!(msg.peerId._ === 'peerUser' && msg.peerId.userId === peer.userId)) {
+            return null
+          }
+          break
+        case 'inputPeerChat':
+          if (!(msg.peerId._ === 'peerChat' && msg.peerId.chatId === peer.chatId)) {
+            return null
+          }
+          break
+      }
+    }
+
+    return new Message(msg, peers)
+  })
 }

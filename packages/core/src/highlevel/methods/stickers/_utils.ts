@@ -10,24 +10,24 @@ import { _normalizeFileToDocument } from '../files/normalize-file-to-document.js
  * @noemit
  */
 export async function _normalizeInputStickerSetItem(
-    client: ITelegramClient,
-    sticker: InputStickerSetItem,
-    params?: {
-        progressCallback?: (uploaded: number, total: number) => void
-    },
+  client: ITelegramClient,
+  sticker: InputStickerSetItem,
+  params?: {
+    progressCallback?: (uploaded: number, total: number) => void
+  },
 ): Promise<tl.TypeInputStickerSetItem> {
-    return {
-        _: 'inputStickerSetItem',
-        document: await _normalizeFileToDocument(client, sticker.file, params ?? {}),
-        emoji: sticker.emojis,
-        maskCoords: sticker.maskPosition
-            ? {
-                _: 'maskCoords',
-                n: MASK_POSITION_POINT_TO_TL[sticker.maskPosition.point],
-                x: sticker.maskPosition.x,
-                y: sticker.maskPosition.y,
-                zoom: sticker.maskPosition.scale,
-            }
-            : undefined,
-    }
+  return {
+    _: 'inputStickerSetItem',
+    document: await _normalizeFileToDocument(client, sticker.file, params ?? {}),
+    emoji: sticker.emojis,
+    maskCoords: sticker.maskPosition
+      ? {
+          _: 'maskCoords',
+          n: MASK_POSITION_POINT_TO_TL[sticker.maskPosition.point],
+          x: sticker.maskPosition.x,
+          y: sticker.maskPosition.y,
+          zoom: sticker.maskPosition.scale,
+        }
+      : undefined,
+  }
 }

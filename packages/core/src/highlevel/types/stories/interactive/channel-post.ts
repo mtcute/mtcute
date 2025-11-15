@@ -11,24 +11,24 @@ import { StoryInteractiveArea } from './base.js'
  * Interactive element containing a channel post
  */
 export class StoryInteractiveChannelPost extends StoryInteractiveArea {
-    readonly type = 'channel_post' as const
+  readonly type = 'channel_post' as const
 
-    constructor(
-        override readonly raw: tl.RawMediaAreaChannelPost,
-        readonly _peers: PeersIndex,
-    ) {
-        super(raw)
-    }
+  constructor(
+    override readonly raw: tl.RawMediaAreaChannelPost,
+    readonly _peers: PeersIndex,
+  ) {
+    super(raw)
+  }
 
-    /** Channel being mentioned */
-    get chat(): Chat {
-        return new Chat(this._peers.chat(this.raw.channelId))
-    }
+  /** Channel being mentioned */
+  get chat(): Chat {
+    return new Chat(this._peers.chat(this.raw.channelId))
+  }
 
-    /** ID of the message being mentioned */
-    get messageId(): number {
-        return this.raw.msgId
-    }
+  /** ID of the message being mentioned */
+  get messageId(): number {
+    return this.raw.msgId
+  }
 }
 
 memoizeGetters(StoryInteractiveChannelPost, ['chat'])

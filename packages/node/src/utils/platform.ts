@@ -8,24 +8,24 @@ import { beforeExit } from './exit-hook.js'
 import { defaultLoggingHandler } from './logging.js'
 
 export class NodePlatform implements ICorePlatform {
-    // ICorePlatform
-    declare log: typeof defaultLoggingHandler
-    declare beforeExit: typeof beforeExit
-    declare normalizeFile: typeof normalizeFile
+  // ICorePlatform
+  declare log: typeof defaultLoggingHandler
+  declare beforeExit: typeof beforeExit
+  declare normalizeFile: typeof normalizeFile
 
-    getDeviceModel(): string {
-        return `Node.js/${process.version} (${os.type()} ${os.arch()})`
+  getDeviceModel(): string {
+    return `Node.js/${process.version} (${os.type()} ${os.arch()})`
+  }
+
+  getDefaultLogLevel(): number | null {
+    const envLogLevel = Number.parseInt(process.env.MTCUTE_LOG_LEVEL ?? '')
+
+    if (!Number.isNaN(envLogLevel)) {
+      return envLogLevel
     }
 
-    getDefaultLogLevel(): number | null {
-        const envLogLevel = Number.parseInt(process.env.MTCUTE_LOG_LEVEL ?? '')
-
-        if (!Number.isNaN(envLogLevel)) {
-            return envLogLevel
-        }
-
-        return null
-    }
+    return null
+  }
 }
 
 NodePlatform.prototype.log = defaultLoggingHandler

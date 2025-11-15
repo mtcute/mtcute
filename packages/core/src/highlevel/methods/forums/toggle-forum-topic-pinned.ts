@@ -8,22 +8,22 @@ import { resolveChannel } from '../users/resolve-peer.js'
  * Only admins with `manageTopics` permission can do this.
  */
 export async function toggleForumTopicPinned(
-    client: ITelegramClient,
-    params: {
-        /** Chat ID or username */
-        chatId: InputPeerLike
-        /** ID of the topic (i.e. its top message ID) */
-        topicId: number | ForumTopic
-        /** Whether the topic should be pinned */
-        pinned: boolean
-    },
+  client: ITelegramClient,
+  params: {
+    /** Chat ID or username */
+    chatId: InputPeerLike
+    /** ID of the topic (i.e. its top message ID) */
+    topicId: number | ForumTopic
+    /** Whether the topic should be pinned */
+    pinned: boolean
+  },
 ): Promise<void> {
-    const { chatId, topicId, pinned } = params
+  const { chatId, topicId, pinned } = params
 
-    await client.call({
-        _: 'channels.updatePinnedForumTopic',
-        channel: await resolveChannel(client, chatId),
-        topicId: typeof topicId === 'number' ? topicId : topicId.id,
-        pinned,
-    })
+  await client.call({
+    _: 'channels.updatePinnedForumTopic',
+    channel: await resolveChannel(client, chatId),
+    topicId: typeof topicId === 'number' ? topicId : topicId.id,
+    pinned,
+  })
 }

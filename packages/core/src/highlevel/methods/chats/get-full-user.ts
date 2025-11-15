@@ -11,12 +11,12 @@ import { resolveUser } from '../users/resolve-peer.js'
  * @param userId  ID of the user or their username
  */
 export async function getFullUser(client: ITelegramClient, userId: InputPeerLike): Promise<FullUser> {
-    const peer = await resolveUser(client, userId)
+  const peer = await resolveUser(client, userId)
 
-    const res = await client.call({
-        _: 'users.getFullUser',
-        id: peer,
-    })
+  const res = await client.call({
+    _: 'users.getFullUser',
+    id: peer,
+  })
 
-    return new FullUser(res)
+  return new FullUser(res)
 }

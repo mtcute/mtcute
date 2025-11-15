@@ -3,19 +3,19 @@ const callbacks = new Set<() => void>()
 let registered = false
 
 export function beforeExit(fn: () => void): () => void {
-    if (!registered) {
-        registered = true
+  if (!registered) {
+    registered = true
 
-        globalThis.addEventListener('unload', () => {
-            for (const callback of callbacks) {
-                callback()
-            }
-        })
-    }
+    globalThis.addEventListener('unload', () => {
+      for (const callback of callbacks) {
+        callback()
+      }
+    })
+  }
 
-    callbacks.add(fn)
+  callbacks.add(fn)
 
-    return () => {
-        callbacks.delete(fn)
-    }
+  return () => {
+    callbacks.delete(fn)
+  }
 }

@@ -8,15 +8,15 @@ import { makeArrayPaginated } from '../../utils/misc-utils.js'
 
 // @exported
 export interface SearchHashtagOffset {
-    rate: number
-    peer: tl.TypeInputPeer
-    id: number
+  rate: number
+  peer: tl.TypeInputPeer
+  id: number
 }
 
 const defaultOffset: SearchHashtagOffset = {
-    rate: 0,
-    peer: { _: 'inputPeerEmpty' },
-    id: 0,
+  rate: 0,
+  peer: { _: 'inputPeerEmpty' },
+  id: 0,
 }
 
 // @available=user
@@ -27,40 +27,40 @@ const defaultOffset: SearchHashtagOffset = {
  * @param params  Additional parameters
  */
 export async function searchHashtag(
-    client: ITelegramClient,
-    hashtag: string,
-    params?: {
-        /** Offset for the search */
-        offset?: SearchHashtagOffset
-        /** Limit the number of results */
-        limit?: number
-    },
+  client: ITelegramClient,
+  hashtag: string,
+  params?: {
+    /** Offset for the search */
+    offset?: SearchHashtagOffset
+    /** Limit the number of results */
+    limit?: number
+  },
 ): Promise<ArrayPaginated<Message, SearchHashtagOffset>> {
-    const { offset: { rate: offsetRate, peer: offsetPeer, id: offsetId } = defaultOffset, limit = 100 } = params ?? {}
-    const res = await client.call({
-        _: 'channels.searchPosts',
-        hashtag,
-        offsetId,
-        offsetRate,
-        offsetPeer,
-        limit,
-    })
+  const { offset: { rate: offsetRate, peer: offsetPeer, id: offsetId } = defaultOffset, limit = 100 } = params ?? {}
+  const res = await client.call({
+    _: 'channels.searchPosts',
+    hashtag,
+    offsetId,
+    offsetRate,
+    offsetPeer,
+    limit,
+  })
 
-    assertTypeIsNot('searchHashtag', res, 'messages.messagesNotModified')
+  assertTypeIsNot('searchHashtag', res, 'messages.messagesNotModified')
 
-    const peers = PeersIndex.from(res)
-    const msgs = res.messages.filter(msg => msg._ !== 'messageEmpty').map(msg => new Message(msg, peers))
-    const last = msgs[msgs.length - 1]
+  const peers = PeersIndex.from(res)
+  const msgs = res.messages.filter(msg => msg._ !== 'messageEmpty').map(msg => new Message(msg, peers))
+  const last = msgs[msgs.length - 1]
 
-    const next = last
-        ? {
-            rate: (res as tl.messages.RawMessagesSlice).nextRate ?? last.raw.date,
-            peer: last.chat.inputPeer,
-            id: last.id,
-        }
-        : undefined
+  const next = last
+    ? {
+        rate: (res as tl.messages.RawMessagesSlice).nextRate ?? last.raw.date,
+        peer: last.chat.inputPeer,
+        id: last.id,
+      }
+    : undefined
 
-    return makeArrayPaginated(msgs, (res as tl.messages.RawMessagesSlice).count ?? msgs.length, next)
+  return makeArrayPaginated(msgs, (res as tl.messages.RawMessagesSlice).count ?? msgs.length, next)
 }
 
 /**
@@ -72,45 +72,45 @@ export async function searchHashtag(
  * @param params  Additional parameters
  */
 export async function* iterSearchHashtag(
-    client: ITelegramClient,
-    hashtag: string,
-    params?: Parameters<typeof searchHashtag>[2] & {
-        /**
-         * Limits the number of messages to be retrieved.
-         *
-         * @default  `Infinity`, i.e. all messages are returned
-         */
-        limit?: number
+  client: ITelegramClient,
+  hashtag: string,
+  params?: Parameters<typeof searchHashtag>[2] & {
+    /**
+     * Limits the number of messages to be retrieved.
+     *
+     * @default  `Infinity`, i.e. all messages are returned
+     */
+    limit?: number
 
-        /**
-         * Chunk size, which will be passed as `limit` parameter
-         * for `messages.search`. Usually you shouldn't care about this.
-         *
-         * @default  100
-         */
-        chunkSize?: number
-    },
+    /**
+     * Chunk size, which will be passed as `limit` parameter
+     * for `messages.search`. Usually you shouldn't care about this.
+     *
+     * @default  100
+     */
+    chunkSize?: number
+  },
 ): AsyncIterableIterator<Message> {
-    if (!params) params = {}
-    const { limit = Infinity, chunkSize = 100 } = params
-    let { offset } = params
-    let current = 0
+  if (!params) params = {}
+  const { limit = Infinity, chunkSize = 100 } = params
+  let { offset } = params
+  let current = 0
 
-    for (;;) {
-        const res = await searchHashtag(client, hashtag, {
-            offset,
-            limit: Math.min(chunkSize, limit - current),
-        })
+  for (;;) {
+    const res = await searchHashtag(client, hashtag, {
+      offset,
+      limit: Math.min(chunkSize, limit - current),
+    })
 
-        if (!res.length) return
+    if (!res.length) return
 
-        for (const msg of res) {
-            yield msg
+    for (const msg of res) {
+      yield msg
 
-            if (++current >= limit) return
-        }
-
-        if (!res.next) return
-        offset = res.next
+      if (++current >= limit) return
     }
+
+    if (!res.next) return
+    offset = res.next
+  }
 }

@@ -9,10 +9,10 @@ import type { TlEntry, TlTypeModifiers } from './types.js'
  * @example `splitNameToNamespace('updatesTooLong') => [null, 'updatesTooLong']`
  */
 export function splitNameToNamespace(name: string): [string | null, string] {
-    const s = name.split('.')
-    if (s.length === 2) return s as [string, string]
+  const s = name.split('.')
+  if (s.length === 2) return s as [string, string]
 
-    return [null, name]
+  return [null, name]
 }
 
 /**
@@ -22,21 +22,21 @@ export function splitNameToNamespace(name: string): [string | null, string] {
  * @returns  Mapping of argument names to argument descriptions
  */
 export function parseTdlibStyleComment(str: string): Record<string, string> {
-    const obj: Record<string, string> = {}
+  const obj: Record<string, string> = {}
 
-    let pos = str.indexOf('@')
+  let pos = str.indexOf('@')
 
-    while (pos !== -1 && pos < str.length) {
-        let nameEnd = str.indexOf(' ', pos)
-        if (nameEnd === -1) nameEnd = str.length
+  while (pos !== -1 && pos < str.length) {
+    let nameEnd = str.indexOf(' ', pos)
+    if (nameEnd === -1) nameEnd = str.length
 
-        const name = str.substring(pos + 1, nameEnd)
+    const name = str.substring(pos + 1, nameEnd)
 
-        pos = str.indexOf('@', nameEnd)
-        obj[name] = str.substring(nameEnd + 1, pos === -1 ? undefined : pos - 1)
-    }
+    pos = str.indexOf('@', nameEnd)
+    obj[name] = str.substring(nameEnd + 1, pos === -1 ? undefined : pos - 1)
+  }
 
-    return obj
+  return obj
 }
 
 /**
@@ -46,52 +46,52 @@ export function parseTdlibStyleComment(str: string): Record<string, string> {
  * @returns  Mapping of namespace to entries. Base namespace is `''` (empty string).
  */
 export function groupTlEntriesByNamespace(entries: TlEntry[]): Record<string, TlEntry[]> {
-    const ret: Record<string, TlEntry[]> = {}
+  const ret: Record<string, TlEntry[]> = {}
 
-    entries.forEach((entry) => {
-        const [ns_] = splitNameToNamespace(entry.name)
-        const ns = ns_ === null ? '' : ns_
+  entries.forEach((entry) => {
+    const [ns_] = splitNameToNamespace(entry.name)
+    const ns = ns_ === null ? '' : ns_
 
-        if (!(ns in ret)) ret[ns] = []
-        ret[ns].push(entry)
-    })
+    if (!(ns in ret)) ret[ns] = []
+    ret[ns].push(entry)
+  })
 
-    return ret
+  return ret
 }
 
 export function stringifyArgumentType(type: string, modifiers?: TlTypeModifiers): string {
-    if (!modifiers) return type
-    let ret = type
+  if (!modifiers) return type
+  let ret = type
 
-    if (modifiers.isBareUnion) ret = `%${ret}`
-    if (modifiers.isVector) ret = `Vector<${ret}>`
-    else if (modifiers.isBareVector) ret = `vector<${ret}>`
-    if (modifiers.predicate) ret = `${modifiers.predicate}?${ret}`
+  if (modifiers.isBareUnion) ret = `%${ret}`
+  if (modifiers.isVector) ret = `Vector<${ret}>`
+  else if (modifiers.isBareVector) ret = `vector<${ret}>`
+  if (modifiers.predicate) ret = `${modifiers.predicate}?${ret}`
 
-    return ret
+  return ret
 }
 
 export function parseArgumentType(type: string): [string, TlTypeModifiers] {
-    const modifiers: TlTypeModifiers = {}
-    const [predicate, type_] = type.split('?')
+  const modifiers: TlTypeModifiers = {}
+  const [predicate, type_] = type.split('?')
 
-    if (type_) {
-        modifiers.predicate = predicate
-        type = type_
-    }
+  if (type_) {
+    modifiers.predicate = predicate
+    type = type_
+  }
 
-    if (type.startsWith('Vector<')) {
-        modifiers.isVector = true
-        type = type.substring(7, type.length - 1)
-    } else if (type.startsWith('vector<') || type.startsWith('%vector<')) {
-        modifiers.isBareVector = true
-        type = type.substring(7, type.length - 1)
-    }
+  if (type.startsWith('Vector<')) {
+    modifiers.isVector = true
+    type = type.substring(7, type.length - 1)
+  } else if (type.startsWith('vector<') || type.startsWith('%vector<')) {
+    modifiers.isBareVector = true
+    type = type.substring(7, type.length - 1)
+  }
 
-    if (type.startsWith('%')) {
-        modifiers.isBareUnion = true
-        type = type.substring(1)
-    }
+  if (type.startsWith('%')) {
+    modifiers.isBareUnion = true
+    type = type.substring(1)
+  }
 
-    return [type, modifiers]
+  return [type, modifiers]
 }

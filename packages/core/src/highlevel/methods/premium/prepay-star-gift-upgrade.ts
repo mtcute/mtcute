@@ -18,39 +18,39 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @returns  Service message about the payment for the upgrade, if one was generated.
  */
 export async function prepayStarGiftUpgrade(
-    client: ITelegramClient,
-    params: {
-        peer: InputPeerLike
-        /** Prepaid upgrade hash, taken from `SavedStarGift.prepaidUpgradeHash` */
-        hash: string
+  client: ITelegramClient,
+  params: {
+    peer: InputPeerLike
+    /** Prepaid upgrade hash, taken from `SavedStarGift.prepaidUpgradeHash` */
+    hash: string
 
-        /**
-         * Whether to dispatch the new message event
-         * to the client's update handler.
-         */
-        shouldDispatch?: true
-    },
+    /**
+     * Whether to dispatch the new message event
+     * to the client's update handler.
+     */
+    shouldDispatch?: true
+  },
 ): Promise<Message | null> {
-    const { peer, hash, shouldDispatch } = params
+  const { peer, hash, shouldDispatch } = params
 
-    const invoice: tl.TypeInputInvoice = {
-        _: 'inputInvoiceStarGiftPrepaidUpgrade',
-        peer: await resolvePeer(client, peer),
-        hash,
-    }
+  const invoice: tl.TypeInputInvoice = {
+    _: 'inputInvoiceStarGiftPrepaidUpgrade',
+    peer: await resolvePeer(client, peer),
+    hash,
+  }
 
-    const form = await client.call({
-        _: 'payments.getPaymentForm',
-        invoice,
-    })
+  const form = await client.call({
+    _: 'payments.getPaymentForm',
+    invoice,
+  })
 
-    const res = await client.call({
-        _: 'payments.sendStarsForm',
-        invoice,
-        formId: form.formId,
-    })
+  const res = await client.call({
+    _: 'payments.sendStarsForm',
+    invoice,
+    formId: form.formId,
+  })
 
-    assertTypeIs('payments.sendStarsForm', res, 'payments.paymentResult')
+  assertTypeIs('payments.sendStarsForm', res, 'payments.paymentResult')
 
-    return _findMessageInUpdate(client, res.updates, false, !shouldDispatch, true)
+  return _findMessageInUpdate(client, res.updates, false, !shouldDispatch, true)
 }

@@ -13,15 +13,15 @@ import { resolveChannel } from '../users/resolve-peer.js'
  * @returns  Modified sticker set
  */
 export async function setChatStickerSet(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    setId: InputStickerSet,
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  setId: InputStickerSet,
 ): Promise<void> {
-    const r = await client.call({
-        _: 'channels.setStickers',
-        channel: await resolveChannel(client, chatId),
-        stickerset: normalizeInputStickerSet(setId),
-    })
+  const r = await client.call({
+    _: 'channels.setStickers',
+    channel: await resolveChannel(client, chatId),
+    stickerset: normalizeInputStickerSet(setId),
+  })
 
-    assertTrue('channels.setStickers', r)
+  assertTrue('channels.setStickers', r)
 }

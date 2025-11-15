@@ -11,32 +11,32 @@ const replaceNewlineInComment = (s: string): string => s.replace(/\n/g, '\n//- '
  * @param entries  Entries to parse
  */
 export function parseFullTlSchema(entries: TlEntry[]): TlFullSchema {
-    const ret: TlFullSchema = {
-        entries,
-        classes: {},
-        methods: {},
-        unions: {},
-    }
+  const ret: TlFullSchema = {
+    entries,
+    classes: {},
+    methods: {},
+    unions: {},
+  }
 
-    entries.forEach((entry) => {
-        const kind = entry.kind === 'class' ? 'classes' : 'methods'
+  entries.forEach((entry) => {
+    const kind = entry.kind === 'class' ? 'classes' : 'methods'
 
-        ret[kind][entry.name] = entry
+    ret[kind][entry.name] = entry
 
-        if (kind === 'classes') {
-            const type = entry.type
+    if (kind === 'classes') {
+      const type = entry.type
 
-            if (!(type in ret.unions)) {
-                ret.unions[type] = {
-                    name: type,
-                    classes: [],
-                }
-            }
-            ret.unions[type].classes.push(entry)
+      if (!(type in ret.unions)) {
+        ret.unions[type] = {
+          name: type,
+          classes: [],
         }
-    })
+      }
+      ret.unions[type].classes.push(entry)
+    }
+  })
 
-    return ret
+  return ret
 }
 
 /**
@@ -46,29 +46,29 @@ export function parseFullTlSchema(entries: TlEntry[]): TlFullSchema {
  * @param params  Additional parameters
  */
 export function writeTlEntriesToString(
-    entries: TlEntry[],
-    params?: {
-        /**
-         * Whether to force compute IDs if one is not present
-         */
-        computeIds?: boolean
+  entries: TlEntry[],
+  params?: {
+    /**
+     * Whether to force compute IDs if one is not present
+     */
+    computeIds?: boolean
 
-        /**
-         * Whether to use TDLib style comments for arguments
-         */
-        tdlibComments?: boolean
+    /**
+     * Whether to use TDLib style comments for arguments
+     */
+    tdlibComments?: boolean
 
-        /**
-         * Whether to omit prelude containing primitive types
-         * (like `int`, `string`, etc.)
-         */
-        omitPrimitives?: boolean
-    },
+    /**
+     * Whether to omit prelude containing primitive types
+     * (like `int`, `string`, etc.)
+     */
+    omitPrimitives?: boolean
+  },
 ): string {
-    const lines: string[] = []
+  const lines: string[] = []
 
-    if (!params?.omitPrimitives) {
-        lines.push(`int ? = Int;
+  if (!params?.omitPrimitives) {
+    lines.push(`int ? = Int;
 long ? = Long;
 double ? = Double;
 string ? = String;
@@ -81,43 +81,43 @@ true#3fedd339 = True;
 boolFalse#bc799737 = Bool;
 boolTrue#997275b5 = Bool;
 `)
+  }
+
+  let currentKind: TlEntry['kind'] = 'class'
+
+  entries.forEach((entry) => {
+    if (entry.kind !== currentKind) {
+      if (entry.kind === 'class') {
+        lines.push('---types---')
+      } else {
+        lines.push('---functions---')
+      }
+
+      currentKind = entry.kind
     }
 
-    let currentKind: TlEntry['kind'] = 'class'
+    if (entry.comment) {
+      if (params?.tdlibComments) {
+        lines.push(`// @description ${replaceNewlineInComment(entry.comment)}`)
+      } else {
+        lines.push(`// ${replaceNewlineInComment(entry.comment)}`)
+      }
+    }
 
-    entries.forEach((entry) => {
-        if (entry.kind !== currentKind) {
-            if (entry.kind === 'class') {
-                lines.push('---types---')
-            } else {
-                lines.push('---functions---')
-            }
-
-            currentKind = entry.kind
+    if (params?.tdlibComments) {
+      entry.arguments.forEach((arg) => {
+        if (arg.comment) {
+          lines.push(`// @${arg.name} ${replaceNewlineInComment(arg.comment)}`)
         }
+      })
+    }
 
-        if (entry.comment) {
-            if (params?.tdlibComments) {
-                lines.push(`// @description ${replaceNewlineInComment(entry.comment)}`)
-            } else {
-                lines.push(`// ${replaceNewlineInComment(entry.comment)}`)
-            }
-        }
+    if (!entry.id && params?.computeIds !== false) {
+      entry.id = computeConstructorIdFromEntry(entry)
+    }
 
-        if (params?.tdlibComments) {
-            entry.arguments.forEach((arg) => {
-                if (arg.comment) {
-                    lines.push(`// @${arg.name} ${replaceNewlineInComment(arg.comment)}`)
-                }
-            })
-        }
+    lines.push(writeTlEntryToString(entry))
+  })
 
-        if (!entry.id && params?.computeIds !== false) {
-            entry.id = computeConstructorIdFromEntry(entry)
-        }
-
-        lines.push(writeTlEntryToString(entry))
-    })
-
-    return lines.join('\n')
+  return lines.join('\n')
 }

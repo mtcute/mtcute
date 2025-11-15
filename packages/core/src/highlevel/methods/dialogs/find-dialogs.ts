@@ -20,94 +20,94 @@ import { iterDialogs } from './iter-dialogs.js'
  * @throws {MtPeerNotFoundError}  If a dialog with any of the given peers was not found
  */
 export async function findDialogs(client: ITelegramClient, peers: MaybeArray<string | number>): Promise<Dialog[]> {
-    if (!Array.isArray(peers)) peers = [peers]
-    const resolved = await resolvePeerMany(client, peers)
+  if (!Array.isArray(peers)) peers = [peers]
+  const resolved = await resolvePeerMany(client, peers)
 
-    // now we need to split `peers` into two parts: ids that we could resolve and those we couldn't
-    // those that we couldn't we'll iterate over all dialogs and try to find them by username/id
-    // those that we could we'll use getPeerDialogs
+  // now we need to split `peers` into two parts: ids that we could resolve and those we couldn't
+  // those that we couldn't we'll iterate over all dialogs and try to find them by username/id
+  // those that we could we'll use getPeerDialogs
 
-    // id -> idx
-    const notFoundIds = new Map<number, number>()
-    // username -> idx
-    const notFoundUsernames = new Map<string, number>()
-    let notFoundCount = 0
+  // id -> idx
+  const notFoundIds = new Map<number, number>()
+  // username -> idx
+  const notFoundUsernames = new Map<string, number>()
+  let notFoundCount = 0
 
-    const foundInputPeers: tl.TypeInputPeer[] = []
-    const foundIdxToOriginalIdx = new Map<number, number>()
+  const foundInputPeers: tl.TypeInputPeer[] = []
+  const foundIdxToOriginalIdx = new Map<number, number>()
 
-    for (let i = 0; i < peers.length; i++) {
-        const input = peers[i]
-        const resolvedPeer = resolved[i]
+  for (let i = 0; i < peers.length; i++) {
+    const input = peers[i]
+    const resolvedPeer = resolved[i]
 
-        if (!resolvedPeer) {
-            if (typeof input === 'number') {
-                notFoundIds.set(input, i)
-            } else {
-                notFoundUsernames.set(input, i)
-            }
+    if (!resolvedPeer) {
+      if (typeof input === 'number') {
+        notFoundIds.set(input, i)
+      } else {
+        notFoundUsernames.set(input, i)
+      }
 
-            notFoundCount += 1
+      notFoundCount += 1
 
-            continue
-        }
-
-        foundInputPeers.push(resolvedPeer)
-        foundIdxToOriginalIdx.set(foundInputPeers.length - 1, i)
+      continue
     }
 
-    const ret: Dialog[] = Array.from({ length: peers.length })
+    foundInputPeers.push(resolvedPeer)
+    foundIdxToOriginalIdx.set(foundInputPeers.length - 1, i)
+  }
 
-    if (foundInputPeers.length !== 0) {
-        // we have some input peers, try to fetch them
-        const dialogs = await getPeerDialogs(client, foundInputPeers)
+  const ret: Dialog[] = Array.from({ length: peers.length })
 
-        if (foundInputPeers.length === peers.length && dialogs.every(isPresent)) {
-            return dialogs
-        }
+  if (foundInputPeers.length !== 0) {
+    // we have some input peers, try to fetch them
+    const dialogs = await getPeerDialogs(client, foundInputPeers)
 
-        // populate found dialogs
-        for (const [idx, origIdx] of foundIdxToOriginalIdx) {
-            if (!dialogs[idx]) continue
-            ret[origIdx] = dialogs[idx]
-        }
+    if (foundInputPeers.length === peers.length && dialogs.every(isPresent)) {
+      return dialogs
     }
 
-    // now we need to iterate over all dialogs and try to find the rest
-    for await (const dialog of iterDialogs(client, {
-        archived: 'keep',
-    })) {
-        const chat = dialog.peer
+    // populate found dialogs
+    for (const [idx, origIdx] of foundIdxToOriginalIdx) {
+      if (!dialogs[idx]) continue
+      ret[origIdx] = dialogs[idx]
+    }
+  }
 
-        const idxById = notFoundIds.get(chat.id)
+  // now we need to iterate over all dialogs and try to find the rest
+  for await (const dialog of iterDialogs(client, {
+    archived: 'keep',
+  })) {
+    const chat = dialog.peer
 
-        if (idxById !== undefined) {
-            ret[idxById] = dialog
-            notFoundIds.delete(chat.id)
-            notFoundCount -= 1
-        }
+    const idxById = notFoundIds.get(chat.id)
 
-        if (notFoundCount === 0) break
-
-        if (!chat.username) continue
-
-        const idxByUsername = notFoundUsernames.get(chat.username)
-
-        if (idxByUsername !== undefined) {
-            ret[idxByUsername] = dialog
-            notFoundUsernames.delete(chat.username)
-            notFoundCount -= 1
-        }
-
-        if (notFoundCount === 0) break
+    if (idxById !== undefined) {
+      ret[idxById] = dialog
+      notFoundIds.delete(chat.id)
+      notFoundCount -= 1
     }
 
-    // if we still have some dialogs that we couldn't find, fail
+    if (notFoundCount === 0) break
 
-    if (notFoundCount > 0) {
-        const notFound = [...notFoundIds.keys(), ...notFoundUsernames.keys()]
-        throw new MtPeerNotFoundError(`Could not find dialogs with peers: ${notFound.join(', ')}`)
+    if (!chat.username) continue
+
+    const idxByUsername = notFoundUsernames.get(chat.username)
+
+    if (idxByUsername !== undefined) {
+      ret[idxByUsername] = dialog
+      notFoundUsernames.delete(chat.username)
+      notFoundCount -= 1
     }
 
-    return ret
+    if (notFoundCount === 0) break
+  }
+
+  // if we still have some dialogs that we couldn't find, fail
+
+  if (notFoundCount > 0) {
+    const notFound = [...notFoundIds.keys(), ...notFoundUsernames.keys()]
+    throw new MtPeerNotFoundError(`Could not find dialogs with peers: ${notFound.join(', ')}`)
+  }
+
+  return ret
 }

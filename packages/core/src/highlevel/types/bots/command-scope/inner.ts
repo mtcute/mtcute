@@ -8,15 +8,15 @@ import type { InputPeerLike } from '../../peers/index.js'
  *
  * Used to avoid manually resolving peers.
  */
-export type IntermediateScope =
-  | {
-      type: 'peer' | 'peer_admins'
-      peer: InputPeerLike
+export type IntermediateScope
+  = | {
+    type: 'peer' | 'peer_admins'
+    peer: InputPeerLike
   }
   | {
-      type: 'member'
-      chat: InputPeerLike
-      user: InputPeerLike
+    type: 'member'
+    chat: InputPeerLike
+    user: InputPeerLike
   }
 
 /**
@@ -25,28 +25,28 @@ export type IntermediateScope =
  * Used if no commands with a narrower scope are available.
  */
 export const default_: tl.RawBotCommandScopeDefault = {
-    _: 'botCommandScopeDefault',
+  _: 'botCommandScopeDefault',
 } as const
 
 /**
  * Scope that covers all private chats
  */
 export const allPrivate: tl.RawBotCommandScopeUsers = {
-    _: 'botCommandScopeUsers',
+  _: 'botCommandScopeUsers',
 } as const
 
 /**
  * Scope that covers all group chats (both legacy and supergroups)
  */
 export const allGroups: tl.RawBotCommandScopeChats = {
-    _: 'botCommandScopeChats',
+  _: 'botCommandScopeChats',
 } as const
 
 /**
  * Scope that covers all group chat administrators (both legacy and supergroups)
  */
 export const allGroupAdmins: tl.RawBotCommandScopeChatAdmins = {
-    _: 'botCommandScopeChatAdmins',
+  _: 'botCommandScopeChatAdmins',
 } as const
 
 /**
@@ -54,31 +54,31 @@ export const allGroupAdmins: tl.RawBotCommandScopeChatAdmins = {
  * or all users of a legacy group or a supergroup)
  */
 export function peer(peer: InputPeerLike): IntermediateScope {
-    return {
-        type: 'peer',
-        peer,
-    }
+  return {
+    type: 'peer',
+    peer,
+  }
 }
 
 /**
  * Scope that covers admins in a specific group
  */
 export function groupAdmins(peer: InputPeerLike): IntermediateScope {
-    return {
-        type: 'peer_admins',
-        peer,
-    }
+  return {
+    type: 'peer_admins',
+    peer,
+  }
 }
 
 /**
  * Scope that covers a specific user in a specific group
  */
 export function groupMember(chat: InputPeerLike, user: InputPeerLike): IntermediateScope {
-    return {
-        type: 'member',
-        chat,
-        user,
-    }
+  return {
+    type: 'member',
+    chat,
+    user,
+  }
 }
 
 /**
@@ -88,9 +88,9 @@ export function groupMember(chat: InputPeerLike, user: InputPeerLike): Intermedi
  * @param description  Command description
  */
 export function cmd(command: string, description: string): tl.RawBotCommand {
-    return {
-        _: 'botCommand',
-        command,
-        description,
-    }
+  return {
+    _: 'botCommand',
+    command,
+    description,
+  }
 }

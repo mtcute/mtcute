@@ -10,19 +10,19 @@ import Long from 'long'
  * @param contacts  List of contacts
  */
 export async function importContacts(
-    client: ITelegramClient,
-    contacts: PartialOnly<Omit<tl.RawInputPhoneContact, '_'>, 'clientId'>[],
+  client: ITelegramClient,
+  contacts: PartialOnly<Omit<tl.RawInputPhoneContact, '_'>, 'clientId'>[],
 ): Promise<tl.contacts.RawImportedContacts> {
-    let seq = Long.ZERO
+  let seq = Long.ZERO
 
-    const contactsNorm: tl.RawInputPhoneContact[] = contacts.map(input => ({
-        _: 'inputPhoneContact',
-        clientId: (seq = seq.add(1)),
-        ...input,
-    }))
+  const contactsNorm: tl.RawInputPhoneContact[] = contacts.map(input => ({
+    _: 'inputPhoneContact',
+    clientId: (seq = seq.add(1)),
+    ...input,
+  }))
 
-    return client.call({
-        _: 'contacts.importContacts',
-        contacts: contactsNorm,
-    })
+  return client.call({
+    _: 'contacts.importContacts',
+    contacts: contactsNorm,
+  })
 }

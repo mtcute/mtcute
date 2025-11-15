@@ -12,19 +12,19 @@ import { sendText } from './send-text.js'
 
 // @exported
 export interface SendCopyParams extends CommonSendParams {
-    /** Target chat ID */
-    toChatId: InputPeerLike
+  /** Target chat ID */
+  toChatId: InputPeerLike
 
-    /**
-     * New message caption (only used for media)
-     */
-    caption?: InputText
+  /**
+   * New message caption (only used for media)
+   */
+  caption?: InputText
 
-    /**
-     * For bots: inline or reply markup or an instruction
-     * to hide a reply keyboard or to force a reply.
-     */
-    replyMarkup?: ReplyMarkup
+  /**
+   * For bots: inline or reply markup or an instruction
+   * to hide a reply keyboard or to force a reply.
+   */
+  replyMarkup?: ReplyMarkup
 }
 
 /**
@@ -36,63 +36,63 @@ export interface SendCopyParams extends CommonSendParams {
  * it can't be copied.
  */
 export async function sendCopy(
-    client: ITelegramClient,
-    params: SendCopyParams &
-      (
-        | {
-            /** Source chat ID */
-            fromChatId: InputPeerLike
-            /** Message ID to forward */
-            message: number
-        }
-        | { message: Message }
+  client: ITelegramClient,
+  params: SendCopyParams
+    & (
+      | {
+        /** Source chat ID */
+        fromChatId: InputPeerLike
+        /** Message ID to forward */
+        message: number
+      }
+      | { message: Message }
         ),
 ): Promise<Message> {
-    const { toChatId, ...rest } = params
+  const { toChatId, ...rest } = params
 
-    let msg
+  let msg
 
-    if ('fromChatId' in params) {
-        const fromPeer = await resolvePeer(client, params.fromChatId)
+  if ('fromChatId' in params) {
+    const fromPeer = await resolvePeer(client, params.fromChatId)
 
         ;[msg] = await getMessages(client, fromPeer, params.message)
 
-        if (!msg) {
-            throw new MtMessageNotFoundError(getMarkedPeerId(fromPeer), params.message, 'to copy')
+    if (!msg) {
+      throw new MtMessageNotFoundError(getMarkedPeerId(fromPeer), params.message, 'to copy')
+    }
+  } else {
+    msg = params.message
+  }
+
+  if (msg.raw._ === 'messageService') {
+    throw new MtArgumentError("Service messages can't be copied")
+  }
+
+  if (msg.media && msg.media.type !== 'webpage' && msg.media.type !== 'invoice') {
+    let caption: InputText | undefined = params.caption
+
+    if (!caption) {
+      if (msg.raw.entities?.length) {
+        caption = {
+          text: msg.raw.message,
+          entities: msg.raw.entities,
         }
-    } else {
-        msg = params.message
+      } else {
+        caption = msg.raw.message
+      }
     }
 
-    if (msg.raw._ === 'messageService') {
-        throw new MtArgumentError("Service messages can't be copied")
-    }
+    return sendMedia(
+      client,
+      toChatId,
+      {
+        type: 'auto',
+        file: msg.media.inputMedia,
+        caption,
+      },
+      rest,
+    )
+  }
 
-    if (msg.media && msg.media.type !== 'webpage' && msg.media.type !== 'invoice') {
-        let caption: InputText | undefined = params.caption
-
-        if (!caption) {
-            if (msg.raw.entities?.length) {
-                caption = {
-                    text: msg.raw.message,
-                    entities: msg.raw.entities,
-                }
-            } else {
-                caption = msg.raw.message
-            }
-        }
-
-        return sendMedia(
-            client,
-            toChatId,
-            {
-                type: 'auto',
-                file: msg.media.inputMedia,
-                caption,
-            },
-            rest,
-        )
-    }
-
-    return sendText(client, toChatId, msg.textWithEntities, rest)
+  return sendText(client, toChatId, msg.textWithEntities, rest)
 }

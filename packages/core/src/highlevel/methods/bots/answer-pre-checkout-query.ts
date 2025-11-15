@@ -11,21 +11,21 @@ import { assertTrue } from '../../../utils/type-assertions.js'
  * @param queryId  Pre-checkout query ID
  */
 export async function answerPreCheckoutQuery(
-    client: ITelegramClient,
-    queryId: tl.Long | PreCheckoutQuery,
-    params?: {
-        /** If pre-checkout is rejected, error message to show to the user */
-        error?: string
-    },
+  client: ITelegramClient,
+  queryId: tl.Long | PreCheckoutQuery,
+  params?: {
+    /** If pre-checkout is rejected, error message to show to the user */
+    error?: string
+  },
 ): Promise<void> {
-    const { error } = params ?? {}
+  const { error } = params ?? {}
 
-    const r = await client.call({
-        _: 'messages.setBotPrecheckoutResults',
-        queryId: Long.isLong(queryId) ? queryId : queryId.queryId,
-        success: !error,
-        error,
-    })
+  const r = await client.call({
+    _: 'messages.setBotPrecheckoutResults',
+    queryId: Long.isLong(queryId) ? queryId : queryId.queryId,
+    success: !error,
+    error,
+  })
 
-    assertTrue('messages.setBotPrecheckoutResults', r)
+  assertTrue('messages.setBotPrecheckoutResults', r)
 }

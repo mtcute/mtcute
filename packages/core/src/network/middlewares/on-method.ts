@@ -35,20 +35,20 @@ import type { RpcCallMiddleware, RpcCallMiddlewareContext } from '../network-man
  * ```
  */
 export function onMethod<T extends tl.RpcMethod['_']>(
-    method: T,
-    middleware: Middleware<
-      Omit<RpcCallMiddlewareContext, 'request'> & {
-          request: Extract<tl.RpcMethod, { _: T }>
-      },
-        tl.RpcCallReturn[T]
-    >,
+  method: T,
+  middleware: Middleware<
+    Omit<RpcCallMiddlewareContext, 'request'> & {
+      request: Extract<tl.RpcMethod, { _: T }>
+    },
+    tl.RpcCallReturn[T]
+  >,
 ): RpcCallMiddleware {
-    return async (ctx, next) => {
-        if (ctx.request._ !== method) {
-            return next(ctx)
-        }
-
-        // eslint-disable-next-line
-        return middleware(ctx as any, next)
+  return async (ctx, next) => {
+    if (ctx.request._ !== method) {
+      return next(ctx)
     }
+
+    // eslint-disable-next-line
+        return middleware(ctx as any, next)
+  }
 }

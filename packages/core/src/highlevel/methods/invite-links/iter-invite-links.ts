@@ -16,51 +16,51 @@ import { getInviteLinks } from './get-invite-links.js'
  * @param params
  */
 export async function* iterInviteLinks(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    params?: Parameters<typeof getInviteLinks>[2] & {
-        /**
-         * Limit the number of invite links to be fetched.
-         * By default, all links are fetched.
-         */
-        limit?: number
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  params?: Parameters<typeof getInviteLinks>[2] & {
+    /**
+     * Limit the number of invite links to be fetched.
+     * By default, all links are fetched.
+     */
+    limit?: number
 
-        /**
-         * Size of chunks which are fetched. Usually not needed.
-         *
-         * @default  `100`
-         */
-        chunkSize?: number
-    },
+    /**
+     * Size of chunks which are fetched. Usually not needed.
+     *
+     * @default  `100`
+     */
+    chunkSize?: number
+  },
 ): AsyncIterableIterator<ChatInviteLink> {
-    if (!params) params = {}
+  if (!params) params = {}
 
-    const { revoked = false, limit = Infinity, chunkSize = 100, admin } = params
+  const { revoked = false, limit = Infinity, chunkSize = 100, admin } = params
 
-    let { offset } = params
+  let { offset } = params
 
-    let current = 0
+  let current = 0
 
-    const peer = await resolvePeer(client, chatId)
-    const adminResolved = admin ? await resolvePeer(client, admin) : ({ _: 'inputUserSelf' } as const)
+  const peer = await resolvePeer(client, chatId)
+  const adminResolved = admin ? await resolvePeer(client, admin) : ({ _: 'inputUserSelf' } as const)
 
-    for (;;) {
-        const links = await getInviteLinks(client, peer, {
-            admin: adminResolved,
-            revoked,
-            limit: Math.min(chunkSize, limit - current),
-            offset,
-        })
+  for (;;) {
+    const links = await getInviteLinks(client, peer, {
+      admin: adminResolved,
+      revoked,
+      limit: Math.min(chunkSize, limit - current),
+      offset,
+    })
 
-        if (!links.length) return
+    if (!links.length) return
 
-        for (const link of links) {
-            yield link
+    for (const link of links) {
+      yield link
 
-            if (++current >= limit) break
-        }
-
-        if (!links.next) return
-        offset = links.next
+      if (++current >= limit) break
     }
+
+    if (!links.next) return
+    offset = links.next
+  }
 }

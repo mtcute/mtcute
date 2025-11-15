@@ -14,63 +14,63 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param peers  Peers for which to fetch dialogs.
  */
 export async function getPeerDialogs(
-    client: ITelegramClient,
-    peers: MaybeArray<InputPeerLike>,
+  client: ITelegramClient,
+  peers: MaybeArray<InputPeerLike>,
 ): Promise<(Dialog | null)[]> {
-    if (!Array.isArray(peers)) {
-        let peer: tl.TypeInputPeer
-        try {
-            peer = await resolvePeer(client, peers)
-        } catch (e) {
-            if (e instanceof MtPeerNotFoundError) {
-                return [null]
-            }
-            throw e
-        }
-
-        const res = await client.call({
-            _: 'messages.getPeerDialogs',
-            peers: [
-                {
-                    _: 'inputDialogPeer',
-                    peer,
-                },
-            ],
-        })
-
-        return Dialog.parseTlDialogs(res)
+  if (!Array.isArray(peers)) {
+    let peer: tl.TypeInputPeer
+    try {
+      peer = await resolvePeer(client, peers)
+    } catch (e) {
+      if (e instanceof MtPeerNotFoundError) {
+        return [null]
+      }
+      throw e
     }
 
-    const resolved = await resolvePeerMany(client, peers)
+    const res = await client.call({
+      _: 'messages.getPeerDialogs',
+      peers: [
+        {
+          _: 'inputDialogPeer',
+          peer,
+        },
+      ],
+    })
 
-    const dialogPeers: tl.TypeInputDialogPeer[] = []
-    const result: (Dialog | null)[] = []
-    const peerToIdx = new Map<number, number>()
-    for (let i = 0; i < resolved.length; i++) {
-        result[i] = null
+    return Dialog.parseTlDialogs(res)
+  }
 
-        const peer = resolved[i]
-        if (!peer || peer._ === 'inputPeerEmpty') {
-            continue
-        }
+  const resolved = await resolvePeerMany(client, peers)
 
-        dialogPeers.push({
-            _: 'inputDialogPeer',
-            peer,
-        })
-        peerToIdx.set(getMarkedPeerId(peer), i)
+  const dialogPeers: tl.TypeInputDialogPeer[] = []
+  const result: (Dialog | null)[] = []
+  const peerToIdx = new Map<number, number>()
+  for (let i = 0; i < resolved.length; i++) {
+    result[i] = null
+
+    const peer = resolved[i]
+    if (!peer || peer._ === 'inputPeerEmpty') {
+      continue
     }
 
-    const dialogs = Dialog.parseTlDialogs(await client.call({
-        _: 'messages.getPeerDialogs',
-        peers: dialogPeers,
-    }))
+    dialogPeers.push({
+      _: 'inputDialogPeer',
+      peer,
+    })
+    peerToIdx.set(getMarkedPeerId(peer), i)
+  }
 
-    for (const dialog of dialogs) {
-        const peerIdx = peerToIdx.get(dialog.peer.id)
-        if (peerIdx === undefined) continue // wtf?
-        result[peerIdx] = dialog
-    }
+  const dialogs = Dialog.parseTlDialogs(await client.call({
+    _: 'messages.getPeerDialogs',
+    peers: dialogPeers,
+  }))
 
-    return result
+  for (const dialog of dialogs) {
+    const peerIdx = peerToIdx.get(dialog.peer.id)
+    if (peerIdx === undefined) continue // wtf?
+    result[peerIdx] = dialog
+  }
+
+  return result
 }

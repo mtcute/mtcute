@@ -18,52 +18,52 @@ import { toReactionEmoji } from '../reactions/types.js'
  * Reactions sent by other bots are not received.
  */
 export class BotReactionUpdate {
-    constructor(
-        readonly raw: tl.RawUpdateBotMessageReaction,
-        readonly _peers: PeersIndex,
-    ) {}
+  constructor(
+    readonly raw: tl.RawUpdateBotMessageReaction,
+    readonly _peers: PeersIndex,
+  ) {}
 
-    /**
-     * Chat where the reaction has been changed
-     */
-    get chat(): Peer {
-        return parsePeer(this.raw.peer, this._peers)
-    }
+  /**
+   * Chat where the reaction has been changed
+   */
+  get chat(): Peer {
+    return parsePeer(this.raw.peer, this._peers)
+  }
 
-    /**
-     * ID of the message where the reaction has been changed
-     */
-    get messageId(): number {
-        return this.raw.msgId
-    }
+  /**
+   * ID of the message where the reaction has been changed
+   */
+  get messageId(): number {
+    return this.raw.msgId
+  }
 
-    /**
-     * Date when the reaction has been changed
-     */
-    get date(): Date {
-        return new Date(this.raw.date * 1000)
-    }
+  /**
+   * Date when the reaction has been changed
+   */
+  get date(): Date {
+    return new Date(this.raw.date * 1000)
+  }
 
-    /**
-     * ID of the user who has set/removed the reaction
-     */
-    get actor(): Peer {
-        return parsePeer(this.raw.actor, this._peers)
-    }
+  /**
+   * ID of the user who has set/removed the reaction
+   */
+  get actor(): Peer {
+    return parsePeer(this.raw.actor, this._peers)
+  }
 
-    /**
-     * List of reactions before the change
-     */
-    get before(): InputReaction[] {
-        return this.raw.oldReactions.map(it => toReactionEmoji(it))
-    }
+  /**
+   * List of reactions before the change
+   */
+  get before(): InputReaction[] {
+    return this.raw.oldReactions.map(it => toReactionEmoji(it))
+  }
 
-    /**
-     * List of reactions after the change
-     */
-    get after(): InputReaction[] {
-        return this.raw.newReactions.map(it => toReactionEmoji(it))
-    }
+  /**
+   * List of reactions after the change
+   */
+  get after(): InputReaction[] {
+    return this.raw.newReactions.map(it => toReactionEmoji(it))
+  }
 }
 
 memoizeGetters(BotReactionUpdate, ['chat', 'actor', 'before', 'after'])
@@ -78,38 +78,38 @@ makeInspectable(BotReactionUpdate)
  * reacted to a message is not visible (e.g. channels).
  */
 export class BotReactionCountUpdate {
-    constructor(
-        readonly raw: tl.RawUpdateBotMessageReactions,
-        readonly _peers: PeersIndex,
-    ) {}
+  constructor(
+    readonly raw: tl.RawUpdateBotMessageReactions,
+    readonly _peers: PeersIndex,
+  ) {}
 
-    /**
-     * Chat where the reaction has been changed
-     */
-    get chat(): Peer {
-        return parsePeer(this.raw.peer, this._peers)
-    }
+  /**
+   * Chat where the reaction has been changed
+   */
+  get chat(): Peer {
+    return parsePeer(this.raw.peer, this._peers)
+  }
 
-    /**
-     * ID of the message where the reaction has been changed
-     */
-    get messageId(): number {
-        return this.raw.msgId
-    }
+  /**
+   * ID of the message where the reaction has been changed
+   */
+  get messageId(): number {
+    return this.raw.msgId
+  }
 
-    /**
-     * Date when the reaction has been changed
-     */
-    get date(): Date {
-        return new Date(this.raw.date * 1000)
-    }
+  /**
+   * Date when the reaction has been changed
+   */
+  get date(): Date {
+    return new Date(this.raw.date * 1000)
+  }
 
-    /**
-     * The new list of reactions to the message
-     */
-    get reactions(): ReactionCount[] {
-        return this.raw.reactions.map(it => new ReactionCount(it))
-    }
+  /**
+   * The new list of reactions to the message
+   */
+  get reactions(): ReactionCount[] {
+    return this.raw.reactions.map(it => new ReactionCount(it))
+  }
 }
 
 memoizeGetters(BotReactionCountUpdate, ['chat'])

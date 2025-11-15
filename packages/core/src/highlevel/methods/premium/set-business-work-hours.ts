@@ -10,47 +10,47 @@ import { businessWorkHoursDaysToRaw } from '../../types/premium/business-work-ho
  * Set current user's business work hours.
  */
 export async function setBusinessWorkHours(
-    client: ITelegramClient,
-    params:
+  client: ITelegramClient,
+  params:
         | ({
-            /** Timezone in which the hours are defined */
-            timezone: string
+          /** Timezone in which the hours are defined */
+          timezone: string
         } & (
           | {
-              /**
-               * Business work intervals, per-day (like available in {@link BusinessWorkHours.days})
-               */
-              hours: ReadonlyArray<BusinessWorkHoursDay>
+            /**
+             * Business work intervals, per-day (like available in {@link BusinessWorkHours.days})
+             */
+            hours: ReadonlyArray<BusinessWorkHoursDay>
           }
           | {
-              /** Business work intervals, raw intervals */
-              intervals: tl.TypeBusinessWeeklyOpen[]
+            /** Business work intervals, raw intervals */
+            intervals: tl.TypeBusinessWeeklyOpen[]
           }
           ))
           | null,
 ): Promise<void> {
-    let businessWorkHours: tl.TypeBusinessWorkHours | undefined
+  let businessWorkHours: tl.TypeBusinessWorkHours | undefined
 
-    if (params) {
-        let weeklyOpen: tl.TypeBusinessWeeklyOpen[]
+  if (params) {
+    let weeklyOpen: tl.TypeBusinessWeeklyOpen[]
 
-        if ('hours' in params) {
-            weeklyOpen = businessWorkHoursDaysToRaw(params.hours)
-        } else {
-            weeklyOpen = params.intervals
-        }
-
-        businessWorkHours = {
-            _: 'businessWorkHours',
-            timezoneId: params.timezone,
-            weeklyOpen,
-        }
+    if ('hours' in params) {
+      weeklyOpen = businessWorkHoursDaysToRaw(params.hours)
+    } else {
+      weeklyOpen = params.intervals
     }
 
-    const res = await client.call({
-        _: 'account.updateBusinessWorkHours',
-        businessWorkHours,
-    })
+    businessWorkHours = {
+      _: 'businessWorkHours',
+      timezoneId: params.timezone,
+      weeklyOpen,
+    }
+  }
 
-    assertTrue('account.updateBusinessWorkHours', res)
+  const res = await client.call({
+    _: 'account.updateBusinessWorkHours',
+    businessWorkHours,
+  })
+
+  assertTrue('account.updateBusinessWorkHours', res)
 }

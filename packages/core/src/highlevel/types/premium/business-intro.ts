@@ -10,33 +10,33 @@ import { parseDocument } from '../media/document-utils.js'
  * when a user opens a chat with a business account for the first time.
  */
 export class BusinessIntro {
-    constructor(readonly raw: tl.RawBusinessIntro) {}
+  constructor(readonly raw: tl.RawBusinessIntro) {}
 
-    /**
-     * Title of the intro.
-     */
-    get title(): string {
-        return this.raw.title
-    }
+  /**
+   * Title of the intro.
+   */
+  get title(): string {
+    return this.raw.title
+  }
 
-    /**
-     * Description of the intro.
-     */
-    get description(): string {
-        return this.raw.description
-    }
+  /**
+   * Description of the intro.
+   */
+  get description(): string {
+    return this.raw.description
+  }
 
-    /**
-     * Sticker of the intro.
-     */
-    get sticker(): Sticker | null {
-        if (!this.raw.sticker || this.raw.sticker._ === 'documentEmpty') return null
+  /**
+   * Sticker of the intro.
+   */
+  get sticker(): Sticker | null {
+    if (!this.raw.sticker || this.raw.sticker._ === 'documentEmpty') return null
 
-        const doc = parseDocument(this.raw.sticker)
-        if (doc.type !== 'sticker') return null
+    const doc = parseDocument(this.raw.sticker)
+    if (doc.type !== 'sticker') return null
 
-        return doc
-    }
+    return doc
+  }
 }
 
 makeInspectable(BusinessIntro)

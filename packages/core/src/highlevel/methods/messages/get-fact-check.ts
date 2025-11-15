@@ -12,21 +12,21 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param msgIds  One or more message IDs
  */
 export async function getFactCheck(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    msgIds: MaybeArray<number>,
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  msgIds: MaybeArray<number>,
 ): Promise<(FactCheck | null)[]> {
-    const res = await client.call({
-        _: 'messages.getFactCheck',
-        peer: await resolvePeer(client, chatId),
-        msgId: Array.isArray(msgIds) ? msgIds : [msgIds],
-    })
+  const res = await client.call({
+    _: 'messages.getFactCheck',
+    peer: await resolvePeer(client, chatId),
+    msgId: Array.isArray(msgIds) ? msgIds : [msgIds],
+  })
 
-    return res.map((x) => {
-        if (x.hash.isZero()) {
-            return null
-        }
+  return res.map((x) => {
+    if (x.hash.isZero()) {
+      return null
+    }
 
-        return new FactCheck(x)
-    })
+    return new FactCheck(x)
+  })
 }

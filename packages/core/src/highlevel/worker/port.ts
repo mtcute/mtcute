@@ -18,164 +18,164 @@ import { DEFAULT_WORKER_ID, deserializeResult } from './protocol.js'
 import { TelegramStorageProxy } from './storage.js'
 
 export interface TelegramWorkerPortOptions {
-    worker: SomeWorker
-    workerId?: string
-    platform: ICorePlatform
+  worker: SomeWorker
+  workerId?: string
+  platform: ICorePlatform
 }
 
 export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> implements ITelegramClient {
-    readonly log: LogManager
-    readonly platform: ICorePlatform
+  readonly log: LogManager
+  readonly platform: ICorePlatform
 
-    private _connection
-    private _invoker
+  private _connection
+  private _invoker
 
-    readonly storage: TelegramStorageProxy
-    readonly appConfig: AppConfigManagerProxy
-    // todo: ideally timers should be handled on the worker side,
-    // but i'm not sure yet of the best way to handle multiple clients (e.g. in SharedWorker-s)
-    // (with one worker client it's not that big of a deal)
-    readonly timers: TimersManager
+  readonly storage: TelegramStorageProxy
+  readonly appConfig: AppConfigManagerProxy
+  // todo: ideally timers should be handled on the worker side,
+  // but i'm not sure yet of the best way to handle multiple clients (e.g. in SharedWorker-s)
+  // (with one worker client it's not that big of a deal)
+  readonly timers: TimersManager
 
-    // bound methods
-    readonly prepare: ITelegramClient['prepare']
-    private _connect
-    readonly disconnect: ITelegramClient['disconnect']
-    readonly destroy_: ITelegramClient['destroy']
-    readonly notifyLoggedIn: ITelegramClient['notifyLoggedIn']
-    readonly notifyLoggedOut: ITelegramClient['notifyLoggedOut']
-    readonly notifyChannelOpened: ITelegramClient['notifyChannelOpened']
-    readonly notifyChannelClosed: ITelegramClient['notifyChannelClosed']
-    readonly importSession: ITelegramClient['importSession']
-    readonly exportSession: ITelegramClient['exportSession']
-    readonly handleClientUpdate: ITelegramClient['handleClientUpdate']
-    readonly getApiCredentials: ITelegramClient['getApiCredentials']
-    readonly getPoolSize: ITelegramClient['getPoolSize']
-    readonly getPrimaryDcId: ITelegramClient['getPrimaryDcId']
-    readonly changePrimaryDc: ITelegramClient['changePrimaryDc']
-    readonly computeSrpParams: ITelegramClient['computeSrpParams']
-    readonly computeNewPasswordHash: ITelegramClient['computeNewPasswordHash']
-    readonly startUpdatesLoop: ITelegramClient['startUpdatesLoop']
-    readonly stopUpdatesLoop: ITelegramClient['stopUpdatesLoop']
-    readonly getMtprotoMessageId: ITelegramClient['getMtprotoMessageId']
-    readonly recreateDc: ITelegramClient['recreateDc']
+  // bound methods
+  readonly prepare: ITelegramClient['prepare']
+  private _connect
+  readonly disconnect: ITelegramClient['disconnect']
+  readonly destroy_: ITelegramClient['destroy']
+  readonly notifyLoggedIn: ITelegramClient['notifyLoggedIn']
+  readonly notifyLoggedOut: ITelegramClient['notifyLoggedOut']
+  readonly notifyChannelOpened: ITelegramClient['notifyChannelOpened']
+  readonly notifyChannelClosed: ITelegramClient['notifyChannelClosed']
+  readonly importSession: ITelegramClient['importSession']
+  readonly exportSession: ITelegramClient['exportSession']
+  readonly handleClientUpdate: ITelegramClient['handleClientUpdate']
+  readonly getApiCredentials: ITelegramClient['getApiCredentials']
+  readonly getPoolSize: ITelegramClient['getPoolSize']
+  readonly getPrimaryDcId: ITelegramClient['getPrimaryDcId']
+  readonly changePrimaryDc: ITelegramClient['changePrimaryDc']
+  readonly computeSrpParams: ITelegramClient['computeSrpParams']
+  readonly computeNewPasswordHash: ITelegramClient['computeNewPasswordHash']
+  readonly startUpdatesLoop: ITelegramClient['startUpdatesLoop']
+  readonly stopUpdatesLoop: ITelegramClient['stopUpdatesLoop']
+  readonly getMtprotoMessageId: ITelegramClient['getMtprotoMessageId']
+  readonly recreateDc: ITelegramClient['recreateDc']
 
-    private _abortController = new AbortController()
-    readonly stopSignal: AbortSignal = this._abortController.signal
-    readonly workerId: string
+  private _abortController = new AbortController()
+  readonly stopSignal: AbortSignal = this._abortController.signal
+  readonly workerId: string
 
-    constructor(readonly options: TelegramWorkerPortOptions) {
-        this.log = new LogManager('worker', options.platform)
-        this.platform = options.platform
+  constructor(readonly options: TelegramWorkerPortOptions) {
+    this.log = new LogManager('worker', options.platform)
+    this.platform = options.platform
 
-        this.workerId = options.workerId ?? DEFAULT_WORKER_ID
+    this.workerId = options.workerId ?? DEFAULT_WORKER_ID
 
-        this._connection = this.connectToWorker(this.options.worker, this._onMessage)
-        this._invoker = new WorkerInvoker(this._connection[0], this.workerId)
+    this._connection = this.connectToWorker(this.options.worker, this._onMessage)
+    this._invoker = new WorkerInvoker(this._connection[0], this.workerId)
 
-        this.storage = new TelegramStorageProxy(this._invoker)
-        this.appConfig = new AppConfigManagerProxy(this._invoker)
+    this.storage = new TelegramStorageProxy(this._invoker)
+    this.appConfig = new AppConfigManagerProxy(this._invoker)
 
-        const bind = this._invoker.makeBinder<ITelegramClient>('client')
+    const bind = this._invoker.makeBinder<ITelegramClient>('client')
 
-        this.prepare = bind('prepare')
-        this._connect = bind('connect')
+    this.prepare = bind('prepare')
+    this._connect = bind('connect')
 
-        this.disconnect = bind('disconnect')
-        this.destroy_ = bind('destroy')
-        this.notifyLoggedIn = bind('notifyLoggedIn')
-        this.notifyLoggedOut = bind('notifyLoggedOut')
-        this.notifyChannelOpened = bind('notifyChannelOpened')
-        this.notifyChannelClosed = bind('notifyChannelClosed')
-        this.importSession = bind('importSession')
-        this.exportSession = bind('exportSession')
-        this.handleClientUpdate = bind('handleClientUpdate', true)
-        this.getApiCredentials = bind('getApiCredentials')
-        this.getPoolSize = bind('getPoolSize')
-        this.getPrimaryDcId = bind('getPrimaryDcId')
-        this.changePrimaryDc = bind('changePrimaryDc')
-        this.computeSrpParams = bind('computeSrpParams')
-        this.computeNewPasswordHash = bind('computeNewPasswordHash')
-        this.startUpdatesLoop = bind('startUpdatesLoop')
-        this.stopUpdatesLoop = bind('stopUpdatesLoop')
-        this.getMtprotoMessageId = bind('getMtprotoMessageId')
-        this.recreateDc = bind('recreateDc')
+    this.disconnect = bind('disconnect')
+    this.destroy_ = bind('destroy')
+    this.notifyLoggedIn = bind('notifyLoggedIn')
+    this.notifyLoggedOut = bind('notifyLoggedOut')
+    this.notifyChannelOpened = bind('notifyChannelOpened')
+    this.notifyChannelClosed = bind('notifyChannelClosed')
+    this.importSession = bind('importSession')
+    this.exportSession = bind('exportSession')
+    this.handleClientUpdate = bind('handleClientUpdate', true)
+    this.getApiCredentials = bind('getApiCredentials')
+    this.getPoolSize = bind('getPoolSize')
+    this.getPrimaryDcId = bind('getPrimaryDcId')
+    this.changePrimaryDc = bind('changePrimaryDc')
+    this.computeSrpParams = bind('computeSrpParams')
+    this.computeNewPasswordHash = bind('computeNewPasswordHash')
+    this.startUpdatesLoop = bind('startUpdatesLoop')
+    this.stopUpdatesLoop = bind('stopUpdatesLoop')
+    this.getMtprotoMessageId = bind('getMtprotoMessageId')
+    this.recreateDc = bind('recreateDc')
 
-        this.timers = new TimersManager()
-        this.timers.onError(err => this.onError.emit(unknownToError(err)))
+    this.timers = new TimersManager()
+    this.timers.onError(err => this.onError.emit(unknownToError(err)))
+  }
+
+  call<T extends tl.RpcMethod>(
+    message: MustEqual<T, tl.RpcMethod>,
+    params?: RpcCallOptions,
+  ): Promise<tl.RpcCallReturn[T['_']]> {
+    if (params?.abortSignal) {
+      const { abortSignal, ...rest } = params
+
+      return this._invoker.invokeWithAbort('client', 'call', [message, rest], abortSignal) as Promise<
+        tl.RpcCallReturn[T['_']]
+      >
     }
 
-    call<T extends tl.RpcMethod>(
-        message: MustEqual<T, tl.RpcMethod>,
-        params?: RpcCallOptions,
-    ): Promise<tl.RpcCallReturn[T['_']]> {
-        if (params?.abortSignal) {
-            const { abortSignal, ...rest } = params
+    return this._invoker.invoke('client', 'call', [message, params]) as Promise<tl.RpcCallReturn[T['_']]>
+  }
 
-            return this._invoker.invokeWithAbort('client', 'call', [message, rest], abortSignal) as Promise<
-                tl.RpcCallReturn[T['_']]
-            >
-        }
+  abstract connectToWorker(worker: SomeWorker, handler: ClientMessageHandler): [SendFn, () => void]
 
-        return this._invoker.invoke('client', 'call', [message, params]) as Promise<tl.RpcCallReturn[T['_']]>
+  onServerUpdate: Emitter<tl.TypeUpdates> = new Emitter()
+  onRawUpdate: Emitter<RawUpdateInfo> = new Emitter()
+  onConnectionState: Emitter<ConnectionState> = new Emitter()
+  onError: Emitter<Error> = new Emitter()
+
+  private _onMessage: ClientMessageHandler = (message) => {
+    if (message._mtcuteWorkerId !== this.workerId) return
+    switch (message.type) {
+      case 'log':
+        this.log.handler(message.color, message.level, message.tag, message.fmt, message.args)
+        break
+      case 'server_update':
+        this.onServerUpdate.emit(deserializeResult(message.update))
+        break
+      case 'conn_state':
+        this.onConnectionState.emit(message.state)
+        break
+      case 'update': {
+        const peers = new PeersIndex(deserializeResult(message.users), deserializeResult(message.chats))
+        peers.hasMin = message.hasMin
+        this.onRawUpdate.emit({ update: deserializeResult(message.update), peers })
+        break
+      }
+      case 'result':
+        this._invoker.handleResult(message)
+        break
+      case 'error':
+        this.onError.emit(deserializeError(message.error))
+        break
+      case 'stop':
+        this._abortController.abort()
+        break
     }
+  }
 
-    abstract connectToWorker(worker: SomeWorker, handler: ClientMessageHandler): [SendFn, () => void]
+  private _destroyed = false
+  async destroy(terminate = false): Promise<void> {
+    if (this._destroyed) return
+    await this.destroy_()
+    this.timers.destroy()
+    this._connection[1]()
+    this._destroyed = true
 
-    onServerUpdate: Emitter<tl.TypeUpdates> = new Emitter()
-    onRawUpdate: Emitter<RawUpdateInfo> = new Emitter()
-    onConnectionState: Emitter<ConnectionState> = new Emitter()
-    onError: Emitter<Error> = new Emitter()
-
-    private _onMessage: ClientMessageHandler = (message) => {
-        if (message._mtcuteWorkerId !== this.workerId) return
-        switch (message.type) {
-            case 'log':
-                this.log.handler(message.color, message.level, message.tag, message.fmt, message.args)
-                break
-            case 'server_update':
-                this.onServerUpdate.emit(deserializeResult(message.update))
-                break
-            case 'conn_state':
-                this.onConnectionState.emit(message.state)
-                break
-            case 'update': {
-                const peers = new PeersIndex(deserializeResult(message.users), deserializeResult(message.chats))
-                peers.hasMin = message.hasMin
-                this.onRawUpdate.emit({ update: deserializeResult(message.update), peers })
-                break
-            }
-            case 'result':
-                this._invoker.handleResult(message)
-                break
-            case 'error':
-                this.onError.emit(deserializeError(message.error))
-                break
-            case 'stop':
-                this._abortController.abort()
-                break
-        }
+    if (terminate && 'terminate' in this.options.worker) {
+      await Promise.resolve(this.options.worker.terminate())
     }
+  }
 
-    private _destroyed = false
-    async destroy(terminate = false): Promise<void> {
-        if (this._destroyed) return
-        await this.destroy_()
-        this.timers.destroy()
-        this._connection[1]()
-        this._destroyed = true
+  invokeCustom<T extends keyof Custom>(method: T, ...args: Parameters<Custom[T]>): Promise<ReturnType<Custom[T]>> {
+    return this._invoker.invoke('custom', method as string, args) as Promise<ReturnType<Custom[T]>>
+  }
 
-        if (terminate && 'terminate' in this.options.worker) {
-            await Promise.resolve(this.options.worker.terminate())
-        }
-    }
-
-    invokeCustom<T extends keyof Custom>(method: T, ...args: Parameters<Custom[T]>): Promise<ReturnType<Custom[T]>> {
-        return this._invoker.invoke('custom', method as string, args) as Promise<ReturnType<Custom[T]>>
-    }
-
-    async connect(): Promise<void> {
-        await this._connect()
-        await this.storage.self.fetch() // force cache self locally
-    }
+  async connect(): Promise<void> {
+    await this._connect()
+    await this.storage.self.fetch() // force cache self locally
+  }
 }

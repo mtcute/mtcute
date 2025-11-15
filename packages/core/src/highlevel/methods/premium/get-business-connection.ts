@@ -11,19 +11,19 @@ import { assertIsUpdatesGroup } from '../../updates/utils.js'
  * @param connectionId  ID of the business connection
  */
 export async function getBusinessConnection(
-    client: ITelegramClient,
-    connectionId: string,
+  client: ITelegramClient,
+  connectionId: string,
 ): Promise<BusinessConnection> {
-    const res = await client.call({
-        _: 'account.getBotBusinessConnection',
-        connectionId,
-    })
+  const res = await client.call({
+    _: 'account.getBotBusinessConnection',
+    connectionId,
+  })
 
-    assertIsUpdatesGroup('account.getBotBusinessConnection', res)
-    client.handleClientUpdate(res)
-    assertTypeIs('account.getBotBusinessConnection', res.updates[0], 'updateBotBusinessConnect')
+  assertIsUpdatesGroup('account.getBotBusinessConnection', res)
+  client.handleClientUpdate(res)
+  assertTypeIs('account.getBotBusinessConnection', res.updates[0], 'updateBotBusinessConnect')
 
-    const peers = PeersIndex.from(res)
+  const peers = PeersIndex.from(res)
 
-    return new BusinessConnection(res.updates[0].connection, peers)
+  return new BusinessConnection(res.updates[0].connection, peers)
 }

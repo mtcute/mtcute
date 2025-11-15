@@ -14,47 +14,47 @@ import { parseDocument } from '../../types/media/document-utils.js'
  * @param ids  IDs of the stickers (as defined in {@link MessageEntity.emojiId})
  */
 export async function getCustomEmojis(client: ITelegramClient, ids: tl.Long[]): Promise<Sticker[]> {
-    const res = await client.call({
-        _: 'messages.getCustomEmojiDocuments',
-        documentId: ids,
-    })
+  const res = await client.call({
+    _: 'messages.getCustomEmojiDocuments',
+    documentId: ids,
+  })
 
-    return res.map((it) => {
-        assertTypeIs('getCustomEmojis', it, 'document')
+  return res.map((it) => {
+    assertTypeIs('getCustomEmojis', it, 'document')
 
-        const doc = parseDocument(it)
+    const doc = parseDocument(it)
 
-        if (doc.type !== 'sticker') {
-            throw new MtTypeAssertionError('getCustomEmojis', 'sticker', doc.type)
-        }
+    if (doc.type !== 'sticker') {
+      throw new MtTypeAssertionError('getCustomEmojis', 'sticker', doc.type)
+    }
 
-        return doc
-    })
+    return doc
+  })
 }
 
 /**
  * Given one or more messages, extract all unique custom emojis from it and fetch them
  */
 export async function getCustomEmojisFromMessages(
-    client: ITelegramClient,
-    messages: MaybeArray<Message>,
+  client: ITelegramClient,
+  messages: MaybeArray<Message>,
 ): Promise<Sticker[]> {
-    const set = new LongSet()
+  const set = new LongSet()
 
-    if (!Array.isArray(messages)) messages = [messages]
+  if (!Array.isArray(messages)) messages = [messages]
 
-    for (const { raw } of messages) {
-        if (raw._ === 'messageService' || !raw.entities) continue
+  for (const { raw } of messages) {
+    if (raw._ === 'messageService' || !raw.entities) continue
 
-        for (const entity of raw.entities) {
-            if (entity._ === 'messageEntityCustomEmoji') {
-                set.add(entity.documentId)
-            }
-        }
+    for (const entity of raw.entities) {
+      if (entity._ === 'messageEntityCustomEmoji') {
+        set.add(entity.documentId)
+      }
     }
+  }
 
-    const arr = [...set]
-    if (!arr.length) return []
+  const arr = [...set]
+  if (!arr.length) return []
 
-    return getCustomEmojis(client, arr)
+  return getCustomEmojis(client, arr)
 }

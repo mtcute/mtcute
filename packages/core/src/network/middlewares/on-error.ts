@@ -31,19 +31,19 @@ import { isTlRpcError } from '../../utils/type-assertions.js'
  * ```
  */
 export function onRpcError(
-    handler: (ctx: RpcCallMiddlewareContext, error: mtp.RawMt_rpc_error) => MaybePromise<unknown>,
+  handler: (ctx: RpcCallMiddlewareContext, error: mtp.RawMt_rpc_error) => MaybePromise<unknown>,
 ): RpcCallMiddleware {
-    return async (ctx, next) => {
-        let res = await next(ctx)
+  return async (ctx, next) => {
+    let res = await next(ctx)
 
-        if (isTlRpcError(res)) {
-            const handlerRes = await handler(ctx, res)
+    if (isTlRpcError(res)) {
+      const handlerRes = await handler(ctx, res)
 
-            if (handlerRes !== undefined) {
-                res = handlerRes
-            }
-        }
-
-        return res
+      if (handlerRes !== undefined) {
+        res = handlerRes
+      }
     }
+
+    return res
+  }
 }

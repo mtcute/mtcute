@@ -5,10 +5,10 @@ import type { BoostSlot } from '../../types/premium/boost-slot.js'
 import { getMyBoostSlots } from './get-my-boost-slots.js'
 
 // @exported
-export type CanApplyBoostResult =
-  | { can: true, replace?: Chat[], slots: BoostSlot[] }
-  | { can: false, reason: 'need_premium', slots: BoostSlot[] }
-  | { can: false, reason: 'no_slots', slots: BoostSlot[] }
+export type CanApplyBoostResult
+  = | { can: true, replace?: Chat[], slots: BoostSlot[] }
+    | { can: false, reason: 'need_premium', slots: BoostSlot[] }
+    | { can: false, reason: 'no_slots', slots: BoostSlot[] }
 
 /**
  * Check if the current user can apply boost to some channel
@@ -23,23 +23,23 @@ export type CanApplyBoostResult =
  *   - In all cases, `slots` will contain all the current user's boost slots
  */
 export async function canApplyBoost(client: ITelegramClient): Promise<CanApplyBoostResult> {
-    const myBoosts = await getMyBoostSlots(client)
+  const myBoosts = await getMyBoostSlots(client)
 
-    if (!myBoosts.length) {
-        return { can: false, reason: 'need_premium', slots: myBoosts }
-    }
+  if (!myBoosts.length) {
+    return { can: false, reason: 'need_premium', slots: myBoosts }
+  }
 
-    const emptySlots = myBoosts.filter(it => !it.occupied)
+  const emptySlots = myBoosts.filter(it => !it.occupied)
 
-    if (emptySlots.length > 0) {
-        return { can: true, slots: myBoosts }
-    }
+  if (emptySlots.length > 0) {
+    return { can: true, slots: myBoosts }
+  }
 
-    const replaceableSlots = myBoosts.filter(it => it.cooldownUntil === null)
+  const replaceableSlots = myBoosts.filter(it => it.cooldownUntil === null)
 
-    if (replaceableSlots.length) {
-        return { can: true, replace: replaceableSlots.map(it => it.chat!), slots: myBoosts }
-    }
+  if (replaceableSlots.length) {
+    return { can: true, replace: replaceableSlots.map(it => it.chat!), slots: myBoosts }
+  }
 
-    return { can: false, reason: 'no_slots', slots: myBoosts }
+  return { can: false, reason: 'no_slots', slots: myBoosts }
 }

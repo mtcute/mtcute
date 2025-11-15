@@ -12,11 +12,11 @@ import { DefaultDcsService } from './service/default-dcs.js'
 import { FutureSaltsService } from './service/future-salts.js'
 
 interface StorageManagerOptions {
-    provider: IMtStorageProvider
-    platform: ICorePlatform
-    log: Logger
-    readerMap: TlReaderMap
-    writerMap: TlWriterMap
+  provider: IMtStorageProvider
+  platform: ICorePlatform
+  log: Logger
+  readerMap: TlReaderMap
+  writerMap: TlWriterMap
 }
 
 /**
@@ -26,93 +26,93 @@ interface StorageManagerOptions {
  * @internal
  */
 export interface StorageManagerExtraOptions {
-    /**
-     * Interval in milliseconds for saving the storage.
-     *
-     * When saving, the storage is expected to persist
-     * all changes to disk, so that they are not lost.
-     */
-    saveInterval?: number
+  /**
+   * Interval in milliseconds for saving the storage.
+   *
+   * When saving, the storage is expected to persist
+   * all changes to disk, so that they are not lost.
+   */
+  saveInterval?: number
 
-    /**
-     * Whether to finalize database before exiting.
-     *
-     * @default  `true`
-     */
-    cleanup?: boolean
+  /**
+   * Whether to finalize database before exiting.
+   *
+   * @default  `true`
+   */
+  cleanup?: boolean
 }
 
 export class StorageManager {
-    readonly provider: IMtStorageProvider
-    readonly driver: IStorageDriver
-    readonly platform: ICorePlatform
-    readonly log: Logger
-    readonly dcs: DefaultDcsService
-    readonly salts: FutureSaltsService
-    readonly keys: AuthKeysService
+  readonly provider: IMtStorageProvider
+  readonly driver: IStorageDriver
+  readonly platform: ICorePlatform
+  readonly log: Logger
+  readonly dcs: DefaultDcsService
+  readonly salts: FutureSaltsService
+  readonly keys: AuthKeysService
 
-    constructor(readonly options: StorageManagerOptions & StorageManagerExtraOptions) {
-        this.provider = this.options.provider
-        this.platform = this.options.platform
-        this.driver = this.provider.driver
-        this.log = this.options.log.create('storage')
+  constructor(readonly options: StorageManagerOptions & StorageManagerExtraOptions) {
+    this.provider = this.options.provider
+    this.platform = this.options.platform
+    this.driver = this.provider.driver
+    this.log = this.options.log.create('storage')
 
-        const serviceOptions: ServiceOptions = {
-            driver: this.driver,
-            readerMap: this.options.readerMap,
-            writerMap: this.options.writerMap,
-            log: this.log,
-        }
-
-        this.dcs = new DefaultDcsService(this.provider.kv, serviceOptions)
-        this.salts = new FutureSaltsService(this.provider.kv, serviceOptions)
-        this.keys = new AuthKeysService(this.provider.authKeys, this.salts, serviceOptions)
+    const serviceOptions: ServiceOptions = {
+      driver: this.driver,
+      readerMap: this.options.readerMap,
+      writerMap: this.options.writerMap,
+      log: this.log,
     }
 
-    private _cleanupRestore?: () => void
+    this.dcs = new DefaultDcsService(this.provider.kv, serviceOptions)
+    this.salts = new FutureSaltsService(this.provider.kv, serviceOptions)
+    this.keys = new AuthKeysService(this.provider.authKeys, this.salts, serviceOptions)
+  }
 
-    private _load = asyncResettable(async () => {
-        this.driver.setup?.(this.log, this.platform)
+  private _cleanupRestore?: () => void
 
-        if (this.options.cleanup ?? true) {
-            this._cleanupRestore = this.platform.beforeExit(() => {
-                this._destroy().catch(err => this.log.error('cleanup error: %e', err))
-            })
-        }
+  private _load = asyncResettable(async () => {
+    this.driver.setup?.(this.log, this.platform)
 
-        await this.driver.load?.()
-    })
-
-    load(): Promise<void> {
-        return this._load.run()
+    if (this.options.cleanup ?? true) {
+      this._cleanupRestore = this.platform.beforeExit(() => {
+        this._destroy().catch(err => this.log.error('cleanup error: %e', err))
+      })
     }
 
-    async save(): Promise<void> {
-        await this.driver.save?.()
+    await this.driver.load?.()
+  })
+
+  load(): Promise<void> {
+    return this._load.run()
+  }
+
+  async save(): Promise<void> {
+    await this.driver.save?.()
+  }
+
+  async clear(withAuthKeys = false): Promise<void> {
+    if (withAuthKeys) {
+      await this.provider.authKeys.deleteAll()
+    }
+    await this.provider.kv.deleteAll()
+    await this.save()
+  }
+
+  private async _destroy(): Promise<void> {
+    if (!this._load.finished()) return
+    await this._load.wait()
+
+    await this.driver.destroy?.()
+    this._load.reset()
+  }
+
+  async destroy(): Promise<void> {
+    if (this._cleanupRestore) {
+      this._cleanupRestore()
+      this._cleanupRestore = undefined
     }
 
-    async clear(withAuthKeys = false): Promise<void> {
-        if (withAuthKeys) {
-            await this.provider.authKeys.deleteAll()
-        }
-        await this.provider.kv.deleteAll()
-        await this.save()
-    }
-
-    private async _destroy(): Promise<void> {
-        if (!this._load.finished()) return
-        await this._load.wait()
-
-        await this.driver.destroy?.()
-        this._load.reset()
-    }
-
-    async destroy(): Promise<void> {
-        if (this._cleanupRestore) {
-            this._cleanupRestore()
-            this._cleanupRestore = undefined
-        }
-
-        await this._destroy()
-    }
+    await this._destroy()
+  }
 }

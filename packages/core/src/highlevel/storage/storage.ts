@@ -11,58 +11,58 @@ import { RefMessagesService } from './service/ref-messages.js'
 import { UpdatesStateService } from './service/updates.js'
 
 interface TelegramStorageManagerOptions {
-    provider: ITelegramStorageProvider
+  provider: ITelegramStorageProvider
 }
 
 /** @internal */
 export interface TelegramStorageManagerExtraOptions {
-    refMessages?: RefMessagesServiceOptions
-    peers?: PeersServiceOptions
+  refMessages?: RefMessagesServiceOptions
+  peers?: PeersServiceOptions
 }
 
 export class TelegramStorageManager {
-    private provider
+  private provider
 
-    readonly updates: UpdatesStateService
-    readonly self: PublicPart<CurrentUserService>
-    readonly refMsgs: RefMessagesService
-    readonly peers: PublicPart<PeersService>
+  readonly updates: UpdatesStateService
+  readonly self: PublicPart<CurrentUserService>
+  readonly refMsgs: RefMessagesService
+  readonly peers: PublicPart<PeersService>
 
-    constructor(
-        private mt: StorageManager,
-        private options: TelegramStorageManagerOptions & TelegramStorageManagerExtraOptions,
-    ) {
-        this.provider = this.options.provider
+  constructor(
+    private mt: StorageManager,
+    private options: TelegramStorageManagerOptions & TelegramStorageManagerExtraOptions,
+  ) {
+    this.provider = this.options.provider
 
-        const serviceOptions: ServiceOptions = {
-            driver: this.mt.driver,
-            readerMap: this.mt.options.readerMap,
-            writerMap: this.mt.options.writerMap,
-            log: this.mt.log,
-        }
-
-        this.updates = new UpdatesStateService(this.provider.kv, serviceOptions)
-        this.self = new CurrentUserService(this.provider.kv, serviceOptions)
-        this.refMsgs = new RefMessagesService(
-            this.options.refMessages ?? {},
-            this.provider.refMessages,
-            serviceOptions,
-        )
-        this.peers = new PeersService(
-            this.options.peers ?? {},
-            this.provider.peers,
-            this.refMsgs,
-            serviceOptions,
-        )
+    const serviceOptions: ServiceOptions = {
+      driver: this.mt.driver,
+      readerMap: this.mt.options.readerMap,
+      writerMap: this.mt.options.writerMap,
+      log: this.mt.log,
     }
 
-    async close(): Promise<void> {
-        await this.peers.close()
-    }
+    this.updates = new UpdatesStateService(this.provider.kv, serviceOptions)
+    this.self = new CurrentUserService(this.provider.kv, serviceOptions)
+    this.refMsgs = new RefMessagesService(
+      this.options.refMessages ?? {},
+      this.provider.refMessages,
+      serviceOptions,
+    )
+    this.peers = new PeersService(
+      this.options.peers ?? {},
+      this.provider.peers,
+      this.refMsgs,
+      serviceOptions,
+    )
+  }
 
-    async clear(withAuthKeys = false): Promise<void> {
-        await this.provider.peers.deleteAll()
-        await this.provider.refMessages.deleteAll()
-        await this.mt.clear(withAuthKeys)
-    }
+  async close(): Promise<void> {
+    await this.peers.close()
+  }
+
+  async clear(withAuthKeys = false): Promise<void> {
+    await this.provider.peers.deleteAll()
+    await this.provider.refMessages.deleteAll()
+    await this.mt.clear(withAuthKeys)
+  }
 }

@@ -9,17 +9,17 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param ids  Message(s) ID(s) to delete.
  */
 export async function deleteScheduledMessages(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    ids: number[],
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  ids: number[],
 ): Promise<void> {
-    const peer = await resolvePeer(client, chatId)
+  const peer = await resolvePeer(client, chatId)
 
-    const res = await client.call({
-        _: 'messages.deleteScheduledMessages',
-        peer,
-        id: ids,
-    })
+  const res = await client.call({
+    _: 'messages.deleteScheduledMessages',
+    peer,
+    id: ids,
+  })
 
-    client.handleClientUpdate(res)
+  client.handleClientUpdate(res)
 }

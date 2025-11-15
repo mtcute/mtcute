@@ -9,34 +9,34 @@ import { resolvePeer } from '../users/resolve-peer.js'
 
 /** @internal */
 export async function _getDiscussionMessage(
-    client: ITelegramClient,
-    peer: InputPeerLike,
-    message: number,
+  client: ITelegramClient,
+  peer: InputPeerLike,
+  message: number,
 ): Promise<[tl.TypeInputPeer, number]> {
-    const inputPeer = await resolvePeer(client, peer)
+  const inputPeer = await resolvePeer(client, peer)
 
-    const res = await client.call({
-        _: 'messages.getDiscussionMessage',
-        peer: inputPeer,
-        msgId: message,
-    })
+  const res = await client.call({
+    _: 'messages.getDiscussionMessage',
+    peer: inputPeer,
+    msgId: message,
+  })
 
-    if (!res.messages.length || res.messages[0]._ === 'messageEmpty') {
-        // no discussion message (i guess?), return the same msg
-        return [inputPeer, message]
-    }
+  if (!res.messages.length || res.messages[0]._ === 'messageEmpty') {
+    // no discussion message (i guess?), return the same msg
+    return [inputPeer, message]
+  }
 
-    const msg = res.messages[0]
-    const chat = res.chats.find(it => it.id === (msg.peerId as tl.RawPeerChannel).channelId)! as tl.RawChannel
+  const msg = res.messages[0]
+  const chat = res.chats.find(it => it.id === (msg.peerId as tl.RawPeerChannel).channelId)! as tl.RawChannel
 
-    return [
-        {
-            _: 'inputPeerChannel',
-            channelId: chat.id,
-            accessHash: chat.accessHash!,
-        },
-        msg.id,
-    ]
+  return [
+    {
+      _: 'inputPeerChannel',
+      channelId: chat.id,
+      accessHash: chat.accessHash!,
+    },
+    msg.id,
+  ]
 }
 
 // public version of the same method because why not
@@ -56,26 +56,26 @@ export async function _getDiscussionMessage(
  * @param message  ID of the channel post
  */
 export async function getDiscussionMessage(
-    client: ITelegramClient,
-    params: InputMessageId,
+  client: ITelegramClient,
+  params: InputMessageId,
 ): Promise<Message | null> {
-    const { chatId, message } = normalizeInputMessageId(params)
+  const { chatId, message } = normalizeInputMessageId(params)
 
-    const inputPeer = await resolvePeer(client, chatId)
+  const inputPeer = await resolvePeer(client, chatId)
 
-    const res = await client.call({
-        _: 'messages.getDiscussionMessage',
-        peer: inputPeer,
-        msgId: message,
-    })
+  const res = await client.call({
+    _: 'messages.getDiscussionMessage',
+    peer: inputPeer,
+    msgId: message,
+  })
 
-    if (!res.messages.length || res.messages[0]._ === 'messageEmpty') {
-        // no discussion message (i guess?), return the same msg
-        return null
-    }
+  if (!res.messages.length || res.messages[0]._ === 'messageEmpty') {
+    // no discussion message (i guess?), return the same msg
+    return null
+  }
 
-    const msg = res.messages[0]
-    const peers = PeersIndex.from(res)
+  const msg = res.messages[0]
+  const peers = PeersIndex.from(res)
 
-    return new Message(msg, peers)
+  return new Message(msg, peers)
 }

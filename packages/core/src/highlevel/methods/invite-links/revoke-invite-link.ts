@@ -14,20 +14,20 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @returns  If `link` is a primary invite, newly generated invite link, otherwise the revoked link
  */
 export async function revokeInviteLink(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    link: string | ChatInviteLink,
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  link: string | ChatInviteLink,
 ): Promise<ChatInviteLink> {
-    const res = await client.call({
-        _: 'messages.editExportedChatInvite',
-        peer: await resolvePeer(client, chatId),
-        link: typeof link === 'string' ? link : link.link,
-        revoked: true,
-    })
+  const res = await client.call({
+    _: 'messages.editExportedChatInvite',
+    peer: await resolvePeer(client, chatId),
+    link: typeof link === 'string' ? link : link.link,
+    revoked: true,
+  })
 
-    const peers = PeersIndex.from(res)
+  const peers = PeersIndex.from(res)
 
-    const invite = res._ === 'messages.exportedChatInviteReplaced' ? res.newInvite : res.invite
+  const invite = res._ === 'messages.exportedChatInviteReplaced' ? res.newInvite : res.invite
 
-    return new ChatInviteLink(invite, peers)
+  return new ChatInviteLink(invite, peers)
 }

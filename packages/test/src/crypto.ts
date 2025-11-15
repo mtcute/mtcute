@@ -28,221 +28,221 @@ fa3de8e50aac96c1275591a1221c32a60a1513370a33a228e00894341b10cf44a6ae6ac250d17a36
 `.replace(/\s/g, '')
 
 export function withFakeRandom(provider: ICryptoProvider, source: string = DEFAULT_ENTROPY): ICryptoProvider {
-    const sourceBytes = hex.decode(source)
-    let offset = 0
+  const sourceBytes = hex.decode(source)
+  let offset = 0
 
-    function getRandomValues(buf: Uint8Array) {
-        if (offset + buf.length > sourceBytes.length) {
-            throw new Error('not enough entropy')
-        }
-
-        buf.set(sourceBytes.subarray(offset, offset + buf.length))
-        offset += buf.length
+  function getRandomValues(buf: Uint8Array) {
+    if (offset + buf.length > sourceBytes.length) {
+      throw new Error('not enough entropy')
     }
 
-    return new Proxy<ICryptoProvider>(provider, {
-        get(target, prop, receiver) {
-            if (prop === 'randomFill') return getRandomValues
+    buf.set(sourceBytes.subarray(offset, offset + buf.length))
+    offset += buf.length
+  }
 
-            // eslint-disable-next-line ts/no-unsafe-return
-            return Reflect.get(target, prop, receiver)
-        },
-    })
+  return new Proxy<ICryptoProvider>(provider, {
+    get(target, prop, receiver) {
+      if (prop === 'randomFill') return getRandomValues
+
+      // eslint-disable-next-line ts/no-unsafe-return
+      return Reflect.get(target, prop, receiver)
+    },
+  })
 }
 
 export function useFakeMathRandom(source: string = DEFAULT_ENTROPY): void {
-    const sourceBytes = hex.decode(source)
-    const dv = typed.toDataView(sourceBytes)
+  const sourceBytes = hex.decode(source)
+  const dv = typed.toDataView(sourceBytes)
 
-    let spy: MockInstance<() => number>
+  let spy: MockInstance<() => number>
 
-    beforeEach(() => {
-        let offset = 0
+  beforeEach(() => {
+    let offset = 0
 
-        spy = vi.spyOn(globalThis.Math, 'random').mockImplementation(() => {
-            const ret = dv.getUint32(offset, true) / 0xFFFFFFFF
-            offset += 4
+    spy = vi.spyOn(globalThis.Math, 'random').mockImplementation(() => {
+      const ret = dv.getUint32(offset, true) / 0xFFFFFFFF
+      offset += 4
 
-            return ret
-        })
+      return ret
     })
-    afterEach(() => {
-        spy.mockRestore()
-    })
+  })
+  afterEach(() => {
+    spy.mockRestore()
+  })
 }
 
 export async function defaultTestCryptoProvider(source: string = DEFAULT_ENTROPY): Promise<ICryptoProvider> {
-    const prov = withFakeRandom(defaultCryptoProvider, source)
-    await prov.initialize?.()
+  const prov = withFakeRandom(defaultCryptoProvider, source)
+  await prov.initialize?.()
 
-    return prov
+  return prov
 }
 
 export function testCryptoProvider(c: ICryptoProvider): void {
-    beforeAll(() => c.initialize?.())
+  beforeAll(() => c.initialize?.())
 
-    function gzipSyncWrap(data: Uint8Array) {
-        if (import.meta.env.TEST_ENV === 'browser') {
-            // @ts-expect-error fucking crutch because @jspm/core uses Buffer.isBuffer for some reason
-            data._isBuffer = true
+  function gzipSyncWrap(data: Uint8Array) {
+    if (import.meta.env.TEST_ENV === 'browser') {
+      // @ts-expect-error fucking crutch because @jspm/core uses Buffer.isBuffer for some reason
+      data._isBuffer = true
 
-            return new Uint8Array(gzipSync(data))
-        }
-
-        return gzipSync(data)
+      return new Uint8Array(gzipSync(data))
     }
 
-    function inflateSyncWrap(data: Uint8Array) {
-        if (import.meta.env.TEST_ENV === 'browser') {
-            // @ts-expect-error fucking crutch because @jspm/core uses Buffer.isBuffer for some reason
-            data._isBuffer = true
+    return gzipSync(data)
+  }
 
-            return new Uint8Array(inflateSync(data))
-        }
+  function inflateSyncWrap(data: Uint8Array) {
+    if (import.meta.env.TEST_ENV === 'browser') {
+      // @ts-expect-error fucking crutch because @jspm/core uses Buffer.isBuffer for some reason
+      data._isBuffer = true
 
-        return inflateSync(data)
+      return new Uint8Array(inflateSync(data))
     }
 
-    it('should calculate sha1', () => {
-        expect(hex.encode(c.sha1(utf8.encoder.encode('')))).to.eq('da39a3ee5e6b4b0d3255bfef95601890afd80709')
-        expect(hex.encode(c.sha1(utf8.encoder.encode('hello')))).to.eq('aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d')
-        expect(hex.encode(c.sha1(hex.decode('aebb1f')))).to.eq('62849d15c5dea495916c5eea8dba5f9551288850')
-    })
+    return inflateSync(data)
+  }
 
-    it('should calculate sha256', () => {
-        expect(hex.encode(c.sha256(utf8.encoder.encode('')))).to.eq(
-            'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-        )
-        expect(hex.encode(c.sha256(utf8.encoder.encode('hello')))).to.eq(
-            '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824',
-        )
-        expect(hex.encode(c.sha256(hex.decode('aebb1f')))).to.eq(
-            '2d29658aba48f2b286fe8bbddb931b7ad297e5adb5b9a6fc3aab67ef7fbf4e80',
-        )
-    })
+  it('should calculate sha1', () => {
+    expect(hex.encode(c.sha1(utf8.encoder.encode('')))).to.eq('da39a3ee5e6b4b0d3255bfef95601890afd80709')
+    expect(hex.encode(c.sha1(utf8.encoder.encode('hello')))).to.eq('aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d')
+    expect(hex.encode(c.sha1(hex.decode('aebb1f')))).to.eq('62849d15c5dea495916c5eea8dba5f9551288850')
+  })
 
-    it('should calculate hmac-sha256', async () => {
-        const key = hex.decode('aaeeff')
+  it('should calculate sha256', () => {
+    expect(hex.encode(c.sha256(utf8.encoder.encode('')))).to.eq(
+      'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    )
+    expect(hex.encode(c.sha256(utf8.encoder.encode('hello')))).to.eq(
+      '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824',
+    )
+    expect(hex.encode(c.sha256(hex.decode('aebb1f')))).to.eq(
+      '2d29658aba48f2b286fe8bbddb931b7ad297e5adb5b9a6fc3aab67ef7fbf4e80',
+    )
+  })
 
-        expect(hex.encode(await c.hmacSha256(utf8.encoder.encode(''), key))).to.eq(
-            '642711307c9e4437df09d6ebaa6bdc1b3a810c7f15c50fd1d0f8d7d5490f44dd',
-        )
-        expect(hex.encode(await c.hmacSha256(utf8.encoder.encode('hello'), key))).to.eq(
-            '39b00bab151f9868e6501655c580b5542954711181243474d46b894703b1c1c2',
-        )
-        expect(hex.encode(await c.hmacSha256(hex.decode('aebb1f'), key))).to.eq(
-            'a3a7273871808711cab17aba14f58e96f63f3ccfc5097d206f0f00ead2c3dd35',
-        )
-    })
+  it('should calculate hmac-sha256', async () => {
+    const key = hex.decode('aaeeff')
 
-    it('should derive pbkdf2 key', async () => {
-        expect(hex.encode(await c.pbkdf2(utf8.encoder.encode('pbkdf2 test'), utf8.encoder.encode('some salt'), 10))).to.eq(
-            'e43276cfa27f135f261cec8ddcf593fd74ec251038e459c165461f2308f3a7235e0744ee1aed9710b00db28d1a2112e20fea3601c60e770ac57ffe6b33ca8be1',
-        )
-    })
+    expect(hex.encode(await c.hmacSha256(utf8.encoder.encode(''), key))).to.eq(
+      '642711307c9e4437df09d6ebaa6bdc1b3a810c7f15c50fd1d0f8d7d5490f44dd',
+    )
+    expect(hex.encode(await c.hmacSha256(utf8.encoder.encode('hello'), key))).to.eq(
+      '39b00bab151f9868e6501655c580b5542954711181243474d46b894703b1c1c2',
+    )
+    expect(hex.encode(await c.hmacSha256(hex.decode('aebb1f'), key))).to.eq(
+      'a3a7273871808711cab17aba14f58e96f63f3ccfc5097d206f0f00ead2c3dd35',
+    )
+  })
 
-    it('should encrypt and decrypt aes-ctr', () => {
-        let aes = c.createAesCtr(
-            hex.decode('d450aae0bf0060a4af1044886b42a13f7c506b35255d134a7e87ab3f23a9493b'),
-            hex.decode('0182de2bd789c295c3c6c875c5e9e190'),
-            true,
-        )
+  it('should derive pbkdf2 key', async () => {
+    expect(hex.encode(await c.pbkdf2(utf8.encoder.encode('pbkdf2 test'), utf8.encoder.encode('some salt'), 10))).to.eq(
+      'e43276cfa27f135f261cec8ddcf593fd74ec251038e459c165461f2308f3a7235e0744ee1aed9710b00db28d1a2112e20fea3601c60e770ac57ffe6b33ca8be1',
+    )
+  })
 
-        const data = hex.decode('7baae571e4c2f4cfadb1931d5923aca7')
-        expect(hex.encode(aes.process(data))).eq('df5647dbb70bc393f2fb05b72f42286f')
-        expect(hex.encode(aes.process(data))).eq('3917147082672516b3177150129bc579')
-        expect(hex.encode(aes.process(data))).eq('2a7a9089270a5de45d5e3dd399cac725')
-        expect(hex.encode(aes.process(data))).eq('56d085217771398ac13583de4d677dd8')
-        expect(hex.encode(aes.process(data))).eq('cc639b488126cf36e79c4515e8012b92')
-        expect(hex.encode(aes.process(data))).eq('01384d100646cd562cc5586ec3f8f8c4')
-
-        aes.close?.()
-        aes = c.createAesCtr(
-            hex.decode('d450aae0bf0060a4af1044886b42a13f7c506b35255d134a7e87ab3f23a9493b'),
-            hex.decode('0182de2bd789c295c3c6c875c5e9e190'),
-            false,
-        )
-
-        expect(hex.encode(aes.process(hex.decode('df5647dbb70bc393f2fb05b72f42286f')))).eq(hex.encode(data))
-        expect(hex.encode(aes.process(hex.decode('3917147082672516b3177150129bc579')))).eq(hex.encode(data))
-        expect(hex.encode(aes.process(hex.decode('2a7a9089270a5de45d5e3dd399cac725')))).eq(hex.encode(data))
-        expect(hex.encode(aes.process(hex.decode('56d085217771398ac13583de4d677dd8')))).eq(hex.encode(data))
-        expect(hex.encode(aes.process(hex.decode('cc639b488126cf36e79c4515e8012b92')))).eq(hex.encode(data))
-        expect(hex.encode(aes.process(hex.decode('01384d100646cd562cc5586ec3f8f8c4')))).eq(hex.encode(data))
-
-        aes.close?.()
-    })
-
-    it('should encrypt and decrypt aes-ige', () => {
-        const aes = c.createAesIge(
-            hex.decode('5468697320697320616E20696D706C655468697320697320616E20696D706C65'),
-            hex.decode('6D656E746174696F6E206F6620494745206D6F646520666F72204F70656E5353'),
-        )
-        expect(
-            hex.encode(aes.encrypt(hex.decode('99706487a1cde613bc6de0b6f24b1c7aa448c8b9c3403e3467a8cad89340f53b'))),
-        ).to.eq('792ea8ae577b1a66cb3bd92679b8030ca54ee631976bd3a04547fdcb4639fa69')
-        expect(
-            hex.encode(aes.decrypt(hex.decode('792ea8ae577b1a66cb3bd92679b8030ca54ee631976bd3a04547fdcb4639fa69'))),
-        ).to.eq('99706487a1cde613bc6de0b6f24b1c7aa448c8b9c3403e3467a8cad89340f53b')
-    })
-
-    it(
-        'should decompose PQ to prime factors P and Q',
-        // since PQ factorization relies on RNG, it may take a while (or may not!)
-        { timeout: 10000 },
-        async () => {
-            const testFactorization = async (pq: string, p_: string, q: string) => {
-                const [p1, q1] = await c.factorizePQ(hex.decode(pq))
-                expect(hex.encode(p1)).eq(p_.toLowerCase())
-                expect(hex.encode(q1)).eq(q.toLowerCase())
-            }
-
-            // from samples at https://core.telegram.org/mtproto/samples-auth_key
-            await testFactorization('17ED48941A08F981', '494C553B', '53911073')
-            // random example
-            await testFactorization('14fcab4dfc861f45', '494c5c99', '494c778d')
-        },
+  it('should encrypt and decrypt aes-ctr', () => {
+    let aes = c.createAesCtr(
+      hex.decode('d450aae0bf0060a4af1044886b42a13f7c506b35255d134a7e87ab3f23a9493b'),
+      hex.decode('0182de2bd789c295c3c6c875c5e9e190'),
+      true,
     )
 
-    it('should correctly gzip', () => {
-        const data = new Uint8Array(1000).fill(0x42)
+    const data = hex.decode('7baae571e4c2f4cfadb1931d5923aca7')
+    expect(hex.encode(aes.process(data))).eq('df5647dbb70bc393f2fb05b72f42286f')
+    expect(hex.encode(aes.process(data))).eq('3917147082672516b3177150129bc579')
+    expect(hex.encode(aes.process(data))).eq('2a7a9089270a5de45d5e3dd399cac725')
+    expect(hex.encode(aes.process(data))).eq('56d085217771398ac13583de4d677dd8')
+    expect(hex.encode(aes.process(data))).eq('cc639b488126cf36e79c4515e8012b92')
+    expect(hex.encode(aes.process(data))).eq('01384d100646cd562cc5586ec3f8f8c4')
 
-        const compressed = c.gzip(data, 100)
+    aes.close?.()
+    aes = c.createAesCtr(
+      hex.decode('d450aae0bf0060a4af1044886b42a13f7c506b35255d134a7e87ab3f23a9493b'),
+      hex.decode('0182de2bd789c295c3c6c875c5e9e190'),
+      false,
+    )
 
-        expect(compressed).not.toBeNull()
+    expect(hex.encode(aes.process(hex.decode('df5647dbb70bc393f2fb05b72f42286f')))).eq(hex.encode(data))
+    expect(hex.encode(aes.process(hex.decode('3917147082672516b3177150129bc579')))).eq(hex.encode(data))
+    expect(hex.encode(aes.process(hex.decode('2a7a9089270a5de45d5e3dd399cac725')))).eq(hex.encode(data))
+    expect(hex.encode(aes.process(hex.decode('56d085217771398ac13583de4d677dd8')))).eq(hex.encode(data))
+    expect(hex.encode(aes.process(hex.decode('cc639b488126cf36e79c4515e8012b92')))).eq(hex.encode(data))
+    expect(hex.encode(aes.process(hex.decode('01384d100646cd562cc5586ec3f8f8c4')))).eq(hex.encode(data))
 
-        const decompressed = inflateSyncWrap(compressed!)
+    aes.close?.()
+  })
 
-        expect(compressed!.length).toBeLessThan(data.length)
-        expect(hex.encode(decompressed)).toEqual(hex.encode(data))
+  it('should encrypt and decrypt aes-ige', () => {
+    const aes = c.createAesIge(
+      hex.decode('5468697320697320616E20696D706C655468697320697320616E20696D706C65'),
+      hex.decode('6D656E746174696F6E206F6620494745206D6F646520666F72204F70656E5353'),
+    )
+    expect(
+      hex.encode(aes.encrypt(hex.decode('99706487a1cde613bc6de0b6f24b1c7aa448c8b9c3403e3467a8cad89340f53b'))),
+    ).to.eq('792ea8ae577b1a66cb3bd92679b8030ca54ee631976bd3a04547fdcb4639fa69')
+    expect(
+      hex.encode(aes.decrypt(hex.decode('792ea8ae577b1a66cb3bd92679b8030ca54ee631976bd3a04547fdcb4639fa69'))),
+    ).to.eq('99706487a1cde613bc6de0b6f24b1c7aa448c8b9c3403e3467a8cad89340f53b')
+  })
+
+  it(
+    'should decompose PQ to prime factors P and Q',
+    // since PQ factorization relies on RNG, it may take a while (or may not!)
+    { timeout: 10000 },
+    async () => {
+      const testFactorization = async (pq: string, p_: string, q: string) => {
+        const [p1, q1] = await c.factorizePQ(hex.decode(pq))
+        expect(hex.encode(p1)).eq(p_.toLowerCase())
+        expect(hex.encode(q1)).eq(q.toLowerCase())
+      }
+
+      // from samples at https://core.telegram.org/mtproto/samples-auth_key
+      await testFactorization('17ED48941A08F981', '494C553B', '53911073')
+      // random example
+      await testFactorization('14fcab4dfc861f45', '494c5c99', '494c778d')
+    },
+  )
+
+  it('should correctly gzip', () => {
+    const data = new Uint8Array(1000).fill(0x42)
+
+    const compressed = c.gzip(data, 100)
+
+    expect(compressed).not.toBeNull()
+
+    const decompressed = inflateSyncWrap(compressed!)
+
+    expect(compressed!.length).toBeLessThan(data.length)
+    expect(hex.encode(decompressed)).toEqual(hex.encode(data))
+  })
+
+  it('should correctly gunzip', () => {
+    const data = new Uint8Array(1000).fill(0x42)
+
+    const compressed = gzipSyncWrap(data)
+    const decompressed = c.gunzip(compressed)
+
+    expect(hex.encode(decompressed)).toEqual(hex.encode(data))
+  })
+
+  describe('randomBytes', () => {
+    it('should return exactly N bytes', () => {
+      expect(c.randomBytes(0).length).eq(0)
+      expect(c.randomBytes(5).length).eq(5)
+      expect(c.randomBytes(10).length).eq(10)
+      expect(c.randomBytes(256).length).eq(256)
     })
 
-    it('should correctly gunzip', () => {
-        const data = new Uint8Array(1000).fill(0x42)
-
-        const compressed = gzipSyncWrap(data)
-        const decompressed = c.gunzip(compressed)
-
-        expect(hex.encode(decompressed)).toEqual(hex.encode(data))
+    it('should not be deterministic', () => {
+      expect([...c.randomBytes(8)]).not.eql([...c.randomBytes(8)])
     })
 
-    describe('randomBytes', () => {
-        it('should return exactly N bytes', () => {
-            expect(c.randomBytes(0).length).eq(0)
-            expect(c.randomBytes(5).length).eq(5)
-            expect(c.randomBytes(10).length).eq(10)
-            expect(c.randomBytes(256).length).eq(256)
-        })
+    it('should use randomFill', () => {
+      const spy = vi.spyOn(c, 'randomFill')
+      c.randomBytes(8)
 
-        it('should not be deterministic', () => {
-            expect([...c.randomBytes(8)]).not.eql([...c.randomBytes(8)])
-        })
-
-        it('should use randomFill', () => {
-            const spy = vi.spyOn(c, 'randomFill')
-            c.randomBytes(8)
-
-            expect(spy).toHaveBeenCalled()
-        })
+      expect(spy).toHaveBeenCalled()
     })
+  })
 }

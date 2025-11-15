@@ -10,21 +10,21 @@ import { fileIdToInputPhoto } from '../../utils/convert-file-id.js'
  * @param ids  ID(s) of the photos. Can be file IDs or raw TL objects
  */
 export async function deleteProfilePhotos(
-    client: ITelegramClient,
-    ids: MaybeArray<string | tl.TypeInputPhoto>,
+  client: ITelegramClient,
+  ids: MaybeArray<string | tl.TypeInputPhoto>,
 ): Promise<void> {
-    if (!Array.isArray(ids)) ids = [ids]
+  if (!Array.isArray(ids)) ids = [ids]
 
-    const photos = ids.map((id) => {
-        if (typeof id === 'string') {
-            return fileIdToInputPhoto(id)
-        }
+  const photos = ids.map((id) => {
+    if (typeof id === 'string') {
+      return fileIdToInputPhoto(id)
+    }
 
-        return id
-    })
+    return id
+  })
 
-    await client.call({
-        _: 'photos.deletePhotos',
-        id: photos,
-    })
+  await client.call({
+    _: 'photos.deletePhotos',
+    id: photos,
+  })
 }

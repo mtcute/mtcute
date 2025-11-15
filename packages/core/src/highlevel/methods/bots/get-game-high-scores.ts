@@ -10,35 +10,35 @@ import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
  * Get high scores of a game
  */
 export async function getGameHighScores(
-    client: ITelegramClient,
-    params: InputMessageId & {
-        /** ID of the user to find high scores for */
-        userId?: InputPeerLike
-    },
+  client: ITelegramClient,
+  params: InputMessageId & {
+    /** ID of the user to find high scores for */
+    userId?: InputPeerLike
+  },
 ): Promise<GameHighScore[]> {
-    const { userId } = params
-    const { chatId, message } = normalizeInputMessageId(params)
+  const { userId } = params
+  const { chatId, message } = normalizeInputMessageId(params)
 
-    const chat = await resolvePeer(client, chatId)
+  const chat = await resolvePeer(client, chatId)
 
-    let user: tl.TypeInputUser
+  let user: tl.TypeInputUser
 
-    if (userId) {
-        user = await resolveUser(client, userId)
-    } else {
-        user = { _: 'inputUserEmpty' }
-    }
+  if (userId) {
+    user = await resolveUser(client, userId)
+  } else {
+    user = { _: 'inputUserEmpty' }
+  }
 
-    const res = await client.call({
-        _: 'messages.getGameHighScores',
-        peer: chat,
-        id: message,
-        userId: user,
-    })
+  const res = await client.call({
+    _: 'messages.getGameHighScores',
+    peer: chat,
+    id: message,
+    userId: user,
+  })
 
-    const peers = PeersIndex.from(res)
+  const peers = PeersIndex.from(res)
 
-    return res.scores.map(score => new GameHighScore(score, peers))
+  return res.scores.map(score => new GameHighScore(score, peers))
 }
 
 /**
@@ -48,30 +48,30 @@ export async function getGameHighScores(
  * @param userId  ID of the user to find high scores for
  */
 export async function getInlineGameHighScores(
-    client: ITelegramClient,
-    messageId: string | tl.TypeInputBotInlineMessageID,
-    userId?: InputPeerLike,
+  client: ITelegramClient,
+  messageId: string | tl.TypeInputBotInlineMessageID,
+  userId?: InputPeerLike,
 ): Promise<GameHighScore[]> {
-    const id = normalizeInlineId(messageId)
+  const id = normalizeInlineId(messageId)
 
-    let user: tl.TypeInputUser
+  let user: tl.TypeInputUser
 
-    if (userId) {
-        user = await resolveUser(client, userId)
-    } else {
-        user = { _: 'inputUserEmpty' }
-    }
+  if (userId) {
+    user = await resolveUser(client, userId)
+  } else {
+    user = { _: 'inputUserEmpty' }
+  }
 
-    const res = await client.call(
-        {
-            _: 'messages.getInlineGameHighScores',
-            id,
-            userId: user,
-        },
-        { dcId: id.dcId },
-    )
+  const res = await client.call(
+    {
+      _: 'messages.getInlineGameHighScores',
+      id,
+      userId: user,
+    },
+    { dcId: id.dcId },
+  )
 
-    const peers = PeersIndex.from(res)
+  const peers = PeersIndex.from(res)
 
-    return res.scores.map(score => new GameHighScore(score, peers))
+  return res.scores.map(score => new GameHighScore(score, peers))
 }

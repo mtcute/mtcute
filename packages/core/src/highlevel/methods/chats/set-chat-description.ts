@@ -12,17 +12,17 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param description  New chat description, 0-255 characters
  */
 export async function setChatDescription(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    description: string,
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  description: string,
 ): Promise<void> {
-    const chat = await resolvePeer(client, chatId)
+  const chat = await resolvePeer(client, chatId)
 
-    const r = await client.call({
-        _: 'messages.editChatAbout',
-        peer: chat,
-        about: description,
-    })
+  const r = await client.call({
+    _: 'messages.editChatAbout',
+    peer: chat,
+    about: description,
+  })
 
-    assertTrue('messages.editChatAbout', r)
+  assertTrue('messages.editChatAbout', r)
 }

@@ -22,50 +22,50 @@ import { _normalizePeerId } from './resolve-peer.js'
  * @returns
  */
 export async function isPeerAvailable(
-    client: ITelegramClient,
-    peerId: InputPeerLike,
+  client: ITelegramClient,
+  peerId: InputPeerLike,
 ): Promise<boolean> {
-    peerId = _normalizePeerId(peerId)
+  peerId = _normalizePeerId(peerId)
 
-    if (typeof peerId === 'object') {
-        // InputPeer (actual one, not mtcute.*)
-        return true
-    }
+  if (typeof peerId === 'object') {
+    // InputPeer (actual one, not mtcute.*)
+    return true
+  }
 
-    if (typeof peerId === 'number') {
-        const fromStorage = await client.storage.peers.getById(peerId)
-        if (fromStorage) return true
+  if (typeof peerId === 'number') {
+    const fromStorage = await client.storage.peers.getById(peerId)
+    if (fromStorage) return true
 
-        // in some cases, the server allows bots to use access_hash=0.
-        const [peerType] = parseMarkedPeerId(peerId)
+    // in some cases, the server allows bots to use access_hash=0.
+    const [peerType] = parseMarkedPeerId(peerId)
 
-        if (peerType === 'chat' || client.storage.self.getCached(true)?.isBot) {
-            return true
-        }
-
-        return false
-    }
-
-    if (typeof peerId === 'string') {
-        if (peerId === 'self' || peerId === 'me') {
-            // inputPeerSelf is always available
-            return true
-        }
-
-        peerId = peerId.replace(/[@+\s()]/g, '')
-
-        if (peerId.match(/^\d+$/)) {
-            // phone number
-            const fromStorage = await client.storage.peers.getByPhone(peerId)
-            if (fromStorage) return true
-        } else {
-            // username
-            const fromStorage = await client.storage.peers.getByUsername(peerId)
-            if (fromStorage) return true
-        }
-
-        return false
+    if (peerType === 'chat' || client.storage.self.getCached(true)?.isBot) {
+      return true
     }
 
     return false
+  }
+
+  if (typeof peerId === 'string') {
+    if (peerId === 'self' || peerId === 'me') {
+      // inputPeerSelf is always available
+      return true
+    }
+
+    peerId = peerId.replace(/[@+\s()]/g, '')
+
+    if (peerId.match(/^\d+$/)) {
+      // phone number
+      const fromStorage = await client.storage.peers.getByPhone(peerId)
+      if (fromStorage) return true
+    } else {
+      // username
+      const fromStorage = await client.storage.peers.getByUsername(peerId)
+      if (fromStorage) return true
+    }
+
+    return false
+  }
+
+  return false
 }

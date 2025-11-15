@@ -21,145 +21,145 @@ const SHREK_SHA256 = 'd3e6434e027f3d31dc3e05c6ea2eaf84fdd1fb00774a215f89d9ed8b56
 const LARGE_MSG = 'https://t.me/test_file_dc2/12'
 
 async function downloadAsSha256(client: TelegramClient, location: FileDownloadLocation): Promise<string> {
-    const sha = createHash('sha256')
+  const sha = createHash('sha256')
 
-    for await (const chunk of client.downloadAsIterable(location)) {
-        sha.update(chunk)
-    }
+  for await (const chunk of client.downloadAsIterable(location)) {
+    sha.update(chunk)
+  }
 
-    return sha.digest('hex')
+  return sha.digest('hex')
 }
 
 // sometimes test dcs are overloaded and we get FILE_REFERENCE_EXPIRED
 // because we got multiple -500:No workers running errors in a row
 // we currently don't have file references database, so we can just retry the test for now
 describe('3. working with files', () => {
-    describe('same-dc', () => {
-        const tg = new TelegramClient(getApiParams('dc2.session'))
+  describe('same-dc', () => {
+    const tg = new TelegramClient(getApiParams('dc2.session'))
 
-        before(() => tg.connect())
-        after(() => tg.destroy())
+    before(() => tg.connect())
+    after(() => tg.destroy())
 
-        it('should download pfp thumbs', async () => {
-            const chat = await tg.getChat(CINNAMOROLL_PFP_CHAT)
-            if (!chat.photo) expect.fail('Chat has no photo')
+    it('should download pfp thumbs', async () => {
+      const chat = await tg.getChat(CINNAMOROLL_PFP_CHAT)
+      if (!chat.photo) expect.fail('Chat has no photo')
 
-            expect(await downloadAsSha256(tg, chat.photo.big)).to.equal(CINNAMOROLL_PFP_THUMB_SHA256)
-        })
-
-        it('should download animated pfps', async () => {
-            const chat = await tg.getFullChat(CINNAMOROLL_PFP_CHAT)
-            const thumb = chat.fullPhoto?.getThumbnail(Thumbnail.THUMB_VIDEO_PROFILE)
-            if (!thumb) expect.fail('Chat has no animated pfp')
-
-            expect(await downloadAsSha256(tg, thumb)).to.equal(CINNAMOROLL_PFP_SHA256)
-        })
-
-        it('should download photos', async () => {
-            const msg = await tg.getMessageByLink(UWU_MSG)
-
-            if (msg?.media?.type !== 'photo') {
-                expect.fail('Message not found or not a photo')
-            }
-
-            expect(await downloadAsSha256(tg, msg.media)).to.equal(UWU_SHA256)
-        })
-
-        it('should download documents', async () => {
-            const msg = await tg.getMessageByLink(SHREK_MSG)
-
-            if (msg?.media?.type !== 'document') {
-                expect.fail('Message not found or not a document')
-            }
-
-            expect(await downloadAsSha256(tg, msg.media)).to.equal(SHREK_SHA256)
-        })
-
-        it('should cancel downloads', async () => {
-            const msg = await tg.getMessageByLink(LARGE_MSG)
-
-            if (msg?.media?.type !== 'document') {
-                expect.fail('Message not found or not a document')
-            }
-
-            const media = msg.media
-
-            const abort = new AbortController()
-
-            let downloaded = 0
-
-            async function download() {
-                const dl = tg.downloadAsIterable(media, { abortSignal: abort.signal })
-
-                try {
-                    for await (const chunk of dl) {
-                        downloaded += chunk.length
-                    }
-                } catch (e) {
-                    if (!(e instanceof DOMException && e.name === 'AbortError')) throw e
-                }
-            }
-
-            const promise = download()
-
-            // let it download for 10 seconds
-            // file is 1gb so it is safe to assume it will take more than that to download
-            await sleep(10000)
-            abort.abort()
-            // abort and snap the downloaded amount
-            const downloadedBefore = downloaded
-
-            const avgSpeed = downloaded / 10
-            // eslint-disable-next-line no-console
-            console.log('Average speed: %d KiB/s', avgSpeed / 1024)
-
-            // wait a bit more to make sure it's aborted
-            await sleep(2000)
-            await promise
-
-            expect(downloaded).to.equal(downloadedBefore, 'nothing should be downloaded after abort')
-        })
+      expect(await downloadAsSha256(tg, chat.photo.big)).to.equal(CINNAMOROLL_PFP_THUMB_SHA256)
     })
 
-    describe('cross-dc', () => {
-        const tg = new TelegramClient(getApiParams('dc1.session'))
+    it('should download animated pfps', async () => {
+      const chat = await tg.getFullChat(CINNAMOROLL_PFP_CHAT)
+      const thumb = chat.fullPhoto?.getThumbnail(Thumbnail.THUMB_VIDEO_PROFILE)
+      if (!thumb) expect.fail('Chat has no animated pfp')
 
-        before(() => tg.connect())
-        after(() => tg.destroy())
-
-        it('should download pfp thumbs', async () => {
-            const chat = await tg.getChat(CINNAMOROLL_PFP_CHAT)
-            if (!chat.photo) expect.fail('Chat has no photo')
-
-            expect(await downloadAsSha256(tg, chat.photo.big)).to.equal(CINNAMOROLL_PFP_THUMB_SHA256)
-        })
-
-        it('should download animated pfps', async () => {
-            const chat = await tg.getFullChat(CINNAMOROLL_PFP_CHAT)
-            const thumb = chat.fullPhoto?.getThumbnail(Thumbnail.THUMB_VIDEO_PROFILE)
-            if (!thumb) expect.fail('Chat has no animated pfp')
-
-            expect(await downloadAsSha256(tg, thumb)).to.equal(CINNAMOROLL_PFP_SHA256)
-        })
-
-        it('should download photos', async () => {
-            const msg = await tg.getMessageByLink(UWU_MSG)
-
-            if (msg?.media?.type !== 'photo') {
-                expect.fail('Message not found or not a photo')
-            }
-
-            expect(await downloadAsSha256(tg, msg.media)).to.equal(UWU_SHA256)
-        })
-
-        it('should download documents', async () => {
-            const msg = await tg.getMessageByLink(SHREK_MSG)
-
-            if (msg?.media?.type !== 'document') {
-                expect.fail('Message not found or not a document')
-            }
-
-            expect(await downloadAsSha256(tg, msg.media)).to.equal(SHREK_SHA256)
-        })
+      expect(await downloadAsSha256(tg, thumb)).to.equal(CINNAMOROLL_PFP_SHA256)
     })
+
+    it('should download photos', async () => {
+      const msg = await tg.getMessageByLink(UWU_MSG)
+
+      if (msg?.media?.type !== 'photo') {
+        expect.fail('Message not found or not a photo')
+      }
+
+      expect(await downloadAsSha256(tg, msg.media)).to.equal(UWU_SHA256)
+    })
+
+    it('should download documents', async () => {
+      const msg = await tg.getMessageByLink(SHREK_MSG)
+
+      if (msg?.media?.type !== 'document') {
+        expect.fail('Message not found or not a document')
+      }
+
+      expect(await downloadAsSha256(tg, msg.media)).to.equal(SHREK_SHA256)
+    })
+
+    it('should cancel downloads', async () => {
+      const msg = await tg.getMessageByLink(LARGE_MSG)
+
+      if (msg?.media?.type !== 'document') {
+        expect.fail('Message not found or not a document')
+      }
+
+      const media = msg.media
+
+      const abort = new AbortController()
+
+      let downloaded = 0
+
+      async function download() {
+        const dl = tg.downloadAsIterable(media, { abortSignal: abort.signal })
+
+        try {
+          for await (const chunk of dl) {
+            downloaded += chunk.length
+          }
+        } catch (e) {
+          if (!(e instanceof DOMException && e.name === 'AbortError')) throw e
+        }
+      }
+
+      const promise = download()
+
+      // let it download for 10 seconds
+      // file is 1gb so it is safe to assume it will take more than that to download
+      await sleep(10000)
+      abort.abort()
+      // abort and snap the downloaded amount
+      const downloadedBefore = downloaded
+
+      const avgSpeed = downloaded / 10
+      // eslint-disable-next-line no-console
+      console.log('Average speed: %d KiB/s', avgSpeed / 1024)
+
+      // wait a bit more to make sure it's aborted
+      await sleep(2000)
+      await promise
+
+      expect(downloaded).to.equal(downloadedBefore, 'nothing should be downloaded after abort')
+    })
+  })
+
+  describe('cross-dc', () => {
+    const tg = new TelegramClient(getApiParams('dc1.session'))
+
+    before(() => tg.connect())
+    after(() => tg.destroy())
+
+    it('should download pfp thumbs', async () => {
+      const chat = await tg.getChat(CINNAMOROLL_PFP_CHAT)
+      if (!chat.photo) expect.fail('Chat has no photo')
+
+      expect(await downloadAsSha256(tg, chat.photo.big)).to.equal(CINNAMOROLL_PFP_THUMB_SHA256)
+    })
+
+    it('should download animated pfps', async () => {
+      const chat = await tg.getFullChat(CINNAMOROLL_PFP_CHAT)
+      const thumb = chat.fullPhoto?.getThumbnail(Thumbnail.THUMB_VIDEO_PROFILE)
+      if (!thumb) expect.fail('Chat has no animated pfp')
+
+      expect(await downloadAsSha256(tg, thumb)).to.equal(CINNAMOROLL_PFP_SHA256)
+    })
+
+    it('should download photos', async () => {
+      const msg = await tg.getMessageByLink(UWU_MSG)
+
+      if (msg?.media?.type !== 'photo') {
+        expect.fail('Message not found or not a photo')
+      }
+
+      expect(await downloadAsSha256(tg, msg.media)).to.equal(UWU_SHA256)
+    })
+
+    it('should download documents', async () => {
+      const msg = await tg.getMessageByLink(SHREK_MSG)
+
+      if (msg?.media?.type !== 'document') {
+        expect.fail('Message not found or not a document')
+      }
+
+      expect(await downloadAsSha256(tg, msg.media)).to.equal(SHREK_SHA256)
+    })
+  })
 })

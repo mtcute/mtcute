@@ -11,9 +11,9 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @returns  IDs of the stores that were marked as read
  */
 export async function readStories(client: ITelegramClient, peerId: InputPeerLike, maxId: number): Promise<number[]> {
-    return client.call({
-        _: 'stories.readStories',
-        peer: await resolvePeer(client, peerId),
-        maxId,
-    })
+  return client.call({
+    _: 'stories.readStories',
+    peer: await resolvePeer(client, peerId),
+    maxId,
+  })
 }

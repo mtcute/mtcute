@@ -10,23 +10,23 @@ import { _normalizeInputText } from '../misc/normalize-text.js'
  * @param text  Text to be inserted into the message input
  */
 export async function createBusinessChatLink(
-    client: ITelegramClient,
-    text: InputText,
-    params?: {
-        /** Custom title for the link */
-        title?: string
-    },
+  client: ITelegramClient,
+  text: InputText,
+  params?: {
+    /** Custom title for the link */
+    title?: string
+  },
 ): Promise<BusinessChatLink> {
-    const [message, entities] = await _normalizeInputText(client, text)
-    const res = await client.call({
-        _: 'account.createBusinessChatLink',
-        link: {
-            _: 'inputBusinessChatLink',
-            message,
-            entities,
-            title: params?.title,
-        },
-    })
+  const [message, entities] = await _normalizeInputText(client, text)
+  const res = await client.call({
+    _: 'account.createBusinessChatLink',
+    link: {
+      _: 'inputBusinessChatLink',
+      message,
+      entities,
+      title: params?.title,
+    },
+  })
 
-    return new BusinessChatLink(res)
+  return new BusinessChatLink(res)
 }

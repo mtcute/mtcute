@@ -12,59 +12,59 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * > using {@link setUsername}/{@link setChatUsername}
  */
 export async function toggleFragmentUsername(
-    client: ITelegramClient,
-    params: {
-        /** Peer ID whose username to toggle */
-        peerId: InputPeerLike
+  client: ITelegramClient,
+  params: {
+    /** Peer ID whose username to toggle */
+    peerId: InputPeerLike
 
-        /**
-         * Username to toggle
-         */
-        username: string
+    /**
+     * Username to toggle
+     */
+    username: string
 
-        /**
-         * Whether to enable or disable the username
-         */
-        active: boolean
-    },
+    /**
+     * Whether to enable or disable the username
+     */
+    active: boolean
+  },
 ): Promise<void> {
-    const { peerId, username, active } = params
+  const { peerId, username, active } = params
 
-    const peer = await resolvePeer(client, peerId)
+  const peer = await resolvePeer(client, peerId)
 
-    if (isInputPeerUser(peer)) {
-        // either a bot or self
+  if (isInputPeerUser(peer)) {
+    // either a bot or self
 
-        if (isSelfPeer(client, peer)) {
-            // self
-            const r = await client.call({
-                _: 'account.toggleUsername',
-                username,
-                active,
-            })
+    if (isSelfPeer(client, peer)) {
+      // self
+      const r = await client.call({
+        _: 'account.toggleUsername',
+        username,
+        active,
+      })
 
-            assertTrue('account.toggleUsername', r)
+      assertTrue('account.toggleUsername', r)
 
-            return
-        }
-
-        // bot
-        const r = await client.call({
-            _: 'bots.toggleUsername',
-            bot: toInputUser(peer, peerId),
-            username,
-            active,
-        })
-
-        assertTrue('bots.toggleUsername', r)
-    } else if (isInputPeerChannel(peer)) {
-        const r = await client.call({
-            _: 'channels.toggleUsername',
-            channel: toInputChannel(peer, peerId),
-            username,
-            active,
-        })
-
-        assertTrue('channels.toggleUsername', r)
+      return
     }
+
+    // bot
+    const r = await client.call({
+      _: 'bots.toggleUsername',
+      bot: toInputUser(peer, peerId),
+      username,
+      active,
+    })
+
+    assertTrue('bots.toggleUsername', r)
+  } else if (isInputPeerChannel(peer)) {
+    const r = await client.call({
+      _: 'channels.toggleUsername',
+      channel: toInputChannel(peer, peerId),
+      username,
+      active,
+    })
+
+    assertTrue('channels.toggleUsername', r)
+  }
 }

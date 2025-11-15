@@ -8,10 +8,10 @@ import { assertTrue } from '../../../utils/type-assertions.js'
  * @param period  New TTL period, in seconds (or 0 to disable)
  */
 export async function setGlobalTtl(client: ITelegramClient, period: number): Promise<void> {
-    const r = await client.call({
-        _: 'messages.setDefaultHistoryTTL',
-        period,
-    })
+  const r = await client.call({
+    _: 'messages.setDefaultHistoryTTL',
+    period,
+  })
 
-    assertTrue('messages.setDefaultHistoryTTL', r)
+  assertTrue('messages.setDefaultHistoryTTL', r)
 }

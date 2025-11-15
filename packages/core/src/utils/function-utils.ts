@@ -1,7 +1,7 @@
 import { timers } from '@fuman/utils'
 
 export type ThrottledFunction = (() => void) & {
-    reset: () => void
+  reset: () => void
 }
 
 /**
@@ -17,62 +17,62 @@ export type ThrottledFunction = (() => void) & {
  * @param delay  Throttle delay
  */
 export function throttle(func: () => void, delay: number): ThrottledFunction {
-    let timeout: timers.Timer | null
+  let timeout: timers.Timer | null
 
-    const res: ThrottledFunction = function () {
-        if (timeout) {
-            return
-        }
-
-        const later = () => {
-            timeout = null
-            func()
-        }
-        timeout = timers.setTimeout(later, delay)
+  const res: ThrottledFunction = function () {
+    if (timeout) {
+      return
     }
 
-    res.reset = () => {
-        if (timeout) {
-            timers.clearTimeout(timeout)
-            timeout = null
-        }
+    const later = () => {
+      timeout = null
+      func()
     }
+    timeout = timers.setTimeout(later, delay)
+  }
 
-    return res
+  res.reset = () => {
+    if (timeout) {
+      timers.clearTimeout(timeout)
+      timeout = null
+    }
+  }
+
+  return res
 }
 
 export function asyncResettable<T extends(...args: any[]) => Promise<any>>(func: T): {
-    run: T
-    finished: () => boolean
-    wait: () => Promise<any> | null
-    reset: () => void
+  run: T
+  finished: () => boolean
+  wait: () => Promise<any> | null
+  reset: () => void
 } {
-    let runningPromise: Promise<any> | null = null
-    let finished = false
+  let runningPromise: Promise<any> | null = null
+  let finished = false
 
-    const run = function (...args: any[]) {
-        if (finished) return Promise.resolve()
+  const run = function (...args: any[]) {
+    if (finished) return Promise.resolve()
 
-        if (runningPromise) {
-            return runningPromise
-        }
-
-        // eslint-disable-next-line ts/no-unsafe-argument
-        runningPromise = func(...args)
-        void runningPromise.then(() => {
-            runningPromise = null
-            finished = true
-        })
-
-        return runningPromise
-    } as T
-
-    return {
-        run,
-        finished: () => finished,
-        wait: () => runningPromise,
-        reset: () => {
-            finished = false
-        },
+    if (runningPromise) {
+      return runningPromise
     }
+
+    // eslint-disable-next-line ts/no-unsafe-argument
+    runningPromise = func(...args)
+    void runningPromise.then(() => {
+      runningPromise = null
+      finished = true
+    })
+
+    return runningPromise
+  } as T
+
+  return {
+    run,
+    finished: () => finished,
+    wait: () => runningPromise,
+    reset: () => {
+      finished = false
+    },
+  }
 }

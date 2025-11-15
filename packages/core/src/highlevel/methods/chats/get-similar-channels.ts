@@ -15,20 +15,20 @@ import { resolveChannel } from '../users/resolve-peer.js'
  * > Returns empty array in case there are no similar channels available.
  */
 export async function getSimilarChannels(
-    client: ITelegramClient,
-    channel: InputPeerLike,
+  client: ITelegramClient,
+  channel: InputPeerLike,
 ): Promise<ArrayWithTotal<Chat>> {
-    const res = await client.call({
-        _: 'channels.getChannelRecommendations',
-        channel: await resolveChannel(client, channel),
-    })
+  const res = await client.call({
+    _: 'channels.getChannelRecommendations',
+    channel: await resolveChannel(client, channel),
+  })
 
-    const parsed = res.chats.map(chat => new Chat(chat))
+  const parsed = res.chats.map(chat => new Chat(chat))
 
-    switch (res._) {
-        case 'messages.chatsSlice':
-            return makeArrayWithTotal(parsed, res.count)
-        case 'messages.chats':
-            return makeArrayWithTotal(parsed, parsed.length)
-    }
+  switch (res._) {
+    case 'messages.chatsSlice':
+      return makeArrayWithTotal(parsed, res.count)
+    case 'messages.chats':
+      return makeArrayWithTotal(parsed, parsed.length)
+  }
 }

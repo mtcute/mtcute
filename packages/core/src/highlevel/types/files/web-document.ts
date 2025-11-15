@@ -6,7 +6,7 @@ import { makeInspectable } from '../../utils/index.js'
 import { FileLocation } from './file-location.js'
 
 function STUB_LOCATION(): never {
-    throw new MtArgumentError('This web document is not downloadable through Telegram')
+  throw new MtArgumentError('This web document is not downloadable through Telegram')
 }
 
 /**
@@ -20,44 +20,44 @@ function STUB_LOCATION(): never {
  * > To be sure, check `isDownloadable` property.
  */
 export class WebDocument extends FileLocation {
-    constructor(readonly raw: tl.TypeWebDocument) {
-        super(
-            raw._ === 'webDocument'
-                ? {
-                    _: 'inputWebFileLocation',
-                    url: raw.url,
-                    accessHash: raw.accessHash,
-                }
-                : STUB_LOCATION,
-            raw.size,
-        )
-        this.raw = raw
-    }
+  constructor(readonly raw: tl.TypeWebDocument) {
+    super(
+      raw._ === 'webDocument'
+        ? {
+            _: 'inputWebFileLocation',
+            url: raw.url,
+            accessHash: raw.accessHash,
+          }
+        : STUB_LOCATION,
+      raw.size,
+    )
+    this.raw = raw
+  }
 
-    /**
-     * URL to the file
-     */
-    get url(): string {
-        return this.raw.url
-    }
+  /**
+   * URL to the file
+   */
+  get url(): string {
+    return this.raw.url
+  }
 
-    /**
-     * MIME type of the file
-     */
-    get mimeType(): string {
-        return this.raw.mimeType
-    }
+  /**
+   * MIME type of the file
+   */
+  get mimeType(): string {
+    return this.raw.mimeType
+  }
 
-    /**
-     * Whether this file can be downloaded through Telegram.
-     *
-     * If `false`, you should use {@link url} to manually
-     * fetch data via HTTP(s), and trying to use `download*` methods
-     * will result in an error
-     */
-    get isDownloadable(): boolean {
-        return this.raw._ === 'webDocument'
-    }
+  /**
+   * Whether this file can be downloaded through Telegram.
+   *
+   * If `false`, you should use {@link url} to manually
+   * fetch data via HTTP(s), and trying to use `download*` methods
+   * will result in an error
+   */
+  get isDownloadable(): boolean {
+    return this.raw._ === 'webDocument'
+  }
 }
 
 makeInspectable(WebDocument)

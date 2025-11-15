@@ -6,36 +6,36 @@ import { _normalizeInputStarGift } from './_normalize-input-star-gift.js'
 
 /** Set resale price for an owned star gift */
 export async function setResaleStarGiftPrice(
-    client: ITelegramClient,
-    params: {
-        /** Star gift to update the price of */
-        gift: InputStarGift
+  client: ITelegramClient,
+  params: {
+    /** Star gift to update the price of */
+    gift: InputStarGift
 
-        /**
-         * New price of the gift (in stars), or `null` to unlist
-         */
-        price: tl.Long | number | tl.TypeStarsAmount | null
-    },
+    /**
+     * New price of the gift (in stars), or `null` to unlist
+     */
+    price: tl.Long | number | tl.TypeStarsAmount | null
+  },
 ): Promise<void> {
-    const { gift, price } = params
+  const { gift, price } = params
 
-    let starsAmount: tl.TypeStarsAmount
+  let starsAmount: tl.TypeStarsAmount
 
-    if (price === null) {
-        starsAmount = { _: 'starsAmount', amount: Long.ZERO, nanos: 0 }
-    } else if (typeof price === 'number') {
-        starsAmount = { _: 'starsAmount', amount: Long.fromNumber(price), nanos: 0 }
-    } else if (Long.isLong(price)) {
-        starsAmount = { _: 'starsAmount', amount: price, nanos: 0 }
-    } else {
-        starsAmount = price
-    }
+  if (price === null) {
+    starsAmount = { _: 'starsAmount', amount: Long.ZERO, nanos: 0 }
+  } else if (typeof price === 'number') {
+    starsAmount = { _: 'starsAmount', amount: Long.fromNumber(price), nanos: 0 }
+  } else if (Long.isLong(price)) {
+    starsAmount = { _: 'starsAmount', amount: price, nanos: 0 }
+  } else {
+    starsAmount = price
+  }
 
-    const r = await client.call({
-        _: 'payments.updateStarGiftPrice',
-        stargift: await _normalizeInputStarGift(client, gift),
-        resellAmount: starsAmount,
-    })
+  const r = await client.call({
+    _: 'payments.updateStarGiftPrice',
+    stargift: await _normalizeInputStarGift(client, gift),
+    resellAmount: starsAmount,
+  })
 
-    client.handleClientUpdate(r)
+  client.handleClientUpdate(r)
 }

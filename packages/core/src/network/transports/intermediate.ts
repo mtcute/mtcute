@@ -16,38 +16,38 @@ const PADDED_TAG = new Uint8Array([0xDD, 0xDD, 0xDD, 0xDD])
  * See https://core.telegram.org/mtproto/mtproto-transports#intermediate
  */
 export class IntermediatePacketCodec implements IPacketCodec {
-    tag(): Uint8Array {
-        return TAG
+  tag(): Uint8Array {
+    return TAG
+  }
+
+  decode(reader: Bytes, eof: boolean): Uint8Array | null {
+    if (eof) return null
+
+    if (reader.available < 8) return null
+
+    const length = read.uint32le(reader)
+
+    if (length === 4) {
+      // error
+      const code = read.int32le(reader)
+      throw new TransportError(-code)
     }
 
-    decode(reader: Bytes, eof: boolean): Uint8Array | null {
-        if (eof) return null
+    if (reader.available < length) {
+      reader.rewind(4)
 
-        if (reader.available < 8) return null
-
-        const length = read.uint32le(reader)
-
-        if (length === 4) {
-            // error
-            const code = read.int32le(reader)
-            throw new TransportError(-code)
-        }
-
-        if (reader.available < length) {
-            reader.rewind(4)
-
-            return null
-        }
-
-        return new Uint8Array(read.exactly(reader, length))
+      return null
     }
 
-    encode(frame: Uint8Array, into: ISyncWritable): void {
-        write.uint32le(into, frame.length)
-        write.bytes(into, frame)
-    }
+    return new Uint8Array(read.exactly(reader, length))
+  }
 
-    reset(): void {}
+  encode(frame: Uint8Array, into: ISyncWritable): void {
+    write.uint32le(into, frame.length)
+    write.bytes(into, frame)
+  }
+
+  reset(): void {}
 }
 
 /**
@@ -55,24 +55,24 @@ export class IntermediatePacketCodec implements IPacketCodec {
  * See https://core.telegram.org/mtproto/mtproto-transports#padded-intermediate
  */
 export class PaddedIntermediatePacketCodec extends IntermediatePacketCodec implements IPacketCodec {
-    override tag(): Uint8Array {
-        return PADDED_TAG
-    }
+  override tag(): Uint8Array {
+    return PADDED_TAG
+  }
 
-    private _crypto!: ICryptoProvider
-    setup?(crypto: ICryptoProvider): void {
-        this._crypto = crypto
-    }
+  private _crypto!: ICryptoProvider
+  setup?(crypto: ICryptoProvider): void {
+    this._crypto = crypto
+  }
 
-    override encode(frame: Uint8Array, into: ISyncWritable): void {
-        // padding size, 0-15
-        const padSize = getRandomInt(16)
+  override encode(frame: Uint8Array, into: ISyncWritable): void {
+    // padding size, 0-15
+    const padSize = getRandomInt(16)
 
-        const ret = into.writeSync(frame.length + 4 + padSize)
-        const dv = typed.toDataView(ret)
-        dv.setUint32(0, frame.length + padSize, true)
-        ret.set(frame, 4)
-        this._crypto.randomFill(ret.subarray(4 + frame.length))
-        into.disposeWriteSync()
-    }
+    const ret = into.writeSync(frame.length + 4 + padSize)
+    const dv = typed.toDataView(ret)
+    dv.setUint32(0, frame.length + padSize, true)
+    ret.set(frame, 4)
+    this._crypto.randomFill(ret.subarray(4 + frame.length))
+    into.disposeWriteSync()
+  }
 }

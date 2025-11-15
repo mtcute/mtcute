@@ -6,9 +6,9 @@ import type { ITelegramClient } from '../../client.types.js'
  * @returns  String containing email pattern to which the recovery code was sent
  */
 export function sendRecoveryCode(client: ITelegramClient): Promise<string> {
-    return client
-        .call({
-            _: 'auth.requestPasswordRecovery',
-        })
-        .then(res => res.emailPattern)
+  return client
+    .call({
+      _: 'auth.requestPasswordRecovery',
+    })
+    .then(res => res.emailPattern)
 }

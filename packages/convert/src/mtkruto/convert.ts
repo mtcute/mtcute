@@ -8,25 +8,25 @@ import { parseMtkrutoSession } from './parse.js'
 import { serializeMtkrutoSession } from './serialize.js'
 
 export function convertFromMtkrutoSession(session: MtkrutoSession | string): StringSessionData {
-    if (typeof session === 'string') {
-        session = parseMtkrutoSession(session)
-    }
+  if (typeof session === 'string') {
+    session = parseMtkrutoSession(session)
+  }
 
-    return {
-        version: 3,
-        primaryDcs: (session.isTest ? DC_MAPPING_TEST : DC_MAPPING_PROD)[session.dcId],
-        authKey: session.authKey,
-    }
+  return {
+    version: 3,
+    primaryDcs: (session.isTest ? DC_MAPPING_TEST : DC_MAPPING_PROD)[session.dcId],
+    authKey: session.authKey,
+  }
 }
 
 export function convertToMtkrutoSession(session: StringSessionData | string): string {
-    if (typeof session === 'string') {
-        session = readStringSession(session)
-    }
+  if (typeof session === 'string') {
+    session = readStringSession(session)
+  }
 
-    return serializeMtkrutoSession({
-        dcId: session.primaryDcs.main.id,
-        isTest: session.primaryDcs.main.testMode ?? false,
-        authKey: session.authKey,
-    })
+  return serializeMtkrutoSession({
+    dcId: session.primaryDcs.main.id,
+    isTest: session.primaryDcs.main.testMode ?? false,
+    authKey: session.authKey,
+  })
 }

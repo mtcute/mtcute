@@ -32,32 +32,32 @@ export class InvalidFileIdError extends FileIdError {}
  * Provided File ID cannot be converted to that TL object.
  */
 export class ConversionError extends FileIdError {
-    constructor(to: string) {
-        super(`Cannot convert given File ID to ${to}`)
-    }
+  constructor(to: string) {
+    super(`Cannot convert given File ID to ${to}`)
+  }
 }
 
 export enum FileType {
-    Thumbnail,
-    ProfilePhoto,
-    Photo,
-    VoiceNote,
-    Video,
-    Document,
-    Encrypted,
-    Temp,
-    Sticker,
-    Audio,
-    Animation,
-    EncryptedThumbnail,
-    Wallpaper,
-    VideoNote,
-    SecureRaw,
-    Secure,
-    Background,
-    DocumentAsFile,
-    Size,
-    None,
+  Thumbnail,
+  ProfilePhoto,
+  Photo,
+  VoiceNote,
+  Video,
+  Document,
+  Encrypted,
+  Temp,
+  Sticker,
+  Audio,
+  Animation,
+  EncryptedThumbnail,
+  Wallpaper,
+  VideoNote,
+  SecureRaw,
+  Secure,
+  Background,
+  DocumentAsFile,
+  Size,
+  None,
 }
 
 // naming convention just like in @mtcute/tl
@@ -75,8 +75,8 @@ export enum FileType {
  * represented simply by a secret number
  */
 export interface RawPhotoSizeSourceLegacy {
-    readonly _: 'legacy'
-    readonly secret: Long
+  readonly _: 'legacy'
+  readonly secret: Long
 }
 
 /**
@@ -84,9 +84,9 @@ export interface RawPhotoSizeSourceLegacy {
  * is provided here as a one-letter string
  */
 export interface RawPhotoSizeSourceThumbnail {
-    readonly _: 'thumbnail'
-    readonly fileType: FileType
-    readonly thumbnailType: string
+  readonly _: 'thumbnail'
+  readonly fileType: FileType
+  readonly thumbnailType: string
 }
 
 /**
@@ -95,10 +95,10 @@ export interface RawPhotoSizeSourceThumbnail {
  * hash are provided here.
  */
 export interface RawPhotoSizeSourceDialogPhoto {
-    readonly _: 'dialogPhoto'
-    readonly big: boolean
-    readonly id: number
-    readonly accessHash: Long
+  readonly _: 'dialogPhoto'
+  readonly big: boolean
+  readonly id: number
+  readonly accessHash: Long
 }
 
 /**
@@ -106,9 +106,9 @@ export interface RawPhotoSizeSourceDialogPhoto {
  * and set's ID and access hash are provided here
  */
 export interface RawPhotoSizeSourceStickerSetThumbnail {
-    readonly _: 'stickerSetThumbnail'
-    readonly id: Long
-    readonly accessHash: Long
+  readonly _: 'stickerSetThumbnail'
+  readonly id: Long
+  readonly accessHash: Long
 }
 
 /**
@@ -116,55 +116,55 @@ export interface RawPhotoSizeSourceStickerSetThumbnail {
  * volume_id, local_id and secret
  */
 export interface RawPhotoSizeSourceFullLegacy {
-    readonly _: 'fullLegacy'
-    readonly volumeId: Long
-    readonly localId: number
-    readonly secret: Long
+  readonly _: 'fullLegacy'
+  readonly volumeId: Long
+  readonly localId: number
+  readonly secret: Long
 }
 
 /**
  * This photo is a legacy dialog photo
  */
 export interface RawPhotoSizeSourceDialogPhotoLegacy extends Omit<RawPhotoSizeSourceDialogPhoto, '_'> {
-    readonly _: 'dialogPhotoLegacy'
-    readonly volumeId: Long
-    readonly localId: number
+  readonly _: 'dialogPhotoLegacy'
+  readonly volumeId: Long
+  readonly localId: number
 }
 
 /**
  * This photo is a legacy sticker set thumbnail
  */
 export interface RawPhotoSizeSourceStickerSetThumbnailLegacy extends Omit<RawPhotoSizeSourceStickerSetThumbnail, '_'> {
-    readonly _: 'stickerSetThumbnailLegacy'
-    readonly volumeId: Long
-    readonly localId: number
+  readonly _: 'stickerSetThumbnailLegacy'
+  readonly volumeId: Long
+  readonly localId: number
 }
 
 /**
  * This photo is a legacy sticker set identified by a version
  */
 export interface RawPhotoSizeSourceStickerSetThumbnailVersion extends Omit<RawPhotoSizeSourceStickerSetThumbnail, '_'> {
-    readonly _: 'stickerSetThumbnailVersion'
-    readonly version: number
+  readonly _: 'stickerSetThumbnailVersion'
+  readonly version: number
 }
 
-export type TypePhotoSizeSource =
-  | RawPhotoSizeSourceLegacy
-  | RawPhotoSizeSourceThumbnail
-  | RawPhotoSizeSourceDialogPhoto
-  | RawPhotoSizeSourceStickerSetThumbnail
-  | RawPhotoSizeSourceFullLegacy
-  | RawPhotoSizeSourceDialogPhotoLegacy
-  | RawPhotoSizeSourceStickerSetThumbnailLegacy
-  | RawPhotoSizeSourceStickerSetThumbnailVersion
+export type TypePhotoSizeSource
+  = | RawPhotoSizeSourceLegacy
+    | RawPhotoSizeSourceThumbnail
+    | RawPhotoSizeSourceDialogPhoto
+    | RawPhotoSizeSourceStickerSetThumbnail
+    | RawPhotoSizeSourceFullLegacy
+    | RawPhotoSizeSourceDialogPhotoLegacy
+    | RawPhotoSizeSourceStickerSetThumbnailLegacy
+    | RawPhotoSizeSourceStickerSetThumbnailVersion
 
 /**
  * An external web file
  */
 export interface RawWebRemoteFileLocation {
-    readonly _: 'web'
-    readonly url: string
-    readonly accessHash: Long
+  readonly _: 'web'
+  readonly url: string
+  readonly accessHash: Long
 }
 
 /**
@@ -174,10 +174,10 @@ export interface RawWebRemoteFileLocation {
  * servers.
  */
 export interface RawPhotoRemoteFileLocation {
-    readonly _: 'photo'
-    readonly id: Long
-    readonly accessHash: Long
-    readonly source: TypePhotoSizeSource
+  readonly _: 'photo'
+  readonly id: Long
+  readonly accessHash: Long
+  readonly source: TypePhotoSizeSource
 }
 
 /**
@@ -185,9 +185,9 @@ export interface RawPhotoRemoteFileLocation {
  * of ID and access hash
  */
 export interface RawCommonRemoteFileLocation {
-    readonly _: 'common'
-    readonly id: Long
-    readonly accessHash: Long
+  readonly _: 'common'
+  readonly id: Long
+  readonly accessHash: Long
 }
 
 export type TypeRemoteFileLocation = RawWebRemoteFileLocation | RawPhotoRemoteFileLocation | RawCommonRemoteFileLocation
@@ -204,29 +204,29 @@ export type TypeRemoteFileLocation = RawWebRemoteFileLocation | RawPhotoRemoteFi
  * really need to care about this type at all.
  */
 export interface RawFullRemoteFileLocation {
-    readonly _: 'remoteFileLocation'
+  readonly _: 'remoteFileLocation'
 
-    /**
-     * DC ID where this file is located
-     */
-    readonly dcId: number
-    /**
-     * Type of the file
-     */
-    readonly type: FileType
-    /**
-     * File reference (if any)
-     */
-    readonly fileReference: Uint8Array | null
-    /**
-     * Context of the file location
-     */
-    readonly location: TypeRemoteFileLocation
+  /**
+   * DC ID where this file is located
+   */
+  readonly dcId: number
+  /**
+   * Type of the file
+   */
+  readonly type: FileType
+  /**
+   * File reference (if any)
+   */
+  readonly fileReference: Uint8Array | null
+  /**
+   * Context of the file location
+   */
+  readonly location: TypeRemoteFileLocation
 }
 
 export function isFileIdLike(obj: unknown): obj is string | RawFullRemoteFileLocation {
-    return (
-        typeof obj === 'string'
-        || (obj !== null && typeof obj === 'object' && (obj as { _: unknown })._ === 'remoteFileLocation')
-    )
+  return (
+    typeof obj === 'string'
+    || (obj !== null && typeof obj === 'object' && (obj as { _: unknown })._ === 'remoteFileLocation')
+  )
 }

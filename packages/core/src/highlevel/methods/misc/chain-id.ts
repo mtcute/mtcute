@@ -5,7 +5,7 @@ import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 
 /** @internal */
 export function _getPeerChainId(client: ITelegramClient, peer: tl.TypeInputPeer, prefix = 'peer') {
-    const id = peer._ === 'inputPeerSelf' ? client.storage.self.getCached()!.userId : getMarkedPeerId(peer)
+  const id = peer._ === 'inputPeerSelf' ? client.storage.self.getCached()!.userId : getMarkedPeerId(peer)
 
-    return `${prefix}:${id}`
+  return `${prefix}:${id}`
 }

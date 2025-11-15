@@ -29,128 +29,128 @@ import { _processCommonSendParameters } from './send-common.js'
  * @param params  Additional sending parameters
  */
 export async function sendText(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    text: InputText,
-    params?: CommonSendParams & {
-        /**
-         * For bots: inline or reply markup or an instruction
-         * to hide a reply keyboard or to force a reply.
-         */
-        replyMarkup?: ReplyMarkup
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  text: InputText,
+  params?: CommonSendParams & {
+    /**
+     * For bots: inline or reply markup or an instruction
+     * to hide a reply keyboard or to force a reply.
+     */
+    replyMarkup?: ReplyMarkup
 
-        /**
-         * Whether to disable links preview in this message
-         */
-        disableWebPreview?: boolean
+    /**
+     * Whether to disable links preview in this message
+     */
+    disableWebPreview?: boolean
 
-        /**
-         * Whether to invert media position.
-         *
-         * Currently only supported for web previews and makes the
-         * client render the preview above the caption and not below.
-         */
-        invertMedia?: boolean
-    },
+    /**
+     * Whether to invert media position.
+     *
+     * Currently only supported for web previews and makes the
+     * client render the preview above the caption and not below.
+     */
+    invertMedia?: boolean
+  },
 ): Promise<Message> {
-    if (!params) params = {}
+  if (!params) params = {}
 
-    const [message, entities] = await _normalizeInputText(client, text)
+  const [message, entities] = await _normalizeInputText(client, text)
 
-    const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
-    const { peer, replyTo, scheduleDate, chainId, quickReplyShortcut } = await _processCommonSendParameters(
-        client,
-        chatId,
-        params,
-    )
+  const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
+  const { peer, replyTo, scheduleDate, chainId, quickReplyShortcut } = await _processCommonSendParameters(
+    client,
+    chatId,
+    params,
+  )
 
-    const randomId = randomLong()
-    const res = await _maybeInvokeWithBusinessConnection(
-        client,
-        params.businessConnectionId,
-        {
-            _: 'messages.sendMessage',
-            peer,
-            noWebpage: params.disableWebPreview,
-            silent: params.silent,
-            replyTo,
-            randomId,
-            scheduleDate,
-            replyMarkup,
-            message,
-            entities,
-            clearDraft: params.clearDraft,
-            noforwards: params.forbidForwards,
-            sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
-            invertMedia: params.invertMedia,
-            quickReplyShortcut,
-            effect: params.effect,
-            allowPaidFloodskip: params.allowPaidFloodskip,
-            allowPaidStars: params.allowPaidMessages,
-        },
-        { chainId, abortSignal: params.abortSignal },
-    )
+  const randomId = randomLong()
+  const res = await _maybeInvokeWithBusinessConnection(
+    client,
+    params.businessConnectionId,
+    {
+      _: 'messages.sendMessage',
+      peer,
+      noWebpage: params.disableWebPreview,
+      silent: params.silent,
+      replyTo,
+      randomId,
+      scheduleDate,
+      replyMarkup,
+      message,
+      entities,
+      clearDraft: params.clearDraft,
+      noforwards: params.forbidForwards,
+      sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
+      invertMedia: params.invertMedia,
+      quickReplyShortcut,
+      effect: params.effect,
+      allowPaidFloodskip: params.allowPaidFloodskip,
+      allowPaidStars: params.allowPaidMessages,
+    },
+    { chainId, abortSignal: params.abortSignal },
+  )
 
-    if (res._ === 'updateShortSentMessage') {
-        // todo extract this to updates manager?
-        const msg: tl.RawMessage = {
-            _: 'message',
-            id: res.id,
-            peerId: inputPeerToPeer(peer),
-            fromId: { _: 'peerUser', userId: client.storage.self.getCached()!.userId },
-            message,
-            date: res.date,
-            out: res.out,
-            replyMarkup,
-            entities: res.entities,
-        }
-
-        if (!params.shouldDispatch) {
-            client.handleClientUpdate(createDummyUpdate(res.pts, res.ptsCount))
-        }
-
-        const peers = new PeersIndex()
-
-        const fetchPeer = async (peer: tl.TypePeer | tl.TypeInputPeer): Promise<void> => {
-            const id = getMarkedPeerId(peer)
-
-            let cached = await client.storage.peers.getCompleteById(id)
-
-            if (!cached) {
-                cached = await _getRawPeerBatched(client, await resolvePeer(client, peer))
-            }
-
-            if (!cached) {
-                throw new MtTypeAssertionError('sendText (@ getFullPeerById)', 'user | chat', 'null')
-            }
-
-            switch (cached._) {
-                case 'user':
-                    peers.users.set(cached.id, cached)
-                    break
-                case 'chat':
-                case 'chatForbidden':
-                case 'channel':
-                case 'channelForbidden':
-                    peers.chats.set(cached.id, cached)
-                    break
-                default:
-                    throw new MtTypeAssertionError(
-                        'sendText (@ users.getUsers)',
-                        'user | chat | channel', // not very accurate, but good enough
-                        cached._,
-                    )
-            }
-        }
-
-        await Promise.all([fetchPeer(peer), fetchPeer(msg.fromId!)])
-
-        const ret = new Message(msg, peers)
-
-        return ret
+  if (res._ === 'updateShortSentMessage') {
+    // todo extract this to updates manager?
+    const msg: tl.RawMessage = {
+      _: 'message',
+      id: res.id,
+      peerId: inputPeerToPeer(peer),
+      fromId: { _: 'peerUser', userId: client.storage.self.getCached()!.userId },
+      message,
+      date: res.date,
+      out: res.out,
+      replyMarkup,
+      entities: res.entities,
     }
 
-    const msg = _findMessageInUpdate(client, res, false, !params.shouldDispatch, false, randomId)
+    if (!params.shouldDispatch) {
+      client.handleClientUpdate(createDummyUpdate(res.pts, res.ptsCount))
+    }
 
-    return msg
+    const peers = new PeersIndex()
+
+    const fetchPeer = async (peer: tl.TypePeer | tl.TypeInputPeer): Promise<void> => {
+      const id = getMarkedPeerId(peer)
+
+      let cached = await client.storage.peers.getCompleteById(id)
+
+      if (!cached) {
+        cached = await _getRawPeerBatched(client, await resolvePeer(client, peer))
+      }
+
+      if (!cached) {
+        throw new MtTypeAssertionError('sendText (@ getFullPeerById)', 'user | chat', 'null')
+      }
+
+      switch (cached._) {
+        case 'user':
+          peers.users.set(cached.id, cached)
+          break
+        case 'chat':
+        case 'chatForbidden':
+        case 'channel':
+        case 'channelForbidden':
+          peers.chats.set(cached.id, cached)
+          break
+        default:
+          throw new MtTypeAssertionError(
+            'sendText (@ users.getUsers)',
+            'user | chat | channel', // not very accurate, but good enough
+            cached._,
+          )
+      }
+    }
+
+    await Promise.all([fetchPeer(peer), fetchPeer(msg.fromId!)])
+
+    const ret = new Message(msg, peers)
+
+    return ret
+  }
+
+  const msg = _findMessageInUpdate(client, res, false, !params.shouldDispatch, false, randomId)
+
+  return msg
 }

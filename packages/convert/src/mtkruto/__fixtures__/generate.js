@@ -3,12 +3,12 @@
 import { Client, StorageMemory } from 'https://deno.land/x/mtkruto@0.1.157/mod.ts'
 
 const client = new Client(new StorageMemory(), Number(Deno.env.get('API_ID')), Deno.env.get('API_HASH'), {
-    initialDc: '2-test',
+  initialDc: '2-test',
 })
 
 await client.start({
-    phone: () => '9996621234',
-    code: () => '22222',
+  phone: () => '9996621234',
+  code: () => '22222',
 })
 
 const authString = await client.exportAuthString()

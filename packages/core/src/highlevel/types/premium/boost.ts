@@ -21,80 +21,80 @@ export type BoostOrigin = 'gift' | 'unclaimed_gift' | 'giveaway' | 'user'
  * Information about a boost (one or more)
  */
 export class Boost {
-    constructor(
-        readonly raw: tl.RawBoost,
-        readonly _peers: PeersIndex,
-    ) {}
+  constructor(
+    readonly raw: tl.RawBoost,
+    readonly _peers: PeersIndex,
+  ) {}
 
-    /** Unique ID of this boost */
-    get id(): string {
-        return this.raw.id
-    }
+  /** Unique ID of this boost */
+  get id(): string {
+    return this.raw.id
+  }
 
-    /** Number of boosts this boost is actually representing */
-    get count(): number {
-        return this.raw.multiplier ?? 1
-    }
+  /** Number of boosts this boost is actually representing */
+  get count(): number {
+    return this.raw.multiplier ?? 1
+  }
 
-    /** Date when this boost was applied */
-    get date(): Date {
-        return new Date(this.raw.date * 1000)
-    }
+  /** Date when this boost was applied */
+  get date(): Date {
+    return new Date(this.raw.date * 1000)
+  }
 
-    /** Amount of Telegram Stars that were awarded along with this boost */
-    get stars(): tl.Long | null {
-        return this.raw.stars ?? null
-    }
+  /** Amount of Telegram Stars that were awarded along with this boost */
+  get stars(): tl.Long | null {
+    return this.raw.stars ?? null
+  }
 
-    /**
-     * Date when this boost will automatically expire.
-     *
-     * > **Note**: User can still manually cancel the boost before that date
-     */
-    get expireDate(): Date {
-        return new Date(this.raw.expires * 1000)
-    }
+  /**
+   * Date when this boost will automatically expire.
+   *
+   * > **Note**: User can still manually cancel the boost before that date
+   */
+  get expireDate(): Date {
+    return new Date(this.raw.expires * 1000)
+  }
 
-    /**
-     * Whether this boost was applied because the channel
-     * directly gifted a subscription to the user
-     */
-    get origin(): BoostOrigin {
-        if (this.raw.unclaimed) return 'unclaimed_gift'
-        if (this.raw.gift) return 'gift'
-        if (this.raw.giveaway) return 'giveaway'
-        if (this.raw.userId) return 'user'
+  /**
+   * Whether this boost was applied because the channel
+   * directly gifted a subscription to the user
+   */
+  get origin(): BoostOrigin {
+    if (this.raw.unclaimed) return 'unclaimed_gift'
+    if (this.raw.gift) return 'gift'
+    if (this.raw.giveaway) return 'giveaway'
+    if (this.raw.userId) return 'user'
 
-        throw new MtUnsupportedError('Unknown boost origin')
-    }
+    throw new MtUnsupportedError('Unknown boost origin')
+  }
 
-    /**
-     * User who is boosting the channel.
-     *
-     * Only available for some origins
-     */
-    get user(): User | null {
-        if (!this.raw.userId) return null
+  /**
+   * User who is boosting the channel.
+   *
+   * Only available for some origins
+   */
+  get user(): User | null {
+    if (!this.raw.userId) return null
 
-        return new User(this._peers.user(this.raw.userId))
-    }
+    return new User(this._peers.user(this.raw.userId))
+  }
 
-    /**
-     * ID of the message containing the giveaway where this
-     * user has won
-     */
-    get giveawayMessageId(): number | null {
-        return this.raw.giveawayMsgId ?? null
-    }
+  /**
+   * ID of the message containing the giveaway where this
+   * user has won
+   */
+  get giveawayMessageId(): number | null {
+    return this.raw.giveawayMsgId ?? null
+  }
 
-    /**
-     * The created Telegram Premium gift code, only set if `origin` is not `user`,
-     * AND it is either a gift code for the currently logged in user,
-     * or if it was already claimed
-     */
-    get usedGiftSlug(): string | null {
-        return this.raw.usedGiftSlug ?? null
-    }
+  /**
+   * The created Telegram Premium gift code, only set if `origin` is not `user`,
+   * AND it is either a gift code for the currently logged in user,
+   * or if it was already claimed
+   */
+  get usedGiftSlug(): string | null {
+    return this.raw.usedGiftSlug ?? null
+  }
 }
 
 memoizeGetters(Boost, ['user'])

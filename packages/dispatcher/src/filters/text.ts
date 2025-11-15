@@ -1,47 +1,47 @@
 import type {
-    BusinessCallbackQuery,
-    CallbackQuery,
-    ChosenInlineResult,
-    InlineCallbackQuery,
-    InlineQuery,
+  BusinessCallbackQuery,
+  CallbackQuery,
+  ChosenInlineResult,
+  InlineCallbackQuery,
+  InlineQuery,
 } from '@mtcute/core'
 import type { UpdateContextDistributed } from '../context/base.js'
 
 import type { UpdateFilter } from './types.js'
 
 import {
-    BusinessMessage,
-    Message,
+  BusinessMessage,
+  Message,
 } from '@mtcute/core'
 
-type UpdatesWithText =
-  | Message
-  | BusinessMessage
-  | UpdateContextDistributed<
-    | InlineQuery
-    | ChosenInlineResult
-    | CallbackQuery
-    | InlineCallbackQuery
-    | BusinessCallbackQuery
-  >
+type UpdatesWithText
+  = | Message
+    | BusinessMessage
+    | UpdateContextDistributed<
+      | InlineQuery
+      | ChosenInlineResult
+      | CallbackQuery
+      | InlineCallbackQuery
+      | BusinessCallbackQuery
+    >
 
 function extractText(obj: UpdatesWithText): string | null {
-    if (obj instanceof Message || obj instanceof BusinessMessage) {
-        return obj.text
-    }
+  if (obj instanceof Message || obj instanceof BusinessMessage) {
+    return obj.text
+  }
 
-    switch (obj._name) {
-        case 'inline_query':
-            return obj.query
-        case 'chosen_inline_result':
-            return obj.id
-        case 'callback_query':
-        case 'inline_callback_query':
-        case 'business_callback_query':
-            if (obj.raw.data) return obj.dataStr
-    }
+  switch (obj._name) {
+    case 'inline_query':
+      return obj.query
+    case 'chosen_inline_result':
+      return obj.id
+    case 'callback_query':
+    case 'inline_callback_query':
+    case 'business_callback_query':
+      if (obj.raw.data) return obj.dataStr
+  }
 
-    return null
+  return null
 }
 
 /**
@@ -57,20 +57,20 @@ function extractText(obj: UpdatesWithText): string | null {
  * @param regex  Regex to be matched
  */
 export function regex(regex: RegExp): UpdateFilter<UpdatesWithText, { match: RegExpMatchArray }> {
-    return (obj) => {
-        const txt = extractText(obj)
-        if (!txt) return false
+  return (obj) => {
+    const txt = extractText(obj)
+    if (!txt) return false
 
-        const m = txt.match(regex)
+    const m = txt.match(regex)
 
-        if (m) {
-            (obj as typeof obj & { match: RegExpMatchArray }).match = m
+    if (m) {
+      (obj as typeof obj & { match: RegExpMatchArray }).match = m
 
-            return true
-        }
-
-        return false
+      return true
     }
+
+    return false
+  }
 }
 
 /**
@@ -84,13 +84,13 @@ export function regex(regex: RegExp): UpdateFilter<UpdatesWithText, { match: Reg
  * @param ignoreCase  Whether string case should be ignored
  */
 export function equals(str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> {
-    if (ignoreCase) {
-        str = str.toLowerCase()
+  if (ignoreCase) {
+    str = str.toLowerCase()
 
-        return obj => extractText(obj)?.toLowerCase() === str
-    }
+    return obj => extractText(obj)?.toLowerCase() === str
+  }
 
-    return obj => extractText(obj) === str
+  return obj => extractText(obj) === str
 }
 
 /**
@@ -104,21 +104,21 @@ export function equals(str: string, ignoreCase = false): UpdateFilter<UpdatesWit
  * @param ignoreCase  Whether string case should be ignored
  */
 export function contains(str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> {
-    if (ignoreCase) {
-        str = str.toLowerCase()
-
-        return (obj) => {
-            const txt = extractText(obj)
-
-            return txt != null && txt.toLowerCase().includes(str)
-        }
-    }
+  if (ignoreCase) {
+    str = str.toLowerCase()
 
     return (obj) => {
-        const txt = extractText(obj)
+      const txt = extractText(obj)
 
-        return txt != null && txt.includes(str)
+      return txt != null && txt.toLowerCase().includes(str)
     }
+  }
+
+  return (obj) => {
+    const txt = extractText(obj)
+
+    return txt != null && txt.includes(str)
+  }
 }
 
 /**
@@ -132,21 +132,21 @@ export function contains(str: string, ignoreCase = false): UpdateFilter<UpdatesW
  * @param ignoreCase  Whether string case should be ignored
  */
 export function startsWith(str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> {
-    if (ignoreCase) {
-        str = str.toLowerCase()
-
-        return (obj) => {
-            const txt = extractText(obj)
-
-            return txt != null && txt.toLowerCase().substring(0, str.length) === str
-        }
-    }
+  if (ignoreCase) {
+    str = str.toLowerCase()
 
     return (obj) => {
-        const txt = extractText(obj)
+      const txt = extractText(obj)
 
-        return txt != null && txt.substring(0, str.length) === str
+      return txt != null && txt.toLowerCase().substring(0, str.length) === str
     }
+  }
+
+  return (obj) => {
+    const txt = extractText(obj)
+
+    return txt != null && txt.substring(0, str.length) === str
+  }
 }
 
 /**
@@ -160,19 +160,19 @@ export function startsWith(str: string, ignoreCase = false): UpdateFilter<Update
  * @param ignoreCase  Whether string case should be ignored
  */
 export function endsWith(str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> {
-    if (ignoreCase) {
-        str = str.toLowerCase()
-
-        return (obj) => {
-            const txt = extractText(obj)
-
-            return txt != null && txt.toLowerCase().substring(0, str.length) === str
-        }
-    }
+  if (ignoreCase) {
+    str = str.toLowerCase()
 
     return (obj) => {
-        const txt = extractText(obj)
+      const txt = extractText(obj)
 
-        return txt != null && txt.substring(0, str.length) === str
+      return txt != null && txt.toLowerCase().substring(0, str.length) === str
     }
+  }
+
+  return (obj) => {
+    const txt = extractText(obj)
+
+    return txt != null && txt.substring(0, str.length) === str
+  }
 }

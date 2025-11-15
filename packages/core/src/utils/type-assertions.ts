@@ -5,7 +5,7 @@ import { MtTypeAssertionError } from '../types/errors.js'
 // mostly taken from https://github.com/robertmassaioli/ts-is-present
 
 export function isPresent<T>(t: T | undefined | null | void): t is T {
-    return t !== undefined && t !== null
+  return t !== undefined && t !== null
 }
 
 /**
@@ -27,47 +27,47 @@ export function isPresent<T>(t: T | undefined | null | void): t is T {
  */
 export function hasValueAtKey<const K extends string | number | symbol, const V>(k: K, v: V):
 <T>(a: T & { [k in K]: unknown }) => a is T & { [k in K]: V } {
-    return function <T> (a: T & { [k in K]: unknown }): a is T & { [k in K]: V } {
-        return a[k] === v
-    }
+  return function <T> (a: T & { [k in K]: unknown }): a is T & { [k in K]: V } {
+    return a[k] === v
+  }
 }
 
 export function assertTypeIs<T extends tl.TlObject, K extends T['_']>(
-    context: string,
-    obj: T,
-    expected: K,
+  context: string,
+  obj: T,
+  expected: K,
 ): asserts obj is tl.FindByName<T, K> {
-    if (obj._ !== expected) {
-        throw new MtTypeAssertionError(context, expected, obj._)
-    }
+  if (obj._ !== expected) {
+    throw new MtTypeAssertionError(context, expected, obj._)
+  }
 }
 
 export function assertTypeIsNot<T extends tl.TlObject, K extends T['_']>(
-    context: string,
-    obj: T,
-    expectedNot: K,
+  context: string,
+  obj: T,
+  expectedNot: K,
 ): asserts obj is Exclude<T, tl.FindByName<T, K>> {
-    if (obj._ === expectedNot) {
-        throw new MtTypeAssertionError(context, `not ${expectedNot}`, obj._)
-    }
+  if (obj._ === expectedNot) {
+    throw new MtTypeAssertionError(context, `not ${expectedNot}`, obj._)
+  }
 }
 
 export function mtpAssertTypeIs<T extends mtp.TlObject, K extends T['_']>(
-    context: string,
-    obj: T,
-    expected: K,
+  context: string,
+  obj: T,
+  expected: K,
 ): asserts obj is mtp.FindByName<T, K> {
-    if (obj._ !== expected) {
-        throw new MtTypeAssertionError(context, expected, obj._)
-    }
+  if (obj._ !== expected) {
+    throw new MtTypeAssertionError(context, expected, obj._)
+  }
 }
 
 export function assertTrue(context: string, cond: boolean): asserts cond {
-    if (!cond) {
-        throw new MtTypeAssertionError(context, 'true', 'false')
-    }
+  if (!cond) {
+    throw new MtTypeAssertionError(context, 'true', 'false')
+  }
 }
 
 export function isTlRpcError(obj: unknown): obj is mtp.RawMt_rpc_error {
-    return typeof obj === 'object' && obj !== null && (obj as { _: string })._ === 'mt_rpc_error'
+  return typeof obj === 'object' && obj !== null && (obj as { _: string })._ === 'mt_rpc_error'
 }

@@ -19,56 +19,56 @@ import { _normalizeInputStarGift } from './_normalize-input-star-gift.js'
  * @returns  Service message about the transferred gift, if one was generated.
  */
 export async function transferStarGift(
-    client: ITelegramClient,
-    params: {
-        /** Star gift to transfer */
-        gift: InputStarGift
+  client: ITelegramClient,
+  params: {
+    /** Star gift to transfer */
+    gift: InputStarGift
 
-        /** ID of the user to transfer the gift to */
-        recipient: InputPeerLike
+    /** ID of the user to transfer the gift to */
+    recipient: InputPeerLike
 
-        /**
-         * Whether to dispatch the new message event
-         * to the client's update handler.
-         */
-        shouldDispatch?: true
-    },
+    /**
+     * Whether to dispatch the new message event
+     * to the client's update handler.
+     */
+    shouldDispatch?: true
+  },
 ): Promise<Message | null> {
-    const { gift, recipient, shouldDispatch } = params
+  const { gift, recipient, shouldDispatch } = params
 
-    const invoice: tl.TypeInputInvoice = {
-        _: 'inputInvoiceStarGiftTransfer',
-        stargift: await _normalizeInputStarGift(client, gift),
-        toId: await resolvePeer(client, recipient),
+  const invoice: tl.TypeInputInvoice = {
+    _: 'inputInvoiceStarGiftTransfer',
+    stargift: await _normalizeInputStarGift(client, gift),
+    toId: await resolvePeer(client, recipient),
+  }
+
+  let updates: tl.TypeUpdates
+  try {
+    const form = await client.call({
+      _: 'payments.getPaymentForm',
+      invoice,
+    })
+
+    const res = await client.call({
+      _: 'payments.sendStarsForm',
+      invoice,
+      formId: form.formId,
+    })
+
+    assertTypeIs('payments.sendStarsForm', res, 'payments.paymentResult')
+
+    updates = res.updates
+  } catch (e) {
+    if (tl.RpcError.is(e, 'NO_PAYMENT_NEEDED')) {
+      updates = await client.call({
+        _: 'payments.transferStarGift',
+        stargift: invoice.stargift,
+        toId: invoice.toId,
+      })
+    } else {
+      throw e
     }
+  }
 
-    let updates: tl.TypeUpdates
-    try {
-        const form = await client.call({
-            _: 'payments.getPaymentForm',
-            invoice,
-        })
-
-        const res = await client.call({
-            _: 'payments.sendStarsForm',
-            invoice,
-            formId: form.formId,
-        })
-
-        assertTypeIs('payments.sendStarsForm', res, 'payments.paymentResult')
-
-        updates = res.updates
-    } catch (e) {
-        if (tl.RpcError.is(e, 'NO_PAYMENT_NEEDED')) {
-            updates = await client.call({
-                _: 'payments.transferStarGift',
-                stargift: invoice.stargift,
-                toId: invoice.toId,
-            })
-        } else {
-            throw e
-        }
-    }
-
-    return _findMessageInUpdate(client, updates, false, !shouldDispatch, true)
+  return _findMessageInUpdate(client, updates, false, !shouldDispatch, true)
 }

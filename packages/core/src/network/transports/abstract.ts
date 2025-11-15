@@ -9,21 +9,21 @@ import type { BasicDcOption, ICryptoProvider, Logger } from '../../utils/index.j
  * Interface implementing a transport to interact with Telegram servers.
  */
 export interface ITelegramConnection extends IConnection<any, any> {
-    /**
-     * Provides crypto and logging for the transport.
-     * Not done in constructor to simplify factory.
-     *
-     * This method is called before any other.
-     */
-    setup?(crypto: ICryptoProvider, log: Logger): void
+  /**
+   * Provides crypto and logging for the transport.
+   * Not done in constructor to simplify factory.
+   *
+   * This method is called before any other.
+   */
+  setup?(crypto: ICryptoProvider, log: Logger): void
 
-    getMtproxyInfo?(): tl.RawInputClientProxy
+  getMtproxyInfo?(): tl.RawInputClientProxy
 }
 
 export interface TelegramTransport {
-    setup?(crypto: ICryptoProvider, log: Logger): void
-    connect: (dc: BasicDcOption) => Promise<ITelegramConnection>
-    packetCodec: (dc: BasicDcOption) => IPacketCodec
+  setup?(crypto: ICryptoProvider, log: Logger): void
+  connect: (dc: BasicDcOption) => Promise<ITelegramConnection>
+  packetCodec: (dc: BasicDcOption) => IPacketCodec
 }
 
 /**
@@ -32,14 +32,14 @@ export interface TelegramTransport {
  * and codec is supposed to emit `packet` or `error` event when packet is parsed.
  */
 export interface IPacketCodec extends IFrameDecoder, IFrameEncoder {
-    /** Initial tag of the codec. Will be sent immediately once connected. */
-    tag(): MaybePromise<Uint8Array>
+  /** Initial tag of the codec. Will be sent immediately once connected. */
+  tag(): MaybePromise<Uint8Array>
 
-    /**
-     * For codecs that use crypto functions and/or logging.
-     * This method is called before any other.
-     */
-    setup?(crypto: ICryptoProvider, log: Logger): void
+  /**
+   * For codecs that use crypto functions and/or logging.
+   * This method is called before any other.
+   */
+  setup?(crypto: ICryptoProvider, log: Logger): void
 }
 
 /**
@@ -49,10 +49,10 @@ export interface IPacketCodec extends IFrameDecoder, IFrameEncoder {
  * More: https://core.telegram.org/mtproto/mtproto-transports#transport-errors
  */
 export class TransportError extends Error {
-    code: number
+  code: number
 
-    constructor(code: number) {
-        super(`Transport error: ${code}`)
-        this.code = code
-    }
+  constructor(code: number) {
+    super(`Transport error: ${code}`)
+    this.code = code
+  }
 }

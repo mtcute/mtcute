@@ -24,73 +24,73 @@ import { and, or } from './logic.js'
  * @param caseSensitive
  */
 export function command(commands: MaybeArray<string | RegExp>, {
-    prefixes = '/',
-    caseSensitive = false,
+  prefixes = '/',
+  caseSensitive = false,
 }: {
-    prefixes?: MaybeArray<string> | null
-    caseSensitive?: boolean
+  prefixes?: MaybeArray<string> | null
+  caseSensitive?: boolean
 } = {}): UpdateFilter<MessageContext | BusinessMessageContext, { command: string[] }> {
-    if (!Array.isArray(commands)) commands = [commands]
+  if (!Array.isArray(commands)) commands = [commands]
 
-    if (!caseSensitive) {
-        commands = commands.map(i => (typeof i === 'string' ? i.toLowerCase() : i))
-    }
+  if (!caseSensitive) {
+    commands = commands.map(i => (typeof i === 'string' ? i.toLowerCase() : i))
+  }
 
-    const argumentsRe = /(["'])(.*?)(?<!\\)\1|(\S+)/g
-    const unescapeRe = /\\(['"])/
-    const commandsRe: RegExp[] = []
-    commands.forEach((cmd) => {
-        if (typeof cmd !== 'string') cmd = cmd.source
+  const argumentsRe = /(["'])(.*?)(?<!\\)\1|(\S+)/g
+  const unescapeRe = /\\(['"])/
+  const commandsRe: RegExp[] = []
+  commands.forEach((cmd) => {
+    if (typeof cmd !== 'string') cmd = cmd.source
 
-        commandsRe.push(new RegExp(`^(${cmd})(?:\\s|$|@([a-zA-Z0-9_]+?bot)(?:\\s|$))`, caseSensitive ? '' : 'i'))
-    })
+    commandsRe.push(new RegExp(`^(${cmd})(?:\\s|$|@([a-zA-Z0-9_]+?bot)(?:\\s|$))`, caseSensitive ? '' : 'i'))
+  })
 
-    if (prefixes === null) prefixes = []
-    if (typeof prefixes === 'string') prefixes = [prefixes]
+  if (prefixes === null) prefixes = []
+  if (typeof prefixes === 'string') prefixes = [prefixes]
 
-    const _prefixes = prefixes
+  const _prefixes = prefixes
 
-    const check = (msg: MessageContext | BusinessMessageContext): MaybePromise<boolean> => {
-        if (msg.isMessageGroup) return check(msg.messages[0])
+  const check = (msg: MessageContext | BusinessMessageContext): MaybePromise<boolean> => {
+    if (msg.isMessageGroup) return check(msg.messages[0])
 
-        for (const pref of _prefixes) {
-            if (!msg.text.startsWith(pref)) continue
+    for (const pref of _prefixes) {
+      if (!msg.text.startsWith(pref)) continue
 
-            const withoutPrefix = msg.text.slice(pref.length)
+      const withoutPrefix = msg.text.slice(pref.length)
 
-            for (const regex of commandsRe) {
-                const m = withoutPrefix.match(regex)
-                if (!m) continue
+      for (const regex of commandsRe) {
+        const m = withoutPrefix.match(regex)
+        if (!m) continue
 
-                const lastGroup = m[m.length - 1]
+        const lastGroup = m[m.length - 1]
 
-                if (lastGroup) {
-                    const self = msg.client.storage.self.getCached()
+        if (lastGroup) {
+          const self = msg.client.storage.self.getCached()
 
-                    if (self && self.isBot && !self.usernames.some(u => u.toLowerCase() === lastGroup.toLowerCase())) {
-                        return false
-                    }
-                }
-
-                const match = m.slice(1, -1)
-                if (!caseSensitive) match[0] = match[0].toLowerCase()
-
-                // we use .replace to iterate over global regex, not to replace the text
-                withoutPrefix.slice(m[0].length).replace(argumentsRe, ($0, $1, $2: string, $3: string) => {
-                    match.push(($2 || $3 || '').replace(unescapeRe, '$1'))
-
-                    return ''
-                })
-                ;(msg as MessageContext & { command: string[] }).command = match
-
-                return true
-            }
+          if (self && self.isBot && !self.usernames.some(u => u.toLowerCase() === lastGroup.toLowerCase())) {
+            return false
+          }
         }
 
-        return false
+        const match = m.slice(1, -1)
+        if (!caseSensitive) match[0] = match[0].toLowerCase()
+
+        // we use .replace to iterate over global regex, not to replace the text
+        withoutPrefix.slice(m[0].length).replace(argumentsRe, ($0, $1, $2: string, $3: string) => {
+          match.push(($2 || $3 || '').replace(unescapeRe, '$1'))
+
+          return ''
+        })
+        ;(msg as MessageContext & { command: string[] }).command = match
+
+        return true
+      }
     }
 
-    return check
+    return false
+  }
+
+  return check
 }
 
 /**
@@ -100,8 +100,8 @@ export function command(commands: MaybeArray<string | RegExp>, {
 export const start: UpdateFilter<
     MessageContext | BusinessMessageContext,
     {
-        chat: User
-        command: string[]
+      chat: User
+      command: string[]
     }
 > = and(chat('user'), command('start'))
 
@@ -111,58 +111,58 @@ export const start: UpdateFilter<
  */
 export const startGroup: UpdateFilter<
   MessageContext | BusinessMessageContext,
-    {
-        chat: Modify<Chat, {
-            chatType: 'group' | 'supergroup'
-        }>
-        command: string[]
-    },
-    never
+  {
+    chat: Modify<Chat, {
+      chatType: 'group' | 'supergroup'
+    }>
+    command: string[]
+  },
+  never
 > = and(or(chat('supergroup'), chat('group')), command('start'))
 
 function deeplinkBase(base: UpdateFilter<MessageContext | BusinessMessageContext, { command: string[] }>) {
-    return (
-        params: MaybeArray<string | RegExp>,
-    ): UpdateFilter<MessageContext | BusinessMessageContext, { command: string[] }> => {
-        if (!Array.isArray(params)) {
-            return and(start, (_msg: Message) => {
-                const msg = _msg as Message & { command: string[] }
+  return (
+    params: MaybeArray<string | RegExp>,
+  ): UpdateFilter<MessageContext | BusinessMessageContext, { command: string[] }> => {
+    if (!Array.isArray(params)) {
+      return and(start, (_msg: Message) => {
+        const msg = _msg as Message & { command: string[] }
 
-                if (msg.command.length !== 2) return false
+        if (msg.command.length !== 2) return false
 
-                const p = msg.command[1]
-                if (typeof params === 'string' && p === params) return true
+        const p = msg.command[1]
+        if (typeof params === 'string' && p === params) return true
 
-                const m = p.match(params)
-                if (!m) return false
+        const m = p.match(params)
+        if (!m) return false
 
-                msg.command.push(...m.slice(1))
+        msg.command.push(...m.slice(1))
 
-                return true
-            })
-        }
-
-        return and(base, (_msg: Message) => {
-            const msg = _msg as Message & { command: string[] }
-
-            if (msg.command.length !== 2) return false
-
-            const p = msg.command[1]
-
-            for (const param of params) {
-                if (typeof param === 'string' && p === param) return true
-
-                const m = p.match(param)
-                if (!m) continue
-
-                msg.command.push(...m.slice(1))
-
-                return true
-            }
-
-            return false
-        })
+        return true
+      })
     }
+
+    return and(base, (_msg: Message) => {
+      const msg = _msg as Message & { command: string[] }
+
+      if (msg.command.length !== 2) return false
+
+      const p = msg.command[1]
+
+      for (const param of params) {
+        if (typeof param === 'string' && p === param) return true
+
+        const m = p.match(param)
+        if (!m) continue
+
+        msg.command.push(...m.slice(1))
+
+        return true
+      }
+
+      return false
+    })
+  }
 }
 
 /**

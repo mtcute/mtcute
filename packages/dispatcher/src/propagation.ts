@@ -15,8 +15,8 @@
  * or after `state.exit()` to dispatch the update to the root dispatcher.
  */
 export enum PropagationAction {
-    Stop = 'stop',
-    StopChildren = 'stop-children',
-    Continue = 'continue',
-    ToScene = 'scene',
+  Stop = 'stop',
+  StopChildren = 'stop-children',
+  Continue = 'continue',
+  ToScene = 'scene',
 }

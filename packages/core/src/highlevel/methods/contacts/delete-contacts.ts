@@ -15,22 +15,22 @@ import { resolvePeerMany } from '../users/resolve-peer-many.js'
  * @param userIds  User IDs, usernames or phone numbers
  */
 export async function deleteContacts(client: ITelegramClient, userIds: MaybeArray<InputPeerLike>): Promise<User[]> {
-    if (!Array.isArray(userIds)) userIds = [userIds]
+  if (!Array.isArray(userIds)) userIds = [userIds]
 
-    const inputPeers = await resolvePeerMany(client, userIds, toInputUser)
+  const inputPeers = await resolvePeerMany(client, userIds, toInputUser)
 
-    if (!inputPeers.length) {
-        throw new MtInvalidPeerTypeError('all provided ids', 'user')
-    }
+  if (!inputPeers.length) {
+    throw new MtInvalidPeerTypeError('all provided ids', 'user')
+  }
 
-    const res = await client.call({
-        _: 'contacts.deleteContacts',
-        id: inputPeers,
-    })
+  const res = await client.call({
+    _: 'contacts.deleteContacts',
+    id: inputPeers,
+  })
 
-    assertIsUpdatesGroup('contacts.deleteContacts', res)
+  assertIsUpdatesGroup('contacts.deleteContacts', res)
 
-    client.handleClientUpdate(res)
+  client.handleClientUpdate(res)
 
-    return res.users.map(user => new User(user))
+  return res.users.map(user => new User(user))
 }

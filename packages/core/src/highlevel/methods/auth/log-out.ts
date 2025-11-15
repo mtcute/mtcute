@@ -2,11 +2,11 @@ import type { ITelegramClient } from '../../client.types.js'
 
 // @exported
 export interface LogOutResult {
-    /**
-     * Future auth token returned by the server (if any), which can then be passed to
-     * {@link start} and {@link sendCode} methods to avoid sending the code again.
-     */
-    futureAuthToken?: Uint8Array
+  /**
+   * Future auth token returned by the server (if any), which can then be passed to
+   * {@link start} and {@link sendCode} methods to avoid sending the code again.
+   */
+  futureAuthToken?: Uint8Array
 }
 
 /**
@@ -18,10 +18,10 @@ export interface LogOutResult {
  * @returns  On success, `true` is returned
  */
 export async function logOut(client: ITelegramClient): Promise<LogOutResult> {
-    const res = await client.call({ _: 'auth.logOut' })
-    await client.notifyLoggedOut()
+  const res = await client.call({ _: 'auth.logOut' })
+  await client.notifyLoggedOut()
 
-    return {
-        futureAuthToken: res.futureAuthToken,
-    }
+  return {
+    futureAuthToken: res.futureAuthToken,
+  }
 }

@@ -8,48 +8,48 @@ import { sendText } from './send-text.js'
 
 /** Send a text to the same chat (and topic, if applicable) as a given message */
 export function answerText(
-    client: ITelegramClient,
-    message: Message,
-    ...params: ParametersSkip2<typeof sendText>
+  client: ITelegramClient,
+  message: Message,
+  ...params: ParametersSkip2<typeof sendText>
 ): ReturnType<typeof sendText> {
-    if (!message.isTopicMessage || !message.replyToMessage?.threadId) {
-        return sendText(client, message.chat.inputPeer, ...params)
-    }
+  if (!message.isTopicMessage || !message.replyToMessage?.threadId) {
+    return sendText(client, message.chat.inputPeer, ...params)
+  }
 
-    const [text, params_ = {}] = params
-    params_.replyTo = message.replyToMessage.threadId
+  const [text, params_ = {}] = params
+  params_.replyTo = message.replyToMessage.threadId
 
-    return sendText(client, message.chat.inputPeer, text, params_)
+  return sendText(client, message.chat.inputPeer, text, params_)
 }
 
 /** Send a media to the same chat (and topic, if applicable) as a given message */
 export function answerMedia(
-    client: ITelegramClient,
-    message: Message,
-    ...params: ParametersSkip2<typeof sendMedia>
+  client: ITelegramClient,
+  message: Message,
+  ...params: ParametersSkip2<typeof sendMedia>
 ): ReturnType<typeof sendMedia> {
-    if (!message.isTopicMessage || !message.replyToMessage?.threadId) {
-        return sendMedia(client, message.chat.inputPeer, ...params)
-    }
+  if (!message.isTopicMessage || !message.replyToMessage?.threadId) {
+    return sendMedia(client, message.chat.inputPeer, ...params)
+  }
 
-    const [media, params_ = {}] = params
-    params_.replyTo = message.replyToMessage.threadId
+  const [media, params_ = {}] = params
+  params_.replyTo = message.replyToMessage.threadId
 
-    return sendMedia(client, message.chat.inputPeer, media, params_)
+  return sendMedia(client, message.chat.inputPeer, media, params_)
 }
 
 /** Send a media group to the same chat (and topic, if applicable) as a given message */
 export function answerMediaGroup(
-    client: ITelegramClient,
-    message: Message,
-    ...params: ParametersSkip2<typeof sendMediaGroup>
+  client: ITelegramClient,
+  message: Message,
+  ...params: ParametersSkip2<typeof sendMediaGroup>
 ): ReturnType<typeof sendMediaGroup> {
-    if (!message.isTopicMessage || !message.replyToMessage?.threadId) {
-        return sendMediaGroup(client, message.chat.inputPeer, ...params)
-    }
+  if (!message.isTopicMessage || !message.replyToMessage?.threadId) {
+    return sendMediaGroup(client, message.chat.inputPeer, ...params)
+  }
 
-    const [media, params_ = {}] = params
-    params_.replyTo = message.replyToMessage.threadId
+  const [media, params_ = {}] = params
+  params_.replyTo = message.replyToMessage.threadId
 
-    return sendMediaGroup(client, message.chat.inputPeer, media, params_)
+  return sendMediaGroup(client, message.chat.inputPeer, media, params_)
 }

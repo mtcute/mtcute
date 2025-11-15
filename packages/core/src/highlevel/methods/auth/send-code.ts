@@ -13,48 +13,48 @@ import { normalizePhoneNumber } from '../../utils/misc-utils.js'
  *     or a user if the user was already logged in
  */
 export async function sendCode(
-    client: ITelegramClient,
-    params: {
-        /** Phone number in international format */
-        phone: string
+  client: ITelegramClient,
+  params: {
+    /** Phone number in international format */
+    phone: string
 
-        /** Saved future auth tokens, if any */
-        futureAuthTokens?: Uint8Array[]
+    /** Saved future auth tokens, if any */
+    futureAuthTokens?: Uint8Array[]
 
-        /** Additional code settings to pass to the server */
-        codeSettings?: Omit<tl.RawCodeSettings, '_' | 'logoutTokens'>
+    /** Additional code settings to pass to the server */
+    codeSettings?: Omit<tl.RawCodeSettings, '_' | 'logoutTokens'>
 
-        /** Abort signal */
-        abortSignal?: AbortSignal
-    },
+    /** Abort signal */
+    abortSignal?: AbortSignal
+  },
 ): Promise<SentCode | User> {
-    const phone = normalizePhoneNumber(params.phone)
+  const phone = normalizePhoneNumber(params.phone)
 
-    const { id, hash } = await client.getApiCredentials()
+  const { id, hash } = await client.getApiCredentials()
 
-    const res = await client.call(
-        {
-            _: 'auth.sendCode',
-            phoneNumber: phone,
-            apiId: id,
-            apiHash: hash,
-            settings: {
-                _: 'codeSettings',
-                logoutTokens: params.futureAuthTokens,
-                ...params.codeSettings,
-            },
-        },
-        { abortSignal: params.abortSignal },
-    )
+  const res = await client.call(
+    {
+      _: 'auth.sendCode',
+      phoneNumber: phone,
+      apiId: id,
+      apiHash: hash,
+      settings: {
+        _: 'codeSettings',
+        logoutTokens: params.futureAuthTokens,
+        ...params.codeSettings,
+      },
+    },
+    { abortSignal: params.abortSignal },
+  )
 
-    if (res._ === 'auth.sentCodeSuccess') {
-        return new User(await client.notifyLoggedIn(res.authorization))
-    }
+  if (res._ === 'auth.sentCodeSuccess') {
+    return new User(await client.notifyLoggedIn(res.authorization))
+  }
 
-    if (res._ === 'auth.sentCodePaymentRequired') {
-        // explicitly not supported, if you need this please implement the logic yourself
-        throw new MtArgumentError('Payment is required to sign in, please log in with a first-party client first')
-    }
+  if (res._ === 'auth.sentCodePaymentRequired') {
+    // explicitly not supported, if you need this please implement the logic yourself
+    throw new MtArgumentError('Payment is required to sign in, please log in with a first-party client first')
+  }
 
-    return new SentCode(res)
+  return new SentCode(res)
 }

@@ -1,11 +1,11 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type {
-    InputStickerSet,
-    InputStickerSetItem,
+  InputStickerSet,
+  InputStickerSetItem,
 } from '../../types/index.js'
 import {
-    normalizeInputStickerSet,
-    StickerSet,
+  normalizeInputStickerSet,
+  StickerSet,
 } from '../../types/index.js'
 
 import { _normalizeInputStickerSetItem } from './_utils.js'
@@ -21,24 +21,24 @@ import { _normalizeInputStickerSetItem } from './_utils.js'
  * @returns  Modfiied sticker set
  */
 export async function addStickerToSet(
-    client: ITelegramClient,
-    setId: InputStickerSet,
-    sticker: InputStickerSetItem,
-    params?: {
-        /**
-         * Upload progress callback
-         *
-         * @param uploaded  Number of bytes uploaded
-         * @param total  Total file size
-         */
-        progressCallback?: (uploaded: number, total: number) => void
-    },
+  client: ITelegramClient,
+  setId: InputStickerSet,
+  sticker: InputStickerSetItem,
+  params?: {
+    /**
+     * Upload progress callback
+     *
+     * @param uploaded  Number of bytes uploaded
+     * @param total  Total file size
+     */
+    progressCallback?: (uploaded: number, total: number) => void
+  },
 ): Promise<StickerSet> {
-    const res = await client.call({
-        _: 'stickers.addStickerToSet',
-        stickerset: normalizeInputStickerSet(setId),
-        sticker: await _normalizeInputStickerSetItem(client, sticker, params),
-    })
+  const res = await client.call({
+    _: 'stickers.addStickerToSet',
+    stickerset: normalizeInputStickerSet(setId),
+    sticker: await _normalizeInputStickerSetItem(client, sticker, params),
+  })
 
-    return new StickerSet(res)
+  return new StickerSet(res)
 }

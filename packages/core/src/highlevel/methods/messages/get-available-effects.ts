@@ -10,19 +10,19 @@ import { MessageEffect } from '../../types/index.js'
  * Get a list of available message effects
  */
 export async function getAvailableMessageEffects(client: ITelegramClient): Promise<MessageEffect[]> {
-    const res = await client.call({
-        _: 'messages.getAvailableEffects',
-        hash: 0,
-    })
+  const res = await client.call({
+    _: 'messages.getAvailableEffects',
+    hash: 0,
+  })
 
-    assertTypeIsNot('getAvailableMessageEffects', res, 'messages.availableEffectsNotModified')
+  assertTypeIsNot('getAvailableMessageEffects', res, 'messages.availableEffectsNotModified')
 
-    const documentsMap = new LongMap<tl.RawDocument>()
+  const documentsMap = new LongMap<tl.RawDocument>()
 
-    for (const doc of res.documents) {
-        if (doc._ !== 'document') continue
-        documentsMap.set(doc.id, doc)
-    }
+  for (const doc of res.documents) {
+    if (doc._ !== 'document') continue
+    documentsMap.set(doc.id, doc)
+  }
 
-    return res.effects.map(effect => new MessageEffect(effect, documentsMap))
+  return res.effects.map(effect => new MessageEffect(effect, documentsMap))
 }

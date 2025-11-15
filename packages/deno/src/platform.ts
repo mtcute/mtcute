@@ -5,23 +5,23 @@ import { beforeExit } from './utils/exit-hook.js'
 import { normalizeFile } from './utils/normalize-file.js'
 
 export class DenoPlatform implements ICorePlatform {
-    declare log: typeof defaultLoggingHandler
-    declare beforeExit: typeof beforeExit
-    declare normalizeFile: typeof normalizeFile
+  declare log: typeof defaultLoggingHandler
+  declare beforeExit: typeof beforeExit
+  declare normalizeFile: typeof normalizeFile
 
-    getDeviceModel(): string {
-        return `Deno/${Deno.version.deno} (${Deno.build.os} ${Deno.build.arch})`
+  getDeviceModel(): string {
+    return `Deno/${Deno.version.deno} (${Deno.build.os} ${Deno.build.arch})`
+  }
+
+  getDefaultLogLevel(): number | null {
+    const envLogLevel = Number.parseInt(Deno.env.get('MTCUTE_LOG_LEVEL') ?? '')
+
+    if (!Number.isNaN(envLogLevel)) {
+      return envLogLevel
     }
 
-    getDefaultLogLevel(): number | null {
-        const envLogLevel = Number.parseInt(Deno.env.get('MTCUTE_LOG_LEVEL') ?? '')
-
-        if (!Number.isNaN(envLogLevel)) {
-            return envLogLevel
-        }
-
-        return null
-    }
+    return null
+  }
 }
 
 DenoPlatform.prototype.log = defaultLoggingHandler

@@ -10,30 +10,30 @@ import { normalizePhoneNumber } from '../../utils/misc-utils.js'
  * {@link SentCode} object returned by {@link sendCode}
  */
 export async function resendCode(
-    client: ITelegramClient,
-    params: {
-        /** Phone number in international format */
-        phone: string
+  client: ITelegramClient,
+  params: {
+    /** Phone number in international format */
+    phone: string
 
-        /** Confirmation code identifier from {@link SentCode} */
-        phoneCodeHash: string
+    /** Confirmation code identifier from {@link SentCode} */
+    phoneCodeHash: string
 
-        /** Abort signal */
-        abortSignal?: AbortSignal
-    },
+    /** Abort signal */
+    abortSignal?: AbortSignal
+  },
 ): Promise<SentCode> {
-    const { phone, phoneCodeHash, abortSignal } = params
+  const { phone, phoneCodeHash, abortSignal } = params
 
-    const res = await client.call(
-        {
-            _: 'auth.resendCode',
-            phoneNumber: normalizePhoneNumber(phone),
-            phoneCodeHash,
-        },
-        { abortSignal },
-    )
+  const res = await client.call(
+    {
+      _: 'auth.resendCode',
+      phoneNumber: normalizePhoneNumber(phone),
+      phoneCodeHash,
+    },
+    { abortSignal },
+  )
 
-    assertTypeIs('sendCode', res, 'auth.sentCode')
+  assertTypeIs('sendCode', res, 'auth.sentCode')
 
-    return new SentCode(res)
+  return new SentCode(res)
 }

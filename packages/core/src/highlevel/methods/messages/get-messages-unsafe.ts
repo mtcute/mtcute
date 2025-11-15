@@ -21,30 +21,30 @@ import { Message, PeersIndex } from '../../types/index.js'
  *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
  */
 export async function getMessagesUnsafe(
-    client: ITelegramClient,
-    messageIds: MaybeArray<number>,
-    fromReply = false,
+  client: ITelegramClient,
+  messageIds: MaybeArray<number>,
+  fromReply = false,
 ): Promise<(Message | null)[]> {
-    if (!Array.isArray(messageIds)) messageIds = [messageIds]
+  if (!Array.isArray(messageIds)) messageIds = [messageIds]
 
-    const type = fromReply ? 'inputMessageReplyTo' : 'inputMessageID'
-    const ids: tl.TypeInputMessage[] = messageIds.map(it => ({
-        _: type,
-        id: it,
-    }))
+  const type = fromReply ? 'inputMessageReplyTo' : 'inputMessageID'
+  const ids: tl.TypeInputMessage[] = messageIds.map(it => ({
+    _: type,
+    id: it,
+  }))
 
-    const res = await client.call({
-        _: 'messages.getMessages',
-        id: ids,
-    })
+  const res = await client.call({
+    _: 'messages.getMessages',
+    id: ids,
+  })
 
-    assertTypeIsNot('getMessagesUnsafe', res, 'messages.messagesNotModified')
+  assertTypeIsNot('getMessagesUnsafe', res, 'messages.messagesNotModified')
 
-    const peers = PeersIndex.from(res)
+  const peers = PeersIndex.from(res)
 
-    return res.messages.map((msg) => {
-        if (msg._ === 'messageEmpty') return null
+  return res.messages.map((msg) => {
+    if (msg._ === 'messageEmpty') return null
 
-        return new Message(msg, peers)
-    })
+    return new Message(msg, peers)
+  })
 }

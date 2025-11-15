@@ -14,15 +14,15 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param ids  ID(s) of the stories to increment views of (max 200)
  */
 export async function incrementStoriesViews(
-    client: ITelegramClient,
-    peerId: InputPeerLike,
-    ids: MaybeArray<number>,
+  client: ITelegramClient,
+  peerId: InputPeerLike,
+  ids: MaybeArray<number>,
 ): Promise<void> {
-    const r = await client.call({
-        _: 'stories.incrementStoryViews',
-        peer: await resolvePeer(client, peerId),
-        id: Array.isArray(ids) ? ids : [ids],
-    })
+  const r = await client.call({
+    _: 'stories.incrementStoryViews',
+    peer: await resolvePeer(client, peerId),
+    id: Array.isArray(ids) ? ids : [ids],
+  })
 
-    assertTrue('stories.incrementStoryViews', r)
+  assertTrue('stories.incrementStoryViews', r)
 }

@@ -7,18 +7,18 @@ const UMAMI_NOSCRIPT = `https://tei.su/zond.php?website=${WEBSITE_ID}`
 const { createElement: h } = JSX
 
 export function load(app) {
-    app.renderer.hooks.on('head.end', () => {
-        return h('script', {
-            'async': true,
-            'src': `${UMAMI_URL}/script.js`,
-            'data-website-id': WEBSITE_ID,
-        })
+  app.renderer.hooks.on('head.end', () => {
+    return h('script', {
+      'async': true,
+      'src': `${UMAMI_URL}/script.js`,
+      'data-website-id': WEBSITE_ID,
     })
-    app.renderer.hooks.on('body.begin', () => {
-        return h(
-            'noscript',
-            null,
-            h('div', null, h('img', { src: UMAMI_NOSCRIPT, style: 'position:absolute; left:-9999px;' })),
-        )
-    })
+  })
+  app.renderer.hooks.on('body.begin', () => {
+    return h(
+      'noscript',
+      null,
+      h('div', null, h('img', { src: UMAMI_NOSCRIPT, style: 'position:absolute; left:-9999px;' })),
+    )
+  })
 }

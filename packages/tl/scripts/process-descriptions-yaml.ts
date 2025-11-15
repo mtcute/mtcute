@@ -1,141 +1,141 @@
 import type { CachedDocumentation, CachedDocumentationEntry } from './documentation.js'
 
-type MaybeOverwrite =
-  | string
-  | {
+type MaybeOverwrite
+  = | string
+    | {
       text: string
       overwrite: boolean
-  }
+    }
 
 interface RegexRule {
-    _cached?: RegExp
+  _cached?: RegExp
 
-    regex: string
-    flags?: string
-    repl: string
+  regex: string
+  flags?: string
+  repl: string
 }
 
 interface DescriptionsYaml {
-    objects: Record<
-        string,
-        {
-            desc?: MaybeOverwrite
-            arguments?: Record<string, MaybeOverwrite>
-        }
-    >
+  objects: Record<
+    string,
+    {
+      desc?: MaybeOverwrite
+      arguments?: Record<string, MaybeOverwrite>
+    }
+  >
 
-    arguments: Record<string, string>
+  arguments: Record<string, string>
 
-    regex: RegexRule[]
+  regex: RegexRule[]
 }
 
 function unwrapMaybe(what: MaybeOverwrite, has: boolean): string | undefined {
-    let text: string
-    let overwrite = false
+  let text: string
+  let overwrite = false
 
-    if (typeof what === 'object') {
-        if (!what.text) throw new Error('Invalid overwrite object')
-        text = what.text
-        overwrite = what.overwrite
-    } else {
-        text = what
-    }
+  if (typeof what === 'object') {
+    if (!what.text) throw new Error('Invalid overwrite object')
+    text = what.text
+    overwrite = what.overwrite
+  } else {
+    text = what
+  }
 
-    if (!has || overwrite) {
-        return text
-    }
+  if (!has || overwrite) {
+    return text
+  }
 
-    return undefined
+  return undefined
 }
 
 export function applyDescriptionsYamlFile(input: CachedDocumentation, yaml: unknown): CachedDocumentation {
-    const { objects: byObjects, arguments: byArguments, regex: byRegex } = yaml as DescriptionsYaml
+  const { objects: byObjects, arguments: byArguments, regex: byRegex } = yaml as DescriptionsYaml
 
-    // first create an index of all classes and methods
-    const objIndex: Record<string, CachedDocumentationEntry> = {}
+  // first create an index of all classes and methods
+  const objIndex: Record<string, CachedDocumentationEntry> = {}
 
-    function indexObject(obj: Record<string, CachedDocumentationEntry>, prefix: string) {
-        for (const name in obj) {
-            objIndex[prefix + name] = obj[name]!
+  function indexObject(obj: Record<string, CachedDocumentationEntry>, prefix: string) {
+    for (const name in obj) {
+      objIndex[prefix + name] = obj[name]!
+    }
+  }
+
+  indexObject(input.classes, 'c_')
+  indexObject(input.methods, 'm_')
+
+  // process byObjects
+  for (const name in byObjects) {
+    const rules = byObjects[name]
+    const obj = objIndex[name]
+
+    if (!obj) continue
+
+    if (rules.desc) {
+      const desc = unwrapMaybe(rules.desc, Boolean(obj.comment))
+      if (desc) obj.comment = desc
+    }
+
+    if (rules.arguments) {
+      for (const arg in rules.arguments) {
+        const repl = unwrapMaybe(rules.arguments[arg], obj.arguments !== undefined && arg in obj.arguments)
+
+        if (repl) {
+          if (!obj.arguments) obj.arguments = {}
+          obj.arguments[arg] = repl
         }
+      }
+    }
+  }
+
+  // process byArguments
+  for (const i in objIndex) {
+    const obj = objIndex[i]
+
+    for (const arg in byArguments) {
+      if (obj.arguments && !(arg in obj.arguments)) continue
+
+      const repl = unwrapMaybe(byArguments[arg], Boolean(obj.arguments && arg in obj.arguments))
+
+      if (repl) {
+        if (!obj.arguments) obj.arguments = {}
+        obj.arguments[arg] = repl
+      }
+    }
+  }
+
+  // process byRegex
+  function applyRegex(str: string | undefined, rule: RegexRule) {
+    if (!str) return ''
+
+    if (!rule._cached) {
+      let flags = rule.flags || ''
+      if (!flags.includes('g')) flags += 'g'
+
+      rule._cached = new RegExp(rule.regex, flags)
     }
 
-    indexObject(input.classes, 'c_')
-    indexObject(input.methods, 'm_')
+    return str.replace(rule._cached, rule.repl)
+  }
 
-    // process byObjects
-    for (const name in byObjects) {
-        const rules = byObjects[name]
-        const obj = objIndex[name]
+  for (const i in objIndex) {
+    const obj = objIndex[i]
 
-        if (!obj) continue
+    byRegex.forEach((rule) => {
+      obj.comment = applyRegex(obj.comment, rule)
 
-        if (rules.desc) {
-            const desc = unwrapMaybe(rules.desc, Boolean(obj.comment))
-            if (desc) obj.comment = desc
+      if (obj.arguments) {
+        for (const name in obj.arguments) {
+          obj.arguments[name] = applyRegex(obj.arguments[name], rule)
         }
+      }
+    })
+  }
 
-        if (rules.arguments) {
-            for (const arg in rules.arguments) {
-                const repl = unwrapMaybe(rules.arguments[arg], obj.arguments !== undefined && arg in obj.arguments)
+  for (const i in input.unions) {
+    byRegex.forEach((rule) => {
+      input.unions[i] = applyRegex(input.unions[i], rule)
+    })
+  }
 
-                if (repl) {
-                    if (!obj.arguments) obj.arguments = {}
-                    obj.arguments[arg] = repl
-                }
-            }
-        }
-    }
-
-    // process byArguments
-    for (const i in objIndex) {
-        const obj = objIndex[i]
-
-        for (const arg in byArguments) {
-            if (obj.arguments && !(arg in obj.arguments)) continue
-
-            const repl = unwrapMaybe(byArguments[arg], Boolean(obj.arguments && arg in obj.arguments))
-
-            if (repl) {
-                if (!obj.arguments) obj.arguments = {}
-                obj.arguments[arg] = repl
-            }
-        }
-    }
-
-    // process byRegex
-    function applyRegex(str: string | undefined, rule: RegexRule) {
-        if (!str) return ''
-
-        if (!rule._cached) {
-            let flags = rule.flags || ''
-            if (!flags.includes('g')) flags += 'g'
-
-            rule._cached = new RegExp(rule.regex, flags)
-        }
-
-        return str.replace(rule._cached, rule.repl)
-    }
-
-    for (const i in objIndex) {
-        const obj = objIndex[i]
-
-        byRegex.forEach((rule) => {
-            obj.comment = applyRegex(obj.comment, rule)
-
-            if (obj.arguments) {
-                for (const name in obj.arguments) {
-                    obj.arguments[name] = applyRegex(obj.arguments[name], rule)
-                }
-            }
-        })
-    }
-
-    for (const i in input.unions) {
-        byRegex.forEach((rule) => {
-            input.unions[i] = applyRegex(input.unions[i], rule)
-        })
-    }
-
-    return input
+  return input
 }

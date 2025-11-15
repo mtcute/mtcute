@@ -15,39 +15,39 @@ import type { Modify, UpdateFilter } from './types.js'
  * @returns
  */
 export function every<Mod, State extends object>(
-    filter: UpdateFilter<Message, Mod, State>,
+  filter: UpdateFilter<Message, Mod, State>,
 ): UpdateFilter<
     MessageContext | BusinessMessageContext,
     Mod & {
-        messages: Modify<MessageContext | BusinessMessageContext, Mod>[]
+      messages: Modify<MessageContext | BusinessMessageContext, Mod>[]
     },
     State
-    > {
-    return (ctx, state) => {
-        let i = 0
-        const upds = ctx.messages
-        const max = upds.length
+> {
+  return (ctx, state) => {
+    let i = 0
+    const upds = ctx.messages
+    const max = upds.length
 
-        const next = (): MaybePromise<boolean> => {
-            if (i === max) return true
+    const next = (): MaybePromise<boolean> => {
+      if (i === max) return true
 
-            const res = filter(upds[i++], state)
+      const res = filter(upds[i++], state)
 
-            if (typeof res === 'boolean') {
-                if (!res) return false
-
-                return next()
-            }
-
-            return res.then((r: boolean) => {
-                if (!r) return false
-
-                return next()
-            })
-        }
+      if (typeof res === 'boolean') {
+        if (!res) return false
 
         return next()
+      }
+
+      return res.then((r: boolean) => {
+        if (!r) return false
+
+        return next()
+      })
     }
+
+    return next()
+  }
 }
 
 /**
@@ -60,32 +60,32 @@ export function every<Mod, State extends object>(
  * @returns
  */
 export function some<State extends object>(
-    filter: UpdateFilter<Message, any, State>,
-    // eslint-disable-next-line
+  filter: UpdateFilter<Message, any, State>,
+  // eslint-disable-next-line
 ): UpdateFilter<MessageContext | BusinessMessageContext, {}, State> {
-    return (ctx, state) => {
-        let i = 0
-        const upds = ctx.messages
-        const max = upds.length
+  return (ctx, state) => {
+    let i = 0
+    const upds = ctx.messages
+    const max = upds.length
 
-        const next = (): MaybePromise<boolean> => {
-            if (i === max) return false
+    const next = (): MaybePromise<boolean> => {
+      if (i === max) return false
 
-            const res = filter(upds[i++], state)
+      const res = filter(upds[i++], state)
 
-            if (typeof res === 'boolean') {
-                if (res) return true
-
-                return next()
-            }
-
-            return res.then((r: boolean) => {
-                if (r) return true
-
-                return next()
-            })
-        }
+      if (typeof res === 'boolean') {
+        if (res) return true
 
         return next()
+      }
+
+      return res.then((r: boolean) => {
+        if (r) return true
+
+        return next()
+      })
     }
+
+    return next()
+  }
 }

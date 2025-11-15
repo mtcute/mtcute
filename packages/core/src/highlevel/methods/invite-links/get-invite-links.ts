@@ -6,8 +6,8 @@ import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 
 // @exported
 export interface GetInviteLinksOffset {
-    date: number
-    link: string
+  date: number
+  link: string
 }
 
 /**
@@ -22,59 +22,59 @@ export interface GetInviteLinksOffset {
  * @param params
  */
 export async function getInviteLinks(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    params?: {
-        /**
-         * Only return this admin's links.
-         *
-         * @default `"self"`
-         */
-        admin?: InputPeerLike
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  params?: {
+    /**
+     * Only return this admin's links.
+     *
+     * @default `"self"`
+     */
+    admin?: InputPeerLike
 
-        /**
-         * Whether to fetch revoked invite links
-         */
-        revoked?: boolean
+    /**
+     * Whether to fetch revoked invite links
+     */
+    revoked?: boolean
 
-        /**
-         * Limit the number of invite links to be fetched.
-         *
-         * @default  100
-         */
-        limit?: number
+    /**
+     * Limit the number of invite links to be fetched.
+     *
+     * @default  100
+     */
+    limit?: number
 
-        /**
-         * Offset for pagination.
-         */
-        offset?: GetInviteLinksOffset
-    },
+    /**
+     * Offset for pagination.
+     */
+    offset?: GetInviteLinksOffset
+  },
 ): Promise<ArrayPaginated<ChatInviteLink, GetInviteLinksOffset>> {
-    if (!params) params = {}
+  if (!params) params = {}
 
-    const { revoked = false, limit = Infinity, admin, offset } = params
+  const { revoked = false, limit = Infinity, admin, offset } = params
 
-    const res = await client.call({
-        _: 'messages.getExportedChatInvites',
-        peer: await resolvePeer(client, chatId),
-        revoked,
-        adminId: admin ? await resolveUser(client, admin) : { _: 'inputUserSelf' },
-        limit,
-        offsetDate: offset?.date,
-        offsetLink: offset?.link,
-    })
+  const res = await client.call({
+    _: 'messages.getExportedChatInvites',
+    peer: await resolvePeer(client, chatId),
+    revoked,
+    adminId: admin ? await resolveUser(client, admin) : { _: 'inputUserSelf' },
+    limit,
+    offsetDate: offset?.date,
+    offsetLink: offset?.link,
+  })
 
-    const peers = PeersIndex.from(res)
+  const peers = PeersIndex.from(res)
 
-    const links = res.invites.map(it => new ChatInviteLink(it, peers))
+  const links = res.invites.map(it => new ChatInviteLink(it, peers))
 
-    const last = links[links.length - 1]
-    const nextOffset = last
-        ? {
-            date: last.raw.date,
-            link: last.raw.link,
-        }
-        : undefined
+  const last = links[links.length - 1]
+  const nextOffset = last
+    ? {
+        date: last.raw.date,
+        link: last.raw.link,
+      }
+    : undefined
 
-    return makeArrayPaginated(links, res.count, nextOffset)
+  return makeArrayPaginated(links, res.count, nextOffset)
 }

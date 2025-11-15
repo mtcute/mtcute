@@ -8,18 +8,18 @@ import { assertIsUpdatesGroup } from '../../updates/utils.js'
 
 /** @internal */
 export function _findStoryInUpdate(client: ITelegramClient, res: tl.TypeUpdates): Story {
-    assertIsUpdatesGroup('_findStoryInUpdate', res)
+  assertIsUpdatesGroup('_findStoryInUpdate', res)
 
-    client.handleClientUpdate(res, true)
+  client.handleClientUpdate(res, true)
 
-    const peers = PeersIndex.from(res)
-    const updateStory = res.updates.find(hasValueAtKey('_', 'updateStory'))
+  const peers = PeersIndex.from(res)
+  const updateStory = res.updates.find(hasValueAtKey('_', 'updateStory'))
 
-    if (!updateStory) {
-        throw new MtTypeAssertionError('_findStoryInUpdate (@ .updates[*])', 'updateStory', 'none')
-    }
+  if (!updateStory) {
+    throw new MtTypeAssertionError('_findStoryInUpdate (@ .updates[*])', 'updateStory', 'none')
+  }
 
-    assertTypeIs('updateStory.story', updateStory.story, 'storyItem')
+  assertTypeIs('updateStory.story', updateStory.story, 'storyItem')
 
-    return new Story(updateStory.story, peers)
+  return new Story(updateStory.story, peers)
 }

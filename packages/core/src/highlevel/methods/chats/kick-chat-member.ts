@@ -15,27 +15,27 @@ import { unbanChatMember } from './unban-chat-member.js'
  *  @returns  Service message about removed user, if one was generated.
  */
 export async function kickChatMember(
-    client: ITelegramClient,
-    params: {
-        /** Chat ID */
-        chatId: InputPeerLike
-        /** User ID */
-        userId: InputPeerLike
-    },
+  client: ITelegramClient,
+  params: {
+    /** Chat ID */
+    chatId: InputPeerLike
+    /** User ID */
+    userId: InputPeerLike
+  },
 ): Promise<Message | null> {
-    const { chatId, userId } = params
+  const { chatId, userId } = params
 
-    const chat = await resolvePeer(client, chatId)
-    const user = await resolvePeer(client, userId)
+  const chat = await resolvePeer(client, chatId)
+  const user = await resolvePeer(client, userId)
 
-    const msg = await banChatMember(client, { chatId: chat, participantId: user })
+  const msg = await banChatMember(client, { chatId: chat, participantId: user })
 
-    // not needed in case this is a legacy group
-    if (isInputPeerChannel(chat)) {
-        // i fucking love telegram serverside race conditions
-        await sleepWithAbort(1000, client.stopSignal)
-        await unbanChatMember(client, { chatId: chat, participantId: user })
-    }
+  // not needed in case this is a legacy group
+  if (isInputPeerChannel(chat)) {
+    // i fucking love telegram serverside race conditions
+    await sleepWithAbort(1000, client.stopSignal)
+    await unbanChatMember(client, { chatId: chat, participantId: user })
+  }
 
-    return msg
+  return msg
 }

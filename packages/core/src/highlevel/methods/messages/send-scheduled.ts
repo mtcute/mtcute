@@ -18,29 +18,29 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param ids  ID(s) of the messages
  */
 export async function sendScheduled(
-    client: ITelegramClient,
-    peer: InputPeerLike,
-    ids: MaybeArray<number>,
+  client: ITelegramClient,
+  peer: InputPeerLike,
+  ids: MaybeArray<number>,
 ): Promise<Message[]> {
-    if (!Array.isArray(ids)) ids = [ids]
+  if (!Array.isArray(ids)) ids = [ids]
 
-    const res = await client.call({
-        _: 'messages.sendScheduledMessages',
-        peer: await resolvePeer(client, peer),
-        id: ids,
-    })
+  const res = await client.call({
+    _: 'messages.sendScheduledMessages',
+    peer: await resolvePeer(client, peer),
+    id: ids,
+  })
 
-    assertIsUpdatesGroup('sendScheduled', res)
-    client.handleClientUpdate(res, true)
+  assertIsUpdatesGroup('sendScheduled', res)
+  client.handleClientUpdate(res, true)
 
-    const peers = PeersIndex.from(res)
+  const peers = PeersIndex.from(res)
 
-    const msgs = res.updates
-        .filter(
-            (u): u is Extract<typeof u, tl.RawUpdateNewMessage | tl.RawUpdateNewChannelMessage> =>
-                u._ === 'updateNewMessage' || u._ === 'updateNewChannelMessage',
-        )
-        .map(u => new Message(u.message, peers))
+  const msgs = res.updates
+    .filter(
+      (u): u is Extract<typeof u, tl.RawUpdateNewMessage | tl.RawUpdateNewChannelMessage> =>
+        u._ === 'updateNewMessage' || u._ === 'updateNewChannelMessage',
+    )
+    .map(u => new Message(u.message, peers))
 
-    return msgs
+  return msgs
 }

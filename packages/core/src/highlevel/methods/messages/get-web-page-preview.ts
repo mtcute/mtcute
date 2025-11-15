@@ -10,19 +10,19 @@ import { _normalizeInputText } from '../misc/normalize-text.js'
  * @param text  Text of the message, or simply the link for which the preview should be retrieved
  */
 export async function getWebPagePreview(
-    client: ITelegramClient,
-    text: InputText,
+  client: ITelegramClient,
+  text: InputText,
 ): Promise<WebPageMedia | null> {
-    const [message, entities] = await _normalizeInputText(client, text)
+  const [message, entities] = await _normalizeInputText(client, text)
 
-    const res = await client.call({
-        _: 'messages.getWebPagePreview',
-        message,
-        entities,
-    })
+  const res = await client.call({
+    _: 'messages.getWebPagePreview',
+    message,
+    entities,
+  })
 
-    if (res.media._ === 'messageMediaEmpty') return null
-    assert(res.media._ === 'messageMediaWebPage')
+  if (res.media._ === 'messageMediaEmpty') return null
+  assert(res.media._ === 'messageMediaWebPage')
 
-    return new WebPageMedia(res.media)
+  return new WebPageMedia(res.media)
 }

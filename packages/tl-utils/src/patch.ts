@@ -5,8 +5,8 @@ import { generateWriterCodeForTlEntries } from './codegen/writer.js'
 import { parseTlToEntries } from './parse.js'
 
 function evalForResult<T>(js: string): T {
-    // eslint-disable-next-line ts/no-implied-eval, no-new-func, ts/no-unsafe-call
-    return new Function(js)() as T
+  // eslint-disable-next-line ts/no-implied-eval, no-new-func, ts/no-unsafe-call
+  return new Function(js)() as T
 }
 
 /**
@@ -21,45 +21,45 @@ function evalForResult<T>(js: string): T {
  * @returns  New readers and writers map
  */
 export function patchRuntimeTlSchema(
-    schema: string,
-    readers: TlReaderMap,
-    writers: TlWriterMap,
+  schema: string,
+  readers: TlReaderMap,
+  writers: TlWriterMap,
 ): {
-        readerMap: TlReaderMap
-        writerMap: TlWriterMap
-    } {
-    const entries = parseTlToEntries(schema, { parseMethodTypes: true })
+  readerMap: TlReaderMap
+  writerMap: TlWriterMap
+} {
+  const entries = parseTlToEntries(schema, { parseMethodTypes: true })
 
-    const readersCode = generateReaderCodeForTlEntries(entries, {
-        variableName: '_',
-        includeMethods: false,
-        includeMethodResults: true,
-    })
-    const writersCode = generateWriterCodeForTlEntries(entries, {
-        variableName: '_',
-        includePrelude: true,
-    })
+  const readersCode = generateReaderCodeForTlEntries(entries, {
+    variableName: '_',
+    includeMethods: false,
+    includeMethodResults: true,
+  })
+  const writersCode = generateWriterCodeForTlEntries(entries, {
+    variableName: '_',
+    includePrelude: true,
+  })
 
-    const newReaders = evalForResult<TlReaderMap>(readersCode.replace('var _=', 'return'))
-    const newWriters = evalForResult<TlWriterMap>(writersCode.replace('var _=', 'return'))
+  const newReaders = evalForResult<TlReaderMap>(readersCode.replace('var _=', 'return'))
+  const newWriters = evalForResult<TlWriterMap>(writersCode.replace('var _=', 'return'))
 
-    return {
-        readerMap: {
-            ...readers,
-            ...newReaders,
-            _results: {
-                ...readers._results,
-                ...newReaders._results,
-            },
-        },
-        // @ts-expect-error ts is not smart enough
-        writerMap: {
-            ...writers,
-            ...newWriters,
-            _bare: {
-                ...writers._bare,
-                ...newWriters._bare,
-            },
-        },
-    }
+  return {
+    readerMap: {
+      ...readers,
+      ...newReaders,
+      _results: {
+        ...readers._results,
+        ...newReaders._results,
+      },
+    },
+    // @ts-expect-error ts is not smart enough
+    writerMap: {
+      ...writers,
+      ...newWriters,
+      _bare: {
+        ...writers._bare,
+        ...newWriters._bare,
+      },
+    },
+  }
 }

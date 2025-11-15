@@ -7,23 +7,23 @@ import { deeplinkBuilder } from './common.js'
  * Used to import stickersets or custom emoji stickersets
  */
 export const stickerset: Deeplink<{
-    slug: string
-    emoji?: boolean
+  slug: string
+  emoji?: boolean
 }> = /* #__PURE__ */ deeplinkBuilder({
-    internalBuild: ({ slug, emoji }) => [emoji ? 'addemoji' : 'addstickers', { set: slug }],
-    internalParse: (path, query) => {
-        if (path !== 'addstickers' && path !== 'addemoji') return null
+  internalBuild: ({ slug, emoji }) => [emoji ? 'addemoji' : 'addstickers', { set: slug }],
+  internalParse: (path, query) => {
+    if (path !== 'addstickers' && path !== 'addemoji') return null
 
-        const slug = query.get('set')
-        if (!slug) return null
+    const slug = query.get('set')
+    if (!slug) return null
 
-        return { slug, emoji: path === 'addemoji' }
-    },
-    externalBuild: ({ slug, emoji }) => [`${emoji ? 'addemoji' : 'addstickers'}/${slug}`, null],
-    externalParse: (path) => {
-        const [prefix, slug] = path.split('/')
-        if (prefix !== 'addstickers' && prefix !== 'addemoji') return null
+    return { slug, emoji: path === 'addemoji' }
+  },
+  externalBuild: ({ slug, emoji }) => [`${emoji ? 'addemoji' : 'addstickers'}/${slug}`, null],
+  externalParse: (path) => {
+    const [prefix, slug] = path.split('/')
+    if (prefix !== 'addstickers' && prefix !== 'addemoji') return null
 
-        return { slug, emoji: prefix === 'addemoji' }
-    },
+    return { slug, emoji: prefix === 'addemoji' }
+  },
 })

@@ -14,49 +14,49 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @returns  Service message for the created topic
  */
 export async function createForumTopic(
-    client: ITelegramClient,
-    params: {
-        /** Chat ID or username */
-        chatId: InputPeerLike
+  client: ITelegramClient,
+  params: {
+    /** Chat ID or username */
+    chatId: InputPeerLike
 
-        /**
-         * Topic title
-         */
-        title: string
+    /**
+     * Topic title
+     */
+    title: string
 
-        /**
-         * Icon of the topic.
-         *
-         * Can be a number (color in RGB, see {@link ForumTopic} static members for allowed values)
-         * or a custom emoji ID.
-         *
-         * Icon color can't be changed after the topic is created.
-         */
-        icon?: number | tl.Long
+    /**
+     * Icon of the topic.
+     *
+     * Can be a number (color in RGB, see {@link ForumTopic} static members for allowed values)
+     * or a custom emoji ID.
+     *
+     * Icon color can't be changed after the topic is created.
+     */
+    icon?: number | tl.Long
 
-        /**
-         * Send as a specific channel
-         */
-        sendAs?: InputPeerLike
+    /**
+     * Send as a specific channel
+     */
+    sendAs?: InputPeerLike
 
-        /**
-         * Whether to dispatch the returned service message (if any)
-         * to the client's update handler.
-         */
-        shouldDispatch?: true
-    },
+    /**
+     * Whether to dispatch the returned service message (if any)
+     * to the client's update handler.
+     */
+    shouldDispatch?: true
+  },
 ): Promise<Message> {
-    const { chatId, title, icon, sendAs, shouldDispatch } = params
+  const { chatId, title, icon, sendAs, shouldDispatch } = params
 
-    const res = await client.call({
-        _: 'messages.createForumTopic',
-        peer: await resolvePeer(client, chatId),
-        title,
-        iconColor: typeof icon === 'number' ? icon : undefined,
-        iconEmojiId: typeof icon !== 'number' ? icon : undefined,
-        sendAs: sendAs ? await resolvePeer(client, sendAs) : undefined,
-        randomId: randomLong(),
-    })
+  const res = await client.call({
+    _: 'messages.createForumTopic',
+    peer: await resolvePeer(client, chatId),
+    title,
+    iconColor: typeof icon === 'number' ? icon : undefined,
+    iconEmojiId: typeof icon !== 'number' ? icon : undefined,
+    sendAs: sendAs ? await resolvePeer(client, sendAs) : undefined,
+    randomId: randomLong(),
+  })
 
-    return _findMessageInUpdate(client, res, false, !shouldDispatch)
+  return _findMessageInUpdate(client, res, false, !shouldDispatch)
 }

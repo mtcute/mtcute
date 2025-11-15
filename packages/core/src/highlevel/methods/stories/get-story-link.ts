@@ -11,15 +11,15 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * I have no idea why is this an RPC call, but whatever
  */
 export async function getStoryLink(
-    client: ITelegramClient,
-    peerId: InputPeerLike,
-    storyId: number,
+  client: ITelegramClient,
+  peerId: InputPeerLike,
+  storyId: number,
 ): Promise<string> {
-    return client
-        .call({
-            _: 'stories.exportStoryLink',
-            peer: await resolvePeer(client, peerId),
-            id: storyId,
-        })
-        .then(r => r.link)
+  return client
+    .call({
+      _: 'stories.exportStoryLink',
+      peer: await resolvePeer(client, peerId),
+      id: storyId,
+    })
+    .then(r => r.link)
 }

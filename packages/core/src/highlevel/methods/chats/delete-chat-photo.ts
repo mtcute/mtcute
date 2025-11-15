@@ -12,24 +12,24 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param chatId  Chat ID or username
  */
 export async function deleteChatPhoto(client: ITelegramClient, chatId: InputPeerLike): Promise<void> {
-    const chat = await resolvePeer(client, chatId)
+  const chat = await resolvePeer(client, chatId)
 
-    let res
-    if (isInputPeerChat(chat)) {
-        res = await client.call({
-            _: 'messages.editChatPhoto',
-            chatId: chat.chatId,
-            photo: { _: 'inputChatPhotoEmpty' },
-        })
-    } else if (isInputPeerChannel(chat)) {
-        res = await client.call({
-            _: 'channels.editPhoto',
-            channel: toInputChannel(chat),
-            photo: { _: 'inputChatPhotoEmpty' },
-        })
-    } else {
-        throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
-    }
+  let res
+  if (isInputPeerChat(chat)) {
+    res = await client.call({
+      _: 'messages.editChatPhoto',
+      chatId: chat.chatId,
+      photo: { _: 'inputChatPhotoEmpty' },
+    })
+  } else if (isInputPeerChannel(chat)) {
+    res = await client.call({
+      _: 'channels.editPhoto',
+      channel: toInputChannel(chat),
+      photo: { _: 'inputChatPhotoEmpty' },
+    })
+  } else {
+    throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+  }
 
-    client.handleClientUpdate(res)
+  client.handleClientUpdate(res)
 }

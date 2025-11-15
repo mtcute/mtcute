@@ -14,11 +14,11 @@ const nodeModules = fileURLToPath(new URL('../node_modules', import.meta.url))
 let count = 0
 
 for (const file of globSync(join(nodeModules, '.pnpm/**/node_modules/@jsr/**/*.ts'))) {
-    if (file.endsWith('.d.ts')) continue
-    if (!fs.existsSync(file)) continue
+  if (file.endsWith('.d.ts')) continue
+  if (!fs.existsSync(file)) continue
 
-    fs.unlinkSync(file)
-    count++
+  fs.unlinkSync(file)
+  count++
 }
 
 console.log(`[jsr] removed ${count} source files`)

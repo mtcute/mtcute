@@ -17,17 +17,17 @@ import { resolveUser } from './resolve-peer.js'
  * @param ids  Users' identifiers. Can be ID, username, phone number, `"me"`, `"self"` or TL object
  */
 export async function getUsers(client: ITelegramClient, ids: MaybeArray<InputPeerLike>): Promise<(User | null)[]> {
-    if (!Array.isArray(ids)) {
-        // avoid unnecessary overhead of Promise.all and resolvePeerMany
-        const res = await _getUsersBatched(client, await resolveUser(client, ids))
+  if (!Array.isArray(ids)) {
+    // avoid unnecessary overhead of Promise.all and resolvePeerMany
+    const res = await _getUsersBatched(client, await resolveUser(client, ids))
 
-        return [res ? new User(res) : null]
-    }
+    return [res ? new User(res) : null]
+  }
 
-    const inputPeers = await resolvePeerMany(client, ids, toInputUser)
+  const inputPeers = await resolvePeerMany(client, ids, toInputUser)
 
-    // pooling will be done by the helper
-    const res = await Promise.all(inputPeers.map(peer => _getUsersBatched(client, peer)))
+  // pooling will be done by the helper
+  const res = await Promise.all(inputPeers.map(peer => _getUsersBatched(client, peer)))
 
-    return res.map(it => (it ? new User(it) : null))
+  return res.map(it => (it ? new User(it) : null))
 }

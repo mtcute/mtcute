@@ -9,271 +9,271 @@ import Long from 'long'
 import { PeersIndex } from '../../highlevel/types/peers/peers-index.js'
 
 function replaceType<
-    Input extends tlCompat.TlObject,
-    NewTypeName extends tl.TlObject['_'],
+  Input extends tlCompat.TlObject,
+  NewTypeName extends tl.TlObject['_'],
 >(obj: Input, type: NewTypeName): Omit<Input, '_'> & { _: NewTypeName } {
-    // modifying the object is safe because we have created the object ourselves inside the original reader fn
-    return Object.assign(obj, { _: type })
+  // modifying the object is safe because we have created the object ourselves inside the original reader fn
+  return Object.assign(obj, { _: type })
 }
 
 function dropFields<T extends tlCompat.TlObject, const Fields extends (keyof T)[]>(
-    obj: T,
-    fields: Fields,
+  obj: T,
+  fields: Fields,
 ): Omit<T, Fields[number]> {
-    for (let i = 0; i < fields.length; i++) {
-        delete obj[fields[i]]
-    }
-    return obj
+  for (let i = 0; i < fields.length; i++) {
+    delete obj[fields[i]]
+  }
+  return obj
 }
 
 function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
-    switch (obj._) {
-        case 'starGiftUnique_layer197':
-            return {
-                ...obj,
-                _: 'starGiftUnique',
-                giftId: Long.ZERO,
-                ownerId: obj.ownerId ? { _: 'peerUser', userId: obj.ownerId } : undefined,
-            }
-        case 'starGiftUnique_layer198':
-        case 'starGiftUnique_layer202':
-        case 'starGiftUnique_layer206':
-            return {
-                ...obj,
-                _: 'starGiftUnique',
-                giftId: Long.ZERO,
-            }
-        case 'starGiftUnique_layer210':
-            return {
-                ...obj,
-                _: 'starGiftUnique',
-                giftId: Long.ZERO,
-                resellAmount: obj.resellStars
-                    ? [{
-                        _: 'starsAmount',
-                        amount: obj.resellStars,
-                        nanos: 0,
-                    }]
-                    : undefined,
-            }
-        case 'starGiftUnique_layer211':
-            return {
-                ...obj,
-                _: 'starGiftUnique',
-                giftId: Long.ZERO,
-            }
-        case 'starGiftUnique_layer214':
-            return replaceType(obj, 'starGiftUnique')
-        case 'starGift_layer202':
-        case 'starGift_layer206':
-        case 'starGift_layer209':
-        case 'starGift_layer211':
-            return replaceType(obj, 'starGift')
-        default:
-            return obj
-    }
+  switch (obj._) {
+    case 'starGiftUnique_layer197':
+      return {
+        ...obj,
+        _: 'starGiftUnique',
+        giftId: Long.ZERO,
+        ownerId: obj.ownerId ? { _: 'peerUser', userId: obj.ownerId } : undefined,
+      }
+    case 'starGiftUnique_layer198':
+    case 'starGiftUnique_layer202':
+    case 'starGiftUnique_layer206':
+      return {
+        ...obj,
+        _: 'starGiftUnique',
+        giftId: Long.ZERO,
+      }
+    case 'starGiftUnique_layer210':
+      return {
+        ...obj,
+        _: 'starGiftUnique',
+        giftId: Long.ZERO,
+        resellAmount: obj.resellStars
+          ? [{
+              _: 'starsAmount',
+              amount: obj.resellStars,
+              nanos: 0,
+            }]
+          : undefined,
+      }
+    case 'starGiftUnique_layer211':
+      return {
+        ...obj,
+        _: 'starGiftUnique',
+        giftId: Long.ZERO,
+      }
+    case 'starGiftUnique_layer214':
+      return replaceType(obj, 'starGiftUnique')
+    case 'starGift_layer202':
+    case 'starGift_layer206':
+    case 'starGift_layer209':
+    case 'starGift_layer211':
+      return replaceType(obj, 'starGift')
+    default:
+      return obj
+  }
 }
 
 function mapCompatEmojiStatus(obj: tlCompat.TypeEmojiStatus): tl.TypeEmojiStatus {
-    switch (obj._) {
-        case 'emojiStatus_layer197':
-            return {
-                ...obj,
-                _: 'emojiStatus',
-                documentId: obj.documentId,
-            }
-        case 'emojiStatusUntil_layer214':
-            return {
-                _: 'emojiStatus',
-                documentId: obj.documentId,
-                until: obj.until,
-            }
-        default:
-            return obj
-    }
+  switch (obj._) {
+    case 'emojiStatus_layer197':
+      return {
+        ...obj,
+        _: 'emojiStatus',
+        documentId: obj.documentId,
+      }
+    case 'emojiStatusUntil_layer214':
+      return {
+        _: 'emojiStatus',
+        documentId: obj.documentId,
+        until: obj.until,
+      }
+    default:
+      return obj
+  }
 }
 
 function mapCompatMessageMedia(obj: tlCompat.TypeMessageMedia): tl.TypeMessageMedia {
-    switch (obj._) {
-        case 'messageMediaDocument_layer197':
-            return replaceType(obj, 'messageMediaDocument')
-        default:
-            return obj
-    }
+  switch (obj._) {
+    case 'messageMediaDocument_layer197':
+      return replaceType(obj, 'messageMediaDocument')
+    default:
+      return obj
+  }
 }
 
 function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessageAction {
-    switch (obj._) {
-        case 'messageActionStarGiftUnique_layer197':
-        case 'messageActionStarGiftUnique_layer202':
-        case 'messageActionStarGiftUnique_layer214':
-            return {
-                ...obj,
-                _: 'messageActionStarGiftUnique',
-                gift: mapCompatStarGift(obj.gift),
+  switch (obj._) {
+    case 'messageActionStarGiftUnique_layer197':
+    case 'messageActionStarGiftUnique_layer202':
+    case 'messageActionStarGiftUnique_layer214':
+      return {
+        ...obj,
+        _: 'messageActionStarGiftUnique',
+        gift: mapCompatStarGift(obj.gift),
+      }
+    case 'messageActionStarGiftUnique_layer210':
+      return {
+        ...obj,
+        _: 'messageActionStarGiftUnique',
+        gift: mapCompatStarGift(obj.gift),
+        resaleAmount: obj.resaleStars
+          ? {
+              _: 'starsAmount',
+              amount: obj.resaleStars,
+              nanos: 0,
             }
-        case 'messageActionStarGiftUnique_layer210':
-            return {
-                ...obj,
-                _: 'messageActionStarGiftUnique',
-                gift: mapCompatStarGift(obj.gift),
-                resaleAmount: obj.resaleStars
-                    ? {
-                        _: 'starsAmount',
-                        amount: obj.resaleStars,
-                        nanos: 0,
-                    }
-                    : undefined,
-            }
-        case 'messageActionStarGift_layer197':
-        case 'messageActionStarGift_layer211':
-            return {
-                ...obj,
-                _: 'messageActionStarGift',
-                gift: mapCompatStarGift(obj.gift),
-            }
-        case 'messageActionPaidMessagesPrice_layer203':
-            return replaceType(obj, 'messageActionPaidMessagesPrice')
-        case 'messageActionSetChatTheme_layer211':
-            return {
-                _: 'messageActionSetChatTheme',
-                theme: {
-                    _: 'chatTheme',
-                    emoticon: obj.emoticon,
-                },
-            }
-        default:
-            return obj
-    }
+          : undefined,
+      }
+    case 'messageActionStarGift_layer197':
+    case 'messageActionStarGift_layer211':
+      return {
+        ...obj,
+        _: 'messageActionStarGift',
+        gift: mapCompatStarGift(obj.gift),
+      }
+    case 'messageActionPaidMessagesPrice_layer203':
+      return replaceType(obj, 'messageActionPaidMessagesPrice')
+    case 'messageActionSetChatTheme_layer211':
+      return {
+        _: 'messageActionSetChatTheme',
+        theme: {
+          _: 'chatTheme',
+          emoticon: obj.emoticon,
+        },
+      }
+    default:
+      return obj
+  }
 }
 
 function mapMessageReplyHeader(obj: tlCompat.TypeMessageReplyHeader): tl.TypeMessageReplyHeader {
-    switch (obj._) {
-        case 'messageReplyHeader_layer206':
-            return {
-                ...obj,
-                _: 'messageReplyHeader',
-                replyMedia: obj.replyMedia ? mapCompatMessageMedia(obj.replyMedia) : undefined,
-            }
-        default:
-            return obj
-    }
+  switch (obj._) {
+    case 'messageReplyHeader_layer206':
+      return {
+        ...obj,
+        _: 'messageReplyHeader',
+        replyMedia: obj.replyMedia ? mapCompatMessageMedia(obj.replyMedia) : undefined,
+      }
+    default:
+      return obj
+  }
 }
 
 function mapCompatMessage(obj: tlCompat.TypeMessage): tl.TypeMessage {
-    switch (obj._) {
-        case 'message_layer199':
-        case 'message_layer204':
-            return {
-                ...obj,
-                _: 'message',
-                media: obj.media ? mapCompatMessageMedia(obj.media) : undefined,
-                replyTo: obj.replyTo ? mapMessageReplyHeader(obj.replyTo) : undefined,
-            }
-        case 'messageService_layer204':
-            return {
-                ...obj,
-                _: 'messageService',
-                action: mapCompatMessageAction(obj.action),
-                replyTo: obj.replyTo ? mapMessageReplyHeader(obj.replyTo) : undefined,
-            }
-        default:
-            return obj
-    }
+  switch (obj._) {
+    case 'message_layer199':
+    case 'message_layer204':
+      return {
+        ...obj,
+        _: 'message',
+        media: obj.media ? mapCompatMessageMedia(obj.media) : undefined,
+        replyTo: obj.replyTo ? mapMessageReplyHeader(obj.replyTo) : undefined,
+      }
+    case 'messageService_layer204':
+      return {
+        ...obj,
+        _: 'messageService',
+        action: mapCompatMessageAction(obj.action),
+        replyTo: obj.replyTo ? mapMessageReplyHeader(obj.replyTo) : undefined,
+      }
+    default:
+      return obj
+  }
 }
 
 function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
-    switch (obj._) {
-        case 'starGiftUnique_layer197':
-        case 'starGiftUnique_layer198':
-        case 'starGiftUnique_layer202':
-        case 'starGiftUnique_layer206':
-        case 'starGiftUnique_layer210':
-        case 'starGiftUnique_layer211':
-        case 'starGiftUnique_layer214':
-        case 'starGift_layer202':
-        case 'starGift_layer206':
-        case 'starGift_layer209':
-        case 'starGift_layer211':
-            return mapCompatStarGift(obj)
-        case 'emojiStatus_layer197':
-        case 'emojiStatusUntil_layer214':
-            return mapCompatEmojiStatus(obj)
-        case 'messageMediaDocument_layer197':
-            return mapCompatMessageMedia(obj)
-        case 'channelFull_layer197':
-        case 'channelFull_layer204':
-            return replaceType(obj, 'channelFull')
-        case 'messageActionStarGift_layer197':
-        case 'messageActionStarGift_layer211':
-        case 'messageActionStarGiftUnique_layer197':
-        case 'messageActionStarGiftUnique_layer202':
-        case 'messageActionStarGiftUnique_layer210':
-        case 'messageActionPaidMessagesPrice_layer203':
-        case 'messageActionSetChatTheme_layer211':
-        case 'messageActionStarGiftUnique_layer214':
-            return mapCompatMessageAction(obj)
-        case 'userFull_layer199':
-            return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
-        case 'userFull_layer200':
-        case 'userFull_layer209':
-        case 'userFull_layer210':
-        case 'userFull_layer211':
-        case 'userFull_layer214':
-            return replaceType(obj, 'userFull')
-        case 'user_layer199':
-            return {
-                ...obj,
-                _: 'user',
-                emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
-            }
-        case 'channel_layer199':
-        case 'channel_layer203':
-            return {
-                ...obj,
-                _: 'channel',
-                emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
-            }
-        case 'channelFull_layer211':
-            return replaceType(obj, 'channelFull')
-        case 'phoneCallDiscardReasonAllowGroupCall_layer202':
-            // removed constructor in favor of phoneCallDiscardReasonMigrateConferenceCall,
-            // which requires extra info we don't have
-            return { _: 'phoneCallDiscardReasonMissed' }
-        case 'message_layer199':
-        case 'message_layer204':
-        case 'messageService_layer204':
-            return mapCompatMessage(obj)
-        case 'messageReplyHeader_layer206':
-            return mapMessageReplyHeader(obj)
-        case 'storyItem_layer210':
-            return {
-                ...obj,
-                _: 'storyItem',
-                media: mapCompatMessageMedia(obj.media),
-            }
-        case 'premiumGiftOption_layer199':
-            // can only be present in userFull_layer199, but we strip the field containing that
-            return null!
-        default:
-            return obj
-    }
+  switch (obj._) {
+    case 'starGiftUnique_layer197':
+    case 'starGiftUnique_layer198':
+    case 'starGiftUnique_layer202':
+    case 'starGiftUnique_layer206':
+    case 'starGiftUnique_layer210':
+    case 'starGiftUnique_layer211':
+    case 'starGiftUnique_layer214':
+    case 'starGift_layer202':
+    case 'starGift_layer206':
+    case 'starGift_layer209':
+    case 'starGift_layer211':
+      return mapCompatStarGift(obj)
+    case 'emojiStatus_layer197':
+    case 'emojiStatusUntil_layer214':
+      return mapCompatEmojiStatus(obj)
+    case 'messageMediaDocument_layer197':
+      return mapCompatMessageMedia(obj)
+    case 'channelFull_layer197':
+    case 'channelFull_layer204':
+      return replaceType(obj, 'channelFull')
+    case 'messageActionStarGift_layer197':
+    case 'messageActionStarGift_layer211':
+    case 'messageActionStarGiftUnique_layer197':
+    case 'messageActionStarGiftUnique_layer202':
+    case 'messageActionStarGiftUnique_layer210':
+    case 'messageActionPaidMessagesPrice_layer203':
+    case 'messageActionSetChatTheme_layer211':
+    case 'messageActionStarGiftUnique_layer214':
+      return mapCompatMessageAction(obj)
+    case 'userFull_layer199':
+      return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
+    case 'userFull_layer200':
+    case 'userFull_layer209':
+    case 'userFull_layer210':
+    case 'userFull_layer211':
+    case 'userFull_layer214':
+      return replaceType(obj, 'userFull')
+    case 'user_layer199':
+      return {
+        ...obj,
+        _: 'user',
+        emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
+      }
+    case 'channel_layer199':
+    case 'channel_layer203':
+      return {
+        ...obj,
+        _: 'channel',
+        emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
+      }
+    case 'channelFull_layer211':
+      return replaceType(obj, 'channelFull')
+    case 'phoneCallDiscardReasonAllowGroupCall_layer202':
+      // removed constructor in favor of phoneCallDiscardReasonMigrateConferenceCall,
+      // which requires extra info we don't have
+      return { _: 'phoneCallDiscardReasonMissed' }
+    case 'message_layer199':
+    case 'message_layer204':
+    case 'messageService_layer204':
+      return mapCompatMessage(obj)
+    case 'messageReplyHeader_layer206':
+      return mapMessageReplyHeader(obj)
+    case 'storyItem_layer210':
+      return {
+        ...obj,
+        _: 'storyItem',
+        media: mapCompatMessageMedia(obj.media),
+      }
+    case 'premiumGiftOption_layer199':
+      // can only be present in userFull_layer199, but we strip the field containing that
+      return null!
+    default:
+      return obj
+  }
 }
 
 function wrapReader(reader: (r: unknown) => unknown) {
-    return (r: unknown) => mapCompatObject(reader(r) as tlCompat.TlObject)
+  return (r: unknown) => mapCompatObject(reader(r) as tlCompat.TlObject)
 }
 
 function getCombinedReaderMap(): Record<number, (r: unknown) => unknown> {
-    const ret: Record<number, (r: unknown) => unknown> = {
-        ...__tlReaderMap,
-    }
+  const ret: Record<number, (r: unknown) => unknown> = {
+    ...__tlReaderMap,
+  }
 
-    for (const [id, reader] of objectEntries(__tlReaderMapCompat)) {
-        ret[id] = wrapReader(reader)
-    }
+  for (const [id, reader] of objectEntries(__tlReaderMapCompat)) {
+    ret[id] = wrapReader(reader)
+  }
 
-    return ret
+  return ret
 }
 
 const _combinedReaderMap = /* @__PURE__ */ getCombinedReaderMap()
@@ -287,30 +287,30 @@ const _combinedReaderMap = /* @__PURE__ */ getCombinedReaderMap()
  * > or [compat.tl](https://github.com/mtcute/mtcute/blob/master/packages/tl/data/compat.tl)
  */
 export function deserializeObjectWithCompat(data: Uint8Array): tl.TlObject {
-    return TlBinaryReader.deserializeObject(_combinedReaderMap, data)
+  return TlBinaryReader.deserializeObject(_combinedReaderMap, data)
 }
 
 /** Helper function to deserialize a {@link PeersIndex} with backwards compatibility */
 export function deserializePeersIndexWithCompat(data: Uint8Array): PeersIndex {
-    const res = new PeersIndex()
+  const res = new PeersIndex()
 
-    const bytes = Bytes.from(data)
+  const bytes = Bytes.from(data)
 
-    const userCount = read.int32le(bytes)
-    for (let i = 0; i < userCount; i++) {
-        const len = read.int32le(bytes)
-        const obj = deserializeObjectWithCompat(read.exactly(bytes, len))
-        assert(tl.isAnyUser(obj))
-        res.users.set(obj.id, obj)
-    }
+  const userCount = read.int32le(bytes)
+  for (let i = 0; i < userCount; i++) {
+    const len = read.int32le(bytes)
+    const obj = deserializeObjectWithCompat(read.exactly(bytes, len))
+    assert(tl.isAnyUser(obj))
+    res.users.set(obj.id, obj)
+  }
 
-    const chatCount = read.int32le(bytes)
-    for (let i = 0; i < chatCount; i++) {
-        const len = read.int32le(bytes)
-        const obj = deserializeObjectWithCompat(read.exactly(bytes, len))
-        assert(tl.isAnyChat(obj))
-        res.chats.set(obj.id, obj)
-    }
+  const chatCount = read.int32le(bytes)
+  for (let i = 0; i < chatCount; i++) {
+    const len = read.int32le(bytes)
+    const obj = deserializeObjectWithCompat(read.exactly(bytes, len))
+    assert(tl.isAnyChat(obj))
+    res.chats.set(obj.id, obj)
+  }
 
-    return res
+  return res
 }

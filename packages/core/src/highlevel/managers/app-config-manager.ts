@@ -7,56 +7,56 @@ import { MtTypeAssertionError } from '../../types/errors.js'
 import { tlJsonToJson } from '../../utils/tl-json.js'
 
 export class AppConfigManager {
-    private _resource
-    constructor(private client: BaseTelegramClient) {
-        this._resource = new AsyncResource<tl.help.RawAppConfig>({
-            fetcher: async ({ current }) => {
-                const res = await this.client.call({
-                    _: 'help.getAppConfig',
-                    hash: current?.hash ?? 0,
-                })
-
-                if (res._ === 'help.appConfigNotModified') {
-                    return {
-                        data: asNonNull(current),
-                        expiresIn: 3_600_000,
-                    }
-                }
-
-                return {
-                    data: res,
-                    expiresIn: 3_600_000,
-                }
-            },
+  private _resource
+  constructor(private client: BaseTelegramClient) {
+    this._resource = new AsyncResource<tl.help.RawAppConfig>({
+      fetcher: async ({ current }) => {
+        const res = await this.client.call({
+          _: 'help.getAppConfig',
+          hash: current?.hash ?? 0,
         })
-    }
 
-    private _object?: AppConfigSchema
-    async get(): Promise<AppConfigSchema> {
-        if (!this._resource.isStale && this._object) return this._object
-
-        const obj = tlJsonToJson((await this._resource.get())!.config)
-
-        if (!obj || typeof obj !== 'object') {
-            throw new MtTypeAssertionError('appConfig', 'object', typeof obj)
+        if (res._ === 'help.appConfigNotModified') {
+          return {
+            data: asNonNull(current),
+            expiresIn: 3_600_000,
+          }
         }
 
-        this._object = obj as AppConfigSchema
+        return {
+          data: res,
+          expiresIn: 3_600_000,
+        }
+      },
+    })
+  }
 
-        return this._object
+  private _object?: AppConfigSchema
+  async get(): Promise<AppConfigSchema> {
+    if (!this._resource.isStale && this._object) return this._object
+
+    const obj = tlJsonToJson((await this._resource.get())!.config)
+
+    if (!obj || typeof obj !== 'object') {
+      throw new MtTypeAssertionError('appConfig', 'object', typeof obj)
     }
 
-    async getField<K extends keyof AppConfigSchema>(field: K): Promise<AppConfigSchema[K]>
-    async getField<K extends keyof AppConfigSchema>(
-        field: K,
-        fallback: NonNullable<AppConfigSchema[K]>,
-    ): Promise<NonNullable<AppConfigSchema[K]>>
-    async getField<K extends keyof AppConfigSchema>(
-        field: K,
-        fallback?: NonNullable<AppConfigSchema[K]>,
-    ): Promise<AppConfigSchema[K]> {
-        const obj = await this.get()
+    this._object = obj as AppConfigSchema
 
-        return obj[field] ?? fallback
-    }
+    return this._object
+  }
+
+  async getField<K extends keyof AppConfigSchema>(field: K): Promise<AppConfigSchema[K]>
+  async getField<K extends keyof AppConfigSchema>(
+    field: K,
+    fallback: NonNullable<AppConfigSchema[K]>,
+  ): Promise<NonNullable<AppConfigSchema[K]>>
+  async getField<K extends keyof AppConfigSchema>(
+    field: K,
+    fallback?: NonNullable<AppConfigSchema[K]>,
+  ): Promise<AppConfigSchema[K]> {
+    const obj = await this.get()
+
+    return obj[field] ?? fallback
+  }
 }

@@ -11,27 +11,27 @@ import { resolveChannel } from '../users/resolve-peer.js'
  * @returns  Service message about the modification
  */
 export async function toggleGeneralTopicHidden(
-    client: ITelegramClient,
-    params: {
-        /** Chat ID or username */
-        chatId: InputPeerLike
-        /** Whether the topic should be hidden */
-        hidden: boolean
+  client: ITelegramClient,
+  params: {
+    /** Chat ID or username */
+    chatId: InputPeerLike
+    /** Whether the topic should be hidden */
+    hidden: boolean
 
-        /**
-         * Whether to dispatch the returned service message (if any)
-         * to the client's update handler.
-         */
-        shouldDispatch?: true
-    },
+    /**
+     * Whether to dispatch the returned service message (if any)
+     * to the client's update handler.
+     */
+    shouldDispatch?: true
+  },
 ): Promise<Message> {
-    const { chatId, hidden, shouldDispatch } = params
-    const res = await client.call({
-        _: 'channels.editForumTopic',
-        channel: await resolveChannel(client, chatId),
-        topicId: 1,
-        hidden,
-    })
+  const { chatId, hidden, shouldDispatch } = params
+  const res = await client.call({
+    _: 'channels.editForumTopic',
+    channel: await resolveChannel(client, chatId),
+    topicId: 1,
+    hidden,
+  })
 
-    return _findMessageInUpdate(client, res, false, shouldDispatch)
+  return _findMessageInUpdate(client, res, false, shouldDispatch)
 }

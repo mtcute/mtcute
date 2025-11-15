@@ -7,5 +7,5 @@ import type { ITelegramClient } from '../../client.types.js'
  * does not call any API methods.
  */
 export async function getMyUsername(client: ITelegramClient): Promise<string | null> {
-    return client.storage.self.fetch().then(self => self?.usernames[0] ?? null)
+  return client.storage.self.fetch().then(self => self?.usernames[0] ?? null)
 }

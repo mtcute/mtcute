@@ -10,10 +10,10 @@ import { downloadAsStream } from '@mtcute/core/methods.js'
  * @param params  File download parameters
  */
 export function downloadAsNodeStream(
-    client: ITelegramClient,
-    location: FileDownloadLocation,
-    params?: FileDownloadParameters,
+  client: ITelegramClient,
+  location: FileDownloadLocation,
+  params?: FileDownloadParameters,
 ): Readable {
-    // @ts-expect-error typings are wrong
-    return Readable.fromWeb(downloadAsStream(client, location, params))
+  // @ts-expect-error typings are wrong
+  return Readable.fromWeb(downloadAsStream(client, location, params))
 }

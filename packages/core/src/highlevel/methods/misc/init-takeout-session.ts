@@ -9,14 +9,14 @@ import { TakeoutSession } from '../../types/index.js'
  * @param params  Takeout session parameters
  */
 export async function initTakeoutSession(
-    client: ITelegramClient,
-    params: Omit<tl.account.RawInitTakeoutSessionRequest, '_'>,
+  client: ITelegramClient,
+  params: Omit<tl.account.RawInitTakeoutSessionRequest, '_'>,
 ): Promise<TakeoutSession> {
-    return new TakeoutSession(
-        client,
-        await client.call({
-            _: 'account.initTakeoutSession',
-            ...params,
-        }),
-    )
+  return new TakeoutSession(
+    client,
+    await client.call({
+      _: 'account.initTakeoutSession',
+      ...params,
+    }),
+  )
 }

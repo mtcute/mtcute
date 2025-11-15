@@ -10,10 +10,10 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @returns  IDs of stories that were removed
  */
 export async function getBoostStats(client: ITelegramClient, peerId: InputPeerLike): Promise<BoostStats> {
-    const res = await client.call({
-        _: 'premium.getBoostsStatus',
-        peer: await resolvePeer(client, peerId),
-    })
+  const res = await client.call({
+    _: 'premium.getBoostsStatus',
+    peer: await resolvePeer(client, peerId),
+  })
 
-    return new BoostStats(res)
+  return new BoostStats(res)
 }

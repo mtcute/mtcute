@@ -5,19 +5,19 @@ import { __getWasm } from '../src/index.js'
 import { initWasm } from './init.js'
 
 beforeAll(async () => {
-    await initWasm()
+  await initWasm()
 })
 
 describe('allocator', () => {
-    it('should not leak memory', () => {
-        const wasm = __getWasm()
-        const memUsage = wasm.memory.buffer.byteLength
+  it('should not leak memory', () => {
+    const wasm = __getWasm()
+    const memUsage = wasm.memory.buffer.byteLength
 
-        for (let i = 0; i < 1024; i++) {
-            const ptr = wasm.__malloc(1024)
-            wasm.__free(ptr)
-        }
+    for (let i = 0; i < 1024; i++) {
+      const ptr = wasm.__malloc(1024)
+      wasm.__free(ptr)
+    }
 
-        expect(wasm.memory.buffer.byteLength).toEqual(memUsage)
-    })
+    expect(wasm.memory.buffer.byteLength).toEqual(memUsage)
+  })
 })

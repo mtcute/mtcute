@@ -20,43 +20,43 @@ import type { TextWithEntities } from '../types/misc/entities.js'
  * ```
  */
 export function joinTextWithEntities(
-    parts: (string | TextWithEntities)[],
-    delim: string | TextWithEntities = '',
+  parts: (string | TextWithEntities)[],
+  delim: string | TextWithEntities = '',
 ): TextWithEntities {
-    const textParts: string[] = []
-    const newEntities: tl.TypeMessageEntity[] = []
+  const textParts: string[] = []
+  const newEntities: tl.TypeMessageEntity[] = []
 
-    let position = 0
+  let position = 0
 
-    if (typeof delim === 'string') {
-        delim = { text: delim }
+  if (typeof delim === 'string') {
+    delim = { text: delim }
+  }
+
+  const pushPart = (part: TextWithEntities) => {
+    textParts.push(part.text)
+    const entitiesOffset = position
+    position += part.text.length
+
+    if (part.entities) {
+      for (const entity of part.entities) {
+        newEntities.push({
+          ...entity,
+          offset: entity.offset + entitiesOffset,
+        })
+      }
+    }
+  }
+
+  for (const part of parts) {
+    if (position > 0) {
+      pushPart(delim)
     }
 
-    const pushPart = (part: TextWithEntities) => {
-        textParts.push(part.text)
-        const entitiesOffset = position
-        position += part.text.length
+    pushPart(typeof part === 'string' ? { text: part } : part)
+  }
 
-        if (part.entities) {
-            for (const entity of part.entities) {
-                newEntities.push({
-                    ...entity,
-                    offset: entity.offset + entitiesOffset,
-                })
-            }
-        }
-    }
-
-    for (const part of parts) {
-        if (position > 0) {
-            pushPart(delim)
-        }
-
-        pushPart(typeof part === 'string' ? { text: part } : part)
-    }
-
-    return {
-        text: textParts.join(''),
-        entities: newEntities,
-    }
+  return {
+    text: textParts.join(''),
+    entities: newEntities,
+  }
 }

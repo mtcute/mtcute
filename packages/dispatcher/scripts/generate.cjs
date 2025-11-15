@@ -1,38 +1,38 @@
 const { types, toSentence, replaceSections } = require('../../core/scripts/generate-updates.cjs')
 
 function generateHandler() {
-    const lines = []
-    const names = ['RawUpdateHandler']
+  const lines = []
+  const names = ['RawUpdateHandler']
 
-    // imports must be added manually because yeah
+  // imports must be added manually because yeah
 
-    types.forEach((type) => {
-        lines.push(
-            `export type ${type.handlerTypeName}Handler<T = ${type.context}`
-            + `${type.state ? ', S = never' : ''}> = ParsedUpdateHandler<`
-            + `'${type.typeName}', T${type.state ? ', S' : ''}>`,
-        )
-        names.push(`${type.handlerTypeName}Handler`)
-    })
-
-    replaceSections(
-        'handler.ts',
-        {
-            codegen:
-                `${lines.join('\n')}\n\nexport type UpdateHandler = \n${names.map(i => `    | ${i}\n`).join('')}`,
-        },
-        __dirname,
+  types.forEach((type) => {
+    lines.push(
+      `export type ${type.handlerTypeName}Handler<T = ${type.context}`
+      + `${type.state ? ', S = never' : ''}> = ParsedUpdateHandler<`
+      + `'${type.typeName}', T${type.state ? ', S' : ''}>`,
     )
+    names.push(`${type.handlerTypeName}Handler`)
+  })
+
+  replaceSections(
+    'handler.ts',
+    {
+      codegen:
+                `${lines.join('\n')}\n\nexport type UpdateHandler = \n${names.map(i => `    | ${i}\n`).join('')}`,
+    },
+    __dirname,
+  )
 }
 
 function generateDispatcher() {
-    const lines = []
-    const imports = ['UpdateHandler', 'RawUpdateHandler']
+  const lines = []
+  const imports = ['UpdateHandler', 'RawUpdateHandler']
 
-    types.forEach((type) => {
-        imports.push(`${type.handlerTypeName}Handler`)
+  types.forEach((type) => {
+    imports.push(`${type.handlerTypeName}Handler`)
 
-        lines.push(`
+    lines.push(`
     /**
      * Register ${toSentence(type)} without any filters
      *
@@ -40,12 +40,12 @@ function generateDispatcher() {
      * @param group  Handler group index
      */
     on${type.handlerTypeName}(handler: ${type.handlerTypeName}Handler${
-    type.state ? `<${type.context}, State extends never ? never : UpdateState<State>>` : ''
-}['callback'], group?: number): void
+      type.state ? `<${type.context}, State extends never ? never : UpdateState<State>>` : ''
+    }['callback'], group?: number): void
 
 ${
-    type.state
-        ? `
+  type.state
+    ? `
     /**
      * Register ${toSentence(type)} with a filter
      *
@@ -56,12 +56,12 @@ ${
     on${type.handlerTypeName}<Mod>(
         filter: UpdateFilter<${type.context}, Mod, State>,
         handler: ${type.handlerTypeName}Handler<filters.Modify<${
-    type.context
-}, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+          type.context
+        }, Mod>, State extends never ? never : UpdateState<State>>['callback'],
         group?: number
     ): void
     `
-        : ''
+    : ''
 }
 
     /**
@@ -74,8 +74,8 @@ ${
     on${type.handlerTypeName}<Mod>(
         filter: UpdateFilter<${type.context}, Mod>,
         handler: ${type.handlerTypeName}Handler<filters.Modify<${type.context}, Mod>${
-    type.state ? ', State extends never ? never : UpdateState<State>' : ''
-}>['callback'],
+          type.state ? ', State extends never ? never : UpdateState<State>' : ''
+        }>['callback'],
         group?: number
     ): void
 
@@ -84,31 +84,31 @@ ${
         this._addKnownHandler('${type.typeName}', filter, handler, group)
     }
 `)
-    })
+  })
 
-    replaceSections(
-        'dispatcher.ts',
-        {
-            'codegen': lines.join('\n'),
-            'codegen-imports':
+  replaceSections(
+    'dispatcher.ts',
+    {
+      'codegen': lines.join('\n'),
+      'codegen-imports':
                 `import {\n${
-                imports
+                  imports
                     .sort()
                     .map(i => `    ${i},\n`)
                     .join('')
                 }} from './handler.js'`,
-        },
-        __dirname,
-    )
+    },
+    __dirname,
+  )
 }
 
 async function main() {
-    generateHandler()
-    generateDispatcher()
+  generateHandler()
+  generateDispatcher()
 }
 
 module.exports = { types, toSentence }
 
 if (require.main === module) {
-    main().catch(console.error)
+  main().catch(console.error)
 }

@@ -1,15 +1,15 @@
 import type { FileDownloadLocation, FileDownloadParameters, ITelegramStorageProvider, PartialOnly, User } from '@mtcute/core'
 import type {
-    BaseTelegramClientOptions as BaseTelegramClientOptionsBase,
-    TelegramClientOptions,
+  BaseTelegramClientOptions as BaseTelegramClientOptionsBase,
+  TelegramClientOptions,
 } from '@mtcute/core/client.js'
 import type { Interface as RlInterface } from 'node:readline'
 
 import type { Readable } from 'node:stream'
 import { createInterface } from 'node:readline'
 import {
-    BaseTelegramClient as BaseTelegramClientBase,
-    TelegramClient as TelegramClientBase,
+  BaseTelegramClient as BaseTelegramClientBase,
+  TelegramClient as TelegramClientBase,
 } from '@mtcute/core/client.js'
 
 import { downloadToFile } from './methods/download-file.js'
@@ -22,112 +22,112 @@ import { TcpTransport } from './utils/tcp.js'
 export type { TelegramClientOptions }
 
 export interface BaseTelegramClientOptions
-    extends PartialOnly<Omit<BaseTelegramClientOptionsBase, 'storage'>, 'transport' | 'crypto' | 'platform'> {
-    /**
-     * Storage to use for this client.
-     *
-     * If a string is passed, it will be used as
-     * a name for an SQLite database file.
-     *
-     * @default `"client.session"`
-     */
-    storage?: string | ITelegramStorageProvider
+  extends PartialOnly<Omit<BaseTelegramClientOptionsBase, 'storage'>, 'transport' | 'crypto' | 'platform'> {
+  /**
+   * Storage to use for this client.
+   *
+   * If a string is passed, it will be used as
+   * a name for an SQLite database file.
+   *
+   * @default `"client.session"`
+   */
+  storage?: string | ITelegramStorageProvider
 }
 
 export class BaseTelegramClient extends BaseTelegramClientBase {
-    constructor(opts: BaseTelegramClientOptions) {
-        super({
-            crypto: new BunCryptoProvider(),
-            transport: new TcpTransport(),
-            platform: new BunPlatform(),
-            ...opts,
-            storage:
+  constructor(opts: BaseTelegramClientOptions) {
+    super({
+      crypto: new BunCryptoProvider(),
+      transport: new TcpTransport(),
+      platform: new BunPlatform(),
+      ...opts,
+      storage:
                 typeof opts.storage === 'string'
-                    ? new SqliteStorage(opts.storage)
-                    : opts.storage ?? new SqliteStorage('client.session'),
-        })
-    }
+                  ? new SqliteStorage(opts.storage)
+                  : opts.storage ?? new SqliteStorage('client.session'),
+    })
+  }
 }
 
 /**
  * Telegram client for use in Bun
  */
 export class TelegramClient extends TelegramClientBase {
-    constructor(opts: TelegramClientOptions) {
-        if ('client' in opts) {
-            super(opts)
+  constructor(opts: TelegramClientOptions) {
+    if ('client' in opts) {
+      super(opts)
 
-            return
-        }
-
-        super({
-            client: new BaseTelegramClient(opts),
-            disableUpdates: opts.disableUpdates,
-            skipConversationUpdates: opts.skipConversationUpdates,
-            updates: opts.updates,
-        })
+      return
     }
 
-    private _rl?: RlInterface
+    super({
+      client: new BaseTelegramClient(opts),
+      disableUpdates: opts.disableUpdates,
+      skipConversationUpdates: opts.skipConversationUpdates,
+      updates: opts.updates,
+    })
+  }
 
-    /**
-     * Tiny wrapper over Node `readline` package
-     * for simpler user input for `.start()` method.
-     *
-     * Associated `readline` interface is closed
-     * after `start()` returns, or with the client.
-     *
-     * @param text  Text of the question
-     */
-    input(text: string): Promise<string> {
-        if (!this._rl) {
-            this._rl = createInterface({
-                input: process.stdin,
-                output: process.stdout,
-            })
-        }
+  private _rl?: RlInterface
 
-        return new Promise(res => this._rl?.question(text, res))
+  /**
+   * Tiny wrapper over Node `readline` package
+   * for simpler user input for `.start()` method.
+   *
+   * Associated `readline` interface is closed
+   * after `start()` returns, or with the client.
+   *
+   * @param text  Text of the question
+   */
+  input(text: string): Promise<string> {
+    if (!this._rl) {
+      this._rl = createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      })
     }
 
-    override destroy(): Promise<void> {
-        this._rl?.close()
+    return new Promise(res => this._rl?.question(text, res))
+  }
 
-        return super.destroy()
+  override destroy(): Promise<void> {
+    this._rl?.close()
+
+    return super.destroy()
+  }
+
+  override start(params: Parameters<TelegramClientBase['start']>[0] = {}): Promise<User> {
+    if (!params.botToken) {
+      if (!params.phone) params.phone = () => this.input('phone > ')
+      if (!params.code) params.code = () => this.input('code > ')
+
+      if (!params.password) {
+        params.password = () => this.input('2fa password > ')
+      }
     }
 
-    override start(params: Parameters<TelegramClientBase['start']>[0] = {}): Promise<User> {
-        if (!params.botToken) {
-            if (!params.phone) params.phone = () => this.input('phone > ')
-            if (!params.code) params.code = () => this.input('code > ')
+    return super.start(params).then((user) => {
+      if (this._rl) {
+        this._rl.close()
+        delete this._rl
+      }
 
-            if (!params.password) {
-                params.password = () => this.input('2fa password > ')
-            }
-        }
+      return user
+    })
+  }
 
-        return super.start(params).then((user) => {
-            if (this._rl) {
-                this._rl.close()
-                delete this._rl
-            }
+  override downloadToFile(
+    filename: string,
+    location: FileDownloadLocation,
+    params?: FileDownloadParameters | undefined,
+  ): Promise<void> {
+    return downloadToFile(this, filename, location, params)
+  }
 
-            return user
-        })
-    }
-
-    override downloadToFile(
-        filename: string,
-        location: FileDownloadLocation,
-        params?: FileDownloadParameters | undefined,
-    ): Promise<void> {
-        return downloadToFile(this, filename, location, params)
-    }
-
-    override downloadAsNodeStream(
-        location: FileDownloadLocation,
-        params?: FileDownloadParameters | undefined,
-    ): Readable {
-        return downloadAsNodeStream(this, location, params)
-    }
+  override downloadAsNodeStream(
+    location: FileDownloadLocation,
+    params?: FileDownloadParameters | undefined,
+  ): Readable {
+    return downloadAsNodeStream(this, location, params)
+  }
 }

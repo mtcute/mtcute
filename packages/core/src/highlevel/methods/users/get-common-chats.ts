@@ -11,12 +11,12 @@ import { resolveUser } from './resolve-peer.js'
  * @throws MtInvalidPeerTypeError
  */
 export async function getCommonChats(client: ITelegramClient, userId: InputPeerLike): Promise<Chat[]> {
-    return client
-        .call({
-            _: 'messages.getCommonChats',
-            userId: await resolveUser(client, userId),
-            maxId: 0,
-            limit: 100,
-        })
-        .then(res => res.chats.map(it => new Chat(it)))
+  return client
+    .call({
+      _: 'messages.getCommonChats',
+      userId: await resolveUser(client, userId),
+      maxId: 0,
+      limit: 100,
+    })
+    .then(res => res.chats.map(it => new Chat(it)))
 }

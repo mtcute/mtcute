@@ -13,11 +13,11 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param chatId  Chat IDs
  */
 export async function exportInviteLink(client: ITelegramClient, chatId: InputPeerLike): Promise<ChatInviteLink> {
-    const res = await client.call({
-        _: 'messages.exportChatInvite',
-        peer: await resolvePeer(client, chatId),
-        legacyRevokePermanent: true,
-    })
+  const res = await client.call({
+    _: 'messages.exportChatInvite',
+    peer: await resolvePeer(client, chatId),
+    legacyRevokePermanent: true,
+  })
 
-    return new ChatInviteLink(res)
+  return new ChatInviteLink(res)
 }

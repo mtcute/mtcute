@@ -9,24 +9,24 @@ import { memoizeGetters } from '../../utils/memoize.js'
  * A story was deleted
  */
 export class DeleteStoryUpdate {
-    constructor(
-        readonly raw: tl.RawUpdateStory,
-        readonly _peers: PeersIndex,
-    ) {}
+  constructor(
+    readonly raw: tl.RawUpdateStory,
+    readonly _peers: PeersIndex,
+  ) {}
 
-    /**
-     * Peer that owns these stories.
-     */
-    get peer(): Peer {
-        return parsePeer(this.raw.peer, this._peers)
-    }
+  /**
+   * Peer that owns these stories.
+   */
+  get peer(): Peer {
+    return parsePeer(this.raw.peer, this._peers)
+  }
 
-    /**
-     * ID of the deleted story
-     */
-    get storyId(): number {
-        return this.raw.story.id
-    }
+  /**
+   * ID of the deleted story
+   */
+  get storyId(): number {
+    return this.raw.story.id
+  }
 }
 
 memoizeGetters(DeleteStoryUpdate, ['peer'])

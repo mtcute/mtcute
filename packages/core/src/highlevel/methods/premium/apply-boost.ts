@@ -8,8 +8,8 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param peerId  Peer ID to boost
  */
 export async function applyBoost(client: ITelegramClient, peerId: InputPeerLike): Promise<void> {
-    await client.call({
-        _: 'premium.applyBoost',
-        peer: await resolvePeer(client, peerId),
-    })
+  await client.call({
+    _: 'premium.applyBoost',
+    peer: await resolvePeer(client, peerId),
+  })
 }

@@ -22,18 +22,18 @@ import type { UploadedFile } from './uploaded-file.js'
  *  - `Readable` (Node.js/Bun readable stream)
  *  - `Response` (from `window.fetch`)
  */
-export type UploadFileLike =
-  | URL
-  | Uint8Array
-  | File
-  | Blob
-  | string
-  | IReadable
-  | AnyToNever<import('node:fs').ReadStream>
-  | AnyToNever<ReadableStream<Uint8Array>>
-  | AnyToNever<NodeJS.ReadableStream>
-  | AnyToNever<Response>
-  | AnyToNever<Deno.FsFile>
+export type UploadFileLike
+  = | URL
+    | Uint8Array
+    | File
+    | Blob
+    | string
+    | IReadable
+    | AnyToNever<import('node:fs').ReadStream>
+    | AnyToNever<ReadableStream<Uint8Array>>
+    | AnyToNever<NodeJS.ReadableStream>
+    | AnyToNever<Response>
+    | AnyToNever<Deno.FsFile>
 
 // AnyToNever in the above type ensures we don't make the entire type `any`
 // if some of the types are not available in the current environment
@@ -58,12 +58,12 @@ export type UploadFileLike =
  *  - `URL` (from the Web API, will be `fetch()`-ed if needed; `file://` URLs are not available in browsers)
  *  - `td.RawFullRemoteFileLocation` (parsed File ID)
  */
-export type InputFileLike =
-  | UploadFileLike
-  | UploadedFile
-  | tl.TypeInputFile
-  | tl.TypeInputMedia
-  | tdFileId.RawFullRemoteFileLocation
+export type InputFileLike
+  = | UploadFileLike
+    | UploadedFile
+    | tl.TypeInputFile
+    | tl.TypeInputMedia
+    | tdFileId.RawFullRemoteFileLocation
 
 /**
  * ID of an already uploaded document. Can be a:
@@ -80,50 +80,50 @@ export type InputDocumentId = string | tdFileId.RawFullRemoteFileLocation | tl.R
 export type FileDownloadLocation = tl.TypeInputFileLocation | tl.TypeInputWebFileLocation | FileLocation | string
 
 export interface FileDownloadParameters {
-    /**
-     * Total file size, if known.
-     * Used to determine upload part size.
-     * In some cases can be inferred from `file` automatically.
-     */
-    fileSize?: number
+  /**
+   * Total file size, if known.
+   * Used to determine upload part size.
+   * In some cases can be inferred from `file` automatically.
+   */
+  fileSize?: number
 
-    /**
-     * Download part size (in KB).
-     * By default, automatically selected depending on the file size
-     * (or 64, if not provided). Must not be bigger than 512,
-     * must not be a fraction, and must be divisible by 4.
-     */
-    partSize?: number
+  /**
+   * Download part size (in KB).
+   * By default, automatically selected depending on the file size
+   * (or 64, if not provided). Must not be bigger than 512,
+   * must not be a fraction, and must be divisible by 4.
+   */
+  partSize?: number
 
-    /**
-     * DC id from which the file will be downloaded.
-     *
-     * If provided DC is not the one storing the file,
-     * redirection will be handled automatically.
-     */
-    dcId?: number
+  /**
+   * DC id from which the file will be downloaded.
+   *
+   * If provided DC is not the one storing the file,
+   * redirection will be handled automatically.
+   */
+  dcId?: number
 
-    /**
-     * Offset in bytes. Must be divisible by 4096 (4 KB).
-     */
-    offset?: number
+  /**
+   * Offset in bytes. Must be divisible by 4096 (4 KB).
+   */
+  offset?: number
 
-    /**
-     * Number of bytes to be downloaded.
-     * By default, downloads the entire file
-     */
-    limit?: number
+  /**
+   * Number of bytes to be downloaded.
+   * By default, downloads the entire file
+   */
+  limit?: number
 
-    /**
-     * Function that will be called after some part has been downloaded.
-     *
-     * @param uploaded  Number of bytes already downloaded
-     * @param total  Total file size (`Infinity` if not available)
-     */
-    progressCallback?: (downloaded: number, total: number) => void
+  /**
+   * Function that will be called after some part has been downloaded.
+   *
+   * @param uploaded  Number of bytes already downloaded
+   * @param total  Total file size (`Infinity` if not available)
+   */
+  progressCallback?: (downloaded: number, total: number) => void
 
-    /**
-     * Abort signal that can be used to cancel the download.
-     */
-    abortSignal?: AbortSignal
+  /**
+   * Abort signal that can be used to cancel the download.
+   */
+  abortSignal?: AbortSignal
 }

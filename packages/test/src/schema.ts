@@ -8,32 +8,32 @@ let _cachedUnionsMap: Map<string, TlEntry[]> | null = null
 
 /** @internal */
 export function getEntriesMap(): {
-    entries: Map<string, TlEntry>
-    unions: Map<string, TlEntry[]>
+  entries: Map<string, TlEntry>
+  unions: Map<string, TlEntry[]>
 } {
-    if (_cachedEntriesMap) {
-        return {
-            entries: _cachedEntriesMap,
-            unions: _cachedUnionsMap!,
-        }
-    }
-
-    _cachedEntriesMap = new Map()
-    _cachedUnionsMap = new Map()
-
-    let entry: TlEntry
-
-    for (entry of schema.e) {
-        _cachedEntriesMap.set(entry.name, entry)
-
-        if (!_cachedUnionsMap.has(entry.type)) {
-            _cachedUnionsMap.set(entry.type, [])
-        }
-        _cachedUnionsMap.get(entry.type)!.push(entry)
-    }
-
+  if (_cachedEntriesMap) {
     return {
-        entries: _cachedEntriesMap,
-        unions: _cachedUnionsMap,
+      entries: _cachedEntriesMap,
+      unions: _cachedUnionsMap!,
     }
+  }
+
+  _cachedEntriesMap = new Map()
+  _cachedUnionsMap = new Map()
+
+  let entry: TlEntry
+
+  for (entry of schema.e) {
+    _cachedEntriesMap.set(entry.name, entry)
+
+    if (!_cachedUnionsMap.has(entry.type)) {
+      _cachedUnionsMap.set(entry.type, [])
+    }
+    _cachedUnionsMap.get(entry.type)!.push(entry)
+  }
+
+  return {
+    entries: _cachedEntriesMap,
+    unions: _cachedUnionsMap,
+  }
 }

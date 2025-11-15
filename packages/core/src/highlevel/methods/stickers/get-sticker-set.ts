@@ -8,11 +8,11 @@ import { normalizeInputStickerSet, StickerSet } from '../../types/index.js'
  * @param setId  Sticker set identifier
  */
 export async function getStickerSet(client: ITelegramClient, setId: InputStickerSet): Promise<StickerSet> {
-    const res = await client.call({
-        _: 'messages.getStickerSet',
-        stickerset: normalizeInputStickerSet(setId),
-        hash: 0,
-    })
+  const res = await client.call({
+    _: 'messages.getStickerSet',
+    stickerset: normalizeInputStickerSet(setId),
+    hash: 0,
+  })
 
-    return new StickerSet(res)
+  return new StickerSet(res)
 }

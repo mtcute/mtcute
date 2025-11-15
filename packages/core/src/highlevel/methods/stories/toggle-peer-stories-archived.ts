@@ -9,15 +9,15 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * This **does not** archive the chat with that peer, only stories.
  */
 export async function togglePeerStoriesArchived(
-    client: ITelegramClient,
-    peerId: InputPeerLike,
-    archived: boolean,
+  client: ITelegramClient,
+  peerId: InputPeerLike,
+  archived: boolean,
 ): Promise<void> {
-    const r = await client.call({
-        _: 'stories.togglePeerStoriesHidden',
-        peer: await resolvePeer(client, peerId),
-        hidden: archived,
-    })
+  const r = await client.call({
+    _: 'stories.togglePeerStoriesHidden',
+    peer: await resolvePeer(client, peerId),
+    hidden: archived,
+  })
 
-    assertTrue('stories.togglePeerStoriesHidden', r)
+  assertTrue('stories.togglePeerStoriesHidden', r)
 }

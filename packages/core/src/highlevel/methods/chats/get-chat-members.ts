@@ -19,129 +19,129 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param params  Additional parameters
  */
 export async function getChatMembers(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    params?: {
-        /**
-         * Search query to filter members by their display names and usernames
-         *
-         * > **Note**: Only used for these values of `filter`:
-         * > `all, banned, restricted, mention, contacts`
-         *
-         * @default  `''` (empty string)
-         */
-        query?: string
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  params?: {
+    /**
+     * Search query to filter members by their display names and usernames
+     *
+     * > **Note**: Only used for these values of `filter`:
+     * > `all, banned, restricted, mention, contacts`
+     *
+     * @default  `''` (empty string)
+     */
+    query?: string
 
-        /**
-         * Sequential number of the first member to be returned.
-         */
-        offset?: number
+    /**
+     * Sequential number of the first member to be returned.
+     */
+    offset?: number
 
-        /**
-         * Maximum number of members to be retrieved.
-         *
-         * > **Note**: Telegram currently only allows you to ever retrieve at most
-         * > 200 members, regardless of offset/limit. I.e. when passing
-         * > `offset=201` nothing will ever be returned.
-         *
-         * @default  200
-         */
-        limit?: number
+    /**
+     * Maximum number of members to be retrieved.
+     *
+     * > **Note**: Telegram currently only allows you to ever retrieve at most
+     * > 200 members, regardless of offset/limit. I.e. when passing
+     * > `offset=201` nothing will ever be returned.
+     *
+     * @default  200
+     */
+    limit?: number
 
-        /**
-         * Type of the query. Can be:
-         *  - `all`: get all members
-         *  - `banned`: get only banned members
-         *  - `restricted`: get only restricted members
-         *  - `bots`: get only bots
-         *  - `recent`: get recent members
-         *  - `admins`: get only administrators (and creator)
-         *  - `contacts`: get only contacts
-         *  - `mention`: get users that can be mentioned (see {@link tl.RawChannelParticipantsMentions})
-         *
-         *  Only used for channels and supergroups.
-         *
-         * @default  `recent`
-         */
-        type?: 'all' | 'banned' | 'restricted' | 'bots' | 'recent' | 'admins' | 'contacts' | 'mention'
-    },
+    /**
+     * Type of the query. Can be:
+     *  - `all`: get all members
+     *  - `banned`: get only banned members
+     *  - `restricted`: get only restricted members
+     *  - `bots`: get only bots
+     *  - `recent`: get recent members
+     *  - `admins`: get only administrators (and creator)
+     *  - `contacts`: get only contacts
+     *  - `mention`: get users that can be mentioned (see {@link tl.RawChannelParticipantsMentions})
+     *
+     *  Only used for channels and supergroups.
+     *
+     * @default  `recent`
+     */
+    type?: 'all' | 'banned' | 'restricted' | 'bots' | 'recent' | 'admins' | 'contacts' | 'mention'
+  },
 ): Promise<ArrayWithTotal<ChatMember>> {
-    const { query = '', offset = 0, limit = 200, type = 'recent' } = params ?? {}
+  const { query = '', offset = 0, limit = 200, type = 'recent' } = params ?? {}
 
-    const chat = await resolvePeer(client, chatId)
+  const chat = await resolvePeer(client, chatId)
 
-    if (isInputPeerChat(chat)) {
-        const res = await client.call({
-            _: 'messages.getFullChat',
-            chatId: chat.chatId,
-        })
+  if (isInputPeerChat(chat)) {
+    const res = await client.call({
+      _: 'messages.getFullChat',
+      chatId: chat.chatId,
+    })
 
-        assertTypeIs('getChatMember (@ messages.getFullChat)', res.fullChat, 'chatFull')
+    assertTypeIs('getChatMember (@ messages.getFullChat)', res.fullChat, 'chatFull')
 
-        let members
-            = res.fullChat.participants._ === 'chatParticipantsForbidden' ? [] : res.fullChat.participants.participants
+    let members
+      = res.fullChat.participants._ === 'chatParticipantsForbidden' ? [] : res.fullChat.participants.participants
 
-        if (offset) members = members.slice(offset)
-        if (limit) members = members.slice(0, limit)
+    if (offset) members = members.slice(offset)
+    if (limit) members = members.slice(0, limit)
 
-        const peers = PeersIndex.from(res)
+    const peers = PeersIndex.from(res)
 
-        const ret = members.map(m => new ChatMember(m, peers))
+    const ret = members.map(m => new ChatMember(m, peers))
 
-        return makeArrayWithTotal(ret, ret.length)
+    return makeArrayWithTotal(ret, ret.length)
+  }
+
+  if (isInputPeerChannel(chat)) {
+    const q = query
+
+    let filter: tl.TypeChannelParticipantsFilter
+
+    switch (type) {
+      case 'all':
+        filter = { _: 'channelParticipantsSearch', q }
+        break
+      case 'banned':
+        filter = { _: 'channelParticipantsKicked', q }
+        break
+      case 'restricted':
+        filter = { _: 'channelParticipantsBanned', q }
+        break
+      case 'mention':
+        filter = { _: 'channelParticipantsMentions', q }
+        break
+      case 'bots':
+        filter = { _: 'channelParticipantsBots' }
+        break
+      case 'recent':
+        filter = { _: 'channelParticipantsRecent' }
+        break
+      case 'admins':
+        filter = { _: 'channelParticipantsAdmins' }
+        break
+      case 'contacts':
+        filter = { _: 'channelParticipantsContacts', q }
+        break
+      default:
+        assertNever(type)
     }
 
-    if (isInputPeerChannel(chat)) {
-        const q = query
+    const res = await client.call({
+      _: 'channels.getParticipants',
+      channel: toInputChannel(chat),
+      filter,
+      offset,
+      limit,
+      hash: Long.ZERO,
+    })
 
-        let filter: tl.TypeChannelParticipantsFilter
+    assertTypeIs('getChatMembers (@ channels.getParticipants)', res, 'channels.channelParticipants')
 
-        switch (type) {
-            case 'all':
-                filter = { _: 'channelParticipantsSearch', q }
-                break
-            case 'banned':
-                filter = { _: 'channelParticipantsKicked', q }
-                break
-            case 'restricted':
-                filter = { _: 'channelParticipantsBanned', q }
-                break
-            case 'mention':
-                filter = { _: 'channelParticipantsMentions', q }
-                break
-            case 'bots':
-                filter = { _: 'channelParticipantsBots' }
-                break
-            case 'recent':
-                filter = { _: 'channelParticipantsRecent' }
-                break
-            case 'admins':
-                filter = { _: 'channelParticipantsAdmins' }
-                break
-            case 'contacts':
-                filter = { _: 'channelParticipantsContacts', q }
-                break
-            default:
-                assertNever(type)
-        }
+    const peers = PeersIndex.from(res)
 
-        const res = await client.call({
-            _: 'channels.getParticipants',
-            channel: toInputChannel(chat),
-            filter,
-            offset,
-            limit,
-            hash: Long.ZERO,
-        })
+    const ret = res.participants.map(i => new ChatMember(i, peers))
 
-        assertTypeIs('getChatMembers (@ channels.getParticipants)', res, 'channels.channelParticipants')
+    return makeArrayWithTotal(ret, res.count)
+  }
 
-        const peers = PeersIndex.from(res)
-
-        const ret = res.participants.map(i => new ChatMember(i, peers))
-
-        return makeArrayWithTotal(ret, res.count)
-    }
-
-    throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+  throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 }

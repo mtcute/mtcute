@@ -11,7 +11,7 @@ export const all: tl.RawInputPrivacyValueAllowAll = { _: 'inputPrivacyValueAllow
 export const contacts: tl.RawInputPrivacyValueAllowContacts = { _: 'inputPrivacyValueAllowContacts' }
 /** Allow only "close friends" list */
 export const closeFriends: tl.RawInputPrivacyValueAllowCloseFriends = {
-    _: 'inputPrivacyValueAllowCloseFriends',
+  _: 'inputPrivacyValueAllowCloseFriends',
 }
 
 /**
@@ -20,10 +20,10 @@ export const closeFriends: tl.RawInputPrivacyValueAllowCloseFriends = {
  * @param users  Users to allow
  */
 export function users(users: MaybeArray<InputPeerLike>): InputPrivacyRuleUsers {
-    return {
-        allow: true,
-        users: Array.isArray(users) ? users : [users],
-    }
+  return {
+    allow: true,
+    users: Array.isArray(users) ? users : [users],
+  }
 }
 
 /**
@@ -32,8 +32,8 @@ export function users(users: MaybeArray<InputPeerLike>): InputPrivacyRuleUsers {
  * @param chats  Chats to allow
  */
 export function chatParticipants(chats: MaybeArray<InputPeerLike>): InputPrivacyRuleChatParticipants {
-    return {
-        allow: true,
-        chats: Array.isArray(chats) ? chats : [chats],
-    }
+  return {
+    allow: true,
+    chats: Array.isArray(chats) ? chats : [chats],
+  }
 }

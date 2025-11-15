@@ -21,74 +21,74 @@ import { _normalizeInputMedia } from './normalize-input-media.js'
  * @param params  Upload parameters
  */
 export async function uploadMedia(
-    client: ITelegramClient,
-    media: InputMediaLike,
-    params: {
-        /**
-         * Peer to associate this media with.
-         *
-         * @default  `self`
-         */
-        peer?: InputPeerLike
+  client: ITelegramClient,
+  media: InputMediaLike,
+  params: {
+    /**
+     * Peer to associate this media with.
+     *
+     * @default  `self`
+     */
+    peer?: InputPeerLike
 
-        /**
-         * Upload progress callback
-         *
-         * @param uploaded  Number of bytes uploaded
-         * @param total  Total file size
-         */
-        progressCallback?: (uploaded: number, total: number) => void
-    } = {},
+    /**
+     * Upload progress callback
+     *
+     * @param uploaded  Number of bytes uploaded
+     * @param total  Total file size
+     */
+    progressCallback?: (uploaded: number, total: number) => void
+  } = {},
 ): Promise<Extract<MessageMedia, Photo | RawDocument>> {
-    const normMedia = await _normalizeInputMedia(client, media, params, false)
+  const normMedia = await _normalizeInputMedia(client, media, params, false)
 
-    switch (normMedia._) {
-        case 'inputMediaEmpty':
-        case 'inputMediaGeoPoint':
-        case 'inputMediaGeoLive':
-        case 'inputMediaContact':
-        case 'inputMediaVenue':
-        case 'inputMediaGame':
-        case 'inputMediaInvoice':
-        case 'inputMediaPoll':
-        case 'inputMediaDice':
-        case 'inputMediaPaidMedia':
-        case 'inputMediaTodo':
-            throw new MtArgumentError(`This media (${normMedia._}) can't be uploaded`)
-    }
+  switch (normMedia._) {
+    case 'inputMediaEmpty':
+    case 'inputMediaGeoPoint':
+    case 'inputMediaGeoLive':
+    case 'inputMediaContact':
+    case 'inputMediaVenue':
+    case 'inputMediaGame':
+    case 'inputMediaInvoice':
+    case 'inputMediaPoll':
+    case 'inputMediaDice':
+    case 'inputMediaPaidMedia':
+    case 'inputMediaTodo':
+      throw new MtArgumentError(`This media (${normMedia._}) can't be uploaded`)
+  }
 
-    const res = await client.call({
-        _: 'messages.uploadMedia',
-        peer: params.peer
-            ? await resolvePeer(client, params.peer)
-            : {
-                _: 'inputPeerSelf',
-            },
-        media: normMedia,
-    })
+  const res = await client.call({
+    _: 'messages.uploadMedia',
+    peer: params.peer
+      ? await resolvePeer(client, params.peer)
+      : {
+          _: 'inputPeerSelf',
+        },
+    media: normMedia,
+  })
 
-    assertTypeIsNot('uploadMedia', res, 'messageMediaEmpty')
+  assertTypeIsNot('uploadMedia', res, 'messageMediaEmpty')
 
-    switch (normMedia._) {
-        case 'inputMediaUploadedPhoto':
-        case 'inputMediaPhoto':
-        case 'inputMediaPhotoExternal':
-            assertTypeIs('uploadMedia', res, 'messageMediaPhoto')
-            assertTypeIs('uploadMedia', res.photo!, 'photo')
+  switch (normMedia._) {
+    case 'inputMediaUploadedPhoto':
+    case 'inputMediaPhoto':
+    case 'inputMediaPhotoExternal':
+      assertTypeIs('uploadMedia', res, 'messageMediaPhoto')
+      assertTypeIs('uploadMedia', res.photo!, 'photo')
 
-            return new Photo(res.photo)
-        case 'inputMediaUploadedDocument':
-        case 'inputMediaDocument':
-        case 'inputMediaDocumentExternal':
-            assertTypeIs('uploadMedia', res, 'messageMediaDocument')
-            assertTypeIs('uploadMedia', res.document!, 'document')
+      return new Photo(res.photo)
+    case 'inputMediaUploadedDocument':
+    case 'inputMediaDocument':
+    case 'inputMediaDocumentExternal':
+      assertTypeIs('uploadMedia', res, 'messageMediaDocument')
+      assertTypeIs('uploadMedia', res.document!, 'document')
 
-            // eslint-disable-next-line
+      // eslint-disable-next-line
             return parseDocument(res.document, res) as any
-        case 'inputMediaStory':
-        case 'inputMediaWebPage':
-            throw new MtArgumentError(`This media (${normMedia._}) can't be uploaded`)
-        default:
-            assertNever(normMedia)
-    }
+    case 'inputMediaStory':
+    case 'inputMediaWebPage':
+      throw new MtArgumentError(`This media (${normMedia._}) can't be uploaded`)
+    default:
+      assertNever(normMedia)
+  }
 }

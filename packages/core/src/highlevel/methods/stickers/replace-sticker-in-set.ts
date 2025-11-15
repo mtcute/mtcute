@@ -20,28 +20,28 @@ import { _normalizeInputStickerSetItem } from './_utils.js'
  * @returns  Modfiied sticker set
  */
 export async function replaceStickerInSet(
-    client: ITelegramClient,
-    sticker: InputDocumentId,
-    newSticker: InputStickerSetItem,
-    params?: {
-        /**
-         * Upload progress callback
-         *
-         * @param uploaded  Number of bytes uploaded
-         * @param total  Total file size
-         */
-        progressCallback?: (uploaded: number, total: number) => void
-    },
+  client: ITelegramClient,
+  sticker: InputDocumentId,
+  newSticker: InputStickerSetItem,
+  params?: {
+    /**
+     * Upload progress callback
+     *
+     * @param uploaded  Number of bytes uploaded
+     * @param total  Total file size
+     */
+    progressCallback?: (uploaded: number, total: number) => void
+  },
 ): Promise<StickerSet> {
-    if (tdFileId.isFileIdLike(sticker)) {
-        sticker = fileIdToInputDocument(sticker)
-    }
+  if (tdFileId.isFileIdLike(sticker)) {
+    sticker = fileIdToInputDocument(sticker)
+  }
 
-    const res = await client.call({
-        _: 'stickers.replaceSticker',
-        sticker,
-        newSticker: await _normalizeInputStickerSetItem(client, newSticker, params),
-    })
+  const res = await client.call({
+    _: 'stickers.replaceSticker',
+    sticker,
+    newSticker: await _normalizeInputStickerSetItem(client, newSticker, params),
+  })
 
-    return new StickerSet(res)
+  return new StickerSet(res)
 }

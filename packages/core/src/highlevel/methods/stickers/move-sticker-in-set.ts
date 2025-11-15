@@ -18,19 +18,19 @@ import { fileIdToInputDocument } from '../../utils/convert-file-id.js'
  * @returns  Modified sticker set
  */
 export async function moveStickerInSet(
-    client: ITelegramClient,
-    sticker: InputDocumentId,
-    position: number,
+  client: ITelegramClient,
+  sticker: InputDocumentId,
+  position: number,
 ): Promise<StickerSet> {
-    if (tdFileId.isFileIdLike(sticker)) {
-        sticker = fileIdToInputDocument(sticker)
-    }
+  if (tdFileId.isFileIdLike(sticker)) {
+    sticker = fileIdToInputDocument(sticker)
+  }
 
-    const res = await client.call({
-        _: 'stickers.changeStickerPosition',
-        sticker,
-        position,
-    })
+  const res = await client.call({
+    _: 'stickers.changeStickerPosition',
+    sticker,
+    position,
+  })
 
-    return new StickerSet(res)
+  return new StickerSet(res)
 }

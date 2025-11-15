@@ -8,110 +8,110 @@ import { stringifyArgumentType } from './utils.js'
  * @param b  Entry B (field `new` in diff)
  */
 export function generateTlEntriesDifference(a: TlEntry, b: TlEntry): TlEntryDiff {
-    if (a.kind !== b.kind || a.name !== b.name) {
-        throw new Error('Incompatible entries')
+  if (a.kind !== b.kind || a.name !== b.name) {
+    throw new Error('Incompatible entries')
+  }
+
+  const diff: TlEntryDiff = {
+    name: a.name,
+  }
+
+  if (a.comment !== b.comment) {
+    diff.comment = {
+      old: a.comment,
+      new: b.comment,
+    }
+  }
+
+  if (a.id !== b.id) {
+    const oldId = a.id
+    const newId = b.id
+
+    /* c8 ignore next 3 */
+    if (oldId === 0 || newId === 0) {
+      throw new Error('Entry ID cannot be 0')
     }
 
-    const diff: TlEntryDiff = {
-        name: a.name,
+    if (oldId !== newId) {
+      diff.id = {
+        old: oldId,
+        new: newId,
+      }
+    }
+  }
+
+  if (
+    !a.generics !== !b.generics
+    || (a.generics && b.generics && JSON.stringify(a.generics) !== JSON.stringify(b.generics))
+  ) {
+    diff.generics = {
+      old: a.generics,
+      new: b.generics,
+    }
+  }
+
+  const argsDiff: NonNullable<TlEntryDiff['arguments']> = {
+    added: [],
+    removed: [],
+    modified: [],
+  }
+
+  const oldArgsIndex: Record<string, TlArgument> = {}
+
+  a.arguments.forEach((arg) => {
+    oldArgsIndex[arg.name] = arg
+  })
+
+  const newArgsIndex: Record<string, 1> = {}
+
+  b.arguments.forEach((arg) => {
+    newArgsIndex[arg.name] = 1
+
+    if (!(arg.name in oldArgsIndex)) {
+      argsDiff.added.push(arg)
+
+      return
     }
 
-    if (a.comment !== b.comment) {
-        diff.comment = {
-            old: a.comment,
-            new: b.comment,
-        }
+    const oldArg = oldArgsIndex[arg.name]
+
+    const diff: TlArgumentDiff = {
+      name: arg.name,
     }
 
-    if (a.id !== b.id) {
-        const oldId = a.id
-        const newId = b.id
+    const argStr = stringifyArgumentType(arg.type, arg.typeModifiers)
+    const oldArgStr = stringifyArgumentType(oldArg.type, oldArg.typeModifiers)
 
-        /* c8 ignore next 3 */
-        if (oldId === 0 || newId === 0) {
-            throw new Error('Entry ID cannot be 0')
-        }
-
-        if (oldId !== newId) {
-            diff.id = {
-                old: oldId,
-                new: newId,
-            }
-        }
+    if (argStr !== oldArgStr) {
+      diff.type = {
+        old: oldArgStr,
+        new: argStr,
+      }
     }
 
-    if (
-        !a.generics !== !b.generics
-        || (a.generics && b.generics && JSON.stringify(a.generics) !== JSON.stringify(b.generics))
-    ) {
-        diff.generics = {
-            old: a.generics,
-            new: b.generics,
-        }
+    if (arg.comment !== oldArg.comment) {
+      diff.comment = {
+        old: oldArg.comment,
+        new: arg.comment,
+      }
     }
 
-    const argsDiff: NonNullable<TlEntryDiff['arguments']> = {
-        added: [],
-        removed: [],
-        modified: [],
+    if (diff.type || diff.comment) {
+      argsDiff.modified.push(diff)
     }
+  })
 
-    const oldArgsIndex: Record<string, TlArgument> = {}
-
-    a.arguments.forEach((arg) => {
-        oldArgsIndex[arg.name] = arg
-    })
-
-    const newArgsIndex: Record<string, 1> = {}
-
-    b.arguments.forEach((arg) => {
-        newArgsIndex[arg.name] = 1
-
-        if (!(arg.name in oldArgsIndex)) {
-            argsDiff.added.push(arg)
-
-            return
-        }
-
-        const oldArg = oldArgsIndex[arg.name]
-
-        const diff: TlArgumentDiff = {
-            name: arg.name,
-        }
-
-        const argStr = stringifyArgumentType(arg.type, arg.typeModifiers)
-        const oldArgStr = stringifyArgumentType(oldArg.type, oldArg.typeModifiers)
-
-        if (argStr !== oldArgStr) {
-            diff.type = {
-                old: oldArgStr,
-                new: argStr,
-            }
-        }
-
-        if (arg.comment !== oldArg.comment) {
-            diff.comment = {
-                old: oldArg.comment,
-                new: arg.comment,
-            }
-        }
-
-        if (diff.type || diff.comment) {
-            argsDiff.modified.push(diff)
-        }
-    })
-
-    a.arguments.forEach((arg) => {
-        if (!(arg.name in newArgsIndex)) {
-            argsDiff.removed.push(arg)
-        }
-    })
-
-    if (argsDiff.added.length || argsDiff.removed.length || argsDiff.modified.length) {
-        diff.arguments = argsDiff
+  a.arguments.forEach((arg) => {
+    if (!(arg.name in newArgsIndex)) {
+      argsDiff.removed.push(arg)
     }
+  })
 
-    return diff
+  if (argsDiff.added.length || argsDiff.removed.length || argsDiff.modified.length) {
+    diff.arguments = argsDiff
+  }
+
+  return diff
 }
 
 /**
@@ -121,116 +121,116 @@ export function generateTlEntriesDifference(a: TlEntry, b: TlEntry): TlEntryDiff
  * @param b  Entry B (field `new` in diff)
  */
 export function generateTlSchemasDifference(a: TlFullSchema, b: TlFullSchema): TlSchemaDiff {
-    // schemas already contain indexes, so we don't need to make our own
+  // schemas already contain indexes, so we don't need to make our own
 
-    const diff: TlSchemaDiff = {
-        classes: {
-            added: [],
-            removed: [],
-            modified: [],
-        },
-        methods: {
-            added: [],
-            removed: [],
-            modified: [],
-        },
-        unions: {
-            added: [],
-            removed: [],
-            modified: [],
-        },
+  const diff: TlSchemaDiff = {
+    classes: {
+      added: [],
+      removed: [],
+      modified: [],
+    },
+    methods: {
+      added: [],
+      removed: [],
+      modified: [],
+    },
+    unions: {
+      added: [],
+      removed: [],
+      modified: [],
+    },
+  }
+
+  const unionDiffIndex: Record<string, TlSchemaDiff['unions']['modified'][number]> = {}
+  const unionDiffIndex2: Record<string, 1> = {}
+
+  a.entries.forEach((entry) => {
+    const kind = entry.kind === 'class' ? 'classes' : 'methods'
+
+    // check union
+    const union = a.unions[entry.type]
+
+    if (!(entry.type in b.unions) && !(entry.type in unionDiffIndex2)) {
+      // deleted union
+      unionDiffIndex2[entry.type] = 1
+      diff.unions.removed.push(union)
     }
 
-    const unionDiffIndex: Record<string, TlSchemaDiff['unions']['modified'][number]> = {}
-    const unionDiffIndex2: Record<string, 1> = {}
+    if (!(entry.name in b[kind])) {
+      diff[kind].removed.push(entry)
 
-    a.entries.forEach((entry) => {
-        const kind = entry.kind === 'class' ? 'classes' : 'methods'
-
-        // check union
-        const union = a.unions[entry.type]
-
-        if (!(entry.type in b.unions) && !(entry.type in unionDiffIndex2)) {
-            // deleted union
-            unionDiffIndex2[entry.type] = 1
-            diff.unions.removed.push(union)
+      // we also need to diff the respective union
+      if (entry.type in b.unions) {
+        if (!(entry.type in unionDiffIndex)) {
+          unionDiffIndex[entry.type] = {
+            name: entry.type,
+            classes: {
+              added: [],
+              removed: [],
+              modified: [],
+            },
+            methods: {
+              added: [],
+              removed: [],
+              modified: [],
+            },
+          }
+          diff.unions.modified.push(unionDiffIndex[entry.type])
         }
+        const unionDiff = unionDiffIndex[entry.type]
+        unionDiff[kind].removed.push(entry)
+      }
 
-        if (!(entry.name in b[kind])) {
-            diff[kind].removed.push(entry)
+      return
+    }
 
-            // we also need to diff the respective union
-            if (entry.type in b.unions) {
-                if (!(entry.type in unionDiffIndex)) {
-                    unionDiffIndex[entry.type] = {
-                        name: entry.type,
-                        classes: {
-                            added: [],
-                            removed: [],
-                            modified: [],
-                        },
-                        methods: {
-                            added: [],
-                            removed: [],
-                            modified: [],
-                        },
-                    }
-                    diff.unions.modified.push(unionDiffIndex[entry.type])
-                }
-                const unionDiff = unionDiffIndex[entry.type]
-                unionDiff[kind].removed.push(entry)
-            }
+    const other = b[kind][entry.name]
 
-            return
+    const entryDiff = generateTlEntriesDifference(entry, other)
+
+    if (entryDiff.id || entryDiff.generics || entryDiff.arguments) {
+      diff[kind].modified.push(entryDiff)
+    }
+  })
+
+  b.entries.forEach((entry) => {
+    const kind = entry.kind === 'class' ? 'classes' : 'methods'
+
+    // check union
+    const union = b.unions[entry.type]
+
+    if (!(entry.type in a.unions) && !(entry.type in unionDiffIndex2)) {
+      // added union
+      unionDiffIndex2[entry.type] = 1
+      diff.unions.added.push(union)
+    }
+
+    if (!(entry.name in a[kind])) {
+      diff[kind].added.push(entry)
+
+      // we also need to diff the respective union
+      if (entry.type in a.unions) {
+        if (!(entry.type in unionDiffIndex)) {
+          unionDiffIndex[entry.type] = {
+            name: entry.type,
+            classes: {
+              added: [],
+              removed: [],
+              modified: [],
+            },
+            methods: {
+              added: [],
+              removed: [],
+              modified: [],
+            },
+          }
+          diff.unions.modified.push(unionDiffIndex[entry.type])
         }
+        const unionDiff = unionDiffIndex[entry.type]
+        unionDiff[kind].added.push(entry)
+      }
+    }
+  })
 
-        const other = b[kind][entry.name]
-
-        const entryDiff = generateTlEntriesDifference(entry, other)
-
-        if (entryDiff.id || entryDiff.generics || entryDiff.arguments) {
-            diff[kind].modified.push(entryDiff)
-        }
-    })
-
-    b.entries.forEach((entry) => {
-        const kind = entry.kind === 'class' ? 'classes' : 'methods'
-
-        // check union
-        const union = b.unions[entry.type]
-
-        if (!(entry.type in a.unions) && !(entry.type in unionDiffIndex2)) {
-            // added union
-            unionDiffIndex2[entry.type] = 1
-            diff.unions.added.push(union)
-        }
-
-        if (!(entry.name in a[kind])) {
-            diff[kind].added.push(entry)
-
-            // we also need to diff the respective union
-            if (entry.type in a.unions) {
-                if (!(entry.type in unionDiffIndex)) {
-                    unionDiffIndex[entry.type] = {
-                        name: entry.type,
-                        classes: {
-                            added: [],
-                            removed: [],
-                            modified: [],
-                        },
-                        methods: {
-                            added: [],
-                            removed: [],
-                            modified: [],
-                        },
-                    }
-                    diff.unions.modified.push(unionDiffIndex[entry.type])
-                }
-                const unionDiff = unionDiffIndex[entry.type]
-                unionDiff[kind].added.push(entry)
-            }
-        }
-    })
-
-    return diff
+  return diff
 }

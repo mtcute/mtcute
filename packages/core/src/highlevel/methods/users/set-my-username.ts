@@ -10,14 +10,14 @@ import { User } from '../../types/index.js'
  * @param username  New username (5-32 chars, allowed chars: `a-zA-Z0-9_`), or `null` to remove
  */
 export async function setMyUsername(client: ITelegramClient, username: string | null): Promise<User> {
-    if (username === null) username = ''
+  if (username === null) username = ''
 
-    const res = await client.call({
-        _: 'account.updateUsername',
-        username,
-    })
+  const res = await client.call({
+    _: 'account.updateUsername',
+    username,
+  })
 
-    await client.storage.self.update({ username })
+  await client.storage.self.update({ username })
 
-    return new User(res)
+  return new User(res)
 }

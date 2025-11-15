@@ -12,14 +12,14 @@ import { resolveChannel } from '../users/resolve-peer.js'
  * @param enabled  Whether join requests should be enabled
  */
 export async function toggleJoinRequests(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    enabled = false,
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  enabled = false,
 ): Promise<void> {
-    const res = await client.call({
-        _: 'channels.toggleJoinRequest',
-        channel: await resolveChannel(client, chatId),
-        enabled,
-    })
-    client.handleClientUpdate(res)
+  const res = await client.call({
+    _: 'channels.toggleJoinRequest',
+    channel: await resolveChannel(client, chatId),
+    enabled,
+  })
+  client.handleClientUpdate(res)
 }

@@ -11,52 +11,52 @@ import { Story } from '../stories/story.js'
  * internally represented as a message media
  */
 export class MediaStory {
-    readonly type = 'story' as const
+  readonly type = 'story' as const
 
-    constructor(
-        readonly raw: tl.RawMessageMediaStory,
-        readonly _peers: PeersIndex,
-    ) {}
+  constructor(
+    readonly raw: tl.RawMessageMediaStory,
+    readonly _peers: PeersIndex,
+  ) {}
 
-    /**
-     * Whether this story was automatically forwarded to you
-     * because you were mentioned in it
-     */
-    get isMention(): boolean {
-        return this.raw.viaMention!
+  /**
+   * Whether this story was automatically forwarded to you
+   * because you were mentioned in it
+   */
+  get isMention(): boolean {
+    return this.raw.viaMention!
+  }
+
+  /**
+   * Peer who has posted this story
+   */
+  get peer(): Peer {
+    return parsePeer(this.raw.peer, this._peers)
+  }
+
+  /**
+   * ID of the story
+   */
+  get storyId(): number {
+    return this.raw.id
+  }
+
+  /**
+   * Contents of the story. May not be available, in which case the story
+   * should be fetched using {@link getStoriesById}
+   */
+  get story(): Story | null {
+    if (this.raw.story?._ !== 'storyItem') return null
+
+    return new Story(this.raw.story, this._peers)
+  }
+
+  get inputMedia(): tl.TypeInputMedia {
+    return {
+      _: 'inputMediaStory',
+      peer: this.peer.inputPeer,
+      id: this.raw.id,
     }
-
-    /**
-     * Peer who has posted this story
-     */
-    get peer(): Peer {
-        return parsePeer(this.raw.peer, this._peers)
-    }
-
-    /**
-     * ID of the story
-     */
-    get storyId(): number {
-        return this.raw.id
-    }
-
-    /**
-     * Contents of the story. May not be available, in which case the story
-     * should be fetched using {@link getStoriesById}
-     */
-    get story(): Story | null {
-        if (this.raw.story?._ !== 'storyItem') return null
-
-        return new Story(this.raw.story, this._peers)
-    }
-
-    get inputMedia(): tl.TypeInputMedia {
-        return {
-            _: 'inputMediaStory',
-            peer: this.peer.inputPeer,
-            id: this.raw.id,
-        }
-    }
+  }
 }
 
 makeInspectable(MediaStory, undefined, ['inputMedia'])

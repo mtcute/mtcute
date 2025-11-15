@@ -17,48 +17,48 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @returns  Service message about removed user, if one was generated.
  */
 export async function banChatMember(
-    client: ITelegramClient,
-    params: {
-        /** Chat ID */
-        chatId: InputPeerLike
+  client: ITelegramClient,
+  params: {
+    /** Chat ID */
+    chatId: InputPeerLike
 
-        /** ID of the user/channel to ban */
-        participantId: InputPeerLike
+    /** ID of the user/channel to ban */
+    participantId: InputPeerLike
 
-        untilDate?: number | Date
+    untilDate?: number | Date
 
-        /**
-         * Whether to dispatch the returned service message (if any)
-         * to the client's update handler.
-         */
-        shouldDispatch?: true
-    },
+    /**
+     * Whether to dispatch the returned service message (if any)
+     * to the client's update handler.
+     */
+    shouldDispatch?: true
+  },
 ): Promise<Message | null> {
-    const { chatId, participantId, shouldDispatch } = params
-    const chat = await resolvePeer(client, chatId)
-    const peer = await resolvePeer(client, participantId)
+  const { chatId, participantId, shouldDispatch } = params
+  const chat = await resolvePeer(client, chatId)
+  const peer = await resolvePeer(client, participantId)
 
-    let res
-    if (isInputPeerChannel(chat)) {
-        res = await client.call({
-            _: 'channels.editBanned',
-            channel: toInputChannel(chat),
-            participant: peer,
-            bannedRights: {
-                _: 'chatBannedRights',
-                untilDate: normalizeDate(params?.untilDate) ?? 0,
-                viewMessages: true,
-            },
-        })
-    } else if (isInputPeerChat(chat)) {
-        res = await client.call({
-            _: 'messages.deleteChatUser',
-            chatId: chat.chatId,
-            userId: toInputUser(peer),
-        })
-    } else {
-        throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
-    }
+  let res
+  if (isInputPeerChannel(chat)) {
+    res = await client.call({
+      _: 'channels.editBanned',
+      channel: toInputChannel(chat),
+      participant: peer,
+      bannedRights: {
+        _: 'chatBannedRights',
+        untilDate: normalizeDate(params?.untilDate) ?? 0,
+        viewMessages: true,
+      },
+    })
+  } else if (isInputPeerChat(chat)) {
+    res = await client.call({
+      _: 'messages.deleteChatUser',
+      chatId: chat.chatId,
+      userId: toInputUser(peer),
+    })
+  } else {
+    throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+  }
 
-    return _findMessageInUpdate(client, res, false, !shouldDispatch, true)
+  return _findMessageInUpdate(client, res, false, !shouldDispatch, true)
 }

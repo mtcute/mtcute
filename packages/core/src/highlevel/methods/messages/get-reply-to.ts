@@ -12,17 +12,17 @@ import { getMessages } from './get-messages.js'
  * this method will also return `null`.
  */
 export async function getReplyTo(client: ITelegramClient, message: Message): Promise<Message | null> {
-    if (!message.replyToMessage?.id) {
-        return null
-    }
+  if (!message.replyToMessage?.id) {
+    return null
+  }
 
-    if (message.raw.peerId._ === 'peerChannel') {
-        const [msg] = await getMessages(client, message.chat.inputPeer, message.id, true)
-
-        return msg
-    }
-
-    const [msg] = await getMessagesUnsafe(client, message.id, true)
+  if (message.raw.peerId._ === 'peerChannel') {
+    const [msg] = await getMessages(client, message.chat.inputPeer, message.id, true)
 
     return msg
+  }
+
+  const [msg] = await getMessagesUnsafe(client, message.id, true)
+
+  return msg
 }

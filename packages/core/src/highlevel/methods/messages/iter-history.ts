@@ -11,52 +11,52 @@ import { getHistory } from './get-history.js'
  * @param params  Additional fetch parameters
  */
 export async function* iterHistory(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    params?: Parameters<typeof getHistory>[2] & {
-        /**
-         * Limits the number of messages to be retrieved.
-         *
-         * @default  Infinity, i.e. all messages
-         */
-        limit?: number
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  params?: Parameters<typeof getHistory>[2] & {
+    /**
+     * Limits the number of messages to be retrieved.
+     *
+     * @default  Infinity, i.e. all messages
+     */
+    limit?: number
 
-        /**
-         * Chunk size. Usually you shouldn't care about this.
-         *
-         * @default  100
-         */
-        chunkSize?: number
-    },
+    /**
+     * Chunk size. Usually you shouldn't care about this.
+     *
+     * @default  100
+     */
+    chunkSize?: number
+  },
 ): AsyncIterableIterator<Message> {
-    if (!params) params = {}
+  if (!params) params = {}
 
-    const { limit = Infinity, chunkSize = 100, minId = 0, maxId = 0, reverse = false } = params
+  const { limit = Infinity, chunkSize = 100, minId = 0, maxId = 0, reverse = false } = params
 
-    let { offset, addOffset = 0 } = params
-    let current = 0
+  let { offset, addOffset = 0 } = params
+  let current = 0
 
-    // resolve peer once and pass an InputPeer afterwards
-    const peer = await resolvePeer(client, chatId)
+  // resolve peer once and pass an InputPeer afterwards
+  const peer = await resolvePeer(client, chatId)
 
-    for (;;) {
-        const res = await getHistory(client, peer, {
-            offset,
-            addOffset,
-            limit: Math.min(chunkSize, limit - current),
-            maxId,
-            minId,
-            reverse,
-        })
+  for (;;) {
+    const res = await getHistory(client, peer, {
+      offset,
+      addOffset,
+      limit: Math.min(chunkSize, limit - current),
+      maxId,
+      minId,
+      reverse,
+    })
 
-        for (const msg of res) {
-            yield msg
+    for (const msg of res) {
+      yield msg
 
-            if (++current >= limit) return
-        }
-
-        if (!res.next) return
-        offset = res.next
-        addOffset = 0
+      if (++current >= limit) return
     }
+
+    if (!res.next) return
+    offset = res.next
+    addOffset = 0
+  }
 }

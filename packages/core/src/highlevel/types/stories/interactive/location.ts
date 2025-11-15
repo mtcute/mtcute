@@ -11,20 +11,20 @@ import { StoryInteractiveArea } from './base.js'
  * Interactive element containing a location on the map
  */
 export class StoryInteractiveLocation extends StoryInteractiveArea {
-    readonly type = 'location' as const
+  readonly type = 'location' as const
 
-    constructor(override readonly raw: tl.RawMediaAreaGeoPoint) {
-        super(raw)
-    }
+  constructor(override readonly raw: tl.RawMediaAreaGeoPoint) {
+    super(raw)
+  }
 
-    /**
-     * Geolocation
-     */
-    get location(): Location {
-        assertTypeIs('StoryInteractiveLocation#location', this.raw.geo, 'geoPoint')
+  /**
+   * Geolocation
+   */
+  get location(): Location {
+    assertTypeIs('StoryInteractiveLocation#location', this.raw.geo, 'geoPoint')
 
-        return new Location(this.raw.geo)
-    }
+    return new Location(this.raw.geo)
+  }
 }
 
 memoizeGetters(StoryInteractiveLocation, ['location'])

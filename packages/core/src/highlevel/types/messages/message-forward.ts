@@ -11,66 +11,66 @@ import { parsePeer } from '../peers/peer.js'
  * Information about forwarded message origin
  */
 export class MessageForwardInfo {
-    constructor(
-        readonly raw: tl.RawMessageFwdHeader,
-        readonly _peers: PeersIndex,
-    ) {}
+  constructor(
+    readonly raw: tl.RawMessageFwdHeader,
+    readonly _peers: PeersIndex,
+  ) {}
 
-    /**
-     * Date the original message was sent
-     */
-    get date(): Date {
-        return new Date(this.raw.date * 1000)
+  /**
+   * Date the original message was sent
+   */
+  get date(): Date {
+    return new Date(this.raw.date * 1000)
+  }
+
+  /**
+   * Sender of the original message (either user or a channel)
+   * or their name (for users with private forwards)
+   */
+  get sender(): PeerSender {
+    if (this.raw.fromName) {
+      return {
+        type: 'anonymous',
+        displayName: this.raw.fromName,
+      }
     }
 
-    /**
-     * Sender of the original message (either user or a channel)
-     * or their name (for users with private forwards)
-     */
-    get sender(): PeerSender {
-        if (this.raw.fromName) {
-            return {
-                type: 'anonymous',
-                displayName: this.raw.fromName,
-            }
-        }
-
-        if (this.raw.fromId) {
-            return parsePeer(this.raw.fromId, this._peers)
-        }
-
-        throw new MtTypeAssertionError('MessageForwardInfo', 'to have fromId or fromName', 'neither')
+    if (this.raw.fromId) {
+      return parsePeer(this.raw.fromId, this._peers)
     }
 
-    /**
-     * For "saved" messages (i.e. messages forwarded to yourself,
-     * "Saved Messages"), the peer where the message was originally sent.
-     *
-     * `null` for other messages, you might want to use {@link sender} instead
-     */
-    fromChat(): Peer | null {
-        if (!this.raw.savedFromPeer) return null
+    throw new MtTypeAssertionError('MessageForwardInfo', 'to have fromId or fromName', 'neither')
+  }
 
-        return parsePeer(this.raw.savedFromPeer, this._peers)
-    }
+  /**
+   * For "saved" messages (i.e. messages forwarded to yourself,
+   * "Saved Messages"), the peer where the message was originally sent.
+   *
+   * `null` for other messages, you might want to use {@link sender} instead
+   */
+  fromChat(): Peer | null {
+    if (!this.raw.savedFromPeer) return null
 
-    /**
-     * For messages forwarded from channels,
-     * identifier of the original message in the channel
-     *
-     * (only availale if {@link fromChat} is not `null`)
-     */
-    get fromMessageId(): number | null {
-        return this.raw.savedFromMsgId ?? null
-    }
+    return parsePeer(this.raw.savedFromPeer, this._peers)
+  }
 
-    /**
-     * For messages forwarded from channels,
-     * signature of the post author (if present)
-     */
-    get signature(): string | null {
-        return this.raw.postAuthor ?? null
-    }
+  /**
+   * For messages forwarded from channels,
+   * identifier of the original message in the channel
+   *
+   * (only availale if {@link fromChat} is not `null`)
+   */
+  get fromMessageId(): number | null {
+    return this.raw.savedFromMsgId ?? null
+  }
+
+  /**
+   * For messages forwarded from channels,
+   * signature of the post author (if present)
+   */
+  get signature(): string | null {
+    return this.raw.postAuthor ?? null
+  }
 }
 
 memoizeGetters(MessageForwardInfo, ['sender', 'fromChat'])

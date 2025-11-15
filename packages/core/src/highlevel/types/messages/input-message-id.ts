@@ -14,10 +14,10 @@ export type OmitInputMessageId<T> = Omit<T, 'chatId' | 'message'>
 
 /** @internal */
 export function normalizeInputMessageId(id: InputMessageId): {
-    chatId: InputPeerLike
-    message: number
+  chatId: InputPeerLike
+  message: number
 } {
-    if ('chatId' in id) return id
+  if ('chatId' in id) return id
 
-    return { chatId: id.message.chat.inputPeer, message: id.message.id }
+  return { chatId: id.message.chat.inputPeer, message: id.message.id }
 }

@@ -9,38 +9,38 @@ import { BusinessWorkHours } from './business-work-hours.js'
 
 /** Information about a business account */
 export class BusinessAccount {
-    constructor(readonly info: tl.RawUserFull) {}
+  constructor(readonly info: tl.RawUserFull) {}
 
-    /** Introduction of the business account */
-    get intro(): BusinessIntro | null {
-        if (!this.info.businessIntro) return null
+  /** Introduction of the business account */
+  get intro(): BusinessIntro | null {
+    if (!this.info.businessIntro) return null
 
-        return new BusinessIntro(this.info.businessIntro)
-    }
+    return new BusinessIntro(this.info.businessIntro)
+  }
 
-    /** Work hours of the business */
-    get workHours(): BusinessWorkHours | null {
-        if (!this.info.businessWorkHours) return null
+  /** Work hours of the business */
+  get workHours(): BusinessWorkHours | null {
+    if (!this.info.businessWorkHours) return null
 
-        return new BusinessWorkHours(this.info.businessWorkHours)
-    }
+    return new BusinessWorkHours(this.info.businessWorkHours)
+  }
 
-    /** Location of the business */
-    get location(): BusinessLocation | null {
-        if (!this.info.businessLocation) return null
+  /** Location of the business */
+  get location(): BusinessLocation | null {
+    if (!this.info.businessLocation) return null
 
-        return new BusinessLocation(this.info.businessLocation)
-    }
+    return new BusinessLocation(this.info.businessLocation)
+  }
 
-    /** Information about a greeting message */
-    get greetingMessage(): tl.TypeBusinessGreetingMessage | null {
-        return this.info.businessGreetingMessage ?? null
-    }
+  /** Information about a greeting message */
+  get greetingMessage(): tl.TypeBusinessGreetingMessage | null {
+    return this.info.businessGreetingMessage ?? null
+  }
 
-    /** Information about an "away" message */
-    get awayMessage(): tl.TypeBusinessAwayMessage | null {
-        return this.info.businessAwayMessage ?? null
-    }
+  /** Information about an "away" message */
+  get awayMessage(): tl.TypeBusinessAwayMessage | null {
+    return this.info.businessAwayMessage ?? null
+  }
 }
 
 memoizeGetters(BusinessAccount, ['intro', 'workHours', 'location'])

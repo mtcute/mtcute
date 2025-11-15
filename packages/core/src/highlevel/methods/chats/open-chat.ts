@@ -18,22 +18,22 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param chat  Chat to open
  */
 export async function openChat(client: ITelegramClient, chat: InputPeerLike): Promise<void> {
-    const peer = await resolvePeer(client, chat)
+  const peer = await resolvePeer(client, chat)
 
-    if (isInputPeerChannel(peer)) {
-        let pts: number | undefined
-        if (!client.storage.self.getCached()?.isBot) {
-            const [dialog] = await getPeerDialogs(client, peer)
-            pts = dialog?.raw.pts
-        } else {
-            pts = await client.storage.updates.getChannelPts(peer.channelId) ?? undefined
-        }
-
-        await client.notifyChannelOpened(peer.channelId, pts)
+  if (isInputPeerChannel(peer)) {
+    let pts: number | undefined
+    if (!client.storage.self.getCached()?.isBot) {
+      const [dialog] = await getPeerDialogs(client, peer)
+      pts = dialog?.raw.pts
+    } else {
+      pts = await client.storage.updates.getChannelPts(peer.channelId) ?? undefined
     }
 
-    // todo: once we have proper dialogs/peers db, we should also
-    // update full info here and fetch auxillary info (like channel members etc)
+    await client.notifyChannelOpened(peer.channelId, pts)
+  }
+
+  // todo: once we have proper dialogs/peers db, we should also
+  // update full info here and fetch auxillary info (like channel members etc)
 }
 
 /**
@@ -46,12 +46,12 @@ export async function openChat(client: ITelegramClient, chat: InputPeerLike): Pr
  * @param chat  Chat to open
  */
 export async function closeChat(client: ITelegramClient, chat: InputPeerLike): Promise<void> {
-    const peer = await resolvePeer(client, chat)
+  const peer = await resolvePeer(client, chat)
 
-    if (isInputPeerChannel(peer)) {
-        await client.notifyChannelClosed(peer.channelId)
-    }
+  if (isInputPeerChannel(peer)) {
+    await client.notifyChannelClosed(peer.channelId)
+  }
 
-    // todo: once we have proper dialogs/peers db, we should also
-    // update full info here and fetch auxillary info (like channel members etc)
+  // todo: once we have proper dialogs/peers db, we should also
+  // update full info here and fetch auxillary info (like channel members etc)
 }

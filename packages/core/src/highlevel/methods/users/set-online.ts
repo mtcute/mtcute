@@ -9,10 +9,10 @@ import type { ITelegramClient } from '../../client.types.js'
  * @param online  Whether the user is currently online
  */
 export async function sendOnline(client: ITelegramClient, online: boolean): Promise<void> {
-    await client.call({
-        _: 'account.updateStatus',
-        offline: !online,
-    })
+  await client.call({
+    _: 'account.updateStatus',
+    offline: !online,
+  })
 }
 
 const TIMER_ID = 'online'
@@ -27,19 +27,19 @@ const TIMER_INTERVAL = 240_000 // 4 minutes
  * @param online
  */
 export async function setOnline(client: ITelegramClient, online = true): Promise<void> {
-    if (online) {
-        client.timers.create(TIMER_ID, async (abortSignal) => {
-            await client.call({
-                _: 'account.updateStatus',
-                offline: false,
-            }, { abortSignal })
-        }, TIMER_INTERVAL, true)
-    } else {
-        client.timers.cancel(TIMER_ID)
+  if (online) {
+    client.timers.create(TIMER_ID, async (abortSignal) => {
+      await client.call({
+        _: 'account.updateStatus',
+        offline: false,
+      }, { abortSignal })
+    }, TIMER_INTERVAL, true)
+  } else {
+    client.timers.cancel(TIMER_ID)
 
-        await client.call({
-            _: 'account.updateStatus',
-            offline: true,
-        })
-    }
+    await client.call({
+      _: 'account.updateStatus',
+      offline: true,
+    })
+  }
 }

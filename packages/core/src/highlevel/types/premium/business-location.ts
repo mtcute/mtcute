@@ -6,18 +6,18 @@ import { Location } from '../media/location.js'
 
 /** Location of a business */
 export class BusinessLocation {
-    constructor(readonly raw: tl.RawBusinessLocation) {}
+  constructor(readonly raw: tl.RawBusinessLocation) {}
 
-    /** Address of the business */
-    get address(): string {
-        return this.raw.address
-    }
+  /** Address of the business */
+  get address(): string {
+    return this.raw.address
+  }
 
-    get location(): Location | null {
-        if (!this.raw.geoPoint || this.raw.geoPoint._ === 'geoPointEmpty') return null
+  get location(): Location | null {
+    if (!this.raw.geoPoint || this.raw.geoPoint._ === 'geoPointEmpty') return null
 
-        return new Location(this.raw.geoPoint)
-    }
+    return new Location(this.raw.geoPoint)
+  }
 }
 
 makeInspectable(BusinessLocation)

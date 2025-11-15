@@ -10,30 +10,30 @@ import { _normalizeInputText } from '../misc/normalize-text.js'
  * @param toLanguage  Target language (two-letter ISO 639-1 language code)
  */
 export async function translateText(
-    client: ITelegramClient,
-    text: InputText,
-    toLanguage: string,
+  client: ITelegramClient,
+  text: InputText,
+  toLanguage: string,
 ): Promise<TextWithEntities> {
-    const [message, entities] = await _normalizeInputText(client, text)
+  const [message, entities] = await _normalizeInputText(client, text)
 
-    const res = await client.call({
-        _: 'messages.translateText',
-        text: [
-            {
-                _: 'textWithEntities',
-                text: message,
-                entities: entities || [],
-            },
-        ],
-        toLang: toLanguage,
-    })
+  const res = await client.call({
+    _: 'messages.translateText',
+    text: [
+      {
+        _: 'textWithEntities',
+        text: message,
+        entities: entities || [],
+      },
+    ],
+    toLang: toLanguage,
+  })
 
-    if (!res.result[0]) {
-        throw new MtTypeAssertionError('messages.translateResult#result', 'not empty', 'empty')
-    }
+  if (!res.result[0]) {
+    throw new MtTypeAssertionError('messages.translateResult#result', 'not empty', 'empty')
+  }
 
-    return {
-        text: res.result[0].text,
-        entities: res.result[0].entities,
-    }
+  return {
+    text: res.result[0].text,
+    entities: res.result[0].entities,
+  }
 }

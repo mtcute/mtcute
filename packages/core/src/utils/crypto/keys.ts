@@ -17,26 +17,26 @@ import { parseAsn1, parsePemContents } from '../binary/asn1-parser.js'
  * @param old  Whether this is an "old" key
  */
 export function parsePublicKey(crypto: ICryptoProvider, key: string, old = false): TlPublicKey {
-    const asn1 = parseAsn1(parsePemContents(key))
-    const modulus = asn1.children?.[0].value
-    const exponent = asn1.children?.[1].value
-    if (!modulus || !exponent) throw new Error('Invalid public key')
+  const asn1 = parseAsn1(parsePemContents(key))
+  const modulus = asn1.children?.[0].value
+  const exponent = asn1.children?.[1].value
+  if (!modulus || !exponent) throw new Error('Invalid public key')
 
-    const writer = TlBinaryWriter.manual(512)
-    // they are actually smaller, about 270 bytes, but idc :D
-    writer.bytes(modulus)
-    writer.bytes(exponent)
+  const writer = TlBinaryWriter.manual(512)
+  // they are actually smaller, about 270 bytes, but idc :D
+  writer.bytes(modulus)
+  writer.bytes(exponent)
 
-    const data = writer.result()
-    const sha = crypto.sha1(data)
-    const fp = hex.encode(sha.slice(-8).reverse())
+  const data = writer.result()
+  const sha = crypto.sha1(data)
+  const fp = hex.encode(sha.slice(-8).reverse())
 
-    return {
-        modulus: hex.encode(modulus),
-        exponent: hex.encode(exponent),
-        fingerprint: fp,
-        old,
-    }
+  return {
+    modulus: hex.encode(modulus),
+    exponent: hex.encode(exponent),
+    fingerprint: fp,
+    old,
+  }
 }
 
 /**
@@ -47,8 +47,8 @@ export function parsePublicKey(crypto: ICryptoProvider, key: string, old = false
  * @param old  Whether this is an "old" key
  */
 export function addPublicKey(crypto: ICryptoProvider, key: string, old = false): void {
-    const parsed = parsePublicKey(crypto, key, old)
-    keysIndex[parsed.fingerprint] = parsed
+  const parsed = parsePublicKey(crypto, key, old)
+  keysIndex[parsed.fingerprint] = parsed
 }
 
 /**
@@ -58,17 +58,17 @@ export function addPublicKey(crypto: ICryptoProvider, key: string, old = false):
  * @param allowOld  Whether to allow "old" keys
  */
 export function findKeyByFingerprints(fingerprints: (string | Long)[], allowOld = false): TlPublicKey | null {
-    for (let fp of fingerprints) {
-        if (typeof fp !== 'string') {
-            fp = fp.toUnsigned().toString(16)
-        }
-        if (fp in keysIndex) {
-            if (keysIndex[fp].old && !allowOld) continue
-
-            return keysIndex[fp]
-        }
+  for (let fp of fingerprints) {
+    if (typeof fp !== 'string') {
+      fp = fp.toUnsigned().toString(16)
     }
-    if (!allowOld) return findKeyByFingerprints(fingerprints, true)
+    if (fp in keysIndex) {
+      if (keysIndex[fp].old && !allowOld) continue
 
-    return null
+      return keysIndex[fp]
+    }
+  }
+  if (!allowOld) return findKeyByFingerprints(fingerprints, true)
+
+  return null
 }

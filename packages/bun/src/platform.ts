@@ -7,24 +7,24 @@ import { defaultLoggingHandler } from './utils/logging.js'
 import { normalizeFile } from './utils/normalize-file.js'
 
 export class BunPlatform implements ICorePlatform {
-    // ICorePlatform
-    declare log: typeof defaultLoggingHandler
-    declare beforeExit: typeof beforeExit
-    declare normalizeFile: typeof normalizeFile
+  // ICorePlatform
+  declare log: typeof defaultLoggingHandler
+  declare beforeExit: typeof beforeExit
+  declare normalizeFile: typeof normalizeFile
 
-    getDeviceModel(): string {
-        return `Bun/${Bun.version} (${os.type()} ${os.arch()})`
+  getDeviceModel(): string {
+    return `Bun/${Bun.version} (${os.type()} ${os.arch()})`
+  }
+
+  getDefaultLogLevel(): number | null {
+    const envLogLevel = Number.parseInt(process.env.MTCUTE_LOG_LEVEL ?? '')
+
+    if (!Number.isNaN(envLogLevel)) {
+      return envLogLevel
     }
 
-    getDefaultLogLevel(): number | null {
-        const envLogLevel = Number.parseInt(process.env.MTCUTE_LOG_LEVEL ?? '')
-
-        if (!Number.isNaN(envLogLevel)) {
-            return envLogLevel
-        }
-
-        return null
-    }
+    return null
+  }
 }
 
 BunPlatform.prototype.normalizeFile = normalizeFile

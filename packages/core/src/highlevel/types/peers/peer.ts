@@ -21,15 +21,15 @@ export type PeerType = 'user' | 'bot' | 'group' | 'channel' | 'supergroup'
  * > * Telegram has moved to int64 IDs. Though, Levin [has confirmed](https://t.me/tdlibchat/25071)
  * > that new IDs *will* still fit into int53, meaning JS integers are fine.
  */
-export type InputPeerLike =
-  | 'me' | 'self' | 'some_username'
-  | (string & {})
-  | number
-  | tl.TypePeer
-  | tl.TypeInputPeer
-  | tl.TypeInputUser
-  | tl.TypeInputChannel
-  | { inputPeer: tl.TypeInputPeer }
+export type InputPeerLike
+  = | 'me' | 'self' | 'some_username'
+    | (string & {})
+    | number
+    | tl.TypePeer
+    | tl.TypeInputPeer
+    | tl.TypeInputUser
+    | tl.TypeInputChannel
+    | { inputPeer: tl.TypeInputPeer }
 
 /**
  * Peer (a user or a chat)
@@ -42,12 +42,12 @@ export type Peer = User | Chat
  * An object representing an anonymous sender (e.g. for users that have forwards hidden)
  */
 export interface AnonymousSender {
-    readonly type: 'anonymous'
+  readonly type: 'anonymous'
 
-    /**
-     * Name of the anonymous sender that should be displayed
-     */
-    readonly displayName: string
+  /**
+   * Name of the anonymous sender that should be displayed
+   */
+  readonly displayName: string
 }
 
 /**
@@ -60,12 +60,12 @@ export type PeerSender = Peer | AnonymousSender
  * Given a `tl.TypePeer`, return a {@link Peer} object ({@link User} or {@link Chat})
  */
 export function parsePeer(peer: tl.TypePeer, index: PeersIndex): Peer {
-    switch (peer._) {
-        case 'peerUser':
-            return new User(index.user(peer.userId))
-        case 'peerChat':
-            return new Chat(index.chat(peer.chatId))
-        case 'peerChannel':
-            return new Chat(index.chat(peer.channelId))
-    }
+  switch (peer._) {
+    case 'peerUser':
+      return new User(index.user(peer.userId))
+    case 'peerChat':
+      return new Chat(index.chat(peer.chatId))
+    case 'peerChannel':
+      return new Chat(index.chat(peer.channelId))
+  }
 }

@@ -12,29 +12,29 @@ import { _onAuthorization } from './utils.js'
  * @throws  SessionPasswordNeededError  In case a password is needed to sign in
  */
 export async function signIn(
-    client: ITelegramClient,
-    params: {
-        /** Phone number in international format */
-        phone: string
-        /** Code identifier from {@link sendCode} */
-        phoneCodeHash: string
-        /** The confirmation code that was received */
-        phoneCode: string
-        /** Abort signal */
-        abortSignal?: AbortSignal
-    },
+  client: ITelegramClient,
+  params: {
+    /** Phone number in international format */
+    phone: string
+    /** Code identifier from {@link sendCode} */
+    phoneCodeHash: string
+    /** The confirmation code that was received */
+    phoneCode: string
+    /** Abort signal */
+    abortSignal?: AbortSignal
+  },
 ): Promise<User> {
-    const { phone, phoneCodeHash, phoneCode, abortSignal } = params
+  const { phone, phoneCodeHash, phoneCode, abortSignal } = params
 
-    const res = await client.call(
-        {
-            _: 'auth.signIn',
-            phoneNumber: normalizePhoneNumber(phone),
-            phoneCodeHash,
-            phoneCode,
-        },
-        { abortSignal },
-    )
+  const res = await client.call(
+    {
+      _: 'auth.signIn',
+      phoneNumber: normalizePhoneNumber(phone),
+      phoneCodeHash,
+      phoneCode,
+    },
+    { abortSignal },
+  )
 
-    return _onAuthorization(client, res)
+  return _onAuthorization(client, res)
 }

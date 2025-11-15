@@ -15,20 +15,20 @@ import { resolveUser } from './resolve-peer.js'
  * @param params
  */
 export async function getProfilePhoto(
-    client: ITelegramClient,
-    userId: InputPeerLike,
-    photoId: tl.Long,
+  client: ITelegramClient,
+  userId: InputPeerLike,
+  photoId: tl.Long,
 ): Promise<Photo> {
-    const res = await client.call({
-        _: 'photos.getUserPhotos',
-        userId: await resolveUser(client, userId),
-        offset: -1,
-        limit: 1,
-        maxId: photoId,
-    })
+  const res = await client.call({
+    _: 'photos.getUserPhotos',
+    userId: await resolveUser(client, userId),
+    offset: -1,
+    limit: 1,
+    maxId: photoId,
+  })
 
-    const photo = res.photos[0]
-    assertTypeIs('getProfilePhotos', photo, 'photo')
+  const photo = res.photos[0]
+  assertTypeIs('getProfilePhotos', photo, 'photo')
 
-    return new Photo(photo)
+  return new Photo(photo)
 }

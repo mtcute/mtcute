@@ -16,51 +16,51 @@ import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
  * @returns  List of users that were failed to be invited (may be empty)
  */
 export async function addChatMembers(
-    client: ITelegramClient,
-    chatId: InputPeerLike,
-    users: MaybeArray<InputPeerLike>,
-    params: {
-        /**
-         * Number of old messages to be forwarded (0-100).
-         * Only applicable to legacy groups, ignored for supergroups and channels
-         *
-         * @default 100
-         */
-        forwardCount?: number
-    },
+  client: ITelegramClient,
+  chatId: InputPeerLike,
+  users: MaybeArray<InputPeerLike>,
+  params: {
+    /**
+     * Number of old messages to be forwarded (0-100).
+     * Only applicable to legacy groups, ignored for supergroups and channels
+     *
+     * @default 100
+     */
+    forwardCount?: number
+  },
 ): Promise<tl.RawMissingInvitee[]> {
-    const { forwardCount = 100 } = params
+  const { forwardCount = 100 } = params
 
-    const chat = await resolvePeer(client, chatId)
+  const chat = await resolvePeer(client, chatId)
 
-    if (!Array.isArray(users)) users = [users]
+  if (!Array.isArray(users)) users = [users]
 
-    if (isInputPeerChat(chat)) {
-        const missing: tl.RawMissingInvitee[] = []
+  if (isInputPeerChat(chat)) {
+    const missing: tl.RawMissingInvitee[] = []
 
-        for (const user of users) {
-            const p = await resolveUser(client, user)
+    for (const user of users) {
+      const p = await resolveUser(client, user)
 
-            const { updates, missingInvitees } = await client.call({
-                _: 'messages.addChatUser',
-                chatId: chat.chatId,
-                userId: p,
-                fwdLimit: forwardCount,
-            })
-            client.handleClientUpdate(updates)
-            missing.push(...missingInvitees)
-        }
-
-        return missing
-    } else if (isInputPeerChannel(chat)) {
-        const { updates, missingInvitees } = await client.call({
-            _: 'channels.inviteToChannel',
-            channel: toInputChannel(chat),
-            users: await resolvePeerMany(client, users, toInputUser),
-        })
-        client.handleClientUpdate(updates)
-
-        return missingInvitees
+      const { updates, missingInvitees } = await client.call({
+        _: 'messages.addChatUser',
+        chatId: chat.chatId,
+        userId: p,
+        fwdLimit: forwardCount,
+      })
+      client.handleClientUpdate(updates)
+      missing.push(...missingInvitees)
     }
-    throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+
+    return missing
+  } else if (isInputPeerChannel(chat)) {
+    const { updates, missingInvitees } = await client.call({
+      _: 'channels.inviteToChannel',
+      channel: toInputChannel(chat),
+      users: await resolvePeerMany(client, users, toInputUser),
+    })
+    client.handleClientUpdate(updates)
+
+    return missingInvitees
+  }
+  throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 }

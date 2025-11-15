@@ -10,18 +10,18 @@ import { _onAuthorization } from './utils.js'
  * @throws BadRequestError  In case the code is invalid
  */
 export async function recoverPassword(
-    client: ITelegramClient,
-    params: {
-        /** The recovery code sent via email */
-        recoveryCode: string
-    },
+  client: ITelegramClient,
+  params: {
+    /** The recovery code sent via email */
+    recoveryCode: string
+  },
 ): Promise<User> {
-    const { recoveryCode } = params
+  const { recoveryCode } = params
 
-    const res = await client.call({
-        _: 'auth.recoverPassword',
-        code: recoveryCode,
-    })
+  const res = await client.call({
+    _: 'auth.recoverPassword',
+    code: recoveryCode,
+  })
 
-    return _onAuthorization(client, res)
+  return _onAuthorization(client, res)
 }

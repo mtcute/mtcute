@@ -16,80 +16,80 @@ import { User } from './user.js'
 export type ChatPreviewType = 'group' | 'supergroup' | 'channel'
 
 export class ChatPreview {
-    constructor(
-        readonly invite: tl.RawChatInvite,
-        /**
-         * Original invite link used to fetch this preview
-         */
-        readonly link: string,
-    ) {}
-
+  constructor(
+    readonly invite: tl.RawChatInvite,
     /**
-     * Title of the chat
+     * Original invite link used to fetch this preview
      */
-    get title(): string {
-        return this.invite.title
-    }
+    readonly link: string,
+  ) {}
 
-    /**
-     * Type of the chat
-     */
-    get type(): ChatPreviewType {
-        if (this.invite.broadcast) return 'channel'
-        if (this.invite.megagroup || this.invite.channel) return 'supergroup'
+  /**
+   * Title of the chat
+   */
+  get title(): string {
+    return this.invite.title
+  }
 
-        return 'group'
-    }
+  /**
+   * Type of the chat
+   */
+  get type(): ChatPreviewType {
+    if (this.invite.broadcast) return 'channel'
+    if (this.invite.megagroup || this.invite.channel) return 'supergroup'
 
-    /**
-     * Whether this chat is public
-     */
-    get public(): boolean {
-        return this.invite.public!
-    }
+    return 'group'
+  }
 
-    /**
-     * Total chat member count
-     */
-    get memberCount(): number {
-        return this.invite.participantsCount
-    }
+  /**
+   * Whether this chat is public
+   */
+  get public(): boolean {
+    return this.invite.public!
+  }
 
-    /**
-     * Chat photo
-     */
-    get photo(): Photo | null {
-        if (this.invite.photo._ === 'photoEmpty') return null
+  /**
+   * Total chat member count
+   */
+  get memberCount(): number {
+    return this.invite.participantsCount
+  }
 
-        return new Photo(this.invite.photo)
-    }
+  /**
+   * Chat photo
+   */
+  get photo(): Photo | null {
+    if (this.invite.photo._ === 'photoEmpty') return null
 
-    /**
-     * Preview of some of the chat members.
-     *
-     * This usually contains around 10 members,
-     * and members that are inside your contacts list are
-     * ordered before others.
-     */
-    get someMembers(): ReadonlyArray<User> {
-        return this.invite.participants?.map(it => new User(it)) ?? []
-    }
+    return new Photo(this.invite.photo)
+  }
 
-    /**
-     * Whether by using this link you'll also need
-     * to wait for admin approval.
-     */
-    get withApproval(): boolean {
-        return this.invite.requestNeeded!
-    }
+  /**
+   * Preview of some of the chat members.
+   *
+   * This usually contains around 10 members,
+   * and members that are inside your contacts list are
+   * ordered before others.
+   */
+  get someMembers(): ReadonlyArray<User> {
+    return this.invite.participants?.map(it => new User(it)) ?? []
+  }
 
-    /**
-     * If non-null, this user was verified by a bot, and this field contains
-     * the ID of the custom emoji to display as the verification icon.
-     */
-    get customVerification(): BotVerification | null {
-        return this.invite.botVerification ? new BotVerification(this.invite.botVerification) : null
-    }
+  /**
+   * Whether by using this link you'll also need
+   * to wait for admin approval.
+   */
+  get withApproval(): boolean {
+    return this.invite.requestNeeded!
+  }
+
+  /**
+   * If non-null, this user was verified by a bot, and this field contains
+   * the ID of the custom emoji to display as the verification icon.
+   */
+  get customVerification(): BotVerification | null {
+    return this.invite.botVerification ? new BotVerification(this.invite.botVerification) : null
+  }
 }
 
 memoizeGetters(ChatPreview, ['photo', 'someMembers'])

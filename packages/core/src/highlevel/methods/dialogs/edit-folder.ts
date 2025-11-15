@@ -12,49 +12,49 @@ import { getFolders } from './get-folders.js'
  * @returns  Modified folder
  */
 export async function editFolder(
-    client: ITelegramClient,
-    params: {
-        /**
-         * Folder, folder ID or name.
-         * Note that passing an ID or name will require re-fetching all folders,
-         * and passing name might affect not the right folder if you have multiple
-         * with the same name.
-         */
-        folder: tl.RawDialogFilter | number | string
+  client: ITelegramClient,
+  params: {
+    /**
+     * Folder, folder ID or name.
+     * Note that passing an ID or name will require re-fetching all folders,
+     * and passing name might affect not the right folder if you have multiple
+     * with the same name.
+     */
+    folder: tl.RawDialogFilter | number | string
 
-        /** Modification to be applied to this folder */
-        modification: Partial<Omit<tl.RawDialogFilter, 'id' | '_'>>
-    },
+    /** Modification to be applied to this folder */
+    modification: Partial<Omit<tl.RawDialogFilter, 'id' | '_'>>
+  },
 ): Promise<tl.RawDialogFilter> {
-    const { modification } = params
-    let { folder } = params
+  const { modification } = params
+  let { folder } = params
 
-    if (folder === 0) {
-        throw new MtArgumentError('Cannot modify default folder')
-    }
-    if (typeof folder === 'number' || typeof folder === 'string') {
-        const old = await getFolders(client)
-        const found = old.filters.find(it => it._ === 'dialogFilter' && (it.id === folder || it.title.text === folder))
+  if (folder === 0) {
+    throw new MtArgumentError('Cannot modify default folder')
+  }
+  if (typeof folder === 'number' || typeof folder === 'string') {
+    const old = await getFolders(client)
+    const found = old.filters.find(it => it._ === 'dialogFilter' && (it.id === folder || it.title.text === folder))
 
-        if (!found) {
-            throw new MtArgumentError(`Could not find a folder ${folder}`)
-        }
-
-        folder = found as tl.RawDialogFilter
+    if (!found) {
+      throw new MtArgumentError(`Could not find a folder ${folder}`)
     }
 
-    const filter: tl.RawDialogFilter = {
-        ...folder,
-        ...modification,
-    }
+    folder = found as tl.RawDialogFilter
+  }
 
-    const r = await client.call({
-        _: 'messages.updateDialogFilter',
-        id: folder.id,
-        filter,
-    })
+  const filter: tl.RawDialogFilter = {
+    ...folder,
+    ...modification,
+  }
 
-    assertTrue('messages.updateDialogFilter', r)
+  const r = await client.call({
+    _: 'messages.updateDialogFilter',
+    id: folder.id,
+    filter,
+  })
 
-    return filter
+  assertTrue('messages.updateDialogFilter', r)
+
+  return filter
 }

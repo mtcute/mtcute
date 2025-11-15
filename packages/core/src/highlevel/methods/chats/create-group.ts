@@ -10,10 +10,10 @@ import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 // @exported
 export interface CreateGroupResult {
-    /** Chat that was created */
-    chat: Chat
-    /** Users that were failed to be invited */
-    missing: tl.RawMissingInvitee[]
+  /** Chat that was created */
+  chat: Chat
+  /** Users that were failed to be invited */
+  missing: tl.RawMissingInvitee[]
 }
 
 /**
@@ -23,46 +23,46 @@ export interface CreateGroupResult {
  * instead.
  */
 export async function createGroup(
-    client: ITelegramClient,
-    params: {
-        /**
-         * Group title
-         */
-        title: string
+  client: ITelegramClient,
+  params: {
+    /**
+     * Group title
+     */
+    title: string
 
-        /**
-         * User(s) to be invited in the group (ID(s), username(s) or phone number(s)).
-         * Due to Telegram limitations, you can't create a legacy group with just yourself.
-         */
-        users: MaybeArray<InputPeerLike>
+    /**
+     * User(s) to be invited in the group (ID(s), username(s) or phone number(s)).
+     * Due to Telegram limitations, you can't create a legacy group with just yourself.
+     */
+    users: MaybeArray<InputPeerLike>
 
-        /**
-         * TTL period (in seconds) for the newly created chat
-         *
-         * @default 0 (i.e. messages don't expire)
-         */
-        ttlPeriod?: number
-    },
+    /**
+     * TTL period (in seconds) for the newly created chat
+     *
+     * @default 0 (i.e. messages don't expire)
+     */
+    ttlPeriod?: number
+  },
 ): Promise<CreateGroupResult> {
-    const { title } = params
-    let { users } = params
+  const { title } = params
+  let { users } = params
 
-    if (!Array.isArray(users)) users = [users]
+  if (!Array.isArray(users)) users = [users]
 
-    const peers = await resolvePeerMany(client, users, toInputUser)
+  const peers = await resolvePeerMany(client, users, toInputUser)
 
-    const { updates, missingInvitees } = await client.call({
-        _: 'messages.createChat',
-        title,
-        users: peers,
-    })
+  const { updates, missingInvitees } = await client.call({
+    _: 'messages.createChat',
+    title,
+    users: peers,
+  })
 
-    assertIsUpdatesGroup('messages.createChat', updates)
+  assertIsUpdatesGroup('messages.createChat', updates)
 
-    client.handleClientUpdate(updates)
+  client.handleClientUpdate(updates)
 
-    return {
-        chat: new Chat(updates.chats[0]),
-        missing: missingInvitees,
-    }
+  return {
+    chat: new Chat(updates.chats[0]),
+    missing: missingInvitees,
+  }
 }

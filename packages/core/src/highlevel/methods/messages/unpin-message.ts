@@ -13,14 +13,14 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param messageId  Message ID
  */
 export async function unpinMessage(client: ITelegramClient, params: InputMessageId): Promise<void> {
-    const { chatId, message } = normalizeInputMessageId(params)
+  const { chatId, message } = normalizeInputMessageId(params)
 
-    const res = await client.call({
-        _: 'messages.updatePinnedMessage',
-        peer: await resolvePeer(client, chatId),
-        id: message,
-        unpin: true,
-    })
+  const res = await client.call({
+    _: 'messages.updatePinnedMessage',
+    peer: await resolvePeer(client, chatId),
+    id: message,
+    unpin: true,
+  })
 
-    client.handleClientUpdate(res)
+  client.handleClientUpdate(res)
 }

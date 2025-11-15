@@ -5,84 +5,84 @@ import { MtArgumentError } from '../../../types/errors.js'
 const ERROR_MSG = 'Given peer is not available in this index. This is most likely an internal library error.'
 
 export class PeersIndex {
-    constructor(
-        readonly users: Map<number, tl.TypeUser> = new Map(),
-        readonly chats: Map<number, tl.TypeChat> = new Map(),
-    ) {}
+  constructor(
+    readonly users: Map<number, tl.TypeUser> = new Map(),
+    readonly chats: Map<number, tl.TypeChat> = new Map(),
+  ) {}
 
-    hasMin = false
+  hasMin = false
 
-    static from(obj: { users?: tl.TypeUser[], chats?: tl.TypeChat[] }): PeersIndex {
-        const index = new PeersIndex()
+  static from(obj: { users?: tl.TypeUser[], chats?: tl.TypeChat[] }): PeersIndex {
+    const index = new PeersIndex()
 
-        obj.users?.forEach((user) => {
-            index.users.set(user.id, user)
+    obj.users?.forEach((user) => {
+      index.users.set(user.id, user)
 
-            if ((user as Exclude<typeof user, tl.RawUserEmpty>).min) {
-                index.hasMin = true
-            }
-        })
-        obj.chats?.forEach((chat) => {
-            index.chats.set(chat.id, chat)
+      if ((user as Exclude<typeof user, tl.RawUserEmpty>).min) {
+        index.hasMin = true
+      }
+    })
+    obj.chats?.forEach((chat) => {
+      index.chats.set(chat.id, chat)
 
-            if (
-                (
-                    chat as Exclude<
+      if (
+        (
+          chat as Exclude<
                         typeof chat,
                         tl.RawChatEmpty | tl.RawChat | tl.RawChatForbidden | tl.RawChannelForbidden
-                    >
-                ).min
-            ) {
-                index.hasMin = true
-            }
-        })
+          >
+        ).min
+      ) {
+        index.hasMin = true
+      }
+    })
 
-        return index
+    return index
+  }
+
+  get empty(): boolean {
+    return this.users.size === 0 && this.chats.size === 0
+  }
+
+  user(id: number): tl.TypeUser {
+    const r = this.users.get(id)
+
+    if (!r) {
+      throw new MtArgumentError(ERROR_MSG)
     }
 
-    get empty(): boolean {
-        return this.users.size === 0 && this.chats.size === 0
+    return r
+  }
+
+  chat(id: number): tl.TypeChat {
+    const r = this.chats.get(id)
+
+    if (!r) {
+      throw new MtArgumentError(ERROR_MSG)
     }
 
-    user(id: number): tl.TypeUser {
-        const r = this.users.get(id)
+    return r
+  }
 
-        if (!r) {
-            throw new MtArgumentError(ERROR_MSG)
-        }
-
-        return r
+  get(peer: tl.TypePeer): tl.TypeUser | tl.TypeChat {
+    switch (peer._) {
+      case 'peerUser':
+        return this.user(peer.userId)
+      case 'peerChat':
+        return this.chat(peer.chatId)
+      case 'peerChannel':
+        return this.chat(peer.channelId)
     }
+  }
 
-    chat(id: number): tl.TypeChat {
-        const r = this.chats.get(id)
-
-        if (!r) {
-            throw new MtArgumentError(ERROR_MSG)
-        }
-
-        return r
+  has(peer: tl.TypePeer): boolean {
+    switch (peer._) {
+      case 'peerUser':
+        return this.users.has(peer.userId)
+      case 'peerChat':
+        return this.chats.has(peer.chatId)
+      case 'peerChannel':
+        return this.chats.has(peer.channelId)
     }
-
-    get(peer: tl.TypePeer): tl.TypeUser | tl.TypeChat {
-        switch (peer._) {
-            case 'peerUser':
-                return this.user(peer.userId)
-            case 'peerChat':
-                return this.chat(peer.chatId)
-            case 'peerChannel':
-                return this.chat(peer.channelId)
-        }
-    }
-
-    has(peer: tl.TypePeer): boolean {
-        switch (peer._) {
-            case 'peerUser':
-                return this.users.has(peer.userId)
-            case 'peerChat':
-                return this.chats.has(peer.chatId)
-            case 'peerChannel':
-                return this.chats.has(peer.channelId)
-        }
-    }
+  }
 }

@@ -5,16 +5,16 @@ import type { FutureSaltsService } from './future-salts.js'
 import { BaseService } from './base.js'
 
 export class AuthKeysService extends BaseService {
-    constructor(
-        readonly _keys: IAuthKeysRepository,
-        readonly _salts: FutureSaltsService,
-        opts: ServiceOptions,
-    ) {
-        super(opts)
-    }
+  constructor(
+    readonly _keys: IAuthKeysRepository,
+    readonly _salts: FutureSaltsService,
+    opts: ServiceOptions,
+  ) {
+    super(opts)
+  }
 
-    async deleteByDc(dc: number): Promise<void> {
-        await this._keys.deleteByDc(dc)
-        await this._salts.delete(dc)
-    }
+  async deleteByDc(dc: number): Promise<void> {
+    await this._keys.deleteByDc(dc)
+    await this._salts.delete(dc)
+  }
 }

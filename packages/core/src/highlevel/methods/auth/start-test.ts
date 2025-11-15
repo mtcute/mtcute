@@ -16,78 +16,78 @@ import { start } from './start.js'
  * @param params  Additional parameters
  */
 export async function startTest(
-    client: ITelegramClient,
-    params?: {
-        /**
-         * Whether to log out if current session is logged in.
-         *
-         * @default  false.
-         */
-        logout?: boolean
+  client: ITelegramClient,
+  params?: {
+    /**
+     * Whether to log out if current session is logged in.
+     *
+     * @default  false.
+     */
+    logout?: boolean
 
-        /**
-         * Override phone number. Must be a valid Test phone number.
-         *
-         * By default is randomly generated.
-         */
-        phone?: string
+    /**
+     * Override phone number. Must be a valid Test phone number.
+     *
+     * By default is randomly generated.
+     */
+    phone?: string
 
-        /**
-         * Override user's DC. Must be a valid test DC.
-         */
-        dcId?: number
-    },
+    /**
+     * Override user's DC. Must be a valid test DC.
+     */
+    dcId?: number
+  },
 ): Promise<User> {
-    if (!params) params = {}
+  if (!params) params = {}
 
-    if (params.logout) {
-        try {
-            await logOut(client)
-        } catch {}
-    }
+  if (params.logout) {
+    try {
+      await logOut(client)
+    } catch {}
+  }
 
-    const availableDcs = await client
-        .call({
-            _: 'help.getConfig',
-        })
-        .then(res => res.dcOptions)
-
-    let phone = params.phone
-
-    if (phone) {
-        if (!phone.match(/^99966\d{5}/)) {
-            throw new MtArgumentError(`${phone} is an invalid test phone number`)
-        }
-        const id = Number.parseInt(phone[5])
-
-        if (!availableDcs.find(dc => dc.id === id)) {
-            throw new MtArgumentError(`${phone} has invalid DC ID (${id})`)
-        }
-    } else {
-        let dcId = await client.getPrimaryDcId()
-
-        if (params.dcId) {
-            if (!availableDcs.find(dc => dc.id === params.dcId)) {
-                throw new MtArgumentError(`DC ID is invalid (${dcId})`)
-            }
-            dcId = params.dcId
-        }
-
-        let numbers = Math.floor(Math.random() * 9999).toString()
-        while (numbers.length !== 4) numbers += '0'
-
-        phone = `99966${dcId}${numbers}`
-    }
-
-    let code = ''
-
-    return start(client, {
-        phone,
-        code: () => code,
-        codeSentCallback: (sent) => {
-            for (let i = 0; i < sent.length; i++) {
-                code += phone[5]
-            }
-        },
+  const availableDcs = await client
+    .call({
+      _: 'help.getConfig',
     })
+    .then(res => res.dcOptions)
+
+  let phone = params.phone
+
+  if (phone) {
+    if (!phone.match(/^99966\d{5}/)) {
+      throw new MtArgumentError(`${phone} is an invalid test phone number`)
+    }
+    const id = Number.parseInt(phone[5])
+
+    if (!availableDcs.find(dc => dc.id === id)) {
+      throw new MtArgumentError(`${phone} has invalid DC ID (${id})`)
+    }
+  } else {
+    let dcId = await client.getPrimaryDcId()
+
+    if (params.dcId) {
+      if (!availableDcs.find(dc => dc.id === params.dcId)) {
+        throw new MtArgumentError(`DC ID is invalid (${dcId})`)
+      }
+      dcId = params.dcId
+    }
+
+    let numbers = Math.floor(Math.random() * 9999).toString()
+    while (numbers.length !== 4) numbers += '0'
+
+    phone = `99966${dcId}${numbers}`
+  }
+
+  let code = ''
+
+  return start(client, {
+    phone,
+    code: () => code,
+    codeSentCallback: (sent) => {
+      for (let i = 0; i < sent.length; i++) {
+        code += phone[5]
+      }
+    },
+  })
 }

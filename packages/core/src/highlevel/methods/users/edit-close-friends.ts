@@ -11,12 +11,12 @@ import { resolvePeerMany } from './resolve-peer-many.js'
  * @param ids  User IDs
  */
 export async function editCloseFriendsRaw(client: ITelegramClient, ids: number[]): Promise<void> {
-    const r = await client.call({
-        _: 'contacts.editCloseFriends',
-        id: ids,
-    })
+  const r = await client.call({
+    _: 'contacts.editCloseFriends',
+    id: ids,
+  })
 
-    assertTrue('contacts.editCloseFriends', r)
+  assertTrue('contacts.editCloseFriends', r)
 }
 
 /**
@@ -25,16 +25,16 @@ export async function editCloseFriendsRaw(client: ITelegramClient, ids: number[]
  * @param ids  User IDs
  */
 export async function editCloseFriends(client: ITelegramClient, ids: InputPeerLike[]): Promise<void> {
-    const r = await client.call({
-        _: 'contacts.editCloseFriends',
-        id: await resolvePeerMany(client, ids, toInputUser).then(r =>
-            r.map((u) => {
-                if ('userId' in u) return u.userId
+  const r = await client.call({
+    _: 'contacts.editCloseFriends',
+    id: await resolvePeerMany(client, ids, toInputUser).then(r =>
+      r.map((u) => {
+        if ('userId' in u) return u.userId
 
-                return 0
-            }),
-        ),
-    })
+        return 0
+      }),
+    ),
+  })
 
-    assertTrue('contacts.editCloseFriends', r)
+  assertTrue('contacts.editCloseFriends', r)
 }

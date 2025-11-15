@@ -7,10 +7,10 @@ import { ChatlistPreview } from '../../types/index.js'
  * @param link  Invite link
  */
 export async function getChatlistPreview(client: ITelegramClient, link: string): Promise<ChatlistPreview> {
-    const res = await client.call({
-        _: 'chatlists.checkChatlistInvite',
-        slug: link,
-    })
+  const res = await client.call({
+    _: 'chatlists.checkChatlistInvite',
+    slug: link,
+  })
 
-    return new ChatlistPreview(res)
+  return new ChatlistPreview(res)
 }

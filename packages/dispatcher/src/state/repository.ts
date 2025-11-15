@@ -13,56 +13,56 @@ import type { MaybePromise } from '@mtcute/core'
  * Alternatively, you can store them as simple strings
  */
 export interface IStateRepository {
-    /**
-     * Retrieve state from the storage
-     * If state is not found or has expired, return `null`
-     *
-     * @param key  Key of the state, as defined by {@link StateKeyDelegate}
-     */
-    getState: (key: string, now: number) => MaybePromise<string | null>
+  /**
+   * Retrieve state from the storage
+   * If state is not found or has expired, return `null`
+   *
+   * @param key  Key of the state, as defined by {@link StateKeyDelegate}
+   */
+  getState: (key: string, now: number) => MaybePromise<string | null>
 
-    /**
-     * Save state to the storage
-     *
-     * @param key  Key of the state, as defined by {@link StateKeyDelegate}
-     * @param state  String representing the state
-     * @param ttl  TTL for the state, in seconds
-     */
-    setState: (key: string, state: string, ttl?: number) => MaybePromise<void>
+  /**
+   * Save state to the storage
+   *
+   * @param key  Key of the state, as defined by {@link StateKeyDelegate}
+   * @param state  String representing the state
+   * @param ttl  TTL for the state, in seconds
+   */
+  setState: (key: string, state: string, ttl?: number) => MaybePromise<void>
 
-    /**
-     * Delete state from the storage
-     *
-     * @param key  Key of the state, as defined by {@link StateKeyDelegate}
-     */
-    deleteState: (key: string) => MaybePromise<void>
+  /**
+   * Delete state from the storage
+   *
+   * @param key  Key of the state, as defined by {@link StateKeyDelegate}
+   */
+  deleteState: (key: string) => MaybePromise<void>
 
-    /**
-     * Clean up expired states and rate limits.
-     *
-     * @param now  Current unix time in ms
-     */
-    vacuum: (now: number) => MaybePromise<void>
+  /**
+   * Clean up expired states and rate limits.
+   *
+   * @param now  Current unix time in ms
+   */
+  vacuum: (now: number) => MaybePromise<void>
 
-    /**
-     * Get information about a rate limit.
-     *
-     * It is recommended that you use sliding window or leaky bucket
-     * to implement rate limiting ([learn more](https://konghq.com/blog/how-to-design-a-scalable-rate-limiting-algorithm/)),
-     *
-     * @param key  Key of the rate limit
-     * @param now  Current unix time in ms
-     * @param limit  Maximum number of requests in `window`
-     * @param window  Window size in seconds
-     * @returns  Tuple containing the number of remaining and
-     *   unix time in ms when the user can try again
-     */
-    getRateLimit: (key: string, now: number, limit: number, window: number) => MaybePromise<[number, number]>
+  /**
+   * Get information about a rate limit.
+   *
+   * It is recommended that you use sliding window or leaky bucket
+   * to implement rate limiting ([learn more](https://konghq.com/blog/how-to-design-a-scalable-rate-limiting-algorithm/)),
+   *
+   * @param key  Key of the rate limit
+   * @param now  Current unix time in ms
+   * @param limit  Maximum number of requests in `window`
+   * @param window  Window size in seconds
+   * @returns  Tuple containing the number of remaining and
+   *   unix time in ms when the user can try again
+   */
+  getRateLimit: (key: string, now: number, limit: number, window: number) => MaybePromise<[number, number]>
 
-    /**
-     * Reset a rate limit.
-     *
-     * @param key  Key of the rate limit
-     */
-    resetRateLimit: (key: string) => MaybePromise<void>
+  /**
+   * Reset a rate limit.
+   *
+   * @param key  Key of the rate limit
+   */
+  resetRateLimit: (key: string) => MaybePromise<void>
 }

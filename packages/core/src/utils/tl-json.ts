@@ -9,33 +9,33 @@ import { MtArgumentError } from '../types/errors.js'
  */
 
 export function jsonToTlJson(obj: unknown): tl.TypeJSONValue {
-    if (obj === null || obj === undefined) return { _: 'jsonNull' }
-    if (typeof obj === 'boolean') return { _: 'jsonBool', value: obj }
-    if (typeof obj === 'number') return { _: 'jsonNumber', value: obj }
-    if (typeof obj === 'string') return { _: 'jsonString', value: obj }
+  if (obj === null || obj === undefined) return { _: 'jsonNull' }
+  if (typeof obj === 'boolean') return { _: 'jsonBool', value: obj }
+  if (typeof obj === 'number') return { _: 'jsonNumber', value: obj }
+  if (typeof obj === 'string') return { _: 'jsonString', value: obj }
 
-    if (Array.isArray(obj)) {
-        return { _: 'jsonArray', value: obj.map(jsonToTlJson) }
-    }
+  if (Array.isArray(obj)) {
+    return { _: 'jsonArray', value: obj.map(jsonToTlJson) }
+  }
 
-    if (typeof obj !== 'object') {
-        throw new MtArgumentError(`Unsupported type: ${typeof obj}`)
-    }
+  if (typeof obj !== 'object') {
+    throw new MtArgumentError(`Unsupported type: ${typeof obj}`)
+  }
 
-    const items: tl.TypeJSONObjectValue[] = []
+  const items: tl.TypeJSONObjectValue[] = []
 
-    Object.entries(obj).forEach(([key, value]) => {
-        items.push({
-            _: 'jsonObjectValue',
-            key,
-            value: jsonToTlJson(value),
-        })
+  Object.entries(obj).forEach(([key, value]) => {
+    items.push({
+      _: 'jsonObjectValue',
+      key,
+      value: jsonToTlJson(value),
     })
+  })
 
-    return {
-        _: 'jsonObject',
-        value: items,
-    }
+  return {
+    _: 'jsonObject',
+    value: items,
+  }
 }
 
 /**
@@ -44,22 +44,22 @@ export function jsonToTlJson(obj: unknown): tl.TypeJSONValue {
  * @param obj  TL JSON object to convert
  */
 export function tlJsonToJson(obj: tl.TypeJSONValue): unknown {
-    switch (obj._) {
-        case 'jsonNull':
-            return null
-        case 'jsonBool':
-        case 'jsonNumber':
-        case 'jsonString':
-            return obj.value
-        case 'jsonArray':
-            return obj.value.map(tlJsonToJson)
-    }
+  switch (obj._) {
+    case 'jsonNull':
+      return null
+    case 'jsonBool':
+    case 'jsonNumber':
+    case 'jsonString':
+      return obj.value
+    case 'jsonArray':
+      return obj.value.map(tlJsonToJson)
+  }
 
-    const ret: Record<string, unknown> = {}
+  const ret: Record<string, unknown> = {}
 
-    obj.value.forEach((item) => {
-        ret[item.key] = tlJsonToJson(item.value)
-    })
+  obj.value.forEach((item) => {
+    ret[item.key] = tlJsonToJson(item.value)
+  })
 
-    return ret
+  return ret
 }
