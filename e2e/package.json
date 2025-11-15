@@ -17,7 +17,7 @@
     "mtcute": "file:../packages/node",
     "tsx": "^4.19.2",
     "esbuild": "^0.24.0",
-    "better-sqlite3": "11.6.0"
+    "better-sqlite3": "12.4.1"
   },
   "devDependencies": {
     "@types/chai": "^4.3.8",
