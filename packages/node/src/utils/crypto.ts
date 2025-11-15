@@ -11,7 +11,7 @@ export class NodeCryptoProvider extends BaseCryptoProvider {
   createAesCtr(key: Uint8Array, iv: Uint8Array): IAesCtr {
     const cipher = createCipheriv(`aes-${key.length * 8}-ctr`, key, iv)
 
-    const update = (data: Uint8Array) => cipher.update(data)
+    const update = (data: Uint8Array) => cipher.update(data) as Uint8Array
 
     return {
       process: update,
@@ -26,21 +26,21 @@ export class NodeCryptoProvider extends BaseCryptoProvider {
     algo = 'sha512',
   ): Promise<Uint8Array> {
     return new Promise((resolve, reject) =>
-      pbkdf2(password, salt, iterations, keylen, algo, (err: Error | null, buf: Uint8Array) =>
-        err !== null ? reject(err) : resolve(buf)),
+      pbkdf2(password, salt, iterations, keylen, algo, (err: Error | null, buf) =>
+        err !== null ? reject(err) : resolve(buf as Uint8Array)),
     )
   }
 
   sha1(data: Uint8Array): Uint8Array {
-    return createHash('sha1').update(data).digest()
+    return createHash('sha1').update(data).digest() as Uint8Array
   }
 
   sha256(data: Uint8Array): Uint8Array {
-    return createHash('sha256').update(data).digest()
+    return createHash('sha256').update(data).digest() as Uint8Array
   }
 
   hmacSha256(data: Uint8Array, key: Uint8Array): Uint8Array {
-    return createHmac('sha256', key).update(data).digest()
+    return createHmac('sha256', key).update(data).digest() as Uint8Array
   }
 
   gzip(data: Uint8Array, maxSize: number): Uint8Array | null {
@@ -48,7 +48,7 @@ export class NodeCryptoProvider extends BaseCryptoProvider {
       // telegram accepts both zlib and gzip, but zlib is faster and has less overhead, so we use it here
       return deflateSync(data, {
         maxOutputLength: maxSize,
-      })
+      }) as Uint8Array
       // hot path, avoid additional runtime checks
     } catch (e: any) {
       if (e.code === 'ERR_BUFFER_TOO_LARGE') {
@@ -60,7 +60,7 @@ export class NodeCryptoProvider extends BaseCryptoProvider {
   }
 
   gunzip(data: Uint8Array): Uint8Array {
-    return gunzipSync(data)
+    return gunzipSync(data) as Uint8Array
   }
 
   randomFill(buf: Uint8Array): void {

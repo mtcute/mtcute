@@ -1,5 +1,4 @@
-/// <reference types="@vitest/browser/providers/playwright" />
-
+import { playwright } from '@vitest/browser-playwright'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { mergeConfig } from 'vitest/config'
 import { fixupCjs } from './vite-utils/fixup-cjs'
@@ -9,7 +8,7 @@ export default mergeConfig(baseConfig, {
   test: {
     browser: {
       enabled: true,
-      provider: 'playwright',
+      provider: playwright(),
       slowHijackESM: false,
       headless: Boolean(process.env.CI),
       instances: [
@@ -47,11 +46,12 @@ export default mergeConfig(baseConfig, {
     },
   },
   define: {
-    'import.meta.env.TEST_ENV': '"browser"',
+    'process.env.TEST_ENV': '"browser"',
   },
   optimizeDeps: {
     esbuildOptions: {
       target: 'esnext',
     },
+    include: ['node:zlib', 'vite-plugin-node-polyfills/shims/global', 'vite-plugin-node-polyfills/shims/process'],
   },
 })

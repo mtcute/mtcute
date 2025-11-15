@@ -8,7 +8,7 @@ import {
 } from '@mtcute/test'
 import { afterAll, beforeAll, describe } from 'vitest'
 
-if (import.meta.env.TEST_ENV === 'node') {
+if (process.env.TEST_ENV === 'node') {
   const { SqliteStorage } = await import('./index.js')
 
   describe('SqliteStorage', () => {

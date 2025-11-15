@@ -46,3 +46,5 @@ for (const pkg of packages) {
     await writeFile(jsonPath, JSON.stringify(rawJson, null, 2))
   }
 }
+
+console.log('dont forget to update @mtcute/deno package.json too')

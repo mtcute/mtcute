@@ -9,7 +9,7 @@ import { expect } from 'chai'
 import { afterAll, beforeAll, describe, it } from 'vitest'
 import { IdbStorage } from './index.js'
 
-if (import.meta.env.TEST_ENV === 'browser') {
+if (process.env.TEST_ENV === 'browser') {
   describe('idb storage', () => {
     const idbName = `mtcute_test_${Math.random().toString(36).slice(2)}`
 

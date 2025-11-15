@@ -26,7 +26,7 @@ class FakeFs implements INodeFsLike {
     return Promise.resolve()
   }
 }
-if (import.meta.env.TEST_ENV === 'node') {
+if (process.env.TEST_ENV === 'node') {
   const { fileURLToPath } = await import('node:url')
   describe('gramjs/store-session', () => {
     it('should read a store session', async () => {

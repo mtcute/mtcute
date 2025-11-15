@@ -26,7 +26,7 @@ class FakeFs implements INodeFsLike {
   }
 }
 
-if (import.meta.env.TEST_ENV === 'node') {
+if (process.env.TEST_ENV === 'node') {
   describe('tdata', async () => {
     const { getDefaultCryptoProviderImpl } = await import('../utils/_crypto.js')
     const { fileURLToPath } = await import('node:url')

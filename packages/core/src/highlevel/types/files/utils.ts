@@ -33,7 +33,10 @@ export type UploadFileLike
     | AnyToNever<ReadableStream<Uint8Array>>
     | AnyToNever<NodeJS.ReadableStream>
     | AnyToNever<Response>
-    | AnyToNever<Deno.FsFile>
+    // https://github.com/denoland/deno/issues/31304
+    // | AnyToNever<Deno.FsFile>
+    // todo: while this is supported, deno publish for some reason doesn't like it lol
+    // too lazy to debug, so just remove it for now
 
 // AnyToNever in the above type ensures we don't make the entire type `any`
 // if some of the types are not available in the current environment

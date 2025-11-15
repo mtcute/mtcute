@@ -85,13 +85,13 @@ export class WebCryptoProvider extends BaseCryptoProvider implements ICryptoProv
     keylen?: number | undefined,
     algo?: string | undefined,
   ): Promise<Uint8Array> {
-    const keyMaterial = await this.crypto.subtle.importKey('raw', password, 'PBKDF2', false, ['deriveBits'])
+    const keyMaterial = await this.crypto.subtle.importKey('raw', password as Uint8Array<ArrayBuffer>, 'PBKDF2', false, ['deriveBits'])
 
     return this.crypto.subtle
       .deriveBits(
         {
           name: 'PBKDF2',
-          salt,
+          salt: salt as Uint8Array<ArrayBuffer>,
           iterations,
           hash: algo ? ALGO_TO_SUBTLE[algo] : 'SHA-512',
         },
@@ -104,13 +104,13 @@ export class WebCryptoProvider extends BaseCryptoProvider implements ICryptoProv
   async hmacSha256(data: Uint8Array, key: Uint8Array): Promise<Uint8Array> {
     const keyMaterial = await this.crypto.subtle.importKey(
       'raw',
-      key,
+      key as Uint8Array<ArrayBuffer>,
       { name: 'HMAC', hash: { name: 'SHA-256' } },
       false,
       ['sign'],
     )
 
-    const res = await this.crypto.subtle.sign({ name: 'HMAC' }, keyMaterial, data)
+    const res = await this.crypto.subtle.sign({ name: 'HMAC' }, keyMaterial, data as Uint8Array<ArrayBuffer>)
 
     return new Uint8Array(res)
   }

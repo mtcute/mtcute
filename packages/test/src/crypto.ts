@@ -82,7 +82,7 @@ export function testCryptoProvider(c: ICryptoProvider): void {
   beforeAll(() => c.initialize?.())
 
   function gzipSyncWrap(data: Uint8Array) {
-    if (import.meta.env.TEST_ENV === 'browser') {
+    if (process.env.TEST_ENV === 'browser') {
       // @ts-expect-error fucking crutch because @jspm/core uses Buffer.isBuffer for some reason
       data._isBuffer = true
 
@@ -93,7 +93,7 @@ export function testCryptoProvider(c: ICryptoProvider): void {
   }
 
   function inflateSyncWrap(data: Uint8Array) {
-    if (import.meta.env.TEST_ENV === 'browser') {
+    if (process.env.TEST_ENV === 'browser') {
       // @ts-expect-error fucking crutch because @jspm/core uses Buffer.isBuffer for some reason
       data._isBuffer = true
 

@@ -1,9 +1,11 @@
-import { IExtendedCryptoProvider } from './crypto.js'
+import type { IExtendedCryptoProvider } from './crypto.js'
 
+/* eslint-disable ts/no-unsafe-assignment, ts/no-unsafe-call */
 export function getDefaultCryptoProviderImpl(
-  nodeCrypto: typeof import('node:crypto'),
-  NodeCryptoProvider: typeof import('@mtcute/node/utils.js').NodeCryptoProvider,
+  nodeCrypto: any,
+  NodeCryptoProvider: any,
 ): IExtendedCryptoProvider {
+  // @ts-expect-error - any
   return new (class extends NodeCryptoProvider implements IExtendedCryptoProvider {
     createHash(algorithm: 'md5' | 'sha512') {
       const hasher = nodeCrypto.createHash(algorithm)

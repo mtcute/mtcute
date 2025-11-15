@@ -8,7 +8,7 @@ import { TlBinaryWriter, TlSerializationCounter } from './writer.js'
 
 let randomBytes: (n: number) => Uint8Array
 
-if (import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') {
+if (process.env.TEST_ENV === 'node' || process.env.TEST_ENV === 'bun') {
   randomBytes = await import('node:crypto').then(m => m.randomBytes)
 } else {
   randomBytes = (n: number) => {

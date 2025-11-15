@@ -13,7 +13,8 @@ export async function getDefaultCryptoProvider(): Promise<IExtendedCryptoProvide
   const crypto = /* @vite-ignore */ await import('node:crypto')
   const nodeModule = '@mtcute/node/utils.js'
 
-  const { NodeCryptoProvider } = await import(/* @vite-ignore */ nodeModule) as typeof import('@mtcute/node/utils.js')
+  // eslint-disable-next-line ts/no-unsafe-assignment
+  const { NodeCryptoProvider } = await import(/* @vite-ignore */ nodeModule)
 
   return getDefaultCryptoProviderImpl(crypto, NodeCryptoProvider)
 }

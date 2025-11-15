@@ -36,7 +36,7 @@ export default antfu({
     'unused-imports/no-unused-imports': 'error',
     'curly': ['error', 'multi-line'],
     'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
-    'node/prefer-global/process': ['error', 'always'],
+    'node/prefer-global/process': 'off',
     'node/prefer-global/buffer': ['error', 'always'],
     'no-restricted-globals': ['error', 'Buffer', '__dirname', 'require', 'NodeJS', 'setTimeout', 'clearTimeout'],
     'style/quotes': ['error', 'single', { avoidEscape: true }],
@@ -109,6 +109,7 @@ export default antfu({
   },
 }, {
   files: ['packages/create-*/**', 'packages/deno/**'],
+  ignores: ['packages/deno/**/*.test.ts'],
   rules: {
     'node/prefer-global/process': ['error', 'never'],
     'node/prefer-global/buffer': ['error', 'never'],

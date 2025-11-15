@@ -8,7 +8,8 @@ import {
 } from '@mtcute/test'
 import { afterAll, beforeAll, describe } from 'vitest'
 
-if (import.meta.env.TEST_ENV === 'bun') {
+// todo https://github.com/vitest-dev/vitest/issues/8925
+if (false && process.env.TEST_ENV === 'bun') {
   const { SqliteStorage } = await import('./index.js')
 
   describe('SqliteStorage', () => {
