@@ -5,8 +5,8 @@ import type { PeersIndex } from '../peers/peers-index.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { parsePeer } from '../peers/peer.js'
-import { StarGiftUnique } from './stars-gift-unique.js'
-import { StarGift } from './stars-gift.js'
+import { StarGiftUnique } from './star-gift-unique.js'
+import { StarGift } from './star-gift.js'
 
 export class SavedStarGift {
   constructor(

@@ -135,6 +135,11 @@ export class Message {
     return this.raw._ === 'message' && this.raw.fromScheduled!
   }
 
+  /** If this message is a scheduled message, the repeat period in seconds */
+  get scheduleRepeatPeriod(): number | null {
+    return this.raw._ === 'message' ? this.raw.scheduleRepeatPeriod ?? null : null
+  }
+
   /** Whether the message is pinned in the current chat */
   get isPinned(): boolean {
     return this.raw._ === 'message' && this.raw.pinned!

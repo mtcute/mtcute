@@ -469,7 +469,7 @@ async function main() {
 
   console.log('Writing diff to file...')
   const oldSchema = unpackTlSchema(JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8')) as TlPackedSchema)
-  const diff = generateTlSchemasDifference(oldSchema[0], resultSchema)
+  const diff = generateTlSchemasDifference(oldSchema[0], resultSchema, { ignoreComments: true })
   await writeFile(
     API_SCHEMA_DIFF_JSON_FILE,
     JSON.stringify(

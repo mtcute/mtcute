@@ -54,6 +54,19 @@ export class StarGift {
     return this.raw.requirePremium!
   }
 
+  /** If this gift is currently sold through an auction, info about that auction. `null` otherwise */
+  get action(): {
+    slug: string
+    giftsPerRound: number
+  } | null {
+    if (!this.raw.auctionSlug || this.raw.giftsPerRound == null) return null
+
+    return {
+      slug: this.raw.auctionSlug,
+      giftsPerRound: this.raw.giftsPerRound,
+    }
+  }
+
   /** Whether this gift includes a peer color that can be applied to user's profile */
   get hasPeerColor(): boolean {
     return this.raw.peerColorAvailable!

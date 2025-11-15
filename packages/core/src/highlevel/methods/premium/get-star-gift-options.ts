@@ -1,7 +1,7 @@
 import type { ITelegramClient } from '../../client.types.js'
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import { PeersIndex } from '../../types/index.js'
-import { StarGift } from '../../types/premium/stars-gift.js'
+import { StarGift } from '../../types/premium/star-gift.js'
 
 // @available=user
 /**

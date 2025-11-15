@@ -412,8 +412,8 @@ export class Chat {
   /**
    * Maximum ID of stories this chat has (or 0 if none)
    */
-  get storiesMaxId(): number {
-    return this.raw._ === 'channel' ? this.raw.storiesMaxId ?? 0 : 0
+  get storiesMaxId(): tl.RawRecentStory | null {
+    return this.raw._ === 'channel' ? this.raw.storiesMaxId ?? null : null
   }
 
   /**

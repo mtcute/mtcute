@@ -1,9 +1,10 @@
 import type { tl } from '@mtcute/tl'
 import type { TextWithEntities } from '../misc/entities.js'
+import type { Peer } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { User } from '../peers/user.js'
+import { parsePeer } from '../peers/peer.js'
 
 export class TodoItem {
   constructor(
@@ -24,13 +25,13 @@ export class TodoItem {
     return this.completion != null
   }
 
-  get completedBy(): User | null {
+  get completedBy(): Peer | null {
     if (!this.completion) return null
 
-    const peer = this._peers.user(this.completion.completedBy)
+    const peer = parsePeer(this.completion.completedBy, this._peers)
     if (!peer) return null
 
-    return new User(peer)
+    return peer
   }
 
   get completedDate(): Date | null {

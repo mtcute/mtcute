@@ -10,8 +10,8 @@ import { WebDocument } from '../files/web-document.js'
 import { _messageMediaFromTl } from '../messages/message-media.js'
 import { parsePeer } from '../peers/peer.js'
 
-import { StarGiftUnique } from './stars-gift-unique.js'
-import { StarGift } from './stars-gift.js'
+import { StarGiftUnique } from './star-gift-unique.js'
+import { StarGift } from './star-gift.js'
 
 // ref: https://github.com/tdlib/td/blob/master/td/telegram/StarManager.cpp#L223
 
@@ -208,6 +208,7 @@ export type StarsTransactionType
       /** The dropped gift */
       gift: StarGiftUnique
     }
+    // todo: phonegroup_message, stargift_auction_bid
 
 export class StarsTransaction {
   constructor(

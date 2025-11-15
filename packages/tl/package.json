@@ -1,39 +1,39 @@
 {
-  "name": "@mtcute/tl",
-  "version": "216.0.0",
-  "description": "TL schema used for mtcute",
-  "author": "alina sireneva <alina@tei.su>",
-  "license": "MIT",
-  "scripts": {
-    "test": "tsc --noEmit --esModuleInterop tests/types.ts",
-    "fetch-mtp": "tsx scripts/fetch-mtp.ts",
-    "fetch-api": "tsx scripts/fetch-api.ts",
-    "fetch-errors": "tsx scripts/fetch-errors.ts",
-    "docs-cli": "tsx scripts/documentation.ts",
-    "gen-code": "tsx scripts/gen-code.ts",
-    "gen-rsa": "tsx scripts/gen-rsa-keys.ts",
-    "fetch-and-gen": "pnpm run fetch-api && pnpm run gen-code",
-    "build": "tsx scripts/build-package.ts",
-    "build:jsr": "JSR=1 tsx scripts/build-package.ts"
-  },
-  "dependencies": {
-    "long": "5.2.3"
-  },
-  "devDependencies": {
-    "@mtcute/core": "workspace:^",
-    "@mtcute/node": "workspace:^",
-    "@mtcute/tl-utils": "workspace:^",
-    "@fuman/utils": "0.0.16",
-    "@fuman/fetch": "0.2.0",
-    "@types/js-yaml": "^4.0.5",
-    "cheerio": "1.0.0-rc.12",
-    "csv-parse": "^5.5.0",
-    "js-yaml": "4.1.0"
-  },
-  "typedoc": {
-    "entryPoint": "index.d.ts"
-  },
-  "fuman": {
-    "ownVersioning": true
-  }
+    "name": "@mtcute/tl",
+    "version": "218.0.0",
+    "description": "TL schema used for mtcute",
+    "author": "alina sireneva <alina@tei.su>",
+    "license": "MIT",
+    "scripts": {
+        "test": "tsc --noEmit --esModuleInterop tests/types.ts",
+        "fetch-mtp": "tsx scripts/fetch-mtp.ts",
+        "fetch-api": "tsx scripts/fetch-api.ts",
+        "fetch-errors": "tsx scripts/fetch-errors.ts",
+        "docs-cli": "tsx scripts/documentation.ts",
+        "gen-code": "tsx scripts/gen-code.ts",
+        "gen-rsa": "tsx scripts/gen-rsa-keys.ts",
+        "fetch-and-gen": "pnpm run fetch-api && pnpm run gen-code",
+        "build": "tsx scripts/build-package.ts",
+        "build:jsr": "JSR=1 tsx scripts/build-package.ts"
+    },
+    "dependencies": {
+        "long": "5.2.3"
+    },
+    "devDependencies": {
+        "@mtcute/core": "workspace:^",
+        "@mtcute/node": "workspace:^",
+        "@mtcute/tl-utils": "workspace:^",
+        "@fuman/utils": "0.0.16",
+        "@fuman/fetch": "0.2.0",
+        "@types/js-yaml": "^4.0.5",
+        "cheerio": "1.0.0-rc.12",
+        "csv-parse": "^5.5.0",
+        "js-yaml": "4.1.0"
+    },
+    "typedoc": {
+        "entryPoint": "index.d.ts"
+    },
+    "fuman": {
+        "ownVersioning": true
+    }
 }

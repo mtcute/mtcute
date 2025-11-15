@@ -428,8 +428,8 @@ export class User {
   /**
    * Maximum ID of stories this user has (or 0 if none)
    */
-  get storiesMaxId(): number {
-    return this.raw.storiesMaxId ?? 0
+  get storiesMaxId(): tl.RawRecentStory | null {
+    return this.raw.storiesMaxId ?? null
   }
 
   /**

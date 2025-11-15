@@ -9,8 +9,8 @@ import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 
 import { Photo } from '../media/photo.js'
 import { parsePeer } from '../peers/peer.js'
-import { StarGiftUnique } from '../premium/stars-gift-unique.js'
-import { StarGift } from '../premium/stars-gift.js'
+import { StarGiftUnique } from '../premium/star-gift-unique.js'
+import { StarGift } from '../premium/star-gift.js'
 
 /** Group was created */
 export interface ActionChatCreated {
@@ -379,8 +379,8 @@ export interface ActionPremiumGifted {
    */
   amount: number
 
-  /** Duration of the gifted subscription in months */
-  months: number
+  /** Duration of the gifted subscription in days */
+  days: number
 
   /** If the subscription was bought with crypto, information about it */
   crypto?: {
@@ -580,6 +580,12 @@ export interface ActionStarGiftSent {
   upgradeStars: tl.Long
   /** If the gift was upgraded, ID of the message where this happened */
   upgradeMsgId: number | null
+
+  /** Whether this gift was purchased on an auction */
+  fromAuction: boolean
+
+  /** Recipient of the gift */
+  toId: Peer | null
 
   /** ID of the related saved profile gift */
   savedId?: tl.Long
@@ -999,7 +1005,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         type: 'premium_gifted',
         currency: act.currency,
         amount: act.amount.toNumber(),
-        months: act.months,
+        days: act.days,
         crypto: act.cryptoAmount
           ? {
               currency: act.cryptoCurrency!,
@@ -1104,6 +1110,8 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         upgraded: act.upgraded!,
         upgradeStars: act.upgradeStars ?? Long.ZERO,
         upgradeMsgId: act.upgradeMsgId ?? null,
+        fromAuction: act.auctionAcquired!,
+        toId: act.toId ? parsePeer(act.toId, this._peers) : null,
 
         savedId: act.savedId,
         prepaidUpgradeHash: act.prepaidUpgradeHash ?? undefined,

@@ -1,7 +1,7 @@
 import type { MaybeArray } from '@fuman/utils'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/peers/peer.js'
-import type { InputStarGift } from '../../types/premium/stars-gift.js'
+import type { InputStarGift } from '../../types/premium/star-gift.js'
 import { parallelMap } from '@fuman/utils'
 import { assertTrue } from '../../../utils/type-assertions.js'
 import { resolvePeer } from '../users/resolve-peer.js'

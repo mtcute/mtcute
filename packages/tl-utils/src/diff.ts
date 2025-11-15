@@ -7,7 +7,11 @@ import { stringifyArgumentType } from './utils.js'
  * @param a  Entry A (field `old` in diff)
  * @param b  Entry B (field `new` in diff)
  */
-export function generateTlEntriesDifference(a: TlEntry, b: TlEntry): TlEntryDiff {
+export function generateTlEntriesDifference(a: TlEntry, b: TlEntry, options?: {
+  ignoreComments?: boolean
+}): TlEntryDiff {
+  const { ignoreComments = false } = options ?? {}
+
   if (a.kind !== b.kind || a.name !== b.name) {
     throw new Error('Incompatible entries')
   }
@@ -16,7 +20,7 @@ export function generateTlEntriesDifference(a: TlEntry, b: TlEntry): TlEntryDiff
     name: a.name,
   }
 
-  if (a.comment !== b.comment) {
+  if (!ignoreComments && a.comment !== b.comment) {
     diff.comment = {
       old: a.comment,
       new: b.comment,
@@ -89,7 +93,7 @@ export function generateTlEntriesDifference(a: TlEntry, b: TlEntry): TlEntryDiff
       }
     }
 
-    if (arg.comment !== oldArg.comment) {
+    if (!ignoreComments && arg.comment !== oldArg.comment) {
       diff.comment = {
         old: oldArg.comment,
         new: arg.comment,
@@ -120,7 +124,11 @@ export function generateTlEntriesDifference(a: TlEntry, b: TlEntry): TlEntryDiff
  * @param a  Entry A (field `old` in diff)
  * @param b  Entry B (field `new` in diff)
  */
-export function generateTlSchemasDifference(a: TlFullSchema, b: TlFullSchema): TlSchemaDiff {
+export function generateTlSchemasDifference(a: TlFullSchema, b: TlFullSchema, options?: {
+  ignoreComments?: boolean
+}): TlSchemaDiff {
+  const { ignoreComments = false } = options ?? {}
+
   // schemas already contain indexes, so we don't need to make our own
 
   const diff: TlSchemaDiff = {
@@ -186,7 +194,7 @@ export function generateTlSchemasDifference(a: TlFullSchema, b: TlFullSchema): T
 
     const other = b[kind][entry.name]
 
-    const entryDiff = generateTlEntriesDifference(entry, other)
+    const entryDiff = generateTlEntriesDifference(entry, other, { ignoreComments })
 
     if (entryDiff.id || entryDiff.generics || entryDiff.arguments) {
       diff[kind].modified.push(entryDiff)

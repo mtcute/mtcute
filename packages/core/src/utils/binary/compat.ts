@@ -225,6 +225,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
       return {
         ...obj,
         _: 'user',
+        storiesMaxId: obj.storiesMaxId ? { _: 'recentStory', maxId: obj.storiesMaxId } : undefined,
         emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
       }
     case 'channel_layer199':
@@ -232,6 +233,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
       return {
         ...obj,
         _: 'channel',
+        storiesMaxId: obj.storiesMaxId ? { _: 'recentStory', maxId: obj.storiesMaxId } : undefined,
         emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
       }
     case 'channelFull_layer211':
