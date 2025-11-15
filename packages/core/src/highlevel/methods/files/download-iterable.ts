@@ -155,7 +155,7 @@ export async function* downloadAsIterable(
         {
           _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
           // eslint-disable-next-line
-                    location: location as any,
+          location: location as any,
           offset: offset + chunkSize * chunk,
           limit: chunkSize,
         },
@@ -163,6 +163,7 @@ export async function* downloadAsIterable(
           dcId,
           kind: connectionKind,
           maxRetryCount: Infinity, // retry until explicitly aborted (or finished)
+          floodSleepThreshold: Infinity,
           abortSignal,
         },
       )
