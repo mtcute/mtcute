@@ -223,3 +223,82 @@ const tg = new TelegramClient({
       ]
     }
 })
+```
+
+## How to fix `better-sqlite3` issues?
+
+A very common issue with mtcute users under Node.js is the native bindings
+that come with the `better-sqlite3` library mtcute uses internally. Unfortunately,
+until `node:sqlite` is stable, we're stuck with this library.
+
+### Make sure `postinstall` scripts are allowed
+
+Starting with pnpm 10, `postinstall` scripts are no longer allowed by default.
+If you are using `pnpm`, check that your `pnpm-workspace.yaml` file contains:
+
+```yaml
+onlyBuiltDependencies:
+  - better-sqlite3
+```
+
+If it doesn't, add it and run `pnpm rebuild better-sqlite3`.
+
+### Try running `pnpm rebuild better-sqlite3`
+
+If you are getting an error similar to this:
+```sh
+Error: The module '.../better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 127. This version of Node.js requires
+NODE_MODULE_VERSION 115. Please try re-compiling or re-installing the module (for instance, using `npm rebuild` or `npm install`).
+    at Module._extensions..node (node:internal/modules/cjs/loader:1454:18)
+    at ... {
+  code: 'ERR_DLOPEN_FAILED'
+}
+```
+
+Chances are, you are using a newer Node.js version than the one `better-sqlite3` bindings are compiled for.
+
+Either use the same version as before, or run `pnpm rebuild better-sqlite3` to rebuild them.
+You can view a mapping of `NODE_MODULE_VERSION` values to actual Node.js versions [here](https://github.com/nodejs/node/blob/main/doc/abi_version_registry.json)
+
+### Try using LTS Node.js
+
+If you are having issues building the library, you can try using LTS Node.js version (20, 22, 24 as of writing).
+
+better-sqlite3 comes with pre-built binaries for LTS Node.js versions.
+This will download the necessary binaries automatically in its postinstall script,
+and you won't need to do anything.
+
+### Make sure all build-time dependencies are installed
+
+If you aren't using an LTS Node.js, you'll have to build it yourself.
+
+For better-sqlite3 to build correctly, you need `python3`, `make` and `gcc` to be installed.
+
+> yes, python, because `better-sqlite3` uses `node-gyp`, and `node-gyp` uses python 😭
+
+Depending on your OS/distro, you may need to run one of the following:
+```sh
+# Windows
+winget install Microsoft.VisualStudio.2022.BuildTools Python.Python.3.11
+# macOS
+xcode-select --install # install xcode command-line tools
+brew install python make
+
+# nix
+nix-shell -p python3 gnumake gcc
+
+# Ubuntu/Debian
+sudo apt install python3 make gcc
+# Arch Linux
+sudo pacman -S python make gcc
+# Fedora
+sudo dnf install python3 make gcc
+# CentOS/RHEL
+sudo yum install python3 make gcc
+# openSUSE
+sudo zypper install python3 make gcc
+# Alpine Linux
+sudo apk add python3 make gcc
+```
