@@ -85,7 +85,7 @@ export default {
       './.config/typedoc/plugin-umami.js',
       './.config/typedoc/plugin-fix-cfpages.js',
     ],
-    gitRemote: 'https://github.com/mtcute/mtcute',
+    sourceLinkTemplate: 'https://github.com/mtcute/mtcute/blob/{gitRevision}/{path}#L{line}',
   },
   viteConfig: '.config/vite.build.ts',
 }

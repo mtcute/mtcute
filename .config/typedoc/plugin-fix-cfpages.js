@@ -1,15 +1,14 @@
-import { DefaultTheme } from 'typedoc'
+import { KindRouter, ReflectionKind } from 'typedoc'
 
-class FixedTheme extends DefaultTheme {
+// (tldr: /functions/ is treated incorrectly on cloudflare pages, rename it to /funcs/)
+class FixedKindRouter extends KindRouter {
   constructor(renderer) {
     super(renderer)
-    this.mappings.find(it => it.directory === 'functions').directory = 'funcs'
+    this.directories.set(ReflectionKind.Function, 'funcs')
   }
 }
 
+/** @param {import('typedoc').Application} app */
 export function load(app) {
-  // https://github.com/TypeStrong/typedoc/issues/2111
-  // https://github.com/cloudflare/workers-sdk/issues/2240
-  // (tldr: /functions/ is treated incorrectly on cloudflare pages)
-  app.renderer.themes.set('default', FixedTheme)
+  app.renderer.routers.set('kind', FixedKindRouter)
 }
