@@ -118,11 +118,11 @@ refer to [Transport](../topics/transport.html#http-s-proxy-transport) documentat
 
 So far we've only discussed the `.start` helper method.
 
-While they do provide some flexibility and convenience, they are not always
-suitable for every use case. For example, when building a web application,
-you might want to use a different way to ask for user input.
+While it does provide some flexibility and convenience, it is intended
+for handling *interactive* authorization flows, e.g. in cli or web apps.
 
-In that case, you can use the underlying sign-in methods directly
+If you are building some kind of headless service, you will most likely
+want to use the underlying authorization methods directly, as described below.
 
 <!-- TODO link to full example -->
 

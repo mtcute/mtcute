@@ -29,9 +29,9 @@ import { signIn } from './sign-in.js'
  * All parameters are `MaybeDynamic<T>`, meaning you
  * can either supply `T`, or a function that returns `MaybePromise<T>`
  *
- * This method is intended for simple and fast use in automated
- * scripts and bots. If you are developing a custom client,
- * you'll probably need to use other auth methods.
+ * This method is intended for *interactive* login.
+ * If you are building some kind of headless service, you will most likely
+ * want to use the underlying authorization methods directly.
  */
 export async function start(
   client: ITelegramClient,
