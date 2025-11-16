@@ -68,6 +68,7 @@ function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
     case 'starGift_layer206':
     case 'starGift_layer209':
     case 'starGift_layer211':
+    case 'starGift_layer216':
       return replaceType(obj, 'starGift')
     default:
       return obj
@@ -127,6 +128,7 @@ function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessage
       }
     case 'messageActionStarGift_layer197':
     case 'messageActionStarGift_layer211':
+    case 'messageActionStarGift_layer216':
       return {
         ...obj,
         _: 'messageActionStarGift',
@@ -141,6 +143,18 @@ function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessage
           _: 'chatTheme',
           emoticon: obj.emoticon,
         },
+      }
+    case 'messageActionGiftCode_layer216':
+      return {
+        ...obj,
+        _: 'messageActionGiftCode',
+        days: obj.months / 30,
+      }
+    case 'messageActionGiftPremium_layer216':
+      return {
+        ...obj,
+        _: 'messageActionGiftPremium',
+        days: obj.months / 30,
       }
     default:
       return obj
@@ -164,6 +178,7 @@ function mapCompatMessage(obj: tlCompat.TypeMessage): tl.TypeMessage {
   switch (obj._) {
     case 'message_layer199':
     case 'message_layer204':
+    case 'message_layer216':
       return {
         ...obj,
         _: 'message',
@@ -195,6 +210,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'starGift_layer206':
     case 'starGift_layer209':
     case 'starGift_layer211':
+    case 'starGift_layer216':
       return mapCompatStarGift(obj)
     case 'emojiStatus_layer197':
     case 'emojiStatusUntil_layer214':
@@ -212,6 +228,9 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'messageActionPaidMessagesPrice_layer203':
     case 'messageActionSetChatTheme_layer211':
     case 'messageActionStarGiftUnique_layer214':
+    case 'messageActionGiftCode_layer216':
+    case 'messageActionGiftPremium_layer216':
+    case 'messageActionStarGift_layer216':
       return mapCompatMessageAction(obj)
     case 'userFull_layer199':
       return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
@@ -222,6 +241,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'userFull_layer214':
       return replaceType(obj, 'userFull')
     case 'user_layer199':
+    case 'user_layer216':
       return {
         ...obj,
         _: 'user',
@@ -230,6 +250,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
       }
     case 'channel_layer199':
     case 'channel_layer203':
+    case 'channel_layer216':
       return {
         ...obj,
         _: 'channel',
@@ -244,6 +265,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
       return { _: 'phoneCallDiscardReasonMissed' }
     case 'message_layer199':
     case 'message_layer204':
+    case 'message_layer216':
     case 'messageService_layer204':
       return mapCompatMessage(obj)
     case 'messageReplyHeader_layer206':
@@ -253,6 +275,13 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
         ...obj,
         _: 'storyItem',
         media: mapCompatMessageMedia(obj.media),
+      }
+    case 'todoCompletion_layer216':
+      return {
+        _: 'todoCompletion',
+        date: obj.date,
+        completedBy: { _: 'peerUser', userId: obj.completedBy },
+        id: obj.id,
       }
     case 'premiumGiftOption_layer199':
       // can only be present in userFull_layer199, but we strip the field containing that

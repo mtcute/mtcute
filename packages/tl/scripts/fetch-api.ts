@@ -267,7 +267,6 @@ async function generateCompatSchema(oldLayer: number, oldSchema: TlFullSchema, d
 
   while (queue.length) {
     const it = queue.pop()!
-    processedTypes.add(it)
 
     const entry = oldSchema.classes[it]
     if (!entry) {
@@ -278,6 +277,8 @@ async function generateCompatSchema(oldLayer: number, oldSchema: TlFullSchema, d
     if (diffedTypes.has(it) && !processedTypes.has(it)) {
       typesToAdd.add(it)
     }
+
+    processedTypes.add(it)
 
     for (const arg of entry.arguments) {
       const type = arg.type
@@ -469,7 +470,7 @@ async function main() {
 
   console.log('Writing diff to file...')
   const oldSchema = unpackTlSchema(JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8')) as TlPackedSchema)
-  const diff = generateTlSchemasDifference(oldSchema[0], resultSchema, { ignoreComments: true })
+  const diff = generateTlSchemasDifference(oldSchema[0], resultSchema)
   await writeFile(
     API_SCHEMA_DIFF_JSON_FILE,
     JSON.stringify(
