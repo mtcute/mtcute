@@ -55,7 +55,7 @@ export class StarGift {
   }
 
   /** If this gift is currently sold through an auction, info about that auction. `null` otherwise */
-  get action(): {
+  get auction(): {
     slug: string
     giftsPerRound: number
   } | null {
@@ -65,6 +65,11 @@ export class StarGift {
       slug: this.raw.auctionSlug,
       giftsPerRound: this.raw.giftsPerRound,
     }
+  }
+
+  /** @deprecated Use {@link auction} instead (typo in older versions) */
+  get action(): this['auction'] {
+    return this.auction
   }
 
   /** Whether this gift includes a peer color that can be applied to user's profile */
