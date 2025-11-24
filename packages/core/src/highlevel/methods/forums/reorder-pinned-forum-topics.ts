@@ -1,6 +1,6 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { ForumTopic, InputPeerLike } from '../../types/index.js'
-import { resolveChannel } from '../users/resolve-peer.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Reorder pinned forum topics
@@ -26,8 +26,8 @@ export async function reorderPinnedForumTopics(
 ): Promise<void> {
   const { chatId, order, force } = params
   await client.call({
-    _: 'channels.reorderPinnedForumTopics',
-    channel: await resolveChannel(client, chatId),
+    _: 'messages.reorderPinnedForumTopics',
+    peer: await resolvePeer(client, chatId),
     order: order.map(it => (typeof it === 'number' ? it : it.id)),
     force,
   })
