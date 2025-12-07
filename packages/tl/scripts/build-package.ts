@@ -118,5 +118,22 @@ if (process.env.JSR) {
   }
   await fsp.writeFile(resolve(outDir, 'deno.json'), JSON.stringify(denoJson, null, 2))
 } else {
+  packageJson.main = './index.js'
+  packageJson.types = './index.d.ts'
+  packageJson.exports = {
+    '.': {
+      types: './index.d.ts',
+      default: './index.js',
+    },
+    './compat': {
+      types: './compat/index.d.ts',
+      default: './compat/reader.js',
+    },
+    './binary/reader.js': './binary/reader.js',
+    './binary/writer.js': './binary/writer.js',
+    './binary/rsa-keys.js': './binary/rsa-keys.js',
+    './package.json': './package.json',
+  }
+  
   await fsp.writeFile(resolve(outDir, 'package.json'), JSON.stringify(packageJson, null, 2))
 }
