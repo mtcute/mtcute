@@ -1,4 +1,4 @@
-/* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument */
+/* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument, style/max-len */
 import type { tl } from '@mtcute/tl'
 import type Long from 'long'
 import type { RpcCallOptions } from '../network/index.js'
@@ -115,6 +115,7 @@ import { addContact } from './methods/contacts/add-contact.js'
 import { deleteContacts } from './methods/contacts/delete-contacts.js'
 import { getContacts } from './methods/contacts/get-contacts.js'
 import { importContacts } from './methods/contacts/import-contacts.js'
+import { setContactNote } from './methods/contacts/set-contact-note.js'
 import { createFolder } from './methods/dialogs/create-folder.js'
 import { deleteFolder } from './methods/dialogs/delete-folder.js'
 import { editFolder } from './methods/dialogs/edit-folder.js'
@@ -418,7 +419,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   checkPassword(
     options: string | {
-      /** Your Two-Step verification password */
+    /** Your Two-Step verification password */
       password: string
 
       /** Existing response from `account.getPassword`, if available (to avoid extra API calls) */
@@ -441,7 +442,7 @@ export interface TelegramClient extends ITelegramClient {
    * When you log out, you can immediately log back in using
    * the same {@link TelegramClient} instance.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @returns  On success, `true` is returned
    */
@@ -456,7 +457,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   recoverPassword(
     params: {
-      /** The recovery code sent via email */
+    /** The recovery code sent via email */
       recoveryCode: string
     }): Promise<User>
   /**
@@ -469,7 +470,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   resendCode(
     params: {
-      /** Phone number in international format */
+    /** Phone number in international format */
       phone: string
 
       /** Confirmation code identifier from {@link SentCode} */
@@ -488,7 +489,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   sendCode(
     params: {
-      /** Phone number in international format */
+    /** Phone number in international format */
       phone: string
 
       /** Saved future auth tokens, if any */
@@ -511,7 +512,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Authorize a bot using its token issued by [@BotFather](//t.me/BotFather)
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param token  Bot token issued by BotFather
    * @returns  Bot's {@link User} object
@@ -529,11 +530,11 @@ export interface TelegramClient extends ITelegramClient {
    */
   signInQr(
     params: {
-      /**
-       * Function that will be called whenever the login URL is changed.
-       *
-       * The app is expected to display `url` as a QR code to the user
-       */
+    /**
+     * Function that will be called whenever the login URL is changed.
+     *
+     * The app is expected to display `url` as a QR code to the user
+     */
       onUrlUpdated: (url: string, expires: Date) => void
 
       /**
@@ -567,7 +568,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   signIn(
     params: {
-      /** Phone number in international format */
+    /** Phone number in international format */
       phone: string
       /** Code identifier from {@link sendCode} */
       phoneCodeHash: string
@@ -584,17 +585,17 @@ export interface TelegramClient extends ITelegramClient {
    * > **Note**: Using this method assumes that you
    * > are using a test DC in `primaryDc` parameter.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param params  Additional parameters
    */
   startTest(
     params?: {
-      /**
-       * Whether to log out if current session is logged in.
-       *
-       * @default  false.
-       */
+    /**
+     * Whether to log out if current session is logged in.
+     *
+     * @default  false.
+     */
       logout?: boolean
 
       /**
@@ -619,22 +620,22 @@ export interface TelegramClient extends ITelegramClient {
    * All parameters are `MaybeDynamic<T>`, meaning you
    * can either supply `T`, or a function that returns `MaybePromise<T>`
    *
-   * This method is intended for simple and fast use in automated
-   * scripts and bots. If you are developing a custom client,
-   * you'll probably need to use other auth methods.
+   * This method is intended for *interactive* login.
+   * If you are building some kind of headless service, you will most likely
+   * want to use the underlying authorization methods directly.
    * **Available**: ✅ both users and bots
    *
    */
   start(
     params: {
-      /**
-       * String session exported using {@link TelegramClient.exportSession}.
-       *
-       * This simply calls {@link TelegramClient.importSession} before anything else.
-       *
-       * Note that passed session will be ignored in case storage already
-       * contains authorization.
-       */
+    /**
+     * String session exported using {@link TelegramClient.exportSession}.
+     *
+     * This simply calls {@link TelegramClient.importSession} before anything else.
+     *
+     * Note that passed session will be ignored in case storage already
+     * contains authorization.
+     */
       session?: string | InputStringSessionData
 
       /**
@@ -717,7 +718,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Send an answer to a callback query.
    *
-   * **Available**: 🤖 bots only
+   * **Available**: 👤 users only
    *
    * @param queryId  ID of the callback query, or the query itself
    * @param params  Parameters of the answer
@@ -725,12 +726,12 @@ export interface TelegramClient extends ITelegramClient {
   answerCallbackQuery(
     queryId: Long | CallbackQuery,
     params?: {
-      /**
-       * Maximum amount of time in seconds for which
-       * this result can be cached by the client (not server!).
-       *
-       * @default  0
-       */
+    /**
+     * Maximum amount of time in seconds for which
+     * this result can be cached by the client (not server!).
+     *
+     * @default  0
+     */
       cacheTime?: number
 
       /**
@@ -762,7 +763,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Answer an inline query.
    *
-   * **Available**: 🤖 bots only
+   * **Available**: 👤 users only
    *
    * @param queryId  Inline query ID
    * @param results  Results of the query
@@ -772,12 +773,12 @@ export interface TelegramClient extends ITelegramClient {
     queryId: tl.Long | InlineQuery,
     results: InputInlineResult[],
     params?: {
-      /**
-       * Maximum number of time in seconds that the results of the
-       * query may be cached on the server for.
-       *
-       * @default  300
-       */
+    /**
+     * Maximum number of time in seconds that the results of the
+     * query may be cached on the server for.
+     *
+     * @default  300
+     */
       cacheTime?: number
 
       /**
@@ -828,9 +829,9 @@ export interface TelegramClient extends ITelegramClient {
        * the chat where they wanted to use the bot's inline capabilities
        */
       switchPm?: {
-        /**
-         * Text of the button
-         */
+      /**
+       * Text of the button
+       */
         text: string
 
         /**
@@ -844,9 +845,9 @@ export interface TelegramClient extends ITelegramClient {
        * list with the specified text, that switches the user to the specified bot web app.
        */
       switchWebview?: {
-        /**
-         * Text of the button
-         */
+      /**
+       * Text of the button
+       */
         text: string
 
         /**
@@ -858,14 +859,14 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Answer a pre-checkout query.
    *
-   * **Available**: 🤖 bots only
+   * **Available**: 👤 users only
    *
    * @param queryId  Pre-checkout query ID
    */
   answerPreCheckoutQuery(
     queryId: tl.Long | PreCheckoutQuery,
     params?: {
-      /** If pre-checkout is rejected, error message to show to the user */
+    /** If pre-checkout is rejected, error message to show to the user */
       error?: string
     }): Promise<void>
   /**
@@ -874,16 +875,16 @@ export interface TelegramClient extends ITelegramClient {
    * Does the same as passing `null` to  {@link setMyCommands}
    *
    * Learn more about scopes in the [Bot API docs](https://core.telegram.org/bots/api#botcommandscope)
-   * **Available**: 🤖 bots only
+   * **Available**: 👤 users only
    *
    */
   deleteMyCommands(
     params?: {
-      /**
-       * Scope of the commands.
-       *
-       * @default  `BotScope.default_` (i.e. `botCommandScopeDefault`)
-       */
+    /**
+     * Scope of the commands.
+     *
+     * @default  `BotScope.default_` (i.e. `botCommandScopeDefault`)
+     */
       scope?: tl.TypeBotCommandScope | BotCommands.IntermediateScope
 
       /**
@@ -893,15 +894,15 @@ export interface TelegramClient extends ITelegramClient {
     }): Promise<void>
   /**
    * Gets information about a bot the current uzer owns (or the current bot)
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   getBotInfo(
     params: {
-      /**
-       * When called by a user, a bot the user owns must be specified.
-       * When called by a bot, must be empty
-       */
+    /**
+     * When called by a user, a bot the user owns must be specified.
+     * When called by a bot, must be empty
+     */
       bot?: InputPeerLike
 
       /**
@@ -912,7 +913,7 @@ export interface TelegramClient extends ITelegramClient {
     }): Promise<tl.bots.RawBotInfo>
   /**
    * Fetches the menu button set for the given user.
-   * **Available**: 🤖 bots only
+   * **Available**: 👤 users only
    *
    */
   getBotMenuButton(user: InputPeerLike): Promise<tl.TypeBotMenuButton>
@@ -926,7 +927,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   getCallbackAnswer(
     params: InputMessageId & {
-      /** Data contained in the button */
+    /** Data contained in the button */
       data: string | Uint8Array
 
       /**
@@ -963,18 +964,18 @@ export interface TelegramClient extends ITelegramClient {
     }): Promise<tl.messages.TypeBotCallbackAnswer>
   /**
    * Get high scores of a game
-   * **Available**: 🤖 bots only
+   * **Available**: 👤 users only
    *
    */
   getGameHighScores(
     params: InputMessageId & {
-      /** ID of the user to find high scores for */
+    /** ID of the user to find high scores for */
       userId?: InputPeerLike
     }): Promise<GameHighScore[]>
   /**
    * Get high scores of a game from an inline message
    *
-   * **Available**: 🤖 bots only
+   * **Available**: 👤 users only
    *
    * @param messageId  ID of the inline message containing the game
    * @param userId  ID of the user to find high scores for
@@ -987,16 +988,16 @@ export interface TelegramClient extends ITelegramClient {
    * and user language. If they are not set, empty set is returned.
    *
    * Learn more about scopes in the [Bot API docs](https://core.telegram.org/bots/api#botcommandscope)
-   * **Available**: 🤖 bots only
+   * **Available**: 👤 users only
    *
    */
   getMyCommands(
     params?: {
-      /**
-       * Scope of the commands.
-       *
-       * @default  `BotScope.default_` (i.e. `botCommandScopeDefault`)
-       */
+    /**
+     * Scope of the commands.
+     *
+     * @default  `BotScope.default_` (i.e. `botCommandScopeDefault`)
+     */
       scope?: tl.TypeBotCommandScope | BotCommands.IntermediateScope
 
       /**
@@ -1011,7 +1012,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   openWebview(
     params: {
-      /** Information about the webview to open */
+    /** Information about the webview to open */
       webview: InputWebview
 
       /**
@@ -1032,8 +1033,8 @@ export interface TelegramClient extends ITelegramClient {
        * Each value should be a string (hex-encoded RGB, no alpha)
        */
       theme?: tl.TypeDataJSON | {
-        // https://corefork.telegram.org/api/bots/webapps#theme-parameters
-        /** Background color */
+      // https://corefork.telegram.org/api/bots/webapps#theme-parameters
+      /** Background color */
         bg_color?: string
         /** Secondary background color */
         secondary_bg_color?: string
@@ -1093,7 +1094,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Prepare an inline message result to be sent later via the
    * `shareMessage` [mini-app api method](https://core.telegram.org/bots/webapps#initializing-mini-apps).
-   * **Available**: 🤖 bots only
+   * **Available**: 👤 users only
    *
    */
   prepareInlineMessage(
@@ -1108,7 +1109,7 @@ export interface TelegramClient extends ITelegramClient {
        * Note that this is just a hint for the client, and the client is free to ignore it.
        */
       filter?: tl.TypeInlineQueryPeerType[] | {
-        /** private chat with the bot itself */
+      /** private chat with the bot itself */
         botSelf?: boolean
         /** private chats */
         private?: boolean
@@ -1124,15 +1125,15 @@ export interface TelegramClient extends ITelegramClient {
     }): Promise<tl.messages.TypeBotPreparedInlineMessage>
   /**
    * Sets information about a bot the current uzer owns (or the current bot)
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   setBotInfo(
     params: {
-      /**
-       * When called by a user, a bot the user owns must be specified.
-       * When called by a bot, must be empty
-       */
+    /**
+     * When called by a user, a bot the user owns must be specified.
+     * When called by a bot, must be empty
+     */
       bot?: InputPeerLike
 
       /**
@@ -1152,7 +1153,7 @@ export interface TelegramClient extends ITelegramClient {
     }): Promise<void>
   /**
    * Sets a menu button for the given user.
-   * **Available**: 🤖 bots only
+   * **Available**: 👤 users only
    *
    */
   setBotMenuButton(
@@ -1161,14 +1162,14 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Set a score of a user in a game
    *
-   * **Available**: 🤖 bots only
+   * **Available**: 👤 users only
    *
    * @param params
    * @returns  The modified message
    */
   setGameScore(
     params: InputMessageId & {
-      /** ID of the user who has scored */
+    /** ID of the user who has scored */
       userId: InputPeerLike
 
       /** The new score (must be >0) */
@@ -1196,13 +1197,13 @@ export interface TelegramClient extends ITelegramClient {
    * Set a score of a user in a game contained in
    * an inline message
    *
-   * **Available**: 🤖 bots only
+   * **Available**: 👤 users only
    *
    * @param params
    */
   setInlineGameScore(
     params: {
-      /** ID of the inline message */
+    /** ID of the inline message */
       messageId: string | tl.TypeInputBotInlineMessageID
       /** ID of the user who has scored */
       userId: InputPeerLike
@@ -1224,16 +1225,16 @@ export interface TelegramClient extends ITelegramClient {
    * Set or delete commands for the current bot and the given scope
    *
    * Learn more about scopes in the [Bot API docs](https://core.telegram.org/bots/api#botcommandscope)
-   * **Available**: 🤖 bots only
+   * **Available**: 👤 users only
    *
    */
   setMyCommands(
     params: {
-      /**
-       * New list of bot commands for the given scope.
-       *
-       * Pass empty array or `null` to delete them.
-       */
+    /**
+     * New list of bot commands for the given scope.
+     *
+     * Pass empty array or `null` to delete them.
+     */
       commands: tl.RawBotCommand[] | null
 
       /**
@@ -1250,12 +1251,12 @@ export interface TelegramClient extends ITelegramClient {
     }): Promise<void>
   /**
    * Sets the default chat permissions for the bot in the supergroup or channel.
-   * **Available**: 🤖 bots only
+   * **Available**: 👤 users only
    *
    */
   setMyDefaultRights(
     params: {
-      /** Whether to target groups or channels. */
+    /** Whether to target groups or channels. */
       target: 'channel' | 'group'
       /** The default chat permissions. */
       rights: Omit<tl.RawChatAdminRights, '_'>
@@ -1267,7 +1268,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   toggleEmojiStatusPermission(
     params: {
-      /** Bot to which the permission should be granted/revoked */
+    /** Bot to which the permission should be granted/revoked */
       userId: InputPeerLike
       /** Whether to grant or revoke permission */
       allow: boolean
@@ -1285,12 +1286,12 @@ export interface TelegramClient extends ITelegramClient {
     chatId: InputPeerLike,
     users: MaybeArray<InputPeerLike>,
     params: {
-      /**
-       * Number of old messages to be forwarded (0-100).
-       * Only applicable to legacy groups, ignored for supergroups and channels
-       *
-       * @default 100
-       */
+    /**
+     * Number of old messages to be forwarded (0-100).
+     * Only applicable to legacy groups, ignored for supergroups and channels
+     *
+     * @default 100
+     */
       forwardCount?: number
     }): Promise<tl.RawMissingInvitee[]>
   /**
@@ -1309,13 +1310,13 @@ export interface TelegramClient extends ITelegramClient {
    * When banning a channel, the user won't be able to use
    * any of their channels to post until the ban is lifted.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @returns  Service message about removed user, if one was generated.
    */
   banChatMember(
     params: {
-      /** Chat ID */
+    /** Chat ID */
       chatId: InputPeerLike
 
       /** ID of the user/channel to ban */
@@ -1338,9 +1339,9 @@ export interface TelegramClient extends ITelegramClient {
    */
   createChannel(
     params: {
-      /**
-       * Channel title
-       */
+    /**
+     * Channel title
+     */
       title: string
 
       /**
@@ -1358,9 +1359,9 @@ export interface TelegramClient extends ITelegramClient {
    */
   createGroup(
     params: {
-      /**
-       * Group title
-       */
+    /**
+     * Group title
+     */
       title: string
 
       /**
@@ -1385,9 +1386,9 @@ export interface TelegramClient extends ITelegramClient {
    */
   createSupergroup(
     params: {
-      /**
-       * Supergroup title
-       */
+    /**
+     * Supergroup title
+     */
       title: string
 
       /**
@@ -1430,7 +1431,7 @@ export interface TelegramClient extends ITelegramClient {
    *
    * You must be an administrator and have the appropriate permissions.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID or username
    */
@@ -1451,14 +1452,14 @@ export interface TelegramClient extends ITelegramClient {
   deleteHistory(
     chat: InputPeerLike,
     params?: {
-      /**
-       * Deletion mode. Can be:
-       * - `delete`: delete messages (only for yourself) AND the dialog itself
-       * - `clear`: delete messages (only for yourself), but keep the dialog in the list
-       * - `revoke`: delete messages for all users
-       *
-       * @default  'delete'
-       */
+    /**
+     * Deletion mode. Can be:
+     * - `delete`: delete messages (only for yourself) AND the dialog itself
+     * - `clear`: delete messages (only for yourself), but keep the dialog in the list
+     * - `revoke`: delete messages for all users
+     *
+     * @default  'delete'
+     */
       mode: 'delete' | 'clear' | 'revoke'
 
       /**
@@ -1475,7 +1476,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   deleteUserHistory(
     params: {
-      /** Chat ID */
+    /** Chat ID */
       chatId: InputPeerLike
       /** User/channel ID whose messages to delete */
       participantId: InputPeerLike
@@ -1488,12 +1489,12 @@ export interface TelegramClient extends ITelegramClient {
     }): Promise<void>
   /**
    * Edit supergroup/channel admin rights of a user.
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   editAdminRights(
     params: {
-      /** Chat ID */
+    /** Chat ID */
       chatId: InputPeerLike
       /** User ID */
       userId: InputPeerLike
@@ -1520,9 +1521,9 @@ export interface TelegramClient extends ITelegramClient {
   getChatEventLog(
     chatId: InputPeerLike,
     params?: {
-      /**
-       * Search query
-       */
+    /**
+     * Search query
+     */
       query?: string
 
       /**
@@ -1571,7 +1572,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Get information about a single chat member
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID or username
    * @param userId  User ID, username, phone number, `"me"` or `"self"`
@@ -1579,7 +1580,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   getChatMember(
     params: {
-      /** Chat ID or username */
+    /** Chat ID or username */
       chatId: InputPeerLike
       /** User ID, username, phone number, `"me"` or `"self"` */
       userId: InputPeerLike
@@ -1589,7 +1590,7 @@ export interface TelegramClient extends ITelegramClient {
    *
    * You can retrieve up to 200 members at once
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID or username
    * @param params  Additional parameters
@@ -1597,14 +1598,14 @@ export interface TelegramClient extends ITelegramClient {
   getChatMembers(
     chatId: InputPeerLike,
     params?: {
-      /**
-       * Search query to filter members by their display names and usernames
-       *
-       * > **Note**: Only used for these values of `filter`:
-       * > `all, banned, restricted, mention, contacts`
-       *
-       * @default  `''` (empty string)
-       */
+    /**
+     * Search query to filter members by their display names and usernames
+     *
+     * > **Note**: Only used for these values of `filter`:
+     * > `all, banned, restricted, mention, contacts`
+     *
+     * @default  `''` (empty string)
+     */
       query?: string
 
       /**
@@ -1735,11 +1736,11 @@ export interface TelegramClient extends ITelegramClient {
   iterChatEventLog(
     chatId: InputPeerLike,
     params?: Parameters<typeof getChatEventLog>[2] & {
-      /**
-       * Total number of events to return.
-       *
-       * @default  Infinity
-       */
+    /**
+     * Total number of events to return.
+     *
+     * @default  Infinity
+     */
       limit?: number
 
       /**
@@ -1765,12 +1766,12 @@ export interface TelegramClient extends ITelegramClient {
   iterChatMembers(
     chatId: InputPeerLike,
     params?: Parameters<typeof getChatMembers>[2] & {
-      /**
-       * Chunk size, which will be passed as `limit` parameter
-       * to {@link getChatMembers}. Usually you shouldn't care about this.
-       *
-       * @default  `200`
-       */
+    /**
+     * Chunk size, which will be passed as `limit` parameter
+     * to {@link getChatMembers}. Usually you shouldn't care about this.
+     *
+     * @default  `200`
+     */
       chunkSize?: number
     }): AsyncIterableIterator<ChatMember>
   /**
@@ -1798,7 +1799,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   kickChatMember(
     params: {
-      /** Chat ID */
+    /** Chat ID */
       chatId: InputPeerLike
       /** User ID */
       userId: InputPeerLike
@@ -1806,16 +1807,16 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Leave a group chat, supergroup or channel
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID or username
    */
   leaveChat(
     chatId: InputPeerLike,
     params?: {
-      /**
-       * Whether to clear history after leaving (only for legacy group chats)
-       */
+    /**
+     * Whether to clear history after leaving (only for legacy group chats)
+     */
       clear?: boolean
     }): Promise<void>
   /**
@@ -1866,12 +1867,12 @@ export interface TelegramClient extends ITelegramClient {
     order: string[]): Promise<void>
   /**
    * Restrict a user in a supergroup.
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   restrictChatMember(
     params: {
-      /** Chat ID */
+    /** Chat ID */
       chatId: InputPeerLike
 
       /** User ID */
@@ -1914,11 +1915,11 @@ export interface TelegramClient extends ITelegramClient {
    */
   setChatColor(
     params: {
-      /**
-       * Peer where to update the color.
-       *
-       * By default will change the color for the current user
-       */
+    /**
+     * Peer where to update the color.
+     *
+     * By default will change the color for the current user
+     */
       peer?: InputPeerLike
 
       /**
@@ -1943,8 +1944,6 @@ export interface TelegramClient extends ITelegramClient {
       /**
        * Whether to set this color for the profile
        * header instead of chat name/replies.
-       *
-       * Currently only available for the current user.
        */
       forProfile?: boolean
     }): Promise<void>
@@ -1953,7 +1952,7 @@ export interface TelegramClient extends ITelegramClient {
    *
    * You must be an administrator in the chat and have appropriate permissions.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID or username
    * @param restrictions
@@ -1970,7 +1969,7 @@ export interface TelegramClient extends ITelegramClient {
    *
    * You must be an administrator and have the appropriate permissions.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID or username
    * @param description  New chat description, 0-255 characters
@@ -1982,12 +1981,12 @@ export interface TelegramClient extends ITelegramClient {
    * Set a new chat photo or video.
    *
    * You must be an administrator and have the appropriate permissions.
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   setChatPhoto(
     params: {
-      /** Chat ID or username */
+    /** Chat ID or username */
       chatId: InputPeerLike
 
       /** Media type (photo or video) */
@@ -2007,7 +2006,7 @@ export interface TelegramClient extends ITelegramClient {
    *
    * You must be an administrator and have the appropriate permissions.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID or username
    * @param title  New chat title, 1-255 characters
@@ -2067,7 +2066,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   toggleFragmentUsername(
     params: {
-      /** Peer ID whose username to toggle */
+    /** Peer ID whose username to toggle */
       peerId: InputPeerLike
 
       /**
@@ -2121,12 +2120,12 @@ export interface TelegramClient extends ITelegramClient {
    * just allows the user to join the chat again, if they want.
    *
    * This method acts as a no-op in case a legacy group is passed.
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   unbanChatMember(
     params: {
-      /** Chat ID */
+    /** Chat ID */
       chatId: InputPeerLike
 
       /** User/channel ID who should be unbanned */
@@ -2140,12 +2139,12 @@ export interface TelegramClient extends ITelegramClient {
    * just allows the user to join the chat again, if they want.
    *
    * This method acts as a no-op in case a legacy group is passed.
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   unrestrictChatMember(
     params: {
-      /** Chat ID */
+    /** Chat ID */
       chatId: InputPeerLike
 
       /** User/channel ID who should be unbanned */
@@ -2158,7 +2157,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   addContact(
     params: {
-      /** User ID, username or phone number */
+    /** User ID, username or phone number */
       userId: InputPeerLike
 
       /**
@@ -2183,6 +2182,11 @@ export interface TelegramClient extends ITelegramClient {
        * @default false
        */
       sharePhone?: boolean
+
+      /**
+       * Note to the contact
+       */
+      note?: InputText
     }): Promise<User>
   /**
    * Delete one or more contacts from your Telegram contacts list
@@ -2210,6 +2214,15 @@ export interface TelegramClient extends ITelegramClient {
    */
   importContacts(
     contacts: PartialOnly<Omit<tl.RawInputPhoneContact, '_'>, 'clientId'>[]): Promise<tl.contacts.RawImportedContacts>
+  /**
+   * Set a note for a contact
+   *
+   * @param userId  ID of the user to set the note for
+   * @param note  Note text
+   */
+  setContactNote(
+    userId: InputPeerLike,
+    note: InputText): Promise<void>
   /**
    * Create a folder from given parameters
    *
@@ -2240,12 +2253,12 @@ export interface TelegramClient extends ITelegramClient {
    */
   editFolder(
     params: {
-      /**
-       * Folder, folder ID or name.
-       * Note that passing an ID or name will require re-fetching all folders,
-       * and passing name might affect not the right folder if you have multiple
-       * with the same name.
-       */
+    /**
+     * Folder, folder ID or name.
+     * Note that passing an ID or name will require re-fetching all folders,
+     * and passing name might affect not the right folder if you have multiple
+     * with the same name.
+     */
       folder: tl.RawDialogFilter | number | string
 
       /** Modification to be applied to this folder */
@@ -2276,7 +2289,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   findFolder(
     params: {
-      /** Folder title */
+    /** Folder title */
       title?: string
       /** Folder emoji */
       emoji?: string
@@ -2320,9 +2333,9 @@ export interface TelegramClient extends ITelegramClient {
    */
   iterDialogs(
     params?: {
-      /**
-       * Offset message date used as an anchor for pagination.
-       */
+    /**
+     * Offset message date used as an anchor for pagination.
+     */
       offsetDate?: Date | number
 
       /**
@@ -2429,7 +2442,7 @@ export interface TelegramClient extends ITelegramClient {
   joinChatlist(
     link: string,
     params?: {
-      /** Chats to join from the chatlist (all by default) */
+    /** Chats to join from the chatlist (all by default) */
       peers?: MaybeArray<InputPeerLike>
     }): Promise<tl.RawDialogFilterChatlist>
   /**
@@ -2519,7 +2532,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Normalize an {@link InputMediaLike} to `InputMedia`,
    * uploading the file if needed.
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   _normalizeInputMedia(
@@ -2543,9 +2556,9 @@ export interface TelegramClient extends ITelegramClient {
    */
   uploadFile(
     params: {
-      /**
-       * Upload file source.
-       */
+    /**
+     * Upload file source.
+     */
       file: UploadFileLike
 
       /**
@@ -2622,7 +2635,7 @@ export interface TelegramClient extends ITelegramClient {
    * the returned object will act like a message media
    * and contain fields like File ID.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param media  Media to upload
    * @param [params={}]  Upload parameters
@@ -2637,13 +2650,11 @@ export interface TelegramClient extends ITelegramClient {
    *
    * Only admins with `manageTopics` permission can do this.
    *
-   * **Available**: ✅ both users and bots
-   *
    * @returns  Service message for the created topic
    */
   createForumTopic(
     params: {
-      /** Chat ID or username */
+    /** Chat ID or username */
       chatId: InputPeerLike
 
       /**
@@ -2675,8 +2686,6 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Delete a forum topic and all its history
    *
-   * **Available**: ✅ both users and bots
-   *
    * @param chat  Chat or user ID, username, phone number, `"me"` or `"self"`
    * @param topicId  ID of the topic (i.e. its top message ID)
    */
@@ -2684,10 +2693,10 @@ export interface TelegramClient extends ITelegramClient {
     chat: InputPeerLike,
     topicId: number | ForumTopic,
     params?: {
-      /**
-       * Whether to dispatch updates that will be generated by this call.
-       * Doesn't follow `disableNoDispatch`
-       */
+    /**
+     * Whether to dispatch updates that will be generated by this call.
+     * Doesn't follow `disableNoDispatch`
+     */
       shouldDispatch?: true
     }): Promise<void>
   /**
@@ -2695,15 +2704,13 @@ export interface TelegramClient extends ITelegramClient {
    *
    * Only admins with `manageTopics` permission can do this.
    *
-   * **Available**: ✅ both users and bots
-   *
    * @param chatId  Chat ID or username
    * @param topicId  ID of the topic (i.e. its top message ID)
    * @returns  Service message about the modification
    */
   editForumTopic(
     params: {
-      /** Chat ID or username */
+    /** Chat ID or username */
       chatId: InputPeerLike
 
       /** ID of the topic (i.e. its top message ID) */
@@ -2727,11 +2734,15 @@ export interface TelegramClient extends ITelegramClient {
        * to the client's update handler.
        */
       shouldDispatch?: true
+
+      /** Whether to (un)close the topic */
+      closed?: boolean
+
+      /** Whether to (un)hide the topic */
+      hidden?: boolean
     }): Promise<Message>
   /**
    * Get forum topics by their IDs
-   *
-   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID or username
    */
@@ -2741,16 +2752,14 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Get forum topics
    *
-   * **Available**: 👤 users only
-   *
    * @param chatId  Chat ID or username
    */
   getForumTopics(
     chatId: InputPeerLike,
     params?: {
-      /**
-       * Search query
-       */
+    /**
+     * Search query
+     */
       query?: string
 
       /**
@@ -2775,11 +2784,11 @@ export interface TelegramClient extends ITelegramClient {
   iterForumTopics(
     chatId: InputPeerLike,
     params?: Parameters<typeof getForumTopics>[2] & {
-      /**
-       * Maximum number of topics to return.
-       *
-       * @default  `Infinity`, i.e. return all topics
-       */
+    /**
+     * Maximum number of topics to return.
+     *
+     * @default  `Infinity`, i.e. return all topics
+     */
       limit?: number
 
       /**
@@ -2791,12 +2800,10 @@ export interface TelegramClient extends ITelegramClient {
    * Reorder pinned forum topics
    *
    * Only admins with `manageTopics` permission can do this.
-   * **Available**: 👤 users only
-   *
    */
   reorderPinnedForumTopics(
     params: {
-      /** Chat ID or username */
+    /** Chat ID or username */
       chatId: InputPeerLike
 
       /**
@@ -2814,13 +2821,11 @@ export interface TelegramClient extends ITelegramClient {
    *
    * Only admins with `manageTopics` permission can do this.
    *
-   * **Available**: ✅ both users and bots
-   *
    * @returns  Service message about the modification
    */
   toggleForumTopicClosed(
     parmas: {
-      /** Chat ID or username */
+    /** Chat ID or username */
       chatId: InputPeerLike
 
       /** ID of the topic (i.e. its top message ID) */
@@ -2839,12 +2844,10 @@ export interface TelegramClient extends ITelegramClient {
    * Toggle whether a topic in a forum is pinned
    *
    * Only admins with `manageTopics` permission can do this.
-   * **Available**: 👤 users only
-   *
    */
   toggleForumTopicPinned(
     params: {
-      /** Chat ID or username */
+    /** Chat ID or username */
       chatId: InputPeerLike
       /** ID of the topic (i.e. its top message ID) */
       topicId: number | ForumTopic
@@ -2864,7 +2867,7 @@ export interface TelegramClient extends ITelegramClient {
   updateForumSettings(
     chatId: InputPeerLike,
     settings: null | {
-      /** Whether the supergroup should be a forum */
+    /** Whether the supergroup should be a forum */
       isForum: boolean
       threadsMode: 'list' | 'tabs'
     }): Promise<void>
@@ -2873,13 +2876,13 @@ export interface TelegramClient extends ITelegramClient {
    *
    * Only admins with `manageTopics` permission can do this.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @returns  Service message about the modification
    */
   toggleGeneralTopicHidden(
     params: {
-      /** Chat ID or username */
+    /** Chat ID or username */
       chatId: InputPeerLike
       /** Whether the topic should be hidden */
       hidden: boolean
@@ -2895,7 +2898,7 @@ export interface TelegramClient extends ITelegramClient {
    *
    * You must be an administrator and have appropriate rights.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID
    * @param params
@@ -2903,10 +2906,10 @@ export interface TelegramClient extends ITelegramClient {
   createInviteLink(
     chatId: InputPeerLike,
     params?: {
-      /**
-       * Date when this link will expire.
-       * If `number` is passed, UNIX time in ms is expected.
-       */
+    /**
+     * Date when this link will expire.
+     * If `number` is passed, UNIX time in ms is expected.
+     */
       expires?: number | Date
 
       /**
@@ -2938,7 +2941,7 @@ export interface TelegramClient extends ITelegramClient {
    *
    * Only pass the fields that you want to modify.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID
    * @param link  Invite link to edit
@@ -2947,7 +2950,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   editInviteLink(
     params: {
-      /** Chat ID */
+    /** Chat ID */
       chatId: InputPeerLike
       /** Invite link to edit */
       link: string | ChatInviteLink
@@ -2978,7 +2981,7 @@ export interface TelegramClient extends ITelegramClient {
    * > **Note**: each administrator has their own primary invite link,
    * > and bots by default don't have one.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat IDs
    */
@@ -2995,9 +2998,9 @@ export interface TelegramClient extends ITelegramClient {
   getInviteLinkMembers(
     chatId: InputPeerLike,
     params?: {
-      /**
-       * Invite link for which to get members
-       */
+    /**
+     * Invite link for which to get members
+     */
       link?: string | ChatInviteLink
 
       /**
@@ -3058,11 +3061,11 @@ export interface TelegramClient extends ITelegramClient {
   getInviteLinks(
     chatId: InputPeerLike,
     params?: {
-      /**
-       * Only return this admin's links.
-       *
-       * @default `"self"`
-       */
+    /**
+     * Only return this admin's links.
+     *
+     * @default `"self"`
+     */
       admin?: InputPeerLike
 
       /**
@@ -3097,7 +3100,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   hideAllJoinRequests(
     params: {
-      /** Chat/channel ID */
+    /** Chat/channel ID */
       chatId: InputPeerLike
 
       /** Whether to approve or decline the join requests */
@@ -3108,12 +3111,12 @@ export interface TelegramClient extends ITelegramClient {
     }): Promise<void>
   /**
    * Approve or decline join request to a chat.
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   hideJoinRequest(
     params: {
-      /** Chat/channel ID */
+    /** Chat/channel ID */
       chatId: InputPeerLike
       /** User ID */
       user: InputPeerLike
@@ -3132,11 +3135,11 @@ export interface TelegramClient extends ITelegramClient {
   iterInviteLinkMembers(
     chatId: InputPeerLike,
     params?: Parameters<typeof getInviteLinkMembers>[2] & {
-      /**
-       * Maximum number of users to return
-       *
-       * @default  `Infinity`, i.e. all users are fetched
-       */
+    /**
+     * Maximum number of users to return
+     *
+     * @default  `Infinity`, i.e. all users are fetched
+     */
       limit?: number
 
       /**
@@ -3163,10 +3166,10 @@ export interface TelegramClient extends ITelegramClient {
   iterInviteLinks(
     chatId: InputPeerLike,
     params?: Parameters<typeof getInviteLinks>[2] & {
-      /**
-       * Limit the number of invite links to be fetched.
-       * By default, all links are fetched.
-       */
+    /**
+     * Limit the number of invite links to be fetched.
+     * By default, all links are fetched.
+     */
       limit?: number
 
       /**
@@ -3182,7 +3185,7 @@ export interface TelegramClient extends ITelegramClient {
    * If `link` is a primary invite link, a new invite link will be
    * generated automatically by Telegram
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID
    * @param link  Invite link to revoke
@@ -3194,13 +3197,13 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Append item(s) to a todo list
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @returns  Service message about the appended todo item(s), if any.
    */
   appendTodoList(
     params: InputMessageId & {
-      /** Items to append */
+    /** Items to append */
       items: MaybeArray<InputText>
 
       /**
@@ -3214,21 +3217,21 @@ export interface TelegramClient extends ITelegramClient {
    *
    * Once closed, poll can't be re-opened, and nobody
    * will be able to vote in it
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   closePoll(
     params: InputMessageId & {
-      /**
-       * Whether to dispatch the edit message event
-       * to the client's update handler.
-       */
+    /**
+     * Whether to dispatch the edit message event
+     * to the client's update handler.
+     */
       shouldDispatch?: true
     }): Promise<Poll>
   /**
    * Delete messages by their IDs
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
    * @param ids  Message(s) ID(s) to delete.
@@ -3261,7 +3264,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Edit sent inline message text, media and reply markup.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param messageId
    *     Inline message ID, either as a TL object, or as a
@@ -3270,10 +3273,10 @@ export interface TelegramClient extends ITelegramClient {
    */
   editInlineMessage(
     params: {
-      /**
-       * Inline message ID, either as a TL object, or as a
-       * TDLib and Bot API compatible string
-       */
+    /**
+     * Inline message ID, either as a TL object, or as a
+     * TDLib and Bot API compatible string
+     */
       messageId: tl.TypeInputBotInlineMessageID | string
 
       /**
@@ -3326,11 +3329,11 @@ export interface TelegramClient extends ITelegramClient {
    */
   editMessage(
     params: InputMessageId & {
-      /**
-       * New message text
-       *
-       * When `media` is passed, `media.caption` is used instead
-       */
+    /**
+     * New message text
+     *
+     * When `media` is passed, `media.caption` is used instead
+     */
       text?: InputText
 
       /**
@@ -3383,7 +3386,7 @@ export interface TelegramClient extends ITelegramClient {
    * Forward one or more messages by their IDs.
    * You can forward no more than 100 messages at once.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param toChatId  Destination chat ID, username, phone, `"me"` or `"self"`
    * @param fromChatId  Source chat ID, username, phone, `"me"` or `"self"`
@@ -3393,7 +3396,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   forwardMessagesById(
     params: ForwardMessageOptions & {
-      /** Source chat ID, username, phone, `"me"` or `"self"` */
+    /** Source chat ID, username, phone, `"me"` or `"self"` */
       fromChatId: InputPeerLike
       /** Message IDs to forward */
       messages: number[]
@@ -3482,11 +3485,11 @@ export interface TelegramClient extends ITelegramClient {
   getHistory(
     chatId: InputPeerLike,
     params?: {
-      /**
-       * Limits the number of messages to be retrieved.
-       *
-       * @default  100
-       */
+    /**
+     * Limits the number of messages to be retrieved.
+     *
+     * @default  100
+     */
       limit?: number
 
       /**
@@ -3592,7 +3595,7 @@ export interface TelegramClient extends ITelegramClient {
    * For messages that were not found, `null` will be
    * returned at that position.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param messageIds  Messages IDs
    * @param [fromReply]
@@ -3628,9 +3631,9 @@ export interface TelegramClient extends ITelegramClient {
    */
   getReactionUsers(
     params: InputMessageId & {
-      /**
-       * Get only reactions with the specified emoji
-       */
+    /**
+     * Get only reactions with the specified emoji
+     */
       emoji?: InputReaction
 
       /**
@@ -3689,11 +3692,11 @@ export interface TelegramClient extends ITelegramClient {
   iterHistory(
     chatId: InputPeerLike,
     params?: Parameters<typeof getHistory>[2] & {
-      /**
-       * Limits the number of messages to be retrieved.
-       *
-       * @default  Infinity, i.e. all messages
-       */
+    /**
+     * Limits the number of messages to be retrieved.
+     *
+     * @default  Infinity, i.e. all messages
+     */
       limit?: number
 
       /**
@@ -3716,11 +3719,11 @@ export interface TelegramClient extends ITelegramClient {
    */
   iterReactionUsers(
     params: Parameters<typeof getReactionUsers>[1] & {
-      /**
-       * Limit the number of events returned.
-       *
-       * @default  `Infinity`, i.e. all events are returned
-       */
+    /**
+     * Limit the number of events returned.
+     *
+     * @default  `Infinity`, i.e. all events are returned
+     */
       limit?: number
 
       /**
@@ -3743,11 +3746,11 @@ export interface TelegramClient extends ITelegramClient {
    */
   iterSearchGlobal(
     params?: Parameters<typeof searchGlobal>[1] & {
-      /**
-       * Limits the number of messages to be retrieved.
-       *
-       * @default  `Infinity`, i.e. all messages are returned
-       */
+    /**
+     * Limits the number of messages to be retrieved.
+     *
+     * @default  `Infinity`, i.e. all messages are returned
+     */
       limit?: number
 
       /**
@@ -3770,11 +3773,11 @@ export interface TelegramClient extends ITelegramClient {
    */
   iterSearchMessages(
     params?: Parameters<typeof searchMessages>[1] & {
-      /**
-       * Limits the number of messages to be retrieved.
-       *
-       * @default  `Infinity`, i.e. all messages are returned
-       */
+    /**
+     * Limits the number of messages to be retrieved.
+     *
+     * @default  `Infinity`, i.e. all messages are returned
+     */
       limit?: number
 
       /**
@@ -3791,13 +3794,13 @@ export interface TelegramClient extends ITelegramClient {
    * For supergroups/channels, you must have appropriate permissions,
    * either as an admin, or as default permissions
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @returns  Service message about pinned message, if one was generated.
    */
   pinMessage(
     params: InputMessageId & {
-      /** Whether to send a notification (only for legacy groups and supergroups) */
+    /** Whether to send a notification (only for legacy groups and supergroups) */
       notify?: boolean
       /** Whether to pin for both sides (only for private chats) */
       bothSides?: boolean
@@ -3818,11 +3821,11 @@ export interface TelegramClient extends ITelegramClient {
   readHistory(
     chatId: InputPeerLike,
     params?: {
-      /**
-       * Message up until which to read history
-       *
-       * @default  0, i.e. read everything
-       */
+    /**
+     * Message up until which to read history
+     *
+     * @default  0, i.e. read everything
+     */
       maxId?: number
 
       /**
@@ -3846,10 +3849,10 @@ export interface TelegramClient extends ITelegramClient {
   readReactions(
     chatId: InputPeerLike,
     params?: {
-      /**
-       * Whether to dispatch updates that will be generated by this call.
-       * Doesn't follow `disableNoDispatch`
-       */
+    /**
+     * Whether to dispatch updates that will be generated by this call.
+     * Doesn't follow `disableNoDispatch`
+     */
       shouldDispatch?: true
     }): Promise<void>
   /**
@@ -3863,11 +3866,11 @@ export interface TelegramClient extends ITelegramClient {
    */
   searchGlobal(
     params?: {
-      /**
-       * Text query string. Use `"@"` to search for mentions.
-       *
-       * @default `""` (empty string)
-       */
+    /**
+     * Text query string. Use `"@"` to search for mentions.
+     *
+     * @default `""` (empty string)
+     */
       query?: string
 
       /**
@@ -3916,7 +3919,7 @@ export interface TelegramClient extends ITelegramClient {
   searchHashtag(
     hashtag: string,
     params?: {
-      /** Offset for the search */
+    /** Offset for the search */
       offset?: SearchHashtagOffset
       /** Limit the number of results */
       limit?: number
@@ -3934,11 +3937,11 @@ export interface TelegramClient extends ITelegramClient {
   iterSearchHashtag(
     hashtag: string,
     params?: Parameters<typeof searchHashtag>[2] & {
-      /**
-       * Limits the number of messages to be retrieved.
-       *
-       * @default  `Infinity`, i.e. all messages are returned
-       */
+    /**
+     * Limits the number of messages to be retrieved.
+     *
+     * @default  `Infinity`, i.e. all messages are returned
+     */
       limit?: number
 
       /**
@@ -3959,12 +3962,12 @@ export interface TelegramClient extends ITelegramClient {
    */
   searchMessages(
     params?: {
-      /**
-       * Text query string. Required for text-only messages,
-       * optional for media.
-       *
-       * @default  `""` (empty string)
-       */
+    /**
+     * Text query string. Required for text-only messages,
+     * optional for media.
+     *
+     * @default  `""` (empty string)
+     */
       query?: string
 
       /**
@@ -4064,7 +4067,7 @@ export interface TelegramClient extends ITelegramClient {
   searchPostsGlobal(
     query: string,
     params?: {
-      /** Offset for the search */
+    /** Offset for the search */
       offset?: SearchPostsGlobalOffset
       /** Limit the number of results */
       limit?: number
@@ -4141,7 +4144,7 @@ export interface TelegramClient extends ITelegramClient {
     params: SendCopyGroupParams
       & (
         | {
-          /** Source chat ID */
+        /** Source chat ID */
           fromChatId: InputPeerLike
           /** Message IDs to forward */
           messages: number[]
@@ -4162,7 +4165,7 @@ export interface TelegramClient extends ITelegramClient {
     params: SendCopyParams
       & (
         | {
-          /** Source chat ID */
+        /** Source chat ID */
           fromChatId: InputPeerLike
           /** Message ID to forward */
           message: number
@@ -4186,12 +4189,12 @@ export interface TelegramClient extends ITelegramClient {
     chatId: InputPeerLike,
     medias: (InputMediaLike | string)[],
     params?: CommonSendParams & {
-      /**
-       * Whether to invert media position.
-       *
-       * Currently only supported for web previews and makes the
-       * client render the preview above the caption and not below.
-       */
+    /**
+     * Whether to invert media position.
+     *
+     * Currently only supported for web previews and makes the
+     * client render the preview above the caption and not below.
+     */
       invertMedia?: boolean
 
       /**
@@ -4222,10 +4225,10 @@ export interface TelegramClient extends ITelegramClient {
     chatId: InputPeerLike,
     media: InputMediaLike | string,
     params?: CommonSendParams & {
-      /**
-       * For bots: inline or reply markup or an instruction
-       * to hide a reply keyboard or to force a reply.
-       */
+    /**
+     * For bots: inline or reply markup or an instruction
+     * to hide a reply keyboard or to force a reply.
+     */
       replyMarkup?: ReplyMarkup
 
       /**
@@ -4266,9 +4269,9 @@ export interface TelegramClient extends ITelegramClient {
    */
   sendPaidReaction(
     params: InputMessageId & {
-      /**
-       * Whether to send the reaction anonymously
-       */
+    /**
+     * Whether to send the reaction anonymously
+     */
       anonymous?: boolean
 
       /**
@@ -4293,21 +4296,21 @@ export interface TelegramClient extends ITelegramClient {
   quoteWithText(
     message: Message,
     params: QuoteParamsFrom<Parameters<typeof sendText>[3]> & {
-      /** Text to send */
+    /** Text to send */
       text: Parameters<typeof sendText>[2]
     }): ReturnType<typeof sendText>
   /** Send a media in reply to a given quote */
   quoteWithMedia(
     message: Message,
     params: QuoteParamsFrom<Parameters<typeof sendMedia>[3]> & {
-      /** Media to send */
+    /** Media to send */
       media: Parameters<typeof sendMedia>[2]
     }): ReturnType<typeof sendMedia>
   /** Send a media group in reply to a given quote */
   quoteWithMediaGroup(
     message: Message,
     params: QuoteParamsFrom<Parameters<typeof sendMediaGroup>[3]> & {
-      /** Media group to send */
+    /** Media group to send */
       medias: Parameters<typeof sendMediaGroup>[2]
     }): ReturnType<typeof sendMediaGroup>
   /**
@@ -4321,7 +4324,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   sendReaction(
     params: InputMessageId & {
-      /** Reaction emoji (or `null` to remove reaction) */
+    /** Reaction emoji (or `null` to remove reaction) */
       emoji?: MaybeArray<InputReaction> | null
       /** Whether to use a big reaction */
       big?: boolean
@@ -4372,10 +4375,10 @@ export interface TelegramClient extends ITelegramClient {
     chatId: InputPeerLike,
     text: InputText,
     params?: CommonSendParams & {
-      /**
-       * For bots: inline or reply markup or an instruction
-       * to hide a reply keyboard or to force a reply.
-       */
+    /**
+     * For bots: inline or reply markup or an instruction
+     * to hide a reply keyboard or to force a reply.
+     */
       replyMarkup?: ReplyMarkup
 
       /**
@@ -4410,9 +4413,9 @@ export interface TelegramClient extends ITelegramClient {
   sendTyping(
     chatId: InputPeerLike, status?: Exclude<TypingStatus, 'interaction' | 'interaction_seen'> | tl.TypeSendMessageAction,
     params?: {
-      /**
-       * For `upload_*` and history import actions, progress of the upload
-       */
+    /**
+     * For `upload_*` and history import actions, progress of the upload
+     */
       progress?: number
 
       /**
@@ -4432,12 +4435,12 @@ export interface TelegramClient extends ITelegramClient {
    */
   sendVote(
     params: InputMessageId & {
-      /**
-       * Selected options, or `null` to retract.
-       * You can pass indexes of the answers or the `Buffer`s
-       * representing them. In case of indexes, the poll will first
-       * be requested from the server.
-       */
+    /**
+     * Selected options, or `null` to retract.
+     * You can pass indexes of the answers or the `Buffer`s
+     * representing them. In case of indexes, the poll will first
+     * be requested from the server.
+     */
       options: null | MaybeArray<number | Uint8Array>
     }): Promise<Poll>
   /**
@@ -4445,12 +4448,12 @@ export interface TelegramClient extends ITelegramClient {
    *
    * This status is automatically renewed by mtcute until a further
    * call with `cancel` is made, or a message is sent to the chat.
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   setTyping(
     params: {
-      /** Chat ID where the user is currently typing */
+    /** Chat ID where the user is currently typing */
       peerId: InputPeerLike
 
       /**
@@ -4478,13 +4481,13 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Toggle the completion status of a todo list item(s)
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @returns  Service message about the toggled items, if any.
    */
   toggleTodoCompleted(
     params: InputMessageId & {
-      /** Items to mark as completed */
+    /** Items to mark as completed */
       completed: MaybeArray<number>
       /** Items to mark as uncompleted */
       uncompleted: MaybeArray<number>
@@ -4504,7 +4507,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   translateMessage(
     params: InputMessageId & {
-      /** Target language (two-letter ISO 639-1 language code) */
+    /** Target language (two-letter ISO 639-1 language code) */
       toLanguage: string
     }): Promise<TextWithEntities>
   /**
@@ -4521,16 +4524,16 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Unpin all pinned messages in a chat.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat or user ID
    */
   unpinAllMessages(
     chatId: InputPeerLike,
     params?: {
-      /**
-       * For forums - unpin only messages from the given topic
-       */
+    /**
+     * For forums - unpin only messages from the given topic
+     */
       topicId?: number
 
       /**
@@ -4545,7 +4548,7 @@ export interface TelegramClient extends ITelegramClient {
    * For supergroups/channels, you must have appropriate permissions,
    * either as an admin, or as default permissions
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID, username, phone number, `"self"` or `"me"`
    * @param messageId  Message ID
@@ -4584,7 +4587,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   changeCloudPassword(
     params: {
-      /** Current password as plaintext */
+    /** Current password as plaintext */
       currentPassword: string
       /** New password as plaintext */
       newPassword: string
@@ -4603,7 +4606,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   enableCloudPassword(
     params: {
-      /** 2FA password as plaintext */
+    /** 2FA password as plaintext */
       password: string
       /** Hint for the new password */
       hint?: string
@@ -4651,7 +4654,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   acceptStarGift(
     params: {
-      /** Input star gift to accept */
+    /** Input star gift to accept */
       gift: InputStarGift
 
       /**
@@ -4673,7 +4676,7 @@ export interface TelegramClient extends ITelegramClient {
 
   buyResaleGift(
     params: {
-      /** Slug of the star gift to buy */
+    /** Slug of the star gift to buy */
       slug: string
 
       /** ID of the user to buy the gift for */
@@ -4714,7 +4717,7 @@ export interface TelegramClient extends ITelegramClient {
   createBusinessChatLink(
     text: InputText,
     params?: {
-      /** Custom title for the link */
+    /** Custom title for the link */
       title?: string
     }): Promise<BusinessChatLink>
 
@@ -4728,7 +4731,7 @@ export interface TelegramClient extends ITelegramClient {
   editBusinessChatLink(
     link: string | BusinessChatLink,
     params: {
-      /** Text to be inserted in the message input */
+    /** Text to be inserted in the message input */
       text: InputText
       /** Custom title for the link */
       title?: string
@@ -4759,9 +4762,9 @@ export interface TelegramClient extends ITelegramClient {
   getBoosts(
     peerId: InputPeerLike,
     params?: {
-      /**
-       * Offset for pagination
-       */
+    /**
+     * Offset for pagination
+     */
       offset?: string
 
       /**
@@ -4799,12 +4802,12 @@ export interface TelegramClient extends ITelegramClient {
   getMyBoostSlots(): Promise<BoostSlot[]>
   /**
    * Get a list of star gifts up for resale
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   getStarGiftResaleOptions(
     params: {
-      /** ID of the gift to get resale options for */
+    /** ID of the gift to get resale options for */
       giftId: tl.Long
 
       /**
@@ -4835,12 +4838,12 @@ export interface TelegramClient extends ITelegramClient {
    * Get a list of saved star gifts of a user/channel
    *
    * Note that filters currently only work for channels
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   getSavedStarGifts(
     params: {
-      /** Peer to get saved gifts from */
+    /** Peer to get saved gifts from */
       owner: InputPeerLike
 
       /** Whether to exclude hidden gifts */
@@ -4855,6 +4858,11 @@ export interface TelegramClient extends ITelegramClient {
       excludeUnupgradable?: boolean
       /** Whether to exclude gifts that can be upgraded */
       excludeUpgradable?: boolean
+      /** Whether to exclude "hosted" gifts (i.e. those that are actually stored on the TON blockchain) */
+      excludeHosted?: boolean
+
+      /** Whether to only return gifts with peer color available */
+      peerColorAvailable?: boolean
 
       /** ID of the collection to get gifts from */
       collectionId?: number
@@ -4876,16 +4884,18 @@ export interface TelegramClient extends ITelegramClient {
   getStarGiftOptions(): Promise<StarGift[]>
   /**
    * Get the value of a unique star gift
+   * **Available**: 👤 users only
+   *
    */
   getStarGiftValue(
     params: {
-      /** Slug of the star gift */
+    /** Slug of the star gift */
       slug: string
     }): Promise<StarGiftValue>
 
   getStarGiftWithdrawalUrl(
     params: {
-      /** The star gift to withdraw */
+    /** The star gift to withdraw */
       gift: InputStarGift
 
       /** 2FA password */
@@ -4897,7 +4907,7 @@ export interface TelegramClient extends ITelegramClient {
    * You can either pass `self` to get your own transactions,
    * or a chat/bot ID to get transactions of that peer.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param peerId  Peer ID
    * @param params  Additional parameters
@@ -4905,9 +4915,9 @@ export interface TelegramClient extends ITelegramClient {
   getStarsTransactions(
     peerId: InputPeerLike,
     params?: {
-      /**
-       * If passed, only transactions of this direction will be returned
-       */
+    /**
+     * If passed, only transactions of this direction will be returned
+     */
       direction?: 'incoming' | 'outgoing'
       /**
        * Direction to sort transactions date by (default: desc)
@@ -4930,7 +4940,7 @@ export interface TelegramClient extends ITelegramClient {
     }): Promise<StarsStatus>
   /**
    * Get information about a unique star gift by its slug
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   getUniqueStarGift(
@@ -4945,11 +4955,11 @@ export interface TelegramClient extends ITelegramClient {
   iterBoosters(
     peerId: InputPeerLike,
     params?: Parameters<typeof getBoosts>[2] & {
-      /**
-       * Total number of boosters to fetch
-       *
-       * @default  Infinity, i.e. fetch all boosters
-       */
+    /**
+     * Total number of boosters to fetch
+     *
+     * @default  Infinity, i.e. fetch all boosters
+     */
       limit?: number
 
       /**
@@ -4963,16 +4973,16 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Iterate over saved star gifts of a user,
    * wrapper over {@link getSavedStarGifts}
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   iterSavedStarGifts(
     params: Parameters<typeof getSavedStarGifts>[1] & {
-      /**
-       * Number of gifts to fetch per request
-       *
-       * @default 100
-       */
+    /**
+     * Number of gifts to fetch per request
+     *
+     * @default 100
+     */
       chunkSize?: number
 
       /**
@@ -4998,11 +5008,11 @@ export interface TelegramClient extends ITelegramClient {
   iterStarsTransactions(
     peerId: InputPeerLike,
     params?: Parameters<typeof getStarsTransactions>[2] & {
-      /**
-       * Total number of boosters to fetch
-       *
-       * @default  Infinity, i.e. fetch all boosters
-       */
+    /**
+     * Total number of boosters to fetch
+     *
+     * @default  Infinity, i.e. fetch all boosters
+     */
       limit?: number
 
       /**
@@ -5015,12 +5025,12 @@ export interface TelegramClient extends ITelegramClient {
     }): AsyncIterableIterator<StarsTransaction>
   /**
    * Toggles whether one or more star gift is pinned to the top of the list
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   togglePinnedStarGifts(
     params: {
-      /** One or more gifts to pin */
+    /** One or more gifts to pin */
       gifts: MaybeArray<InputStarGift>
       /** Peer where the gift is sent */
       peer: InputPeerLike
@@ -5063,7 +5073,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   sendStarGift(
     params: {
-      /** ID of the peer to send the gift to */
+    /** ID of the peer to send the gift to */
       peerId: InputPeerLike
 
       /** ID of the gift to send */
@@ -5098,9 +5108,9 @@ export interface TelegramClient extends ITelegramClient {
    */
   setBusinessIntro(
     intro: {
-      /**
-       * Title of the introduction
-       */
+    /**
+     * Title of the introduction
+     */
       title?: string
 
       /**
@@ -5140,7 +5150,7 @@ export interface TelegramClient extends ITelegramClient {
   /** Set resale price for an owned star gift */
   setResaleStarGiftPrice(
     params: {
-      /** Star gift to update the price of */
+    /** Star gift to update the price of */
       gift: InputStarGift
 
       /**
@@ -5162,7 +5172,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   transferStarGift(
     params: {
-      /** Star gift to transfer */
+    /** Star gift to transfer */
       gift: InputStarGift
 
       /** ID of the user to transfer the gift to */
@@ -5207,7 +5217,7 @@ export interface TelegramClient extends ITelegramClient {
    *
    * For bots the sticker set must have been created by this bot.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param setId  Sticker set short name or TL object with input sticker set
    * @param sticker  Sticker to be added
@@ -5218,30 +5228,30 @@ export interface TelegramClient extends ITelegramClient {
     setId: InputStickerSet,
     sticker: InputStickerSetItem,
     params?: {
-      /**
-       * Upload progress callback
-       *
-       * @param uploaded  Number of bytes uploaded
-       * @param total  Total file size
-       */
+    /**
+     * Upload progress callback
+     *
+     * @param uploaded  Number of bytes uploaded
+     * @param total  Total file size
+     */
       progressCallback?: (uploaded: number, total: number) => void
     }): Promise<StickerSet>
   /**
    * Create a new sticker set.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param params
    * @returns  Newly created sticker set
    */
   createStickerSet(
     params: {
-      /**
-       * Owner of the sticker set (must be user).
-       *
-       * If this pack is created from a user account,
-       * can only be `"self"`
-       */
+    /**
+     * Owner of the sticker set (must be user).
+     *
+     * If this pack is created from a user account,
+     * can only be `"self"`
+     */
       owner: InputPeerLike
 
       /**
@@ -5305,7 +5315,7 @@ export interface TelegramClient extends ITelegramClient {
    *
    * For bots the sticker set must have been created by this bot.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param sticker
    *     TDLib and Bot API compatible File ID, or a
@@ -5317,7 +5327,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Get custom emoji stickers by their IDs
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param ids  IDs of the stickers (as defined in {@link MessageEntity.emojiId})
    */
@@ -5347,7 +5357,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   getMyStickerSets(
     params?: {
-      /** Offset for pagination */
+    /** Offset for pagination */
       offset?: Long
       /** Limit for pagination */
       limit?: number
@@ -5355,7 +5365,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Get a sticker set and stickers inside of it.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param setId  Sticker set identifier
    */
@@ -5366,7 +5376,7 @@ export interface TelegramClient extends ITelegramClient {
    *
    * For bots the sticker set must have been created by this bot.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param sticker
    *     TDLib and Bot API compatible File ID, or a
@@ -5395,18 +5405,18 @@ export interface TelegramClient extends ITelegramClient {
     sticker: InputDocumentId,
     newSticker: InputStickerSetItem,
     params?: {
-      /**
-       * Upload progress callback
-       *
-       * @param uploaded  Number of bytes uploaded
-       * @param total  Total file size
-       */
+    /**
+     * Upload progress callback
+     *
+     * @param uploaded  Number of bytes uploaded
+     * @param total  Total file size
+     */
       progressCallback?: (uploaded: number, total: number) => void
     }): Promise<StickerSet>
   /**
    * Set group sticker set for a supergroup
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param setId  Sticker set short name or a TL object with input sticker set
    * @param thumb  Sticker set thumbnail
@@ -5419,7 +5429,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Set sticker set thumbnail
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param id  Sticker set short name or a TL object with input sticker set
    * @param thumb  Sticker set thumbnail
@@ -5430,12 +5440,12 @@ export interface TelegramClient extends ITelegramClient {
     id: InputStickerSet,
     thumb: InputFileLike | tl.TypeInputDocument,
     params?: {
-      /**
-       * Upload progress callback
-       *
-       * @param uploaded  Number of bytes uploaded
-       * @param total  Total file size
-       */
+    /**
+     * Upload progress callback
+     *
+     * @param uploaded  Number of bytes uploaded
+     * @param total  Total file size
+     */
       progressCallback?: (uploaded: number, total: number) => void
     }): Promise<StickerSet>
   /**
@@ -5459,9 +5469,9 @@ export interface TelegramClient extends ITelegramClient {
    */
   deleteStories(
     params: {
-      /**
-       * Story IDs to delete
-       */
+    /**
+     * Story IDs to delete
+     */
       ids: MaybeArray<number>
 
       /**
@@ -5480,9 +5490,9 @@ export interface TelegramClient extends ITelegramClient {
    */
   editStory(
     params: {
-      /**
-       * Story ID to edit
-       */
+    /**
+     * Story ID to edit
+     */
       id: number
 
       /**
@@ -5521,9 +5531,9 @@ export interface TelegramClient extends ITelegramClient {
    */
   getAllStories(
     params?: {
-      /**
-       * Offset from which to fetch stories
-       */
+    /**
+     * Offset from which to fetch stories
+     */
       offset?: string
 
       /**
@@ -5547,13 +5557,13 @@ export interface TelegramClient extends ITelegramClient {
   getProfileStories(
     peerId: InputPeerLike,
     params?: {
-      /**
-       * Kind of stories to fetch
-       * - `pinned` - stories pinned to the profile and visible to everyone
-       * - `archived` - "archived" stories that can later be pinned, only visible to the owner
-       *
-       * @default  `pinned`
-       */
+    /**
+     * Kind of stories to fetch
+     * - `pinned` - stories pinned to the profile and visible to everyone
+     * - `archived` - "archived" stories that can later be pinned, only visible to the owner
+     *
+     * @default  `pinned`
+     */
       kind?: 'pinned' | 'archived'
 
       /**
@@ -5611,9 +5621,9 @@ export interface TelegramClient extends ITelegramClient {
     peerId: InputPeerLike,
     storyId: number,
     params?: {
-      /**
-       * Whether to only fetch viewers from contacts
-       */
+    /**
+     * Whether to only fetch viewers from contacts
+     */
       onlyContacts?: boolean
 
       /**
@@ -5651,11 +5661,11 @@ export interface TelegramClient extends ITelegramClient {
    */
   hideMyStoriesViews(
     params?: {
-      /**
-       * Whether to hide views from the last 5 minutes
-       *
-       * @default  true
-       */
+    /**
+     * Whether to hide views from the last 5 minutes
+     *
+     * @default  true
+     */
       past?: boolean
 
       /**
@@ -5688,11 +5698,11 @@ export interface TelegramClient extends ITelegramClient {
    */
   iterAllStories(
     params?: Parameters<typeof getAllStories>[1] & {
-      /**
-       * Maximum number of stories to fetch
-       *
-       * @default  Infinity
-       */
+    /**
+     * Maximum number of stories to fetch
+     *
+     * @default  Infinity
+     */
       limit?: number
     }): AsyncIterableIterator<PeerStories>
   /**
@@ -5703,11 +5713,11 @@ export interface TelegramClient extends ITelegramClient {
   iterProfileStories(
     peerId: InputPeerLike,
     params?: Parameters<typeof getProfileStories>[2] & {
-      /**
-       * Total number of stories to fetch
-       *
-       * @default  `Infinity`, i.e. fetch all stories
-       */
+    /**
+     * Total number of stories to fetch
+     *
+     * @default  `Infinity`, i.e. fetch all stories
+     */
       limit?: number
 
       /**
@@ -5728,11 +5738,11 @@ export interface TelegramClient extends ITelegramClient {
     peerId: InputPeerLike,
     storyId: number,
     params?: Parameters<typeof getStoryViewers>[3] & {
-      /**
-       * Total number of viewers to fetch
-       *
-       * @default  Infinity, i.e. fetch all viewers
-       */
+    /**
+     * Total number of viewers to fetch
+     *
+     * @default  Infinity, i.e. fetch all viewers
+     */
       limit?: number
 
       /**
@@ -5778,11 +5788,11 @@ export interface TelegramClient extends ITelegramClient {
    */
   sendStory(
     params: {
-      /**
-       * Peer ID to send story as
-       *
-       * @default  `self`
-       */
+    /**
+     * Peer ID to send story as
+     *
+     * @default  `self`
+     */
       peer?: InputPeerLike
 
       /**
@@ -5851,9 +5861,9 @@ export interface TelegramClient extends ITelegramClient {
    */
   toggleStoriesPinned(
     params: {
-      /**
-       * Story ID(s) to toggle
-       */
+    /**
+     * Story ID(s) to toggle
+     */
       ids: MaybeArray<number>
 
       /**
@@ -5918,7 +5928,7 @@ export interface TelegramClient extends ITelegramClient {
   getGlobalTtl(): Promise<number>
   /**
    * Get currently authorized user's full information
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   getMe(): Promise<User>
@@ -5937,7 +5947,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Get a single profile picture of a user by its ID
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param userId  User ID, username, phone number, `"me"` or `"self"`
    * @param photoId  ID of the photo to fetch
@@ -5949,7 +5959,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Get a list of profile pictures of a user
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param userId  User ID, username, phone number, `"me"` or `"self"`
    * @param params
@@ -5957,11 +5967,11 @@ export interface TelegramClient extends ITelegramClient {
   getProfilePhotos(
     userId: InputPeerLike,
     params?: {
-      /**
-       * Offset from which to fetch.
-       *
-       * @default  `0`
-       */
+    /**
+     * Offset from which to fetch.
+     *
+     * @default  `0`
+     */
       offset?: number
 
       /**
@@ -5973,10 +5983,12 @@ export interface TelegramClient extends ITelegramClient {
     }): Promise<ArrayPaginated<Photo, number>>
   /**
    * Get music files saved to the user's profile
+   * **Available**: 👤 users only
+   *
    */
   getSavedMusic(
     params: {
-      /** User ID, username, phone number, `"me"` or `"self"` */
+    /** User ID, username, phone number, `"me"` or `"self"` */
       userId: InputPeerLike
 
       /** Offset for pagination */
@@ -6027,11 +6039,11 @@ export interface TelegramClient extends ITelegramClient {
   iterProfilePhotos(
     userId: InputPeerLike,
     params?: Parameters<typeof getProfilePhotos>[2] & {
-      /**
-       * Maximum number of items to fetch
-       *
-       * @default  `Infinity`, i.e. all items are fetched
-       */
+    /**
+     * Maximum number of items to fetch
+     *
+     * @default  `Infinity`, i.e. all items are fetched
+     */
       limit?: number
 
       /**
@@ -6108,7 +6120,7 @@ export interface TelegramClient extends ITelegramClient {
 
   saveMusicToProfile(
     params: {
-      /** Audio file to save (or its ID) */
+    /** Audio file to save (or its ID) */
       audio: InputMediaAudio | InputDocumentId
       /** Optionally, document ID after which we should insert the music */
       after?: InputDocumentId
@@ -6124,7 +6136,7 @@ export interface TelegramClient extends ITelegramClient {
 
   unsaveMusicFromProfile(
     params: {
-      /** ID of the Audio file to unsave */
+    /** ID of the Audio file to unsave */
       audio: InputDocumentId
     }): Promise<void>
   /**
@@ -6134,10 +6146,12 @@ export interface TelegramClient extends ITelegramClient {
    *  - yourself (`self`)
    *  - supergroups or channels with enough boosts which you are an admin of
    *  - for bots – users who gave you the appropriate permissions
+   * **Available**: 👤 users only
+   *
    */
   setEmojiStatus(
     params: {
-      /** User or chat where the emoji status should be set */
+    /** User or chat where the emoji status should be set */
       peerId: InputPeerLike
       /** Custom emoji ID or `null` to remove the emoji */
       emoji: tl.Long | null
@@ -6165,7 +6179,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   setMyBirthday(
     birthday: {
-      /** Birthday day */
+    /** Birthday day */
       day: number
       /** Birthday month */
       month: number
@@ -6176,12 +6190,12 @@ export interface TelegramClient extends ITelegramClient {
    * Set a new profile photo or video for the current user.
    *
    * You can also pass a file ID or an InputPhoto to re-use existing photo.
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    */
   setMyProfilePhoto(
     params: {
-      /** Media type (photo or video) */
+    /** Media type (photo or video) */
       type: 'photo' | 'video'
       /** Input media file */
       media: InputFileLike | tl.TypeInputPhoto
@@ -6240,9 +6254,9 @@ export interface TelegramClient extends ITelegramClient {
    */
   updateProfile(
     params: {
-      /**
-       * New first name
-       */
+    /**
+     * New first name
+     */
       firstName?: string
 
       /**
@@ -6311,6 +6325,7 @@ export class TelegramClient implements ITelegramClient {
     Object.defineProperty(this, 'timers', { value: this._client.timers })
     Object.defineProperty(this, 'stopSignal', { value: this._client.stopSignal })
     Object.defineProperty(this, 'appConfig', { value: this._client.appConfig })
+    Object.defineProperty(this, 'platform', { value: this._client.platform })
     Object.defineProperty(this, 'onServerUpdate', { value: this._client.onServerUpdate })
     Object.defineProperty(this, 'onRawUpdate', { value: this._client.onRawUpdate })
     Object.defineProperty(this, 'onConnectionState', { value: this._client.onConnectionState })
@@ -6686,6 +6701,9 @@ TelegramClient.prototype.getContacts = function (...args) {
 }
 TelegramClient.prototype.importContacts = function (...args) {
   return importContacts(this._client, ...args)
+}
+TelegramClient.prototype.setContactNote = function (...args) {
+  return setContactNote(this._client, ...args)
 }
 TelegramClient.prototype.createFolder = function (...args) {
   return createFolder(this._client, ...args)

@@ -41,7 +41,7 @@ ${text}`,
 
 function visitRecursively(ast, check, callback) {
   const visit = (node) => {
-    if (!ts.isNode(node)) return
+    if (!('getSourceFile' in node)) return
 
     // recursively continue visiting
     for (const [key, value] of Object.entries(node)) {

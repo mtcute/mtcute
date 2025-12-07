@@ -30,6 +30,9 @@ export type ConnectionState = 'offline' | 'connecting' | 'updating' | 'connected
 // NB: when adding new methods, don't forget to add them to:
 //  - worker/port.ts
 //  - generate-client script
+// when adding new properties, don't forget to add them to:
+//  - methods/_init.ts
+//  - worker/port.ts
 
 export interface ITelegramClient {
   /** Logger for the client */
