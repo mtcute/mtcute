@@ -35,6 +35,7 @@
     "test:browser": "vitest --config .config/vite.browser.ts run",
     "test:browser:dev": "vitest --config .config/vite.browser.ts watch",
     "test:bun": "bun --bun run test",
+    "bun:setup": "bun install && cd packages/tl && bun run gen-code && bun x tsc && bun run build && cd ../tl-runtime && bun x tsc && cd ../tl-utils && bun x tsc ",
     "test:deno": "deno run -A --unstable-ffi --unstable-sloppy-imports --no-check --unstable-detect-cjs --import-map=.config/deno-import-map.json --node-modules-dir=auto npm:vitest@4.0.8 --config .config/vite.ts",
     "lint": "eslint",
     "lint:ci": "CI=1 NODE_OPTIONS=\\\"--max_old_space_size=8192\\\" eslint",
