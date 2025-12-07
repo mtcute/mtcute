@@ -6311,6 +6311,7 @@ export class TelegramClient implements ITelegramClient {
     Object.defineProperty(this, 'timers', { value: this._client.timers })
     Object.defineProperty(this, 'stopSignal', { value: this._client.stopSignal })
     Object.defineProperty(this, 'appConfig', { value: this._client.appConfig })
+    Object.defineProperty(this, 'platform', { value: this._client.platform })
     Object.defineProperty(this, 'onServerUpdate', { value: this._client.onServerUpdate })
     Object.defineProperty(this, 'onRawUpdate', { value: this._client.onRawUpdate })
     Object.defineProperty(this, 'onConnectionState', { value: this._client.onConnectionState })
