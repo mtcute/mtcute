@@ -17,30 +17,14 @@ import { determinePartSize } from '../../utils/file-utils.js'
 const SMALL_FILE_MAX_SIZE = 131072
 const REQUESTS_PER_CONNECTION = 3 // some arbitrary magic value that seems to work best
 
-/**
- * Download a file and return it as an iterable, which yields file contents
- * in chunks of a given size. Order of the chunks is guaranteed to be
- * consecutive.
- *
- * @param params  Download parameters
- */
-export async function* downloadAsIterable(
+export async function _normalizeFileDownloadLocation(
   client: ITelegramClient,
   input: FileDownloadLocation,
-  params?: FileDownloadParameters,
-): AsyncIterableIterator<Uint8Array> {
-  const offset = params?.offset ?? 0
-
-  if (offset % 4096 !== 0) {
-    throw new MtArgumentError(`Invalid offset: ${offset}. Must be divisible by 4096`)
-  }
-
-  let dcId = params?.dcId
-  let fileSize = params?.fileSize
-
-  const abortSignal = params?.abortSignal
-  let ended = false
-
+): Promise<{
+  location: tl.TypeInputFileLocation | tl.TypeInputWebFileLocation | Uint8Array<ArrayBufferLike>
+  dcId?: number
+  fileSize?: number
+}> {
   let location: tl.TypeInputFileLocation | tl.TypeInputWebFileLocation
   if (input instanceof FileLocation) {
     let locationInner = input.location
@@ -49,14 +33,11 @@ export async function* downloadAsIterable(
       locationInner = locationInner()
     }
 
-    if (ArrayBuffer.isView(locationInner)) {
-      yield locationInner
-
-      return
+    return {
+      location: locationInner,
+      dcId: input.dcId,
+      fileSize: input.fileSize,
     }
-    if (!dcId) dcId = input.dcId
-    if (!fileSize) fileSize = input.fileSize
-    location = locationInner
   } else if (typeof input === 'string') {
     const parsed = parseFileId(input)
 
@@ -68,8 +49,6 @@ export async function* downloadAsIterable(
   } else {
     location = input
   }
-
-  const isWeb = tl.isAnyInputWebFileLocation(location)
 
   if (location._ === 'inputPeerPhotoFileLocation') {
     // replace dummy min input peers with input peers with min access hash (we can use it as-is without having to find a ref message)
@@ -101,9 +80,46 @@ export async function* downloadAsIterable(
     }
   }
 
+  return { location }
+}
+
+/**
+ * Download a file and return it as an iterable, which yields file contents
+ * in chunks of a given size. Order of the chunks is guaranteed to be
+ * consecutive.
+ *
+ * @param params  Download parameters
+ */
+export async function* downloadAsIterable(
+  client: ITelegramClient,
+  input: FileDownloadLocation,
+  params?: FileDownloadParameters,
+): AsyncIterableIterator<Uint8Array> {
+  const offset = params?.offset ?? 0
+
+  if (offset % 4096 !== 0) {
+    throw new MtArgumentError(`Invalid offset: ${offset}. Must be divisible by 4096`)
+  }
+
+  const normalized = await _normalizeFileDownloadLocation(client, input)
+  const fileSize = params?.fileSize ?? normalized.fileSize
+  const location = normalized.location
+
+  if (ArrayBuffer.isView(location)) {
+    yield location
+
+    return
+  }
+
+  const isWeb = tl.isAnyInputWebFileLocation(location)
+
+  let dcId = params?.dcId ?? normalized?.dcId
   // we will receive a FileMigrateError in case this is invalid
   const primaryDcId = await client.getPrimaryDcId()
   if (!dcId) dcId = primaryDcId
+
+  const abortSignal = params?.abortSignal
+  let ended = false
 
   const partSizeKb = params?.partSize ?? (fileSize ? determinePartSize(fileSize) : 64)
 
@@ -115,6 +131,15 @@ export async function* downloadAsIterable(
 
   let limitBytes = params?.limit ?? fileSize ?? Infinity
   if (limitBytes === 0) return
+
+  if (limitBytes !== Infinity && limitBytes !== fileSize) {
+    if (limitBytes % 4096 !== 0) {
+      throw new MtArgumentError(`Invalid limit: ${limitBytes}. Must be divisible by 4096.`)
+    }
+    if (1048576 % limitBytes !== 0) {
+      throw new MtArgumentError(`Invalid limit: ${limitBytes}. Must be a multiple of 1MB.`)
+    }
+  }
 
   let numChunks = limitBytes === Infinity ? Infinity : ~~((limitBytes + chunkSize - offset - 1) / chunkSize)
 

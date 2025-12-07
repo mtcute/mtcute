@@ -128,7 +128,8 @@ import { iterDialogs } from './methods/dialogs/iter-dialogs.js'
 import { joinChatlist } from './methods/dialogs/join-chatlist.js'
 import { setFoldersOrder } from './methods/dialogs/set-folders-order.js'
 import { downloadAsBuffer } from './methods/files/download-buffer.js'
-import { downloadAsIterable } from './methods/files/download-iterable.js'
+import { downloadChunk } from './methods/files/download-chunk.js'
+import { _normalizeFileDownloadLocation, downloadAsIterable } from './methods/files/download-iterable.js'
 import { downloadAsStream } from './methods/files/download-stream.js'
 import { _normalizeInputFile } from './methods/files/normalize-input-file.js'
 import { _normalizeInputMedia } from './methods/files/normalize-input-media.js'
@@ -2466,6 +2467,40 @@ export interface TelegramClient extends ITelegramClient {
   downloadAsBuffer(
     location: FileDownloadLocation,
     params?: FileDownloadParameters): Promise<Uint8Array>
+  /**
+   * Download a single chunk of a file, using [`precise`](https://core.telegram.org/api/files#downloading-files) download mode
+   *
+   * **Available**: 👤 users only
+   *
+   * @param params  Download parameters
+   */
+  downloadChunk(
+    params: {
+    /** File from which to download a chunk */
+      location: FileDownloadLocation
+
+      /**
+       * DC id from which the file will be downloaded.
+       *
+       * If provided DC is not the one storing the file,
+       * redirection will be handled automatically.
+       */
+      dcId?: number
+
+      /** Offset of the chunk in bytes */
+      offset: number
+
+      /**
+       * Number of bytes to download (starting from the offset)
+       *
+       * Max 1MB (1048576)
+       */
+      limit: number
+
+      maxRetryCount?: number
+      floodSleepThreshold?: number
+      abortSignal?: AbortSignal
+    }): Promise<Uint8Array>
 
   /**
    * Download a remote file to a local file (only for Node.js).
@@ -2480,6 +2515,13 @@ export interface TelegramClient extends ITelegramClient {
     filename: string,
     location: FileDownloadLocation,
     params?: FileDownloadParameters): Promise<void>
+
+  _normalizeFileDownloadLocation(
+    input: FileDownloadLocation): Promise<{
+    location: tl.TypeInputFileLocation | tl.TypeInputWebFileLocation | Uint8Array<ArrayBufferLike>
+    dcId?: number
+    fileSize?: number
+  }>
   /**
    * Download a file and return it as an iterable, which yields file contents
    * in chunks of a given size. Order of the chunks is guaranteed to be
@@ -6740,6 +6782,12 @@ TelegramClient.prototype.setFoldersOrder = function (...args) {
 }
 TelegramClient.prototype.downloadAsBuffer = function (...args) {
   return downloadAsBuffer(this._client, ...args)
+}
+TelegramClient.prototype.downloadChunk = function (...args) {
+  return downloadChunk(this._client, ...args)
+}
+TelegramClient.prototype._normalizeFileDownloadLocation = function (...args) {
+  return _normalizeFileDownloadLocation(this._client, ...args)
 }
 TelegramClient.prototype.downloadAsIterable = function (...args) {
   return downloadAsIterable(this._client, ...args)
