@@ -1008,6 +1008,15 @@ export class UpdatesManager {
         this._fetchChannelDifference(channelId, fallbackPts)
           .catch((err) => {
             this.log.warn('error fetching difference for %d: %e', channelId, err)
+
+            if (tl.RpcError.is('PERSISTENT_TIMESTAMP_INVALID')) {
+              // reset channel pts value
+              this.log.warn('received PERSISTENT_TIMESTAMP_INVALID, resetting channel pts value')
+              this.cpts.delete(channelId)
+              this.cptsMod.delete(channelId)
+            }
+
+            // ! PERSISTENT_TIMESTAMP_OUTDATED also falls here, ignore it since it's caused by server-side issues
           })
           .then((ok) => {
             requestedDiff.delete(channelId)
@@ -1144,9 +1153,12 @@ export class UpdatesManager {
             this.log.warn('error fetching common difference: %e', err)
 
             if (tl.RpcError.is(err, 'PERSISTENT_TIMESTAMP_INVALID')) {
+              this.log.warn('received PERSISTENT_TIMESTAMP_INVALID, re-fetching updates state')
               // this function never throws
               return this._fetchUpdatesState()
             }
+
+            // ! PERSISTENT_TIMESTAMP_OUTDATED also falls here, ignore it since it's caused by server-side issues
           })
           .then(() => {
             requestedDiff.delete(0)

@@ -39,6 +39,11 @@ export interface InternalErrorsHandlerOptions {
   exceptErrors?: string[]
 }
 
+const PTS_ERRORS = /* #__PURE__ */ new Set<string>([
+  'PERSISTENT_TIMESTAMP_INVALID',
+  'PERSISTENT_TIMESTAMP_OUTDATED',
+])
+
 export function internalErrorsHandler(params: InternalErrorsHandlerOptions): RpcCallMiddleware {
   const { maxRetries = Infinity, waitTime = 1, exceptErrors } = params
 
@@ -53,6 +58,8 @@ export function internalErrorsHandler(params: InternalErrorsHandlerOptions): Rpc
       if (!isTlRpcError(res)) return res
 
       if (!CLIENT_ERRORS.has(res.errorCode)) {
+        // should be handled by the updates manager, shouldn't be thrown by anything except getDifference
+        if (PTS_ERRORS.has(res.errorMessage)) return res
         if (exceptErrorsSet?.has(res.errorMessage)) return res
 
         lastError = res
