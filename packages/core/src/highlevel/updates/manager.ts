@@ -1986,6 +1986,8 @@ export class UpdatesManager {
 
       log.debug('updates loop stopped')
     } catch (e) {
+      // this shouldn't be needed but there were reports that not doing this causes issues shrug
+      if (this.client.destroyed) return
       log.error('updates loop encountered error, restarting: %s', e)
 
       return this._loop()

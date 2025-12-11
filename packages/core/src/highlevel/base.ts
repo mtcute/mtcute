@@ -168,7 +168,12 @@ export class BaseTelegramClient implements ITelegramClient {
     if (this.#destroyed) return
     this.#destroyed = true
     await this.disconnect()
+    this.updates?.destroy()
     await this.mt.destroy()
+  }
+
+  get destroyed(): boolean {
+    return this.#destroyed
   }
 
   [Symbol.asyncDispose](): Promise<void> {
