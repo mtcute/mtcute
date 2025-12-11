@@ -16,6 +16,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.forgejo/actions/init
       - uses: https://github.com/denoland/setup-deno@v2
+        # https://github.com/denoland/deno/issues/31304
+        with:
+          deno-version: 2.5.6
       - name: 'TypeScript'
         run: pnpm run lint:tsc:ci
       - name: 'ESLint'
@@ -51,6 +54,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.forgejo/actions/init
       - uses: https://github.com/denoland/setup-deno@v2
+        # https://github.com/denoland/deno/issues/31304
+        with:
+          deno-version: 2.5.6
       - name: 'Run tests'
         run: pnpm run test:deno
   

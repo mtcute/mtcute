@@ -36,7 +36,9 @@ jobs:
         run: git checkout ${{ github.event.inputs.branch }}
       - uses: ./.forgejo/actions/init
       - uses: https://github.com/denoland/setup-deno@v2
-
+        # https://github.com/denoland/deno/issues/31304
+        with:
+          deno-version: 2.5.6
       - name: Initialize configs
         env:
           GH_PRIVKEY: ${{ secrets.GH_PRIVKEY }}
