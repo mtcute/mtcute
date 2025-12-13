@@ -58,12 +58,14 @@ export class StarGift {
   get auction(): {
     slug: string
     giftsPerRound: number
+    startDate: Date
   } | null {
-    if (!this.raw.auctionSlug || this.raw.giftsPerRound == null) return null
+    if (!this.raw.auctionSlug || this.raw.giftsPerRound == null || !this.raw.auctionStartDate) return null
 
     return {
       slug: this.raw.auctionSlug,
       giftsPerRound: this.raw.giftsPerRound,
+      startDate: new Date(this.raw.auctionStartDate * 1000),
     }
   }
 
@@ -184,7 +186,17 @@ export class StarGift {
     if (!this.raw.releasedBy) return null
     return parsePeer(this.raw.releasedBy, this._peers)
   }
+
+  /** Number of unique upgrade variants that will be available for the gift */
+  get upgradeVariants(): number {
+    return this.raw.upgradeVariants ?? 0
+  }
+
+  /** Background color of the gift */
+  get background(): tl.TypeStarGiftBackground | null {
+    return this.raw.background ?? null
+  }
 }
 
 makeInspectable(StarGift)
-memoizeGetters(StarGift, ['sticker'])
+memoizeGetters(StarGift, ['sticker', 'auction'])

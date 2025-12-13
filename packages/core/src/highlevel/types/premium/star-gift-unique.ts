@@ -288,6 +288,16 @@ export class StarGiftUnique {
     if (!this.raw.releasedBy) return null
     return parsePeer(this.raw.releasedBy, this._peers)
   }
+
+  /** Value of the gift in USD */
+  get valueUsd(): tl.Long | null {
+    return this.raw.valueUsdAmount ?? null
+  }
+
+  /** Minimum number of stars required to create a purchase offer for the gift */
+  get offerMinStars(): number | null {
+    return this.raw.offerMinStars ?? null
+  }
 }
 
 makeInspectable(StarGiftUnique)

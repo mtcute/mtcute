@@ -3,7 +3,6 @@ import type { tl } from '@mtcute/tl'
 import type { TextWithEntities } from '../misc/entities.js'
 import type { Peer } from '../peers/peer.js'
 import type { Message } from './message.js'
-import { assert } from '@fuman/utils'
 import Long from 'long'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 
@@ -584,6 +583,9 @@ export interface ActionStarGiftSent {
   /** Whether this gift was purchased on an auction */
   fromAuction: boolean
 
+  /** For limited-offer gifts, the sequential number of the gift */
+  giftNum?: number
+
   /** Recipient of the gift */
   toId: Peer | null
 
@@ -642,6 +644,41 @@ export interface ActionStarGiftBoughtResale extends StarGiftUniqueCommon {
 
   /** Number of stars/TON that were paid for the gift */
   amount: tl.TypeStarsAmount
+}
+
+/** A star gift was bought from a purchase offer */
+export interface ActionStarGiftBoughtOffer extends StarGiftUniqueCommon {
+  readonly type: 'star_gift_bought_offer'
+}
+
+/** A purchase offer was created for one of the user's star gifts */
+export interface ActionStarGiftPurchaseOffer {
+  readonly type: 'star_gift_purchase_offer'
+
+  /** Current status of the offer */
+  status: 'pending' | 'accepted' | 'declined'
+
+  /** Star gift */
+  gift: StarGiftUnique
+
+  /** The amount of money that was offered for the gift */
+  price: tl.TypeStarsAmount
+
+  /** Date when the offer will expire */
+  expiresAt: Date
+}
+
+/** A purchase offer was declined or expired */
+export interface ActionStarGiftPurchaseOfferDeclined {
+  readonly type: 'star_gift_purchase_offer_declined'
+
+  /** Whether the offer was auto-declined due to expiration */
+  expired: boolean
+
+  gift: StarGiftUnique
+
+  /** The amount of money refunded to the user who created the offer */
+  price: tl.TypeStarsAmount
 }
 
 /** A star gift previously exported to the blockchain was assigned to your profile */
@@ -781,6 +818,9 @@ export type MessageAction
     | ActionTodoAppendTasks
     | ActionTonGift
     | ActionSuggestBirthday
+    | ActionStarGiftPurchaseOffer
+    | ActionStarGiftPurchaseOfferDeclined
+    | ActionStarGiftBoughtOffer
     | null
 
 /** @internal */
@@ -973,7 +1013,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
       }
     case 'messageActionSetChatTheme':
       if (act.theme._ === 'chatThemeUniqueGift') {
-        assert(act.theme.gift._ === 'starGiftUnique')
+        if (act.theme.gift._ !== 'starGiftUnique') return null
         return {
           type: 'theme_changed_unique',
           gift: new StarGiftUnique(act.theme.gift, this._peers),
@@ -1087,7 +1127,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         giveawayMessageId: act.giveawayMsgId,
       }
     case 'messageActionStarGift':
-      assert(act.gift._ === 'starGift')
+      if (act.gift._ !== 'starGift') return null
       if (act.prepaidUpgrade) {
         return {
           type: 'star_gift_upgrade_paid',
@@ -1111,13 +1151,14 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         upgradeStars: act.upgradeStars ?? Long.ZERO,
         upgradeMsgId: act.upgradeMsgId ?? null,
         fromAuction: act.auctionAcquired!,
+        giftNum: act.giftNum,
         toId: act.toId ? parsePeer(act.toId, this._peers) : null,
 
         savedId: act.savedId,
         prepaidUpgradeHash: act.prepaidUpgradeHash ?? undefined,
       }
     case 'messageActionStarGiftUnique': {
-      assert(act.gift._ === 'starGiftUnique')
+      if (act.gift._ !== 'starGiftUnique') return null
       const common = {
         saved: act.saved!,
         refunded: act.refunded!,
@@ -1132,6 +1173,13 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
       if (act.assigned) {
         return {
           type: 'star_gift_assigned',
+          ...common,
+        }
+      }
+
+      if (act.fromOffer) {
+        return {
+          type: 'star_gift_bought_offer',
           ...common,
         }
       }
@@ -1191,6 +1239,24 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
       return {
         type: 'suggest_birthday',
         birthday: act.birthday,
+      }
+    case 'messageActionStarGiftPurchaseOffer':
+      if (act.gift._ !== 'starGiftUnique') return null
+      return {
+        type: 'star_gift_purchase_offer',
+        status: act.accepted ? 'accepted' : act.declined ? 'declined' : 'pending',
+        gift: new StarGiftUnique(act.gift, this._peers),
+        price: act.price,
+        expiresAt: new Date(act.expiresAt * 1000),
+      }
+    case 'messageActionStarGiftPurchaseOfferDeclined':
+      if (act.gift._ !== 'starGiftUnique') return null
+
+      return {
+        type: 'star_gift_purchase_offer_declined',
+        expired: act.expired!,
+        gift: new StarGiftUnique(act.gift, this._peers),
+        price: act.price,
       }
     default:
       return null

@@ -159,6 +159,13 @@ export type StarsTransactionType
       gift: StarGiftUnique
     }
     | {
+      type: 'star_gift_offer'
+      /** Related peer */
+      peer: Peer
+      /** The gift that was offered for sale */
+      gift: StarGiftUnique
+    }
+    | {
       type: 'paid_message'
       /** Related peer */
       peer: Peer
@@ -363,6 +370,12 @@ export class StarsTransaction {
           } else if (this.raw.stargiftDropOriginalDetails) {
             return {
               type: 'star_gift_drop_details',
+              peer,
+              gift: new StarGiftUnique(this.raw.stargift, this.peers),
+            }
+          } else if (this.raw.offer) {
+            return {
+              type: 'star_gift_offer',
               peer,
               gift: new StarGiftUnique(this.raw.stargift, this.peers),
             }

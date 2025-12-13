@@ -23,6 +23,7 @@ export default antfu({
   yaml: false,
   markdown: false,
   jsonc: false,
+  pnpm: false, // https://github.com/antfu/eslint-config/issues/791
   linterOptions: {
     reportUnusedDisableDirectives: Boolean(process.env.CI),
   },

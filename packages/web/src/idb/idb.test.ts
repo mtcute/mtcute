@@ -4,9 +4,8 @@ import {
   testPeersRepository,
   testRefMessagesRepository,
 } from '@mtcute/test'
-import { expect } from 'chai'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { afterAll, beforeAll, describe, it } from 'vitest'
 import { IdbStorage } from './index.js'
 
 if (process.env.TEST_ENV === 'browser') {

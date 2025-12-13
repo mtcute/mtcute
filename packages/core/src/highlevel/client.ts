@@ -8,6 +8,8 @@ import type { ITelegramClient } from './client.types.js'
 import type { LogOutResult } from './methods/auth/log-out.js'
 import type { CreateGroupResult } from './methods/chats/create-group.js'
 import type { GetForumTopicsOffset } from './methods/forums/get-forum-topics.js'
+import type { InputStarGiftAttributeIds, ResaleStarGiftsMeta } from './methods/gifts/get-resale-star-gifts.js'
+import type { StarGiftUpgradeOptions } from './methods/gifts/get-star-gift-upgrade-options.js'
 import type { GetInviteLinksOffset } from './methods/invite-links/get-invite-links.js'
 import type { DeleteMessagesParams } from './methods/messages/delete-messages.js'
 import type { ForwardMessageOptions } from './methods/messages/forward-messages.js'
@@ -21,8 +23,8 @@ import type { CommonSendParams } from './methods/messages/send-common.js'
 import type { SendCopyGroupParams } from './methods/messages/send-copy-group.js'
 import type { SendCopyParams } from './methods/messages/send-copy.js'
 import type { QuoteParamsFrom } from './methods/messages/send-quote.js'
+import type { InputStarsAmount } from './methods/premium/_normalize-stars-amount.js'
 import type { CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
-import type { InputStarGiftAttributeIds, ResaleStarGiftsMeta } from './methods/premium/get-resale-star-gifts.js'
 import type { CanSendStoryResult } from './methods/stories/can-send-story.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
 import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
@@ -146,6 +148,26 @@ import { toggleForumTopicClosed } from './methods/forums/toggle-forum-topic-clos
 import { toggleForumTopicPinned } from './methods/forums/toggle-forum-topic-pinned.js'
 import { updateForumSettings } from './methods/forums/toggle-forum.js'
 import { toggleGeneralTopicHidden } from './methods/forums/toggle-general-topic-hidden.js'
+import { _normalizeInputStarGift } from './methods/gifts/_normalize-input-star-gift.js'
+import { acceptStarGift } from './methods/gifts/accept-star-gift.js'
+import { buyResaleGift } from './methods/gifts/buy-resale-gift.js'
+import { getStarGiftResaleOptions } from './methods/gifts/get-resale-star-gifts.js'
+import { getSavedStarGiftsById } from './methods/gifts/get-saved-star-gifts-by-id.js'
+import { getSavedStarGifts } from './methods/gifts/get-saved-star-gifts.js'
+import { getStarGiftOptions } from './methods/gifts/get-star-gift-options.js'
+import { getStarGiftUpgradeOptions } from './methods/gifts/get-star-gift-upgrade-options.js'
+import { getStarGiftValue } from './methods/gifts/get-star-gift-value.js'
+import { getStarGiftWithdrawalUrl } from './methods/gifts/get-star-gift-withdrawal-url.js'
+import { getUniqueStarGift } from './methods/gifts/get-unique-star-gift.js'
+import { iterSavedStarGifts } from './methods/gifts/iter-saved-star-gifts.js'
+import { togglePinnedStarGifts } from './methods/gifts/pin-star-gift.js'
+import { prepayStarGiftUpgrade } from './methods/gifts/prepay-star-gift-upgrade.js'
+import { resolveStarGiftOffer } from './methods/gifts/resolve-star-gift-offer.js'
+import { sendStarGiftOffer } from './methods/gifts/send-star-gift-offer.js'
+import { sendStarGift } from './methods/gifts/send-star-gift.js'
+import { setResaleStarGiftPrice } from './methods/gifts/set-gift-resale-price.js'
+import { transferStarGift } from './methods/gifts/transfer-star-gift.js'
+import { upgradeStarGift } from './methods/gifts/upgrade-star-gift.js'
 import { createInviteLink } from './methods/invite-links/create-invite-link.js'
 import { editInviteLink } from './methods/invite-links/edit-invite-link.js'
 import { exportInviteLink } from './methods/invite-links/export-invite-link.js'
@@ -219,10 +241,7 @@ import { changeCloudPassword } from './methods/password/change-cloud-password.js
 import { enableCloudPassword } from './methods/password/enable-cloud-password.js'
 import { cancelPasswordEmail, resendPasswordEmail, verifyPasswordEmail } from './methods/password/password-email.js'
 import { removeCloudPassword } from './methods/password/remove-cloud-password.js'
-import { _normalizeInputStarGift } from './methods/premium/_normalize-input-star-gift.js'
-import { acceptStarGift } from './methods/premium/accept-star-gift.js'
 import { applyBoost } from './methods/premium/apply-boost.js'
-import { buyResaleGift } from './methods/premium/buy-resale-gift.js'
 import { canApplyBoost } from './methods/premium/can-apply-boost.js'
 import { createBusinessChatLink } from './methods/premium/create-business-chat-link.js'
 import { deleteBusinessChatLink, editBusinessChatLink } from './methods/premium/edit-business-chat-link.js'
@@ -231,25 +250,11 @@ import { getBoosts } from './methods/premium/get-boosts.js'
 import { getBusinessChatLinks } from './methods/premium/get-business-chat-links.js'
 import { getBusinessConnection } from './methods/premium/get-business-connection.js'
 import { getMyBoostSlots } from './methods/premium/get-my-boost-slots.js'
-import { getStarGiftResaleOptions } from './methods/premium/get-resale-star-gifts.js'
-import { getSavedStarGiftsById } from './methods/premium/get-saved-star-gifts-by-id.js'
-import { getSavedStarGifts } from './methods/premium/get-saved-star-gifts.js'
-import { getStarGiftOptions } from './methods/premium/get-star-gift-options.js'
-import { getStarGiftValue } from './methods/premium/get-star-gift-value.js'
-import { getStarGiftWithdrawalUrl } from './methods/premium/get-star-gift-withdrawal-url.js'
 import { getStarsTransactions } from './methods/premium/get-stars-transactions.js'
-import { getUniqueStarGift } from './methods/premium/get-unique-star-gift.js'
 import { iterBoosters } from './methods/premium/iter-boosters.js'
-import { iterSavedStarGifts } from './methods/premium/iter-saved-star-gifts.js'
 import { iterStarsTransactions } from './methods/premium/iter-stars-transactions.js'
-import { togglePinnedStarGifts } from './methods/premium/pin-star-gift.js'
-import { prepayStarGiftUpgrade } from './methods/premium/prepay-star-gift-upgrade.js'
-import { sendStarGift } from './methods/premium/send-star-gift.js'
 import { setBusinessIntro } from './methods/premium/set-business-intro.js'
 import { setBusinessWorkHours } from './methods/premium/set-business-work-hours.js'
-import { setResaleStarGiftPrice } from './methods/premium/set-gift-resale-price.js'
-import { transferStarGift } from './methods/premium/transfer-star-gift.js'
-import { upgradeStarGift } from './methods/premium/upgrade-star-gift.js'
 import { addStickerToSet } from './methods/stickers/add-sticker-to-set.js'
 import { createStickerSet } from './methods/stickers/create-sticker-set.js'
 import { deleteStickerFromSet } from './methods/stickers/delete-sticker-from-set.js'
@@ -2935,6 +2940,370 @@ export interface TelegramClient extends ITelegramClient {
        */
       shouldDispatch?: true
     }): Promise<Message>
+
+  _normalizeInputStarGift(
+    gift: InputStarGift): Promise<tl.TypeInputSavedStarGift>
+
+  /**
+   * Accept, hide or convert a star gift.
+   *
+   * **Available**: 👤 users only
+   *
+   * @returns  Whether the action was successful
+   */
+  acceptStarGift(
+    params: {
+    /** Input star gift to accept */
+      gift: InputStarGift
+
+      /**
+       * Action to perform on the gift.
+       *  - `save` - save the gift to your profile
+       *  - `hide` - hide the gift from your profile
+       *  - `convert` - convert the gift to stars (can't be undone)
+       */
+      action: 'save' | 'hide' | 'convert'
+    }): Promise<boolean>
+
+  buyResaleGift(
+    params: {
+    /** Slug of the star gift to buy */
+      slug: string
+
+      /** ID of the user to buy the gift for */
+      recipient: InputPeerLike
+
+      /**
+       * Whether to dispatch the new message event
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+
+      /** Whether to use TON currency for payment */
+      ton?: boolean
+    }): Promise<Message | null>
+  /**
+   * Get a list of star gifts up for resale
+   * **Available**: 👤 users only
+   *
+   */
+  getStarGiftResaleOptions(
+    params: {
+    /** ID of the gift to get resale options for */
+      giftId: tl.Long
+
+      /**
+       * Sorting attribute
+       *
+       * - `price`: Sort by price
+       * - `num`: Sort by its unique number
+       */
+      sort?: 'price' | 'num'
+
+      /**
+       * Hash of the `attributes` field, as returned by the server in the first response
+       */
+      attributesHash?: Long
+
+      /** Attributes to filter for */
+      attributes?: tl.TypeStarGiftAttributeId[] | InputStarGiftAttributeIds
+
+      /** Offset for pagination */
+      offset?: string
+      /** Limit for pagination */
+      limit?: number
+    }): Promise<ArrayPaginatedWithMeta<StarGiftUnique, string, ResaleStarGiftsMeta>>
+  /** Get one or more saved star gifts by their IDs */
+  getSavedStarGiftsById(
+    gifts: MaybeArray<InputStarGift>): Promise<SavedStarGift[]>
+  /**
+   * Get a list of saved star gifts of a user/channel
+   *
+   * Note that filters currently only work for channels
+   * **Available**: 👤 users only
+   *
+   */
+  getSavedStarGifts(
+    params: {
+    /** Peer to get saved gifts from */
+      owner: InputPeerLike
+
+      /** Whether to exclude hidden gifts */
+      excludeHidden?: boolean
+      /** Whether to exclude publicly visible gifts */
+      excludePublic?: boolean
+      /** Whether to exclude gifts with unlimited availability */
+      excludeUnlimited?: boolean
+      /** Whether to exclude unique gifts */
+      excludeUnique?: boolean
+      /** Whether to exclude gifts that cannot be upgraded (either not limited or already upgraded) */
+      excludeUnupgradable?: boolean
+      /** Whether to exclude gifts that can be upgraded */
+      excludeUpgradable?: boolean
+      /** Whether to exclude "hosted" gifts (i.e. those that are actually stored on the TON blockchain) */
+      excludeHosted?: boolean
+
+      /** Whether to only return gifts with peer color available */
+      peerColorAvailable?: boolean
+
+      /** ID of the collection to get gifts from */
+      collectionId?: number
+
+      /** Whether to sort by value */
+      sortByValue?: boolean
+
+      /** Offset for pagination */
+      offset?: string
+      /** Limit for pagination */
+      limit?: number
+    }): Promise<ArrayPaginated<SavedStarGift, string>>
+
+  /**
+   * Get the list of available star gifts.
+   * **Available**: 👤 users only
+   *
+   */
+  getStarGiftOptions(): Promise<StarGift[]>
+  /**
+   * Get a list of all possible attributes when upgrading a given star gift
+   */
+  getStarGiftUpgradeOptions(
+    giftId: tl.Long): Promise<StarGiftUpgradeOptions>
+  /**
+   * Get the value of a unique star gift
+   * **Available**: 👤 users only
+   *
+   */
+  getStarGiftValue(
+    params: {
+    /** Slug of the star gift */
+      slug: string
+    }): Promise<StarGiftValue>
+
+  getStarGiftWithdrawalUrl(
+    params: {
+    /** The star gift to withdraw */
+      gift: InputStarGift
+
+      /** 2FA password */
+      password: string
+    }): Promise<string>
+  /**
+   * Get information about a unique star gift by its slug
+   * **Available**: 👤 users only
+   *
+   */
+  getUniqueStarGift(
+    slug: string): Promise<StarGiftUnique>
+  /**
+   * Iterate over saved star gifts of a user,
+   * wrapper over {@link getSavedStarGifts}
+   * **Available**: 👤 users only
+   *
+   */
+  iterSavedStarGifts(
+    params: Parameters<typeof getSavedStarGifts>[1] & {
+    /**
+     * Number of gifts to fetch per request
+     *
+     * @default 100
+     */
+      chunkSize?: number
+
+      /**
+       * Total number of gifts to fetch
+       *
+       * @default Infinity
+       */
+      limit?: number
+    }): AsyncIterableIterator<SavedStarGift>
+  /**
+   * Toggles whether one or more star gift is pinned to the top of the list
+   * **Available**: 👤 users only
+   *
+   */
+  togglePinnedStarGifts(
+    params: {
+    /** One or more gifts to pin */
+      gifts: MaybeArray<InputStarGift>
+      /** Peer where the gift is sent */
+      peer: InputPeerLike
+    }): Promise<void>
+  /**
+   * Pay for other user's star gift upgrade.
+   *
+   * > **Note**: this method is not indended to be used by full-fledged clients,
+   * > as this method hides the actual invoice and payment form from the user.
+   * > For GUI clients, you should refer to the method's source code and
+   * > present the payment form to the user.
+   *
+   * **Available**: 👤 users only
+   *
+   * @returns  Service message about the payment for the upgrade, if one was generated.
+   */
+  prepayStarGiftUpgrade(
+    params: {
+      peer: InputPeerLike
+      /** Prepaid upgrade hash, taken from `SavedStarGift.prepaidUpgradeHash` */
+      hash: string
+
+      /**
+       * Whether to dispatch the new message event
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+    }): Promise<Message | null>
+  /**
+   * Accept or decline a purchase offer for a star gift
+   *
+   * @returns The generated service message
+   */
+  resolveStarGiftOffer(
+    options: {
+    /** ID of the message containing the offer */
+      message: number
+
+      /** Whether to accept or decline the offer */
+      action: 'accept' | 'decline'
+
+      /**
+       * Whether to dispatch the new message event
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+    }): Promise<Message>
+  /**
+   * Create a purchase offer for a unique star gift
+   * @param client
+   * @param params
+   */
+  sendStarGiftOffer(
+    params: {
+    /** ID of the peer to send the offer to */
+      peerId: InputPeerLike
+
+      /** Slug of the star gift to create an offer for */
+      slug: string
+
+      /** Amount of stars to offer */
+      price: InputStarsAmount
+
+      /** Duration of the offer in seconds */
+      duration: number
+
+      /** When the recipient has paid messages enabled, the maximum number of stars that you are willing to spend */
+      allowPaidMessages?: tl.Long
+
+      /**
+       * Whether to dispatch the new message event
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+    }): Promise<Message>
+  /**
+   * Send a star gift to a user.
+   *
+   * > **Note**: this method is not indended to be used by full-fledged clients,
+   * > as this method hides the actual invoice and payment form from the user.
+   * > For GUI clients, you should refer to the method's source code and
+   * > present the payment form to the user.
+   *
+   * **Available**: 👤 users only
+   *
+   * @returns  Service message about the sent gift, if one was generated.
+   */
+  sendStarGift(
+    params: {
+    /** ID of the peer to send the gift to */
+      peerId: InputPeerLike
+
+      /** ID of the gift to send */
+      gift: Long | StarGift
+
+      /**
+       * Whether to send the gift anonymously
+       * (i.e. if the recipient chooses to display the gift
+       * on their profile, your name won't be visible)
+       */
+      anonymous?: boolean
+
+      /** Message to send along with the gift */
+      message?: InputText
+
+      /** Whether to automatically upgrade the gift to a unique star gift */
+      withUpgrade?: boolean
+
+      /**
+       * Whether to dispatch the new message event
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+    }): Promise<Message | null>
+  /** Set resale price for an owned star gift */
+  setResaleStarGiftPrice(
+    params: {
+    /** Star gift to update the price of */
+      gift: InputStarGift
+
+      /**
+       * New price of the gift (in stars), or `null` to unlist
+       */
+      price: InputStarsAmount | null
+    }): Promise<void>
+  /**
+   * Transfer a unique star gift.
+   *
+   * > **Note**: this method is not indended to be used by full-fledged clients,
+   * > as this method hides the actual invoice and payment form from the user.
+   * > For GUI clients, you should refer to the method's source code and
+   * > present the payment form to the user.
+   *
+   * **Available**: 👤 users only
+   *
+   * @returns  Service message about the transferred gift, if one was generated.
+   */
+  transferStarGift(
+    params: {
+    /** Star gift to transfer */
+      gift: InputStarGift
+
+      /** ID of the user to transfer the gift to */
+      recipient: InputPeerLike
+
+      /**
+       * Whether to dispatch the new message event
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+    }): Promise<Message | null>
+  /**
+   * Upgrades a star gift to a unique gift.
+   *
+   * > **Note**: this method is not indended to be used by full-fledged clients,
+   * > as this method hides the actual invoice and payment form from the user.
+   * > For GUI clients, you should refer to the method's source code and
+   * > present the payment form to the user.
+   *
+   * **Available**: 👤 users only
+   *
+   * @returns  Service message about the upgraded gift, if one was generated.
+   */
+  upgradeStarGift(
+    params: {
+      gift: InputStarGift
+
+      /**
+       * Whether to retain the original details of the gift
+       * (like sender, recipient, date, message)
+       */
+      keepOriginalDetails?: boolean
+
+      /**
+       * Whether to dispatch the new message event
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+    }): Promise<Message | null>
   /**
    * Create an additional invite link for the chat.
    *
@@ -4683,30 +5052,6 @@ export interface TelegramClient extends ITelegramClient {
    * @param password  2FA password as plaintext
    */
   removeCloudPassword(password: string): Promise<void>
-
-  _normalizeInputStarGift(
-    gift: InputStarGift): Promise<tl.TypeInputSavedStarGift>
-
-  /**
-   * Accept, hide or convert a star gift.
-   *
-   * **Available**: 👤 users only
-   *
-   * @returns  Whether the action was successful
-   */
-  acceptStarGift(
-    params: {
-    /** Input star gift to accept */
-      gift: InputStarGift
-
-      /**
-       * Action to perform on the gift.
-       *  - `save` - save the gift to your profile
-       *  - `hide` - hide the gift from your profile
-       *  - `convert` - convert the gift to stars (can't be undone)
-       */
-      action: 'save' | 'hide' | 'convert'
-    }): Promise<boolean>
   /**
    * Boost a given channel
    *
@@ -4715,24 +5060,6 @@ export interface TelegramClient extends ITelegramClient {
    * @param peerId  Peer ID to boost
    */
   applyBoost(peerId: InputPeerLike): Promise<void>
-
-  buyResaleGift(
-    params: {
-    /** Slug of the star gift to buy */
-      slug: string
-
-      /** ID of the user to buy the gift for */
-      recipient: InputPeerLike
-
-      /**
-       * Whether to dispatch the new message event
-       * to the client's update handler.
-       */
-      shouldDispatch?: true
-
-      /** Whether to use TON currency for payment */
-      ton?: boolean
-    }): Promise<Message | null>
   /**
    * Check if the current user can apply boost to some channel
    *
@@ -4843,107 +5170,6 @@ export interface TelegramClient extends ITelegramClient {
    */
   getMyBoostSlots(): Promise<BoostSlot[]>
   /**
-   * Get a list of star gifts up for resale
-   * **Available**: 👤 users only
-   *
-   */
-  getStarGiftResaleOptions(
-    params: {
-    /** ID of the gift to get resale options for */
-      giftId: tl.Long
-
-      /**
-       * Sorting attribute
-       *
-       * - `price`: Sort by price
-       * - `num`: Sort by its unique number
-       */
-      sort?: 'price' | 'num'
-
-      /**
-       * Hash of the `attributes` field, as returned by the server in the first response
-       */
-      attributesHash?: Long
-
-      /** Attributes to filter for */
-      attributes?: tl.TypeStarGiftAttributeId[] | InputStarGiftAttributeIds
-
-      /** Offset for pagination */
-      offset?: string
-      /** Limit for pagination */
-      limit?: number
-    }): Promise<ArrayPaginatedWithMeta<StarGiftUnique, string, ResaleStarGiftsMeta>>
-  /** Get one or more saved star gifts by their IDs */
-  getSavedStarGiftsById(
-    gifts: MaybeArray<InputStarGift>): Promise<SavedStarGift[]>
-  /**
-   * Get a list of saved star gifts of a user/channel
-   *
-   * Note that filters currently only work for channels
-   * **Available**: 👤 users only
-   *
-   */
-  getSavedStarGifts(
-    params: {
-    /** Peer to get saved gifts from */
-      owner: InputPeerLike
-
-      /** Whether to exclude hidden gifts */
-      excludeHidden?: boolean
-      /** Whether to exclude publicly visible gifts */
-      excludePublic?: boolean
-      /** Whether to exclude gifts with unlimited availability */
-      excludeUnlimited?: boolean
-      /** Whether to exclude unique gifts */
-      excludeUnique?: boolean
-      /** Whether to exclude gifts that cannot be upgraded (either not limited or already upgraded) */
-      excludeUnupgradable?: boolean
-      /** Whether to exclude gifts that can be upgraded */
-      excludeUpgradable?: boolean
-      /** Whether to exclude "hosted" gifts (i.e. those that are actually stored on the TON blockchain) */
-      excludeHosted?: boolean
-
-      /** Whether to only return gifts with peer color available */
-      peerColorAvailable?: boolean
-
-      /** ID of the collection to get gifts from */
-      collectionId?: number
-
-      /** Whether to sort by value */
-      sortByValue?: boolean
-
-      /** Offset for pagination */
-      offset?: string
-      /** Limit for pagination */
-      limit?: number
-    }): Promise<ArrayPaginated<SavedStarGift, string>>
-
-  /**
-   * Get the list of available star gifts.
-   * **Available**: 👤 users only
-   *
-   */
-  getStarGiftOptions(): Promise<StarGift[]>
-  /**
-   * Get the value of a unique star gift
-   * **Available**: 👤 users only
-   *
-   */
-  getStarGiftValue(
-    params: {
-    /** Slug of the star gift */
-      slug: string
-    }): Promise<StarGiftValue>
-
-  getStarGiftWithdrawalUrl(
-    params: {
-    /** The star gift to withdraw */
-      gift: InputStarGift
-
-      /** 2FA password */
-      password: string
-    }): Promise<string>
-  /**
    * Get Telegram Stars transactions for a given peer.
    *
    * You can either pass `self` to get your own transactions,
@@ -4981,13 +5207,6 @@ export interface TelegramClient extends ITelegramClient {
       limit?: number
     }): Promise<StarsStatus>
   /**
-   * Get information about a unique star gift by its slug
-   * **Available**: 👤 users only
-   *
-   */
-  getUniqueStarGift(
-    slug: string): Promise<StarGiftUnique>
-  /**
    * Iterate over boosters of a channel.
    *
    * Wrapper over {@link getBoosters}
@@ -5012,28 +5231,6 @@ export interface TelegramClient extends ITelegramClient {
        */
       chunkSize?: number
     }): AsyncIterableIterator<Boost>
-  /**
-   * Iterate over saved star gifts of a user,
-   * wrapper over {@link getSavedStarGifts}
-   * **Available**: 👤 users only
-   *
-   */
-  iterSavedStarGifts(
-    params: Parameters<typeof getSavedStarGifts>[1] & {
-    /**
-     * Number of gifts to fetch per request
-     *
-     * @default 100
-     */
-      chunkSize?: number
-
-      /**
-       * Total number of gifts to fetch
-       *
-       * @default Infinity
-       */
-      limit?: number
-    }): AsyncIterableIterator<SavedStarGift>
   /**
    * Iterate over Telegram Stars transactions for a given peer.
    *
@@ -5065,81 +5262,6 @@ export interface TelegramClient extends ITelegramClient {
        */
       chunkSize?: number
     }): AsyncIterableIterator<StarsTransaction>
-  /**
-   * Toggles whether one or more star gift is pinned to the top of the list
-   * **Available**: 👤 users only
-   *
-   */
-  togglePinnedStarGifts(
-    params: {
-    /** One or more gifts to pin */
-      gifts: MaybeArray<InputStarGift>
-      /** Peer where the gift is sent */
-      peer: InputPeerLike
-    }): Promise<void>
-  /**
-   * Pay for other user's star gift upgrade.
-   *
-   * > **Note**: this method is not indended to be used by full-fledged clients,
-   * > as this method hides the actual invoice and payment form from the user.
-   * > For GUI clients, you should refer to the method's source code and
-   * > present the payment form to the user.
-   *
-   * **Available**: 👤 users only
-   *
-   * @returns  Service message about the payment for the upgrade, if one was generated.
-   */
-  prepayStarGiftUpgrade(
-    params: {
-      peer: InputPeerLike
-      /** Prepaid upgrade hash, taken from `SavedStarGift.prepaidUpgradeHash` */
-      hash: string
-
-      /**
-       * Whether to dispatch the new message event
-       * to the client's update handler.
-       */
-      shouldDispatch?: true
-    }): Promise<Message | null>
-  /**
-   * Send a star gift to a user.
-   *
-   * > **Note**: this method is not indended to be used by full-fledged clients,
-   * > as this method hides the actual invoice and payment form from the user.
-   * > For GUI clients, you should refer to the method's source code and
-   * > present the payment form to the user.
-   *
-   * **Available**: 👤 users only
-   *
-   * @returns  Service message about the sent gift, if one was generated.
-   */
-  sendStarGift(
-    params: {
-    /** ID of the peer to send the gift to */
-      peerId: InputPeerLike
-
-      /** ID of the gift to send */
-      gift: Long | StarGift
-
-      /**
-       * Whether to send the gift anonymously
-       * (i.e. if the recipient chooses to display the gift
-       * on their profile, your name won't be visible)
-       */
-      anonymous?: boolean
-
-      /** Message to send along with the gift */
-      message?: InputText
-
-      /** Whether to automatically upgrade the gift to a unique star gift */
-      withUpgrade?: boolean
-
-      /**
-       * Whether to dispatch the new message event
-       * to the client's update handler.
-       */
-      shouldDispatch?: true
-    }): Promise<Message | null>
 
   /**
    * Set current user's business introduction.
@@ -5189,71 +5311,6 @@ export interface TelegramClient extends ITelegramClient {
           }
           ))
           | null): Promise<void>
-  /** Set resale price for an owned star gift */
-  setResaleStarGiftPrice(
-    params: {
-    /** Star gift to update the price of */
-      gift: InputStarGift
-
-      /**
-       * New price of the gift (in stars), or `null` to unlist
-       */
-      price: tl.Long | number | tl.TypeStarsAmount | null
-    }): Promise<void>
-  /**
-   * Transfer a unique star gift.
-   *
-   * > **Note**: this method is not indended to be used by full-fledged clients,
-   * > as this method hides the actual invoice and payment form from the user.
-   * > For GUI clients, you should refer to the method's source code and
-   * > present the payment form to the user.
-   *
-   * **Available**: 👤 users only
-   *
-   * @returns  Service message about the transferred gift, if one was generated.
-   */
-  transferStarGift(
-    params: {
-    /** Star gift to transfer */
-      gift: InputStarGift
-
-      /** ID of the user to transfer the gift to */
-      recipient: InputPeerLike
-
-      /**
-       * Whether to dispatch the new message event
-       * to the client's update handler.
-       */
-      shouldDispatch?: true
-    }): Promise<Message | null>
-  /**
-   * Upgrades a star gift to a unique gift.
-   *
-   * > **Note**: this method is not indended to be used by full-fledged clients,
-   * > as this method hides the actual invoice and payment form from the user.
-   * > For GUI clients, you should refer to the method's source code and
-   * > present the payment form to the user.
-   *
-   * **Available**: 👤 users only
-   *
-   * @returns  Service message about the upgraded gift, if one was generated.
-   */
-  upgradeStarGift(
-    params: {
-      gift: InputStarGift
-
-      /**
-       * Whether to retain the original details of the gift
-       * (like sender, recipient, date, message)
-       */
-      keepOriginalDetails?: boolean
-
-      /**
-       * Whether to dispatch the new message event
-       * to the client's update handler.
-       */
-      shouldDispatch?: true
-    }): Promise<Message | null>
   /**
    * Add a sticker to a sticker set.
    *
@@ -6840,6 +6897,66 @@ TelegramClient.prototype.updateForumSettings = function (...args) {
 TelegramClient.prototype.toggleGeneralTopicHidden = function (...args) {
   return toggleGeneralTopicHidden(this._client, ...args)
 }
+TelegramClient.prototype._normalizeInputStarGift = function (...args) {
+  return _normalizeInputStarGift(this._client, ...args)
+}
+TelegramClient.prototype.acceptStarGift = function (...args) {
+  return acceptStarGift(this._client, ...args)
+}
+TelegramClient.prototype.buyResaleGift = function (...args) {
+  return buyResaleGift(this._client, ...args)
+}
+TelegramClient.prototype.getStarGiftResaleOptions = function (...args) {
+  return getStarGiftResaleOptions(this._client, ...args)
+}
+TelegramClient.prototype.getSavedStarGiftsById = function (...args) {
+  return getSavedStarGiftsById(this._client, ...args)
+}
+TelegramClient.prototype.getSavedStarGifts = function (...args) {
+  return getSavedStarGifts(this._client, ...args)
+}
+TelegramClient.prototype.getStarGiftOptions = function (...args) {
+  return getStarGiftOptions(this._client, ...args)
+}
+TelegramClient.prototype.getStarGiftUpgradeOptions = function (...args) {
+  return getStarGiftUpgradeOptions(this._client, ...args)
+}
+TelegramClient.prototype.getStarGiftValue = function (...args) {
+  return getStarGiftValue(this._client, ...args)
+}
+TelegramClient.prototype.getStarGiftWithdrawalUrl = function (...args) {
+  return getStarGiftWithdrawalUrl(this._client, ...args)
+}
+TelegramClient.prototype.getUniqueStarGift = function (...args) {
+  return getUniqueStarGift(this._client, ...args)
+}
+TelegramClient.prototype.iterSavedStarGifts = function (...args) {
+  return iterSavedStarGifts(this._client, ...args)
+}
+TelegramClient.prototype.togglePinnedStarGifts = function (...args) {
+  return togglePinnedStarGifts(this._client, ...args)
+}
+TelegramClient.prototype.prepayStarGiftUpgrade = function (...args) {
+  return prepayStarGiftUpgrade(this._client, ...args)
+}
+TelegramClient.prototype.resolveStarGiftOffer = function (...args) {
+  return resolveStarGiftOffer(this._client, ...args)
+}
+TelegramClient.prototype.sendStarGiftOffer = function (...args) {
+  return sendStarGiftOffer(this._client, ...args)
+}
+TelegramClient.prototype.sendStarGift = function (...args) {
+  return sendStarGift(this._client, ...args)
+}
+TelegramClient.prototype.setResaleStarGiftPrice = function (...args) {
+  return setResaleStarGiftPrice(this._client, ...args)
+}
+TelegramClient.prototype.transferStarGift = function (...args) {
+  return transferStarGift(this._client, ...args)
+}
+TelegramClient.prototype.upgradeStarGift = function (...args) {
+  return upgradeStarGift(this._client, ...args)
+}
 TelegramClient.prototype.createInviteLink = function (...args) {
   return createInviteLink(this._client, ...args)
 }
@@ -7098,17 +7215,8 @@ TelegramClient.prototype.cancelPasswordEmail = function (...args) {
 TelegramClient.prototype.removeCloudPassword = function (...args) {
   return removeCloudPassword(this._client, ...args)
 }
-TelegramClient.prototype._normalizeInputStarGift = function (...args) {
-  return _normalizeInputStarGift(this._client, ...args)
-}
-TelegramClient.prototype.acceptStarGift = function (...args) {
-  return acceptStarGift(this._client, ...args)
-}
 TelegramClient.prototype.applyBoost = function (...args) {
   return applyBoost(this._client, ...args)
-}
-TelegramClient.prototype.buyResaleGift = function (...args) {
-  return buyResaleGift(this._client, ...args)
 }
 TelegramClient.prototype.canApplyBoost = function (...args) {
   return canApplyBoost(this._client, ...args)
@@ -7137,62 +7245,20 @@ TelegramClient.prototype.getBusinessConnection = function (...args) {
 TelegramClient.prototype.getMyBoostSlots = function (...args) {
   return getMyBoostSlots(this._client, ...args)
 }
-TelegramClient.prototype.getStarGiftResaleOptions = function (...args) {
-  return getStarGiftResaleOptions(this._client, ...args)
-}
-TelegramClient.prototype.getSavedStarGiftsById = function (...args) {
-  return getSavedStarGiftsById(this._client, ...args)
-}
-TelegramClient.prototype.getSavedStarGifts = function (...args) {
-  return getSavedStarGifts(this._client, ...args)
-}
-TelegramClient.prototype.getStarGiftOptions = function (...args) {
-  return getStarGiftOptions(this._client, ...args)
-}
-TelegramClient.prototype.getStarGiftValue = function (...args) {
-  return getStarGiftValue(this._client, ...args)
-}
-TelegramClient.prototype.getStarGiftWithdrawalUrl = function (...args) {
-  return getStarGiftWithdrawalUrl(this._client, ...args)
-}
 TelegramClient.prototype.getStarsTransactions = function (...args) {
   return getStarsTransactions(this._client, ...args)
-}
-TelegramClient.prototype.getUniqueStarGift = function (...args) {
-  return getUniqueStarGift(this._client, ...args)
 }
 TelegramClient.prototype.iterBoosters = function (...args) {
   return iterBoosters(this._client, ...args)
 }
-TelegramClient.prototype.iterSavedStarGifts = function (...args) {
-  return iterSavedStarGifts(this._client, ...args)
-}
 TelegramClient.prototype.iterStarsTransactions = function (...args) {
   return iterStarsTransactions(this._client, ...args)
-}
-TelegramClient.prototype.togglePinnedStarGifts = function (...args) {
-  return togglePinnedStarGifts(this._client, ...args)
-}
-TelegramClient.prototype.prepayStarGiftUpgrade = function (...args) {
-  return prepayStarGiftUpgrade(this._client, ...args)
-}
-TelegramClient.prototype.sendStarGift = function (...args) {
-  return sendStarGift(this._client, ...args)
 }
 TelegramClient.prototype.setBusinessIntro = function (...args) {
   return setBusinessIntro(this._client, ...args)
 }
 TelegramClient.prototype.setBusinessWorkHours = function (...args) {
   return setBusinessWorkHours(this._client, ...args)
-}
-TelegramClient.prototype.setResaleStarGiftPrice = function (...args) {
-  return setResaleStarGiftPrice(this._client, ...args)
-}
-TelegramClient.prototype.transferStarGift = function (...args) {
-  return transferStarGift(this._client, ...args)
-}
-TelegramClient.prototype.upgradeStarGift = function (...args) {
-  return upgradeStarGift(this._client, ...args)
 }
 TelegramClient.prototype.addStickerToSet = function (...args) {
   return addStickerToSet(this._client, ...args)

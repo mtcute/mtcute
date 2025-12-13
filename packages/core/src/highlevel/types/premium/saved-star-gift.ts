@@ -119,6 +119,11 @@ export class SavedStarGift {
   get prepaidUpgradeHash(): string | null {
     return this.raw.prepaidUpgradeHash ?? null
   }
+
+  /** Number of the gift for limited-offer gifts */
+  get giftNum(): number | null {
+    return this.raw.giftNum ?? null
+  }
 }
 
 makeInspectable(SavedStarGift)

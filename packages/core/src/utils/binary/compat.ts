@@ -63,12 +63,14 @@ function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
         giftId: Long.ZERO,
       }
     case 'starGiftUnique_layer214':
+    case 'starGiftUnique_layer218':
       return replaceType(obj, 'starGiftUnique')
     case 'starGift_layer202':
     case 'starGift_layer206':
     case 'starGift_layer209':
     case 'starGift_layer211':
     case 'starGift_layer216':
+    case 'starGift_layer218':
       return replaceType(obj, 'starGift')
     default:
       return obj
@@ -129,6 +131,7 @@ function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessage
     case 'messageActionStarGift_layer197':
     case 'messageActionStarGift_layer211':
     case 'messageActionStarGift_layer216':
+    case 'messageActionStarGift_layer218':
       return {
         ...obj,
         _: 'messageActionStarGift',
@@ -206,11 +209,13 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'starGiftUnique_layer210':
     case 'starGiftUnique_layer211':
     case 'starGiftUnique_layer214':
+    case 'starGiftUnique_layer218':
     case 'starGift_layer202':
     case 'starGift_layer206':
     case 'starGift_layer209':
     case 'starGift_layer211':
     case 'starGift_layer216':
+    case 'starGift_layer218':
       return mapCompatStarGift(obj)
     case 'emojiStatus_layer197':
     case 'emojiStatusUntil_layer214':
@@ -231,6 +236,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'messageActionGiftCode_layer216':
     case 'messageActionGiftPremium_layer216':
     case 'messageActionStarGift_layer216':
+    case 'messageActionStarGift_layer218':
       return mapCompatMessageAction(obj)
     case 'userFull_layer199':
       return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
@@ -286,6 +292,12 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'premiumGiftOption_layer199':
       // can only be present in userFull_layer199, but we strip the field containing that
       return null!
+    case 'webPageAttributeStarGiftAuction_layer218':
+      return {
+        _: 'webPageAttributeStarGiftAuction',
+        gift: mapCompatStarGift(obj.gift),
+        endDate: obj.endDate,
+      }
     default:
       return obj
   }
