@@ -1,7 +1,8 @@
+import type { MaybePromise } from '@fuman/utils'
 import type { ConnectionKind } from '../../../network/network-manager.js'
 import type { ITelegramClient } from '../../client.types.js'
-import type { FileDownloadLocation, FileDownloadParameters } from '../../types/index.js'
 
+import type { FileDownloadLocation, FileDownloadParameters } from '../../types/index.js'
 import { ConditionVariable } from '@fuman/utils'
 import { parseFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
@@ -93,7 +94,16 @@ export async function _normalizeFileDownloadLocation(
 export async function* downloadAsIterable(
   client: ITelegramClient,
   input: FileDownloadLocation,
-  params?: FileDownloadParameters,
+  params?: FileDownloadParameters & {
+    /**
+     * A function to apply backpressure to the download.
+     *
+     * If the consumer isn't keeping up, the function is supposed to return a promise that resolves when the consumer is ready to receive more data.
+     *
+     * Note that this function will likely get called multiple times simultaneously, since the download is parallelized.
+     */
+    throttle?: (chunkSize: number) => MaybePromise<void>
+  },
 ): AsyncIterableIterator<Uint8Array> {
   const offset = params?.offset ?? 0
 
@@ -173,6 +183,11 @@ export async function* downloadAsIterable(
 
     if (ended) {
       return
+    }
+
+    const throttlePromise = params?.throttle?.(chunkSize)
+    if (throttlePromise) {
+      await throttlePromise
     }
 
     try {

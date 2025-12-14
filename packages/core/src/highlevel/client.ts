@@ -2538,7 +2538,16 @@ export interface TelegramClient extends ITelegramClient {
    */
   downloadAsIterable(
     input: FileDownloadLocation,
-    params?: FileDownloadParameters): AsyncIterableIterator<Uint8Array>
+    params?: FileDownloadParameters & {
+    /**
+     * A function to apply backpressure to the download.
+     *
+     * If the consumer isn't keeping up, the function is supposed to return a promise that resolves when the consumer is ready to receive more data.
+     *
+     * Note that this function will likely get called multiple times simultaneously, since the download is parallelized.
+     */
+      throttle?: (chunkSize: number) => MaybePromise<void>
+    }): AsyncIterableIterator<Uint8Array>
 
   /**
    * Download a remote file as a Node.js Readable stream.
@@ -2551,7 +2560,7 @@ export interface TelegramClient extends ITelegramClient {
     location: FileDownloadLocation,
     params?: FileDownloadParameters): import('node:stream').Readable
   /**
-   * Download a file and return it as a `@fuman/io` stream,
+   * Download a file and return it as a Web Stream,
    * streaming file contents.
    *
    * **Available**: ✅ both users and bots
@@ -2560,7 +2569,18 @@ export interface TelegramClient extends ITelegramClient {
    */
   downloadAsStream(
     location: FileDownloadLocation,
-    params?: FileDownloadParameters): ReadableStream<Uint8Array>
+    params?: FileDownloadParameters & {
+    /**
+     * If passed, the maximum number of bytes that can be buffered in the stream.
+     *
+     * If the consumer isn't keeping up, the stream will pause until the buffer is below this limit.
+     *
+     * Note that this parameter is not guaranteed to be strictly the maximum number of bytes
+     * buffered at once, since the underlying download is parallelized, and is treated merely as a hint.
+     * The actual number of bytes buffered at once can be as much as `partSize * numWorkers`
+     */
+      highWaterMark?: number
+    }): ReadableStream<Uint8Array>
   /**
    * Normalize a {@link InputFileLike} to `InputFile`,
    * uploading it if needed.
