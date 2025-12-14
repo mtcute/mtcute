@@ -32,7 +32,7 @@ export function parseDocument(doc: tl.RawDocument, media?: tl.RawMessageMediaDoc
     switch (attr._) {
       case 'documentAttributeAudio':
         if (attr.voice) {
-          return new Voice(doc, attr)
+          return new Voice(doc, attr, media)
         }
 
         return new Audio(doc, attr)

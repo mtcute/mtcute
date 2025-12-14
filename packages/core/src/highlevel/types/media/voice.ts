@@ -20,6 +20,7 @@ export class Voice extends RawDocument {
   constructor(
     doc: tl.RawDocument,
     readonly attr: tl.RawDocumentAttributeAudio,
+    readonly media?: tl.RawMessageMediaDocument | undefined,
   ) {
     super(doc)
   }
@@ -39,6 +40,11 @@ export class Voice extends RawDocument {
    */
   get waveform(): number[] {
     return decodeWaveform(this.attr.waveform!)
+  }
+
+  /** For self-destructing voice notes, TTL in seconds */
+  get ttlSeconds(): number | null {
+    return this.media?.ttlSeconds ?? null
   }
 }
 memoizeGetters(Voice, ['fileName', 'thumbnails', 'fileId', 'uniqueFileId', 'waveform'])
