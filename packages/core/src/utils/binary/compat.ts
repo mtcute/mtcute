@@ -100,6 +100,8 @@ function mapCompatMessageMedia(obj: tlCompat.TypeMessageMedia): tl.TypeMessageMe
   switch (obj._) {
     case 'messageMediaDocument_layer197':
       return replaceType(obj, 'messageMediaDocument')
+    case 'messageMediaDice_layer220':
+      return replaceType(obj, 'messageMediaDice')
     default:
       return obj
   }
@@ -182,6 +184,7 @@ function mapCompatMessage(obj: tlCompat.TypeMessage): tl.TypeMessage {
     case 'message_layer199':
     case 'message_layer204':
     case 'message_layer216':
+    case 'message_layer220':
       return {
         ...obj,
         _: 'message',
@@ -221,6 +224,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'emojiStatusUntil_layer214':
       return mapCompatEmojiStatus(obj)
     case 'messageMediaDocument_layer197':
+    case 'messageMediaDice_layer220':
       return mapCompatMessageMedia(obj)
     case 'channelFull_layer197':
     case 'channelFull_layer204':
@@ -272,6 +276,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'message_layer199':
     case 'message_layer204':
     case 'message_layer216':
+    case 'message_layer220':
     case 'messageService_layer204':
       return mapCompatMessage(obj)
     case 'messageReplyHeader_layer206':
