@@ -302,3 +302,55 @@ sudo zypper install python3 make gcc
 # Alpine Linux
 sudo apk add python3 make gcc
 ```
+
+## How to view logs?
+
+mtcute does quite a bit of debug logging, which is however not visible by default.
+To view these logs, you need to pass `logLevel: level` to the client constructor:
+
+```ts
+new TelegramClient({
+  ...,
+  logLevel: 5
+})
+```
+
+Additionally, you can use the `MTCUTE_LOG_LEVEL=5` environment variable (node/deno/bun):
+
+```
+MTCUTE_LOG_LEVEL=5 node my-script.js
+```
+
+Or `localStorage.MTCUTE_LOG_LEVEL = '5'` in browser
+
+### Log levels
+
+- `0`: Disable logging
+- `1`: Error: something went very wrong
+- `2`: Warning: something went wrong, but the library was able to recover
+- `3`: Info: basic information about what's happening
+- `4`: Debug: detailed information about how the library handles MTProto packets
+- `5`: Verbose: additionally prints all RPC requests and responses
+
+The default log level is 2 (Warning).
+When troubleshooting, it's recommended to set the log level to 4 or 5.
+
+::: warning
+Note that since every single request is logged on level 5, it will probably contain private information.
+Take care when sharing these logs!
+:::
+
+### Custom log handler
+
+You can also provide a custom log handler:
+
+```ts
+const tg = new TelegramClient({ ... })
+
+tg.log.mgr.handler = (color, level, tag, fmt, args) => {
+  // color: color for the tag, based on the tag
+  // level: log level
+  // tag: tag for the message (i.e. the scope of the library that produced the message)
+  // fmt, args: format string and its arguments, compatible with `console.log` (and `util.format`)
+}
+```
