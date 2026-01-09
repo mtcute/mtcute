@@ -114,7 +114,14 @@ export class MtprotoSession {
   queuedStateReq: Long[] = []
   queuedResendReq: Long[] = []
   queuedCancelReq: Long[] = []
-  getStateSchedule: SortedArray<PendingRpc> = new SortedArray<PendingRpc>([], (a, b) => a.getState! - b.getState!)
+  getStateSchedule: SortedArray<PendingRpc> = new SortedArray<PendingRpc>([], (a, b) => {
+    const diff = a.getState! - b.getState!
+    if (diff !== 0) return diff
+    // i *think* msgId should always be present here, but im not entirely sure
+    if (a.msgId && b.msgId) return a.msgId.compare(b.msgId)
+    return 0
+  })
+
   pendingGetStateTimeouts: LongMap<timers.Timer> = new LongMap()
 
   chains: Map<string | number, Long> = new Map()

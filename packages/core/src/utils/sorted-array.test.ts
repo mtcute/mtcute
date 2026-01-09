@@ -83,4 +83,24 @@ describe('SortedArray', () => {
     expect(arr.includes(5)).toBeTruthy()
     expect(arr.includes(10)).toBeFalsy()
   })
+
+  it('should correctly remove items with equal comparator value', () => {
+    interface Value { n: number, item: number }
+
+    const val1: Value = { n: 1, item: 1 }
+    const val2: Value = { n: 1, item: 2 }
+
+    const arr = new SortedArray<Value>([], (a, b) => a.n - b.n)
+
+    arr.insert(val1)
+    arr.insert(val2)
+
+    expect(arr.raw.length).toBe(2)
+    expect(arr.raw).toEqual([val1, val2])
+
+    arr.remove(val1)
+
+    expect(arr.raw.length).toBe(1)
+    expect(arr.raw).toEqual([val2])
+  })
 })

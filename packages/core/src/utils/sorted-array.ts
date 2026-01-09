@@ -78,7 +78,8 @@ export class SortedArray<T> {
   }
 
   remove(item: T): void {
-    const idx = this.index(item)
+    // ! we dont use this.index() because we need identity comparison
+    const idx = this.raw.indexOf(item)
     if (idx === -1) return
 
     this.raw.splice(idx, 1)
