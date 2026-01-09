@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/html-parser",
     "type": "module",
-    "version": "0.27.5",
+    "version": "0.27.6",
     "private": true,
     "description": "HTML entities parser for mtcute",
     "author": "alina sireneva <alina@tei.su>",
