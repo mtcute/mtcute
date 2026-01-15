@@ -53,10 +53,15 @@ console.log(`Logged in as ${self.displayName}`)
 ```
 
 ::: tip
-`tg.input` is a tiny wrapper over `readline` module in Node.js,
+`tg.input` is a tiny wrapper over the `node:readline` module,
 that will ask you for input in the console.
 
 It's not available in `@mtcute/core`, since it is platform-agnostic
+:::
+
+::: warning
+If you are using some kind of watcher (notably, [tsx](https://github.com/privatenumber/tsx/issues/163) suffers from this), 
+you may run into issues when entering the values. In that case, try disabling the watcher functionality when logging in.
 :::
 
 
@@ -74,6 +79,30 @@ const tg = new TelegramClient({
 
 const self = await tg.start({
   botToken: '12345678:0123456789abcdef0123456789abcdef'
+})
+console.log(`Logged in as ${self.displayName}`)
+```
+
+## QR sign in
+
+mtcute also supports QR code sign in:
+
+```ts
+import { encodeQR } from 'qr'
+
+// Replace with your own values
+const tg = new TelegramClient({
+  apiId: API_ID,
+  apiHash: 'API_HASH'
+})
+
+const self = await tg.start({
+  qrCodeHandler: (url, expires) => {
+    // display the `url` as the qr code to the user, for example print it to console:
+    console.log(encodeQR(url, 'ascii'))
+  },
+  // logging in via qr still requires entering a 2fa password if you have one set up
+  password: () => tg.input('Password > ')
 })
 console.log(`Logged in as ${self.displayName}`)
 ```
@@ -102,8 +131,15 @@ const tg = new TelegramClient({
 ```
 
 ```bash
-dotenv ts-node your-file.ts
+dotenv tsx your-file.ts
 ```
+
+::: note
+When making a public-facing client application, you'll inevitably expose them to the public,
+so it's not like it's game over if they get leaked.
+
+Nevertheless, it is still usually a good practice to not hardcode them.
+:::
 
 ## Using a proxy
 
