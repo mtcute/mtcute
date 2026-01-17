@@ -1117,8 +1117,12 @@ export class SessionConnection extends PersistentConnection {
           this._session.pendingGetStateTimeouts.delete(msgId)
         }
 
-        this._session.queuedStateReq.unshift(...msgInfo.msgIds)
-        this._flushTimer.emitWhenIdle()
+        // only re-queue msg_ids that are still pending
+        const stillPending = msgInfo.msgIds.filter(id => this._session.pendingMessages.has(id))
+        if (stillPending.length > 0) {
+          this._session.queuedStateReq.unshift(...stillPending)
+          this._flushTimer.emitWhenIdle()
+        }
         break
       }
       case 'bind':
@@ -1348,6 +1352,8 @@ export class SessionConnection extends PersistentConnection {
 
       return
     }
+
+    this.log.debug('received msgs_state_info for %l', msg.reqMsgId)
 
     this._session.pendingMessages.delete(msg.reqMsgId)
 
