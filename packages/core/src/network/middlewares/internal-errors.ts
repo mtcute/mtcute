@@ -71,9 +71,10 @@ export function internalErrorsHandler(params: InternalErrorsHandlerOptions): Rpc
         const waitSeconds = res.errorMessage === 'WORKER_BUSY_TOO_LONG_RETRY' ? Math.max(1, waitTime) : waitTime
 
         ctx.manager._log.warn(
-          'Telegram is having internal issues: %d:%s, retrying in %ds',
+          'Telegram is having internal issues: %d:%s (%s), retrying in %ds',
           res.errorCode,
           res.errorMessage,
+          ctx.request._,
           waitSeconds,
         )
 
