@@ -45,7 +45,7 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
 
 const TEMP_AUTH_KEY_EXPIRY = 86400 // 24 hours
 const GET_STATE_INTERVAL = 1500 // 1.5 seconds
-const GET_STATE_TIMEOUT = 2000 // 2 seconds
+const GET_STATE_TIMEOUT = 2500 // 2 seconds
 
 // destroy_auth_key#d1435160 = DestroyAuthKeyRes;
 // const DESTROY_AUTH_KEY = Buffer.from('605134d1', 'hex')
@@ -1336,9 +1336,19 @@ export class SessionConnection extends PersistentConnection {
   private _onMsgsStateInfo(msg: mtp.RawMt_msgs_state_info): void {
     const info = this._session.pendingMessages.get(msg.reqMsgId)
 
+    let timer: timers.Timer | undefined
+    if (timer = this._session.pendingGetStateTimeouts.get(msg.reqMsgId)) {
+      timers.clearTimeout(timer)
+      this._session.pendingGetStateTimeouts.delete(msg.reqMsgId)
+    }
+
     if (!info) {
-      if (this._session.recentOutgoingMsgIds.has(msg.reqMsgId)) {
-        // it probably timed out or was cancelled, ignore
+      const msgIdsFromRecents = this._session.recentStateRequests.get(msg.reqMsgId)
+      if (msgIdsFromRecents) {
+        // the initial message has probably been cancelled or timed out, but we should still process the state info
+        // to avoid stalling in case of a timed out request
+        this._session.recentStateRequests.delete(msg.reqMsgId)
+        this._onMessagesInfo(msgIdsFromRecents, msg.info)
         return
       }
 
@@ -1356,13 +1366,6 @@ export class SessionConnection extends PersistentConnection {
     this.log.debug('received msgs_state_info for %l', msg.reqMsgId)
 
     this._session.pendingMessages.delete(msg.reqMsgId)
-
-    let timer: timers.Timer | undefined
-    if (timer = this._session.pendingGetStateTimeouts.get(msg.reqMsgId)) {
-      timers.clearTimeout(timer)
-      this._session.pendingGetStateTimeouts.delete(msg.reqMsgId)
-    }
-
     this._onMessagesInfo(info.msgIds, msg.info)
   }
 
@@ -1936,6 +1939,7 @@ export class SessionConnection extends PersistentConnection {
         containerId: getStateMsgId,
       }
       this._session.pendingMessages.set(getStateMsgId, getStatePending)
+      this._session.recentStateRequests.set(getStateMsgId, getStatePending.msgIds)
       otherPendings.push(getStatePending)
 
       const timeout = timers.setTimeout(this._handleGetStateTimeout, GET_STATE_TIMEOUT, getStateMsgId)
