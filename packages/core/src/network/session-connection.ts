@@ -1249,7 +1249,7 @@ export class SessionConnection extends PersistentConnection {
           this._session.pendingMessages.delete(msgId)
         }
 
-        return
+        continue
       }
 
       const containerId = val._ === 'rpc' ? val.rpc.containerId || msgId : val.containerId
@@ -1278,7 +1278,6 @@ export class SessionConnection extends PersistentConnection {
         case 3:
           // message wasn't received by the server
           return this._onMessageFailed(msgId, `message info state ${status}`)
-          break
 
         case 0:
           if (!answerMsgId.isZero()) {
@@ -1289,7 +1288,7 @@ export class SessionConnection extends PersistentConnection {
               answerMsgId,
             )
 
-            return this._onMessageFailed(msgId, 'message info state = 0, ans_id = 0')
+            return this._onMessageFailed(msgId, 'message info state = 0 with unexpected ans_id')
           }
           // fallthrough
         case 4:
@@ -2119,9 +2118,9 @@ export class SessionConnection extends PersistentConnection {
       getStateMsgIds,
       getStateMsgId,
       resendMsgIds,
-      cancelRpcs,
-      cancelRpcs,
       resendMsgId,
+      cancelRpcs,
+      cancelRpcs,
       getFutureSaltsRequest,
       getFutureSaltsMsgId,
       rpcToSend.map(it => it.method),

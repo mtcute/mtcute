@@ -107,6 +107,7 @@ export class MtprotoSession {
   // recent msg ids
   recentOutgoingMsgIds: LruSet<Long> = new LruSet(1000, LongSet)
   recentIncomingMsgIds: LruSet<Long> = new LruSet(1000, LongSet)
+  // eslint-disable-next-line ts/no-unsafe-argument
   recentStateRequests: LruMap<Long, Long[]> = new LruMap(1000, LongMap as any)
 
   // queues
@@ -163,7 +164,8 @@ export class MtprotoSession {
       this.queuedRpc.length
       || this.queuedAcks.length
       || this.queuedStateReq.length
-      || this.queuedResendReq.length,
+      || this.queuedResendReq.length
+      || this.queuedCancelReq.length,
     )
   }
 
