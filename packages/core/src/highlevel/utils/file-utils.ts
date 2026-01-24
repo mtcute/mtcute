@@ -12,7 +12,7 @@ export function determinePartSize(fileSize: number): number {
   if (fileSize <= 786432000) return 256 // 750 MB
   if (fileSize <= 2097152000) return 512 // 2000 MB
 
-  throw new MtArgumentError('File is too large')
+  return 1024
 }
 
 /**
