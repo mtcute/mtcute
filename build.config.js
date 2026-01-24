@@ -87,5 +87,11 @@ export default {
     ],
     sourceLinkTemplate: 'https://github.com/mtcute/mtcute/blob/{gitRevision}/{path}#L{line}',
   },
+  lint: {
+    externalDependencies: {
+      // due to jsr libraries
+      shouldSkip: ctx => ctx.package.json.name === '@mtcute/deno',
+    },
+  },
   viteConfig: '.config/vite.build.ts',
 }

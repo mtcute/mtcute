@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@mtcute/core": "workspace:^",
-    "@fuman/utils": "0.0.17"
+    "@fuman/utils": "0.0.19"
   },
   "devDependencies": {
     "@mtcute/test": "workspace:^"

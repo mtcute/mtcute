@@ -17,9 +17,9 @@
     "@mtcute/html-parser": "workspace:^",
     "@mtcute/markdown-parser": "workspace:^",
     "@mtcute/wasm": "workspace:^",
-    "@fuman/utils": "0.0.17",
-    "@fuman/net": "0.0.17",
-    "@fuman/node": "0.0.17",
+    "@fuman/utils": "0.0.19",
+    "@fuman/net": "0.0.19",
+    "@fuman/node": "0.0.19",
     "better-sqlite3": "^12.4.1"
   },
   "devDependencies": {
