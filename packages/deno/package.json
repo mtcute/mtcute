@@ -13,7 +13,6 @@
         "./methods.js": "./src/methods.ts"
     },
     "dependencies": {
-        "@db/sqlite": "npm:@jsr/db__sqlite@0.12.0",
         "@fuman/utils": "npm:@jsr/fuman__utils@0.0.19",
         "@fuman/net": "npm:@jsr/fuman__net@0.0.19",
         "@fuman/io": "npm:@jsr/fuman__io@0.0.19",

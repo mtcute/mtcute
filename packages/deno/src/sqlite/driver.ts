@@ -1,10 +1,9 @@
-import type { BindParameters, Database as TDatabase, Statement as TStatement } from '@db/sqlite'
 import type { ISqliteDatabase, ISqliteStatement } from '@mtcute/core'
+import type { DatabaseSyncOptions, SQLInputValue, StatementSync } from 'node:sqlite'
 import type { Logger } from '../utils.js'
+import { DatabaseSync } from 'node:sqlite'
 
 import { BaseSqliteStorageDriver } from '@mtcute/core'
-
-let Database: typeof import('@db/sqlite').Database
 
 export interface SqliteStorageDriverOptions {
   /**
@@ -18,57 +17,58 @@ export interface SqliteStorageDriverOptions {
    * @default  false
    */
   disableWal?: boolean
-}
 
-function replaceBigintsWithNumber(obj?: object): object | undefined {
-  if (!obj) return obj
-
-  for (const [key, value] of Object.entries(obj)) {
-    if (typeof value === 'bigint') {
-      (obj as any)[key] = Number(value)
-    }
-  }
-
-  return obj
+  /** Extra options to pass to `node:sqlite` */
+  extra?: DatabaseSyncOptions
 }
 
 class WrappedStatement implements ISqliteStatement {
   constructor(
-    private stmt: TStatement,
-    private sql: string,
+    private stmt: StatementSync,
     private log: Logger,
   ) {}
 
   run(...params: unknown[]): void {
-    this.log.verbose('RUN %s %o', this.sql, params)
-    this.stmt.run(...(params as BindParameters[]))
+    this.log.verbose('RUN %s %o', this.stmt.sourceSQL, params)
+    this.stmt.run(...(params as SQLInputValue[]))
   }
 
   get(...params: unknown[]): unknown {
-    this.log.verbose('GET %s %o', this.sql, params)
+    this.log.verbose('GET %s %o', this.stmt.sourceSQL, params)
 
-    return replaceBigintsWithNumber(this.stmt.get(...(params as BindParameters[])))
+    return this.stmt.get(...(params as SQLInputValue[]))
   }
 
   all(...params: unknown[]): unknown[] {
-    this.log.verbose('ALL %s %o', this.sql, params)
+    this.log.verbose('ALL %s %o', this.stmt.sourceSQL, params)
 
-    return this.stmt.all(...(params as BindParameters[])).map(replaceBigintsWithNumber)
+    return this.stmt.all(...(params as SQLInputValue[])) // .map(replaceBigintsWithNumber)
   }
 }
 
 class WrappedDatabase implements ISqliteDatabase {
   constructor(
-    private db: TDatabase,
+    private db: DatabaseSync,
     private log: Logger,
   ) {}
 
-  transaction(fn: any): any {
-    return this.db.transaction(fn)
+  transaction<F extends (...args: any[]) => any>(fn: F): F {
+    return ((...args) => {
+      const session = this.db.createSession()
+      try {
+        // eslint-disable-next-line ts/no-unsafe-assignment, ts/no-unsafe-argument
+        const res = fn(...args)
+        this.db.applyChangeset(session.changeset())
+        // eslint-disable-next-line ts/no-unsafe-return
+        return res
+      } finally {
+        session.close()
+      }
+    }) as F
   }
 
   prepare<BindParameters extends unknown[]>(sql: string): ISqliteStatement<BindParameters> {
-    return new WrappedStatement(this.db.prepare(sql), sql, this.log)
+    return new WrappedStatement(this.db.prepare(sql), this.log)
   }
 
   exec(sql: string): void {
@@ -88,20 +88,11 @@ export class SqliteStorageDriver extends BaseSqliteStorageDriver {
     super()
   }
 
-  override async _load(): Promise<void> {
-    if (!Database) {
-      // we load this lazily to avoid loading ffi if it's not needed,
-      // in case the user doesn't use sqlite storage
-      Database = (await import('@db/sqlite')).Database
-    }
-    await super._load()
-  }
-
   _createDatabase(): ISqliteDatabase {
     // non-int64 mode trims numbers to 32 bits, and we don't want that
     // but int64 mode returns all numbers as bigints, but mtcute expects them
     // as numbers, so we need to convert them... thx deno
-    const db = new Database(this.filename, { int64: true })
+    const db = new DatabaseSync(this.filename, this.params?.extra)
 
     if (!this.params?.disableWal) {
       db.exec('PRAGMA journal_mode = WAL;')

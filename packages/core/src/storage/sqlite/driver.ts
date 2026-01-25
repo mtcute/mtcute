@@ -129,7 +129,7 @@ export abstract class BaseSqliteStorageDriver extends BaseStorageDriver {
 
     this._runMany = this.db.transaction((stmts: [ISqliteStatement, unknown[]][]) => {
       stmts.forEach((stmt) => {
-        stmt[0].run(stmt[1])
+        stmt[0].run(...stmt[1])
       })
     })
 
