@@ -19,21 +19,12 @@ export class ServerSaltManager {
     // todo: we should use adjusted monotonic clock here
     const now = Date.now() / 1000
 
-    // Remove expired salts
-    while (salts.length > 0 && now > salts[0].validUntil) {
+    while (salts.length > 0 && salts[0].validSince <= now) {
       this.currentSalt = salts[0].salt
       this._futureSalts.shift()
     }
 
-    // Remove and activate currently-valid salt
-    if (salts.length > 0 && salts[0].validSince <= now) {
-      this.currentSalt = salts[0].salt
-      this._futureSalts.shift()
-    }
-
-    if (!this._futureSalts.length) {
-      // No future salts, keep current
-    } else {
+    if (this._futureSalts.length) {
       this._scheduleReplace(this._futureSalts[0])
     }
   }
