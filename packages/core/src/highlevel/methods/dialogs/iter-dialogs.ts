@@ -325,6 +325,12 @@ export async function* iterDialogs(
 
     for (const d of dialogs) {
       if (filterFolder && !filterFolder(d)) continue
+      if (d.isPinned) {
+        // server returns pinned chats from both folders regardless of the folderId passed
+        // filter them client-side
+        if (archived === 'exclude' && d.isArchived) continue
+        if (archived === 'only' && !d.isArchived) continue
+      }
 
       yield d
       if (++current >= limit) return
