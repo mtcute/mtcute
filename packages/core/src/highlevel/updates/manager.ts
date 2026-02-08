@@ -5,7 +5,7 @@ import type {
 import type { BaseTelegramClient } from '../base.js'
 
 import type { PendingUpdate, PendingUpdateContainer, UpdatesManagerParams } from './types.js'
-import { AsyncLock, ConditionVariable, Deque, timers, unknownToError } from '@fuman/utils'
+import { AsyncLock, ConditionVariable, Deque, LruSet, timers, unknownToError } from '@fuman/utils'
 import { tl } from '@mtcute/tl'
 import Long from 'long'
 import { MtArgumentError } from '../../types/errors.js'
@@ -125,6 +125,11 @@ export class UpdatesManager {
   // channel id or 0 => pts
   noDispatchPts: Map<number, Set<number>> = new Map()
   noDispatchQts: Set<number> = new Set()
+
+  // message IDs from common message box that were dispatched recently,
+  // used to deduplicate messages from getDifference.newMessages that may have
+  // already been processed via regular pts-ordered updates
+  _recentlyDispatchedCommonMsgs: LruSet<number> = new LruSet(100)
 
   lock: AsyncLock = new AsyncLock()
   // rpsIncoming?: RpsMeter
@@ -1083,6 +1088,16 @@ export class UpdatesManager {
 
       if (message._ === 'messageEmpty') return
 
+      // deduplicate against messages already dispatched via regular pts-ordered updates.
+      // this can happen when a channel diff fails and falls back to common diff:
+      // the common diff is requested with the old pts, but by the time the response arrives,
+      // some of its messages may have already been dispatched via regular updates.
+      if (this._recentlyDispatchedCommonMsgs.has(message.id)) {
+        log.debug('skipping message %d from common diff because it was already dispatched', message.id)
+
+        return
+      }
+
       // pts does not need to be checked for them
       pendingUnorderedUpdates.pushBack(toPendingUpdate(messageToUpdate(message), peers, true))
     })
@@ -1374,6 +1389,11 @@ export class UpdatesManager {
     }
 
     log.debug('dispatching %s (postponed = %s)', upd._, postponed)
+
+    if (upd._ === 'updateNewMessage' && upd.message._ !== 'messageEmpty') {
+      this._recentlyDispatchedCommonMsgs.add(upd.message.id)
+    }
+
     client.onRawUpdate.emit(new RawUpdateInfo(upd, pending.peers))
   }
 
