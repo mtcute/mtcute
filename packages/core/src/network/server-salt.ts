@@ -32,10 +32,11 @@ export class ServerSaltManager {
   private _timer?: timers.Timer
 
   private _scheduleReplace(salt: mtp.RawMt_future_salt): void {
+    const delay = Math.max(0, salt.validSince * 1000 - Date.now())
     this._timer = timers.setTimeout(() => {
       this.currentSalt = salt.salt
       this._replaceAndScheduleNext()
-    }, salt.validSince * 1000 - Date.now())
+    }, delay)
   }
 
   private _replaceAndScheduleNext(): void {
