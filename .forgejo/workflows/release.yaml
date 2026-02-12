@@ -38,7 +38,7 @@ jobs:
       - uses: https://github.com/denoland/setup-deno@v2
         # https://github.com/denoland/deno/issues/31304
         with:
-          deno-version: 2.5.6
+          deno-version: 2.6.9
       - name: Initialize configs
         env:
           GH_PRIVKEY: ${{ secrets.GH_PRIVKEY }}
@@ -58,6 +58,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # https://github.com/denoland/deno/issues/32150
+          unset GITHUB_ACTIONS
+          unset ACTIONS_ID_TOKEN_REQUEST_URL
+
           pnpm exec fuman-build release \
             --kind=${{ github.event.inputs.kind }} \
             --with-npm \

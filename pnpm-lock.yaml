@@ -15,8 +15,8 @@ importers:
         specifier: ^6.2.0
         version: 6.6.1(@vue/compiler-sfc@3.5.25)(eslint@9.39.2)(typescript@5.9.3)(vitest@4.0.18)
       '@fuman/build':
-        specifier: 0.0.19
-        version: 0.0.19(typedoc@0.28.15(typescript@5.9.3))(typescript@5.9.3)(vite@7.2.7(@types/node@24.10.3)(tsx@4.17.0)(yaml@2.8.2))(ws@8.18.3)
+        specifier: https://pkg.pr.new/teidesu/fuman/@fuman/build@5058cc0
+        version: https://pkg.pr.new/teidesu/fuman/@fuman/build@5058cc0(typedoc@0.28.15(typescript@5.9.3))(typescript@5.9.3)(vite@7.2.7(@types/node@24.10.3)(tsx@4.17.0)(yaml@2.8.2))(ws@8.18.3)
       '@fuman/utils':
         specifier: 0.0.19
         version: 0.0.19
@@ -1256,8 +1256,9 @@ packages:
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@fuman/build@0.0.19':
-    resolution: {integrity: sha512-y7l8odvmdVaJiRDkDeaUtSh44Eydm58YiHZycUfhaAUn3t9rKBul0pcTrRYPVO2Rph+JPYS4x+1drwsL98DYqQ==}
+  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@5058cc0':
+    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/build@5058cc0}
+    version: 0.0.19
     hasBin: true
     peerDependencies:
       typedoc: '>=0.24.0'
@@ -1286,6 +1287,15 @@ packages:
 
   '@fuman/node@0.0.19':
     resolution: {integrity: sha512-1VNTBb47yrN5BzuXiP4t6An7mDPklH5N+vUtkeL3XATK+xWbtlQsSsU244T7iqGurmDpYrLM9kIUjdMFm8OhDw==}
+    peerDependencies:
+      ws: ^8.18.1
+    peerDependenciesMeta:
+      ws:
+        optional: true
+
+  '@fuman/node@https://pkg.pr.new/teidesu/fuman/@fuman/node@5058cc08107a5343654b8576487788706a13851d':
+    resolution: {tarball: https://pkg.pr.new/teidesu/fuman/@fuman/node@5058cc08107a5343654b8576487788706a13851d}
+    version: 0.0.19
     peerDependencies:
       ws: ^8.18.1
     peerDependenciesMeta:
@@ -4683,12 +4693,12 @@ snapshots:
       '@eslint/core': 0.17.0
       levn: 0.4.1
 
-  '@fuman/build@0.0.19(typedoc@0.28.15(typescript@5.9.3))(typescript@5.9.3)(vite@7.2.7(@types/node@24.10.3)(tsx@4.17.0)(yaml@2.8.2))(ws@8.18.3)':
+  '@fuman/build@https://pkg.pr.new/teidesu/fuman/@fuman/build@5058cc0(typedoc@0.28.15(typescript@5.9.3))(typescript@5.9.3)(vite@7.2.7(@types/node@24.10.3)(tsx@4.17.0)(yaml@2.8.2))(ws@8.18.3)':
     dependencies:
       '@drizzle-team/brocli': 0.11.0
       '@fuman/fetch': 0.5.0
       '@fuman/io': 0.0.19
-      '@fuman/node': 0.0.19(ws@8.18.3)
+      '@fuman/node': https://pkg.pr.new/teidesu/fuman/@fuman/node@5058cc08107a5343654b8576487788706a13851d(ws@8.18.3)
       '@fuman/utils': 0.0.19
       cross-spawn: 7.0.6
       detect-indent: 7.0.2
@@ -4727,6 +4737,14 @@ snapshots:
       '@fuman/utils': 0.0.19
 
   '@fuman/node@0.0.19(ws@8.18.3)':
+    dependencies:
+      '@fuman/io': 0.0.19
+      '@fuman/net': 0.0.19
+      '@fuman/utils': 0.0.19
+    optionalDependencies:
+      ws: 8.18.3
+
+  '@fuman/node@https://pkg.pr.new/teidesu/fuman/@fuman/node@5058cc08107a5343654b8576487788706a13851d(ws@8.18.3)':
     dependencies:
       '@fuman/io': 0.0.19
       '@fuman/net': 0.0.19

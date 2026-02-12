@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^6.2.0",
-    "@fuman/build": "0.0.19",
+    "@fuman/build": "https://pkg.pr.new/teidesu/fuman/@fuman/build@5058cc0",
     "@fuman/utils": "0.0.19",
     "@types/bun": "^1.3.2",
     "@types/deno": "^2.5.0",
