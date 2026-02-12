@@ -5,7 +5,7 @@ import type { BasicDcOption } from '@mtcute/core/utils.js'
 import type { SecureContextOptions } from 'node:tls'
 import { performHttpProxyHandshake, performSocksHandshake } from '@fuman/net'
 import { connectTcp, connectTls } from '@fuman/node'
-import { BaseMtProxyTransport, IntermediatePacketCodec } from '@mtcute/core'
+import { BaseMtProxyTransport, createProxyTransportFactory, IntermediatePacketCodec } from '@mtcute/core'
 
 export type { SocksProxySettings } from '@fuman/net'
 export { HttpProxyConnectionError, SocksProxyConnectionError } from '@fuman/net'
@@ -83,3 +83,20 @@ export class MtProxyTcpTransport extends BaseMtProxyTransport {
     return connectTcp(endpoint)
   }
 }
+
+/**
+ * Create a proxy transport based on an url.
+ *
+ * Supported URLs (self-explanatory):
+ * - `socks4://user:pass@1.2.3.4:80`
+ * - `socks5://user:pass@1.2.3.4:80`
+ * - `http://user:pass@1.2.3.4:80`
+ * - `https://user:pass@1.2.3.4:443`
+ * - `https://t.me/proxy?server=example.com&port=443&secret=3dpBFlW2hP6Hq_WOwiNeKBY`
+ * @returns  Transport for that proxy
+ */
+export const proxyTransportFromUrl: (url: string) => TelegramTransport = createProxyTransportFactory({
+  SocksProxyTcpTransport,
+  HttpProxyTcpTransport,
+  MtProxyTcpTransport,
+})
