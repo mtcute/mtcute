@@ -26,6 +26,31 @@ function dropFields<T extends tlCompat.TlObject, const Fields extends (keyof T)[
   return obj
 }
 
+function mapCompatStarGiftAttribute(obj: tlCompat.TypeStarGiftAttribute): tl.TypeStarGiftAttribute {
+  switch (obj._) {
+    case 'starGiftAttributeBackdrop_layer221':
+      return {
+        ...dropFields(obj, ['rarityPermille']),
+        _: 'starGiftAttributeBackdrop',
+        rarity: { _: 'starGiftAttributeRarity', permille: obj.rarityPermille },
+      }
+    case 'starGiftAttributePattern_layer221':
+      return {
+        ...dropFields(obj, ['rarityPermille']),
+        _: 'starGiftAttributePattern',
+        rarity: { _: 'starGiftAttributeRarity', permille: obj.rarityPermille },
+      }
+    case 'starGiftAttributeModel_layer221':
+      return {
+        ...dropFields(obj, ['rarityPermille']),
+        _: 'starGiftAttributeModel',
+        rarity: { _: 'starGiftAttributeRarity', permille: obj.rarityPermille },
+      }
+    default:
+      return obj
+  }
+}
+
 function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
   switch (obj._) {
     case 'starGiftUnique_layer197':
@@ -34,6 +59,7 @@ function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
         _: 'starGiftUnique',
         giftId: Long.ZERO,
         ownerId: obj.ownerId ? { _: 'peerUser', userId: obj.ownerId } : undefined,
+        attributes: obj.attributes.map(mapCompatStarGiftAttribute),
       }
     case 'starGiftUnique_layer198':
     case 'starGiftUnique_layer202':
@@ -42,12 +68,14 @@ function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
         ...obj,
         _: 'starGiftUnique',
         giftId: Long.ZERO,
+        attributes: obj.attributes.map(mapCompatStarGiftAttribute),
       }
     case 'starGiftUnique_layer210':
       return {
         ...obj,
         _: 'starGiftUnique',
         giftId: Long.ZERO,
+        attributes: obj.attributes.map(mapCompatStarGiftAttribute),
         resellAmount: obj.resellStars
           ? [{
               _: 'starsAmount',
@@ -61,10 +89,16 @@ function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
         ...obj,
         _: 'starGiftUnique',
         giftId: Long.ZERO,
+        attributes: obj.attributes.map(mapCompatStarGiftAttribute),
       }
     case 'starGiftUnique_layer214':
     case 'starGiftUnique_layer218':
-      return replaceType(obj, 'starGiftUnique')
+    case 'starGiftUnique_layer221':
+      return {
+        ...obj,
+        _: 'starGiftUnique',
+        attributes: obj.attributes.map(mapCompatStarGiftAttribute),
+      }
     case 'starGift_layer202':
     case 'starGift_layer206':
     case 'starGift_layer209':
@@ -112,6 +146,7 @@ function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessage
     case 'messageActionStarGiftUnique_layer197':
     case 'messageActionStarGiftUnique_layer202':
     case 'messageActionStarGiftUnique_layer214':
+    case 'messageActionStarGiftUnique_layer221':
       return {
         ...obj,
         _: 'messageActionStarGiftUnique',
@@ -203,6 +238,30 @@ function mapCompatMessage(obj: tlCompat.TypeMessage): tl.TypeMessage {
   }
 }
 
+function mapCompatKeyboardButton(obj: tlCompat.TypeKeyboardButton): tl.TypeKeyboardButton {
+  switch (obj._) {
+    case 'keyboardButton_layer221': return replaceType(obj, 'keyboardButton')
+    case 'keyboardButtonUrl_layer221': return replaceType(obj, 'keyboardButtonUrl')
+    case 'keyboardButtonCallback_layer221': return replaceType(obj, 'keyboardButtonCallback')
+    case 'keyboardButtonRequestPhone_layer221': return replaceType(obj, 'keyboardButtonRequestPhone')
+    case 'keyboardButtonRequestGeoLocation_layer221': return replaceType(obj, 'keyboardButtonRequestGeoLocation')
+    case 'keyboardButtonSwitchInline_layer221': return replaceType(obj, 'keyboardButtonSwitchInline')
+    case 'keyboardButtonGame_layer221': return replaceType(obj, 'keyboardButtonGame')
+    case 'keyboardButtonBuy_layer221': return replaceType(obj, 'keyboardButtonBuy')
+    case 'keyboardButtonUrlAuth_layer221': return replaceType(obj, 'keyboardButtonUrlAuth')
+    case 'inputKeyboardButtonUrlAuth_layer221': return replaceType(obj, 'inputKeyboardButtonUrlAuth')
+    case 'keyboardButtonRequestPoll_layer221': return replaceType(obj, 'keyboardButtonRequestPoll')
+    case 'inputKeyboardButtonUserProfile_layer221': return replaceType(obj, 'inputKeyboardButtonUserProfile')
+    case 'keyboardButtonUserProfile_layer221': return replaceType(obj, 'keyboardButtonUserProfile')
+    case 'keyboardButtonWebView_layer221': return replaceType(obj, 'keyboardButtonWebView')
+    case 'keyboardButtonSimpleWebView_layer221': return replaceType(obj, 'keyboardButtonSimpleWebView')
+    case 'keyboardButtonRequestPeer_layer221': return replaceType(obj, 'keyboardButtonRequestPeer')
+    case 'inputKeyboardButtonRequestPeer_layer221': return replaceType(obj, 'inputKeyboardButtonRequestPeer')
+    case 'keyboardButtonCopy_layer221': return replaceType(obj, 'keyboardButtonCopy')
+    default: return obj
+  }
+}
+
 function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
   switch (obj._) {
     case 'starGiftUnique_layer197':
@@ -213,6 +272,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'starGiftUnique_layer211':
     case 'starGiftUnique_layer214':
     case 'starGiftUnique_layer218':
+    case 'starGiftUnique_layer221':
     case 'starGift_layer202':
     case 'starGift_layer206':
     case 'starGift_layer209':
@@ -241,6 +301,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'messageActionGiftPremium_layer216':
     case 'messageActionStarGift_layer216':
     case 'messageActionStarGift_layer218':
+    case 'messageActionStarGiftUnique_layer221':
       return mapCompatMessageAction(obj)
     case 'userFull_layer199':
       return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
@@ -303,6 +364,29 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
         gift: mapCompatStarGift(obj.gift),
         endDate: obj.endDate,
       }
+    case 'starGiftAttributeBackdrop_layer221':
+    case 'starGiftAttributePattern_layer221':
+    case 'starGiftAttributeModel_layer221':
+      return mapCompatStarGiftAttribute(obj)
+    case 'keyboardButton_layer221':
+    case 'keyboardButtonUrl_layer221':
+    case 'keyboardButtonCallback_layer221':
+    case 'keyboardButtonRequestPhone_layer221':
+    case 'keyboardButtonRequestGeoLocation_layer221':
+    case 'keyboardButtonSwitchInline_layer221':
+    case 'keyboardButtonGame_layer221':
+    case 'keyboardButtonBuy_layer221':
+    case 'keyboardButtonUrlAuth_layer221':
+    case 'inputKeyboardButtonUrlAuth_layer221':
+    case 'keyboardButtonRequestPoll_layer221':
+    case 'inputKeyboardButtonUserProfile_layer221':
+    case 'keyboardButtonUserProfile_layer221':
+    case 'keyboardButtonWebView_layer221':
+    case 'keyboardButtonSimpleWebView_layer221':
+    case 'keyboardButtonRequestPeer_layer221':
+    case 'inputKeyboardButtonRequestPeer_layer221':
+    case 'keyboardButtonCopy_layer221':
+      return mapCompatKeyboardButton(obj)
     default:
       return obj
   }

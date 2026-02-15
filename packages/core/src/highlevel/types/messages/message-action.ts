@@ -8,6 +8,7 @@ import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 
 import { Photo } from '../media/photo.js'
 import { parsePeer } from '../peers/peer.js'
+import { User } from '../peers/user.js'
 import { StarGiftUnique } from '../premium/star-gift-unique.js'
 import { StarGift } from '../premium/star-gift.js'
 
@@ -625,6 +626,8 @@ interface StarGiftUniqueCommon {
   canResellAt?: Date
   /** If the gift can be exported to blockchain, date when it will become available */
   canExportAt?: Date
+  /** If the gift can be crafted, date when it will become available */
+  canCraftAt?: Date
 
   /** Amount of stars needed to drop the original details */
   dropDetailsStars?: tl.Long
@@ -636,6 +639,11 @@ interface StarGiftUniqueCommon {
 /** A star gift was upgraded to a unique one */
 export interface ActionStarGiftUpgraded extends StarGiftUniqueCommon {
   readonly type: 'star_gift_upgraded'
+}
+
+/** A star gift was crafted */
+export interface ActionStarGiftCrafted extends StarGiftUniqueCommon {
+  readonly type: 'star_gift_crafted'
 }
 
 /** A star gift was bought from a resale listing */
@@ -759,6 +767,22 @@ export interface ActionSuggestBirthday {
   birthday: tl.RawBirthday
 }
 
+/** Group creator has left the group, and a new creator has been assigned but not yet made one */
+export interface ActionNewCreatorPending {
+  readonly type: 'new_creator_pending'
+
+  /** New creator */
+  newCreator: User
+}
+
+/** Group creator has left the group, and a new creator has been assigned */
+export interface ActionChangeCreator {
+  readonly type: 'change_creator'
+
+  /** New creator */
+  newCreator: User
+}
+
 export type MessageAction
   = | ActionChatCreated
     | ActionChannelCreated
@@ -821,6 +845,9 @@ export type MessageAction
     | ActionStarGiftPurchaseOffer
     | ActionStarGiftPurchaseOfferDeclined
     | ActionStarGiftBoughtOffer
+    | ActionStarGiftCrafted
+    | ActionNewCreatorPending
+    | ActionChangeCreator
     | null
 
 /** @internal */
@@ -1166,6 +1193,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         canTransferAt: act.canTransferAt ? new Date(act.canTransferAt * 1000) : undefined,
         canResellAt: act.canResellAt ? new Date(act.canResellAt * 1000) : undefined,
         canExportAt: act.canExportAt ? new Date(act.canExportAt * 1000) : undefined,
+        canCraftAt: act.canCraftAt ? new Date(act.canCraftAt * 1000) : undefined,
         savedId: act.savedId,
         dropDetailsStars: act.dropOriginalDetailsStars,
       }
@@ -1173,6 +1201,13 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
       if (act.assigned) {
         return {
           type: 'star_gift_assigned',
+          ...common,
+        }
+      }
+
+      if (act.craft) {
+        return {
+          type: 'star_gift_crafted',
           ...common,
         }
       }
@@ -1257,6 +1292,16 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         expired: act.expired!,
         gift: new StarGiftUnique(act.gift, this._peers),
         price: act.price,
+      }
+    case 'messageActionNewCreatorPending':
+      return {
+        type: 'new_creator_pending',
+        newCreator: new User(this._peers.user(act.newCreatorId)),
+      }
+    case 'messageActionChangeCreator':
+      return {
+        type: 'change_creator',
+        newCreator: new User(this._peers.user(act.newCreatorId)),
       }
     default:
       return null

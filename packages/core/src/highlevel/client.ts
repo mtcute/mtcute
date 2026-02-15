@@ -82,6 +82,7 @@ import { getChatMember } from './methods/chats/get-chat-member.js'
 import { getChatMembers } from './methods/chats/get-chat-members.js'
 import { getChatPreview } from './methods/chats/get-chat-preview.js'
 import { getChat } from './methods/chats/get-chat.js'
+import { getCreatorAfterLeave } from './methods/chats/get-creator-after-leave.js'
 import { getFullChat } from './methods/chats/get-full-chat.js'
 import { getFullUser } from './methods/chats/get-full-user.js'
 import { getMessageAuthor } from './methods/chats/get-message-author.js'
@@ -1671,6 +1672,13 @@ export interface TelegramClient extends ITelegramClient {
    *   Use {@link getChatPreview} instead.
    */
   getChat(chatId: InputPeerLike): Promise<Chat>
+  /**
+   * Get the user who will be made the creator of the channel/supergroup if you were to leave it.
+   *
+   * You must be the creator of the channel/supergroup to use this method.
+   */
+  getCreatorAfterLeave(
+    chatId: InputPeerLike): Promise<User | null>
 
   /**
    * Get full information about a chat.
@@ -3019,6 +3027,9 @@ export interface TelegramClient extends ITelegramClient {
        * - `num`: Sort by its unique number
        */
       sort?: 'price' | 'num'
+
+      /** Whether to filter for options that can be used in a craft */
+      forCraft?: boolean
 
       /**
        * Hash of the `attributes` field, as returned by the server in the first response
@@ -6709,6 +6720,9 @@ TelegramClient.prototype.getChatPreview = function (...args) {
 }
 TelegramClient.prototype.getChat = function (...args) {
   return getChat(this._client, ...args)
+}
+TelegramClient.prototype.getCreatorAfterLeave = function (...args) {
+  return getCreatorAfterLeave(this._client, ...args)
 }
 TelegramClient.prototype.getFullChat = function (...args) {
   return getFullChat(this._client, ...args)

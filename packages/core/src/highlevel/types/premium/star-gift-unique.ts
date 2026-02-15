@@ -10,15 +10,41 @@ import { memoizeGetters } from '../../utils/memoize.js'
 import { parseDocument } from '../media/document-utils.js'
 import { parsePeer } from '../peers/peer.js'
 
+export type StarGiftUniqueAttributeRarity = 'uncommon' | 'rare' | 'epic' | 'legendary'
+function mapRarity(rarity: tl.TypeStarGiftAttributeRarity): StarGiftUniqueAttributeRarity | null {
+  switch (rarity._) {
+    case 'starGiftAttributeRarityUncommon':
+      return 'uncommon'
+    case 'starGiftAttributeRarityRare':
+      return 'rare'
+    case 'starGiftAttributeRarityEpic':
+      return 'epic'
+    case 'starGiftAttributeRarityLegendary':
+      return 'legendary'
+    default:
+      return null
+  }
+}
+
 /** An attribute of a unique star gift containing a sticker */
 export class StarGiftUniqueAttribute {
   constructor(
     readonly raw: tl.RawStarGiftAttributeModel | tl.RawStarGiftAttributePattern,
   ) {}
 
-  /** Rarity permille of the attribute */
-  get permille(): number {
-    return this.raw.rarityPermille
+  /** Whether this attribute is specific to this craft */
+  get crafted(): boolean {
+    return this.raw._ === 'starGiftAttributeModel' && this.raw.crafted!
+  }
+
+  /** Rarity permille of the attribute, if available */
+  get permille(): number | null {
+    return this.raw.rarity._ === 'starGiftAttributeRarity' ? this.raw.rarity.permille : null
+  }
+
+  /** Rarity type of the attribute, if available. Mutually exclusive with {@link permille} */
+  get rarity(): StarGiftUniqueAttributeRarity | null {
+    return mapRarity(this.raw.rarity)
   }
 
   /** Display name of the attribute */
@@ -26,6 +52,7 @@ export class StarGiftUniqueAttribute {
     return this.raw.name
   }
 
+  /** Sticker of the attribute */
   get sticker(): Sticker {
     assert(this.raw.document._ === 'document')
     const parsed = parseDocument(this.raw.document)
@@ -49,9 +76,14 @@ export class StarGiftUniqueBackdrop {
     return this.raw.backdropId
   }
 
-  /** Rarity permille of the attribute */
-  get permille(): number {
-    return this.raw.rarityPermille
+  /** Rarity permille of the attribute, if available */
+  get permille(): number | null {
+    return this.raw.rarity._ === 'starGiftAttributeRarity' ? this.raw.rarity.permille : null
+  }
+
+  /** Rarity type of the attribute, if available. Mutually exclusive with {@link permille} */
+  get rarity(): StarGiftUniqueAttributeRarity | null {
+    return mapRarity(this.raw.rarity)
   }
 
   /** Display name of the attribute */
@@ -164,6 +196,21 @@ export class StarGiftUnique {
   /** Whether this gift is available only to premium users */
   get isPremiumOnly(): boolean {
     return this.raw.requirePremium!
+  }
+
+  /** Whether this gift was burned to craft a new one */
+  get isBurned(): boolean {
+    return this.raw.burned!
+  }
+
+  /** Whether this gift was crafted */
+  get isCrafted(): boolean {
+    return this.raw.crafted!
+  }
+
+  /** If this gift can be used in a craft, the chance of success, in permille */
+  get craftChancePermille(): number | null {
+    return this.raw.craftChancePermille ?? null
   }
 
   /** Number of the NFT */

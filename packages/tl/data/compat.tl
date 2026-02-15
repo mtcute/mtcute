@@ -68,3 +68,27 @@ messageActionStarGift_layer218#db596550 flags:# name_hidden:flags.0?true saved:f
 // LAYER 220
 messageMediaDice_layer220#3f7ee58b value:int emoticon:string = MessageMedia;
 message_layer220#b92f76cf flags:# out:flags.1?true mentioned:flags.4?true media_unread:flags.5?true silent:flags.13?true post:flags.14?true from_scheduled:flags.18?true legacy:flags.19?true edit_hide:flags.21?true pinned:flags.24?true noforwards:flags.26?true invert_media:flags.27?true flags2:# offline:flags2.1?true video_processing_pending:flags2.4?true paid_suggested_post_stars:flags2.8?true paid_suggested_post_ton:flags2.9?true id:int from_id:flags.8?Peer from_boosts_applied:flags.29?int peer_id:Peer saved_peer_id:flags.28?Peer fwd_from:flags.2?MessageFwdHeader via_bot_id:flags.11?int53 via_business_bot_id:flags2.0?int53 reply_to:flags.3?MessageReplyHeader date:int message:string media:flags.9?MessageMedia reply_markup:flags.6?ReplyMarkup entities:flags.7?Vector<MessageEntity> views:flags.10?int forwards:flags.10?int replies:flags.23?MessageReplies edit_date:flags.15?int post_author:flags.16?string grouped_id:flags.17?long reactions:flags.20?MessageReactions restriction_reason:flags.22?Vector<RestrictionReason> ttl_period:flags.25?int quick_reply_shortcut_id:flags.30?int effect:flags2.2?long factcheck:flags2.3?FactCheck report_delivery_until_date:flags2.5?int paid_message_stars:flags2.6?long suggested_post:flags2.7?SuggestedPost schedule_repeat_period:flags2.10?int = Message;
+// LAYER 221
+starGiftUnique_layer221#569d64c9 flags:# require_premium:flags.6?true resale_ton_only:flags.7?true theme_available:flags.9?true id:long gift_id:long title:string slug:string num:int owner_id:flags.0?Peer owner_name:flags.1?string owner_address:flags.2?string attributes:Vector<StarGiftAttribute> availability_issued:int availability_total:int gift_address:flags.3?string resell_amount:flags.4?Vector<StarsAmount> released_by:flags.5?Peer value_amount:flags.8?long value_currency:flags.8?string value_usd_amount:flags.8?long theme_peer:flags.10?Peer peer_color:flags.11?PeerColor host_id:flags.12?Peer offer_min_stars:flags.13?int = StarGift;
+starGiftAttributeBackdrop_layer221#d93d859c name:string backdrop_id:int center_color:int edge_color:int pattern_color:int text_color:int rarity_permille:int = StarGiftAttribute;
+starGiftAttributePattern_layer221#13acff19 name:string document:Document rarity_permille:int = StarGiftAttribute;
+starGiftAttributeModel_layer221#39d99013 name:string document:Document rarity_permille:int = StarGiftAttribute;
+messageActionStarGiftUnique_layer221#95728543 flags:# upgrade:flags.0?true transferred:flags.1?true saved:flags.2?true refunded:flags.5?true prepaid_upgrade:flags.11?true assigned:flags.13?true from_offer:flags.14?true gift:StarGift can_export_at:flags.3?int transfer_stars:flags.4?long from_id:flags.6?Peer peer:flags.7?Peer saved_id:flags.7?long resale_amount:flags.8?StarsAmount can_transfer_at:flags.9?int can_resell_at:flags.10?int drop_original_details_stars:flags.12?long = MessageAction;
+keyboardButtonCopy_layer221#75d2698e text:string copy_text:string = KeyboardButton;
+inputKeyboardButtonRequestPeer_layer221#c9662d05 flags:# name_requested:flags.0?true username_requested:flags.1?true photo_requested:flags.2?true text:string button_id:int peer_type:RequestPeerType max_quantity:int = KeyboardButton;
+keyboardButtonRequestPeer_layer221#53d7bfd8 text:string button_id:int peer_type:RequestPeerType max_quantity:int = KeyboardButton;
+keyboardButtonSimpleWebView_layer221#a0c0505c text:string url:string = KeyboardButton;
+keyboardButtonWebView_layer221#13767230 text:string url:string = KeyboardButton;
+keyboardButtonUserProfile_layer221#308660c1 text:string user_id:int53 = KeyboardButton;
+inputKeyboardButtonUserProfile_layer221#e988037b text:string user_id:InputUser = KeyboardButton;
+keyboardButtonRequestPoll_layer221#bbc7515d flags:# quiz:flags.0?Bool text:string = KeyboardButton;
+inputKeyboardButtonUrlAuth_layer221#d02e7fd4 flags:# request_write_access:flags.0?true text:string fwd_text:flags.1?string url:string bot:InputUser = KeyboardButton;
+keyboardButtonUrlAuth_layer221#10b78d29 flags:# text:string fwd_text:flags.0?string url:string button_id:int = KeyboardButton;
+keyboardButtonBuy_layer221#afd93fbb text:string = KeyboardButton;
+keyboardButtonGame_layer221#50f41ccf text:string = KeyboardButton;
+keyboardButtonSwitchInline_layer221#93b9fbb5 flags:# same_peer:flags.0?true text:string query:string peer_types:flags.1?Vector<InlineQueryPeerType> = KeyboardButton;
+keyboardButtonRequestGeoLocation_layer221#fc796b3f text:string = KeyboardButton;
+keyboardButtonRequestPhone_layer221#b16a6c29 text:string = KeyboardButton;
+keyboardButtonCallback_layer221#35bbdb6b flags:# requires_password:flags.0?true text:string data:bytes = KeyboardButton;
+keyboardButtonUrl_layer221#258aff05 text:string url:string = KeyboardButton;
+keyboardButton_layer221#a2fa4880 text:string = KeyboardButton;

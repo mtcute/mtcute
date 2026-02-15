@@ -128,7 +128,7 @@ export class Chat {
       case 'channelForbidden':
         if (this.raw._ === 'channel' && this.raw.gigagroup) {
           return 'gigagroup'
-        } else if (this.raw._ === 'channel' && this.raw.monoforum) {
+        } else if (this.raw.monoforum) {
           return 'monoforum'
         } else if (this.raw.broadcast) {
           return 'channel'

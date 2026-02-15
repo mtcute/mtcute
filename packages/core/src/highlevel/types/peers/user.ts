@@ -148,6 +148,10 @@ export class User {
     return this.raw.botForumView!
   }
 
+  get canBotManageForumTopics(): boolean {
+    return this.raw.botForumCanManageTopics!
+  }
+
   /** Whether this user has been verified by Telegram */
   get isVerified(): boolean {
     return this.raw.verified!

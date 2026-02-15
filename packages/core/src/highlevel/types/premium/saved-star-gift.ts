@@ -108,6 +108,11 @@ export class SavedStarGift {
     return this.raw.canResellAt ? new Date(this.raw.canResellAt * 1000) : null
   }
 
+  /** Date when the gift can be crafted */
+  get canCraftAt(): Date | null {
+    return this.raw.canCraftAt ? new Date(this.raw.canCraftAt * 1000) : null
+  }
+
   /** IDs of the collections this gift belongs to */
   get collectionIds(): number[] {
     return this.raw.collectionId ?? []

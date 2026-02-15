@@ -72,6 +72,8 @@
     "messageActionChatJoinedByLink": ["inviter_id"],
     "messageActionChatMigrateTo": ["channel_id"],
     "messageActionInviteToGroupCall": ["users"],
+    "messageActionNewCreatorPending": ["new_creator_id"],
+    "messageActionChangeCreator": ["new_creator_id"],
     "messageEntityMentionName": ["user_id"],
     "messageMediaContact": ["user_id"],
     "messageMediaGiveaway": ["channels"],

@@ -103,6 +103,9 @@ export async function getStarGiftResaleOptions(
      */
     sort?: 'price' | 'num'
 
+    /** Whether to filter for options that can be used in a craft */
+    forCraft?: boolean
+
     /**
      * Hash of the `attributes` field, as returned by the server in the first response
      */
@@ -126,6 +129,7 @@ export async function getStarGiftResaleOptions(
     attributes: params.attributes ? _normalizeResaleAttributes(params.attributes) : undefined,
     offset: params.offset ?? '',
     limit: params.limit ?? 100,
+    forCraft: params.forCraft,
   })
 
   const peers = PeersIndex.from(res)

@@ -141,11 +141,16 @@ export function requestPoll(text: string, quiz?: boolean): tl.RawKeyboardButtonR
  * @param text  Button text
  * @param url  URL
  */
-export function url(text: string, url: string): tl.RawKeyboardButtonUrl {
+export function url(
+  text: string,
+  url: string,
+  options?: { style?: tl.RawKeyboardButtonStyle },
+): tl.RawKeyboardButtonUrl {
   return {
     _: 'keyboardButtonUrl',
     text,
     url,
+    style: options?.style,
   }
 }
 
@@ -163,12 +168,16 @@ export function url(text: string, url: string): tl.RawKeyboardButtonUrl {
 export function callback(
   text: string,
   data: string | Uint8Array,
-  requiresPassword?: boolean,
+  options?: {
+    requiresPassword?: boolean
+    style?: tl.RawKeyboardButtonStyle
+  },
 ): tl.RawKeyboardButtonCallback {
   return {
     _: 'keyboardButtonCallback',
     text,
-    requiresPassword,
+    requiresPassword: options?.requiresPassword,
+    style: options?.style,
     data: typeof data === 'string' ? utf8.encoder.encode(data) : data,
   }
 }
@@ -184,16 +193,25 @@ export function callback(
  *
  * @param text  Button text
  * @param query  Inline query (can be empty or omitted)
- * @param currentChat
- *     If set, pressing the button will insert the bot's username
- *     and the specified inline query in the current chat's input field
  */
-export function switchInline(text: string, query = '', currentChat?: boolean): tl.RawKeyboardButtonSwitchInline {
+export function switchInline(text: string, options?: {
+  /**
+   * Inline query (can be empty or omitted)
+   */
+  query?: string
+  /**
+   * If set, pressing the button will insert the bot's username
+   * and the specified inline query in the current chat's input field
+   */
+  currentChat?: boolean
+  style?: tl.RawKeyboardButtonStyle
+}): tl.RawKeyboardButtonSwitchInline {
   return {
     _: 'keyboardButtonSwitchInline',
-    samePeer: currentChat,
+    samePeer: options?.currentChat,
+    style: options?.style,
     text,
-    query,
+    query: options?.query ?? '',
   }
 }
 
@@ -207,8 +225,8 @@ export function switchInline(text: string, query = '', currentChat?: boolean): t
  * game is inferred from {@link InputMedia.game},
  * thus this button should only be used with it.
  */
-export function game(text: string): tl.RawKeyboardButtonGame {
-  return { _: 'keyboardButtonGame', text }
+export function game(text: string, options?: { style?: tl.RawKeyboardButtonStyle }): tl.RawKeyboardButtonGame {
+  return { _: 'keyboardButtonGame', text, style: options?.style }
 }
 
 /**
@@ -221,8 +239,8 @@ export function game(text: string): tl.RawKeyboardButtonGame {
  * invoice is inferred from {@link InputMedia.invoice},
  * thus this button should only be used with it.
  */
-export function pay(text: string): tl.RawKeyboardButtonBuy {
-  return { _: 'keyboardButtonBuy', text }
+export function pay(text: string, options?: { style?: tl.RawKeyboardButtonStyle }): tl.RawKeyboardButtonBuy {
+  return { _: 'keyboardButtonBuy', text, style: options?.style }
 }
 
 /**
@@ -249,6 +267,8 @@ export function urlAuth(
      */
     requestWriteAccess?: boolean
 
+    style?: tl.RawKeyboardButtonStyle
+
     /**
      * Bot, which will be used for user authorization.
      * `url` domain must be the same as the domain linked
@@ -268,6 +288,7 @@ export function urlAuth(
     },
     fwdText: params.fwdText,
     requestWriteAccess: params.requestWriteAccess,
+    style: params.style,
   }
 }
 
@@ -279,11 +300,16 @@ export function urlAuth(
  * @param text  Button label
  * @param url  WebView URL
  */
-export function webView(text: string, url: string): tl.RawKeyboardButtonWebView {
+export function webView(
+  text: string,
+  url: string,
+  options?: { style?: tl.RawKeyboardButtonStyle },
+): tl.RawKeyboardButtonWebView {
   return {
     _: 'keyboardButtonWebView',
     text,
     url,
+    style: options?.style,
   }
 }
 
@@ -293,11 +319,16 @@ export function webView(text: string, url: string): tl.RawKeyboardButtonWebView 
  * @param text  Text of the button
  * @param user  User to be opened (use {@link TelegramClient.resolvePeer})
  */
-export function userProfile(text: string, user: tl.TypeInputPeer): tl.RawInputKeyboardButtonUserProfile {
+export function userProfile(
+  text: string,
+  user: tl.TypeInputPeer,
+  options?: { style?: tl.RawKeyboardButtonStyle },
+): tl.RawInputKeyboardButtonUserProfile {
   return {
     _: 'inputKeyboardButtonUserProfile',
     text,
     userId: toInputUser(user),
+    style: options?.style,
   }
 }
 
@@ -322,6 +353,8 @@ export function requestPeer(
      * @default  1
      */
     count?: number
+
+    style?: tl.RawKeyboardButtonStyle
   },
 ): tl.RawKeyboardButtonRequestPeer {
   return {
@@ -330,6 +363,7 @@ export function requestPeer(
     buttonId,
     peerType: params.peerType,
     maxQuantity: params.count ?? 1,
+    style: params.style,
   }
 }
 
@@ -339,11 +373,13 @@ export function requestPeer(
 export function copy(params: {
   text: string
   copyText?: string
+  style?: tl.RawKeyboardButtonStyle
 }): tl.RawKeyboardButtonCopy {
   return {
     _: 'keyboardButtonCopy',
     text: params.text,
     copyText: params?.copyText ?? params.text,
+    style: params.style,
   }
 }
 
