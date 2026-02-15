@@ -27,6 +27,9 @@ export async function _normalizeFileDownloadLocation(
   fileSize?: number
 }> {
   let location: tl.TypeInputFileLocation | tl.TypeInputWebFileLocation
+  let dcId: number | undefined
+  let fileSize: number | undefined
+
   if (input instanceof FileLocation) {
     let locationInner = input.location
 
@@ -34,11 +37,17 @@ export async function _normalizeFileDownloadLocation(
       locationInner = locationInner()
     }
 
-    return {
-      location: locationInner,
-      dcId: input.dcId,
-      fileSize: input.fileSize,
+    if (ArrayBuffer.isView(locationInner)) {
+      return {
+        location: locationInner,
+        dcId: input.dcId,
+        fileSize: input.fileSize,
+      }
     }
+
+    location = locationInner
+    dcId = input.dcId
+    fileSize = input.fileSize
   } else if (typeof input === 'string') {
     const parsed = parseFileId(input)
 
@@ -81,7 +90,11 @@ export async function _normalizeFileDownloadLocation(
     }
   }
 
-  return { location }
+  return {
+    location,
+    dcId,
+    fileSize,
+  }
 }
 
 /**
