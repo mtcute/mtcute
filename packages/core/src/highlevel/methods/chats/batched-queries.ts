@@ -64,14 +64,14 @@ export const _getUsersBatched: BatchedQuery<tl.TypeInputUser, tl.TypeUser> = bat
 })
 
 /** @internal */
-export const _getChatsBatched: BatchedQuery<number, tl.RawChat> = batchedQuery({
+export const _getChatsBatched: BatchedQuery<number, tl.RawChat | tl.RawChatForbidden> = batchedQuery({
   fetch: (client, items) =>
     client
       .call({
         _: 'messages.getChats',
         id: items,
       })
-      .then(res => res.chats.filter((it): it is tl.RawChat => it._ === 'chat')),
+      .then(res => res.chats.filter(it => it._ === 'chat' || it._ === 'chatForbidden')),
   inputKey: id => id,
   outputKey: item => item.id,
   maxBatchSize: 50,
@@ -84,17 +84,12 @@ export const _getChannelsBatched: BatchedQuery<
     tl.RawChannel | tl.RawChannelForbidden
 > = batchedQuery({
   fetch: (client, items) =>
-    client
-      .call({
-        _: 'channels.getChannels',
-        id: items,
-      })
-      .then(res =>
-        res.chats.filter(
-          (it): it is tl.RawChannel | tl.RawChannelForbidden =>
-            it._ === 'channel' || it._ === 'channelForbidden',
-        ),
-      ),
+    client.call({
+      _: 'channels.getChannels',
+      id: items,
+    }).then(res =>
+      res.chats.filter(it => it._ === 'channel' || it._ === 'channelForbidden'),
+    ),
   inputKey: (id) => {
     switch (id._) {
       case 'inputChannel':

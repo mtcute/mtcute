@@ -1,6 +1,7 @@
 import type { tl } from '@mtcute/tl'
 
 import type { PeersIndex } from './peers-index.js'
+import { asNonNull } from '@fuman/utils'
 import { Chat } from './chat.js'
 import { User } from './user.js'
 
@@ -59,13 +60,29 @@ export type PeerSender = Peer | AnonymousSender
 /**
  * Given a `tl.TypePeer`, return a {@link Peer} object ({@link User} or {@link Chat})
  */
-export function parsePeer(peer: tl.TypePeer, index: PeersIndex): Peer {
+export function parsePeer(peer: tl.TypePeer, index: PeersIndex): Peer
+
+/**
+ * Given a `tl.TypeUser | tl.TypeChat`, return a {@link Peer} object ({@link User} or {@link Chat})
+ */
+export function parsePeer(peer: tl.TypeUser | tl.TypeChat): Peer
+
+export function parsePeer(peer: tl.TypePeer | tl.TypeUser | tl.TypeChat, index?: PeersIndex): Peer {
   switch (peer._) {
     case 'peerUser':
-      return new User(index.user(peer.userId))
+      return new User(asNonNull(index).user(peer.userId))
     case 'peerChat':
-      return new Chat(index.chat(peer.chatId))
+      return new Chat(asNonNull(index).chat(peer.chatId))
     case 'peerChannel':
-      return new Chat(index.chat(peer.channelId))
+      return new Chat(asNonNull(index).chat(peer.channelId))
+    case 'channel':
+    case 'channelForbidden':
+    case 'chat':
+    case 'chatForbidden':
+      return new Chat(peer)
+    case 'user':
+      return new User(peer)
+    default:
+      throw new Error('Empty peer')
   }
 }

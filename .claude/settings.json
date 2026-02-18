@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ide__getDiagnostics",
+      "Bash(node packages/core/scripts/generate-client.cjs)"
+    ]
+  }
+}
