@@ -12,9 +12,8 @@ import { resolveUser } from './resolve-peer.js'
  * Get information about multiple users.
  * You can retrieve up to 200 users at once.
  *
- * Note that order is not guaranteed.
- *
  * @param ids  Users' identifiers. Can be ID, username, phone number, `"me"`, `"self"` or TL object
+ * @returns  The list of users in the same order as the input
  */
 export async function getUsers(client: ITelegramClient, ids: MaybeArray<InputPeerLike>): Promise<(User | null)[]> {
   if (!Array.isArray(ids)) {
