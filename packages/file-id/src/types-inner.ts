@@ -6,7 +6,7 @@ export const PERSISTENT_ID_VERSION = 4
 export const WEB_LOCATION_FLAG: number = 1 << 24
 export const FILE_REFERENCE_FLAG: number = 1 << 25
 
-export const CURRENT_VERSION = 57
+export const CURRENT_VERSION = 58
 
 /**
  * An error occurred while parsing or serializing a File ID
