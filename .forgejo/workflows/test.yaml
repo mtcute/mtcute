@@ -64,7 +64,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - run: apt-get update && apt-get install -y make gcc g++
       - uses: ./.forgejo/actions/init
       - name: 'Run tests'
         uses: https://github.com/nick-fields/retry@v2
