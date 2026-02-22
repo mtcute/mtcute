@@ -1,3 +1,4 @@
+import type { TlReaderMap } from '@mtcute/tl-runtime'
 import type { tlCompat } from '@mtcute/tl/compat'
 import { Bytes, read } from '@fuman/io'
 import { assert, objectEntries } from '@fuman/utils'
@@ -408,7 +409,9 @@ function getCombinedReaderMap(): Record<number, (r: unknown) => unknown> {
   return ret
 }
 
-const _combinedReaderMap = /* @__PURE__ */ getCombinedReaderMap()
+const _combinedReaderMap: TlReaderMap = /* @__PURE__ */ getCombinedReaderMap()
+
+export { _combinedReaderMap as __tlReaderMapWithCompat }
 
 /**
  * Deserialize a TL object previously serialized with {@link serializeObject},
