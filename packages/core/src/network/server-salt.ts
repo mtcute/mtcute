@@ -35,7 +35,7 @@ export class ServerSaltManager {
     this._timer = timers.setTimeout(() => {
       this.currentSalt = salt.salt
       this._replaceAndScheduleNext()
-    }, salt.validSince * 1000 - Date.now())
+    }, Math.max(1, salt.validSince * 1000 - Date.now()))
   }
 
   private _replaceAndScheduleNext(): void {
