@@ -43,23 +43,18 @@ export class ServerSaltManager {
 
     const now = Date.now() / 1000
 
-    // find the first valid salt from the stored ones
-    let next: mtp.RawMt_future_salt | undefined
+    // consume any salts that are already valid
     while (this._futureSalts.length !== 0) {
       const salt = this._futureSalts[0]
-      if (salt.validSince <= now && now <= salt.validUntil) {
-        next = salt
-        break
-      }
+      if (salt.validSince > now) break
+      this.currentSalt = salt.salt
       this._futureSalts.shift()
     }
 
-    if (!next) {
-      // no valid salts left, nothing to schedule
-      return
+    // schedule the next future salt, if any
+    if (this._futureSalts.length) {
+      this._scheduleReplace(this._futureSalts[0])
     }
-
-    this._scheduleReplace(next)
   }
 
   destroy(): void {
