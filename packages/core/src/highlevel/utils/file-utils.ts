@@ -7,12 +7,13 @@ import { MtArgumentError } from '../../types/errors.js'
  * Given file size, determine the appropriate chunk size (in KB)
  * for upload/download operations.
  */
-export function determinePartSize(fileSize: number): number {
+export function determinePartSize(fileSize: number, forUpload = false): number {
   if (fileSize <= 262078465) return 128 // 200 MB
   if (fileSize <= 786432000) return 256 // 750 MB
   if (fileSize <= 2097152000) return 512 // 2000 MB
 
-  return 1024
+  // uploads are limited to 512 KB chunks
+  return forUpload ? 512 : 1024
 }
 
 /**

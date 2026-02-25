@@ -208,9 +208,9 @@ export async function uploadFile(
 
   if (!partSizeKb) {
     if (fileSize === -1) {
-      partSizeKb = params.estimatedSize ? determinePartSize(params.estimatedSize) : 64
+      partSizeKb = params.estimatedSize ? determinePartSize(params.estimatedSize, true) : 64
     } else {
-      partSizeKb = determinePartSize(fileSize)
+      partSizeKb = determinePartSize(fileSize, true)
     }
   }
 
