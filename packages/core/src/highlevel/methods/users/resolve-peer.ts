@@ -167,19 +167,19 @@ export async function resolvePeer(
     const [username] = extractUsernames(cached)
 
     if (username) {
-      const resolved = await resolvePeer(client, username, true)
+      const resolved = await resolvePeer(client, username, true).catch(() => null)
 
       // username might already be taken by someone else, so we need to check it
-      if (getMarkedPeerId(resolved) === peerId) {
+      if (resolved && getMarkedPeerId(resolved) === peerId) {
         return resolved
       }
     }
 
     if (cached._ === 'user' && cached.phone) {
       // try resolving by phone
-      const resolved = await resolvePhoneNumber(client, cached.phone, true)
+      const resolved = await resolvePhoneNumber(client, cached.phone, true).catch(() => null)
 
-      if (getMarkedPeerId(resolved) === peerId) {
+      if (resolved && getMarkedPeerId(resolved) === peerId) {
         return resolved
       }
     }
