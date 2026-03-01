@@ -60,6 +60,15 @@ export enum FileType {
   None,
 }
 
+export enum UniqueFileIdType {
+  Web = 0,
+  Photo = 1,
+  Document = 2,
+  Secure = 3,
+  Encrypted = 4,
+  Temp = 5,
+}
+
 // naming convention just like in @mtcute/tl
 
 // additionally, `_` discriminator is used,
@@ -223,6 +232,54 @@ export interface RawFullRemoteFileLocation {
    */
   readonly location: TypeRemoteFileLocation
 }
+
+export interface UniquePhotoId {
+  readonly _: 'photoId'
+  readonly id: Long
+  /**
+   * - profile photos: 0 - small, 1 - big
+   * - thumbnails: 0 = a, 1 = c, otherwise String.fromCharCode(subType - 5)
+   */
+  readonly subType: number
+}
+
+export interface UniquePhotoLegacy {
+  readonly _: 'photoLegacy'
+  readonly secret: Long
+}
+
+export interface UniquePhotoVolumeId {
+  readonly _: 'photoVolumeId'
+  readonly volumeId: Long
+  readonly localId: number
+}
+
+export interface UniquePhotoStickerSet {
+  readonly _: 'photoStickerSet'
+  readonly stickerSetId: Long
+  readonly stickerSetAccessHash: Long
+}
+
+export interface UniquePhotoStickerSetVersion {
+  readonly _: 'photoStickerSetVersion'
+  readonly stickerSetId: Long
+  readonly stickerSetVersion: number
+}
+
+export type UniquePhotoLocation
+  = | UniquePhotoId
+    | UniquePhotoLegacy
+    | UniquePhotoVolumeId
+    | UniquePhotoStickerSet
+    | UniquePhotoStickerSetVersion
+
+export type ParsedUniqueFileId
+  = | { type: UniqueFileIdType.Web, url: string }
+    | { type: UniqueFileIdType.Photo, location: UniquePhotoLocation }
+    | { type: UniqueFileIdType.Document, id: Long }
+    | { type: UniqueFileIdType.Secure, id: Long }
+    | { type: UniqueFileIdType.Encrypted, id: Long }
+    | { type: UniqueFileIdType.Temp, id: Long }
 
 export function isFileIdLike(obj: unknown): obj is string | RawFullRemoteFileLocation {
   return (

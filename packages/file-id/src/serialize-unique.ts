@@ -36,7 +36,7 @@ export function toUniqueFileId(
   let type
 
   if (inputLocation._ === 'web') {
-    type = 0
+    type = td.UniqueFileIdType.Web
   } else {
     switch (inputType) {
       case td.FileType.Photo:
@@ -44,7 +44,7 @@ export function toUniqueFileId(
       case td.FileType.Thumbnail:
       case td.FileType.EncryptedThumbnail:
       case td.FileType.Wallpaper:
-        type = 1
+        type = td.UniqueFileIdType.Photo
         break
       case td.FileType.Video:
       case td.FileType.VoiceNote:
@@ -55,17 +55,17 @@ export function toUniqueFileId(
       case td.FileType.VideoNote:
       case td.FileType.Background:
       case td.FileType.DocumentAsFile:
-        type = 2
+        type = td.UniqueFileIdType.Document
         break
       case td.FileType.SecureRaw:
       case td.FileType.Secure:
-        type = 3
+        type = td.UniqueFileIdType.Secure
         break
       case td.FileType.Encrypted:
-        type = 4
+        type = td.UniqueFileIdType.Encrypted
         break
       case td.FileType.Temp:
-        type = 5
+        type = td.UniqueFileIdType.Temp
         break
       default:
         throw new td.InvalidFileIdError(`Invalid file type: ${inputType}`)
