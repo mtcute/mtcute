@@ -2,7 +2,13 @@
 // fetches documentation from https://corefork.telegram.org/schema
 // and builds a single .json file from all of that
 //
-// Conflicts merging is interactive, so we can't put this in CI
+// Usage:
+//   --dry-run                   Print report of schemas, conflicts, docs, version and exit
+//   --resolve entryName=N       Resolve conflict (0=remove, 1-based index from dry-run). Repeatable
+//   --docs cached|fresh         Use cached docs or force re-fetch
+//   --bump / --no-bump          Bump package version or skip
+//
+// When flags are omitted and stdin is a TTY, falls back to interactive prompts.
 
 import type {
   TlEntry,
@@ -50,6 +56,53 @@ import { packTlSchema, unpackTlSchema } from './schema.js'
 
 const README_MD_FILE = join(__dirname, '../README.md')
 const PACKAGE_JSON_FILE = join(__dirname, '../package.json')
+
+// region: cli args
+
+interface CliArgs {
+  dryRun: boolean
+  resolve: Map<string, number> // entryName -> choice index
+  docs: 'cached' | 'fresh' | null // null = not specified
+  bump: boolean | null // null = not specified
+}
+
+function parseArgs(argv: string[]): CliArgs {
+  const args: CliArgs = {
+    dryRun: false,
+    resolve: new Map(),
+    docs: null,
+    bump: null,
+  }
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i]
+    if (arg === '--dry-run') {
+      args.dryRun = true
+    } else if (arg === '--resolve') {
+      const val = argv[++i]
+      if (!val) throw new Error('--resolve requires a value (entryName=N)')
+      const eq = val.indexOf('=')
+      if (eq === -1) throw new Error(`Invalid --resolve format: ${val} (expected entryName=N)`)
+      args.resolve.set(val.slice(0, eq), Number.parseInt(val.slice(eq + 1)))
+    } else if (arg === '--docs') {
+      const val = argv[++i]
+      if (val !== 'cached' && val !== 'fresh') throw new Error('--docs must be \'cached\' or \'fresh\'')
+      args.docs = val
+    } else if (arg === '--bump') {
+      args.bump = true
+    } else if (arg === '--no-bump') {
+      args.bump = false
+    } else {
+      throw new Error(`Unknown argument: ${arg}`)
+    }
+  }
+
+  return args
+}
+
+// endregion
+
+// region: schema fetching
 
 function tlToFullSchema(
   tl: string,
@@ -169,16 +222,86 @@ async function fetchWebaSchema(): Promise<Schema> {
   }
 }
 
-function input(rl: readline.Interface, q: string): Promise<string> {
-  return new Promise(resolve => rl.question(q, resolve))
+async function fetchAllSchemas(): Promise<Schema[]> {
+  console.log('Loading schemas...')
+
+  const schemas: Schema[] = await Promise.all([
+    fetchTdlibSchema(),
+    fetchTdesktopSchema(),
+    fetchCoreSchema(),
+    fetchCoreSchema(COREFORK_DOMAIN, 'Corefork'),
+    fetchCoreSchema(BLOGFORK_DOMAIN, 'Blogfork'),
+    fetchWebkSchema(),
+    fetchWebaSchema(),
+    readFile(join(__dirname, '../data/custom.tl'), 'utf8').then(tl => ({
+      name: 'Custom',
+      layer: 0, // handled manually
+      content: tlToFullSchema(tl),
+    })),
+  ])
+
+  console.log('Available schemas:')
+  schemas.forEach(schema =>
+    console.log(' - %s (layer %d): %d entries', schema.name, schema.layer, schema.content.entries.length),
+  )
+
+  return schemas
 }
+
+// endregion
+
+// region: conflict resolution
 
 interface ConflictOption {
   schema: Schema
   entry?: TlEntry
 }
 
-async function updateReadme(currentLayer: number) {
+interface CollectedConflict {
+  name: string
+  kind: string
+  reason: string
+  options: { schemaName: string, entry: string }[]
+}
+
+function resolveAutoConflicts(
+  resultLayer: number,
+  options: ConflictOption[],
+): { resolved: TlEntry | undefined, needsManual: boolean, mergeError: string } {
+  const customEntry = options[options.length - 1]
+
+  if (customEntry.entry) {
+    return { resolved: undefined, needsManual: true, mergeError: 'custom entry in conflict' }
+  }
+
+  let fromLastSchema = options.filter(opt => opt.entry && opt.schema.layer === resultLayer)
+
+  if (fromLastSchema.length === 1) {
+    return { resolved: fromLastSchema[0].entry, needsManual: false, mergeError: '' }
+  }
+
+  if (fromLastSchema.length === 0) {
+    fromLastSchema = options.sort((a, b) => b.schema.layer - a.schema.layer).filter(opt => opt.entry)
+    fromLastSchema = [fromLastSchema[0]]
+  }
+
+  const mergedEntry = mergeTlEntries(fromLastSchema.map(opt => opt.entry).filter(isPresent))
+  if (typeof mergedEntry === 'string') {
+    return { resolved: undefined, needsManual: true, mergeError: mergedEntry }
+  }
+
+  return { resolved: mergedEntry, needsManual: false, mergeError: '' }
+}
+
+function input(rl: readline.Interface, q: string): Promise<string> {
+  return new Promise(resolve => rl.question(q, resolve))
+}
+
+// endregion
+
+// region: other steps
+
+async function updateReadme(currentLayer: number): Promise<void> {
   const oldReadme = await readFile(README_MD_FILE, 'utf8')
   const today = new Date().toLocaleDateString('ru')
   await writeFile(
@@ -190,19 +313,13 @@ async function updateReadme(currentLayer: number) {
   )
 }
 
-async function updatePackageVersion(rl: readline.Interface, currentLayer: number) {
+async function updatePackageVersion(currentLayer: number, bump: boolean): Promise<void> {
   const packageJson = JSON.parse(await readFile(PACKAGE_JSON_FILE, 'utf8')) as { version: string }
   const version = packageJson.version
   let [major, minor] = version.split('.').map(i => Number.parseInt(i))
 
   if (major === currentLayer) {
-    console.log('Current version: %s. Bump minor version?', version)
-    const res = await input(rl, '[Y/n] > ')
-
-    if (res.trim().toLowerCase() === 'n') {
-      return
-    }
-
+    if (!bump) return
     minor += 1
   } else {
     major = currentLayer
@@ -238,8 +355,6 @@ async function overrideInt53(schema: TlFullSchema): Promise<void> {
 
       if (arg.type === 'long') {
         arg.type = 'int53'
-      } else if (arg.type.toLowerCase() === 'vector<long>') {
-        arg.type = 'vector<int53>'
       } else {
         console.log(`[warn] Cannot override ${entry.name}#${argName}: argument is not long (${arg.type})`)
       }
@@ -247,7 +362,7 @@ async function overrideInt53(schema: TlFullSchema): Promise<void> {
   })
 }
 
-async function generateCompatSchema(oldLayer: number, oldSchema: TlFullSchema, diff: TlSchemaDiff) {
+async function generateCompatSchema(oldLayer: number, oldSchema: TlFullSchema, diff: TlSchemaDiff): Promise<void> {
   // generate list of all types that need to be added to compat.tl
   const typesToAdd = new Set<string>()
   const diffedTypes = new Set<string>()
@@ -320,112 +435,98 @@ async function generateCompatSchema(oldLayer: number, oldSchema: TlFullSchema, d
   compatWs.close()
 }
 
-async function main() {
-  console.log('Loading schemas...')
+// endregion
 
-  const schemas: Schema[] = await Promise.all([
-    fetchTdlibSchema(),
-    fetchTdesktopSchema(),
-    fetchCoreSchema(),
-    fetchCoreSchema(COREFORK_DOMAIN, 'Corefork'),
-    fetchCoreSchema(BLOGFORK_DOMAIN, 'Blogfork'),
-    fetchWebkSchema(),
-    fetchWebaSchema(),
-    readFile(join(__dirname, '../data/custom.tl'), 'utf8').then(tl => ({
-      name: 'Custom',
-      layer: 0, // handled manually
-      content: tlToFullSchema(tl),
-    })),
-  ])
+// region: main
 
-  console.log('Available schemas:')
-  schemas.forEach(schema =>
-    console.log(' - %s (layer %d): %d entries', schema.name, schema.layer, schema.content.entries.length),
-  )
+async function main(): Promise<void> {
+  const cliArgs = parseArgs(process.argv.slice(2))
+  const isTTY = process.stdin.isTTY === true
 
+  const schemas = await fetchAllSchemas()
   const resultLayer = Math.max(...schemas.map(it => it.layer))
-  console.log(`Final schema will be on layer ${resultLayer}. Merging...`)
+  console.log(`Final layer: ${resultLayer}. Merging...`)
 
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  })
+  // collect conflicts during merge
+  const conflicts: CollectedConflict[] = []
 
   const resultSchema = await mergeTlSchemas(
     schemas.map(it => it.content),
-    async (_options) => {
+    async (_options, reason) => {
       const options: ConflictOption[] = _options.map((it, idx) => ({
         schema: schemas[idx],
         entry: it,
       }))
 
-      let chooseOptions: ConflictOption[] = []
-      let mergeError = ''
+      const auto = resolveAutoConflicts(resultLayer, options)
+      if (!auto.needsManual) return auto.resolved
 
-      const customEntry = options[options.length - 1]
+      const nonEmptyOptions = options.filter(it => it.entry !== undefined)
+      const entryName = nonEmptyOptions[0].entry!.name
+      const entryKind = nonEmptyOptions[0].entry!.kind
 
-      if (customEntry.entry) {
-        // if there is custom entry in conflict, we must present it, otherwise something may go wrong
-        chooseOptions = options
-      } else {
-        // first of all, prefer entries from the latest layer
-        let fromLastSchema = options.filter(opt => opt.entry && opt.schema.layer === resultLayer)
-
-        // if there is only one schema on the latest layer, we can simply return it
-        if (fromLastSchema.length === 1) return fromLastSchema[0].entry
-
-        // the conflict was earlier, and now this entry is removed altogether.
-        // keep it just in case for now, as it may still be referenced somewhere
-        if (fromLastSchema.length === 0) {
-          fromLastSchema = options.sort((a, b) => b.schema.layer - a.schema.layer).filter(opt => opt.entry)
-          // only keep the latest item
-          fromLastSchema = [fromLastSchema[0]]
-        }
-
-        // there are multiple choices on the latest layer
-        // if they are all the same, it's just conflict between layers,
-        // and we can merge the ones from the latest layer
-        const mergedEntry = mergeTlEntries(fromLastSchema.map(opt => opt.entry).filter(isPresent))
-        if (typeof mergedEntry === 'string') {
-          // merge failed, so there is in fact some conflict
-          chooseOptions = fromLastSchema
-          mergeError = mergedEntry
-        } else {
-          return mergedEntry
-        }
+      // dry-run: collect and skip
+      if (cliArgs.dryRun) {
+        conflicts.push({
+          name: entryName,
+          kind: entryKind,
+          reason: auto.mergeError || reason,
+          options: nonEmptyOptions.map(opt => ({
+            schemaName: opt.schema.name,
+            entry: `(${opt.entry!.kind}) ${writeTlEntryToString(opt.entry!)}`,
+          })),
+        })
+        // return first option as placeholder (won't be written in dry-run)
+        return nonEmptyOptions[0].entry
       }
 
-      const nonEmptyOptions = chooseOptions.filter(it => it.entry !== undefined)
-
-      console.log(
-        'Conflict detected (%s) at %s %s:',
-        mergeError,
-        nonEmptyOptions[0].entry!.kind,
-        nonEmptyOptions[0].entry!.name,
-      )
-      console.log('0. Remove')
-      nonEmptyOptions.forEach((opt, idx) => {
-        console.log(`${idx + 1}. ${opt.schema.name}: (${opt.entry!.kind}) ${writeTlEntryToString(opt.entry!)}`)
-      })
-
-      while (true) {
-        const res = Number.parseInt(await input(rl, `[0-${nonEmptyOptions.length}] > `))
-
-        if (Number.isNaN(res) || res < 0 || res > nonEmptyOptions.length) {
-          continue
+      // check --resolve flag
+      if (cliArgs.resolve.has(entryName)) {
+        const choice = cliArgs.resolve.get(entryName)!
+        if (choice === 0) return undefined
+        if (choice < 1 || choice > nonEmptyOptions.length) {
+          throw new Error(`Invalid --resolve for ${entryName}: ${choice} (expected 0-${nonEmptyOptions.length})`)
         }
+        return nonEmptyOptions[choice - 1].entry
+      }
 
-        if (res === 0) return undefined
+      // interactive fallback
+      if (!isTTY) {
+        throw new Error(`Conflict at ${entryKind} ${entryName} requires --resolve ${entryName}=N (run with --dry-run to see options)`)
+      }
 
-        return nonEmptyOptions[res - 1].entry
+      const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+      try {
+        console.log(
+          'Conflict detected (%s) at %s %s:',
+          auto.mergeError || reason,
+          entryKind,
+          entryName,
+        )
+        console.log('0. Remove')
+        nonEmptyOptions.forEach((opt, idx) => {
+          console.log(`${idx + 1}. ${opt.schema.name}: (${opt.entry!.kind}) ${writeTlEntryToString(opt.entry!)}`)
+        })
+
+        while (true) {
+          const res = Number.parseInt(await input(rl, `[0-${nonEmptyOptions.length}] > `))
+
+          if (Number.isNaN(res) || res < 0 || res > nonEmptyOptions.length) {
+            continue
+          }
+
+          if (res === 0) return undefined
+          return nonEmptyOptions[res - 1].entry
+        }
+      } finally {
+        rl.close()
       }
     },
   )
 
-  console.log('Done! Final schema contains %d entries', resultSchema.entries.length)
+  console.log('Done merging! Final schema contains %d entries', resultSchema.entries.length)
 
-  // find methods that were removed in the latest layer, but still present in older ones,
-  // so we can avoid using them
+  // warn about removed constructors
   const latestLayerCtors = new Set<string>()
   for (const schema of schemas) {
     if (schema.layer !== resultLayer) continue
@@ -434,7 +535,6 @@ async function main() {
     }
   }
 
-  // some ctors are only available in some schemas, avoid spamming
   const warned = new Set<string>(['inputPeerPhotoFileLocationLegacy', 'inputStickerSetThumbLegacy'])
   for (const schema of schemas) {
     if (schema.layer === resultLayer) continue
@@ -448,12 +548,76 @@ async function main() {
     }
   }
 
-  let docs = await getCachedDocumentation()
+  // check docs availability
+  const cachedDocs = await getCachedDocumentation()
 
-  if (docs) {
+  // check version info
+  const packageJson = JSON.parse(await readFile(PACKAGE_JSON_FILE, 'utf8')) as { version: string }
+  const currentVersion = packageJson.version
+  const [major] = currentVersion.split('.').map(i => Number.parseInt(i))
+  const defaultBump = major === resultLayer
+    ? `${major}.${Number.parseInt(currentVersion.split('.')[1]) + 1}.0`
+    : `${resultLayer}.0.0`
+
+  // dry-run: print report and exit
+  if (cliArgs.dryRun) {
+    console.log('')
+    console.log('--- DRY RUN REPORT ---')
+    console.log('')
+
+    console.log('SCHEMAS:')
+    for (const schema of schemas) {
+      console.log(`  ${schema.name}: layer=${schema.layer}, entries=${schema.content.entries.length}`)
+    }
+
+    console.log('')
+    console.log(`LAYER: ${resultLayer}`)
+
+    console.log('')
+    if (conflicts.length === 0) {
+      console.log('CONFLICTS: none')
+    } else {
+      console.log('CONFLICTS:')
+      for (const c of conflicts) {
+        console.log(`  conflict: ${c.name}`)
+        console.log(`    kind: ${c.kind}`)
+        console.log(`    reason: ${c.reason}`)
+        console.log('    0: remove')
+        c.options.forEach((opt, idx) => {
+          console.log(`    ${idx + 1}: ${opt.schemaName}: ${opt.entry}`)
+        })
+        console.log('')
+      }
+    }
+
+    console.log('')
+    console.log('DOCS:')
+    console.log(`  cached: ${cachedDocs ? cachedDocs.updated : 'none'}`)
+
+    console.log('')
+    console.log('VERSION:')
+    console.log(`  current: ${currentVersion}`)
+    console.log(`  layer: ${resultLayer}`)
+    console.log(`  default_bump: ${defaultBump}`)
+
+    return
+  }
+
+  // resolve docs mode
+  let docs = cachedDocs
+  if (cliArgs.docs === 'fresh') {
+    docs = null
+  } else if (cliArgs.docs === 'cached') {
+    // use cached as-is (null if not available)
+  } else if (docs) {
+    // interactive
+    if (!isTTY) {
+      throw new Error('Cached docs available, specify --docs cached or --docs fresh')
+    }
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
     console.log('Cached documentation from %s, use it?', docs.updated)
     const res = await input(rl, '[Y/n] > ')
-
+    rl.close()
     if (res.trim().toLowerCase() === 'n') {
       docs = null
     }
@@ -492,9 +656,25 @@ async function main() {
   console.log('Updating README.md...')
   await updateReadme(resultLayer)
 
-  await updatePackageVersion(rl, resultLayer)
+  // resolve bump mode
+  let shouldBump: boolean
+  if (cliArgs.bump !== null) {
+    shouldBump = cliArgs.bump
+  } else if (!isTTY) {
+    throw new Error('Specify --bump or --no-bump')
+  } else {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+    if (major === resultLayer) {
+      console.log('Current version: %s. Bump minor version?', currentVersion)
+      const res = await input(rl, '[Y/n] > ')
+      shouldBump = res.trim().toLowerCase() !== 'n'
+    } else {
+      shouldBump = true
+    }
+    rl.close()
+  }
 
-  rl.close()
+  await updatePackageVersion(resultLayer, shouldBump)
 
   console.log('Done!')
 }
