@@ -1,4 +1,5 @@
 import type { InputText, MessageEntity, TextWithEntities, tl } from '@mtcute/core'
+import { dateEntityFormatToString, parseDateEntityFormat } from '@mtcute/core/utils.js'
 import { Parser } from 'htmlparser2'
 import Long from 'long'
 
@@ -142,6 +143,37 @@ function parse(
             offset: plainText.length,
             length: 0,
             documentId: Long.fromString(id),
+          }
+          break
+        }
+        case 'tg-time': {
+          // compat with bot api: <tg-time unix="1647531900" format="t">22:45</tg-time>
+          const unix = attribs.unix
+          if (!unix || !unix.match(/^\d+$/)) return
+
+          entity = {
+            _: 'messageEntityFormattedDate',
+            offset: plainText.length,
+            length: 0,
+            date: Number.parseInt(unix),
+            ...(attribs.format ? parseDateEntityFormat(attribs.format) : {}),
+          }
+          break
+        }
+        case 'time': {
+          // compat with native html element: <time datetime="2022-03-17T22:45:00Z">22:45</time>
+          const datetime = attribs.datetime
+          if (!datetime) return
+
+          const date = Math.floor(new Date(datetime).getTime() / 1000)
+          if (Number.isNaN(date)) return
+
+          entity = {
+            _: 'messageEntityFormattedDate',
+            offset: plainText.length,
+            length: 0,
+            date,
+            ...(attribs.format ? parseDateEntityFormat(attribs.format) : {}),
           }
           break
         }
@@ -416,6 +448,11 @@ function _unparse(
       case 'messageEntityMentionName':
         html.push(`<a href="tg://user?id=${entity.userId}">${entityText}</a>`)
         break
+      case 'messageEntityFormattedDate': {
+        const fmt = dateEntityFormatToString(entity)
+        html.push(`<tg-time unix="${entity.date}"${fmt ? ` format="${fmt}"` : ''}>${entityText}</tg-time>`)
+        break
+      }
       default:
         skip = true
         break

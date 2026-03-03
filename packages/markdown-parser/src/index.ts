@@ -1,8 +1,10 @@
 import type { InputText, MessageEntity, TextWithEntities, tl } from '@mtcute/core'
+import { dateEntityFormatToString, parseDateEntityFormat } from '@mtcute/core/utils.js'
 import Long from 'long'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 const EMOJI_REGEX = /^tg:\/\/emoji\?id=(-?\d+)/
+const TIME_REGEX = /^tg:\/\/time\?unix=(\d+)(?:&format=([^&)]+))?/
 
 const TAG_BOLD = '**'
 const TAG_ITALIC = '__'
@@ -114,6 +116,12 @@ function unparse(input: InputText): string {
         startTag = '['
         endTag = `](tg://emoji?id=${entity.documentId.toString()})`
         break
+      case 'messageEntityFormattedDate': {
+        const fmt = dateEntityFormatToString(entity)
+        startTag = '['
+        endTag = `](tg://time?unix=${entity.date}${fmt ? `&format=${fmt}` : ''})`
+        break
+      }
       default:
         continue
     }
@@ -273,6 +281,11 @@ function parse(
         } else if ((m = EMOJI_REGEX.exec(url))) {
           (ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>)._ = 'messageEntityCustomEmoji'
           ;(ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>).documentId = Long.fromString(m[1])
+        } else if ((m = TIME_REGEX.exec(url))) {
+          const flags = parseDateEntityFormat(m[2] ?? '')
+          ;(ent as tl.Mutable<tl.RawMessageEntityFormattedDate>)._ = 'messageEntityFormattedDate'
+          ;(ent as tl.Mutable<tl.RawMessageEntityFormattedDate>).date = Number.parseInt(m[1])
+          Object.assign(ent, flags)
         } else {
           if (url.match(/^\/\//)) url = `http:${url}`
           ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>)._ = 'messageEntityTextUrl'

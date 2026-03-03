@@ -56,6 +56,7 @@ Inline entities are entities that are in-line with other text. We support these 
 | Text link        | `<a href="https://google.com">Google</a>`                        | [Google](https://google.com) |
 | Text mention     | `<a href="tg://user?id=1234567">Name</a>`                        | N/A                          |
 | Custom emoji     | `<emoji id="12345">😄</emoji>` (or `<tg-emoji emoji-id="...">`)  | N/A                          |
+| Date-time        | `<tg-time unix="1647531900" format="t">22:45</tg-time>`          | N/A                          |
 
 > **Note**: It is up to the client to look up user's input entity by ID for text mentions.
 > In most cases, you can only use IDs of users that were seen by the client while using given storage.
@@ -64,6 +65,30 @@ Inline entities are entities that are in-line with other text. We support these 
 > `<a href="tg://user?id=1234567&hash=abc">Name</a>`, where `abc` is user's access hash
 > written as a hexadecimal integer. Order of the parameters does matter, i.e.
 > `tg://user?hash=abc&id=1234567` will not be processed as expected.
+
+## Date-time entities
+
+Date-time entities display a unix timestamp formatted according to the user's locale.
+
+Two tag syntaxes are supported:
+
+```html
+<tg-time unix="1647531900" format="t">22:45</tg-time>
+<time datetime="2022-03-17T22:45:00" format="t">22:45</time>
+```
+
+The `format` attribute is optional and must match `r|w?[dD]?[tT]?`:
+
+| Char | Meaning |
+|------|---------|
+| `r` | Relative time (cannot combine with others) |
+| `w` | Day of the week |
+| `d` | Short date (e.g. "17.03.22") |
+| `D` | Long date (e.g. "March 17, 2022") |
+| `t` | Short time (e.g. "22:45") |
+| `T` | Long time (e.g. "22:45:00") |
+
+When omitted, the underlying text is displayed as-is, but the user can still see the date in their local format.
 
 ## Block entities
 

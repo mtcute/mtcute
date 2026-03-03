@@ -119,6 +119,26 @@ Additionally, a markdown-style link can be used to define a custom emoji like th
 | `[empty link]`                     | [empty link]                   | `[empty link]`                                   |
 | `[User](tg://user?id=1234567)`     | N/A                            | N/A                                              |
 | `[😄](tg://emoji?id=123456)`       | N/A                            | N/A                                              |
+| `[22:45](tg://time?unix=1647531900&format=t)` | N/A | N/A |
+
+### Date-time
+
+Date-time entities display a unix timestamp formatted according to the user's locale.
+
+Defined like this: `[22:45](tg://time?unix=1647531900&format=t)`.
+
+The `format` parameter is optional and must match `r|w?[dD]?[tT]?`:
+
+| Char | Meaning |
+|------|---------|
+| `r` | Relative time (cannot combine with others) |
+| `w` | Day of the week |
+| `d` | Short date (e.g. "17.03.22") |
+| `D` | Long date (e.g. "March 17, 2022") |
+| `t` | Short time (e.g. "22:45") |
+| `T` | Long time (e.g. "22:45:00") |
+
+When omitted, the underlying text is displayed as-is, but the user can still see the date in their local format.
 
 ### Nested and overlapping entities
 

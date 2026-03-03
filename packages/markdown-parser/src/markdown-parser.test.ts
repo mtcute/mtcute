@@ -75,6 +75,29 @@ describe('MarkdownMessageEntityParser', () => {
       )
     })
 
+    it('should handle date-time entities', () => {
+      test(
+        'meet at 22:45',
+        [createEntity('messageEntityFormattedDate', 8, 5, { date: 1647531900, shortTime: true })],
+        'meet at [22:45](tg://time?unix=1647531900&format=t)',
+      )
+      test(
+        'meet at 22:45',
+        [createEntity('messageEntityFormattedDate', 8, 5, { date: 1647531900, relative: true })],
+        'meet at [22:45](tg://time?unix=1647531900&format=r)',
+      )
+      test(
+        'meet at 22:45',
+        [createEntity('messageEntityFormattedDate', 8, 5, { date: 1647531900, dayOfWeek: true, longDate: true, shortTime: true })],
+        'meet at [22:45](tg://time?unix=1647531900&format=wDt)',
+      )
+      test(
+        'meet at 22:45',
+        [createEntity('messageEntityFormattedDate', 8, 5, { date: 1647531900 })],
+        'meet at [22:45](tg://time?unix=1647531900)',
+      )
+    })
+
     it('should handle language in pre', () => {
       test(
         'plain console.log("Hello, world!") some code plain',
@@ -496,6 +519,29 @@ describe('MarkdownMessageEntityParser', () => {
         '/* /*/* /*/*/* __/_ /_/_ /_/_/___ __/- /-/-__ /-/-/-'.replace(/\//g, '\\'),
         [createEntity('messageEntityItalic', 9, 8), createEntity('messageEntityItalic', 18, 4)],
         '* ** *** _ __ ___ - -- ---',
+      )
+    })
+
+    it('should handle date-time links', () => {
+      test(
+        '[22:45](tg://time?unix=1647531900&format=t)',
+        [createEntity('messageEntityFormattedDate', 0, 5, { date: 1647531900, shortTime: true })],
+        '22:45',
+      )
+      test(
+        '[tomorrow](tg://time?unix=1647531900&format=r)',
+        [createEntity('messageEntityFormattedDate', 0, 8, { date: 1647531900, relative: true })],
+        'tomorrow',
+      )
+      test(
+        '[22:45](tg://time?unix=1647531900)',
+        [createEntity('messageEntityFormattedDate', 0, 5, { date: 1647531900 })],
+        '22:45',
+      )
+      test(
+        'meet at [22:45](tg://time?unix=1647531900&format=wDt) ok',
+        [createEntity('messageEntityFormattedDate', 8, 5, { date: 1647531900, dayOfWeek: true, longDate: true, shortTime: true })],
+        'meet at 22:45 ok',
       )
     })
 

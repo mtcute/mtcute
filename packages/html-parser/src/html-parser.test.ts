@@ -68,6 +68,29 @@ describe('HtmlMessageEntityParser', () => {
       )
     })
 
+    it('should handle date-time entities', () => {
+      test(
+        'meet at 22:45',
+        [createEntity('messageEntityFormattedDate', 8, 5, { date: 1647531900, shortTime: true })],
+        'meet at <tg-time unix="1647531900" format="t">22:45</tg-time>',
+      )
+      test(
+        'meet at 22:45',
+        [createEntity('messageEntityFormattedDate', 8, 5, { date: 1647531900, relative: true })],
+        'meet at <tg-time unix="1647531900" format="r">22:45</tg-time>',
+      )
+      test(
+        'meet at 22:45',
+        [createEntity('messageEntityFormattedDate', 8, 5, { date: 1647531900, dayOfWeek: true, longDate: true, shortTime: true })],
+        'meet at <tg-time unix="1647531900" format="wDt">22:45</tg-time>',
+      )
+      test(
+        'meet at 22:45',
+        [createEntity('messageEntityFormattedDate', 8, 5, { date: 1647531900 })],
+        'meet at <tg-time unix="1647531900">22:45</tg-time>',
+      )
+    })
+
     it('should handle links and text mentions', () => {
       test(
         'plain https://google.com google @durov Pavel Durov mail@mail.ru plain',
@@ -298,6 +321,42 @@ describe('HtmlMessageEntityParser', () => {
           }),
         ],
         'user',
+      )
+    })
+
+    it('should handle <tg-time> tag', () => {
+      test(
+        htm`meet at <tg-time unix="1647531900" format="t">22:45</tg-time>`,
+        [createEntity('messageEntityFormattedDate', 8, 5, { date: 1647531900, shortTime: true })],
+        'meet at 22:45',
+      )
+      test(
+        htm`<tg-time unix="1647531900" format="r">tomorrow</tg-time>`,
+        [createEntity('messageEntityFormattedDate', 0, 8, { date: 1647531900, relative: true })],
+        'tomorrow',
+      )
+      test(
+        htm`<tg-time unix="1647531900" format="wDt">Thu, March 17, 22:45</tg-time>`,
+        [createEntity('messageEntityFormattedDate', 0, 20, { date: 1647531900, dayOfWeek: true, longDate: true, shortTime: true })],
+        'Thu, March 17, 22:45',
+      )
+      test(
+        htm`<tg-time unix="1647531900">22:45</tg-time>`,
+        [createEntity('messageEntityFormattedDate', 0, 5, { date: 1647531900 })],
+        '22:45',
+      )
+    })
+
+    it('should handle <time> tag', () => {
+      test(
+        htm`meet at <time datetime="2022-03-17T22:45:00Z" format="t">22:45</time>`,
+        [createEntity('messageEntityFormattedDate', 8, 5, { date: Math.floor(new Date('2022-03-17T22:45:00Z').getTime() / 1000), shortTime: true })],
+        'meet at 22:45',
+      )
+      test(
+        htm`<time datetime="2022-03-17T22:45:00Z">22:45</time>`,
+        [createEntity('messageEntityFormattedDate', 0, 5, { date: Math.floor(new Date('2022-03-17T22:45:00Z').getTime() / 1000) })],
+        '22:45',
       )
     })
 
