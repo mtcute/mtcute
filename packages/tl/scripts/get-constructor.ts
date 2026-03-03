@@ -1,3 +1,4 @@
+/* eslint-disable ts/no-unsafe-assignment */
 import type { TlEntry } from '@mtcute/tl-utils'
 import type { TlPackedSchema } from './schema.js'
 

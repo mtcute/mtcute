@@ -77,10 +77,10 @@ dp.onNewMessage(async (msg) => {
 })
 ```
 
-**Note**: the syntax used by this parser is **not**
-compatible with Bot API's HTML syntax.
+**Note**: Both variants support all Bot API HTML tags. The `html` variant differs from Bot API only in whitespace handling (it collapses whitespace like real HTML). Use `thtml` for full Bot API compatibility.
+
 See [documentation](https://ref.mtcute.dev/modules/_mtcute_html-parser)
-to learn about the syntax.
+to learn more about the syntax.
 
 ## Interpolation
 

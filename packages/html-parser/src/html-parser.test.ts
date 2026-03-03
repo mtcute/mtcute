@@ -571,6 +571,43 @@ describe('HtmlMessageEntityParser', () => {
       )
     })
 
+    it('should handle <ins> as underline', () => {
+      test(
+        htm`plain <ins>underline</ins> plain`,
+        [createEntity('messageEntityUnderline', 6, 9)],
+        'plain underline plain',
+      )
+    })
+
+    it('should handle <span class="tg-spoiler"> as spoiler', () => {
+      test(
+        htm`plain <span class="tg-spoiler">spoiler</span> plain`,
+        [createEntity('messageEntitySpoiler', 6, 7)],
+        'plain spoiler plain',
+      )
+    })
+
+    it('should ignore <span> without tg-spoiler class', () => {
+      test(htm`plain <span class="other">text</span> plain`, [], 'plain text plain')
+      test(htm`plain <span>text</span> plain`, [], 'plain text plain')
+    })
+
+    it('should handle <pre><code class="language-..."> for language', () => {
+      test(
+        htm`<pre><code class="language-python">print("hello")</code></pre>`,
+        [createEntity('messageEntityPre', 0, 14, { language: 'python' })],
+        'print("hello")',
+      )
+    })
+
+    it('should handle <pre><code> without language class', () => {
+      test(
+        htm`<pre><code>some code</code></pre>`,
+        [createEntity('messageEntityPre', 0, 9, { language: '' })],
+        'some code',
+      )
+    })
+
     it('should ignore other tags', () => {
       test(htm`<script>alert(1)</script>`, [], 'alert(1)')
     })

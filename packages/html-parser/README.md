@@ -4,7 +4,8 @@
 
 HTML entities parser for mtcute
 
-> **NOTE**: The syntax implemented here is **incompatible** with Bot API _HTML_.
+> **NOTE**: The `html` variant uses HTML-like whitespace collapsing, which is **incompatible** with Bot API _HTML_.
+> Use `thtml` for Bot API-compatible whitespace handling.
 >
 > Please read [Syntax](#syntax) below for a detailed explanation
 
@@ -81,9 +82,9 @@ Inline entities are entities that are in-line with other text. We support these 
 | ---------------- | ---------------------------------------------------------------- | ---------------------------- |
 | Bold             | `<b>text</b>`, `<strong>text</strong>`                           | **text**                     |
 | Italic           | `<i>text</i>`, `<em>text</em>`                                   | _text_                       |
-| Underline        | `<u>text</u>`                                                    | <u>text</u>                  |
+| Underline        | `<u>text</u>`, `<ins>text</ins>`                                 | <u>text</u>                  |
 | Strikethrough    | `<s>text</s>`, `<del>text</del>`, `<strike>text</strike>`        | ~~text~~                     |
-| Spoiler          | `<spoiler>text</spoiler>` (or `tg-spoiler`)                      | N/A                          |
+| Spoiler          | `<spoiler>text</spoiler>`, `<tg-spoiler>`, `<span class="tg-spoiler">` | N/A                     |
 | Monospace (code) | `<code>text</code>`                                              | `text`                       |
 | Text link        | `<a href="https://google.com">Google</a>`                        | [Google](https://google.com) |
 | Text mention     | `<a href="tg://user?id=1234567">Name</a>`                        | N/A                          |
@@ -128,10 +129,14 @@ The only block entity that Telegram supports are `<pre>` and `<blockquote>`, the
 
 ## `<pre>`
 
-Optionally, language for `<pre>` block can be specified like this:
+Optionally, language for `<pre>` block can be specified in two ways:
 
 ```html
+<!-- mtcute style -->
 <pre language="typescript">export type Foo = 42</pre>
+
+<!-- Bot API style -->
+<pre><code class="language-typescript">export type Foo = 42</code></pre>
 ```
 
 | Code                                                                                | Result (visual)              |

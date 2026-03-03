@@ -98,8 +98,18 @@ function parse(
 
       processPendingText()
 
-      // ignore tags inside pre (except pre)
-      if (name !== 'pre' && stacks.pre?.length) return
+      // ignore tags inside pre (except pre and code for language extraction)
+      if (stacks.pre?.length && name !== 'pre') {
+        if (name === 'code' && attribs.class) {
+          const match = attribs.class.match(/language-(\S+)/)
+          if (match) {
+            const preEntity = stacks.pre[stacks.pre.length - 1] as tl.RawMessageEntityPre
+            preEntity.language = match[1]
+          }
+        }
+
+        return
+      }
 
       let entity: tl.TypeMessageEntity
 
@@ -126,6 +136,7 @@ function parse(
           }
           break
         case 'u':
+        case 'ins':
           entity = {
             _: 'messageEntityUnderline',
             offset: plainText.length,
@@ -166,6 +177,14 @@ function parse(
           break
         case 'spoiler':
         case 'tg-spoiler':
+          entity = {
+            _: 'messageEntitySpoiler',
+            offset: plainText.length,
+            length: 0,
+          }
+          break
+        case 'span':
+          if (attribs.class !== 'tg-spoiler') return
           entity = {
             _: 'messageEntitySpoiler',
             offset: plainText.length,
@@ -561,6 +580,8 @@ export const html: HtmlTagFn = Object.assign(
 /**
  * Like {@link html}, but preserves whitespace as-is
  * instead of collapsing it like HTML does.
+ *
+ * This variant is fully compatible with the Bot API HTML syntax.
  *
  * Leading indentation common to all lines is stripped (dedented),
  * making it safe to use in indented code.
