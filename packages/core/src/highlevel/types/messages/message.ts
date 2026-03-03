@@ -121,7 +121,7 @@ export class Message {
     return this.raw.mediaUnread!
   }
 
-  /** For messages in groups with ranks enabled, the rank of the sender */
+  /** For messages in groups chats, the rank of the sender, if any */
   get fromRank(): string | null {
     return this.raw._ === 'message' ? this.raw.fromRank ?? null : null
   }

@@ -6,6 +6,7 @@
       "Bash(pnpm tsx scripts/fetch-api.ts*)",
       "Bash(pnpm tsx scripts/gen-code.ts)",
       "Bash(pnpm tsx scripts/process-diff.ts)",
+      "Bash(pnpm tsx packages/tl/scripts/get-constructor.ts)",
       "Bash(pnpm run -w lint:tsc)",
       "Bash(pnpm run -w lint:ci --fix)",
       "Bash(pnpm run -w test)"

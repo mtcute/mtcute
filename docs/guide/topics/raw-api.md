@@ -62,19 +62,39 @@ Learn more about pagination in [Telegram docs](https://core.telegram.org/api/off
 ## Resolving peers
 
 To fetch a value for fields that require `InputPeer`, use `resolvePeer` method.
-If you need `InputUser` or `InputChannel`, you can use `to*` functions
-respectively:
+If you need `InputUser` or `InputChannel`, you can use the shorthand methods
+`resolveUser` and `resolveChannel`:
 
 ```ts
 const result = await tg.call({
     _: 'channels.reportSpam',
-    channel: toInputChannel(await tg.resolvePeer(...)),
-    userId: toInputUser(await tg.resolvePeer(...)),
+    channel: await tg.resolveChannel(channelId),
+    userId: await tg.resolveUser(userId),
     id: [1, 2, 3]
 })
 ```
 
-These functions will throw in case the peer is of wrong type
+Alternatively, you can use `toInputChannel`/`toInputUser` on a resolved `InputPeer`:
+
+```ts
+const channel = toInputChannel(await tg.resolvePeer(channelId))
+```
+
+These functions will throw in case the peer is of wrong type.
+
+When you need to dispatch different API calls based on peer type (chat vs channel),
+use the type guards:
+
+```ts
+import { isInputPeerChannel, toInputChannel } from '@mtcute/core/utils.js'
+
+const peer = await tg.resolvePeer(chatId)
+if (isInputPeerChannel(peer)) {
+    await tg.call({ _: 'channels.deleteMessages', channel: toInputChannel(peer), id: ids })
+} else {
+    await tg.call({ _: 'messages.deleteMessages', id: ids, revoke: true })
+}
+```
 
 ## Handling Updates
 
@@ -166,25 +186,20 @@ const res = await tg.call({
 
 ## Message entities
 
-To simplify processing message entities, client has a special method:
+To normalize text with entities for use in raw API calls, use `_normalizeInputText`:
+
 ```ts
-_parseEntities(
-    text?: string | FormattedString,
-    mode?: string | null,
-    entities?: tl.TypeMessageEntity[]
-): Promise<[string, tl.TypeMessageEntity[] | undefined]>
+const [text, entities] = await tg._normalizeInputText(inputText)
 ```
 
-Here, `text` is user-provided text which may have formatted entities,
-`mode` is the chosen parse mode (or `null` to disable), and `entities`
-is the override message entities provided by the user.
+`InputText` is either a plain string or an object `TextWithEntities { text: string, entities: tl.TypeMessageEntity[] }`.
+The function handles resolving `messageEntityMentionName` entities (converting them to
+`inputMessageEntityMentionName` with proper `InputUser`) and trimming whitespace
+while adjusting entity offsets.
 
-If `FormattedString` is passed (e.g. <code>md\`\*\*Hello!**\`</code>),
-`mode` parameter is ignored.
-
-It returns a tuple containing text without any entities, and the entities
-themselves (if applicable). If `text` was not provided, empty string
-is returned.
+To create formatted text using a parse mode, use the tagged template literals
+(e.g. <code>html\`&lt;b&gt;Hello!&lt;/b&gt;\`</code> or <code>md\`\*\*Hello!**\`</code>)
+which produce `TextWithEntities` objects that can be passed as `InputText`.
 
 ## Fully custom requests
 

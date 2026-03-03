@@ -33,6 +33,10 @@ node packages/core/scripts/generate-client.cjs
 
 # Generate update types for dispatcher
 node packages/dispatcher/scripts/generate.cjs
+
+# Look up a TL constructor/method definition and its TypeScript type
+npx tsx packages/tl/scripts/get-constructor.ts <name>
+# e.g. npx tsx packages/tl/scripts/get-constructor.ts messages.sendMessage
 ```
 
 ## Package overview
@@ -76,13 +80,7 @@ In the `tl` namespace, types are named after their TL object name:
 
 ### Method codegen system
 
-Files in `core/src/highlevel/methods/` use magic comment annotations processed by `generate-client.cjs`:
-- `// @copy` — copy import/block to generated client.ts
-- `// @extension` — add interface fields to TelegramClient class
-- `// @initialize` — copy function body to constructor
-- `// @exported` — re-export type from client module
-
-Shared imports for the codegen live in `methods/_imports.ts`. After adding/modifying methods, run `node packages/core/scripts/generate-client.cjs`.
+See the `writing-methods` skill for comprehensive documentation on writing high-level methods, including codegen annotations, peer resolution, update handling, pagination, and all common patterns.
 
 Auto-generated files (do not edit or read yourself):
 - `packages/core/src/highlevel/client.ts`
@@ -95,6 +93,8 @@ Platform packages (`node`, `bun`, `deno`, `web`) provide `ICorePlatform` impleme
 ### TL schema
 
 `packages/tl` contains the Telegram TL schema (`api-schema.json`) and generated TypeScript types/readers/writers. The `tl` namespace provides typed constructors and methods. Version follows TL layer number (e.g., `222.0.0`).
+
+To look up a TL constructor's definition and TypeScript type, use `pnpm tsx packages/tl/scripts/get-constructor.ts <name>`. Supports both class names (e.g. `user`) and method names (e.g. `messages.sendMessage`). Case-insensitive, shows partial matches if no exact match found.
 
 ## Code style
 

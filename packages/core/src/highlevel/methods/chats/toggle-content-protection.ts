@@ -12,11 +12,16 @@ export async function toggleContentProtection(
   client: ITelegramClient,
   chatId: InputPeerLike,
   enabled = false,
+  params?: {
+    /** If this method was called in response to the other party enabling content protection, ID of that message */
+    requestMsgId?: number
+  },
 ): Promise<void> {
   const res = await client.call({
     _: 'messages.toggleNoForwards',
     peer: await resolvePeer(client, chatId),
     enabled,
+    requestMsgId: params?.requestMsgId,
   })
   client.handleClientUpdate(res)
 }
