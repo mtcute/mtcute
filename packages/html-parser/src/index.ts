@@ -18,7 +18,47 @@ function escape(str: string, quote = false): string {
   return str
 }
 
+function dedent(strings: TemplateStringsArray): string[] {
+  // join all parts to find common indentation
+  const joined = strings.join('\x00')
+  const lines = joined.split('\n')
+
+  // find minimum indentation (skip first and last lines, skip empty lines)
+  let minIndent = Infinity
+
+  for (let i = 1; i < lines.length; i++) {
+    const match = lines[i].match(/^(\s*)\S/)
+    if (match) minIndent = Math.min(minIndent, match[1].length)
+  }
+
+  if (minIndent === Infinity) minIndent = 0
+
+  // strip common indentation from each part
+  const result: string[] = []
+  let remainder = joined
+
+  for (let i = 0; i < strings.length; i++) {
+    const part = remainder.slice(0, strings[i].length)
+    remainder = remainder.slice(strings[i].length + 1) // +1 for \x00
+
+    const partLines = part.split('\n')
+    for (let j = 0; j < partLines.length; j++) {
+      // don't dedent first line of first part (it's on the same line as backtick)
+      if (i === 0 && j === 0) continue
+      partLines[j] = partLines[j].slice(minIndent)
+    }
+    result.push(partLines.join('\n'))
+  }
+
+  // strip leading newline from first part and trailing whitespace from last part
+  if (result[0].startsWith('\n')) result[0] = result[0].slice(1)
+  result[result.length - 1] = result[result.length - 1].replace(/\n[ \t]*$/, '')
+
+  return result
+}
+
 function parse(
+  keepWhitespace: boolean,
   strings: TemplateStringsArray | string,
   ...sub: (InputText | MessageEntity | Long | boolean | number | undefined | null)[]
 ): TextWithEntities {
@@ -29,10 +69,10 @@ function parse(
 
   let isInsideAttrib = false
 
-  function processPendingText(tagEnd = false, keepWhitespace = false) {
+  function processPendingText(tagEnd = false, forceKeepWhitespace = false) {
     if (!pendingText.length) return
 
-    if (!stacks.pre?.length && !keepWhitespace) {
+    if (!stacks.pre?.length && !keepWhitespace && !forceKeepWhitespace) {
       pendingText = pendingText.replace(/[^\S\u00A0]+/g, ' ')
 
       if (tagEnd) pendingText = pendingText.trimEnd()
@@ -271,6 +311,7 @@ function parse(
   }
 
   if (typeof strings === 'string') strings = [strings] as unknown as TemplateStringsArray
+  if (keepWhitespace) strings = dedent(strings) as unknown as TemplateStringsArray
 
   sub.forEach((it, idx) => {
     parser.write(strings[idx])
@@ -330,7 +371,7 @@ function parse(
   }
 }
 
-/** Options passed to `html.unparse` */
+/** Options passed to `html.unparse` / `thtml.unparse` */
 export interface HtmlUnparseOptions {
   /**
    * Syntax highlighter to use when un-parsing `pre` tags with language
@@ -340,6 +381,7 @@ export interface HtmlUnparseOptions {
 
 // internal function that uses recursion to correctly process nested & overlapping entities
 function _unparse(
+  keepWhitespace: boolean,
   text: string,
   entities: ReadonlyArray<tl.TypeMessageEntity>,
   params: HtmlUnparseOptions,
@@ -350,6 +392,8 @@ function _unparse(
   if (!text) return text
 
   if (!entities.length || entities.length === entitiesOffset) {
+    if (keepWhitespace) return escape(text)
+
     return escape(text)
       .replace(/\n/g, '<br>')
       .replace(/ {2,}/g, (match) => {
@@ -400,7 +444,7 @@ function _unparse(
     if (type === 'messageEntityPre') {
       entityText = substr
     } else {
-      entityText = _unparse(substr, entities, params, i + 1, offset + relativeOffset, length)
+      entityText = _unparse(keepWhitespace, substr, entities, params, i + 1, offset + relativeOffset, length)
     }
 
     switch (type) {
@@ -469,53 +513,73 @@ function _unparse(
 /**
  * Add HTML formatting to the text given the plain text and entities contained in it.
  */
-function unparse(input: InputText, options?: HtmlUnparseOptions): string {
+function unparse(keepWhitespace: boolean, input: InputText, options?: HtmlUnparseOptions): string {
   if (typeof input === 'string') {
-    return _unparse(input, [], options ?? {})
+    return _unparse(keepWhitespace, input, [], options ?? {})
   }
 
-  return _unparse(input.text, input.entities ?? [], options ?? {})
+  return _unparse(keepWhitespace, input.text, input.entities ?? [], options ?? {})
 }
 
-// typedoc doesn't support this yet, so we'll have to do it manually
-// https://github.com/TypeStrong/typedoc/issues/2436
+type HtmlSub = InputText | MessageEntity | Long | boolean | number | undefined | null
 
-export const html: {
-  /**
-   * Tagged template based HTML-to-entities parser function
-   *
-   * Additionally, `md` function has two static methods:
-   * - `html.escape` - escape a string to be safely used in HTML
-   *   (should not be needed in most cases, as `html` function itself handles all `string`s
-   *   passed to it automatically as plain text)
-   * - `html.unparse` - add HTML formatting to the text given the plain text and entities contained in it
-   *
-   * @example
-   * ```typescript
-   * const text = html`<b>${user.displayName}</b>`
-   * ```
-   */
-  (
-    strings: TemplateStringsArray,
-    ...sub: (InputText | MessageEntity | boolean | Long | number | undefined | null)[]
-  ): TextWithEntities
-  /**
-   * A variant taking a plain JS string as input
-   * and parsing it.
-   *
-   * Useful for cases when you already have a string
-   * (e.g. from some server) and want to parse it.
-   *
-   * @example
-   * ```typescript
-   * const string = '<b>hello</b>'
-   * const text = html(string)
-   * ```
-   */
+interface HtmlTagFn {
+  (strings: TemplateStringsArray, ...sub: HtmlSub[]): TextWithEntities
   (string: string): TextWithEntities
   escape: typeof escape
-  unparse: typeof unparse
-} = Object.assign(parse, {
-  escape,
-  unparse,
-})
+  unparse: (input: InputText, options?: HtmlUnparseOptions) => string
+}
+
+/**
+ * Tagged template based HTML-to-entities parser function.
+ *
+ * Whitespace is handled like in real HTML: newlines and consecutive spaces
+ * are collapsed into a single space. Use `<br>` for line breaks
+ * and `&nbsp;` for multiple spaces.
+ *
+ * Also has static methods:
+ * - `html.escape` - escape a string to be safely used in HTML
+ * - `html.unparse` - add HTML formatting to the text given the plain text and entities contained in it
+ *
+ * @example
+ * ```typescript
+ * // whitespace is collapsed, <br> for newlines
+ * html`
+ *   <b>Hello</b>,
+ *   <i>world</i>!
+ * `
+ * // => { text: 'Hello, world!' }
+ * ```
+ *
+ * @see {@link thtml} for a variant that preserves whitespace as-is
+ */
+export const html: HtmlTagFn = Object.assign(
+  parse.bind(null, false),
+  { escape, unparse: unparse.bind(null, false) },
+)
+
+/**
+ * Like {@link html}, but preserves whitespace as-is
+ * instead of collapsing it like HTML does.
+ *
+ * Leading indentation common to all lines is stripped (dedented),
+ * making it safe to use in indented code.
+ *
+ * Also has static methods:
+ * - `thtml.escape` - escape a string to be safely used in HTML
+ * - `thtml.unparse` - like `html.unparse`, but preserves whitespace in the output
+ *
+ * @example
+ * ```typescript
+ * // whitespace and newlines are preserved, common indent is stripped
+ * thtml`
+ *   <b>Hello</b>,
+ *   <i>world</i>!
+ * `
+ * // => { text: 'Hello,\nworld!' }
+ * ```
+ */
+export const thtml: HtmlTagFn = Object.assign(
+  parse.bind(null, true),
+  { escape, unparse: unparse.bind(null, true) },
+)

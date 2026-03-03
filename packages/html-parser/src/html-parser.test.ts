@@ -7,7 +7,7 @@ import { MessageEntity } from '@mtcute/core'
 import Long from 'long'
 
 import { describe, expect, it } from 'vitest'
-import { html as htm } from './index.js'
+import { html as htm, thtml } from './index.js'
 
 function createEntity<T extends tl.TypeMessageEntity['_']>(type: T, offset: number, length: number, additional?: Omit<tl.FindByName<tl.TypeMessageEntity, T>, '_' | 'offset' | 'length'>): tl.TypeMessageEntity {
   return {
@@ -705,6 +705,154 @@ describe('HtmlMessageEntityParser', () => {
           'text bold more text',
         )
       })
+    })
+  })
+
+  describe('thtml unparse', () => {
+    const test = (
+      text: string,
+      entities: tl.TypeMessageEntity[],
+      expected: string,
+      params?: HtmlUnparseOptions,
+    ): void => {
+      expect(thtml.unparse({ text, entities }, params)).eq(expected)
+    }
+
+    it('should preserve newlines as-is', () => {
+      test('plain\n\nplain', [], 'plain\n\nplain')
+    })
+
+    it('should preserve multiple spaces as-is', () => {
+      test('plain    plain', [], 'plain    plain')
+    })
+
+    it('should still escape html', () => {
+      test('<&>', [], '&lt;&amp;&gt;')
+    })
+
+    it('should handle entities with preserved whitespace', () => {
+      test(
+        'hello\n  world',
+        [createEntity('messageEntityBold', 0, 5)],
+        '<b>hello</b>\n  world',
+      )
+    })
+
+    it('should handle pre tags normally', () => {
+      test(
+        'code\n  here',
+        [createEntity('messageEntityPre', 0, 11, { language: '' })],
+        '<pre>code\n  here</pre>',
+      )
+    })
+  })
+
+  describe('thtml', () => {
+    const test = (text: TextWithEntities, expectedEntities: tl.TypeMessageEntity[], expectedText: string): void => {
+      expect(text.text).eql(expectedText)
+      expect(text.entities ?? []).eql(expectedEntities)
+    }
+
+    it('should preserve spaces and newlines', () => {
+      test(thtml`this is some text\n\nwith newlines`, [], 'this is some text\n\nwith newlines')
+      test(thtml`multiple   spaces   here`, [], 'multiple   spaces   here')
+    })
+
+    it('should dedent indented content', () => {
+      test(
+        thtml`
+          hello
+          world
+        `,
+        [],
+        'hello\nworld',
+      )
+    })
+
+    it('should dedent with mixed indentation levels', () => {
+      test(
+        thtml`
+          hello
+            indented
+          back
+        `,
+        [],
+        'hello\n  indented\nback',
+      )
+    })
+
+    it('should handle entities with preserved whitespace', () => {
+      test(
+        thtml`
+          <b>bold</b>
+          <i>italic</i>
+        `,
+        [createEntity('messageEntityBold', 0, 4), createEntity('messageEntityItalic', 5, 6)],
+        'bold\nitalic',
+      )
+    })
+
+    it('should handle inline formatting with spaces', () => {
+      test(
+        thtml`hello  <b>bold</b>  world`,
+        [createEntity('messageEntityBold', 7, 4)],
+        'hello  bold  world',
+      )
+    })
+
+    it('should handle interpolations', () => {
+      const name = 'world'
+      test(
+        thtml`
+          hello  ${name}
+          goodbye
+        `,
+        [],
+        'hello  world\ngoodbye',
+      )
+    })
+
+    it('should handle entity interpolations', () => {
+      const inner = htm`<b>bold</b>`
+      test(
+        thtml`
+          hello  ${inner}
+          world
+        `,
+        [createEntity('messageEntityBold', 7, 4)],
+        'hello  bold\nworld',
+      )
+    })
+
+    it('should work with single-line (no dedent needed)', () => {
+      test(thtml`<b>bold</b> and <i>italic</i>`, [
+        createEntity('messageEntityBold', 0, 4),
+        createEntity('messageEntityItalic', 9, 6),
+      ], 'bold and italic')
+    })
+
+    it('should handle br tags', () => {
+      test(thtml`hello<br>world`, [], 'hello\nworld')
+    })
+
+    it('should handle plain string input', () => {
+      test(thtml('<b>bold</b>'), [createEntity('messageEntityBold', 0, 4)], 'bold')
+    })
+
+    it('should preserve blank lines', () => {
+      test(
+        thtml`
+          hello
+
+          world
+        `,
+        [],
+        'hello\n\nworld',
+      )
+    })
+
+    it('should handle &nbsp; as regular space', () => {
+      test(thtml`hello&nbsp;&nbsp;world`, [], 'hello  world')
     })
   })
 })

@@ -16,6 +16,13 @@ HTML entities parser for mtcute
 
 ## Usage
 
+This package exports two tagged template functions: `html` and `thtml`.
+
+### `html` - HTML-like whitespace
+
+Whitespace is collapsed just like in real HTML: newlines and consecutive spaces become a single space.
+Use `<br>` for line breaks and `&nbsp;` for multiple spaces.
+
 ```ts
 import { html } from '@mtcute/html-parser'
 
@@ -26,7 +33,30 @@ tg.sendText(
         ${await getUpdatesFromFeed()}
     `
 )
+// text: "Hello, me! Updates from the feed:\n..."
 ```
+
+### `thtml` - preserved whitespace
+
+Whitespace (spaces and newlines) is kept as-is, Bot API style. 
+Common leading indentation is automatically stripped (dedented), so it's safe to use in indented code.
+
+```ts
+import { thtml } from '@mtcute/html-parser'
+
+tg.sendText(
+    'me',
+    thtml`
+        Hello, <b>me</b>!
+        Updates from the feed:
+        ${await getUpdatesFromFeed()}
+    `
+)
+// text: "Hello, me!\nUpdates from the feed:\n..."
+```
+
+Both functions also have `.escape()` and `.unparse()` static methods.
+`thtml.unparse()` preserves whitespace in the output (no `<br>` / `&nbsp;` conversion).
 
 ## Syntax
 
@@ -34,12 +64,14 @@ tg.sendText(
 supports nearly any HTML. However, since the text is still processed in a custom way for Telegram, the supported subset
 of features is documented below:
 
-## Line breaks and spaces
+## Line breaks and spaces (`html`)
 
-Line breaks are **not** preserved, `<br>` is used instead,
+When using `html`, line breaks are **not** preserved, `<br>` is used instead,
 making the syntax very close to the one used when building web pages.
 
 Multiple spaces and indents are collapsed (except in `pre`), when you do need multiple spaces use `&nbsp;` instead.
+
+When using `thtml`, whitespace is preserved as-is and no collapsing is performed.
 
 ## Inline entities
 
@@ -136,7 +168,7 @@ Overlapping entities are supported in `unparse()`, though.
 
 ## Interpolation
 
-Being a tagged template literal, `html` supports interpolation.
+Both `html` and `thtml` support interpolation as tagged template literals.
 
 You can interpolate one of the following:
 - `string` - **will not** be parsed, and appended to plain text as-is

@@ -9,7 +9,8 @@
       "Bash(pnpm tsx packages/tl/scripts/get-constructor.ts)",
       "Bash(pnpm run -w lint:tsc)",
       "Bash(pnpm run -w lint:ci --fix)",
-      "Bash(pnpm run -w test)"
+      "Bash(pnpm run -w test*)",
+      "Bash(pnpm run test*)"
     ]
   }
 }

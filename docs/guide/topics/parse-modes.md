@@ -45,7 +45,12 @@ to learn about the syntax.
 
 ## HTML
 
-HTML parser is implemented in `@mtcute/html-parser` package:
+HTML parser is implemented in `@mtcute/html-parser` package. It provides two variants:
+
+### `html` - HTML-like whitespace
+
+Whitespace is collapsed just like in real HTML (newlines and consecutive spaces become a single space).
+Use `<br>` for line breaks and `&nbsp;` for multiple spaces.
 
 ```ts
 import { html } from '@mtcute/html-parser'
@@ -55,8 +60,25 @@ dp.onNewMessage(async (msg) => {
 })
 ```
 
-**Note**: the syntax used by this parser is **not** 
-compatible with Bot API's HTML syntax. 
+### `thtml` - preserved whitespace
+
+Whitespace (spaces and newlines) is kept as-is (Bot API style). 
+Common leading indentation is automatically stripped (dedented), so it's safe to use in indented code.
+
+```ts
+import { thtml } from '@mtcute/html-parser'
+
+dp.onNewMessage(async (msg) => {
+    await msg.answerText(thtml`
+        Hello, <b>${msg.sender.displayName}</b>!
+        Welcome back.
+    `)
+    // text: "Hello, Name!\nWelcome back."
+})
+```
+
+**Note**: the syntax used by this parser is **not**
+compatible with Bot API's HTML syntax.
 See [documentation](https://ref.mtcute.dev/modules/_mtcute_html-parser)
 to learn about the syntax.
 
