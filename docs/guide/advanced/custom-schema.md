@@ -49,7 +49,7 @@ so you can use `@mtcute/tl-utils` to code-gen everything on demand:
 
 ```ts
 import { patchRuntimeTlSchema } from '@mtcute/tl-utils'
-import { __tlReaderMap, __tlWriterMap } from '@mtcute/node/utils.js'
+import { __tlReaderMap, __tlWriterMap } from '@mtcute/core/utils.js'
 
 // here you can pass just the difference between 
 // the built-in schema and the custom one
@@ -66,7 +66,7 @@ woof.bark at:InputPeer = Bool;
 Once parsed, you can pass `nextSchema` to `TlBinaryReader` and `TlBinaryWriter` to use it:
 
 ```ts
-import { TlBinaryReader, TlBinaryWriter } from '@mtcute/node/utils.js'
+import { TlBinaryReader, TlBinaryWriter } from '@mtcute/core/utils.js'
 
 const r = await tg.call({
     _: 'mtcute.customMethod',

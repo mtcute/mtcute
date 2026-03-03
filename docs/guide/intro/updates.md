@@ -141,7 +141,7 @@ const tg = new TelegramClient(...)
 const dp = Dispatcher.for(tg)
 
 dp.onNewMessage(async (msg) => {
-  await msg.forwardTo('me')
+  await msg.forwardTo({ toChatId: 'me' })
 })
 
 await tg.start()
@@ -161,7 +161,7 @@ Let's make our code only handle messages containing media:
 dp.onNewMessage(
   filters.media,
   async (msg) => {
-    await msg.forwardTo('me')
+    await msg.forwardTo({ toChatId: 'me' })
   }
 )
 ```

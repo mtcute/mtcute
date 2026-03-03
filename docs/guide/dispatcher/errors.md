@@ -64,7 +64,7 @@ dp.onNewMessage(
   }
 )
 
-tg.onError((err) => {
+tg.onError.add((err) => {
     // will be called since there's no `dp.onError`
     console.log(err)
 })

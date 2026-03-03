@@ -115,7 +115,7 @@ This will not, however, prevent the handlers from a
 A bit ahead of ourselves, since we haven't covered child
 Dispatchers yet, but the idea is pretty simple.
 
-`PropagationAction.StopChidlren` is very similar to the previous one, but also
+`PropagationAction.StopChildren` is very similar to the previous one, but also
 prevents the handlers from child dispatchers to be executed:
 
 ```ts
@@ -124,7 +124,7 @@ dp.onNewMessage(
   async (msg) => {
     console.log('Text or sticker')
 
-    return PropagationAction.StopChidlren
+    return PropagationAction.StopChildren
   }
 )
 

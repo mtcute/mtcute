@@ -138,8 +138,8 @@ which is simply a Dispatcher with an additional method: `addStep`.
 
 Every step is an `onNewMessage` handler that is filtered by the current
 step, which is stored in wizard's FSM state. In each step, you can
-choose either to `WizardAction.Stay` in the same step, proceed to the
-`WizardAction.Next` step, or `WizardAction.Exit` the wizard altogether.
+choose either to `WizardSceneAction.Stay` in the same step, proceed to the
+`WizardSceneAction.Next` step, or `WizardSceneAction.Exit` the wizard altogether.
 
 You can also return a `number` to jump to some step (ordering starts from 0).
 

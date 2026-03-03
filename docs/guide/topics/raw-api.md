@@ -207,14 +207,14 @@ mtcute also allows you to send fully custom requests to the server.
 This is useful if you want to use some undocumented or yet-unreleased APIs
 and don't want to patch the library or use the TL schema override mechanism.
 
-You can use the `mtcute.customRequest` pseudo-method for that:
+You can use the `mtcute.customMethod` pseudo-method for that:
 
 ```ts
 const res = await tg.call({
-    _: 'mtcute.customRequest',
+    _: 'mtcute.customMethod',
     bytes: Buffer.from('11223344', 'hex'),
 })
 ```
 
-`bytes` will be send as-is to the server, and the response will be returned as a `Uint8Array`
+`bytes` will be sent as-is to the server, and the response will be returned as a `Uint8Array`
 for you to handle on your own (it might be useful to look into [`@mtcute/tl-runtime` package](https://ref.mtcute.dev/modules/_mtcute_tl-runtime))

@@ -28,7 +28,7 @@ try {
 ```
 
 ::: tip
-mtcute automatically handles flood waits smaller than `floodWaitThreshold`
+mtcute automatically handles flood waits smaller than `floodSleepThreshold`
 by sleeping for that amount of seconds.
 :::
 
@@ -139,4 +139,4 @@ error handler within the current dispatcher, and do not propagate
 to parent/children. They also stop propagation within this dispatcher.
 
 If there is no dispatcher error handler, but an error still occurs,
-the error is propagated to `TelegramClient` (`conn` will be `undefined`).
+the error is propagated to `TelegramClient`'s `onError` emitter.

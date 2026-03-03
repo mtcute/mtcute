@@ -98,10 +98,10 @@ which can be used to convert the message back to the original text:
 ```ts
 import { html } from '@mtcute/html-parser'
 
-const msg = await tg.sendText('Hi, <b>User</b>!', { parseMode: 'html' })
+const msg = await tg.sendText('me', html`Hi, <b>User</b>!`)
 
 console.log(msg.text)
 // Hi, User!
-console.log(html.unparse())
+console.log(html.unparse(msg))
 // Hi, <b>User</b>!
 ```

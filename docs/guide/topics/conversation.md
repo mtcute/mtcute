@@ -40,8 +40,9 @@ await conv.with(async () => {
 await conv.start()
 try {
     // ... code ...
-} catch (e) {}
-conv.stop()
+} finally {
+    conv.stop()
+}
 ```
 
 Calling `.stop()` is vitally important, failing to do so *will* lead

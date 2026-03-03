@@ -86,7 +86,7 @@ const client = new TelegramClient({
                     logPeerIdInvalid(ctx.request)
                 }
             }),
-            networkMiddlewares.basic()
+            ...networkMiddlewares.basic()
         ]
     }
 })

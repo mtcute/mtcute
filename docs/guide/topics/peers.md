@@ -248,7 +248,7 @@ Or you can use `withCompleteSender` and `withCompleteChat` middleware-like filte
 
 ```ts
 dp.onNewMessage(
-  filters.withCompleteSender(filters.sender('user'))
+  filters.withCompleteSender(filters.sender('user')),
   async (msg) => {
     const user = msg.sender
     // user is guaranteed to be complete
