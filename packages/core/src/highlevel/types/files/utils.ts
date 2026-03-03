@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-globals */
 import type { IReadable } from '@fuman/io'
 import type { tdFileId } from '@mtcute/file-id'
 import type { tl } from '@mtcute/tl'

@@ -442,6 +442,20 @@ export interface ChatActionToggleAntiSpam {
   enabled: boolean
 }
 
+/** Participant rank was edited */
+export interface ChatActionParticipantRankEdited {
+  type: 'participant_rank_edited'
+
+  /** User whose rank was edited */
+  user: User
+
+  /** Previous rank */
+  prevRank: string
+
+  /** New rank */
+  newRank: string
+}
+
 /** Auto-translation has been toggled */
 export interface ChatActionToggleAutotranslation {
   type: 'toggle_autotranslation'
@@ -498,6 +512,7 @@ export type ChatAction
     | ChatActionMessageSent
     | ChatActionToggleAntiSpam
     | ChatActionToggleAutotranslation
+    | ChatActionParticipantRankEdited
     | null
 
 /** @internal */
@@ -779,6 +794,13 @@ export function _actionFromTl(
       return {
         type: 'toggle_autotranslation',
         enabled: e.newValue,
+      }
+    case 'channelAdminLogEventActionParticipantEditRank':
+      return {
+        type: 'participant_rank_edited',
+        user: new User(peers.user(e.userId)),
+        prevRank: e.prevRank,
+        newRank: e.newRank,
       }
     default:
       return null

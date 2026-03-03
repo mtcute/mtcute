@@ -81,6 +81,8 @@ function normalizeBotAdmin(rights?: BotAdminRight[]): string | undefined {
           return 'delete_stories'
         case 'manageDirectMessages':
           return 'manage_chat' // idk?
+        case 'manageRanks':
+          return 'manage_chat' // idk?
         default:
           assertNever(it)
           return ''

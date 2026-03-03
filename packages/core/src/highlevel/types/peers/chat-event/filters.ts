@@ -116,6 +116,7 @@ export function normalizeChatEventFilters(input: InputChatEventFilters): ChatEve
         case 'wallpaper_changed':
         case 'toggle_anti_spam':
         case 'toggle_autotranslation':
+        case 'participant_rank_edited':
           // not documented so idk, enable all
           serverFilter.invite = true
           serverFilter.invites = true

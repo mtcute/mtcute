@@ -245,6 +245,22 @@ export class FullUser extends User {
     return this.full?.ttlPeriod ?? null
   }
 
+  /**
+   * Whether the current user has enabled content protection for own messages in DMs with this user,
+   * i.e. our outgoing messages to this user will be `noforwards`.
+   */
+  get contentProtectionOutgoing(): boolean {
+    return this.full.noforwardsMyEnabled!
+  }
+
+  /**
+   * Whether this user has enabled content protection for their messages in DMs with the current user,
+   * i.e. our incoming messages from this user will be `noforwards`.
+   */
+  get contentProtectionIncoming(): boolean {
+    return this.full.noforwardsPeerEnabled!
+  }
+
   /** Whether the "Gifts" tab should be shown */
   get showGifts(): boolean {
     return this.full.displayGiftsButton!

@@ -69,18 +69,16 @@ export class ChatMember {
   }
 
   /**
-   * Custom title (for creators and admins).
+   * Custom title (rank) of the chat member.
    *
-   * `null` for non-admins and in case custom title is not set.
+   * `null` in case custom title (rank) is not set.
    */
   get title(): string | null {
-    switch (this.raw._) {
-      case 'channelParticipantCreator':
-      case 'channelParticipantAdmin':
-        return this.raw.rank ?? null
-      default:
-        return null
+    if ('rank' in this.raw) {
+      return this.raw.rank ?? null
     }
+
+    return null
   }
 
   /**

@@ -121,6 +121,11 @@ export class Message {
     return this.raw.mediaUnread!
   }
 
+  /** For messages in groups with ranks enabled, the rank of the sender */
+  get fromRank(): string | null {
+    return this.raw._ === 'message' ? this.raw.fromRank ?? null : null
+  }
+
   /** Whether this is a broadcast channel post */
   get isChannelPost(): boolean {
     return this.raw._ === 'message' && this.raw.post!

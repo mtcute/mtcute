@@ -1688,6 +1688,8 @@ export interface TelegramClient extends ITelegramClient {
    * Get the user who will be made the creator of the channel/supergroup if you were to leave it.
    *
    * You must be the creator of the channel/supergroup to use this method.
+   * **Available**: 👤 users only
+   *
    */
   getCreatorAfterLeave(
     chatId: InputPeerLike): Promise<User | null>
@@ -2253,6 +2255,8 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Set a note for a contact
    *
+   * **Available**: 👤 users only
+   *
    * @param userId  ID of the user to set the note for
    * @param note  Note text
    */
@@ -2747,6 +2751,8 @@ export interface TelegramClient extends ITelegramClient {
    *
    * Only admins with `manageTopics` permission can do this.
    *
+   * **Available**: 👤 users only
+   *
    * @returns  Service message for the created topic
    */
   createForumTopic(
@@ -2783,6 +2789,8 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Delete a forum topic and all its history
    *
+   * **Available**: 👤 users only
+   *
    * @param chat  Chat or user ID, username, phone number, `"me"` or `"self"`
    * @param topicId  ID of the topic (i.e. its top message ID)
    */
@@ -2800,6 +2808,8 @@ export interface TelegramClient extends ITelegramClient {
    * Modify a topic in a forum
    *
    * Only admins with `manageTopics` permission can do this.
+   *
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID or username
    * @param topicId  ID of the topic (i.e. its top message ID)
@@ -2841,6 +2851,8 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Get forum topics by their IDs
    *
+   * **Available**: 👤 users only
+   *
    * @param chatId  Chat ID or username
    */
   getForumTopicsById(
@@ -2848,6 +2860,8 @@ export interface TelegramClient extends ITelegramClient {
     ids: MaybeArray<number>): Promise<ForumTopic[]>
   /**
    * Get forum topics
+   *
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID or username
    */
@@ -2897,6 +2911,8 @@ export interface TelegramClient extends ITelegramClient {
    * Reorder pinned forum topics
    *
    * Only admins with `manageTopics` permission can do this.
+   * **Available**: 👤 users only
+   *
    */
   reorderPinnedForumTopics(
     params: {
@@ -2917,6 +2933,8 @@ export interface TelegramClient extends ITelegramClient {
    * Toggle open/close status of a topic in a forum
    *
    * Only admins with `manageTopics` permission can do this.
+   *
+   * **Available**: 👤 users only
    *
    * @returns  Service message about the modification
    */
@@ -2941,6 +2959,8 @@ export interface TelegramClient extends ITelegramClient {
    * Toggle whether a topic in a forum is pinned
    *
    * Only admins with `manageTopics` permission can do this.
+   * **Available**: 👤 users only
+   *
    */
   toggleForumTopicPinned(
     params: {
@@ -3119,6 +3139,8 @@ export interface TelegramClient extends ITelegramClient {
   getStarGiftOptions(): Promise<StarGift[]>
   /**
    * Get a list of all possible attributes when upgrading a given star gift
+   * **Available**: 👤 users only
+   *
    */
   getStarGiftUpgradeOptions(
     giftId: tl.Long): Promise<StarGiftUpgradeOptions>
@@ -3209,6 +3231,8 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Accept or decline a purchase offer for a star gift
    *
+   * **Available**: 👤 users only
+   *
    * @returns The generated service message
    */
   resolveStarGiftOffer(
@@ -3227,6 +3251,8 @@ export interface TelegramClient extends ITelegramClient {
     }): Promise<Message>
   /**
    * Create a purchase offer for a unique star gift
+   * **Available**: 👤 users only
+   *
    * @param client
    * @param params
    */

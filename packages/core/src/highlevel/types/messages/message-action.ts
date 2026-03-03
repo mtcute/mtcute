@@ -767,6 +767,31 @@ export interface ActionSuggestBirthday {
   birthday: tl.RawBirthday
 }
 
+/** Content protection (no-forwards) was toggled */
+export interface ActionNoForwardsToggle {
+  readonly type: 'no_forwards_toggle'
+
+  /** Previous value */
+  prevValue: boolean
+
+  /** New value */
+  newValue: boolean
+}
+
+/** Content protection (no-forwards) toggle was requested */
+export interface ActionNoForwardsRequest {
+  readonly type: 'no_forwards_request'
+
+  /** Whether this request has expired */
+  expired: boolean
+
+  /** Previous value */
+  prevValue: boolean
+
+  /** New value */
+  newValue: boolean
+}
+
 /** Group creator has left the group, and a new creator has been assigned but not yet made one */
 export interface ActionNewCreatorPending {
   readonly type: 'new_creator_pending'
@@ -848,6 +873,8 @@ export type MessageAction
     | ActionStarGiftCrafted
     | ActionNewCreatorPending
     | ActionChangeCreator
+    | ActionNoForwardsToggle
+    | ActionNoForwardsRequest
     | null
 
 /** @internal */
@@ -1302,6 +1329,19 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
       return {
         type: 'change_creator',
         newCreator: new User(this._peers.user(act.newCreatorId)),
+      }
+    case 'messageActionNoForwardsToggle':
+      return {
+        type: 'no_forwards_toggle',
+        prevValue: act.prevValue,
+        newValue: act.newValue,
+      }
+    case 'messageActionNoForwardsRequest':
+      return {
+        type: 'no_forwards_request',
+        expired: act.expired!,
+        prevValue: act.prevValue,
+        newValue: act.newValue,
       }
     default:
       return null

@@ -221,6 +221,7 @@ function mapCompatMessage(obj: tlCompat.TypeMessage): tl.TypeMessage {
     case 'message_layer204':
     case 'message_layer216':
     case 'message_layer220':
+    case 'message_layer222':
       return {
         ...obj,
         _: 'message',
@@ -339,6 +340,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'message_layer204':
     case 'message_layer216':
     case 'message_layer220':
+    case 'message_layer222':
     case 'messageService_layer204':
       return mapCompatMessage(obj)
     case 'messageReplyHeader_layer206':
@@ -369,6 +371,12 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'starGiftAttributePattern_layer221':
     case 'starGiftAttributeModel_layer221':
       return mapCompatStarGiftAttribute(obj)
+    case 'chatParticipant_layer222':
+      return replaceType(obj, 'chatParticipant')
+    case 'chatParticipantCreator_layer222':
+      return replaceType(obj, 'chatParticipantCreator')
+    case 'chatParticipantAdmin_layer222':
+      return replaceType(obj, 'chatParticipantAdmin')
     case 'keyboardButton_layer221':
     case 'keyboardButtonUrl_layer221':
     case 'keyboardButtonCallback_layer221':

@@ -95,6 +95,8 @@ Based on the diff, update these files for new/changed TL types:
 
 ### 9. Verify
 
+> Note: all these tasks may take a long time, use timeout=5m for each to avoid issues
+
 ```bash
 # typecheck and fix any type errors
 pnpm run -w lint:tsc
