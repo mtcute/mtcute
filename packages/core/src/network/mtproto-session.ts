@@ -130,7 +130,6 @@ export class MtprotoSession {
 
   // requests info
   pendingMessages: LongMap<PendingMessage> = new LongMap()
-  destroySessionIdToMsgId: LongMap<Long> = new LongMap()
 
   lastPingRtt: number = Number.NaN
   lastPingTime = 0

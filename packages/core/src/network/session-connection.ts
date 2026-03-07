@@ -699,7 +699,8 @@ export class SessionConnection extends PersistentConnection {
         break
       case 'mt_destroy_session_ok':
       case 'mt_destroy_session_none':
-        this._onDestroySessionResult(message)
+        // no point in handling these
+        this.log.debug('received %s (msg_id = %l): %j', message._, messageId, message)
         break
       default:
         if (tl.isAnyUpdates(message)) {
@@ -778,6 +779,7 @@ export class SessionConnection extends PersistentConnection {
         this._sendAck(messageId)
         // eslint-disable-next-line ts/no-unsafe-argument
         msg.promise.resolve(message.object() as any)
+        this._session.pendingMessages.delete(reqMsgId)
 
         return
       }
@@ -789,12 +791,14 @@ export class SessionConnection extends PersistentConnection {
           result = message.object() as mtp.TlObject
         } catch {
           this.log.debug('failed to parse rpc_result for cancel request %l, ignoring', reqMsgId)
+          this._session.pendingMessages.delete(reqMsgId)
 
           return
         }
 
         this.log.debug('received %s for cancelled request %l: %j', result._, reqMsgId, result)
         this._onMessageAcked(reqMsgId)
+        this._session.pendingMessages.delete(reqMsgId)
 
         return
       }
@@ -1392,20 +1396,6 @@ export class SessionConnection extends PersistentConnection {
     this.onFutureSalts.emit(msg.salts)
   }
 
-  private _onDestroySessionResult(msg: mtp.TypeDestroySessionRes): void {
-    const reqMsgId = this._session.destroySessionIdToMsgId.get(msg.sessionId)
-
-    if (!reqMsgId) {
-      this.log.warn('received %s for unknown session %h', msg._, msg.sessionId)
-
-      return
-    }
-
-    this._session.destroySessionIdToMsgId.delete(msg.sessionId)
-    this._session.pendingMessages.delete(reqMsgId)
-    this.log.debug('received %s for session %h', msg._, msg.sessionId)
-  }
-
   private _enqueueRpc(rpc: PendingRpc, force?: boolean) {
     if (this._session.enqueueRpc(rpc, force)) {
       this._flushTimer.emitWhenIdle()
@@ -1596,6 +1586,7 @@ export class SessionConnection extends PersistentConnection {
     rpc.cancelled = true
 
     if (rpc.msgId) {
+      this._session.pendingMessages.delete(rpc.msgId)
       this._session.queuedCancelReq.push(rpc.msgId)
       this._session.getStateSchedule.remove(rpc)
       this._flushTimer.emitWhenIdle()
@@ -1678,7 +1669,10 @@ export class SessionConnection extends PersistentConnection {
       this._doFlush()
     } catch (e: any) {
       this.log.error('flush error: %s', (e as Error).stack)
-      // should not happen unless there's a bug in the code
+      // should not happen unless there's a bug in the code. play safe and reset state
+      this._resetSession('flush error')
+
+      return
     }
 
     // schedule next flush
@@ -1990,7 +1984,6 @@ export class SessionConnection extends PersistentConnection {
           containerId: msgId,
         }
         this._session.pendingMessages.set(msgId, pending)
-        this._session.destroySessionIdToMsgId.set(sessionId, msgId)
         otherPendings.push(pending)
       })
     }
