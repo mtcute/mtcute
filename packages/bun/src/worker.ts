@@ -8,7 +8,7 @@ import type {
   WorkerMessageHandler,
 } from '@mtcute/core/worker.js'
 
-import { parentPort, Worker } from 'node:worker_threads'
+import { MessagePort, parentPort, Worker } from 'node:worker_threads'
 import {
   TelegramWorker as TelegramWorkerBase,
   TelegramWorkerPort as TelegramWorkerPortBase,
@@ -21,8 +21,6 @@ export type { TelegramWorkerOptions, WorkerCustomMethods }
 export interface TelegramWorkerPortOptions {
   worker: SomeWorker
 }
-
-let _respond: RespondFn | undefined
 
 export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorkerBase<T> {
   registerWorker(handler: WorkerMessageHandler): [RespondFn, VoidFunction] {
@@ -51,8 +49,8 @@ export class TelegramWorkerPort<T extends WorkerCustomMethods> extends TelegramW
   }
 
   connectToWorker(worker: SomeWorker, handler: ClientMessageHandler): [SendFn, () => void] {
-    if (!(worker instanceof Worker)) {
-      throw new TypeError('Only worker_threads are supported')
+    if (!(worker instanceof Worker) && !(worker instanceof MessagePort)) {
+      throw new TypeError('Only worker_threads and MessagePorts are supported')
     }
 
     const send: SendFn = worker.postMessage.bind(worker)

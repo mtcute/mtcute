@@ -132,20 +132,19 @@ export class TelegramWorkerPort<T extends WorkerCustomMethods> extends TelegramW
   }
 
   connectToWorker(worker: SomeWorker, handler: ClientMessageHandler): [SendFn, () => void] {
-    if (worker instanceof Worker) {
+    if (worker instanceof Worker || worker instanceof MessagePort) {
       const send: SendFn = worker.postMessage.bind(worker)
 
-      const messageHandler = (ev: MessageEvent) => {
-        // eslint-disable-next-line ts/no-unsafe-argument
-        handler(ev.data)
-      }
+      // eslint-disable-next-line ts/no-unsafe-argument
+      const messageHandler = (ev: MessageEvent) => handler(ev.data)
 
-      worker.addEventListener('message', messageHandler)
+      worker.addEventListener('message', messageHandler as EventListener)
+      if (worker instanceof MessagePort) worker.start()
 
       return [
         send,
         () => {
-          worker.removeEventListener('message', messageHandler)
+          worker.removeEventListener('message', messageHandler as EventListener)
         },
       ]
     }

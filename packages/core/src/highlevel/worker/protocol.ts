@@ -1,6 +1,6 @@
 import type { tl } from '@mtcute/tl'
 
-import type { Worker as NodeWorker } from 'node:worker_threads'
+import type { MessagePort as NodeMessagePort, Worker as NodeWorker } from 'node:worker_threads'
 import type { ConnectionState } from '../client.types.js'
 
 import type { SerializedError } from './errors.js'
@@ -75,7 +75,7 @@ export const DEFAULT_WORKER_ID = 'default'
 // declare type SharedWorker = never
 // </deno-insert>
 
-export type SomeWorker = NodeWorker | Worker | SharedWorker
+export type SomeWorker = NodeWorker | NodeMessagePort | Worker | SharedWorker | MessagePort
 
 export type SendFn = (message: WorkerInboundMessage) => void
 export type ClientMessageHandler = (message: WorkerOutboundMessage) => void
