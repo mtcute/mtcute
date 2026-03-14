@@ -16,7 +16,6 @@ import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
-import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 import { _findMessageInUpdate } from './find-in-update.js'
 
 /**
@@ -102,7 +101,7 @@ export async function editMessage(
     [content, entities] = await _normalizeInputText(client, params.text)
   }
 
-  const res = await _maybeInvokeWithBusinessConnection(client, params.businessConnectionId, {
+  const res = await client.call({
     _: 'messages.editMessage',
     id: message,
     peer: await resolvePeer(client, chatId),
@@ -112,6 +111,8 @@ export async function editMessage(
     entities,
     media,
     invertMedia: params.invertMedia,
+  }, {
+    businessConnectionId: params.businessConnectionId,
   })
 
   return _findMessageInUpdate(client, res, true, !params.shouldDispatch)

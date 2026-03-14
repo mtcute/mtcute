@@ -12,7 +12,7 @@ import type { SessionConnectionParams } from './session-connection.js'
 import type { TelegramTransport } from './transports/abstract.js'
 import { defaultReconnectionStrategy } from '@fuman/net'
 
-import { asNonNull, composeMiddlewares, Deferred } from '@fuman/utils'
+import { asNonNull, composeMiddlewares, Deferred, LruMap } from '@fuman/utils'
 import { MtArgumentError, MtcuteError, MtUnsupportedError } from '../types/index.js'
 import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
 import { basic as defaultMiddlewares } from './middlewares/default.js'
@@ -165,7 +165,7 @@ export interface RpcCallOptions {
    * **ADVANCED**
    *
    * DC connection manager to use for this call.
-   * Overrides `dcId` if set.
+   * Overrides `dcId` if set, unless `businessConnectionId` is passed.
    */
   manager?: DcConnectionManager
 
@@ -193,6 +193,15 @@ export interface RpcCallOptions {
    * that is in fact not related to the user, but to the specific request.
    */
   localMigrate?: boolean
+
+  /**
+   * Business connection on behalf of which this call should be made.
+   *
+   * This wraps the request with `invokeWithBusinessConnection`,
+   * resolves the correct DC automatically, and overrides `dcId`,
+   * `manager` and `localMigrate`.
+   */
+  businessConnectionId?: string
 
   /**
    * Some requests should be processed consecutively, and not in parallel.
@@ -687,6 +696,8 @@ export class NetworkManager {
   }
 
   notifyLoggedIn(auth: tl.auth.TypeAuthorization | tl.RawUser): tl.RawUser {
+    this._businessConnectionDcs.clear()
+
     if (auth._ === 'auth.authorizationSignUpRequired') {
       throw new MtUnsupportedError(
         'Signup is no longer supported by Telegram for non-official clients. Please use your mobile device to sign up.',
@@ -721,6 +732,7 @@ export class NetworkManager {
   }
 
   notifyLoggedOut(): void {
+    this._businessConnectionDcs.clear()
     this.setIsPremium(false)
     this.resetSessions()
   }
@@ -772,6 +784,37 @@ export class NetworkManager {
     params?: RpcCallOptions,
   ) => Promise<tl.RpcCallReturn[T['_']] | mtp.RawMt_rpc_error>
 
+  private _businessConnectionDcs = new LruMap<string, number>(50)
+
+  private async _getBusinessConnectionDcId(connectionId: string, abortSignal?: AbortSignal): Promise<number> {
+    if (this._businessConnectionDcs.has(connectionId)) {
+      return this._businessConnectionDcs.get(connectionId)!
+    }
+
+    const res = await this.call({
+      _: 'account.getBotBusinessConnection',
+      connectionId,
+    }, { abortSignal })
+
+    if (isTlRpcError(res)) {
+      throw new MtcuteError(`Failed to fetch business connection (${res.errorCode}: ${res.errorMessage})`)
+    }
+
+    if (!('updates' in res) || !Array.isArray(res.updates)) {
+      throw new MtArgumentError('account.getBotBusinessConnection returned invalid updates')
+    }
+
+    const update = res.updates.find((it): it is tl.RawUpdateBotBusinessConnect => it._ === 'updateBotBusinessConnect')
+
+    if (!update) {
+      throw new MtArgumentError('account.getBotBusinessConnection did not return updateBotBusinessConnect')
+    }
+
+    this._businessConnectionDcs.set(connectionId, update.connection.dcId)
+
+    return update.connection.dcId
+  }
+
   private _composeCall = (middlewares?: Middleware<RpcCallMiddlewareContext, unknown>[]) => {
     if (!middlewares) {
       middlewares = defaultMiddlewares()
@@ -804,6 +847,22 @@ export class NetworkManager {
       } else {
         throw new MtcuteError('Not connected to any DC')
       }
+    }
+
+    const businessConnectionId = params?.businessConnectionId
+
+    if (businessConnectionId) {
+      const dcId = await this._getBusinessConnectionDcId(businessConnectionId, params?.abortSignal)
+
+      params.dcId = dcId
+      params.manager = undefined
+      params.localMigrate = true
+
+      message = {
+        _: 'invokeWithBusinessConnection',
+        connectionId: businessConnectionId,
+        query: message,
+      } as unknown as T
     }
 
     const kind = params?.kind ?? 'main'
@@ -844,6 +903,9 @@ export class NetworkManager {
 
         if (params?.localMigrate) {
           manager = await this._getOtherDc(newDc)
+          if (businessConnectionId) {
+            this._businessConnectionDcs.set(businessConnectionId, newDc)
+          }
         } else {
           this._log.info('received %s, migrating to dc %d', err, newDc)
 

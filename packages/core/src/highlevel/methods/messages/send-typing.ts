@@ -6,8 +6,6 @@ import { assertNever } from '../../../types/utils.js'
 import { assertTrue } from '../../../utils/type-assertions.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
-import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
-
 export function _mapTypingStatus(status: Exclude<TypingStatus, 'interaction' | 'interaction_seen'>, progress: number = 0): tl.TypeSendMessageAction {
   switch (status) {
     case 'typing':
@@ -86,11 +84,13 @@ export async function sendTyping(
     status = _mapTypingStatus(status, params?.progress ?? 0)
   }
 
-  const r = await _maybeInvokeWithBusinessConnection(client, params?.businessConnectionId, {
+  const r = await client.call({
     _: 'messages.setTyping',
     peer: await resolvePeer(client, chatId),
     action: status,
     topMsgId: params?.threadId,
+  }, {
+    businessConnectionId: params?.businessConnectionId,
   })
 
   assertTrue('messages.setTyping', r)

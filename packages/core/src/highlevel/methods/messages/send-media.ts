@@ -11,7 +11,6 @@ import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 
 import { resolvePeer } from '../users/resolve-peer.js'
-import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 import { _findMessageInUpdate } from './find-in-update.js'
 import { _processCommonSendParameters } from './send-common.js'
 
@@ -94,9 +93,7 @@ export async function sendMedia(
   const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
 
   const randomId = randomLong()
-  const res = await _maybeInvokeWithBusinessConnection(
-    client,
-    params.businessConnectionId,
+  const res = await client.call(
     {
       _: 'messages.sendMedia',
       peer,
@@ -117,7 +114,11 @@ export async function sendMedia(
       allowPaidFloodskip: params.allowPaidFloodskip,
       allowPaidStars: params.allowPaidMessages,
     },
-    { chainId, abortSignal: params.abortSignal },
+    {
+      chainId,
+      abortSignal: params.abortSignal,
+      businessConnectionId: params.businessConnectionId,
+    },
   )
 
   const msg = _findMessageInUpdate(client, res, false, !params.shouldDispatch, false, randomId)

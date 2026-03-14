@@ -12,7 +12,6 @@ import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 
 import { resolvePeer } from '../users/resolve-peer.js'
-import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 import { _processCommonSendParameters } from './send-common.js'
 
 /**
@@ -102,9 +101,7 @@ export async function sendMediaGroup(
     })
   }
 
-  const res = await _maybeInvokeWithBusinessConnection(
-    client,
-    params.businessConnectionId,
+  const res = await client.call(
     {
       _: 'messages.sendMultiMedia',
       peer,
@@ -121,7 +118,11 @@ export async function sendMediaGroup(
       allowPaidFloodskip: params.allowPaidFloodskip,
       allowPaidStars: params.allowPaidMessages,
     },
-    { chainId, abortSignal: params.abortSignal },
+    {
+      chainId,
+      abortSignal: params.abortSignal,
+      businessConnectionId: params.businessConnectionId,
+    },
   )
 
   assertIsUpdatesGroup('sendMediaGroup', res)
