@@ -143,7 +143,7 @@ export async function forwardMessagesById(
 
   const toPeer = await resolvePeer(client, toChatId)
 
-  client.timers.cancel(_getTypingTimerId(toPeer))
+  await client.timers.cancel(_getTypingTimerId(toPeer))
 
   const res = await client.call({
     _: 'messages.forwardMessages',

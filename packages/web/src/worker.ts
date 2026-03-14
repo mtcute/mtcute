@@ -6,13 +6,15 @@ import type {
   SomeWorker,
   TelegramWorkerOptions,
   WorkerCustomMethods,
+  WorkerInboundMessage,
   WorkerMessageHandler,
 } from '@mtcute/core/worker.js'
+import { unsafeCastType } from '@fuman/utils'
+
 import {
   TelegramWorker as TelegramWorkerBase,
   TelegramWorkerPort as TelegramWorkerPortBase,
 } from '@mtcute/core/worker.js'
-
 import { WebPlatform } from './platform.js'
 
 export type { TelegramWorkerOptions, WorkerCustomMethods }
@@ -32,75 +34,91 @@ export interface TelegramWorkerPortOptions {
 let _broadcast: RespondFn | undefined
 const _sharedHandlers = new Set<WorkerMessageHandler>()
 
+// <deno-remove>
+function isWorkerInboundMessage(message: unknown): message is WorkerInboundMessage {
+  if (!message || typeof message !== 'object') return false
+
+  const data = message as Partial<WorkerInboundMessage>
+  if (typeof data._mtcuteWorkerId !== 'string') return false
+  if (typeof data.connectionId !== 'string') return false
+  return true
+}
+
+function setupSharedWorker(): RespondFn {
+  if (_broadcast) return _broadcast
+  unsafeCastType<SharedWorkerGlobalScope>(self)
+
+  const ports = new Map<string, MessagePort>()
+  const knownConnectionIds = new WeakMap<MessagePort, string>()
+  const cleanupPort = (port: MessagePort, connectionId?: string) => {
+    const knownConnectionId = connectionId ?? knownConnectionIds.get(port)
+    if (knownConnectionId) {
+      ports.delete(knownConnectionId)
+    }
+
+    knownConnectionIds.delete(port)
+    port.close()
+  }
+
+  const broadcast: RespondFn = (message) => {
+    if ('connectionId' in message) {
+      const port = ports.get(message.connectionId)
+      if (!port) return
+
+      port.postMessage(message)
+
+      if (message.type === 'connection_expired') {
+        cleanupPort(port, message.connectionId)
+      }
+
+      return
+    }
+
+    for (const port of ports.values()) {
+      port.postMessage(message)
+    }
+  }
+
+  self.onconnect = (event: MessageEvent) => {
+    const port = event.ports[0]
+    const respond: RespondFn = (message) => {
+      port.postMessage(message)
+
+      if ('connectionId' in message && message.type === 'connection_expired') {
+        cleanupPort(port, message.connectionId)
+      }
+    }
+
+    port.addEventListener('message', (message) => {
+      const data = message.data
+      if (!isWorkerInboundMessage(data)) return
+
+      if (data.type === 'connect') {
+        ports.set(data.connectionId, port)
+        knownConnectionIds.set(port, data.connectionId)
+      } else if (data.type === 'release') {
+        cleanupPort(port)
+      }
+
+      for (const handler of _sharedHandlers) {
+        handler(data, respond)
+      }
+    })
+    port.start()
+  }
+
+  _broadcast = broadcast
+  return broadcast
+}
+// </deno-remove>
+
 export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorkerBase<T> {
   registerWorker(handler: WorkerMessageHandler): [RespondFn, VoidFunction] {
     // <deno-remove>
     if (typeof SharedWorkerGlobalScope !== 'undefined' && self instanceof SharedWorkerGlobalScope) {
-      if (!_broadcast) {
-        const connections: MessagePort[] = []
-
-        const broadcast = (message: unknown) => {
-          for (const port of connections) {
-            port.postMessage(message)
-          }
-        }
-
-        self.onconnect = (event: MessageEvent) => {
-          const port = event.ports[0]
-          connections.push(port)
-
-          const respond = port.postMessage.bind(port)
-
-          // not very reliable, but better than nothing
-          // SharedWorker API doesn't provide a way to detect when the client closes the connection
-          // so we just assume that the client is done when it sends a 'close' message
-          // and keep a timeout for the case when the client closes without sending a 'close' message
-          const onClose = () => {
-            port.close()
-            const idx = connections.indexOf(port)
-
-            if (idx >= 0) {
-              connections.splice(connections.indexOf(port), 1)
-            }
-          }
-
-          const onTimeout = () => {
-            console.warn('some connection timed out!')
-            respond({ __type__: 'timeout' })
-            onClose()
-          }
-
-          // 60s should be a reasonable timeout considering that the client should send a ping every 10s
-          // so even if the browser has suspended the timers, we should still get a ping within a minute
-          let timeout = setTimeout(onTimeout, 60000)
-
-          port.addEventListener('message', (message) => {
-            if (message.data.__type__ === 'close') {
-              onClose()
-
-              return
-            }
-
-            if (message.data.__type__ === 'ping') {
-              clearTimeout(timeout)
-              timeout = setTimeout(onTimeout, 60000)
-
-              return
-            }
-
-            for (const handler of _sharedHandlers) {
-              // eslint-disable-next-line ts/no-unsafe-argument
-              handler(message.data, respond)
-            }
-          })
-          port.start()
-        }
-
-        _broadcast = broadcast
-      }
-
+      const broadcast = setupSharedWorker()
       _sharedHandlers.add(handler)
-      return [_broadcast, () => _sharedHandlers.delete(handler)]
+      return [broadcast, () => _sharedHandlers.delete(handler)]
     }
     // </deno-remove>
 
@@ -153,21 +171,7 @@ export class TelegramWorkerPort<T extends WorkerCustomMethods> extends TelegramW
     if (worker instanceof SharedWorker) {
       const send: SendFn = worker.port.postMessage.bind(worker.port)
 
-      const pingInterval = setInterval(() => {
-        worker.port.postMessage({ __type__: 'ping' })
-      }, 10000)
-
       const messageHandler = (ev: MessageEvent) => {
-        if (ev.data.__type__ === 'timeout') {
-          // we got disconnected from the worker due to timeout
-          // if the page is still alive (which is unlikely), we should reconnect
-          // however it's not really possible with SharedWorker API without re-creating the worker
-          // so we just reload the page for now
-          location.reload()
-
-          return
-        }
-
         // eslint-disable-next-line ts/no-unsafe-argument
         handler(ev.data)
       }
@@ -175,17 +179,10 @@ export class TelegramWorkerPort<T extends WorkerCustomMethods> extends TelegramW
       worker.port.addEventListener('message', messageHandler)
       worker.port.start()
 
-      let cancelBeforeExit: () => void
-
       const close = () => {
-        clearInterval(pingInterval)
-        worker.port.postMessage({ __type__: 'close' })
         worker.port.removeEventListener('message', messageHandler)
         worker.port.close()
-        cancelBeforeExit()
       }
-
-      cancelBeforeExit = platform.beforeExit(close)
 
       return [send, close]
     }

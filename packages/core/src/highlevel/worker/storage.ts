@@ -36,7 +36,7 @@ class CurrentUserServiceProxy implements PublicPart<CurrentUserService> {
   }
 
   async fetch(): Promise<CurrentUserInfo | null> {
-    if (this._cached) return this._cached
+    if (this._cached !== undefined) return this._cached
 
     this._cached = await this._fetch()
 
@@ -56,6 +56,10 @@ class CurrentUserServiceProxy implements PublicPart<CurrentUserService> {
   async update(params: Parameters<CurrentUserService['update']>[0]): Promise<void> {
     await this._update(params)
     this._cached = await this._fetch()
+  }
+
+  setCached(info: CurrentUserInfo | null): void {
+    this._cached = info
   }
 }
 

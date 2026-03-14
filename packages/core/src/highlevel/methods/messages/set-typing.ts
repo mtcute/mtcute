@@ -6,7 +6,6 @@ import type { TypingStatus } from '../../types/peers/typing-status.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
-import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 import { _mapTypingStatus } from './send-typing.js'
 
 export function _getTypingTimerId(peer: tl.TypeInputPeer, businessId?: string): string {
@@ -65,9 +64,7 @@ export async function setTyping(
   const peer = await resolvePeer(client, peerId)
   const timerId = _getTypingTimerId(peer, businessConnectionId)
 
-  if (client.timers.exists(timerId)) {
-    client.timers.cancel(timerId)
-  }
+  await client.timers.cancel(timerId)
 
   if (status._ === 'sendMessageCancelAction') {
     await client.call({
@@ -80,12 +77,17 @@ export async function setTyping(
     return
   }
 
-  client.timers.create(timerId, async (abortSignal) => {
-    await _maybeInvokeWithBusinessConnection(client, params?.businessConnectionId, {
+  await client.timers.upsert({
+    kind: 'rpc',
+    key: timerId,
+    interval: TIMER_INTERVAL,
+    startNow: true,
+    options: { businessConnectionId },
+    request: {
       _: 'messages.setTyping',
       peer,
       action: status,
       topMsgId: threadId,
-    }, { abortSignal })
-  }, TIMER_INTERVAL, true)
+    },
+  })
 }

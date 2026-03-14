@@ -7,16 +7,74 @@ import { deserializeResult, serializeResult } from './protocol.js'
 export type InvokeTarget = Extract<WorkerInboundMessage, { type: 'invoke' }>['target']
 
 export class WorkerInvoker {
-  constructor(private send: SendFn, private readonly workerId: string) {}
+  constructor(
+    private send: SendFn,
+    private readonly workerId: string,
+    private readonly connectionId: string,
+  ) {}
 
   private _nextId = 0
+  private _released = false
+  private _releasedError = new Error('Worker connection closed')
   private _pending = new Map<number, Deferred<unknown>>()
 
+  private _close(error: Error, shouldRelease: boolean): void {
+    if (this._released) return
+
+    this._released = true
+    this._releasedError = error
+    if (shouldRelease) {
+      this.send({
+        _mtcuteWorkerId: this.workerId,
+        connectionId: this.connectionId,
+        type: 'release',
+      })
+    }
+
+    for (const pending of this._pending.values()) {
+      pending.reject(error)
+    }
+    this._pending.clear()
+  }
+
+  connect(): void {
+    this.send({
+      _mtcuteWorkerId: this.workerId,
+      connectionId: this.connectionId,
+      type: 'connect',
+    })
+  }
+
+  heartbeat(): void {
+    if (this._released) return
+
+    this.send({
+      _mtcuteWorkerId: this.workerId,
+      connectionId: this.connectionId,
+      type: 'heartbeat',
+    })
+  }
+
+  release(): void {
+    this._close(new Error('Worker connection closed'), true)
+  }
+
+  expire(): void {
+    this._close(new Error('Worker connection expired'), false)
+  }
+
   private _invoke(target: InvokeTarget, method: string, args: unknown[], isVoid: boolean, abortSignal?: AbortSignal) {
+    if (this._released) {
+      if (isVoid) throw this._releasedError
+
+      return Promise.reject(this._releasedError)
+    }
+
     const id = this._nextId++
 
     this.send({
       _mtcuteWorkerId: this.workerId,
+      connectionId: this.connectionId,
       type: 'invoke',
       id,
       target,
@@ -26,13 +84,30 @@ export class WorkerInvoker {
       withAbort: Boolean(abortSignal),
     })
 
-    abortSignal?.addEventListener('abort', () => {
-      this.send({
-        _mtcuteWorkerId: this.workerId,
-        type: 'abort',
-        id,
-      })
-    })
+    if (abortSignal) {
+      const onAbort = () => {
+        if (this._released) return
+
+        this.send({
+          _mtcuteWorkerId: this.workerId,
+          connectionId: this.connectionId,
+          type: 'abort',
+          id,
+        })
+      }
+      abortSignal.addEventListener('abort', onAbort, { once: true })
+
+      if (!isVoid) {
+        const promise = new Deferred<unknown>()
+        this._pending.set(id, promise)
+
+        return promise.promise.finally(() => {
+          abortSignal.removeEventListener('abort', onAbort)
+        })
+      }
+
+      return
+    }
 
     if (!isVoid) {
       const promise = new Deferred<unknown>()
@@ -44,18 +119,17 @@ export class WorkerInvoker {
   }
 
   invoke(target: InvokeTarget, method: string, args: unknown[]): Promise<unknown> {
-    return this._invoke(target, method, args, false) as Promise<unknown>
+    return this._invoke(target, method, args, false)!
   }
 
   invokeVoid(target: InvokeTarget, method: string, args: unknown[]): void {
-    // eslint-disable-next-line ts/no-floating-promises
-    this._invoke(target, method, args, true)
+    void this._invoke(target, method, args, true)
   }
 
   invokeWithAbort(target: InvokeTarget, method: string, args: unknown[], abortSignal: AbortSignal): Promise<unknown> {
     if (abortSignal.aborted) return Promise.reject(abortSignal.reason)
 
-    return this._invoke(target, method, args, false, abortSignal) as Promise<unknown>
+    return this._invoke(target, method, args, false, abortSignal)!
   }
 
   handleResult(msg: Extract<WorkerOutboundMessage, { type: 'result' }>): void {

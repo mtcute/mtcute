@@ -101,7 +101,12 @@ export class BaseTelegramClient implements ITelegramClient {
       provider: this.params.storage,
       ...this.params.storageOptions,
     })
-    this.timers = new TimersManager()
+    this.timers = new TimersManager(async (spec, abortSignal) => {
+      await this.call(spec.request, {
+        abortSignal,
+        ...spec.options,
+      })
+    })
     this.timers.onError(err => this.onError.emit(unknownToError(err)))
   }
 

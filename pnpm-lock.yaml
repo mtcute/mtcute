@@ -480,6 +480,9 @@ importers:
       '@fuman/net':
         specifier: 0.0.19
         version: 0.0.19
+      '@fuman/utils':
+        specifier: 0.0.19
+        version: 0.0.19
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core

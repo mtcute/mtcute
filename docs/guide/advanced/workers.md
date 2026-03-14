@@ -26,8 +26,12 @@ const tg = new BaseTelegramClient({
 
 new TelegramWorker({
     client: tg,
-})
+}).mount()
 ```
+
+`TelegramWorker` construction is side-effect-free. Call `.mount()` once to bind it to the worker transport.
+
+`TelegramWorkerPort.destroy()` only closes that logical port. It does not destroy the shared client inside the worker.
 
 To communicate with the worker, use the `TelegramWorkerPort` class and pass an instance of
 `Worker` (or `SharedWorker`) to it:
@@ -60,7 +64,7 @@ const tg = new BaseTelegramClient({
 
 new TelegramWorker({
     client: tg,
-})
+}).mount()
 ```
 
 Then, to communicate with the worker, use the `TelegramWorkerPort` class and pass an instance of `Worker` to it:
@@ -107,11 +111,11 @@ when creating the worker:
 new TelegramWorker({
     client: tg,
     workerId: '1',
-})
+}).mount()
 new TelegramWorker({
     client: tg2,
     workerId: '2',
-})
+}).mount()
 ```
 
 Then, you can pass the worker id to the port constructor:
@@ -146,6 +150,69 @@ self.addEventListener('message', message => {
 just within the same worker.
 :::
 
+## MessagePort and multiple ports
+
+`TelegramWorkerPort` can talk not only to `Worker` / `SharedWorker`, but also to a `MessagePort`.
+This is useful when one worker owns the mtcute client, and another thread gets a dedicated port into it.
+
+```ts
+// main.ts
+import { MessageChannel } from 'worker_threads'
+import { Worker } from 'worker_threads'
+
+const { port1, port2 } = new MessageChannel()
+const worker = new Worker(new URL('./worker.js', import.meta.url)) // assuming the same code as above
+const helper = new Worker(new URL('./helper.js', import.meta.url))
+
+worker.on('message', (message) => channel.port1.postMessage(message.payload))
+channel.port1.on('message', (message) => worker.postMessage(message))
+
+helper.postMessage({
+    type: 'init',
+    port: channel.port2,
+}, [channel.port2])
+```
+
+You can also create multiple `TelegramWorkerPort` instances for the same underlying worker:
+
+```ts
+const worker = new Worker(
+    new URL('./worker.js', import.meta.url),
+)
+
+const port1 = new TelegramWorkerPort({ worker })
+const port2 = new TelegramWorkerPort({ worker })
+```
+
+Each port gets its own logical connection. Requests, aborts and keepalives are isolated per port,
+while the underlying mtcute client inside the worker is shared.
+
+This means:
+
+- disconnecting or releasing one port does not affect the other ports
+- one port can have pending RPC calls without interfering with another
+- worker-owned keepalives are cleaned up per port when that port is released
+
+If you use `SharedWorker`, this is the normal model: each page gets its own port, all backed by the same worker client.
+
+### Cleanup policies
+
+Worker-side cleanup when the last port disappears is controlled by `onLastDisconnected`:
+
+- `'nothing'` (default): keep the client alive
+- `'disconnect'`: disconnect the client, but keep the worker process alive
+- `'destroy'`: destroy the client
+
+```ts
+new TelegramWorker({
+    client: tg,
+    onLastDisconnected: 'disconnect',
+}).mount()
+```
+
+If you need to destroy the shared client regardless of other ports, use `unsafeForceDestroy()`.
+Use `destroy()` only when you want to release the current port.
+
 ## Other runtimes
 
 In other runtimes it may also make sense to use workers.
@@ -154,4 +221,3 @@ If your runtime supports web workers, you can use the `@mtcute/web` package to c
 Otherwise, Please refer to 
 [Web](https://github.com/mtcute/mtcute/blob/master/packages/web/src/worker.ts)/[Node.js](https://github.com/mtcute/mtcute/blob/master/packages/node/src/worker.ts)
 for the platform-specific worker implementations, and use them as a reference to create your own worker implementation.
-

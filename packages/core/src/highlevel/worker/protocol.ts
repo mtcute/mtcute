@@ -2,6 +2,7 @@ import type { tl } from '@mtcute/tl'
 
 import type { MessagePort as NodeMessagePort, Worker as NodeWorker } from 'node:worker_threads'
 import type { ConnectionState } from '../client.types.js'
+import type { CurrentUserInfo } from '../storage/service/current-user.js'
 
 import type { SerializedError } from './errors.js'
 
@@ -10,9 +11,25 @@ import Long from 'long'
 export type WorkerInboundMessage
   = | {
     _mtcuteWorkerId: string
+    connectionId: string
+    type: 'connect'
+  }
+  | {
+    _mtcuteWorkerId: string
+    connectionId: string
+    type: 'release'
+  }
+  | {
+    _mtcuteWorkerId: string
+    connectionId: string
+    type: 'heartbeat'
+  }
+  | {
+    _mtcuteWorkerId: string
+    connectionId: string
     type: 'invoke'
     id: number
-    target: 'custom' | 'client' | 'storage' | 'storage-self' | 'storage-peers' | 'app-config'
+    target: 'custom' | 'client' | 'storage' | 'storage-self' | 'storage-peers' | 'app-config' | 'timers'
     method: string
     args: SerializedResult<unknown[]>
     void: boolean
@@ -20,6 +37,7 @@ export type WorkerInboundMessage
   }
   | {
     _mtcuteWorkerId: string
+    connectionId: string
     type: 'abort'
     id: number
   }
@@ -63,6 +81,17 @@ export type WorkerOutboundMessage
   }
   | {
     _mtcuteWorkerId: string
+    type: 'self_sync'
+    self: SerializedResult<CurrentUserInfo | null>
+  }
+  | {
+    _mtcuteWorkerId: string
+    connectionId: string
+    type: 'connection_expired'
+  }
+  | {
+    _mtcuteWorkerId: string
+    connectionId: string
     type: 'result'
     id: number
     result?: SerializedResult<unknown>
@@ -87,7 +116,24 @@ export type WorkerCustomMethods = Record<string, (...args: any[]) => Promise<any
 
 export interface SerializedResult<T> { __serialized__: T }
 
+function serializeLong(value: Long): Record<string, unknown> {
+  return {
+    __type: 'long',
+    low: value.low,
+    high: value.high,
+    unsigned: value.unsigned,
+  }
+}
+
+function isSerializedLong(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === 'object' && (value as Record<string, string>).__type === 'long')
+}
+
 export function serializeResult<T>(result: T): SerializedResult<T> {
+  if (Long.isLong(result)) {
+    return serializeLong(result) as unknown as SerializedResult<T>
+  }
+
   if (ArrayBuffer.isView(result)) return result as unknown as SerializedResult<T>
 
   if (Array.isArray(result)) {
@@ -108,12 +154,7 @@ export function serializeResult<T>(result: T): SerializedResult<T> {
 
     for (const [key, value] of Object.entries(result)) {
       if (Long.isLong(value)) {
-        newResult[key] = {
-          __type: 'long',
-          low: value.low,
-          high: value.high,
-          unsigned: value.unsigned,
-        }
+        newResult[key] = serializeLong(value)
       } else if (typeof value === 'object') {
         newResult[key] = serializeResult(value)
       } else {
@@ -128,6 +169,10 @@ export function serializeResult<T>(result: T): SerializedResult<T> {
 }
 
 export function deserializeResult<T>(result: SerializedResult<T>): T {
+  if (isSerializedLong(result)) {
+    return Long.fromValue(result as unknown as Long) as unknown as T
+  }
+
   if (ArrayBuffer.isView(result)) return result as unknown as T
 
   if (Array.isArray(result)) {
@@ -145,7 +190,7 @@ export function deserializeResult<T>(result: SerializedResult<T>): T {
 
   if (result && typeof result === 'object') {
     for (const [key, value] of Object.entries(result)) {
-      if (value && typeof value === 'object' && (value as Record<string, string>).__type === 'long') {
+      if (isSerializedLong(value)) {
         ;(result as any)[key] = Long.fromValue(value as unknown as Long)
       } else if (typeof value === 'object') {
         ;(result as any)[key] = deserializeResult(value as SerializedResult<unknown>)

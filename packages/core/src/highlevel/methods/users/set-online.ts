@@ -28,14 +28,18 @@ const TIMER_INTERVAL = 240_000 // 4 minutes
  */
 export async function setOnline(client: ITelegramClient, online = true): Promise<void> {
   if (online) {
-    client.timers.create(TIMER_ID, async (abortSignal) => {
-      await client.call({
+    await client.timers.upsert({
+      kind: 'rpc',
+      key: TIMER_ID,
+      interval: TIMER_INTERVAL,
+      startNow: true,
+      request: {
         _: 'account.updateStatus',
         offline: false,
-      }, { abortSignal })
-    }, TIMER_INTERVAL, true)
+      },
+    })
   } else {
-    client.timers.cancel(TIMER_ID)
+    await client.timers.cancel(TIMER_ID)
 
     await client.call({
       _: 'account.updateStatus',

@@ -1,40 +1,71 @@
+import type { tl } from '@mtcute/tl'
+
+import type { RpcCallOptions } from '../../network/network-manager.js'
 import { AsyncInterval } from '@fuman/utils'
 
+export interface RpcTimerSpec {
+  kind: 'rpc'
+  key: string
+  interval: number
+  request: tl.RpcMethod
+  options?: Omit<RpcCallOptions, 'abortSignal' | 'manager'>
+  startNow?: boolean
+}
+
+interface ManagedTimer {
+  ownerId: string
+  timer: AsyncInterval
+}
+
 export class TimersManager {
-  private _timers: Map<string, AsyncInterval> = new Map()
+  private _timers: Map<string, ManagedTimer> = new Map()
   private _errorHandler?: (err: unknown) => void
 
-  constructor() {}
+  constructor(
+    private readonly _executeRpc: (spec: RpcTimerSpec, abortSignal: AbortSignal) => Promise<void>,
+  ) {}
 
-  exists(key: string): boolean {
+  // These methods are async for API parity with worker-backed clients,
+  // where keepalive state is owned by the shared client/worker and accessed over RPC.
+  async exists(key: string): Promise<boolean> {
     return this._timers.has(key)
   }
 
-  create(
-    key: string,
-    handler: (abortSignal: AbortSignal) => Promise<void>,
-    interval: number,
-    startNow = false,
-  ): void {
-    if (this._timers.has(key)) {
-      return
+  async upsert(spec: RpcTimerSpec): Promise<void> {
+    this.upsertOwned('local', spec)
+  }
+
+  async cancel(key: string): Promise<void> {
+    this._cancel(key)
+  }
+
+  upsertOwned(ownerId: string, spec: RpcTimerSpec): void {
+    this._cancel(spec.key)
+
+    const timer = new AsyncInterval(
+      abortSignal => this._executeRpc(spec, abortSignal),
+      spec.interval,
+    )
+
+    if (this._errorHandler) {
+      timer.onError(this._errorHandler)
     }
 
-    const timer = new AsyncInterval(handler, interval)
-    if (this._errorHandler) timer.onError(this._errorHandler)
-    this._timers.set(key, timer)
+    this._timers.set(spec.key, {
+      ownerId,
+      timer,
+    })
 
-    if (startNow) timer.startNow()
+    if (spec.startNow) timer.startNow()
     else timer.start()
   }
 
-  cancel(key: string): void {
-    const timer = this._timers.get(key)
+  clearOwner(ownerId: string): void {
+    for (const [key, timer] of Array.from(this._timers.entries())) {
+      if (timer.ownerId !== ownerId) continue
 
-    if (!timer) return
-
-    timer.stop()
-    this._timers.delete(key)
+      this._cancel(key)
+    }
   }
 
   onError(handler: (err: unknown) => void): void {
@@ -42,9 +73,17 @@ export class TimersManager {
   }
 
   destroy(): void {
-    for (const timer of this._timers.values()) {
-      timer.stop()
+    for (const key of Array.from(this._timers.keys())) {
+      this._cancel(key)
     }
-    this._timers.clear()
+  }
+
+  private _cancel(key: string): void {
+    const timer = this._timers.get(key)
+
+    if (!timer) return
+
+    timer.timer.stop()
+    this._timers.delete(key)
   }
 }

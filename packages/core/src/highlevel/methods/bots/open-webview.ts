@@ -175,8 +175,11 @@ export async function openWebview(
         const queryId = asNonNull(result.queryId)
         const timerId = _getWebviewTimerId(queryId)
 
-        client.timers.create(timerId, async (abortSignal) => {
-          await client.call({
+        await client.timers.upsert({
+          kind: 'rpc',
+          key: timerId,
+          interval: 60_000,
+          request: {
             _: 'messages.prolongWebView',
             silent: webview.silent,
             peer: chatPeer,
@@ -184,8 +187,8 @@ export async function openWebview(
             queryId,
             replyTo: tlReplyTo,
             sendAs: tlSendAs,
-          }, { abortSignal })
-        }, 60_000)
+          },
+        })
       }
 
       return result
@@ -215,14 +218,17 @@ export async function openWebview(
         const queryId = asNonNull(result.queryId)
         const timerId = _getWebviewTimerId(queryId)
 
-        client.timers.create(timerId, async (abortSignal) => {
-          await client.call({
+        await client.timers.upsert({
+          kind: 'rpc',
+          key: timerId,
+          interval: 60_000,
+          request: {
             _: 'messages.prolongWebView',
             peer: chatPeer,
             bot: botPeer,
             queryId,
-          }, { abortSignal })
-        }, 60_000)
+          },
+        })
       }
 
       return result
@@ -242,5 +248,5 @@ export async function closeWebview(
   webview: WebviewResult | tl.Long,
 ): Promise<void> {
   const timerId = _getWebviewTimerId(Long.isLong(webview) ? webview : asNonNull(webview.queryId))
-  client.timers.cancel(timerId)
+  await client.timers.cancel(timerId)
 }

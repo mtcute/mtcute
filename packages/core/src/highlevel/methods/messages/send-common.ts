@@ -194,7 +194,7 @@ export async function _processCommonSendParameters(
 }> {
   let peer = await resolvePeer(client, chatId)
 
-  client.timers.cancel(_getTypingTimerId(peer, params.businessConnectionId))
+  await client.timers.cancel(_getTypingTimerId(peer, params.businessConnectionId))
 
   let replyTo = normalizeMessageId(params.replyTo)
   const replyToPeer = typeof params.replyTo === 'number' ? undefined : params.replyTo?.chat.inputPeer

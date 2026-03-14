@@ -123,7 +123,7 @@ export class CurrentUserService extends BaseService {
   }
 
   async fetch(): Promise<CurrentUserInfo | null> {
-    if (this._cached) {
+    if (this._cached !== undefined) {
       return this._cached
     }
 

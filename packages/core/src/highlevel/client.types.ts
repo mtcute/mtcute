@@ -42,7 +42,7 @@ export interface ITelegramClient {
   /** App config manager */
   readonly appConfig: PublicPart<AppConfigManager>
   /** Timers manager */
-  readonly timers: Pick<TimersManager, 'create' | 'cancel' | 'exists'>
+  readonly timers: Pick<TimersManager, 'upsert' | 'cancel' | 'exists'>
   /** Signal that will be aborted when the client is destroyed */
   readonly stopSignal: AbortSignal
   /** Platform used by the client */
@@ -77,6 +77,9 @@ export interface ITelegramClient {
    *
    * This will terminate any connections to the Telegram servers,
    * free all the resources, and make the client no longer usable
+   *
+   * > **Note**: the above is not true for worker ports, which instead only closes the port connection itself.
+   * > To destroy the underlying client, use `unsafeForceDestroy()`.
    */
   destroy(): Promise<void>
 

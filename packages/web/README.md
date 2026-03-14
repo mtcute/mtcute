@@ -31,16 +31,16 @@ You can also use this package with web workers to offload most of the heavy lift
 // worker.ts
 import { BaseTelegramClient, TelegramWorker } from '@mtcute/web'
 
-// main.ts
-import { TelegramClient, TelegramWorkerPort } from '@mtcute/web'
-
 const client = new BaseTelegramClient({
     apiId: 12345,
     apiHash: 'abcdef',
     storage: 'my-account'
 })
 
-new TelegramWorker({ client })
+new TelegramWorker({ client }).mount()
+
+// main.ts
+import { TelegramClient, TelegramWorkerPort } from '@mtcute/web'
 
 const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' }) // or SharedWorker
 const port = new TelegramWorkerPort({ worker })
@@ -49,3 +49,5 @@ const tg = new TelegramClient({ client: port })
 const self = await tg.start()
 console.log(`✨ logged in as ${user.displayName}`)
 ```
+
+`port.destroy()` only releases that port. Use `port.unsafeForceDestroy()` if you need to tear down the shared worker-side client.
