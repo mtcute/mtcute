@@ -72,6 +72,8 @@ export async function setTyping(
       peer,
       action: status,
       topMsgId: threadId,
+    }, {
+      businessConnectionId,
     })
 
     return

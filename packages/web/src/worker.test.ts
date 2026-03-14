@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { TelegramWorkerPort } from './worker.js'
 
@@ -22,6 +22,8 @@ if (process.env.TEST_ENV === 'browser' && typeof SharedWorker !== 'undefined') {
       while (ports.length) {
         await ports.pop()!.destroy()
       }
+
+      vi.useRealTimers()
     })
 
     it('should route colliding invoke ids across multiple shared worker owners', async () => {
@@ -52,6 +54,18 @@ if (process.env.TEST_ENV === 'browser' && typeof SharedWorker !== 'undefined') {
       })
 
       await expect(port.invokeCustom('echo', 'still-alive')).resolves.toBe('still-alive:done')
+    })
+
+    it('should keep shared worker transport alive for sibling logical ports', async () => {
+      const worker = createSharedWorker()
+      const port1 = new TelegramWorkerPort<TestCustomMethods>({ worker })
+      const port2 = new TelegramWorkerPort<TestCustomMethods>({ worker })
+
+      ports.push(port1, port2)
+
+      await port1.destroy()
+
+      await expect(port2.invokeCustom('echo', 'still-alive')).resolves.toBe('still-alive:done')
     })
   })
 } else {

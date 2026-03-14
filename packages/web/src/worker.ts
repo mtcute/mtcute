@@ -49,15 +49,28 @@ function setupSharedWorker(): RespondFn {
   unsafeCastType<SharedWorkerGlobalScope>(self)
 
   const ports = new Map<string, MessagePort>()
-  const knownConnectionIds = new WeakMap<MessagePort, string>()
-  const cleanupPort = (port: MessagePort, connectionId?: string) => {
-    const knownConnectionId = connectionId ?? knownConnectionIds.get(port)
-    if (knownConnectionId) {
-      ports.delete(knownConnectionId)
+  const knownConnectionIds = new WeakMap<MessagePort, Set<string>>()
+  const addConnection = (port: MessagePort, connectionId: string) => {
+    ports.set(connectionId, port)
+
+    const known = knownConnectionIds.get(port)
+    if (known) {
+      known.add(connectionId)
+      return
     }
 
-    knownConnectionIds.delete(port)
-    port.close()
+    knownConnectionIds.set(port, new Set([connectionId]))
+  }
+  const cleanupConnection = (port: MessagePort, connectionId: string) => {
+    ports.delete(connectionId)
+
+    const known = knownConnectionIds.get(port)
+    if (!known) return
+
+    known.delete(connectionId)
+    if (!known.size) {
+      knownConnectionIds.delete(port)
+    }
   }
 
   const broadcast: RespondFn = (message) => {
@@ -68,7 +81,7 @@ function setupSharedWorker(): RespondFn {
       port.postMessage(message)
 
       if (message.type === 'connection_expired') {
-        cleanupPort(port, message.connectionId)
+        cleanupConnection(port, message.connectionId)
       }
 
       return
@@ -85,7 +98,7 @@ function setupSharedWorker(): RespondFn {
       port.postMessage(message)
 
       if ('connectionId' in message && message.type === 'connection_expired') {
-        cleanupPort(port, message.connectionId)
+        cleanupConnection(port, message.connectionId)
       }
     }
 
@@ -94,10 +107,9 @@ function setupSharedWorker(): RespondFn {
       if (!isWorkerInboundMessage(data)) return
 
       if (data.type === 'connect') {
-        ports.set(data.connectionId, port)
-        knownConnectionIds.set(port, data.connectionId)
+        addConnection(port, data.connectionId)
       } else if (data.type === 'release') {
-        cleanupPort(port)
+        cleanupConnection(port, data.connectionId)
       }
 
       for (const handler of _sharedHandlers) {
@@ -181,7 +193,6 @@ export class TelegramWorkerPort<T extends WorkerCustomMethods> extends TelegramW
 
       const close = () => {
         worker.port.removeEventListener('message', messageHandler)
-        worker.port.close()
       }
 
       return [send, close]
