@@ -69,11 +69,6 @@ export class StarGift {
     }
   }
 
-  /** @deprecated Use {@link auction} instead (typo in older versions) */
-  get action(): this['auction'] {
-    return this.auction
-  }
-
   /** Whether this gift includes a peer color that can be applied to user's profile */
   get hasPeerColor(): boolean {
     return this.raw.peerColorAvailable!
