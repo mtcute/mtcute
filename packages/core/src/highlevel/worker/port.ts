@@ -143,6 +143,7 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
   onError: Emitter<Error> = new Emitter()
 
   private _onMessage: ClientMessageHandler = (message) => {
+    if (this._closed) return
     if (message._mtcuteWorkerId !== this.workerId) return
     if ('connectionId' in message && message.connectionId !== this.connectionId) return
 
@@ -198,8 +199,9 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     } else {
       this._invoker.expire()
     }
-    this._connection[1]()
     this._abortController.abort()
+    // deferred to avoid removing listener mid-emit (e.g. when _close is called from _onMessage)
+    queueMicrotask(() => this._connection[1]())
   }
 
   async destroy(terminate = false): Promise<void> {

@@ -20,6 +20,7 @@ describe('worker/protocol', () => {
     expect(Long.isLong(restored.id)).toBe(true)
     expect(restored.id.toString()).toBe('1234567890123456789')
     expect(Long.isLong(restored.nested.values[0])).toBe(true)
+    // eslint-disable-next-line ts/no-unsafe-call
     expect((restored.nested.values[1] as any).other.toString()).toBe('7')
   })
 

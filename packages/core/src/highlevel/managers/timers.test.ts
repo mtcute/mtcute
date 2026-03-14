@@ -11,6 +11,7 @@ function makeSpec(
     kind: 'rpc',
     key,
     interval: 100,
+    // eslint-disable-next-line ts/no-unsafe-assignment
     request: request as any,
     ...extra,
   }

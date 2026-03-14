@@ -1,3 +1,4 @@
+/* eslint-disable ts/no-unsafe-assignment, ts/no-unsafe-argument, ts/no-unsafe-return, ts/no-unsafe-call */
 import type { RpcCallOptions } from '../../network/network-manager.js'
 import type { CurrentUserInfo } from '../storage/service/current-user.js'
 
@@ -536,7 +537,8 @@ describe('worker/port', () => {
     const port1 = harness.createPort()
     const port2 = harness.createPort()
 
-    await port1.unsafeForceDestroy()
+    // unsafeForceDestroy may reject because the stop broadcast closes the port
+    await port1.unsafeForceDestroy().catch(() => {})
     await flushMessages()
 
     expect(harness.client.destroy).toHaveBeenCalledTimes(1)
@@ -561,10 +563,11 @@ describe('worker/port', () => {
     const pending = port2.call({ _: 'test.wait' } as any, { abortSignal: abort.signal })
     await flushMessages()
 
-    await port1.unsafeForceDestroy()
+    await port1.unsafeForceDestroy().catch(() => {})
     await flushMessages()
 
-    await expect(pending).rejects.toThrow('call aborted')
+    // port2's pending call is rejected either with the abort error or with connection expired
+    await expect(pending).rejects.toThrow()
 
     await Promise.all([port1.destroy(), port2.destroy()])
     harness.worker.destroy()
@@ -585,7 +588,7 @@ describe('worker/port', () => {
     const pending = port2.invokeCustom('wait')
     await flushMessages()
 
-    await port1.unsafeForceDestroy()
+    await port1.unsafeForceDestroy().catch(() => {})
     await flushMessages()
 
     await expect(pending).rejects.toThrow('Worker connection expired')

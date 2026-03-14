@@ -362,7 +362,8 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
         break
       case 'timers':
         target = {
-          upsert: (spec: Parameters<typeof this.client.timers.upsert>[0]) => Promise.resolve(this.client.timers.upsertOwned(msg.connectionId, spec)),
+          upsert: (spec: Parameters<typeof this.client.timers.upsert>[0]) =>
+            Promise.resolve(this.client.timers.upsertOwned(msg.connectionId, spec)),
           cancel: (key: string) => this.client.timers.cancel(key),
           exists: (key: string) => this.client.timers.exists(key),
         }

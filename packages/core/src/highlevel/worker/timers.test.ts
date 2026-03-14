@@ -22,11 +22,13 @@ class FakeInvoker {
 describe('worker/timers', () => {
   it('should proxy upsert calls to the worker', async () => {
     const invoker = new FakeInvoker()
+    // eslint-disable-next-line ts/no-unsafe-argument
     const timers = new WorkerTimersManager(invoker as any)
     const spec: RpcTimerSpec = {
       kind: 'rpc',
       key: 'typing:1',
       interval: 5_000,
+      // eslint-disable-next-line ts/no-unsafe-assignment
       request: { _: 'messages.setTyping', peer: { _: 'inputPeerSelf' }, action: { _: 'sendMessageTypingAction' } } as any,
       startNow: true,
     }
@@ -38,6 +40,7 @@ describe('worker/timers', () => {
 
   it('should proxy cancel and exists calls to the worker', async () => {
     const invoker = new FakeInvoker()
+    // eslint-disable-next-line ts/no-unsafe-argument
     const timers = new WorkerTimersManager(invoker as any)
 
     await timers.cancel('typing:1')

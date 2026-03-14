@@ -68,6 +68,7 @@ export function createTestWorkerClient(params?: {
     computeNewPasswordHash: async () => new Uint8Array(),
     startUpdatesLoop: async () => {},
     stopUpdatesLoop: async () => {},
+    // eslint-disable-next-line ts/no-unsafe-return
     getMtprotoMessageId: async () => 0 as any,
     recreateDc: async () => {},
     call: params?.call ?? (async (message: unknown, options?: RpcCallOptions) => ({ message, options })),

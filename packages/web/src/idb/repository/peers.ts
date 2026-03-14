@@ -29,6 +29,7 @@ export class IdbPeersRepository implements IPeersRepository {
   }
 
   async getById(id: number): Promise<IPeersRepository.PeerInfo | null> {
+    // <deno-tsignore>
     const it = await reqToPromise(this.os().get(id) as IDBRequest<IPeersRepository.PeerInfo>)
 
     if (!it) return null
@@ -39,6 +40,7 @@ export class IdbPeersRepository implements IPeersRepository {
   }
 
   async getByUsername(username: string): Promise<IPeersRepository.PeerInfo | null> {
+    // <deno-tsignore>
     const it = await reqToPromise(
       this.os().index('by_username').get(username) as IDBRequest<IPeersRepository.PeerInfo>,
     )
@@ -50,6 +52,7 @@ export class IdbPeersRepository implements IPeersRepository {
   }
 
   async getByPhone(phone: string): Promise<IPeersRepository.PeerInfo | null> {
+    // <deno-tsignore>
     const it = await reqToPromise(this.os().index('by_phone').get(phone) as IDBRequest<IPeersRepository.PeerInfo>)
 
     // NB: older objects might not have isMin field

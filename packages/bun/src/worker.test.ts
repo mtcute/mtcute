@@ -1,23 +1,22 @@
 import type { WorkerCustomMethods } from '@mtcute/core/worker.js'
 
-import { Worker } from 'node:worker_threads'
-
 import { afterEach, describe, expect, it } from 'vitest'
-
-import { TelegramWorkerPort } from './worker.js'
 
 type TestCustomMethods = WorkerCustomMethods & {
   echo: (value: string, delay?: number) => Promise<string>
 }
 
-function createWorker(): Worker {
-  return new Worker(new URL('./worker.fixture.ts', import.meta.url))
-}
-
 if (process.env.TEST_ENV === 'bun') {
-  describe('bun worker adapter', () => {
-    const workers: Worker[] = []
-    const ports: TelegramWorkerPort<TestCustomMethods>[] = []
+  describe('bun worker adapter', async () => {
+    const { Worker } = await import('node:worker_threads')
+    const { TelegramWorkerPort } = await import('./worker.js')
+
+    function createWorker(): InstanceType<typeof Worker> {
+      return new Worker(new URL('./worker.fixture.ts', import.meta.url))
+    }
+
+    const workers: InstanceType<typeof Worker>[] = []
+    const ports: InstanceType<typeof TelegramWorkerPort<TestCustomMethods>>[] = []
 
     afterEach(async () => {
       while (ports.length) {

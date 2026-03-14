@@ -9,12 +9,13 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-// eslint-disable-next-line no-new
 new TelegramWorker({
+  // eslint-disable-next-line ts/no-unsafe-assignment
   client: createTestWorkerClient(),
   customMethods: {
     async echo(value: string, delay = 0): Promise<string> {
       if (delay) {
+        // eslint-disable-next-line ts/no-unsafe-argument
         await sleep(delay)
       }
 

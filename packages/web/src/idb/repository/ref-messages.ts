@@ -42,6 +42,7 @@ export class IdbRefMsgRepository implements IReferenceMessagesRepository {
     const os = this.os()
     const index = os.index('by_peer')
 
+    // <deno-tsignore>
     const it = await reqToPromise<MessageRefDto>(index.get(peerId) as IDBRequest<MessageRefDto>)
     if (!it) return null
 

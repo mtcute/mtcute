@@ -47,6 +47,7 @@ export class IdbAuthKeysRepository implements IAuthKeysRepository {
   async get(dc: number): Promise<Uint8Array | null> {
     const os = this.os()
 
+    // <deno-tsignore>
     const it = await reqToPromise<AuthKeyDto>(os.get(dc) as IDBRequest<AuthKeyDto>)
     if (it === undefined) return null
 
@@ -69,6 +70,7 @@ export class IdbAuthKeysRepository implements IAuthKeysRepository {
 
   async getTemp(dc: number, idx: number, now: number): Promise<Uint8Array | null> {
     const os = this.osTemp()
+    // <deno-tsignore>
     const row = await reqToPromise<TempAuthKeyDto>(os.get([dc, idx]) as IDBRequest<TempAuthKeyDto>)
 
     if (row === undefined || row.expiresAt! < now) return null

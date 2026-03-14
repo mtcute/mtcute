@@ -10,8 +10,7 @@ export type CustomMethods = typeof customMethods
 
 const client = new BaseTelegramClient(getApiParams('dc1.session'))
 
-// eslint-disable-next-line no-new
 new TelegramWorker({
   client,
   customMethods,
-})
+}).mount()

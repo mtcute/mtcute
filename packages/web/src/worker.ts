@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-globals */
+/* eslint-disable ts/no-unsafe-assignment */
 import type {
   ClientMessageHandler,
   RespondFn,
