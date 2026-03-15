@@ -1,8 +1,8 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike, InputText } from '../../types/index.js'
 import { assertTrue } from '../../../utils/index.js'
-import { resolveUser } from '../../methods.js'
 import { inputTextToTl } from '../../types/index.js'
+import { resolveUser } from '../users/resolve-peer.js'
 
 /**
  * Set a note for a contact

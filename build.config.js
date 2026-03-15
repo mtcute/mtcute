@@ -6,7 +6,11 @@ import { asNonNull } from '@fuman/utils'
 /** @type {import('@fuman/build').RootConfig} */
 export default {
   jsr: {
-    exclude: ['**/*.{test,bench,test-utils,fixture}.ts', '**/__fixtures__/**'],
+    exclude: [
+      '**/*.{test,bench,test-utils,fixture}.ts',
+      '**/__fixtures__/**',
+      '**/__snapshots__/**',
+    ],
     sourceDir: 'src',
     enableDenoDirectives: true,
   },
@@ -16,6 +20,7 @@ export default {
       '**/*.test-utils.ts',
       '**/*.fixture.ts',
       '**/__fixtures__/**',
+      '**/__snapshots__/**',
       '**/*.md',
       'typedoc.cjs',
       '{scripts,dist,tests,private}/**',

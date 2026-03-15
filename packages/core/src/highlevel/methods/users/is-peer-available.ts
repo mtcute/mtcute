@@ -1,8 +1,7 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
 import { parseMarkedPeerId } from '../../../utils/peer-utils.js'
-
-import { _normalizePeerId } from './resolve-peer.js'
+import { _normalizePeerId } from './_resolve-common.js'
 
 /**
  * Check whether a given peer ID can be used to actually

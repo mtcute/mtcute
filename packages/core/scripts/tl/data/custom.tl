@@ -8,4 +8,5 @@ mtcute.dummyInputPeerMinChannel channel_id:int = InputPeer;
 
 
 ---functions---
+// ! codegen for this method is special-cased in gen-code.ts
 mtcute.customMethod bytes:bytes = bytes;

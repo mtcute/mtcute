@@ -3,6 +3,7 @@
 /binary/reader.js
 /binary/writer.js
 /compat/index.d.ts
+/compat/index.js
 /compat/reader.js
 
 /diff.json

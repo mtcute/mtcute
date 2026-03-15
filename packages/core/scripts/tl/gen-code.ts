@@ -17,7 +17,7 @@ import {
   parseTlToEntries,
   stringifyArgumentType,
 } from '@mtcute/tl-utils'
-import { API_SCHEMA_JSON_FILE, COMPAT_TL_FILE, ERRORS_JSON_FILE, ESM_PRELUDE, MTP_SCHEMA_JSON_FILE, TL_DIR } from './constants.js'
+import { API_SCHEMA_JSON_FILE, COMPAT_TL_FILE, ERRORS_JSON_FILE, makeJsPrelude, MTP_SCHEMA_JSON_FILE, TL_DIR } from './constants.js'
 import { unpackTlSchema } from './schema.js'
 
 const OUT_TYPINGS_FILE = join(TL_DIR, 'index.d.ts')
@@ -26,6 +26,7 @@ const OUT_READERS_FILE = join(TL_DIR, 'binary/reader.js')
 const OUT_WRITERS_FILE = join(TL_DIR, 'binary/writer.js')
 
 const OUT_TYPINGS_COMPAT_FILE = join(TL_DIR, 'compat/index.d.ts')
+const OUT_TYPINGS_COMPAT_FILE_JS = join(TL_DIR, 'compat/index.js')
 const OUT_READERS_COMPAT_FILE = join(TL_DIR, 'compat/reader.js')
 
 async function generateTypings(apiSchema: TlFullSchema, apiLayer: number, mtpSchema: TlFullSchema, errors: TlErrors) {
@@ -37,7 +38,7 @@ async function generateTypings(apiSchema: TlFullSchema, apiLayer: number, mtpSch
 
   // wrap CJS-style output in ESM: use local `exports` object, then re-export
   const jsContent = [
-    ESM_PRELUDE,
+    makeJsPrelude('index.d.ts'),
     'const exports = {};',
     apiJs,
     '',
@@ -79,7 +80,7 @@ async function generateReaders(apiSchema: TlFullSchema, mtpSchema: TlFullSchema)
   code = code.substring(0, code.length - 1) + mtpCode.substring(8)
   code += '\nexport const __tlReaderMap = m;'
 
-  await writeFile(OUT_READERS_FILE, ESM_PRELUDE + code)
+  await writeFile(OUT_READERS_FILE, makeJsPrelude('reader.d.ts') + code)
 }
 
 async function generateWriters(apiSchema: TlFullSchema, mtpSchema: TlFullSchema) {
@@ -104,7 +105,7 @@ async function generateWriters(apiSchema: TlFullSchema, mtpSchema: TlFullSchema)
 
   code += '\nexport const __tlWriterMap = m;'
 
-  await writeFile(OUT_WRITERS_FILE, ESM_PRELUDE + code)
+  await writeFile(OUT_WRITERS_FILE, makeJsPrelude('writer.d.ts') + code)
 }
 
 async function generateCompatCode(compatSchema: TlFullSchema, currentSchema: TlFullSchema) {
@@ -154,7 +155,7 @@ async function generateCompatCode(compatSchema: TlFullSchema, currentSchema: TlF
       variableName: 'm',
       includeMethods: false,
     })
-    await writeFile(OUT_READERS_COMPAT_FILE, `${ESM_PRELUDE + code}\nexport const __tlReaderMapCompat = m;`)
+    await writeFile(OUT_READERS_COMPAT_FILE, `${makeJsPrelude('reader.d.ts')}${code}\nexport const __tlReaderMapCompat = m;`)
   }
 
   // typings
@@ -166,6 +167,7 @@ async function generateCompatCode(compatSchema: TlFullSchema, currentSchema: TlF
       extendsSchema: currentSchema,
     })
     await writeFile(OUT_TYPINGS_COMPAT_FILE, `import { tl } from '../index.js';\n${codeTs}`)
+    await writeFile(OUT_TYPINGS_COMPAT_FILE_JS, `${makeJsPrelude('index.d.ts')}/* nothing here */`)
   }
 }
 

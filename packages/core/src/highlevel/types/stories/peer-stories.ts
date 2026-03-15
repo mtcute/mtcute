@@ -4,7 +4,7 @@ import type { Peer, PeersIndex } from '../peers/index.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { parsePeer } from '../peers/index.js'
+import { parsePeer } from '../peers/peer.js'
 
 import { Story } from './story.js'
 

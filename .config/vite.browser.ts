@@ -1,7 +1,6 @@
 import { playwright } from '@vitest/browser-playwright'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { mergeConfig } from 'vitest/config'
-import { fixupCjs } from './vite-utils/fixup-cjs'
 import baseConfig from './vite.js'
 
 export default mergeConfig(baseConfig, {
@@ -29,7 +28,6 @@ export default mergeConfig(baseConfig, {
     // ],
   },
   plugins: [
-    fixupCjs(),
     nodePolyfills({
       include: ['stream', 'path', 'zlib', 'util', 'events'],
       globals: {

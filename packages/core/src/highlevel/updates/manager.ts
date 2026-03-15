@@ -1,30 +1,19 @@
 import type { MaybePromise } from '../../types/utils.js'
-import type {
-  Logger,
-} from '../../utils/index.js'
+import type { Logger } from '../../utils/index.js'
 import type { BaseTelegramClient } from '../base.js'
-
 import type { PendingUpdate, PendingUpdateContainer, UpdatesManagerParams } from './types.js'
+
 import { AsyncLock, ConditionVariable, Deque, LruSet, timers, unknownToError } from '@fuman/utils'
 import Long from 'long'
 import { tl } from '../../tl/index.js'
 import { MtArgumentError } from '../../types/errors.js'
 import { assertNever } from '../../types/utils.js'
-import {
-  EarlyTimer,
-  getBarePeerId,
-  getMarkedPeerId,
-  isInputPeerChannel,
-  isInputPeerUser,
-  parseMarkedPeerId,
-  SortedArray,
-  toggleChannelIdMark,
-  toInputChannel,
-  toInputUser,
-} from '../../utils/index.js'
+import { EarlyTimer } from '../../utils/early-timer.js'
+import { getBarePeerId, getMarkedPeerId, parseMarkedPeerId, toggleChannelIdMark } from '../../utils/peer-utils.js'
+import { SortedArray } from '../../utils/sorted-array.js'
 import { _getChannelsBatched, _getUsersBatched } from '../methods/chats/batched-queries.js'
-
 import { PeersIndex } from '../types/peers/peers-index.js'
+import { isInputPeerChannel, isInputPeerUser, toInputChannel, toInputUser } from '../utils/peer-utils.js'
 import { RawUpdateInfo } from './types.js'
 import {
   createDummyUpdatesContainer,
@@ -102,20 +91,13 @@ export class UpdatesManager {
   postponedTimer: EarlyTimer = new EarlyTimer()
   hasTimedoutPostponed = false
 
-  pendingUpdateContainers: SortedArray<PendingUpdateContainer>
-    = new SortedArray<PendingUpdateContainer>([], (a, b) => a.seqStart - b.seqStart)
-
-  pendingPtsUpdates: SortedArray<PendingUpdate>
-    = new SortedArray<PendingUpdate>([], (a, b) => a.ptsBefore! - b.ptsBefore!)
-
-  pendingPtsUpdatesPostponed: SortedArray<PendingUpdate>
-    = new SortedArray<PendingUpdate>([], (a, b) => a.ptsBefore! - b.ptsBefore!)
-
-  pendingQtsUpdates: SortedArray<PendingUpdate>
-    = new SortedArray<PendingUpdate>([], (a, b) => a.qtsBefore! - b.qtsBefore!)
-
-  pendingQtsUpdatesPostponed: SortedArray<PendingUpdate>
-    = new SortedArray<PendingUpdate>([], (a, b) => a.qtsBefore! - b.qtsBefore!)
+  /* eslint-disable style/max-len */
+  pendingUpdateContainers: SortedArray<PendingUpdateContainer> = new SortedArray<PendingUpdateContainer>([], (a, b) => a.seqStart - b.seqStart)
+  pendingPtsUpdates: SortedArray<PendingUpdate> = new SortedArray<PendingUpdate>([], (a, b) => a.ptsBefore! - b.ptsBefore!)
+  pendingPtsUpdatesPostponed: SortedArray<PendingUpdate> = new SortedArray<PendingUpdate>([], (a, b) => a.ptsBefore! - b.ptsBefore!)
+  pendingQtsUpdates: SortedArray<PendingUpdate> = new SortedArray<PendingUpdate>([], (a, b) => a.qtsBefore! - b.qtsBefore!)
+  pendingQtsUpdatesPostponed: SortedArray<PendingUpdate> = new SortedArray<PendingUpdate>([], (a, b) => a.qtsBefore! - b.qtsBefore!)
+  /* eslint-enable style/max-len */
 
   pendingUnorderedUpdates: Deque<PendingUpdate> = new Deque()
 
