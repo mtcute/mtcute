@@ -17,7 +17,7 @@ import type { RawUpdateInfo, UpdatesManagerParams } from './updates/types.js'
 import { Emitter, unknownToError } from '@fuman/utils'
 import { MtClient } from '../network/client.js'
 import { tl } from '../tl/index.js'
-import { reportUnknownError } from '../utils/error-reporting.js'
+
 import {
   asyncResettable,
   computeNewPasswordHash,
@@ -246,10 +246,6 @@ export class BaseTelegramClient implements ITelegramClient {
 
     if (isTlRpcError(res)) {
       const error = makeRpcError(res, new Error().stack ?? '', message._)
-
-      if (error.unknown && this.params.enableErrorReporting) {
-        reportUnknownError(this.log, error, message._)
-      }
 
       throw error
     }

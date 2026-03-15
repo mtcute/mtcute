@@ -28,7 +28,6 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
   initConnection: tl.RawInitConnectionRequest
   inactivityTimeout?: number
   pingInterval: number
-  enableErrorReporting: boolean
   layer: number
   disableUpdates?: boolean
   withUpdates?: boolean

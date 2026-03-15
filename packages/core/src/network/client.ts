@@ -119,18 +119,6 @@ export interface MtClientOptions {
   disableUpdates?: boolean
 
   /**
-   * mtcute can send all unknown RPC errors to [danog](https://github.com/danog)'s
-   * [error reporting service](https://report-rpc-error.madelineproto.xyz/).
-   *
-   * This is fully anonymous (except maybe IP) and is only used to improve the library
-   * and developer experience for everyone working with MTProto. This is fully opt-in,
-   * and if you're too paranoid, you can disable it by manually passing `enableErrorReporting: false` to the client.
-   *
-   * @default false
-   */
-  enableErrorReporting?: boolean
-
-  /**
    * Extra parameters for {@link NetworkManager}
    */
   network?: NetworkManagerExtraParams
@@ -279,7 +267,6 @@ export class MtClient {
         emitError: params.onError,
         isPremium: false,
         useIpv6: Boolean(params.useIpv6),
-        enableErrorReporting: params.enableErrorReporting ?? false,
         onUsable: this.onUsable.emit.bind(this.onUsable),
         onConnecting: this.onConnecting.emit.bind(this.onConnecting),
         onNetworkChanged: this.onNetworkChanged.emit.bind(this.onNetworkChanged),

@@ -205,7 +205,7 @@ describe('logger', () => {
       it('should format RpcError', () => {
         const [mgr, spy] = createManager()
 
-        mgr.info('test %e', tl.RpcError.create(400, 'FLOOD_WAIT_42'))
+        mgr.info('test %e', new tl.RpcError(400, 'FLOOD_WAIT_42'))
 
         expect(spy).toHaveBeenCalledWith(3, 3, 'base', 'test 400 FLOOD_WAIT_42', [])
       })

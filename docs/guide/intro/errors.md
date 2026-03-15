@@ -32,27 +32,6 @@ mtcute automatically handles flood waits smaller than `floodSleepThreshold`
 by sleeping for that amount of seconds.
 :::
 
-### Unknown errors
-
-Sometimes, Telegram with return an error which is not documented (yet).
-In this case, it will still be an `RpcError`, but will have `.unknown = true`
-
-If you are feeling generous and want to help improve the docs for everyone,
-you can opt into sending unknown errors to [danog](https://github.com/danog)'s
-[error reporting service](https://rpc.pwrtelegram.xyz/).
-
-This is fully anonymous (except maybe IP) and is only used to improve the library
-and developer experience for everyone working with MTProto.
-
-To enable, pass `enableErrorReporting: true` to the client options:
-
-```ts
-const tg = new TelegramClient({
-  ...
-  enableErrorReporting: true
-})
-```
-
 ### Errors with parameters
 
 Some errors (like `FLOOD_WAIT_%d`) also contain a parameter.

@@ -3,10 +3,9 @@ import type { TlErrors } from '../types.js'
 import { snakeToCamel } from './utils.js'
 
 const TEMPLATE_JS = `
-const _descriptionsMap = JSON.parse('{descriptionsMap}')
 class RpcError extends Error {
-    constructor(code, text, description) {
-        super(description || 'Unknown RPC error: [' + code + ':' + text + ']');
+    constructor(code, text) {
+        super('Telegram API error ' + code + ': ' + text);
         this.code = code;
         this.text = text;
     }
@@ -15,25 +14,10 @@ class RpcError extends Error {
     is(text) { return this.text === text; }
 }
 RpcError.fromTl = function (obj) {
-    if (obj.errorMessage in _descriptionsMap) {
-        return new RpcError(obj.errorCode, obj.errorMessage, _descriptionsMap[obj.errorMessage]);
-    }
-
     var err = new RpcError(obj.errorCode, obj.errorMessage);
     var match, param;
 {matchers}
     else return err
-
-    err.message = _descriptionsMap[err.text].replace('%d', param);
-    return err
-}
-RpcError.create = function(code, text) {
-    var desc = _descriptionsMap[text];
-    var err = new RpcError(code, text, desc);
-    if (!desc) {
-        err.unknown = true;
-    }
-    return err;
 }
 {statics}
 {exports}RpcError = RpcError;
@@ -56,13 +40,11 @@ export class RpcError extends Error {
 
     readonly code: number;
     readonly text: MtErrorText;
-    readonly unknown: boolean;
     constructor(code: number, text: MtErrorText);
 
     is<const T extends MtErrorText>(text: T): this is RpcErrorWithArgs<T>;
     static is<const T extends MtErrorText>(err: unknown): err is RpcError;
     static is<const T extends MtErrorText>(err: unknown, text: T): err is RpcErrorWithArgs<T>;
-    static create<const T extends MtErrorText>(code: number, text: T): RpcErrorWithArgs<T>;
     static fromTl(obj: object): RpcError;
 }
 `.trimStart()

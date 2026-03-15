@@ -31,7 +31,6 @@ export interface NetworkManagerParams {
   log: Logger
   platform: ICorePlatform
 
-  enableErrorReporting: boolean
   apiId: number
   initConnectionOptions?: Partial<Omit<tl.RawInitConnectionRequest, 'apiId' | 'query'>>
   transport: TelegramTransport
@@ -270,7 +269,6 @@ export class DcConnectionManager {
       isMainConnection: false,
       isMainDcConnection: this.isPrimary,
       inactivityTimeout: managerParams.inactivityTimeout ?? 60_000,
-      enableErrorReporting: managerParams.enableErrorReporting,
       // NB: we need a separate salts manager for each pfs connection, because server salts are auth_key-bound
       salts: managerParams.usePfs ? new ServerSaltManager() : this._salts,
       platform: managerParams.platform,
