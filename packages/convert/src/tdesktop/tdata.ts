@@ -415,7 +415,7 @@ export class Tdata {
     const legacyMainDcId = read.int32be(bytes)
 
     let userId, mainDcId
-    if (legacyMainDcId === -1 && legacyMainDcId === -1) {
+    if (legacyUserId === -1 && legacyMainDcId === -1) {
       userId = readLong(bytes)
       mainDcId = read.int32be(bytes)
     } else {

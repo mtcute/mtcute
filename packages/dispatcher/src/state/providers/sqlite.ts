@@ -17,17 +17,17 @@ class SqliteStateRepository implements IStateRepository {
   constructor(readonly _driver: BaseSqliteStorageDriver) {
     _driver.registerMigration('state', 1, (db) => {
       db.exec(`
-                create table fsm_state (
-                    key text primary key,
-                    value text not null,
-                    expires_at integer
-                );
-                create table rl_state (
-                    key text primary key,
-                    reset integer not null,
-                    remaining integer not null
-                );
-            `)
+          create table fsm_state (
+              key text primary key,
+              value text not null,
+              expires_at integer
+          );
+          create table rl_state (
+              key text primary key,
+              reset integer not null,
+              remaining integer not null
+          );
+      `)
     })
     _driver.onLoad(() => {
       this._setState = _driver.db.prepare(
@@ -41,10 +41,6 @@ class SqliteStateRepository implements IStateRepository {
       this._getRl = _driver.db.prepare('select reset, remaining from rl_state where key = ?')
       this._deleteRl = _driver.db.prepare('delete from rl_state where key = ?')
       this._deleteOldRl = _driver.db.prepare('delete from rl_state where reset < ?')
-    })
-    _driver.registerLegacyMigration('state', (db) => {
-      // not too important information, just drop the table
-      db.exec('drop table state')
     })
   }
 

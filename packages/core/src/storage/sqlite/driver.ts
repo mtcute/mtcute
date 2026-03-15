@@ -22,17 +22,6 @@ export abstract class BaseSqliteStorageDriver extends BaseStorageDriver {
   private _migrations: Map<string, Map<number, MigrationFunction>> = new Map()
   private _maxVersion: Map<string, number> = new Map()
 
-  // todo: remove in 1.0.0
-  private _legacyMigrations: Map<string, MigrationFunction> = new Map()
-
-  registerLegacyMigration(repo: string, migration: MigrationFunction): void {
-    if (this.loaded) {
-      throw new Error('Cannot register migrations after loading')
-    }
-
-    this._legacyMigrations.set(repo, migration)
-  }
-
   registerMigration(repo: string, version: number, migration: MigrationFunction): void {
     if (this.loaded) {
       throw new Error('Cannot register migrations after loading')
@@ -72,18 +61,7 @@ export abstract class BaseSqliteStorageDriver extends BaseStorageDriver {
     this._pending.push([stmt, params])
   }
 
-  private _runLegacyMigrations = false
-
   _initialize(): void {
-    const hasLegacyTables = this.db
-      .prepare("select name from sqlite_master where type = 'table' and name = 'kv'")
-      .get()
-
-    if (hasLegacyTables) {
-      this._log.info('legacy tables detected, will run migrations')
-      this._runLegacyMigrations = true
-    }
-
     this.db.exec(MIGRATIONS_TABLE_SQL)
 
     const writeVersion = this.db.prepare(
@@ -140,17 +118,6 @@ export abstract class BaseSqliteStorageDriver extends BaseStorageDriver {
       this._destroy()
     })
     for (const cb of this._onLoad) cb(this.db)
-
-    if (this._runLegacyMigrations) {
-      this.db.transaction(() => {
-        for (const migration of this._legacyMigrations.values()) {
-          migration(this.db)
-        }
-
-        // in case _writeLater was used
-        this._runMany(this._pending)
-      })()
-    }
   }
 
   _save(): void {

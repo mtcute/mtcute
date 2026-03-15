@@ -1,13 +1,7 @@
 import type { IKeyValueRepository } from '../../repository/key-value.js'
-import type { ServiceOptions } from '../../service/base.js'
 
 import type { BaseSqliteStorageDriver } from '../driver.js'
 import type { ISqliteStatement } from '../types.js'
-import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
-import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
-import { CurrentUserService } from '../../../highlevel/storage/service/current-user.js'
-import { UpdatesStateService } from '../../../highlevel/storage/service/updates.js'
-import { DefaultDcsService } from '../../service/default-dcs.js'
 
 interface KeyValueDto {
   key: string
@@ -18,11 +12,11 @@ export class SqliteKeyValueRepository implements IKeyValueRepository {
   constructor(readonly _driver: BaseSqliteStorageDriver) {
     _driver.registerMigration('kv', 1, (db) => {
       db.exec(`
-                create table key_value (
-                    key text primary key,
-                    value blob not null
-                );
-            `)
+          create table key_value (
+              key text primary key,
+              value blob not null
+          );
+      `)
     })
     _driver.onLoad((db) => {
       this._get = db.prepare('select value from key_value where key = ?')
@@ -30,61 +24,6 @@ export class SqliteKeyValueRepository implements IKeyValueRepository {
       this._del = db.prepare('delete from key_value where key = ?')
       this._delAll = db.prepare('delete from key_value')
     })
-
-    // awkward dependencies, unsafe code, awful crutches
-    // all in the name of backwards compatibility
-    /* eslint-disable ts/no-unsafe-assignment, ts/no-floating-promises */
-    /* eslint-disable ts/no-unsafe-argument */
-    _driver.registerLegacyMigration('kv', (db) => {
-      // fetch all values from the old table
-      const all = db.prepare('select key, value from kv').all() as { key: string, value: string }[]
-      const obj: Record<string, any> = {}
-
-      for (const { key, value } of all) {
-        obj[key] = JSON.parse(value)
-      }
-
-      db.exec('drop table kv')
-
-      // lol
-      const options: ServiceOptions = {
-        driver: this._driver,
-        readerMap: __tlReaderMap,
-        writerMap: __tlWriterMap,
-        log: this._driver['_log'],
-      }
-
-      if (obj.self) {
-        new CurrentUserService(this, options).store({
-          userId: obj.self.userId,
-          isBot: obj.self.isBot,
-          isPremium: false,
-          usernames: [],
-        })
-      }
-
-      if (obj.pts) {
-        const svc = new UpdatesStateService(this, options)
-        svc.setPts(obj.pts)
-        if (obj.qts) svc.setQts(obj.qts)
-        if (obj.date) svc.setDate(obj.date)
-        if (obj.seq) svc.setSeq(obj.seq)
-
-        // also fetch channel states. they were moved to kv from a separate table
-        const channels = db.prepare('select * from pts').all() as any[]
-
-        for (const channel of channels) {
-          svc.setChannelPts(channel.channel_id, channel.pts)
-        }
-      }
-      db.exec('drop table pts')
-
-      if (obj.def_dc) {
-        new DefaultDcsService(this, options).store(obj.def_dc)
-      }
-    })
-    /* eslint-enable ts/no-unsafe-assignment, ts/no-floating-promises */
-    /* eslint-enable ts/no-unsafe-argument */
   }
 
   private _set!: ISqliteStatement
