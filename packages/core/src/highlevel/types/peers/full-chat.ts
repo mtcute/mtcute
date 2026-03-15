@@ -9,7 +9,6 @@ import { PeerStories } from '../stories/peer-stories.js'
 import { BotInfo } from './bot-info.js'
 import { BotVerification } from './bot-verification.js'
 import { ChatInviteLink } from './chat-invite-link.js'
-import { ChatLocation } from './chat-location.js'
 import { Chat } from './chat.js'
 import { PeersIndex } from './peers-index.js'
 import { User } from './user.js'
@@ -290,17 +289,6 @@ export class FullChat extends Chat {
   }
 
   /**
-   * Location of the chat.
-   */
-  get location(): ChatLocation | null {
-    if (!this.full || this.full._ !== 'channelFull' || this.full.location?._ !== 'channelLocation') {
-      return null
-    }
-
-    return new ChatLocation(this.full.location)
-  }
-
-  /**
    * Information about a linked chat:
    * - for channels: the discussion group
    * - for supergroups: the linked channel
@@ -401,7 +389,6 @@ export class FullChat extends Chat {
 memoizeGetters(FullChat, [
   'fullPhoto',
   'inviteLink',
-  'location',
   'stickerSet',
   'emojiSet',
   'botInfo',

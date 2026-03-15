@@ -57,7 +57,6 @@ export { getCreatorAfterLeave } from './methods/chats/get-creator-after-leave.js
 export { getFullChat } from './methods/chats/get-full-chat.js'
 export { getFullUser } from './methods/chats/get-full-user.js'
 export { getMessageAuthor } from './methods/chats/get-message-author.js'
-export { getNearbyChats } from './methods/chats/get-nearby-chats.js'
 export { getPeer } from './methods/chats/get-peer.js'
 export { getPeers } from './methods/chats/get-peers.js'
 export { getSimilarChannels } from './methods/chats/get-similar-channels.js'

@@ -88,7 +88,6 @@ import { getCreatorAfterLeave } from './methods/chats/get-creator-after-leave.js
 import { getFullChat } from './methods/chats/get-full-chat.js'
 import { getFullUser } from './methods/chats/get-full-user.js'
 import { getMessageAuthor } from './methods/chats/get-message-author.js'
-import { getNearbyChats } from './methods/chats/get-nearby-chats.js'
 import { getPeer } from './methods/chats/get-peer.js'
 import { getPeers } from './methods/chats/get-peers.js'
 import { getSimilarChannels } from './methods/chats/get-similar-channels.js'
@@ -1729,15 +1728,6 @@ export interface TelegramClient extends ITelegramClient {
 
   getMessageAuthor(
     message: InputMessageId): Promise<User>
-  /**
-   * Get nearby chats
-   *
-   * **Available**: 👤 users only
-   *
-   * @param latitude  Latitude of the location
-   * @param longitude  Longitude of the location
-   */
-  getNearbyChats(latitude: number, longitude: number): Promise<Chat[]>
   /** Shorthand for {@link getChat} and {@link getUser} depending on the type of the peer */
   getPeer(peer: InputPeerLike): Promise<Peer>
 
@@ -6816,9 +6806,6 @@ TelegramClient.prototype.getFullUser = function (...args) {
 }
 TelegramClient.prototype.getMessageAuthor = function (...args) {
   return getMessageAuthor(this._client, ...args)
-}
-TelegramClient.prototype.getNearbyChats = function (...args) {
-  return getNearbyChats(this._client, ...args)
 }
 TelegramClient.prototype.getPeer = function (...args) {
   return getPeer(this._client, ...args)

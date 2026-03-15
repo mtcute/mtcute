@@ -8,7 +8,6 @@ import { Message } from '../../messages/message.js'
 import { EmojiStatus } from '../../reactions/emoji-status.js'
 import { ChatColors } from '../chat-colors.js'
 import { ChatInviteLink } from '../chat-invite-link.js'
-import { ChatLocation } from '../chat-location.js'
 import { ChatMember } from '../chat-member.js'
 import { ChatPermissions } from '../chat-permissions.js'
 import { ForumTopic } from '../forum-topic.js'
@@ -234,10 +233,10 @@ export interface ChatActionLocationChanged {
   type: 'location_changed'
 
   /** Old location */
-  old: ChatLocation | null
+  old: tl.RawChannelLocation | null
 
   /** New location */
-  new: ChatLocation | null
+  new: tl.RawChannelLocation | null
 }
 
 /** Group slow mode delay has been changed */
@@ -633,8 +632,8 @@ export function _actionFromTl(
     case 'channelAdminLogEventActionChangeLocation':
       return {
         type: 'location_changed',
-        old: e.prevValue._ === 'channelLocationEmpty' ? null : new ChatLocation(e.prevValue),
-        new: e.newValue._ === 'channelLocationEmpty' ? null : new ChatLocation(e.newValue),
+        old: e.prevValue._ === 'channelLocationEmpty' ? null : e.prevValue,
+        new: e.newValue._ === 'channelLocationEmpty' ? null : e.newValue,
       }
     case 'channelAdminLogEventActionToggleSlowMode':
       return {
