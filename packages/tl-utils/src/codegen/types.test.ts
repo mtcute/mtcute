@@ -95,13 +95,14 @@ describe('generateTypescriptDefinitionsForTlSchema', () => {
 
     let [codeTs, codeJs] = generateTypescriptDefinitionsForTlSchema(schema)
 
-    // skip prelude
-    codeTs = codeTs.substring(codeTs.indexOf('-readonly [P in keyof T]: T[P]') + 37, codeTs.length - 1)
+    // skip prelude, extract namespace body + module-level exports
+    const nsBodyStart = codeTs.indexOf('-readonly [P in keyof T]: T[P]') + 37
+    codeTs = codeTs.substring(nsBodyStart)
     // unindent first level
     codeTs = codeTs.replace(/^ {4}/gm, '')
 
     // skip prelude
-    codeJs = codeJs.substring(codeJs.indexOf('ns.LAYER = 0;') + 14, codeJs.length - 15)
+    codeJs = codeJs.substring(codeJs.indexOf('export var LAYER = 0;') + 22)
 
     expect(codeTs.trim()).toMatchSnapshot()
     expect(codeJs.trim()).toMatchSnapshot()

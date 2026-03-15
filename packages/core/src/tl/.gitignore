@@ -1,5 +1,7 @@
 /index.d.ts
 /index.js
+/inner-tl.js
+/inner-mtp.js
 /binary/reader.js
 /binary/writer.js
 /compat/index.d.ts

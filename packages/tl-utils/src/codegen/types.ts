@@ -208,6 +208,17 @@ export function generateTypescriptDefinitionsForTlEntry(
   return ret
 }
 
+function isAnyExportName(unionName: string, entryNamespace: string): string {
+  const typeName = fullTypeName(unionName, '', { namespace: false })
+  const typeWithoutNs = typeName.substring(4) // strip "Type" prefix
+
+  if (entryNamespace) {
+    return `isAny${camelToPascal(entryNamespace)}_${typeWithoutNs}`
+  }
+
+  return `isAny${typeWithoutNs}`
+}
+
 /**
  * Generate TypeScript definitions for a given TL schema
  *
@@ -246,8 +257,6 @@ export function generateTypescriptDefinitionsForTlSchema(
 export declare namespace ${namespace} {
     const LAYER = ${layer};
 
-    ${onlyTypings ? '' : 'function $extendTypes(types: Record<string, string>): void'}
-
     type Long = _Long;
     type RawLong = Uint8Array;
     type Int128 = Uint8Array;
@@ -261,33 +270,23 @@ export declare namespace ${namespace} {
     }
 `
 
-  let js = `exports.${namespace} = {};
-(function(ns) {
-var _types = void 0;
-function _isAny(type) {
-    return function (obj) {
-        return typeof obj === 'object' && obj && _types[obj._] == type
-    }
-}
-ns.$extendTypes = function(types) {
-    for (var i in types) {
-        types.hasOwnProperty(i) && (_types[i] = types[i])
-    }
-}
-ns.LAYER = ${layer};
-`
+  let js = `function _isAny() { const a = arguments; return function(o) { if (typeof o !== 'object' || o === null) return false; for (let i = 0; i < a.length; i++) if (o._ === a[i]) return true; return false } }
+export const LAYER = ${layer};\n`
 
   if (extendsNamespace && !extendsSchema) {
     ts += '    type AnyToNever<T> = any extends T ? never : T;\n'
   }
 
   if (errors) {
-    const [_ts, _js] = generateCodeForErrors(errors, 'ns.')
+    const [_ts, _js] = generateCodeForErrors(errors)
     ts += _ts
     js += _js
   }
 
   const namespaces = groupTlEntriesByNamespace(schema.entries)
+
+  // collect all isAny functions for module-level export declarations
+  const isAnyDeclarations: string[] = []
 
   for (const ns in namespaces) {
     const entries = namespaces[ns]
@@ -362,10 +361,6 @@ ns.LAYER = ${layer};
 
     ts += `${indent(indentSize, '}')}\n`
 
-    if (ns) {
-      js += `ns.${ns} = {};\n(function(ns){\n`
-    }
-
     for (const name in unions) {
       const union = schema.unions[name]
 
@@ -373,7 +368,6 @@ ns.LAYER = ${layer};
         ts += `${indent(indentSize, jsComment(union.comment))}\n`
       }
       const typeName = fullTypeName(name, '', { namespace: false })
-      const typeWithoutNs = typeName.substring(4)
       ts += indent(indentSize, `type ${typeName} = `)
 
       union.classes.forEach((entry, idx) => {
@@ -390,13 +384,14 @@ ns.LAYER = ${layer};
       ts += '\n'
 
       if (!onlyTypings) {
-        ts += `${indent(indentSize, `function isAny${typeWithoutNs}(o: object): o is ${typeName}`)}\n`
-        js += `ns.isAny${typeWithoutNs} = _isAny('${name}');\n`
-      }
-    }
+        const exportName = isAnyExportName(name, ns)
+        const nsTypeName = ns ? `${namespace}.${ns}.${typeName}` : `${namespace}.${typeName}`
 
-    if (ns) {
-      js += `})(ns.${ns});\n`
+        ts += `${indent(indentSize, `function ${isAnyExportName(name, '')}(o: object): o is ${typeName}`)}\n`
+        const classNames = union.classes.map(c => `'${c.name}'`).join(', ')
+        js += `export const ${exportName} = /*#__PURE__*/ _isAny(${classNames});\n`
+        isAnyDeclarations.push(`export declare function ${exportName}(o: object): o is ${nsTypeName}`)
+      }
     }
 
     if (ns !== '') {
@@ -418,13 +413,7 @@ ns.LAYER = ${layer};
 
   ts += `\n${indent(4, 'type TlObject =')}\n`
 
-  const _types: Record<string, string> = {}
-
   schema.entries.forEach((entry) => {
-    if (entry.kind === 'class') {
-      _types[entry.name] = entry.type
-    }
-
     ts
       += `${indent(
         8,
@@ -440,8 +429,10 @@ ns.LAYER = ${layer};
 
   ts += '}'
 
-  js += `_types = JSON.parse('${JSON.stringify(_types)}');\n`
-  js += `})(exports.${namespace});`
+  // add module-level isAny export declarations after the namespace
+  if (isAnyDeclarations.length) {
+    ts += `\n${isAnyDeclarations.join('\n')}\n`
+  }
 
   return [ts, js]
 }

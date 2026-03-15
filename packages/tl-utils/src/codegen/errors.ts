@@ -3,7 +3,7 @@ import type { TlErrors } from '../types.js'
 import { snakeToCamel } from './utils.js'
 
 const TEMPLATE_JS = `
-class RpcError extends Error {
+export class RpcError extends Error {
     constructor(code, text) {
         super('Telegram API error ' + code + ': ' + text);
         this.code = code;
@@ -20,7 +20,6 @@ RpcError.fromTl = function (obj) {
     else return err
 }
 {statics}
-{exports}RpcError = RpcError;
 `.trimStart()
 
 const TEMPLATE_TS = `
@@ -92,10 +91,9 @@ function placeholderType(_name: string): string {
  * Generate code for given TL errors
  *
  * @param errors  Errors to generate code for
- * @param exports  Prefix for exports object
  * @returns  Tuple containing `[ts, js]` code
  */
-export function generateCodeForErrors(errors: TlErrors, exports = 'exports.'): [string, string] {
+export function generateCodeForErrors(errors: TlErrors): [string, string] {
   const descriptionsMap: Record<string, string> = {}
   let texts = ''
   let argMap = ''
@@ -136,7 +134,6 @@ export function generateCodeForErrors(errors: TlErrors, exports = 'exports.'): [
   return [
     template(TEMPLATE_TS, { statics: staticsTs, texts, argMap }),
     template(TEMPLATE_JS, {
-      exports,
       statics: staticsJs,
       descriptionsMap: JSON.stringify(descriptionsMap).replace(/'/g, "\\'"),
       matchers,

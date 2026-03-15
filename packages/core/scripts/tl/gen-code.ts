@@ -17,11 +17,13 @@ import {
   parseTlToEntries,
   stringifyArgumentType,
 } from '@mtcute/tl-utils'
-import { API_SCHEMA_JSON_FILE, COMPAT_TL_FILE, ERRORS_JSON_FILE, makeJsPrelude, MTP_SCHEMA_JSON_FILE, TL_DIR } from './constants.js'
+import { API_SCHEMA_JSON_FILE, COMPAT_TL_FILE, ERRORS_JSON_FILE, makeTypedPrelude, MTP_SCHEMA_JSON_FILE, PRELUDE, TL_DIR } from './constants.js'
 import { unpackTlSchema } from './schema.js'
 
 const OUT_TYPINGS_FILE = join(TL_DIR, 'index.d.ts')
 const OUT_TYPINGS_JS_FILE = join(TL_DIR, 'index.js')
+const OUT_TL_INNER_FILE = join(TL_DIR, 'inner-tl.js')
+const OUT_MTP_INNER_FILE = join(TL_DIR, 'inner-mtp.js')
 const OUT_READERS_FILE = join(TL_DIR, 'binary/reader.js')
 const OUT_WRITERS_FILE = join(TL_DIR, 'binary/writer.js')
 
@@ -34,19 +36,21 @@ async function generateTypings(apiSchema: TlFullSchema, apiLayer: number, mtpSch
   const [apiTs, apiJs] = generateTypescriptDefinitionsForTlSchema(apiSchema, { layer: apiLayer, errors })
   const [mtpTs, mtpJs] = generateTypescriptDefinitionsForTlSchema(mtpSchema, { layer: 0, namespace: 'mtp', skipLongImport: true })
 
+  // d.ts: both namespaces in one file
   await writeFile(OUT_TYPINGS_FILE, `${apiTs}\n\n${mtpTs}`)
 
-  // wrap CJS-style output in ESM: use local `exports` object, then re-export
-  const jsContent = [
-    makeJsPrelude('index.d.ts'),
-    'const exports = {};',
-    apiJs,
-    '',
-    mtpJs,
-    'export const tl = exports.tl;',
-    'export const mtp = exports.mtp;',
+  // js: separate ESM modules for each namespace
+  await writeFile(OUT_TL_INNER_FILE, `${PRELUDE}${apiJs}\n`)
+  await writeFile(OUT_MTP_INNER_FILE, `${PRELUDE}${mtpJs}\n`)
+
+  // index.js: re-export as namespaces
+  const indexJs = [
+    makeTypedPrelude('index.d.ts'),
+    'import * as tl from \'./inner-tl.js\';',
+    'import * as mtp from \'./inner-mtp.js\';',
+    'export { tl, mtp };',
   ].join('\n')
-  await writeFile(OUT_TYPINGS_JS_FILE, jsContent)
+  await writeFile(OUT_TYPINGS_JS_FILE, indexJs)
 }
 
 function removeInternalEntries(entries: TlEntry[]) {
@@ -80,7 +84,7 @@ async function generateReaders(apiSchema: TlFullSchema, mtpSchema: TlFullSchema)
   code = code.substring(0, code.length - 1) + mtpCode.substring(8)
   code += '\nexport const __tlReaderMap = m;'
 
-  await writeFile(OUT_READERS_FILE, makeJsPrelude('reader.d.ts') + code)
+  await writeFile(OUT_READERS_FILE, makeTypedPrelude('reader.d.ts') + code)
 }
 
 async function generateWriters(apiSchema: TlFullSchema, mtpSchema: TlFullSchema) {
@@ -105,7 +109,7 @@ async function generateWriters(apiSchema: TlFullSchema, mtpSchema: TlFullSchema)
 
   code += '\nexport const __tlWriterMap = m;'
 
-  await writeFile(OUT_WRITERS_FILE, makeJsPrelude('writer.d.ts') + code)
+  await writeFile(OUT_WRITERS_FILE, makeTypedPrelude('writer.d.ts') + code)
 }
 
 async function generateCompatCode(compatSchema: TlFullSchema, currentSchema: TlFullSchema) {
@@ -155,7 +159,7 @@ async function generateCompatCode(compatSchema: TlFullSchema, currentSchema: TlF
       variableName: 'm',
       includeMethods: false,
     })
-    await writeFile(OUT_READERS_COMPAT_FILE, `${makeJsPrelude('reader.d.ts')}${code}\nexport const __tlReaderMapCompat = m;`)
+    await writeFile(OUT_READERS_COMPAT_FILE, `${makeTypedPrelude('reader.d.ts')}${code}\nexport const __tlReaderMapCompat = m;`)
   }
 
   // typings
@@ -167,7 +171,7 @@ async function generateCompatCode(compatSchema: TlFullSchema, currentSchema: TlF
       extendsSchema: currentSchema,
     })
     await writeFile(OUT_TYPINGS_COMPAT_FILE, `import { tl } from '../index.js';\n${codeTs}`)
-    await writeFile(OUT_TYPINGS_COMPAT_FILE_JS, `${makeJsPrelude('index.d.ts')}/* nothing here */`)
+    await writeFile(OUT_TYPINGS_COMPAT_FILE_JS, `${makeTypedPrelude('index.d.ts')}/* nothing here */`)
   }
 }
 

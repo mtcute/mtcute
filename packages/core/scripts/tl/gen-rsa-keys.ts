@@ -8,7 +8,7 @@ import { parsePublicKey } from '@mtcute/core/utils.js'
 
 import { NodeCryptoProvider } from '@mtcute/node/utils.js'
 
-import { __dirname, makeJsPrelude, TL_DIR } from './constants.js'
+import { __dirname, makeTypedPrelude, TL_DIR } from './constants.js'
 
 const IN_TXT_FILE = join(__dirname, 'data/rsa-keys.txt')
 const OUT_JS_FILE = join(TL_DIR, 'binary/rsa-keys.js')
@@ -55,7 +55,7 @@ async function main() {
     obj[parsed.fingerprint] = parsed
   }
 
-  await writeFile(OUT_JS_FILE, `${makeJsPrelude('rsa-keys.d.ts')}export const __publicKeyIndex=JSON.parse('${JSON.stringify(obj)}');\n`)
+  await writeFile(OUT_JS_FILE, `${makeTypedPrelude('rsa-keys.d.ts')}export const __publicKeyIndex=JSON.parse('${JSON.stringify(obj)}');\n`)
 }
 
 main().catch(console.error)

@@ -183,12 +183,15 @@ type RpcMethod =
 
 type TlObject =
     | tl.RawTest
-    | tl.RawGetTestRequest"
+    | tl.RawGetTestRequest
+}
+export declare function isAnyTest(o: object): o is tl.TypeTest"
 `;
 
 exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with methods 2`] = `
-"ns.isAnyTest = _isAny('Test');
-_types = JSON.parse('{"test":"Test"}');"
+"onst a = arguments; return function(o) { if (typeof o !== 'object' || o === null) return false; for (let i = 0; i < a.length; i++) if (o._ === a[i]) return true; return false } }
+export const LAYER = 0;
+export const isAnyTest = /*#__PURE__*/ _isAny('test');"
 `;
 
 exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with multi-unions 1`] = `
@@ -205,12 +208,15 @@ function isAnyTest(o: object): o is TypeTest
 
 type TlObject =
     | tl.RawTest
-    | tl.RawTest2"
+    | tl.RawTest2
+}
+export declare function isAnyTest(o: object): o is tl.TypeTest"
 `;
 
 exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with multi-unions 2`] = `
-"ns.isAnyTest = _isAny('Test');
-_types = JSON.parse('{"test":"Test","test2":"Test"}');"
+"onst a = arguments; return function(o) { if (typeof o !== 'object' || o === null) return false; for (let i = 0; i < a.length; i++) if (o._ === a[i]) return true; return false } }
+export const LAYER = 0;
+export const isAnyTest = /*#__PURE__*/ _isAny('test', 'test2');"
 `;
 
 exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with namespaces 1`] = `
@@ -261,16 +267,17 @@ type TlObject =
     | tl.test.RawTest
     | tl.test.RawTest2
     | tl.RawGetTestRequest
-    | tl.test.RawGetTestRequest"
+    | tl.test.RawGetTestRequest
+}
+export declare function isAnyTest(o: object): o is tl.TypeTest
+export declare function isAnyTest_Test(o: object): o is tl.test.TypeTest"
 `;
 
 exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with namespaces 2`] = `
-"ns.isAnyTest = _isAny('Test');
-ns.test = {};
-(function(ns){
-ns.isAnyTest = _isAny('test.Test');
-})(ns.test);
-_types = JSON.parse('{"test":"Test","test2":"Test","test.test":"test.Test","test.test2":"test.Test"}');"
+"onst a = arguments; return function(o) { if (typeof o !== 'object' || o === null) return false; for (let i = 0; i < a.length; i++) if (o._ === a[i]) return true; return false } }
+export const LAYER = 0;
+export const isAnyTest = /*#__PURE__*/ _isAny('test', 'test2');
+export const isAnyTest_Test = /*#__PURE__*/ _isAny('test.test', 'test.test2');"
 `;
 
 exports[`generateTypescriptDefinitionsForTlSchema > writes simple schemas 1`] = `
@@ -283,10 +290,13 @@ type TypeTest = tl.RawTest
 function isAnyTest(o: object): o is TypeTest
 
 type TlObject =
-    | tl.RawTest"
+    | tl.RawTest
+}
+export declare function isAnyTest(o: object): o is tl.TypeTest"
 `;
 
 exports[`generateTypescriptDefinitionsForTlSchema > writes simple schemas 2`] = `
-"ns.isAnyTest = _isAny('Test');
-_types = JSON.parse('{"test":"Test"}');"
+"onst a = arguments; return function(o) { if (typeof o !== 'object' || o === null) return false; for (let i = 0; i < a.length; i++) if (o._ === a[i]) return true; return false } }
+export const LAYER = 0;
+export const isAnyTest = /*#__PURE__*/ _isAny('test');"
 `;

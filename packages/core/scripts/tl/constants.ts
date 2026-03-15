@@ -26,7 +26,8 @@ export const WEBK_SCHEMA = 'https://raw.githubusercontent.com/morethanwords/tweb
 export const WEBA_SCHEMA = 'https://raw.githubusercontent.com/Ajaxy/telegram-tt/master/src/lib/gramjs/tl/static/api.tl'
 export const WEBA_LAYER = 'https://raw.githubusercontent.com/Ajaxy/telegram-tt/master/src/lib/gramjs/tl/AllTLObjects.ts'
 
-export const makeJsPrelude = (typesFile: string) => `/// <reference types="./${typesFile}" />\n// This file is auto-generated. Do not edit.\n`
+export const PRELUDE = '// This file is auto-generated. Do not edit.\n'
+export const makeTypedPrelude = (typesFile: string) => `/// <reference types="./${typesFile}" />\n${PRELUDE}`
 
 // these types and their descendants are supported for backward compatibility,
 // and will get included into compat.tl on schema bump

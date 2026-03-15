@@ -30,7 +30,7 @@ export class RpcError extends Error {
     static fromTl(obj: object): RpcError;
 }
 ",
-  "class RpcError extends Error {
+  "export class RpcError extends Error {
     constructor(code, text) {
         super('Telegram API error ' + code + ': ' + text);
         this.code = code;
@@ -49,7 +49,6 @@ RpcError.fromTl = function (obj) {
 }
 RpcError.BAD_REQUEST = 400;
 
-exports.RpcError = RpcError;
 ",
 ]
 `;
