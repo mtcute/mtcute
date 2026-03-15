@@ -5534,13 +5534,13 @@ export interface TelegramClient extends ITelegramClient {
   deleteStickerFromSet(
     sticker: InputDocumentId): Promise<StickerSet>
   /**
-   * Get custom emoji stickers by their IDs
+   * Get custom emoji stickers by their IDs, or `null` if not available/found.
    *
    * **Available**: 👤 users only
    *
    * @param ids  IDs of the stickers (as defined in {@link MessageEntity.emojiId})
    */
-  getCustomEmojis(ids: tl.Long[]): Promise<Sticker[]>
+  getCustomEmojis(ids: tl.Long[]): Promise<(Sticker | null)[]>
   /**
    * Given one or more messages, extract all unique custom emojis from it and fetch them
    * **Available**: ✅ both users and bots
