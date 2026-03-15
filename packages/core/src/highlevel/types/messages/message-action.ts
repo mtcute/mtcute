@@ -931,9 +931,13 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         title: act.title,
       }
     case 'messageActionChatEditPhoto':
+      if (act.photo._ === 'photoEmpty') {
+        return { type: 'photo_deleted' }
+      }
+
       return {
         type: 'photo_changed',
-        photo: new Photo(act.photo as tl.RawPhoto),
+        photo: new Photo(act.photo),
       }
     case 'messageActionChatDeletePhoto':
       return {
@@ -1109,9 +1113,10 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         message: act.message,
       }
     case 'messageActionSuggestProfilePhoto':
+      if (act.photo._ !== 'photo') return null
       return {
         type: 'photo_suggested',
-        photo: new Photo(act.photo as tl.RawPhoto),
+        photo: new Photo(act.photo),
       }
     case 'messageActionRequestedPeerSentMe':
       return {

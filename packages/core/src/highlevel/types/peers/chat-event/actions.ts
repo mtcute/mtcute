@@ -99,10 +99,10 @@ export interface ChatActionPhotoChanged {
   type: 'photo_changed'
 
   /** Old photo */
-  old: Photo
+  old: Photo | null
 
   /** New photo */
-  new: Photo
+  new: Photo | null
 }
 
 /** Invites were enabled/disabled */
@@ -550,8 +550,8 @@ export function _actionFromTl(
     case 'channelAdminLogEventActionChangePhoto':
       return {
         type: 'photo_changed',
-        old: new Photo(e.prevPhoto as tl.RawPhoto),
-        new: new Photo(e.newPhoto as tl.RawPhoto),
+        old: e.prevPhoto._ === 'photo' ? new Photo(e.prevPhoto) : null,
+        new: e.newPhoto._ === 'photo' ? new Photo(e.newPhoto) : null,
       }
     case 'channelAdminLogEventActionToggleInvites':
       return {

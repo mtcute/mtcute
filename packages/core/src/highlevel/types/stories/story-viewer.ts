@@ -2,7 +2,6 @@ import type { tl } from '../../../tl/index.js'
 
 import type { Peer } from '../peers/index.js'
 import type { ReactionEmoji } from '../reactions/index.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Message } from '../messages/index.js'
@@ -82,8 +81,8 @@ export class StoryRepost {
     return this.raw._ === 'storyViewPublicForward' ? 'forward' : 'repost'
   }
 
-  /** Date when the repost has happened */
-  get date(): Date {
+  /** Date when the repost has happened, if available */
+  get date(): Date | null {
     if (this.raw._ === 'storyViewPublicForward' && this.raw.message._ === 'message') {
       return new Date(this.raw.message.date * 1000)
     }
@@ -92,7 +91,7 @@ export class StoryRepost {
       return new Date(this.raw.story.date * 1000)
     }
 
-    throw new MtTypeAssertionError('StoryRepost', 'date', 'none')
+    return null
   }
 
   /**

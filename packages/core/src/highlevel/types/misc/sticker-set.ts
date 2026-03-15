@@ -4,6 +4,7 @@ import type { MaskPosition, Sticker, StickerType } from '../media/index.js'
 import { tl } from '../../../tl/index.js'
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { LongMap } from '../../../utils/long-utils.js'
+import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MtEmptyError } from '../errors.js'
@@ -99,7 +100,8 @@ export interface StickerInfo {
   readonly sticker: Sticker
 }
 
-function parseStickerOrThrow(doc: tl.RawDocument): Sticker {
+function parseStickerOrThrow(doc: tl.TypeDocument): Sticker {
+  assertTypeIs('parseStickerOrThrow', doc, 'document')
   const sticker = parseSticker(doc)
 
   if (!sticker) {
@@ -228,7 +230,7 @@ export class StickerSet {
     const index = new LongMap<tl.Mutable<StickerInfo>>()
 
     this.full.documents.forEach((doc) => {
-      const sticker = parseStickerOrThrow(doc as tl.RawDocument)
+      const sticker = parseStickerOrThrow(doc)
 
       const info: tl.Mutable<StickerInfo> = {
         alt: sticker.emoji,
@@ -258,11 +260,11 @@ export class StickerSet {
 
     switch (this.cover._) {
       case 'stickerSetCovered':
-        return [parseStickerOrThrow(this.cover.cover as tl.RawDocument)]
+        return [parseStickerOrThrow(this.cover.cover)]
       case 'stickerSetMultiCovered':
-        return this.cover.covers.map(it => parseStickerOrThrow(it as tl.RawDocument))
+        return this.cover.covers.map(it => parseStickerOrThrow(it))
       case 'stickerSetFullCovered':
-        return this.cover.documents.map(it => parseStickerOrThrow(it as tl.RawDocument))
+        return this.cover.documents.map(it => parseStickerOrThrow(it))
       case 'stickerSetNoCovered':
         return []
     }
@@ -306,9 +308,9 @@ export class StickerSet {
     if (!this.full) throw new MtEmptyError()
 
     if (idx < 0) idx = this.full.documents.length + idx
-    const doc = this.full.documents[idx] as tl.RawDocument
+    const doc = this.full.documents[idx]
 
-    if (!doc) {
+    if (!doc || doc._ !== 'document') {
       throw new RangeError(`Sticker set does not have sticker ${idx}`)
     }
 

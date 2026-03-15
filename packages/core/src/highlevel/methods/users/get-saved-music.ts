@@ -35,6 +35,7 @@ export async function getSavedMusic(
   const files: Audio[] = []
 
   for (const file of res.documents) {
+    if (file._ !== 'document') continue
     assertTypeIs('getSavedMusic', file, 'document')
     const doc = parseDocument(file)
     assert(doc.type === 'audio')

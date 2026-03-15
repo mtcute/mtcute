@@ -2,11 +2,11 @@ import type { tl } from '../../../tl/index.js'
 import type { ITelegramClient } from '../../client.types.js'
 
 import type { ArrayPaginated, InputPeerLike } from '../../types/index.js'
+import { isNotNull } from '@fuman/utils'
 import Long from 'long'
-import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { Photo } from '../../types/index.js'
-import { makeArrayPaginated } from '../../utils/index.js'
 
+import { makeArrayPaginated } from '../../utils/index.js'
 import { resolveUser } from './resolve-peer.js'
 
 /**
@@ -48,10 +48,10 @@ export async function getProfilePhotos(
 
   return makeArrayPaginated(
     res.photos.map((it) => {
-      assertTypeIs('getProfilePhotos', it, 'photo')
+      if (it._ !== 'photo') return null
 
       return new Photo(it)
-    }),
+    }).filter(isNotNull),
     (res as tl.photos.RawPhotosSlice).count ?? res.photos.length,
     offset + res.photos.length,
   )

@@ -6154,7 +6154,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   getProfilePhoto(
     userId: InputPeerLike,
-    photoId: tl.Long): Promise<Photo>
+    photoId: tl.Long): Promise<Photo | null>
   /**
    * Get a list of profile pictures of a user
    *

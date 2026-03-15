@@ -87,12 +87,14 @@ export class Venue {
   get inputMedia(): tl.TypeInputMedia {
     return {
       _: 'inputMediaVenue',
-      geoPoint: {
-        _: 'inputGeoPoint',
-        lat: (this.raw.geo as tl.RawGeoPoint).lat,
-        long: (this.raw.geo as tl.RawGeoPoint).long,
-        accuracyRadius: (this.raw.geo as tl.RawGeoPoint).accuracyRadius,
-      },
+      geoPoint: this.raw.geo._ === 'geoPoint'
+        ? {
+            _: 'inputGeoPoint',
+            lat: this.raw.geo.lat,
+            long: this.raw.geo.long,
+            accuracyRadius: this.raw.geo.accuracyRadius,
+          }
+        : { _: 'inputGeoPointEmpty' },
       title: this.raw.title,
       address: this.raw.address,
       provider: this.raw.provider,

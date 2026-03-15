@@ -1,7 +1,7 @@
 import type { MaybeArray } from '../../../types/utils.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
-import { assertTypeIs } from '../../../utils/type-assertions.js'
+import { isNotNull } from '@fuman/utils'
 import { PeersIndex, Story } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -27,10 +27,10 @@ export async function getStoriesById(
   const peers = PeersIndex.from(res)
 
   const stories = res.stories.map((it) => {
-    assertTypeIs('getProfileStories', it, 'storyItem')
+    if (it._ !== 'storyItem') return null
 
     return new Story(it, peers)
-  })
+  }).filter(isNotNull)
 
   return stories
 }

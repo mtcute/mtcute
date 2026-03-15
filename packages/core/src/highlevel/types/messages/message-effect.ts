@@ -37,9 +37,7 @@ export class MessageEffect {
 
     const parsed = parseSticker(document)
 
-    if (!parsed) {
-      throw new MtTypeAssertionError('MessageEffect.staticIcon', 'sticker', 'null')
-    }
+    if (!parsed) return null
 
     return parsed
   }
@@ -70,9 +68,7 @@ export class MessageEffect {
 
     const parsed = parseSticker(document)
 
-    if (!parsed) {
-      throw new MtTypeAssertionError('MessageEffect.effectAnimation', 'sticker', 'null')
-    }
+    if (!parsed) return null
 
     return parsed
   }

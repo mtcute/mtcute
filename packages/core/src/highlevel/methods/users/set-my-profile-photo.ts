@@ -4,6 +4,7 @@ import type { InputFileLike } from '../../types/index.js'
 import { tdFileId } from '@mtcute/file-id'
 import { tl } from '../../../tl/index.js'
 import { MtArgumentError } from '../../../types/errors.js'
+import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { Photo } from '../../types/index.js'
 import { fileIdToInputPhoto } from '../../utils/convert-file-id.js'
 import { _normalizeInputFile } from '../files/normalize-input-file.js'
@@ -43,7 +44,9 @@ export async function setMyProfilePhoto(
         id: media,
       })
 
-      return new Photo(res.photo as tl.RawPhoto)
+      assertTypeIs('photos.updateProfilePhoto', res.photo, 'photo')
+
+      return new Photo(res.photo)
     }
   }
 
@@ -53,5 +56,7 @@ export async function setMyProfilePhoto(
     videoStartTs: previewSec,
   })
 
-  return new Photo(res.photo as tl.RawPhoto)
+  assertTypeIs('photos.updateProfilePhoto', res.photo, 'photo')
+
+  return new Photo(res.photo)
 }

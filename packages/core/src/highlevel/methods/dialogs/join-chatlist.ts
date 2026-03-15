@@ -45,7 +45,7 @@ export async function joinChatlist(
   assertIsUpdatesGroup('joinChatlist', res)
   client.handleClientUpdate(res)
 
-  const filter = res.updates.find(it => it._ === 'updateDialogFilter') as tl.RawUpdateDialogFilter
+  const filter = res.updates.find(it => it._ === 'updateDialogFilter')
 
   if (!filter?.filter) {
     throw new MtTypeAssertionError('joinChatlist', 'updateDialogFilter', 'nothing')

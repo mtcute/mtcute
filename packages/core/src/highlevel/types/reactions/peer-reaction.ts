@@ -4,12 +4,10 @@ import type { Peer } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
 import type { ReactionEmoji } from './types.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
-import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { parsePeer } from '../peers/peer.js'
 
-import { User } from '../peers/user.js'
 import { toReactionEmoji } from './types.js'
 
 /**
@@ -43,23 +41,21 @@ export class PeerReaction {
   }
 
   /**
-   * ID of the user who has reacted
+   * ID of the peer who has reacted
    */
-  get userId(): number {
+  get peerId(): number {
     return getMarkedPeerId(this.raw.peerId)
   }
 
   /**
    * User who has reacted
    */
-  get user(): User {
-    assertTypeIs('PeerReaction#user', this.raw.peerId, 'peerUser')
-
-    return new User(this._peers.user(this.raw.peerId.userId))
+  get peer(): Peer {
+    return parsePeer(this.raw.peerId, this._peers)
   }
 }
 
-memoizeGetters(PeerReaction, ['user'])
+memoizeGetters(PeerReaction, ['peer'])
 makeInspectable(PeerReaction)
 
 /**

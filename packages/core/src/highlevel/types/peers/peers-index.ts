@@ -16,23 +16,18 @@ export class PeersIndex {
     const index = new PeersIndex()
 
     obj.users?.forEach((user) => {
+      if (user._ === 'userEmpty') return
       index.users.set(user.id, user)
 
-      if ((user as Exclude<typeof user, tl.RawUserEmpty>).min) {
+      if (user.min) {
         index.hasMin = true
       }
     })
     obj.chats?.forEach((chat) => {
+      if (chat._ === 'chatEmpty') return
       index.chats.set(chat.id, chat)
 
-      if (
-        (
-          chat as Exclude<
-                        typeof chat,
-                        tl.RawChatEmpty | tl.RawChat | tl.RawChatForbidden | tl.RawChannelForbidden
-          >
-        ).min
-      ) {
+      if ('min' in chat && chat.min) {
         index.hasMin = true
       }
     })

@@ -1,11 +1,11 @@
 import type { tl } from '../../../tl/index.js'
 
 import type { Peer, PeersIndex } from '../peers/index.js'
-import { assertTypeIs } from '../../../utils/type-assertions.js'
+import { isNotNull } from '@fuman/utils'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { parsePeer } from '../peers/peer.js'
 
+import { parsePeer } from '../peers/peer.js'
 import { Story } from './story.js'
 
 export class PeerStories {
@@ -33,10 +33,10 @@ export class PeerStories {
    */
   get stories(): Story[] {
     return this.raw.stories.map((it) => {
-      assertTypeIs('PeerStories#stories', it, 'storyItem')
+      if (it._ !== 'storyItem') return null
 
       return new Story(it, this._peers)
-    })
+    }).filter(isNotNull)
   }
 }
 

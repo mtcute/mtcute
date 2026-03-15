@@ -1,15 +1,13 @@
 import type { tl } from '../../../tl/index.js'
 
+import type { Chat } from '../peers/chat.js'
 import type { Peer, PeerSender } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
 import type { MessageMedia } from './message-media.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { Chat } from '../peers/chat.js'
 import { parsePeer } from '../peers/peer.js'
 
-import { User } from '../peers/user.js'
 import { MessageEntity } from './message-entity.js'
 import { _messageMediaFromTl } from './message-media.js'
 
@@ -156,17 +154,10 @@ export class RepliedMessageInfo {
     const peer = replyFrom?.fromId ?? replyToPeerId
 
     if (peer) {
-      switch (peer._) {
-        case 'peerChannel':
-          return new Chat(this._peers.chat(peer.channelId))
-        case 'peerUser':
-          return new User(this._peers.user(peer.userId))
-        default:
-          throw new MtTypeAssertionError('fromId ?? replyToPeerId', 'peerUser | peerChannel', peer._)
-      }
+      return parsePeer(peer, this._peers)
     }
 
-    throw new MtTypeAssertionError('replyFrom', 'to have fromId, replyToPeerId or fromName', 'neither')
+    return null // play it safe
   }
 
   /**
