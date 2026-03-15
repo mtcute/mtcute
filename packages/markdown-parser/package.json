@@ -10,6 +10,6 @@
     "exports": "./src/index.ts",
     "dependencies": {
         "@mtcute/core": "workspace:^",
-        "long": "5.2.3"
+        "long": "catalog:"
     }
 }

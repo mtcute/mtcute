@@ -60,7 +60,7 @@ export default {
   lint: {
     externalDependencies: {
       // due to jsr libraries
-      shouldSkip: ctx => ctx.package.json.name === '@mtcute/deno',
+      shouldSkip: ctx => ctx.package.json.name === '@mtcute/deno' || ctx.package.json.name === '@mtcute/e2e-tests',
     },
   },
   viteConfig: '.config/vite.build.ts',

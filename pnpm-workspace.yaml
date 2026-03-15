@@ -1,3 +1,6 @@
 packages:
   - packages/*
   - e2e
+
+catalog:
+  long: ^5.3.2

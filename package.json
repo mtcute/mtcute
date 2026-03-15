@@ -22,9 +22,6 @@
     "userbot",
     "api"
   ],
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "postinstall": "fuman-build lint && node scripts/remove-jsr-sourcefiles.js",
     "test": "vitest --config .config/vite.ts run",

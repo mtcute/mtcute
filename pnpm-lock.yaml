@@ -4,6 +4,12 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    long:
+      specifier: ^5.3.2
+      version: 5.3.2
+
 overrides:
   typescript: ^5.9.3
 
@@ -210,8 +216,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       long:
-        specifier: 5.2.3
-        version: 5.2.3
+        specifier: 'catalog:'
+        version: 5.3.2
     devDependencies:
       '@mtcute/test':
         specifier: workspace:^
@@ -307,8 +313,8 @@ importers:
         specifier: workspace:^
         version: link:../tl-runtime
       long:
-        specifier: 5.2.3
-        version: 5.2.3
+        specifier: 'catalog:'
+        version: 5.3.2
 
   packages/html-parser:
     dependencies:
@@ -319,8 +325,8 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0
       long:
-        specifier: 5.2.3
-        version: 5.2.3
+        specifier: 'catalog:'
+        version: 5.3.2
 
   packages/i18n:
     devDependencies:
@@ -337,8 +343,8 @@ importers:
         specifier: workspace:^
         version: link:../core
       long:
-        specifier: 5.2.3
-        version: 5.2.3
+        specifier: 'catalog:'
+        version: 5.3.2
 
   packages/node:
     dependencies:
@@ -392,8 +398,8 @@ importers:
         specifier: workspace:^
         version: link:../web
       long:
-        specifier: 5.2.3
-        version: 5.2.3
+        specifier: 'catalog:'
+        version: 5.3.2
       vitest:
         specifier: '*'
         version: 4.0.15(@types/node@24.10.3)(@vitest/browser-playwright@4.0.15)(@vitest/ui@4.0.15)(tsx@4.21.0)(yaml@2.8.2)
@@ -408,8 +414,8 @@ importers:
         specifier: 0.0.19
         version: 0.0.19
       long:
-        specifier: 5.2.3
-        version: 5.2.3
+        specifier: 'catalog:'
+        version: 5.3.2
 
   packages/tl-utils:
     dependencies:
@@ -3028,8 +3034,8 @@ packages:
     resolution: {integrity: sha512-ja1E3yCr9i/0hmBVaM0bfwDjnGy8I/s6PP4DFp+yP+a+mrHO4Rm7DtmnqROTUkHIkqffC84YY7AeqX6oFk0WFg==}
     engines: {node: '>=18'}
 
-  long@5.2.3:
-    resolution: {integrity: sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==}
+  long@5.3.2:
+    resolution: {integrity: sha512-mNAgZ1GmyNhD7AuqnTG3/VQ26o760+ZYBPKjPvugO8+nLbYfX6TVpJPseBvopbdY+qpZ/lKUnmEc1LeZYS3QAA==}
 
   longest-streak@3.1.0:
     resolution: {integrity: sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g==}
@@ -6850,7 +6856,7 @@ snapshots:
       is-unicode-supported: 2.1.0
       yoctocolors: 2.1.2
 
-  long@5.2.3: {}
+  long@5.3.2: {}
 
   longest-streak@3.1.0: {}
 

@@ -23,7 +23,7 @@
     }
   },
   "dependencies": {
-    "long": "5.2.3",
+    "long": "catalog:",
     "@fuman/utils": "0.0.19",
     "@fuman/net": "0.0.19"
   },

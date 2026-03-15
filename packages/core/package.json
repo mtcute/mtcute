@@ -30,7 +30,7 @@
     "@mtcute/file-id": "workspace:^",
     "@mtcute/tl-runtime": "workspace:^",
     "@types/events": "3.0.0",
-    "long": "5.2.3"
+    "long": "catalog:"
   },
   "devDependencies": {
     "@mtcute/test": "workspace:^",
