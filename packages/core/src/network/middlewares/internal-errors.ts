@@ -1,7 +1,7 @@
-import type { mtp } from '@mtcute/tl'
+import type { mtp } from '../../tl/index.js'
 
 import type { RpcCallMiddleware } from '../network-manager.js'
-import { tl } from '@mtcute/tl'
+import { tl } from '../../tl/index.js'
 import { MtTimeoutError } from '../../types/errors.js'
 import { combineAbortSignals } from '../../utils/abort-signal.js'
 import { sleepWithAbort } from '../../utils/misc-utils.js'

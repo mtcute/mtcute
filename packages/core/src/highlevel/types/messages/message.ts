@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 
 import type { ReplyMarkup } from '../bots/keyboards/index.js'
 import type { TextWithEntities } from '../misc/index.js'

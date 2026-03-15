@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../tl/index.js'
 
 import type { Deeplink } from './common.js'
 import { assertNever } from '../../types/utils.js'

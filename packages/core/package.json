@@ -12,23 +12,28 @@
     "./utils.js": "./src/utils/index.ts",
     "./client.js": "./src/highlevel/client.ts",
     "./worker.js": "./src/highlevel/worker/index.ts",
-    "./methods.js": "./src/highlevel/methods.ts"
+    "./methods.js": "./src/highlevel/methods.ts",
+    "./tl/api-schema.json": "./src/tl/api-schema.json",
+    "./tl/app-config.json": "./src/tl/app-config.json",
+    "./tl/raw-errors.json": "./src/tl/raw-errors.json",
+    "./tl/mtp-schema.json": "./src/tl/mtp-schema.json"
   },
   "scripts": {
     "gen-client": "node ./scripts/generate-client.cjs",
-    "gen-updates": "node ./scripts/generate-updates.cjs"
+    "gen-updates": "node ./scripts/generate-updates.cjs",
+    "gen-tl": "tsx ./scripts/tl/gen-code.ts"
   },
   "dependencies": {
     "@fuman/io": "0.0.19",
     "@fuman/net": "0.0.19",
     "@fuman/utils": "0.0.19",
     "@mtcute/file-id": "workspace:^",
-    "@mtcute/tl": "workspace:^",
     "@mtcute/tl-runtime": "workspace:^",
     "@types/events": "3.0.0",
     "long": "5.2.3"
   },
   "devDependencies": {
-    "@mtcute/test": "workspace:^"
+    "@mtcute/test": "workspace:^",
+    "@mtcute/tl-utils": "workspace:^"
   }
 }

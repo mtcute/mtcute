@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 import { StubTelegramClient } from '@mtcute/test'
 import { describe, expect, it } from 'vitest'
 import { _normalizeInputText } from './normalize-text.js'

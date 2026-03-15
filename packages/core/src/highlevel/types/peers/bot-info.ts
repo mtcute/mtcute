@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 import type { Video } from '../media/video.js'
 import { asNonNull } from '@fuman/utils'
 import { makeInspectable } from '../../utils/inspectable.js'

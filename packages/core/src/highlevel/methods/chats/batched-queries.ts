@@ -1,7 +1,7 @@
 import type { ITelegramClient } from '../../client.types.js'
 
 import type { BatchedQuery } from '../../utils/query-batcher.js'
-import { tl } from '@mtcute/tl'
+import { tl } from '../../../tl/index.js'
 import { MtArgumentError } from '../../../types/errors.js'
 import {
   isInputPeerChannel,

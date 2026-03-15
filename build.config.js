@@ -38,7 +38,6 @@ export default {
   typedoc: {
     out: 'dist/typedoc',
     excludePackages: [
-      '@mtcute/tl',
       '@mtcute/create-bot',
     ],
     validation: {

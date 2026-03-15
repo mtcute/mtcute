@@ -1,8 +1,8 @@
 import type { Emitter } from '@fuman/utils'
-import type { tl } from '@mtcute/tl'
 import type Long from 'long'
-
 import type { ConnectionKind, RpcCallOptions } from '../network/index.js'
+
+import type { tl } from '../tl/index.js'
 import type { ICorePlatform } from '../types/platform.js'
 import type { MustEqual, PublicPart } from '../types/utils.js'
 import type { Logger } from '../utils/logger.js'

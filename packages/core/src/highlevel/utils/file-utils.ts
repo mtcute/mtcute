@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../tl/index.js'
 import { hex, u8, utf8 } from '@fuman/utils'
 
 import { MtArgumentError } from '../../types/errors.js'

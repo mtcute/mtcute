@@ -1,6 +1,6 @@
 import type { IReadable } from '@fuman/io'
 import type { tdFileId } from '@mtcute/file-id'
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 
 import type { AnyToNever } from '../../../types/utils.js'
 

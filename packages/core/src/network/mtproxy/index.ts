@@ -1,5 +1,5 @@
 import type { ITcpConnection, TcpEndpoint } from '@fuman/net'
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../tl/index.js'
 import type { BasicDcOption, ICryptoProvider, Logger } from '../../utils/index.js'
 import type { IPacketCodec, ITelegramConnection, MtProxyInfo, TelegramTransport } from '../transports/index.js'
 

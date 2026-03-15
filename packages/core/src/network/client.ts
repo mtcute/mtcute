@@ -1,8 +1,8 @@
 import type { ReconnectionStrategy } from '@fuman/net'
-import type { mtp } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import type { IMtStorageProvider } from '../storage/provider.js'
 import type { StorageManagerExtraOptions } from '../storage/storage.js'
+import type { mtp } from '../tl/index.js'
 import type { MustEqual } from '../types/index.js'
 import type { ICorePlatform } from '../types/platform.js'
 
@@ -14,11 +14,11 @@ import type {
 import type { NetworkManagerExtraParams, RpcCallOptions } from './network-manager.js'
 import type { TelegramTransport } from './transports/abstract.js'
 import { Emitter } from '@fuman/utils'
-import { tl } from '@mtcute/tl'
-import { __tlReaderMap as defaultReaderMap } from '@mtcute/tl/binary/reader.js'
-import { __tlWriterMap as defaultWriterMap } from '@mtcute/tl/binary/writer.js'
-
 import { StorageManager } from '../storage/storage.js'
+import { __tlReaderMap as defaultReaderMap } from '../tl/binary/reader.js'
+import { __tlWriterMap as defaultWriterMap } from '../tl/binary/writer.js'
+
+import { tl } from '../tl/index.js'
 import {
   asyncResettable,
   defaultProductionDc,

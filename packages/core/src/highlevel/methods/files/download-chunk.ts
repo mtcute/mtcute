@@ -1,7 +1,7 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { FileDownloadLocation } from '../../types/index.js'
 import { assert } from '@fuman/utils'
-import { tl } from '@mtcute/tl'
+import { tl } from '../../../tl/index.js'
 import { MtArgumentError, MtUnsupportedError } from '../../../types/errors.js'
 import { _normalizeFileDownloadLocation } from './download-iterable.js'
 

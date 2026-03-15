@@ -1,4 +1,4 @@
-import type { mtp } from '@mtcute/tl'
+import type { mtp } from '../../tl/index.js'
 
 import type { RpcCallMiddleware, RpcCallMiddlewareContext } from '../network-manager.js'
 import { combineAbortSignals } from '../../utils/abort-signal.js'

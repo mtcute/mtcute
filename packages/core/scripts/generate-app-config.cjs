@@ -1,7 +1,7 @@
 const fs = require('node:fs')
 const path = require('node:path')
 
-const spec = require('@mtcute/tl/app-config.json')
+const spec = require('../src/tl/app-config.json')
 
 const OUT_FILE = path.join(__dirname, '../src/highlevel/types/misc/app-config.ts')
 

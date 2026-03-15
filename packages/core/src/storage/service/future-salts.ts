@@ -1,4 +1,4 @@
-import type { mtp } from '@mtcute/tl'
+import type { mtp } from '../../tl/index.js'
 import type { IKeyValueRepository } from '../repository/key-value.js'
 
 import type { ServiceOptions } from './base.js'

@@ -1,6 +1,6 @@
-import type { tl } from '@mtcute/tl'
 import type { IKeyValueRepository } from '../../../storage/repository/key-value.js'
 import type { ServiceOptions } from '../../../storage/service/base.js'
+import type { tl } from '../../../tl/index.js'
 
 import { u8 } from '@fuman/utils'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'

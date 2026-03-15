@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../tl/index.js'
 import { parseFileId, tdFileId as td } from '@mtcute/file-id'
 import Long from 'long'
 

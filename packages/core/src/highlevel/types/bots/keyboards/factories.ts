@@ -7,7 +7,7 @@ import type {
 } from './types.js'
 import { utf8 } from '@fuman/utils'
 
-import { tl } from '@mtcute/tl'
+import { tl } from '../../../../tl/index.js'
 import { assertNever } from '../../../../types/utils.js'
 
 import { toInputUser } from '../../../utils/peer-utils.js'

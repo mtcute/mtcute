@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/core'
 import type { TlArgument } from '@mtcute/tl-utils'
 import { u8 } from '@fuman/utils'
 import Long from 'long'

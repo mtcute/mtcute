@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 import type { PeersIndex } from '../peers/peers-index.js'
 
 import Long from 'long'

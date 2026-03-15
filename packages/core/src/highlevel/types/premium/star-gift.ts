@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 
 import type { Sticker } from '../media/sticker.js'
 import type { Message } from '../messages/message.js'

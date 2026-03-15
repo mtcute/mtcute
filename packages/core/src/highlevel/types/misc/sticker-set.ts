@@ -1,7 +1,7 @@
 import type { InputFileLike } from '../files/index.js'
 
 import type { MaskPosition, Sticker, StickerType } from '../media/index.js'
-import { tl } from '@mtcute/tl'
+import { tl } from '../../../tl/index.js'
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { LongMap } from '../../../utils/long-utils.js'
 import { makeInspectable } from '../../utils/index.js'

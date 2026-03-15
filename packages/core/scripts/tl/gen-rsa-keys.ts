@@ -1,4 +1,4 @@
-import type { TlPublicKey } from '../binary/rsa-keys.js'
+import type { TlPublicKey } from '../../src/tl/binary/rsa-keys.js'
 import { createReadStream } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -8,10 +8,10 @@ import { parsePublicKey } from '@mtcute/core/utils.js'
 
 import { NodeCryptoProvider } from '@mtcute/node/utils.js'
 
-import { __dirname, ESM_PRELUDE } from './constants.js'
+import { __dirname, ESM_PRELUDE, TL_DIR } from './constants.js'
 
-const IN_TXT_FILE = join(__dirname, '../data/rsa-keys.txt')
-const OUT_JS_FILE = join(__dirname, '../binary/rsa-keys.js')
+const IN_TXT_FILE = join(__dirname, 'data/rsa-keys.txt')
+const OUT_JS_FILE = join(TL_DIR, 'binary/rsa-keys.js')
 
 interface InputKey {
   kind: 'old' | 'new'
@@ -55,7 +55,7 @@ async function main() {
     obj[parsed.fingerprint] = parsed
   }
 
-  await writeFile(OUT_JS_FILE, `${ESM_PRELUDE}exports.default=JSON.parse('${JSON.stringify(obj)}');`)
+  await writeFile(OUT_JS_FILE, `${ESM_PRELUDE}export const __publicKeyIndex=JSON.parse('${JSON.stringify(obj)}');\n`)
 }
 
 main().catch(console.error)

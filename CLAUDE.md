@@ -13,7 +13,7 @@ mtcute is a TypeScript MTProto (Telegram API) library supporting Node.js, Bun, D
 pnpm install --frozen-lockfile
 
 # Generate TL schema code (required after clone)
-pnpm -C packages/tl run gen-code
+pnpm -C packages/core run gen-tl
 
 # Test
 pnpm test                              # all tests
@@ -35,16 +35,15 @@ node packages/core/scripts/generate-client.cjs
 node packages/dispatcher/scripts/generate.cjs
 
 # Look up a TL constructor/method definition and its TypeScript type
-npx tsx packages/tl/scripts/get-constructor.ts <name>
-# e.g. npx tsx packages/tl/scripts/get-constructor.ts messages.sendMessage
+npx tsx packages/core/scripts/tl/get-constructor.ts <name>
+# e.g. npx tsx packages/core/scripts/tl/get-constructor.ts messages.sendMessage
 ```
 
 ## Package overview
 
 | Package | Purpose |
 |---------|---------|
-| `core` | MTProto client, high-level API methods, types, storage |
-| `tl` | TL schema definitions, codegen from schema JSON |
+| `core` | MTProto client, high-level API methods, types, storage, TL schema |
 | `tl-runtime` | TL binary serialization/deserialization |
 | `tl-utils` | TL schema parsing, codegen utilities |
 | `node` | Node.js platform bindings (crypto, sqlite, transport) |
@@ -92,9 +91,9 @@ Platform packages (`node`, `bun`, `deno`, `web`) provide `ICorePlatform` impleme
 
 ### TL schema
 
-`packages/tl` contains the Telegram TL schema (`api-schema.json`) and generated TypeScript types/readers/writers. The `tl` namespace provides typed constructors and methods. Version follows TL layer number (e.g., `222.0.0`).
+`packages/core/src/tl/` contains the generated TL schema code (types, binary readers/writers). Schema data and codegen scripts live in `packages/core/scripts/tl/`. The `tl` namespace provides typed constructors and methods.
 
-To look up a TL constructor's definition and TypeScript type, use `pnpm tsx packages/tl/scripts/get-constructor.ts <name>`. Supports both class names (e.g. `user`) and method names (e.g. `messages.sendMessage`). Case-insensitive, shows partial matches if no exact match found.
+To look up a TL constructor's definition and TypeScript type, use `pnpm tsx packages/core/scripts/tl/get-constructor.ts <name>`. Supports both class names (e.g. `user`) and method names (e.g. `messages.sendMessage`). Case-insensitive, shows partial matches if no exact match found.
 
 ## Code style
 

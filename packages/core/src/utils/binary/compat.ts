@@ -1,13 +1,13 @@
 import type { TlReaderMap } from '@mtcute/tl-runtime'
-import type { tlCompat } from '@mtcute/tl/compat'
+import type { tlCompat } from '../../tl/compat/index.js'
 import { Bytes, read } from '@fuman/io'
 import { assert, objectEntries } from '@fuman/utils'
-import { tl } from '@mtcute/tl'
 import { TlBinaryReader } from '@mtcute/tl-runtime'
-import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
-import { __tlReaderMapCompat } from '@mtcute/tl/compat/reader.js'
 import Long from 'long'
 import { PeersIndex } from '../../highlevel/types/peers/peers-index.js'
+import { __tlReaderMap } from '../../tl/binary/reader.js'
+import { __tlReaderMapCompat } from '../../tl/compat/reader.js'
+import { tl } from '../../tl/index.js'
 
 function replaceType<
   Input extends tlCompat.TlObject,

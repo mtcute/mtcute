@@ -3,7 +3,7 @@ const path = require('node:path')
 
 const ts = require('typescript')
 
-const schema = require('../../tl/api-schema.json')
+const schema = require('../src/tl/api-schema.json')
 
 const updates = require('./generate-updates.cjs')
 

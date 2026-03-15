@@ -1,6 +1,6 @@
-import type { tl } from '@mtcute/tl'
 import type { TlReaderMap } from '@mtcute/tl-runtime'
 import type Long from 'long'
+import type { tl } from '../tl/index.js'
 import type { ICryptoProvider, Logger } from '../utils/index.js'
 import { typed, u8 } from '@fuman/utils'
 

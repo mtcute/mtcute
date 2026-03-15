@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../tl/index.js'
 import type { BaseTelegramClient } from '../base.js'
 
 import type { AppConfigSchema } from '../types/misc/app-config.js'

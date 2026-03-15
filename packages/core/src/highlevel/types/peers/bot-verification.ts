@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 
 /** Information about a bot-issued verification */

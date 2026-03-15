@@ -1,4 +1,4 @@
-import type { mtp } from '@mtcute/tl'
+import type { mtp } from '../tl/index.js'
 import { timers } from '@fuman/utils'
 import Long from 'long'
 

@@ -1,5 +1,5 @@
-import type { tl } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+import type { tl } from '../../tl/index.js'
 import type { Logger } from '../../utils/logger.js'
 
 import type { IStorageDriver } from '../driver.js'

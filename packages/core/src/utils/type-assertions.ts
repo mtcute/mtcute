@@ -1,4 +1,4 @@
-import type { mtp, tl } from '@mtcute/tl'
+import type { mtp, tl } from '../tl/index.js'
 
 import { MtTypeAssertionError } from '../types/errors.js'
 

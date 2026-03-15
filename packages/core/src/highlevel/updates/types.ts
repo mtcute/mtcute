@@ -1,5 +1,5 @@
 import type { AsyncLock, ConditionVariable, Deque, timers } from '@fuman/utils'
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../tl/index.js'
 
 import type { EarlyTimer, Logger, SortedArray } from '../../utils/index.js'
 import type { CurrentUserInfo } from '../storage/service/current-user.js'

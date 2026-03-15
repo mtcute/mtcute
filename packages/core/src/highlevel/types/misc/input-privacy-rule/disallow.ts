@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../../tl/index.js'
 
 import type { MaybeArray } from '../../../../types/utils.js'
 import type { InputPeerLike } from '../../peers/peer.js'

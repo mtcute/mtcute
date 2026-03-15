@@ -1,6 +1,6 @@
-import type { tl } from '@mtcute/tl'
-
 import type { RpcCallOptions } from '../../../network/network-manager.js'
+
+import type { tl } from '../../../tl/index.js'
 import type { MustEqual } from '../../../types/utils.js'
 import type { ITelegramClient } from '../../client.types.js'
 import { assertTrue } from '../../../utils/type-assertions.js'

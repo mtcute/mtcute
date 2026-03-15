@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../tl/index.js'
 import type { ICryptoProvider } from './abstract.js'
 
 import { bigint, u8, utf8 } from '@fuman/utils'

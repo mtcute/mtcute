@@ -2,7 +2,7 @@ import type { ITelegramClient } from '../../client.types.js'
 import type { InputFileLike, InputPeerLike } from '../../types/index.js'
 
 import { tdFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
+import { tl } from '../../../tl/index.js'
 import { MtArgumentError } from '../../../types/errors.js'
 import { isUploadedFile, MtInvalidPeerTypeError } from '../../types/index.js'
 import { fileIdToInputPhoto } from '../../utils/convert-file-id.js'

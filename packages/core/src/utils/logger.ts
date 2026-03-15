@@ -1,7 +1,7 @@
 import type { ICorePlatform } from '../types/platform.js'
 import { hex } from '@fuman/utils'
 
-import { tl } from '@mtcute/tl'
+import { tl } from '../tl/index.js'
 
 import { isTlRpcError } from './type-assertions.js'
 

@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 
 import type { PeersIndex } from '../peers/index.js'
 import { makeInspectable } from '../../utils/index.js'

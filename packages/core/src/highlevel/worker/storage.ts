@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../tl/index.js'
 
 import type { PublicPart } from '../../types/utils.js'
 import type { CurrentUserInfo, CurrentUserService } from '../storage/service/current-user.js'

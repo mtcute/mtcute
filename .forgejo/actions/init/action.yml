@@ -6,5 +6,5 @@ runs:
     - run: pnpm install --frozen-lockfile
       shell: bash
     - name: 'TL codegen'
-      run: pnpm -C packages/tl run gen-code
+      run: pnpm -C packages/core run gen-tl
       shell: bash

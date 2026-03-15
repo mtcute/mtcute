@@ -1,4 +1,4 @@
-import type { mtp, tl } from '@mtcute/tl'
+import type { mtp, tl } from '../tl/index.js'
 import type { Logger } from '../utils/index.js'
 
 import type { SessionConnectionParams } from './session-connection.js'

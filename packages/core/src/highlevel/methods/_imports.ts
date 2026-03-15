@@ -3,10 +3,10 @@
 // @copy
 import { tdFileId } from '@mtcute/file-id'
 // @copy
-import { tl } from '@mtcute/tl'
+import { RpcCallOptions } from '../../network/index.js'
 
 // @copy
-import { RpcCallOptions } from '../../network/index.js'
+import { tl } from '../../tl/index.js'
 // @copy
 import { MaybeArray, MaybePromise, MtUnsupportedError, PartialExcept, PartialOnly } from '../../types/index.js'
 // @copy

@@ -1,6 +1,6 @@
-import type { tl } from '@mtcute/tl'
-
 import type { RpcCallOptions } from '../../../network/index.js'
+
+import type { tl } from '../../../tl/index.js'
 import type { ITelegramClient } from '../../client.types.js'
 
 // @skip

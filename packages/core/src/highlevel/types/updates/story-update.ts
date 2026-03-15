@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 
 import type { Peer, PeersIndex } from '../../types/peers/index.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'

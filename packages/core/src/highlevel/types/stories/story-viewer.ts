@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 
 import type { Peer } from '../peers/index.js'
 import type { ReactionEmoji } from '../reactions/index.js'

@@ -4,7 +4,7 @@ import type {
   InputMessageId,
   InputPeerLike,
 } from '../../types/index.js'
-import { tl } from '@mtcute/tl'
+import { tl } from '../../../tl/index.js'
 import { MtcuteError } from '../../../types/errors.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'

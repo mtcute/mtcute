@@ -1,6 +1,6 @@
-import type { tl } from '@mtcute/tl'
-
 import type { RpcCallOptions } from '../../network/network-manager.js'
+
+import type { tl } from '../../tl/index.js'
 import { AsyncInterval } from '@fuman/utils'
 
 export interface RpcTimerSpec {

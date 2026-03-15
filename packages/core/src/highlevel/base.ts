@@ -1,9 +1,8 @@
-import type { mtp } from '@mtcute/tl'
 import type Long from 'long'
 import type { MtClientOptions } from '../network/client.js'
 import type { ConnectionKind, RpcCallOptions } from '../network/network-manager.js'
-
 import type { StorageManagerExtraOptions } from '../storage/storage.js'
+import type { mtp } from '../tl/index.js'
 import type { ICorePlatform } from '../types/platform.js'
 import type { MustEqual } from '../types/utils.js'
 import type {
@@ -16,9 +15,8 @@ import type { ITelegramStorageProvider } from './storage/provider.js'
 import type { TelegramStorageManagerExtraOptions } from './storage/storage.js'
 import type { RawUpdateInfo, UpdatesManagerParams } from './updates/types.js'
 import { Emitter, unknownToError } from '@fuman/utils'
-import { tl } from '@mtcute/tl'
-
 import { MtClient } from '../network/client.js'
+import { tl } from '../tl/index.js'
 import { reportUnknownError } from '../utils/error-reporting.js'
 import {
   asyncResettable,

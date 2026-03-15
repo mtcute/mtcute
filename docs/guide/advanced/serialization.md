@@ -75,6 +75,6 @@ because that way the bundle size would be huge.
 Objects that most commonly require persistent storage are supported, however,
 and if you find something missing for your use-case feel free to [open an issue](https://github.com/mtcute/mtcute/issues/new)
 
-For the complete list of supported objects, please see [TYPES_FOR_COMPAT](https://github.com/mtcute/mtcute/blob/master/packages/tl/scripts/constants.ts)
-or [compat.tl](https://github.com/mtcute/mtcute/blob/master/packages/tl/data/compat.tl)
+For the complete list of supported objects, please see [TYPES_FOR_COMPAT](https://github.com/mtcute/mtcute/blob/master/packages/core/scripts/tl/constants.ts)
+or [compat.tl](https://github.com/mtcute/mtcute/blob/master/packages/core/scripts/tl/data/compat.tl)
 :::

@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
 import { makeInspectable } from '../../utils/index.js'

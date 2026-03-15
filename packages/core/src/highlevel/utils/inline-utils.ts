@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../tl/index.js'
 import { base64 } from '@fuman/utils'
 import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
 

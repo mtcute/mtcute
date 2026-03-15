@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../tl/index.js'
 
 export type DateEntityFlags = Omit<tl.RawMessageEntityFormattedDate, '_' | 'offset' | 'length' | 'date'>
 

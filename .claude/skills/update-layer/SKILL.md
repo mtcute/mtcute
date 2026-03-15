@@ -14,7 +14,7 @@ Update the Telegram TL schema by fetching from multiple sources, resolving confl
 ### 1. Dry run
 
 ```bash
-cd packages/tl && pnpm tsx scripts/fetch-api.ts --dry-run
+cd packages/core && pnpm tsx scripts/tl/fetch-api.ts --dry-run
 ```
 
 Parse the output. It contains:
@@ -30,7 +30,7 @@ Parse the output. It contains:
 Build flags from the dry-run output:
 
 ```bash
-pnpm tsx scripts/fetch-api.ts \
+pnpm tsx scripts/tl/fetch-api.ts \
   --resolve entryName=N \    # 0=remove, 1+ = pick option from dry-run. repeat per conflict
   --docs cached|fresh \      # use cached docs if available, or force re-fetch
   --bump                     # or --no-bump
@@ -43,17 +43,17 @@ In most cases you should pass `--bump`, except when running again within the sam
 ### 3. Process diff
 
 ```bash
-pnpm tsx scripts/process-diff.ts
+pnpm tsx scripts/tl/process-diff.ts
 ```
 
 ### 4. Check int53 overrides
 This prints a structured summary of changes: added/removed/modified classes and methods, and a list of `long` fields that may need int53 overrides.
 Check if they represent user/channel/chat IDs or file sizes — those should be `int53`
 
-If there are such `long` fields listed, present them to the user and run the `scripts/add-int53-overrides.ts` script to add the override to the file like so:
+If there are such `long` fields listed, present them to the user and run the `scripts/tl/add-int53-overrides.ts` script to add the override to the file like so:
 ```bash
 # ! key is the entry name, array items are the fields that need to be overridden
-echo '{"class":{"user":["bot_id"],"channel":["linked_id"]},"method":{"messages.getHistory":["offset_id"]}}' | pnpm tsx scripts/add-int53-overrides.ts
+echo '{"class":{"user":["bot_id"],"channel":["linked_id"]},"method":{"messages.getHistory":["offset_id"]}}' | pnpm tsx scripts/tl/add-int53-overrides.ts
 ```
 
 Verify that there were no `[warn]` messages regarding the overrides you just added.
@@ -61,7 +61,7 @@ Verify that there were no `[warn]` messages regarding the overrides you just add
 ### 5. Generate code
 
 ```bash
-pnpm tsx scripts/gen-code.ts
+pnpm run gen-tl
 ```
 
 ### 6. Update compat layer

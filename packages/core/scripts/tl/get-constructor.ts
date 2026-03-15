@@ -15,7 +15,7 @@ import { API_SCHEMA_JSON_FILE, MTP_SCHEMA_JSON_FILE } from './constants.js'
 const name = process.argv[2]
 
 if (!name) {
-  console.error('Usage: npx tsx packages/tl/scripts/get-constructor.ts <constructor-name>')
+  console.error('Usage: npx tsx packages/core/scripts/tl/get-constructor.ts <constructor-name>')
   process.exit(1)
 }
 

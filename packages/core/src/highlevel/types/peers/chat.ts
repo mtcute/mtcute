@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 
 import { MtArgumentError, MtTypeAssertionError } from '../../../types/errors.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'

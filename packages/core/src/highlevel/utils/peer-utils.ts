@@ -1,6 +1,6 @@
 import type { InputPeerLike } from '../types/peers/index.js'
 
-import { tl } from '@mtcute/tl'
+import { tl } from '../../tl/index.js'
 import { assertNever } from '../../types/utils.js'
 import { MtInvalidPeerTypeError } from '../types/errors.js'
 

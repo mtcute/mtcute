@@ -1,5 +1,5 @@
 import type { MaybeArray } from '@fuman/utils'
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { ArrayPaginatedWithMeta } from '../../types/index.js'
 import { assert } from '@fuman/utils'

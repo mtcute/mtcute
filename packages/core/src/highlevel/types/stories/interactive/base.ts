@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../../tl/index.js'
 
 export abstract class StoryInteractiveArea {
   abstract type: string

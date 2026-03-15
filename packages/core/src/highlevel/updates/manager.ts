@@ -6,8 +6,8 @@ import type { BaseTelegramClient } from '../base.js'
 
 import type { PendingUpdate, PendingUpdateContainer, UpdatesManagerParams } from './types.js'
 import { AsyncLock, ConditionVariable, Deque, LruSet, timers, unknownToError } from '@fuman/utils'
-import { tl } from '@mtcute/tl'
 import Long from 'long'
+import { tl } from '../../tl/index.js'
 import { MtArgumentError } from '../../types/errors.js'
 import { assertNever } from '../../types/utils.js'
 import {

@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 
 import type { BasicPeerType } from '../../../types/peers.js'
 import type { TypingStatus } from '../peers/index.js'

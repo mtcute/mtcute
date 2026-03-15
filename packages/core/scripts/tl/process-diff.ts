@@ -19,7 +19,7 @@ function fmtArgType(arg: TlArgument): string {
   return stringifyArgumentType(arg.type, arg.typeModifiers)
 }
 
-const DIFF_FILE = join(__dirname, '../diff.json')
+const DIFF_FILE = join(__dirname, 'diff.json')
 
 interface DiffJson {
   layer: [number, number]
@@ -125,7 +125,7 @@ async function main(): Promise<void> {
       console.log(`  ${f.entry}#${f.arg}: ${f.type}`)
     }
     console.log('')
-    console.log('To override, add entries to packages/tl/data/int53-overrides.json')
+    console.log('To override, add entries to packages/core/src/tl/data/int53-overrides.json')
   } else {
     console.log('LONG FIELDS: none')
   }

@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../tl/index.js'
 import { hex, utf8 } from '@fuman/utils'
 import { defaultTestCryptoProvider } from '@mtcute/test'
 import Long from 'long'

@@ -52,7 +52,7 @@ Copies the import/statement into generated `client.ts`. Used ONLY in `_imports.t
 
 ```ts
 // @copy
-import { tl } from '@mtcute/tl'
+import { tl } from '../../tl/index.js'
 ```
 
 ### `// @exported`

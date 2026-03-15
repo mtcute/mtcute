@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../tl/index.js'
 import { describe, expect, it } from 'vitest'
 
 import { joinTextWithEntities } from './entities.js'

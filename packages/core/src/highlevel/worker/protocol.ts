@@ -1,6 +1,6 @@
-import type { tl } from '@mtcute/tl'
-
 import type { MessagePort as NodeMessagePort, Worker as NodeWorker } from 'node:worker_threads'
+
+import type { tl } from '../../tl/index.js'
 import type { ConnectionState } from '../client.types.js'
 import type { CurrentUserInfo } from '../storage/service/current-user.js'
 

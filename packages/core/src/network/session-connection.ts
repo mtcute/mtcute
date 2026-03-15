@@ -1,5 +1,5 @@
-import type { mtp } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+import type { mtp } from '../tl/index.js'
 import type { ICorePlatform } from '../types/platform.js'
 import type { ICryptoProvider, Logger } from '../utils/index.js'
 import type { PendingMessage, PendingRpc } from './mtproto-session.js'
@@ -7,9 +7,9 @@ import type { PersistentConnectionParams } from './persistent-connection.js'
 import type { ServerSaltManager } from './server-salt.js'
 
 import { Deferred, Emitter, timers, u8 } from '@fuman/utils'
-import { tl } from '@mtcute/tl'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter, TlUnknownObjectError } from '@mtcute/tl-runtime'
 import Long from 'long'
+import { tl } from '../tl/index.js'
 
 import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'

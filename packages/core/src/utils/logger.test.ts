@@ -1,7 +1,7 @@
 import { defaultPlatform } from '@mtcute/test'
-import { tl } from '@mtcute/tl'
 import Long from 'long'
 import { describe, expect, it, vi } from 'vitest'
+import { tl } from '../tl/index.js'
 
 import { LogManager } from './logger.js'
 

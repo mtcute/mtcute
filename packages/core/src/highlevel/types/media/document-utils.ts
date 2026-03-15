@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 
 import { Audio } from './audio.js'
 import { Document } from './document.js'

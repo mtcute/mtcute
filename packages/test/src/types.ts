@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '@mtcute/core'
 
 import type { StubTelegramClient } from './client.js'
 

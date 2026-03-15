@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../../tl/index.js'
 
 import type { VenueSource } from '../../media/venue.js'
 import { assertTypeIs } from '../../../../utils/type-assertions.js'

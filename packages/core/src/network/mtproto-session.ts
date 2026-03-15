@@ -1,6 +1,6 @@
 import type { Deferred } from '@fuman/utils'
-import type { mtp, tl } from '@mtcute/tl'
 import type { TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+import type { mtp, tl } from '../tl/index.js'
 import type {
   ICryptoProvider,
   Logger,

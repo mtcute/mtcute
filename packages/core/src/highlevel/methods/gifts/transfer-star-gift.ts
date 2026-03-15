@@ -2,7 +2,7 @@ import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike, InputStarGift } from '../../types/index.js'
 
 import type { Message } from '../../types/messages/message.js'
-import { tl } from '@mtcute/tl'
+import { tl } from '../../../tl/index.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
 import { resolvePeer } from '../users/resolve-peer.js'

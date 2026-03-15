@@ -3,7 +3,7 @@ import type { ITelegramClient } from '../../client.types.js'
 
 import type { MaybeDynamic } from '../../types/index.js'
 import { base64, Deferred } from '@fuman/utils'
-import { tl } from '@mtcute/tl'
+import { tl } from '../../../tl/index.js'
 import { sleepWithAbort } from '../../../utils/misc-utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { User } from '../../types/index.js'

@@ -4,8 +4,8 @@ export default antfu({
   type: 'lib',
   ignores: [
     'e2e/runtime/*',
-    'packages/tl/**/*.js',
-    'packages/tl/**/*.d.ts',
+    'packages/core/src/tl/**/*.js',
+    'packages/core/src/tl/**/*.d.ts',
   ],
   typescript: process.env.CI
     ? {
@@ -14,6 +14,7 @@ export default antfu({
           '.config/**/*',
           'e2e/**',
           'docs/**',
+          'packages/core/scripts/tl/**',
         ],
         overrides: {
           'ts/consistent-type-imports': 'off',
@@ -83,9 +84,9 @@ export default antfu({
     'packages/tl/binary/rsa-keys.js',
     'packages/tl/binary/reader.js',
     'packages/tl/binary/writer.js',
-    'packages/tl/index.js',
-    'packages/tl/index.d.ts',
-    'packages/tl/*.json',
+    'packages/core/src/tl/**/*.js',
+    'packages/core/src/tl/**/*.d.ts',
+    'packages/core/src/tl/**/*.json',
     'packages/core/utils.ts',
     'e2e/deno/.jsr-data',
     'e2e/node/.verdaccio',

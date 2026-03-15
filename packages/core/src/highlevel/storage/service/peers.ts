@@ -1,5 +1,5 @@
-import type { tl } from '@mtcute/tl'
 import type { ServiceOptions } from '../../../storage/service/base.js'
+import type { tl } from '../../../tl/index.js'
 import type { IPeersRepository } from '../repository/peers.js'
 
 import type { RefMessagesService } from './ref-messages.js'

@@ -8,7 +8,7 @@ import { join } from 'node:path'
 
 import { __dirname, API_SCHEMA_JSON_FILE } from './constants.js'
 
-const OVERRIDES_FILE = join(__dirname, '../data/int53-overrides.json')
+const OVERRIDES_FILE = join(__dirname, 'data/int53-overrides.json')
 
 function sortObjectKeys<T>(obj: Record<string, T>): Record<string, T> {
   const sorted: Record<string, T> = {}

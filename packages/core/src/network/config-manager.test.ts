@@ -1,5 +1,5 @@
 import type { AsyncResourceContext } from '@fuman/utils'
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../tl/index.js'
 import { createStub } from '@mtcute/test'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 

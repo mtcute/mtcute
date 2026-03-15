@@ -2,15 +2,16 @@ import { join } from 'node:path'
 import * as url from 'node:url'
 
 export const __dirname: string = url.fileURLToPath(new URL('.', import.meta.url))
+export const TL_DIR: string = join(__dirname, '../../src/tl')
 
-export const DOC_CACHE_FILE: string = join(__dirname, '../data/documentation.cache.json')
-export const DESCRIPTIONS_YAML_FILE: string = join(__dirname, '../data/descriptions.yaml')
-export const API_SCHEMA_JSON_FILE: string = join(__dirname, '../api-schema.json')
-export const API_SCHEMA_DIFF_JSON_FILE: string = join(__dirname, '../diff.json')
-export const MTP_SCHEMA_JSON_FILE: string = join(__dirname, '../mtp-schema.json')
-export const ERRORS_JSON_FILE: string = join(__dirname, '../raw-errors.json')
-export const APP_CONFIG_JSON_FILE: string = join(__dirname, '../app-config.json')
-export const COMPAT_TL_FILE: string = join(__dirname, '../data/compat.tl')
+export const DOC_CACHE_FILE: string = join(__dirname, 'data/documentation.cache.json')
+export const DESCRIPTIONS_YAML_FILE: string = join(__dirname, 'data/descriptions.yaml')
+export const API_SCHEMA_JSON_FILE: string = join(TL_DIR, 'api-schema.json')
+export const API_SCHEMA_DIFF_JSON_FILE: string = join(TL_DIR, 'diff.json')
+export const MTP_SCHEMA_JSON_FILE: string = join(TL_DIR, 'mtp-schema.json')
+export const ERRORS_JSON_FILE: string = join(TL_DIR, 'raw-errors.json')
+export const APP_CONFIG_JSON_FILE: string = join(TL_DIR, 'app-config.json')
+export const COMPAT_TL_FILE: string = join(__dirname, 'data/compat.tl')
 
 export const CORE_DOMAIN = 'https://core.telegram.org'
 export const COREFORK_DOMAIN = 'https://corefork.telegram.org'
@@ -26,8 +27,6 @@ export const WEBA_SCHEMA = 'https://raw.githubusercontent.com/Ajaxy/telegram-tt/
 export const WEBA_LAYER = 'https://raw.githubusercontent.com/Ajaxy/telegram-tt/master/src/lib/gramjs/tl/AllTLObjects.ts'
 
 export const ESM_PRELUDE = `// This file is auto-generated. Do not edit.
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 `
 
 // these types and their descendants are supported for backward compatibility,

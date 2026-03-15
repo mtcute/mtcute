@@ -54,8 +54,8 @@ import {
 import { applyDocumentation, fetchDocumentation, getCachedDocumentation } from './documentation.js'
 import { packTlSchema, unpackTlSchema } from './schema.js'
 
-const README_MD_FILE = join(__dirname, '../README.md')
-const PACKAGE_JSON_FILE = join(__dirname, '../package.json')
+const README_MD_FILE = join(__dirname, 'README.md')
+const PACKAGE_JSON_FILE = join(__dirname, 'package.json')
 
 // region: cli args
 
@@ -233,7 +233,7 @@ async function fetchAllSchemas(): Promise<Schema[]> {
     fetchCoreSchema(BLOGFORK_DOMAIN, 'Blogfork'),
     fetchWebkSchema(),
     fetchWebaSchema(),
-    readFile(join(__dirname, '../data/custom.tl'), 'utf8').then(tl => ({
+    readFile(join(__dirname, 'data/custom.tl'), 'utf8').then(tl => ({
       name: 'Custom',
       layer: 0, // handled manually
       content: tlToFullSchema(tl),
@@ -335,7 +335,7 @@ async function updatePackageVersion(currentLayer: number, bump: boolean): Promis
 async function overrideInt53(schema: TlFullSchema): Promise<void> {
   console.log('Applying int53 overrides...')
 
-  const config = JSON.parse(await readFile(join(__dirname, '../data/int53-overrides.json'), 'utf8')) as Record<
+  const config = JSON.parse(await readFile(join(__dirname, 'data/int53-overrides.json'), 'utf8')) as Record<
     string,
     Record<string, string[]>
   >

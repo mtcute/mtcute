@@ -1,9 +1,9 @@
 import type { ReconnectionStrategy } from '@fuman/net'
 import type { AsyncResourceContext, ComposedMiddleware, Middleware } from '@fuman/utils'
-import type { mtp, tl } from '@mtcute/tl'
 import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import type Long from 'long'
 import type { StorageManager } from '../storage/storage.js'
+import type { mtp, tl } from '../tl/index.js'
 
 import type { ICorePlatform } from '../types/platform.js'
 import type { DcOptions, ICryptoProvider, Logger } from '../utils/index.js'

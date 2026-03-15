@@ -11,7 +11,6 @@
   "peerDependencies": {
     "@mtcute/core": "workspace:^",
     "@mtcute/node": "workspace:^",
-    "@mtcute/tl": "workspace:*",
     "@mtcute/web": "workspace:^",
     "vitest": "*"
   },

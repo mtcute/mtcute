@@ -1,7 +1,7 @@
 /* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument, style/max-len */
-import type { tl } from '@mtcute/tl'
 import type Long from 'long'
 import type { RpcCallOptions } from '../network/index.js'
+import type { tl } from '../tl/index.js'
 import type { MaybeArray, MaybePromise, PartialExcept, PartialOnly } from '../types/index.js'
 import type { BaseTelegramClientOptions } from './base.js'
 import type { ITelegramClient } from './client.types.js'
@@ -3842,7 +3842,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Edit message text, media, reply markup and schedule date.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
    * @param message  Message or its ID
@@ -4699,7 +4699,7 @@ export interface TelegramClient extends ITelegramClient {
    * To add a caption to the group, add caption to the first
    * media in the group and don't add caption for any other.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
    * @param medias  Medias contained in the message.
@@ -4732,7 +4732,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Send a single media (a photo or a document-based media)
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
    * @param media
@@ -4886,7 +4886,7 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Send a text message
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
    * @param text  Text of the message
@@ -4925,7 +4925,7 @@ export interface TelegramClient extends ITelegramClient {
    *
    * If you need a continuous typing status, use {@link setTyping} instead.
    *
-   * **Available**: ✅ both users and bots
+   * **Available**: 👤 users only
    *
    * @param chatId  Chat ID
    * @param [status='typing']  Typing status

@@ -11,7 +11,7 @@
     "@mtcute/markdown-parser": "0.28.2",
     "@mtcute/node": "0.28.2",
     "@mtcute/test": "0.28.2",
-    "@mtcute/tl": "223.0.0",
+
     "@mtcute/tl-runtime": "0.24.3",
     "@mtcute/tl-utils": "0.26.2",
     "@mtcute/wasm": "0.27.8",

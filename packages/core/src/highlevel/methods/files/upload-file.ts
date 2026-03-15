@@ -1,5 +1,5 @@
 import type { IReadable } from '@fuman/io'
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { UploadedFile, UploadFileLike } from '../../types/index.js'
 

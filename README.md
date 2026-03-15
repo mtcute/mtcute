@@ -11,7 +11,7 @@
     <a href="https://t.me/mt_cute">telegram chat</a>
     <br/><br/>
     <img src="https://git.stupid.fish/teidesu/mtcute/actions/workflows/test.yaml/badge.svg" alt="Tests CI" />
-    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmtcute%2Fmtcute%2Fmaster%2Fpackages%2Ftl%2Fapi-schema.json&query=l&label=tl%20layer" alt="tl layer" />
+    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmtcute%2Fmtcute%2Fmaster%2Fpackages%2Fcore%2Ftl%2Fapi-schema.json&query=l&label=tl%20layer" alt="tl layer" />
     <a href="https://www.npmjs.com/search?q=%40mtcute">
         <img src="https://img.shields.io/npm/v/@mtcute/core" alt="npm" />
     </a>
@@ -102,7 +102,7 @@ cd mtcute
 pnpm install --frozen-lockfile
 
 # generate code from tl schema
-pnpm -C packages/tl run gen-code
+pnpm -C packages/core run gen-tl
 ```
 
 ## acknowledgements

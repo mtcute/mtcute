@@ -1,10 +1,10 @@
-import type { TlPublicKey } from '@mtcute/tl/binary/rsa-keys.js'
 import type Long from 'long'
+import type { TlPublicKey } from '../../tl/binary/rsa-keys.js'
 import type { ICryptoProvider } from './abstract.js'
 import { hex } from '@fuman/utils'
 import { TlBinaryWriter } from '@mtcute/tl-runtime'
 
-import { __publicKeyIndex as keysIndex } from '@mtcute/tl/binary/rsa-keys.js'
+import { __publicKeyIndex as keysIndex } from '../../tl/binary/rsa-keys.js'
 
 import { parseAsn1, parsePemContents } from '../binary/asn1-parser.js'
 

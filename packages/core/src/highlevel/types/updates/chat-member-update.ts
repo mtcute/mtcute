@@ -1,6 +1,6 @@
 import type { PeersIndex } from '../peers/peers-index.js'
 
-import { tl } from '@mtcute/tl'
+import { tl } from '../../../tl/index.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'

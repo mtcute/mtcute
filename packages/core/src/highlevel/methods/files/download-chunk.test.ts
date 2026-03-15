@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import type { tl } from '../../../tl/index.js'
 import { assert } from '@fuman/utils'
 
 import { createStub, defaultCryptoProvider, StubTelegramClient } from '@mtcute/test'

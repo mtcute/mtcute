@@ -14,11 +14,6 @@
         "@mtcute/html-parser": "../packages/html-parser/src/index.ts",
         "@mtcute/file-id": "../packages/file-id/src/index.ts",
         "@mtcute/tl-runtime": "../packages/tl-runtime/src/index.ts",
-        "@mtcute/wasm": "../packages/wasm/src/index.ts",
-        "@mtcute/tl": "./deno-shims/tl.js",
-        "@mtcute/tl/binary/rsa-keys.js": "./deno-shims/tl-rsa.js",
-        "@mtcute/tl/binary/reader.js": "./deno-shims/tl-reader.js",
-        "@mtcute/tl/compat/reader.js": "./deno-shims/tl-reader-compat.js",
-        "@mtcute/tl/binary/writer.js": "./deno-shims/tl-writer.js"
+        "@mtcute/wasm": "../packages/wasm/src/index.ts"
     }
 }
