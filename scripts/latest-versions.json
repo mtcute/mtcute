@@ -1,5 +1,4 @@
 {
-    "@mtcute/e2e-tests": "0.0.0",
     "@mtcute/bun": "0.29.0",
     "@mtcute/convert": "0.29.0",
     "@mtcute/core": "0.29.0",

@@ -32,7 +32,7 @@ export default {
       const versions = {}
 
       for (const { json, root } of packages) {
-        if (root) continue
+        if (root || json.name === '@mtcute/e2e-tests') continue
         versions[asNonNull(json.name)] = asNonNull(json.version)
       }
 
