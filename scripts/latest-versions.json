@@ -7,11 +7,9 @@
     "@mtcute/dispatcher": "0.28.2",
     "@mtcute/file-id": "0.28.2",
     "@mtcute/html-parser": "0.28.2",
-    "@mtcute/i18n": "0.27.0",
     "@mtcute/markdown-parser": "0.28.2",
     "@mtcute/node": "0.28.2",
     "@mtcute/test": "0.28.2",
-
     "@mtcute/tl-runtime": "0.24.3",
     "@mtcute/tl-utils": "0.26.2",
     "@mtcute/wasm": "0.27.8",

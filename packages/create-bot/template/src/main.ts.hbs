@@ -23,13 +23,6 @@ import * as env from './env.js'
 import * as env from './env.ts'
 {{/if}}
 {{/if}}
-{{#if features.i18n}}
-{{#if (eq runtime "node")}}
-import { tr } from './i18n/index.js'
-{{else}}
-import { tr } from './i18n/index.ts'
-{{/if}}
-{{/if}}
 
 const tg = new TelegramClient({
     apiId: env.API_ID,
@@ -41,11 +34,7 @@ const tg = new TelegramClient({
 const dp = Dispatcher.for(tg)
 
 dp.onNewMessage(filters.start, async (msg) => {
-    {{#if features.i18n}}
-    await msg.answerText(tr(msg, 'helloWorld'))
-    {{else}}
     await msg.answerText('Hello, world!')
-    {{/if}}
 })
 {{/if}}
 

@@ -28,10 +28,6 @@ export function buildDependenciesList(config: UserConfig): DependenciesList {
     dependencies.push('@mtcute/dispatcher')
   }
 
-  if (config.features.includes(MtcuteFeature.I18n)) {
-    dependencies.push('@mtcute/i18n')
-  }
-
   if (config.features.includes(MtcuteFeature.TypeScript) && config.packageManager !== PackageManager.Deno) {
     devDependencies.push('typescript', '@types/node')
 

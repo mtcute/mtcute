@@ -58,7 +58,6 @@ npx tsx packages/core/scripts/tl/get-constructor.ts <name>
 | `test` | Test utilities, stub client for unit tests |
 | `wasm` | WASM crypto implementations |
 | `create-bot` | Scaffolding CLI |
-| `i18n` | Internationalization |
 
 ## TL types naming scheme
 

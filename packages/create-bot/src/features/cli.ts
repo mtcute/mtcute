@@ -13,11 +13,6 @@ export function getFeatureChoices(packageMananger: PackageManager): CheckboxChoi
       checked: true,
     },
     {
-      name: ' 🌐 Internationalization',
-      short: 'i18n',
-      value: MtcuteFeature.I18n,
-    },
-    {
       name: ' 📨 Event dispatcher',
       short: 'Dispatcher',
       value: MtcuteFeature.Dispatcher,
