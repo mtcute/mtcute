@@ -1,5 +1,6 @@
 import type { InputPeerLike } from '../types/peers/index.js'
 
+import { asNonNull } from '@fuman/utils'
 import { tl } from '../../tl/index.js'
 import { assertNever } from '../../types/utils.js'
 import { MtInvalidPeerTypeError } from '../types/errors.js'
@@ -9,10 +10,30 @@ export const INVITE_LINK_REGEX: RegExp
 
 // helpers to convert result of `resolvePeer` function
 
-export function toInputPeer(res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel): tl.TypeInputPeer {
+export function toInputPeer(res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | tl.RawUser | tl.RawChat | tl.RawChannel): tl.TypeInputPeer {
   if (tl.isAnyInputPeer(res)) return res
 
   switch (res._) {
+    case 'user': {
+      return {
+        _: 'inputPeerUser',
+        userId: res.id,
+        accessHash: asNonNull(res.accessHash),
+      }
+    }
+    case 'chat': {
+      return {
+        _: 'inputPeerChat',
+        chatId: res.id,
+      }
+    }
+    case 'channel': {
+      return {
+        _: 'inputPeerChannel',
+        channelId: res.id,
+        accessHash: asNonNull(res.accessHash),
+      }
+    }
     case 'inputChannelEmpty':
     case 'inputUserEmpty':
       return { _: 'inputPeerEmpty' }

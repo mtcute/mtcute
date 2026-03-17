@@ -30,6 +30,9 @@ export type InputPeerLike
     | tl.TypeInputPeer
     | tl.TypeInputUser
     | tl.TypeInputChannel
+    | tl.RawUser
+    | tl.RawChannel
+    | tl.RawChat
     | { inputPeer: tl.TypeInputPeer }
 
 /**
