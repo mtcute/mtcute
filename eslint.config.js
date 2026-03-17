@@ -24,6 +24,7 @@ export default antfu({
           'e2e/**',
           'docs/**',
           'packages/core/scripts/tl/**',
+          '.claude/_skills/**',
         ],
         overrides: {
           'ts/consistent-type-imports': 'off',
