@@ -4,8 +4,17 @@ export default antfu({
   type: 'lib',
   ignores: [
     'e2e/runtime/*',
+    // codegen
+    'packages/tl/binary/rsa-keys.js',
+    'packages/tl/binary/reader.js',
+    'packages/tl/binary/writer.js',
     'packages/core/src/tl/**/*.js',
     'packages/core/src/tl/**/*.d.ts',
+    'packages/core/src/tl/**/*.json',
+    'packages/core/utils.ts',
+    'e2e/deno/.jsr-data',
+    'e2e/node/.verdaccio',
+    '.claude/skills/**',
   ],
   typescript: process.env.CI
     ? {
@@ -79,19 +88,6 @@ export default antfu({
     // }],
   },
 }, {
-  ignores: [
-    // codegen
-    'packages/tl/binary/rsa-keys.js',
-    'packages/tl/binary/reader.js',
-    'packages/tl/binary/writer.js',
-    'packages/core/src/tl/**/*.js',
-    'packages/core/src/tl/**/*.d.ts',
-    'packages/core/src/tl/**/*.json',
-    'packages/core/utils.ts',
-    'e2e/deno/.jsr-data',
-    'e2e/node/.verdaccio',
-  ],
-}, {
   files: ['e2e/**', 'packages/node/**', 'packages/bun/**'],
   rules: {
     'no-restricted-globals': 'off',
@@ -103,7 +99,7 @@ export default antfu({
     'import/no-relative-packages': 'off', // common-internals is symlinked from node
   },
 }, {
-  files: ['**/scripts/**', '**/*.cjs', '.config/**/*'],
+  files: ['**/scripts/**', '**/*.cjs', '.config/**/*', '.claude/_skills/**'],
   rules: {
     'no-restricted-imports': 'off',
     'no-restricted-globals': 'off',

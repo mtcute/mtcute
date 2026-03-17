@@ -6,14 +6,15 @@ description: Use when adding or modifying high-level client methods in packages/
 # Writing High-Level Methods
 
 Guide for adding/modifying methods in `packages/core/src/highlevel/methods/`.
+Also read the `using-mtcute` skill for more information.
 
 ## TL Schema Lookup
 
 Before writing a method, look up the TL constructor(s) you need:
 
 ```bash
-pnpm tsx packages/tl/scripts/get-constructor.ts <name>
-# e.g. pnpm tsx packages/tl/scripts/get-constructor.ts messages.sendMessage
+node .claude/skills/using-mtcute/tools/get-constructor.ts <name>
+# e.g. node packages/tl/scripts/get-constructor.ts messages.sendMessage
 ```
 
 This prints TL definition, TypeScript type, union info, and return type.

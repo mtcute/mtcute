@@ -72,6 +72,7 @@ export default ({ mode }) => defineConfig({
               link: '/guide/intro/mtproto-vs-bot-api',
             },
             { text: 'FAQ', link: '/guide/intro/faq' },
+            { text: 'LLM Assistance', link: '/guide/intro/llm-assistance' },
           ],
         },
         {

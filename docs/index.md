@@ -40,5 +40,5 @@ features:
 ---
 
 <small class="index-footnote">
-* Tested on a personal account and a few small-load bots
+* Tested on a personal account and a few small-load bots, YMMV.
 </small>

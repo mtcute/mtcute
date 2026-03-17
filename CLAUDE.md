@@ -33,10 +33,6 @@ node packages/core/scripts/generate-client.cjs
 
 # Generate update types for dispatcher
 node packages/dispatcher/scripts/generate.cjs
-
-# Look up a TL constructor/method definition and its TypeScript type
-npx tsx packages/core/scripts/tl/get-constructor.ts <name>
-# e.g. npx tsx packages/core/scripts/tl/get-constructor.ts messages.sendMessage
 ```
 
 ## Package overview
@@ -91,8 +87,6 @@ Platform packages (`node`, `bun`, `deno`, `web`) provide `ICorePlatform` impleme
 ### TL schema
 
 `packages/core/src/tl/` contains the generated TL schema code (types, binary readers/writers). Schema data and codegen scripts live in `packages/core/scripts/tl/`. The `tl` namespace provides typed constructors and methods.
-
-To look up a TL constructor's definition and TypeScript type, use `pnpm tsx packages/core/scripts/tl/get-constructor.ts <name>`. Supports both class names (e.g. `user`) and method names (e.g. `messages.sendMessage`). Case-insensitive, shows partial matches if no exact match found.
 
 ## Code style
 

@@ -49,6 +49,7 @@
     "@types/deno": "^2.5.0",
     "@types/node": "^24.10.1",
     "@vitest/browser": "^4.0.18",
+    "@vitest/browser-playwright": "^4.0.9",
     "@vitest/coverage-v8": "^4.0.18",
     "@vitest/expect": "^4.0.18",
     "@vitest/spy": "^4.0.18",
@@ -58,6 +59,7 @@
     "dpdm": "^4.0.1",
     "esbuild": "^0.27.0",
     "eslint": "^9.39.1",
+    "fastest-levenshtein": "^1.0.16",
     "glob": "11.0.0",
     "playwright": "^1.56.1",
     "rimraf": "6.0.1",
@@ -70,8 +72,7 @@
     "vite": "^7.2.2",
     "vite-plugin-dts": "4.0.3",
     "vite-plugin-node-polyfills": "0.24.0",
-    "vitest": "^4.0.18",
-    "@vitest/browser-playwright": "^4.0.9"
+    "vitest": "^4.0.18"
   },
   "pnpm": {
     "overrides": {
