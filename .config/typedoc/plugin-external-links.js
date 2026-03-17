@@ -1,4 +1,12 @@
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
 export function load(app) {
+  const schemaLayer = JSON.parse(readFileSync(join(__dirname, '../../packages/core/src/tl/api-schema.json'), 'utf8')).l
+
   app.converter.addUnknownSymbolResolver((declaration) => {
     const symbol = declaration.symbolReference?.path?.map(path => path.path).join('.')
 
@@ -17,40 +25,20 @@ export function load(app) {
         ns = null
       }
 
-      let kind
-
       if (name.startsWith('Type')) {
-        kind = 'union'
         name = name.slice(4)
       } else if (name.startsWith('Raw')) {
         name = name[3].toLowerCase() + name.slice(4)
 
         if (name.endsWith('Request')) {
-          kind = 'method'
           name = name.slice(0, -7)
-        } else {
-          kind = 'class'
         }
       }
 
       name = (ns ? `${ns}.` : '') + name
 
-      let url
-
-      switch (kind) {
-        case 'union':
-          url = `https://core.telegram.org/type/${name}`
-          break
-        case 'method':
-          url = `https://core.telegram.org/method/${name}`
-          break
-        case 'class':
-          url = `https://core.telegram.org/constructor/${name}`
-          break
-      }
-
       return {
-        target: url,
+        target: `https://schema.jppgr.am/layer/${schemaLayer}/${name}`,
         caption: symbol,
       }
     }
