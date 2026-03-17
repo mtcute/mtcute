@@ -1,6 +1,8 @@
 ---
 name: update-layer
 description: Use when updating TL schema layer in mtcute, fetching new Telegram API schemas, or when user asks to update the layer/schema
+metadata: 
+  internal: true
 ---
 
 # Update TL Layer

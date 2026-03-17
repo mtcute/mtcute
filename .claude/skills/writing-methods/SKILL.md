@@ -1,6 +1,8 @@
 ---
 name: writing-methods
 description: Use when adding or modifying high-level client methods in packages/core/src/highlevel/methods/. Covers function signatures, codegen annotations, peer resolution, update handling, pagination, and all common patterns.
+metadata: 
+  internal: true
 ---
 
 # Writing High-Level Methods
