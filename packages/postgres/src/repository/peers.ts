@@ -11,7 +11,7 @@ interface PeerDto {
   usernames: string[]
   updated: number
   phone: string | null
-  complete: Buffer
+  complete: import('node:buffer').Buffer
 }
 
 function mapPeerDto(dto: PeerDto): IPeersRepository.PeerInfo {

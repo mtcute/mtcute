@@ -70,6 +70,49 @@ If you are in fact having problems with WAL mode, you can disable it
 with `disableWal` parameter.
 
 
+## PostgreSQL storage
+
+For applications that already use PostgreSQL, or for deployments where
+a shared database is preferred over per-instance SQLite files,
+you can use `@mtcute/postgres`:
+
+```bash
+pnpm add @mtcute/postgres pg
+```
+
+```ts{5}
+import { TelegramClient } from '@mtcute/node'
+import { PostgresStorage } from '@mtcute/postgres'
+import pg from 'pg'
+
+const pool = new pg.Pool({ connectionString: 'postgres://localhost/mydb' })
+
+const tg = new TelegramClient({
+    storage: new PostgresStorage(pool),
+})
+```
+
+All tables are created in a dedicated schema (`mtcute` by default),
+which can be changed via the `schema` option:
+
+```ts
+new PostgresStorage(pool, { schema: 'my_schema' })
+```
+
+By default, the client connection is automatically closed when the storage
+is destroyed. Set `autoClose: false` if you manage the connection lifecycle yourself.
+
+[PGlite](https://github.com/electric-sql/pglite) is also supported as a PostgreSQL client, useful for testing or embedded scenarios:
+
+```ts
+import { PGlite } from '@electric-sql/pglite'
+
+const tg = new TelegramClient({
+    storage: new PostgresStorage(await PGlite.create()),
+})
+```
+
+
 ## IndexedDB storage
 
 The preferred storage for a Web application is the one using IndexedDB,

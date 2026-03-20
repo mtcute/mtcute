@@ -146,7 +146,7 @@ export class PostgresStorageDriver extends BaseStorageDriver {
     await this._runMigrations()
 
     this._cleanup = this._platform.beforeExit(() => {
-      this._destroy()
+      void this._destroy()
     })
 
     for (const cb of this._onLoadCallbacks) cb()
@@ -156,13 +156,13 @@ export class PostgresStorageDriver extends BaseStorageDriver {
     // PostgreSQL writes are applied immediately, no batching needed
   }
 
-  _destroy(): void {
+  async _destroy(): Promise<void> {
     this._cleanup?.()
     this._cleanup = undefined
 
     if (this._autoClose) {
       const fn = this.client.end ?? this.client.release ?? this.client.close
-      if (fn) fn.call(this.client)
+      if (fn) await fn.call(this.client)
     }
   }
 }
