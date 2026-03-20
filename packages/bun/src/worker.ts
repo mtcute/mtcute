@@ -20,6 +20,7 @@ export type { TelegramWorkerOptions, WorkerCustomMethods }
 
 export interface TelegramWorkerPortOptions {
   worker: SomeWorker
+  workerId?: string
 }
 
 export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorkerBase<T> {
@@ -44,6 +45,7 @@ export class TelegramWorkerPort<T extends WorkerCustomMethods> extends TelegramW
   constructor(options: TelegramWorkerPortOptions) {
     super({
       worker: options.worker,
+      workerId: options.workerId,
       platform: new BunPlatform(),
     })
   }
