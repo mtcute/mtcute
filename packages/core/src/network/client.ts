@@ -25,6 +25,7 @@ import {
   defaultProductionIpv6Dc,
   defaultTestDc,
   defaultTestIpv6Dc,
+  dropUndefined,
   isTlRpcError,
   LogManager,
 } from '../utils/index.js'
@@ -247,7 +248,7 @@ export class MtClient {
       readerMap: this._readerMap,
       writerMap: this._writerMap,
       platform: params.platform,
-      ...params.storageOptions,
+      ...dropUndefined(params.storageOptions),
     })
 
     this.network = new NetworkManager(
@@ -273,7 +274,7 @@ export class MtClient {
         onUpdate: this.onUpdate.emit.bind(this.onUpdate),
         stopSignal: this.stopSignal,
         platform: params.platform,
-        ...params.network,
+        ...dropUndefined(params.network),
       },
       this._config,
     )

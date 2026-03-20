@@ -21,3 +21,14 @@ export function sleepWithAbort(ms: number, signal: AbortSignal): Promise<void> {
 export function getRandomInt(top: number): number {
   return Math.floor(Math.random() * top)
 }
+
+export function dropUndefined<T extends object>(obj: T): T
+export function dropUndefined<T extends object>(obj?: T): T | undefined
+export function dropUndefined<T extends object>(obj?: T): T | undefined {
+  if (!obj) return undefined
+  for (const key in obj) {
+    if (obj[key] === undefined) delete obj[key]
+  }
+
+  return obj
+}

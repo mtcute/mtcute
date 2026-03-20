@@ -14,6 +14,7 @@ import { defaultReconnectionStrategy } from '@fuman/net'
 
 import { asNonNull, composeMiddlewares, Deferred, LruMap } from '@fuman/utils'
 import { MtArgumentError, MtcuteError, MtUnsupportedError } from '../types/index.js'
+import { dropUndefined } from '../utils/index.js'
 import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
 import { basic as defaultMiddlewares } from './middlewares/default.js'
 import { MultiSessionConnection } from './multi-session-connection.js'
@@ -506,10 +507,10 @@ export class NetworkManager {
       systemLangCode: 'en',
       langPack: '', // "langPacks are for official apps only"
       langCode: 'en',
-      ...(params.initConnectionOptions ?? {}),
+      ...dropUndefined(params.initConnectionOptions),
       apiId: params.apiId,
       // eslint-disable-next-line
-            query: null as any,
+      query: null as any,
     }
 
     this._transport = params.transport

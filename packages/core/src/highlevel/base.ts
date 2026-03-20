@@ -22,6 +22,7 @@ import {
   asyncResettable,
   computeNewPasswordHash,
   computeSrpParams,
+  dropUndefined,
   isTlRpcError,
   readStringSession,
   writeStringSession,
@@ -66,7 +67,7 @@ export class BaseTelegramClient implements ITelegramClient {
     this.log = this.params.logger ?? new LogManager('client', params.platform)
     this.platform = this.params.platform
     this.mt = new MtClient({
-      ...this.params,
+      ...dropUndefined(this.params),
       logger: this.log.create('mtproto'),
       onError: (err) => {
         if (this.onError.length > 0) {
@@ -97,7 +98,7 @@ export class BaseTelegramClient implements ITelegramClient {
     this.crypto = this.mt.crypto
     this.storage = new TelegramStorageManager(this.mt.storage, {
       provider: this.params.storage,
-      ...this.params.storageOptions,
+      ...dropUndefined(this.params.storageOptions),
     })
     this.timers = new TimersManager(async (spec, abortSignal) => {
       await this.call(spec.request, {
