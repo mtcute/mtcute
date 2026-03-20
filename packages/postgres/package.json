@@ -1,0 +1,34 @@
+{
+  "name": "@mtcute/postgres",
+  "type": "module",
+  "version": "0.29.0",
+  "private": true,
+  "description": "PostgreSQL storage for mtcute",
+  "author": "alina sireneva <alina@tei.su>",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@mtcute/core": "workspace:^"
+  },
+  "peerDependencies": {
+    "pg": ">=8"
+  },
+  "peerDependenciesMeta": {
+    "pg": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@mtcute/test": "workspace:^",
+    "@types/pg": "^8.11.11",
+    "pg": "^8.13.1"
+  }
+}
