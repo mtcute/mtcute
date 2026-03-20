@@ -376,22 +376,25 @@ importers:
 
   packages/postgres:
     dependencies:
-      '@fuman/utils':
-        specifier: 0.0.19
-        version: 0.0.19
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
-      pg:
-        specifier: ^8.13.1
-        version: 8.20.0
     devDependencies:
+      '@electric-sql/pglite':
+        specifier: ^0.4.1
+        version: 0.4.1
+      '@electric-sql/pglite-socket':
+        specifier: ^0.1.1
+        version: 0.1.1(@electric-sql/pglite@0.4.1)
       '@mtcute/test':
         specifier: workspace:^
         version: link:../test
       '@types/pg':
         specifier: ^8.11.11
         version: 8.18.0
+      pg:
+        specifier: ^8.20.0
+        version: 8.20.0
 
   packages/test:
     dependencies:
@@ -562,6 +565,15 @@ packages:
 
   '@drizzle-team/brocli@0.11.0':
     resolution: {integrity: sha512-hD3pekGiPg0WPCCGAZmusBBJsDqGUR66Y452YgQsZOnkdQ7ViEPKuyP4huUGEZQefp8g34RRodXYmJ2TbCH+tg==}
+
+  '@electric-sql/pglite-socket@0.1.1':
+    resolution: {integrity: sha512-p2hoXw3Z3LQHwTeikdZNsFBOvXGqKY2hk51BBw+8NKND8eoH+8LFOtW9Z8CQKmTJ2qqGYu82ipqiyFZOTTXNfw==}
+    hasBin: true
+    peerDependencies:
+      '@electric-sql/pglite': 0.4.1
+
+  '@electric-sql/pglite@0.4.1':
+    resolution: {integrity: sha512-mZ9NzzUSYPOCnxHH1oAHPRzoMFJHY472raDKwXl/+6oPbpdJ7g8LsCN4FSaIIfkiCKHhb3iF/Zqo3NYxaIhU7Q==}
 
   '@es-joy/jsdoccomment@0.76.0':
     resolution: {integrity: sha512-g+RihtzFgGTx2WYCuTHbdOXJeAlGnROws0TeALx9ow/ZmOROOZkVg5wp/B44n0WJgI4SQFP1eWM2iRPlU2Y14w==}
@@ -4373,6 +4385,12 @@ snapshots:
       sisteransi: 1.0.5
 
   '@drizzle-team/brocli@0.11.0': {}
+
+  '@electric-sql/pglite-socket@0.1.1(@electric-sql/pglite@0.4.1)':
+    dependencies:
+      '@electric-sql/pglite': 0.4.1
+
+  '@electric-sql/pglite@0.4.1': {}
 
   '@es-joy/jsdoccomment@0.76.0':
     dependencies:

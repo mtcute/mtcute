@@ -28,7 +28,7 @@
     "test:dev": "vitest --config .config/vite.ts watch",
     "test:ui": "vitest --config .config/vite.ts --ui",
     "test:coverage": "vitest --config .config/vite.ts run --coverage",
-    "test:ci": "vitest --config .config/vite.ts run --coverage.enabled --coverage.reporter=json",
+    "test:ci": "WITH_POSTGRES_TESTS=1 vitest --config .config/vite.ts run --coverage.enabled --coverage.reporter=json",
     "test:browser": "vitest --config .config/vite.browser.ts run",
     "test:browser:dev": "vitest --config .config/vite.browser.ts watch",
     "test:bun": "bun --bun run test",

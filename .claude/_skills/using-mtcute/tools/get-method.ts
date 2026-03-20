@@ -40,7 +40,7 @@ function parseClientDts(content: string): ParsedMethod[] {
   // match each method: optional jsdoc + method signature
   // jsdoc starts with /**, ends with */ (non-greedy, but must not span multiple comment blocks)
   // signature is indented methodName(...): ReturnType;
-  // eslint-disable-next-line regexp/no-super-linear-backtracking
+  // eslint-disable-next-line regexp/no-super-linear-backtracking, style/max-len
   const methodRe = /(?<jsdoc>[ \t]*\/\*\*(?:(?!\*\/)[\s\S])*?\*\/\s*)?(?<signature>[ \t]*(?<name>\w+)(?:<[^>]+>)?\([\s\S]*?\): [^;]+;)/g
 
   let match: RegExpExecArray | null

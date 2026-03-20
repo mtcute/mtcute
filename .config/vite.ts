@@ -25,6 +25,7 @@ export default defineConfig({
       ],
       exclude: [
         'packages/**/index.ts',
+        'packages/**/*.d.ts',
       ],
     },
     setupFiles: [

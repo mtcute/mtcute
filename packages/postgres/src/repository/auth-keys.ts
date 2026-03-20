@@ -1,6 +1,11 @@
 import type { IAuthKeysRepository } from '@mtcute/core'
 import type { PostgresStorageDriver } from '../driver.js'
 
+interface AuthKeyDto {
+  dc: number
+  key: Uint8Array
+}
+
 export class PostgresAuthKeysRepository implements IAuthKeysRepository {
   private _authKeys: string
   private _tempAuthKeys: string
@@ -15,6 +20,8 @@ export class PostgresAuthKeysRepository implements IAuthKeysRepository {
             dc integer primary key,
             key bytea not null
         );
+      `)
+      await client.query(`
         create table if not exists ${this._tempAuthKeys} (
             dc integer not null,
             idx integer not null,
@@ -40,7 +47,7 @@ export class PostgresAuthKeysRepository implements IAuthKeysRepository {
   }
 
   async get(dc: number): Promise<Uint8Array | null> {
-    const res = await this._driver.client.query(`select key from ${this._authKeys} where dc = $1`, [dc])
+    const res = await this._driver.client.query<AuthKeyDto>(`select key from ${this._authKeys} where dc = $1`, [dc])
     if (!res.rows[0]) return null
 
     return new Uint8Array(res.rows[0].key)
@@ -64,7 +71,7 @@ export class PostgresAuthKeysRepository implements IAuthKeysRepository {
   }
 
   async getTemp(dc: number, idx: number, now: number): Promise<Uint8Array | null> {
-    const res = await this._driver.client.query(
+    const res = await this._driver.client.query<AuthKeyDto>(
       `select key from ${this._tempAuthKeys} where dc = $1 and idx = $2 and expires > $3`,
       [dc, idx, now],
     )

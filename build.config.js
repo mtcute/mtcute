@@ -7,7 +7,7 @@ import { asNonNull } from '@fuman/utils'
 export default {
   jsr: {
     exclude: [
-      '**/*.{test,bench,test-utils,fixture}.ts',
+      '**/*.{test,bench,test-utils,fixture,test-d}.ts',
       '**/__fixtures__/**',
       '**/__snapshots__/**',
     ],
@@ -18,6 +18,7 @@ export default {
     exclude: [
       '**/*.test.ts',
       '**/*.test-utils.ts',
+      '**/*.test-d.ts',
       '**/*.fixture.ts',
       '**/__fixtures__/**',
       '**/__snapshots__/**',

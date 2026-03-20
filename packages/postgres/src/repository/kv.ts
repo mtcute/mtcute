@@ -1,6 +1,11 @@
 import type { IKeyValueRepository } from '@mtcute/core'
 import type { PostgresStorageDriver } from '../driver.js'
 
+interface KeyValueDto {
+  key: string
+  value: Uint8Array
+}
+
 export class PostgresKeyValueRepository implements IKeyValueRepository {
   private _table: string
 
@@ -25,7 +30,7 @@ export class PostgresKeyValueRepository implements IKeyValueRepository {
   }
 
   async get(key: string): Promise<Uint8Array | null> {
-    const res = await this._driver.client.query(`select value from ${this._table} where key = $1`, [key])
+    const res = await this._driver.client.query<KeyValueDto>(`select value from ${this._table} where key = $1`, [key])
     if (!res.rows[0]) return null
 
     return new Uint8Array(res.rows[0].value)

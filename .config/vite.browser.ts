@@ -51,5 +51,6 @@ export default mergeConfig(baseConfig, {
       target: 'esnext',
     },
     include: ['node:zlib', 'vite-plugin-node-polyfills/shims/global', 'vite-plugin-node-polyfills/shims/process'],
+    exclude: ['@electric-sql/pglite'],
   },
 })

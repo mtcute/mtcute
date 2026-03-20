@@ -1,16 +1,13 @@
-import type { QueryConfig, QueryResult, QueryResultRow } from 'pg'
-
+import type { ICorePlatform } from '@mtcute/core'
+import type { Logger } from '@mtcute/core/utils.js'
 import { BaseStorageDriver } from '@mtcute/core'
 
 /**
  * Minimal interface for a pg-compatible client.
- * Satisfied by `pg.Pool`, `pg.Client`, and `pg.PoolClient`.
+ * Satisfied by `pg.Pool`, `pg.Client`, and `pg.PoolClient`, as well as `PGlite`.
  */
 export interface PgClient {
-  query<R extends QueryResultRow = any>(
-    queryTextOrConfig: string | QueryConfig,
-    values?: unknown[],
-  ): Promise<QueryResult<R>>
+  query<T>(query: string, values?: unknown[]): Promise<{ rows: T[] }>
 }
 
 type MigrationFunction = (client: PgClient) => Promise<void>
@@ -47,9 +44,9 @@ export class PostgresStorageDriver extends BaseStorageDriver {
     return `"${this.schema}"."${name}"`
   }
 
-  override setup(...args: Parameters<BaseStorageDriver['setup']>): void {
-    super.setup(...args)
-    this._log = args[0].create('postgres')
+  override setup(log: Logger, platform: ICorePlatform): void {
+    super.setup(log, platform)
+    this._log = log.create('postgres')
   }
 
   registerMigration(repo: string, version: number, migration: MigrationFunction): void {
@@ -97,7 +94,7 @@ export class PostgresStorageDriver extends BaseStorageDriver {
     `)
 
     for (const repo of this._migrations.keys()) {
-      const res = await this.client.query(
+      const res = await this.client.query<{ version: number }>(
         `select version from ${migrationsTable} where repo = $1`,
         [repo],
       )

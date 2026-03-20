@@ -2,12 +2,13 @@ import type { IPeersRepository } from '@mtcute/core'
 import type { PostgresStorageDriver } from '../driver.js'
 
 import { MtcuteError } from '@mtcute/core'
+import { parseBigint, parseJsonb } from '../_utils.js'
 
 interface PeerDto {
   id: string
   hash: string
   is_min: boolean
-  usernames: string
+  usernames: string[]
   updated: number
   phone: string | null
   complete: Buffer
@@ -18,8 +19,8 @@ function mapPeerDto(dto: PeerDto): IPeersRepository.PeerInfo {
     id: Number(dto.id),
     accessHash: dto.hash,
     isMin: dto.is_min,
-    usernames: JSON.parse(dto.usernames) as string[],
-    updated: dto.updated,
+    usernames: parseJsonb(dto.usernames),
+    updated: parseBigint(dto.updated),
     phone: dto.phone || undefined,
     complete: new Uint8Array(dto.complete),
   }
@@ -43,6 +44,8 @@ export class PostgresPeersRepository implements IPeersRepository {
             phone text,
             complete bytea
         );
+      `)
+      await client.query(`
         create index if not exists idx_peers_phone on ${this._table} (phone);
       `)
     })
@@ -77,32 +80,32 @@ export class PostgresPeersRepository implements IPeersRepository {
 
   async getById(id: number): Promise<IPeersRepository.PeerInfo | null> {
     this._ensureLoaded()
-    const res = await this._driver.client.query(`select * from ${this._table} where id = $1`, [id])
+    const res = await this._driver.client.query<PeerDto>(`select * from ${this._table} where id = $1`, [id])
     if (!res.rows[0]) return null
 
-    return mapPeerDto(res.rows[0] as PeerDto)
+    return mapPeerDto(res.rows[0])
   }
 
   async getByUsername(username: string): Promise<IPeersRepository.PeerInfo | null> {
     this._ensureLoaded()
-    const res = await this._driver.client.query(
+    const res = await this._driver.client.query<PeerDto>(
       `select * from ${this._table} where usernames ? $1 and is_min = false`,
       [username],
     )
     if (!res.rows[0]) return null
 
-    return mapPeerDto(res.rows[0] as PeerDto)
+    return mapPeerDto(res.rows[0])
   }
 
   async getByPhone(phone: string): Promise<IPeersRepository.PeerInfo | null> {
     this._ensureLoaded()
-    const res = await this._driver.client.query(
+    const res = await this._driver.client.query<PeerDto>(
       `select * from ${this._table} where phone = $1 and is_min = false`,
       [phone],
     )
     if (!res.rows[0]) return null
 
-    return mapPeerDto(res.rows[0] as PeerDto)
+    return mapPeerDto(res.rows[0])
   }
 
   async deleteAll(): Promise<void> {

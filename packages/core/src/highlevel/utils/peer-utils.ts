@@ -10,7 +10,9 @@ export const INVITE_LINK_REGEX: RegExp
 
 // helpers to convert result of `resolvePeer` function
 
-export function toInputPeer(res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | tl.RawUser | tl.RawChat | tl.RawChannel): tl.TypeInputPeer {
+export function toInputPeer(
+  res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | tl.RawUser | tl.RawChat | tl.RawChannel,
+): tl.TypeInputPeer {
   if (tl.isAnyInputPeer(res)) return res
 
   switch (res._) {

@@ -1,9 +1,10 @@
 import type { IReferenceMessagesRepository } from '@mtcute/core'
 import type { PostgresStorageDriver } from '../driver.js'
+import { parseBigint } from '../_utils.js'
 
 interface ReferenceMessageDto {
-  peer_id: number
-  chat_id: number
+  peer_id: string | number
+  chat_id: string | number
   msg_id: number
 }
 
@@ -20,9 +21,9 @@ export class PostgresRefMessagesRepository implements IReferenceMessagesReposito
             chat_id bigint not null,
             msg_id integer not null
         );
-        create index if not exists idx_message_refs_peer on ${this._table} (peer_id);
-        create index if not exists idx_message_refs on ${this._table} (chat_id, msg_id);
       `)
+      await client.query(`create index if not exists idx_message_refs_peer on ${this._table} (peer_id);`)
+      await client.query(`create index if not exists idx_message_refs on ${this._table} (chat_id, msg_id);`)
     })
   }
 
@@ -34,15 +35,15 @@ export class PostgresRefMessagesRepository implements IReferenceMessagesReposito
   }
 
   async getByPeer(peerId: number): Promise<[number, number] | null> {
-    const res = await this._driver.client.query(
+    const res = await this._driver.client.query<ReferenceMessageDto>(
       `select chat_id, msg_id from ${this._table} where peer_id = $1 limit 1`,
       [peerId],
     )
     if (!res.rows[0]) return null
 
-    const row = res.rows[0] as ReferenceMessageDto
+    const row = res.rows[0]
 
-    return [Number(row.chat_id), row.msg_id]
+    return [parseBigint(row.chat_id), row.msg_id]
   }
 
   async delete(chatId: number, msgIds: number[]): Promise<void> {
