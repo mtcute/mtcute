@@ -6,7 +6,7 @@ import {
   testPeersRepository,
   testRefMessagesRepository,
 } from '@mtcute/test'
-import { afterAll, beforeAll, describe } from 'vitest'
+import { afterAll, beforeAll, describe, expect, vi } from 'vitest'
 
 if (process.env.TEST_ENV !== 'web' && process.env.WITH_POSTGRES_TESTS) {
   const { PGlite } = await import('@electric-sql/pglite')
@@ -21,6 +21,8 @@ if (process.env.TEST_ENV !== 'web' && process.env.WITH_POSTGRES_TESTS) {
     const pglite = await PGlite.create()
     const storage = new PostgresStorage(pglite, { schema: 'mtcute_test' })
 
+    vi.spyOn(pglite, 'close')
+
     beforeAll(async () => {
       storage.driver.setup(new LogManager(undefined, defaultPlatform), defaultPlatform)
       await storage.driver.load()
@@ -33,11 +35,11 @@ if (process.env.TEST_ENV !== 'web' && process.env.WITH_POSTGRES_TESTS) {
 
     afterAll(async () => {
       await storage.driver.destroy()
-      await pglite.close()
+      expect(pglite.close).toHaveBeenCalled()
     })
   })
 
-  describe('PostgresStorage (pg)', async () => {
+  describe('PostgresStorage (pg.Pool)', async () => {
     const pglite = await PGlite.create()
     const socketPath = `${await mkdtemp(join(tmpdir(), 'mtcute-test-'))}/.s.PGSQL.5432`
     const server = new PGLiteSocketServer({
@@ -52,6 +54,7 @@ if (process.env.TEST_ENV !== 'web' && process.env.WITH_POSTGRES_TESTS) {
       database: 'postgres',
       host: dirname(socketPath),
     })
+    vi.spyOn(pool, 'end')
     const storage = new PostgresStorage(pool, { schema: 'mtcute_test' })
 
     beforeAll(async () => {
@@ -66,7 +69,7 @@ if (process.env.TEST_ENV !== 'web' && process.env.WITH_POSTGRES_TESTS) {
 
     afterAll(async () => {
       await storage.driver.destroy()
-      await pool.end()
+      expect(pool.end).toHaveBeenCalled()
       await server.stop()
       await pglite.close()
       await rm(dirname(socketPath), { recursive: true })

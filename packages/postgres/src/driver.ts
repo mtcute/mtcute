@@ -1,4 +1,4 @@
-import type { ICorePlatform } from '@mtcute/core'
+import type { ICorePlatform, MaybePromise } from '@mtcute/core'
 import type { Logger } from '@mtcute/core/utils.js'
 import { BaseStorageDriver } from '@mtcute/core'
 
@@ -8,6 +8,11 @@ import { BaseStorageDriver } from '@mtcute/core'
  */
 export interface PgClient {
   query<T>(query: string, values?: unknown[]): Promise<{ rows: T[] }>
+
+  // destroy methods (not consistent across libraries :c)
+  close?(): MaybePromise<void> // pglite
+  end?(): MaybePromise<void> // pg.Pool, pg.Client
+  release?(): MaybePromise<void> // pg.PoolClient
 }
 
 type MigrationFunction = (client: PgClient) => Promise<void>
@@ -19,6 +24,13 @@ export interface PostgresStorageDriverOptions {
    * @default 'mtcute'
    */
   schema?: string
+
+  /**
+   * Whether to automatically close the client when the driver is destroyed.
+   *
+   * @default true
+   */
+  autoClose?: boolean
 }
 
 export class PostgresStorageDriver extends BaseStorageDriver {
@@ -29,6 +41,7 @@ export class PostgresStorageDriver extends BaseStorageDriver {
   private _migrations: Map<string, Map<number, MigrationFunction>> = new Map()
   private _maxVersion: Map<string, number> = new Map()
   private _onLoadCallbacks = new Set<() => void>()
+  private _autoClose = true
 
   constructor(
     client: PgClient,
@@ -37,6 +50,7 @@ export class PostgresStorageDriver extends BaseStorageDriver {
     super()
     this.client = client
     this.schema = options?.schema ?? 'mtcute'
+    this._autoClose = options?.autoClose ?? true
   }
 
   /** Returns a schema-qualified table name, safe for interpolation into SQL */
@@ -145,5 +159,10 @@ export class PostgresStorageDriver extends BaseStorageDriver {
   _destroy(): void {
     this._cleanup?.()
     this._cleanup = undefined
+
+    if (this._autoClose) {
+      const fn = this.client.end ?? this.client.release ?? this.client.close
+      if (fn) fn.call(this.client)
+    }
   }
 }
