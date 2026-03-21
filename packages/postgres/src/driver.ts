@@ -34,11 +34,19 @@ export interface PostgresStorageDriverOptions {
    * @default false
    */
   autoClose?: boolean
+
+  /**
+   * Account tag used to isolate data when multiple clients share the same database and schema.
+   *
+   * @default 'default'
+   */
+  account?: string
 }
 
 export class PostgresStorageDriver extends BaseStorageDriver {
   readonly client: PgClient
   readonly schema: string
+  readonly account: string
 
   private _cleanup?: () => void
   private _migrations: Map<string, Map<number, MigrationFunction>> = new Map()
@@ -54,6 +62,7 @@ export class PostgresStorageDriver extends BaseStorageDriver {
     this.client = client
     this.schema = options?.schema ?? 'mtcute'
     this._autoClose = options?.autoClose ?? false
+    this.account = options?.account ?? 'default'
   }
 
   /** Returns a schema-qualified table name, safe for interpolation into SQL */

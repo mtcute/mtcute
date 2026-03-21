@@ -20,27 +20,44 @@ export class PostgresKeyValueRepository implements IKeyValueRepository {
         );
       `)
     })
+
+    _driver.registerMigration('kv', 2, async (client) => {
+      await client.query(`alter table ${this._table} add column account text not null default 'default'`)
+      await client.query(`alter table ${this._table} drop constraint key_value_pkey`)
+      await client.query(`alter table ${this._table} add primary key (account, key)`)
+    })
+  }
+
+  private get _account(): string {
+    return this._driver.account
   }
 
   async set(key: string, value: Uint8Array): Promise<void> {
     await this._driver.client.query(
-      `insert into ${this._table} (key, value) values ($1, $2) on conflict (key) do update set value = $2`,
-      [key, value],
+      `insert into ${this._table} (account, key, value) values ($1, $2, $3)
+       on conflict (account, key) do update set value = $3`,
+      [this._account, key, value],
     )
   }
 
   async get(key: string): Promise<Uint8Array | null> {
-    const res = await this._driver.client.query<KeyValueDto>(`select value from ${this._table} where key = $1`, [key])
+    const res = await this._driver.client.query<KeyValueDto>(
+      `select value from ${this._table} where account = $1 and key = $2`,
+      [this._account, key],
+    )
     if (!res.rows[0]) return null
 
     return new Uint8Array(res.rows[0].value)
   }
 
   async delete(key: string): Promise<void> {
-    await this._driver.client.query(`delete from ${this._table} where key = $1`, [key])
+    await this._driver.client.query(
+      `delete from ${this._table} where account = $1 and key = $2`,
+      [this._account, key],
+    )
   }
 
   async deleteAll(): Promise<void> {
-    await this._driver.client.query(`delete from ${this._table}`)
+    await this._driver.client.query(`delete from ${this._table} where account = $1`, [this._account])
   }
 }

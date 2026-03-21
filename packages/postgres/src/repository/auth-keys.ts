@@ -31,23 +31,44 @@ export class PostgresAuthKeysRepository implements IAuthKeysRepository {
         );
       `)
     })
+
+    _driver.registerMigration('auth_keys', 2, async (client) => {
+      await client.query(`alter table ${this._authKeys} add column account text not null default 'default'`)
+      await client.query(`alter table ${this._authKeys} drop constraint auth_keys_pkey`)
+      await client.query(`alter table ${this._authKeys} add primary key (account, dc)`)
+
+      await client.query(`alter table ${this._tempAuthKeys} add column account text not null default 'default'`)
+      await client.query(`alter table ${this._tempAuthKeys} drop constraint temp_auth_keys_pkey`)
+      await client.query(`alter table ${this._tempAuthKeys} add primary key (account, dc, idx)`)
+    })
+  }
+
+  private get _account(): string {
+    return this._driver.account
   }
 
   async set(dc: number, key: Uint8Array | null): Promise<void> {
     if (!key) {
-      await this._driver.client.query(`delete from ${this._authKeys} where dc = $1`, [dc])
+      await this._driver.client.query(
+        `delete from ${this._authKeys} where account = $1 and dc = $2`,
+        [this._account, dc],
+      )
 
       return
     }
 
     await this._driver.client.query(
-      `insert into ${this._authKeys} (dc, key) values ($1, $2) on conflict (dc) do update set key = $2`,
-      [dc, key],
+      `insert into ${this._authKeys} (account, dc, key) values ($1, $2, $3)
+       on conflict (account, dc) do update set key = $3`,
+      [this._account, dc, key],
     )
   }
 
   async get(dc: number): Promise<Uint8Array | null> {
-    const res = await this._driver.client.query<AuthKeyDto>(`select key from ${this._authKeys} where dc = $1`, [dc])
+    const res = await this._driver.client.query<AuthKeyDto>(
+      `select key from ${this._authKeys} where account = $1 and dc = $2`,
+      [this._account, dc],
+    )
     if (!res.rows[0]) return null
 
     return new Uint8Array(res.rows[0].key)
@@ -56,24 +77,24 @@ export class PostgresAuthKeysRepository implements IAuthKeysRepository {
   async setTemp(dc: number, idx: number, key: Uint8Array | null, expires: number): Promise<void> {
     if (!key) {
       await this._driver.client.query(
-        `delete from ${this._tempAuthKeys} where dc = $1 and idx = $2`,
-        [dc, idx],
+        `delete from ${this._tempAuthKeys} where account = $1 and dc = $2 and idx = $3`,
+        [this._account, dc, idx],
       )
 
       return
     }
 
     await this._driver.client.query(
-      `insert into ${this._tempAuthKeys} (dc, idx, key, expires) values ($1, $2, $3, $4)
-       on conflict (dc, idx) do update set key = $3, expires = $4`,
-      [dc, idx, key, expires],
+      `insert into ${this._tempAuthKeys} (account, dc, idx, key, expires) values ($1, $2, $3, $4, $5)
+       on conflict (account, dc, idx) do update set key = $4, expires = $5`,
+      [this._account, dc, idx, key, expires],
     )
   }
 
   async getTemp(dc: number, idx: number, now: number): Promise<Uint8Array | null> {
     const res = await this._driver.client.query<AuthKeyDto>(
-      `select key from ${this._tempAuthKeys} where dc = $1 and idx = $2 and expires > $3`,
-      [dc, idx, now],
+      `select key from ${this._tempAuthKeys} where account = $1 and dc = $2 and idx = $3 and expires > $4`,
+      [this._account, dc, idx, now],
     )
     if (!res.rows[0]) return null
 
@@ -81,12 +102,12 @@ export class PostgresAuthKeysRepository implements IAuthKeysRepository {
   }
 
   async deleteByDc(dc: number): Promise<void> {
-    await this._driver.client.query(`delete from ${this._authKeys} where dc = $1`, [dc])
-    await this._driver.client.query(`delete from ${this._tempAuthKeys} where dc = $1`, [dc])
+    await this._driver.client.query(`delete from ${this._authKeys} where account = $1 and dc = $2`, [this._account, dc])
+    await this._driver.client.query(`delete from ${this._tempAuthKeys} where account = $1 and dc = $2`, [this._account, dc])
   }
 
   async deleteAll(): Promise<void> {
-    await this._driver.client.query(`delete from ${this._authKeys}`)
-    await this._driver.client.query(`delete from ${this._tempAuthKeys}`)
+    await this._driver.client.query(`delete from ${this._authKeys} where account = $1`, [this._account])
+    await this._driver.client.query(`delete from ${this._tempAuthKeys} where account = $1`, [this._account])
   }
 }

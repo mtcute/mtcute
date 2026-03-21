@@ -102,6 +102,25 @@ new PostgresStorage(pool, { schema: 'my_schema' })
 By default, the client connection is automatically closed when the storage
 is destroyed. Set `autoClose: false` if you manage the connection lifecycle yourself.
 
+Multiple clients can share the same database by using the `account` option:
+
+```ts
+const pool = new pg.Pool({ connectionString: 'postgres://localhost/mydb' })
+
+const bot1 = new TelegramClient({
+    storage: new PostgresStorage(pool, { account: 'bot-1', autoClose: false }),
+    // ...
+})
+
+const bot2 = new TelegramClient({
+    storage: new PostgresStorage(pool, { account: 'bot-2', autoClose: false }),
+    // ...
+})
+```
+
+> **Note:** When sharing a single pool across multiple `PostgresStorage` instances,
+> set `autoClose: false` to prevent one client from closing the shared pool on destroy.
+
 [PGlite](https://github.com/electric-sql/pglite) is also supported as a PostgreSQL client, useful for testing or embedded scenarios:
 
 ```ts
