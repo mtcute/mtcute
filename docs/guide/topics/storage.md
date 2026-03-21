@@ -99,8 +99,8 @@ which can be changed via the `schema` option:
 new PostgresStorage(pool, { schema: 'my_schema' })
 ```
 
-By default, the client connection is automatically closed when the storage
-is destroyed. Set `autoClose: false` if you manage the connection lifecycle yourself.
+By default, mtcute does not close the client connection when the storage is destroyed.
+Set `autoClose: true` if you want the storage to handle that for you.
 
 Multiple clients can share the same database by using the `account` option:
 
@@ -108,18 +108,14 @@ Multiple clients can share the same database by using the `account` option:
 const pool = new pg.Pool({ connectionString: 'postgres://localhost/mydb' })
 
 const bot1 = new TelegramClient({
-    storage: new PostgresStorage(pool, { account: 'bot-1', autoClose: false }),
+    storage: new PostgresStorage(pool, { account: 'bot-1' }),
     // ...
 })
 
 const bot2 = new TelegramClient({
-    storage: new PostgresStorage(pool, { account: 'bot-2', autoClose: false }),
+    storage: new PostgresStorage(pool, { account: 'bot-2' }),
     // ...
 })
-```
-
-> **Note:** When sharing a single pool across multiple `PostgresStorage` instances,
-> set `autoClose: false` to prevent one client from closing the shared pool on destroy.
 
 [PGlite](https://github.com/electric-sql/pglite) is also supported as a PostgreSQL client, useful for testing or embedded scenarios:
 

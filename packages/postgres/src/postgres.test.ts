@@ -19,7 +19,7 @@ if (process.env.TEST_ENV !== 'web' && process.env.WITH_POSTGRES_TESTS) {
 
   describe('PostgresStorage (pglite)', async () => {
     const pglite = await PGlite.create()
-    const storage = new PostgresStorage(pglite, { schema: 'mtcute_test' })
+    const storage = new PostgresStorage(pglite, { schema: 'mtcute_test', autoClose: true })
 
     vi.spyOn(pglite, 'close')
 
@@ -55,7 +55,7 @@ if (process.env.TEST_ENV !== 'web' && process.env.WITH_POSTGRES_TESTS) {
       host: dirname(socketPath),
     })
     vi.spyOn(pool, 'end')
-    const storage = new PostgresStorage(pool, { schema: 'mtcute_test' })
+    const storage = new PostgresStorage(pool, { schema: 'mtcute_test', autoClose: true })
 
     beforeAll(async () => {
       storage.driver.setup(new LogManager(undefined, defaultPlatform), defaultPlatform)

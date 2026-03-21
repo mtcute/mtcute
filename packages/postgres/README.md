@@ -35,7 +35,7 @@ console.log(`logged in as ${self.displayName}`)
 new PostgresStorage(pool, {
     // PostgreSQL schema to use for all tables (default: 'mtcute')
     schema: 'my_schema',
-    // Whether to automatically close the client when the storage is destroyed (default: true)
+    // Whether to automatically close the client when the storage is destroyed (default: false)
     // Calls .end(), .release(), or .close() depending on what the client supports
     autoClose: true,
     // Account tag for multi-account isolation within the same schema (default: 'default')
@@ -52,18 +52,15 @@ Each account's data is fully isolated from others:
 const pool = new pg.Pool({ connectionString: 'postgres://localhost/mydb' })
 
 const bot1 = new TelegramClient({
-    storage: new PostgresStorage(pool, { account: 'bot-1', autoClose: false }),
+    storage: new PostgresStorage(pool, { account: 'bot-1' }),
     // ...
 })
 
 const bot2 = new TelegramClient({
-    storage: new PostgresStorage(pool, { account: 'bot-2', autoClose: false }),
+    storage: new PostgresStorage(pool, { account: 'bot-2' }),
     // ...
 })
 ```
-
-> **Note:** When sharing a single pool across multiple `PostgresStorage` instances,
-> set `autoClose: false` to prevent one client from closing the shared pool on destroy.
 
 ## Using with PGlite
 
@@ -96,8 +93,8 @@ const poolClient = await pool.connect()
 const storage = new PostgresStorage(poolClient)
 ```
 
-> **Note:** By default, mtcute will automatically close the client (via `.end()`, `.release()`, or `.close()`)
-> when the storage is destroyed. Set `autoClose: false` if you want to manage the connection lifecycle yourself.
+> **Note:** By default, mtcute does **not** close the client when the storage is destroyed.
+> Set `autoClose: true` if you want the storage to call `.end()`, `.release()`, or `.close()` automatically.
 
 ## Database schema
 
