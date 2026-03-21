@@ -1,17 +1,18 @@
 {
-    "@mtcute/bun": "0.29.0",
-    "@mtcute/convert": "0.29.0",
-    "@mtcute/core": "0.29.0",
+    "@mtcute/bun": "0.29.1",
+    "@mtcute/convert": "0.29.1",
+    "@mtcute/core": "0.29.1",
     "@mtcute/create-bot": "0.29.0",
-    "@mtcute/deno": "0.29.0",
-    "@mtcute/dispatcher": "0.29.0",
+    "@mtcute/deno": "0.29.1",
+    "@mtcute/dispatcher": "0.29.1",
     "@mtcute/file-id": "0.29.0",
-    "@mtcute/html-parser": "0.29.0",
-    "@mtcute/markdown-parser": "0.29.0",
-    "@mtcute/node": "0.29.0",
-    "@mtcute/test": "0.29.0",
+    "@mtcute/html-parser": "0.29.1",
+    "@mtcute/markdown-parser": "0.29.1",
+    "@mtcute/node": "0.29.1",
+    "@mtcute/postgres": "0.29.1",
+    "@mtcute/test": "0.29.1",
     "@mtcute/tl-runtime": "0.29.0",
     "@mtcute/tl-utils": "0.29.0",
     "@mtcute/wasm": "0.29.0",
-    "@mtcute/web": "0.29.0"
+    "@mtcute/web": "0.29.1"
 }
