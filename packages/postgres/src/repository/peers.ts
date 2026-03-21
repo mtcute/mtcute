@@ -49,9 +49,22 @@ export class PostgresPeersRepository implements IPeersRepository {
         create index if not exists idx_peers_phone on ${this._table} (phone);
       `)
     })
+
+    _driver.registerMigration('peers', 2, async (client) => {
+      await client.query(`alter table ${this._table} add column account text not null default 'default'`)
+      await client.query(`alter table ${this._table} drop constraint peers_pkey`)
+      await client.query(`alter table ${this._table} add primary key (account, id)`)
+      await client.query(`drop index if exists ${_driver.tableName('idx_peers_phone')}`)
+      await client.query(`create index idx_peers_phone on ${this._table} (account, phone)`)
+    })
+
     _driver.onLoad(() => {
       this._loaded = true
     })
+  }
+
+  private get _account(): string {
+    return this._driver.account
   }
 
   private _ensureLoaded(): void {
@@ -62,11 +75,12 @@ export class PostgresPeersRepository implements IPeersRepository {
 
   async store(peer: IPeersRepository.PeerInfo): Promise<void> {
     await this._driver.client.query(
-      `insert into ${this._table} (id, hash, is_min, usernames, updated, phone, complete)
-       values ($1, $2, $3, $4, $5, $6, $7)
-       on conflict (id) do update set
-          hash = $2, is_min = $3, usernames = $4, updated = $5, phone = $6, complete = $7`,
+      `insert into ${this._table} (account, id, hash, is_min, usernames, updated, phone, complete)
+       values ($1, $2, $3, $4, $5, $6, $7, $8)
+       on conflict (account, id) do update set
+          hash = $3, is_min = $4, usernames = $5, updated = $6, phone = $7, complete = $8`,
       [
+        this._account,
         peer.id,
         peer.accessHash,
         peer.isMin,
@@ -80,7 +94,10 @@ export class PostgresPeersRepository implements IPeersRepository {
 
   async getById(id: number): Promise<IPeersRepository.PeerInfo | null> {
     this._ensureLoaded()
-    const res = await this._driver.client.query<PeerDto>(`select * from ${this._table} where id = $1`, [id])
+    const res = await this._driver.client.query<PeerDto>(
+      `select * from ${this._table} where account = $1 and id = $2`,
+      [this._account, id],
+    )
     if (!res.rows[0]) return null
 
     return mapPeerDto(res.rows[0])
@@ -89,8 +106,8 @@ export class PostgresPeersRepository implements IPeersRepository {
   async getByUsername(username: string): Promise<IPeersRepository.PeerInfo | null> {
     this._ensureLoaded()
     const res = await this._driver.client.query<PeerDto>(
-      `select * from ${this._table} where usernames ? $1 and is_min = false`,
-      [username],
+      `select * from ${this._table} where account = $1 and usernames ? $2 and is_min = false`,
+      [this._account, username],
     )
     if (!res.rows[0]) return null
 
@@ -100,8 +117,8 @@ export class PostgresPeersRepository implements IPeersRepository {
   async getByPhone(phone: string): Promise<IPeersRepository.PeerInfo | null> {
     this._ensureLoaded()
     const res = await this._driver.client.query<PeerDto>(
-      `select * from ${this._table} where phone = $1 and is_min = false`,
-      [phone],
+      `select * from ${this._table} where account = $1 and phone = $2 and is_min = false`,
+      [this._account, phone],
     )
     if (!res.rows[0]) return null
 
@@ -109,6 +126,6 @@ export class PostgresPeersRepository implements IPeersRepository {
   }
 
   async deleteAll(): Promise<void> {
-    await this._driver.client.query(`delete from ${this._table}`)
+    await this._driver.client.query(`delete from ${this._table} where account = $1`, [this._account])
   }
 }

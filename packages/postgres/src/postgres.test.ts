@@ -6,7 +6,7 @@ import {
   testPeersRepository,
   testRefMessagesRepository,
 } from '@mtcute/test'
-import { afterAll, beforeAll, describe, expect, vi } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 if (process.env.TEST_ENV !== 'web' && process.env.WITH_POSTGRES_TESTS) {
   const { PGlite } = await import('@electric-sql/pglite')
@@ -73,6 +73,79 @@ if (process.env.TEST_ENV !== 'web' && process.env.WITH_POSTGRES_TESTS) {
       await server.stop()
       await pglite.close()
       await rm(dirname(socketPath), { recursive: true })
+    })
+  })
+  describe('PostgresStorage (account isolation)', async () => {
+    const pglite = await PGlite.create()
+    const storageA = new PostgresStorage(pglite, { schema: 'mtcute_iso', account: 'account_a', autoClose: false })
+    const storageB = new PostgresStorage(pglite, { schema: 'mtcute_iso', account: 'account_b', autoClose: false })
+
+    beforeAll(async () => {
+      storageA.driver.setup(new LogManager(undefined, defaultPlatform), defaultPlatform)
+      storageB.driver.setup(new LogManager(undefined, defaultPlatform), defaultPlatform)
+      await storageA.driver.load()
+      await storageB.driver.load()
+    })
+
+    afterAll(async () => {
+      await storageA.driver.destroy()
+      await storageB.driver.destroy()
+      await pglite.close()
+    })
+
+    it('should isolate auth keys between accounts', async () => {
+      const key = new Uint8Array([1, 2, 3])
+      await storageA.authKeys.set(1, key)
+
+      expect(await storageA.authKeys.get(1)).toEqual(key)
+      expect(await storageB.authKeys.get(1)).toBeNull()
+    })
+
+    it('should isolate key-value between accounts', async () => {
+      const value = new Uint8Array([4, 5, 6])
+      await storageA.kv.set('test', value)
+
+      expect(await storageA.kv.get('test')).toEqual(value)
+      expect(await storageB.kv.get('test')).toBeNull()
+    })
+
+    it('should isolate peers between accounts', async () => {
+      const peer: Parameters<typeof storageA.peers.store>[0] = {
+        id: 123,
+        accessHash: '456',
+        isMin: false,
+        usernames: ['alice'],
+        updated: Date.now(),
+        phone: '+1234567890',
+        complete: new Uint8Array([7, 8, 9]),
+      }
+
+      await storageA.peers.store(peer)
+
+      expect(await storageA.peers.getById(123)).not.toBeNull()
+      expect(await storageB.peers.getById(123)).toBeNull()
+
+      expect(await storageA.peers.getByUsername('alice')).not.toBeNull()
+      expect(await storageB.peers.getByUsername('alice')).toBeNull()
+    })
+
+    it('should isolate ref messages between accounts', async () => {
+      await storageA.refMessages.store(100, 200, 300)
+
+      expect(await storageA.refMessages.getByPeer(100)).toEqual([200, 300])
+      expect(await storageB.refMessages.getByPeer(100)).toBeNull()
+    })
+
+    it('deleteAll should only affect own account', async () => {
+      const keyA = new Uint8Array([10, 11])
+      const keyB = new Uint8Array([12, 13])
+      await storageA.kv.set('shared_key', keyA)
+      await storageB.kv.set('shared_key', keyB)
+
+      await storageA.kv.deleteAll()
+
+      expect(await storageA.kv.get('shared_key')).toBeNull()
+      expect(await storageB.kv.get('shared_key')).toEqual(keyB)
     })
   })
 } else {

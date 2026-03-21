@@ -38,8 +38,32 @@ new PostgresStorage(pool, {
     // Whether to automatically close the client when the storage is destroyed (default: true)
     // Calls .end(), .release(), or .close() depending on what the client supports
     autoClose: true,
+    // Account tag for multi-account isolation within the same schema (default: 'default')
+    account: 'bot-1',
 })
 ```
+
+## Multi-account
+
+Multiple clients can share the same database and schema by using different `account` tags.
+Each account's data is fully isolated from others:
+
+```ts
+const pool = new pg.Pool({ connectionString: 'postgres://localhost/mydb' })
+
+const bot1 = new TelegramClient({
+    storage: new PostgresStorage(pool, { account: 'bot-1', autoClose: false }),
+    // ...
+})
+
+const bot2 = new TelegramClient({
+    storage: new PostgresStorage(pool, { account: 'bot-2', autoClose: false }),
+    // ...
+})
+```
+
+> **Note:** When sharing a single pool across multiple `PostgresStorage` instances,
+> set `autoClose: false` to prevent one client from closing the shared pool on destroy.
 
 ## Using with PGlite
 
