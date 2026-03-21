@@ -28,7 +28,10 @@ export interface PostgresStorageDriverOptions {
   /**
    * Whether to automatically close the client when the driver is destroyed.
    *
-   * @default true
+   * When passing a shared `pg.Pool`, you should leave this as `false`
+   * (the default) to avoid terminating the pool for other consumers.
+   *
+   * @default false
    */
   autoClose?: boolean
 
@@ -49,7 +52,7 @@ export class PostgresStorageDriver extends BaseStorageDriver {
   private _migrations: Map<string, Map<number, MigrationFunction>> = new Map()
   private _maxVersion: Map<string, number> = new Map()
   private _onLoadCallbacks = new Set<() => void>()
-  private _autoClose = true
+  private _autoClose = false
 
   constructor(
     client: PgClient,
@@ -58,8 +61,8 @@ export class PostgresStorageDriver extends BaseStorageDriver {
     super()
     this.client = client
     this.schema = options?.schema ?? 'mtcute'
+    this._autoClose = options?.autoClose ?? false
     this.account = options?.account ?? 'default'
-    this._autoClose = options?.autoClose ?? true
   }
 
   /** Returns a schema-qualified table name, safe for interpolation into SQL */
