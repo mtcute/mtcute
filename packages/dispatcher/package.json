@@ -1,7 +1,7 @@
 {
   "name": "@mtcute/dispatcher",
   "type": "module",
-  "version": "0.29.1",
+  "version": "0.29.4",
   "private": true,
   "description": "Updates dispatcher and bot framework for @mtcute/client",
   "author": "alina sireneva <alina@tei.su>",
