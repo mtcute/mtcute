@@ -12,7 +12,7 @@
     "@mtcute/postgres": "0.29.2",
     "@mtcute/test": "0.29.1",
     "@mtcute/tl-runtime": "0.29.0",
-    "@mtcute/tl-utils": "0.29.0",
+    "@mtcute/tl-utils": "0.29.3",
     "@mtcute/wasm": "0.29.0",
     "@mtcute/web": "0.29.1"
 }
