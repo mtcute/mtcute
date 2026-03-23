@@ -41,11 +41,11 @@ export class RpcError extends Error {
     is(text) { return this.text === text; }
 }
 RpcError.fromTl = function (obj) {
-    var err = new RpcError(obj.errorCode, obj.errorMessage);
-    var match, param;
-    if ((match=err.text.match(/^FLOOD_WAIT_(\\d+)$/))!=null){ err.text = 'FLOOD_WAIT_%d'; param = err.duration = parseInt(match[1]) }
+    const err = new RpcError(obj.errorCode, obj.errorMessage);
+    let match;
+    if ((match=err.text.match(/^FLOOD_WAIT_(\\d+)$/))!=null){ err.text = 'FLOOD_WAIT_%d'; err.duration = parseInt(match[1]) }
 
-    else return err
+    return err
 }
 RpcError.BAD_REQUEST = 400;
 

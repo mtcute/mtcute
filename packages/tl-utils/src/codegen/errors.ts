@@ -14,10 +14,10 @@ export class RpcError extends Error {
     is(text) { return this.text === text; }
 }
 RpcError.fromTl = function (obj) {
-    var err = new RpcError(obj.errorCode, obj.errorMessage);
-    var match, param;
+    const err = new RpcError(obj.errorCode, obj.errorMessage);
+    let match;
 {matchers}
-    else return err
+    return err
 }
 {statics}
 `.trimStart()
@@ -123,7 +123,7 @@ export function generateCodeForErrors(errors: TlErrors): [string, string] {
         += `    '${name}': { ${placeholders.map((it, i) => `${it}: ${placeholderTypes[i]}`).join(', ')} },\n`
 
       const regex = name.replace('%d', '(\\d+)')
-      const setters = placeholders.map((it, i) => `param = err.${it} = parseInt(match[${i + 1}])`).join('; ')
+      const setters = placeholders.map((it, i) => `err.${it} = parseInt(match[${i + 1}])`).join('; ')
       matchers += `    ${
         first ? '' : 'else '
       }if ((match=err.text.match(/^${regex}$/))!=null){ err.text = '${name}'; ${setters} }\n`
