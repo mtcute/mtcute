@@ -80,7 +80,6 @@ export class BaseTelegramClient implements ITelegramClient {
 
     if (!params.disableUpdates && params.updates !== false) {
       this.updates = new UpdatesManager(this, params.updates)
-      this.onServerUpdate.add(this.updates.handleUpdate.bind(this.updates))
       this.updates.onCatchingUp((catchingUp) => {
         this.onConnectionState.emit(catchingUp ? 'updating' : 'connected')
       })

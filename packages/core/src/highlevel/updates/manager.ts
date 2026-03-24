@@ -159,6 +159,7 @@ export class UpdatesManager {
     }
 
     this._onKeepAlive = this._onKeepAlive.bind(this)
+    this.handleUpdate = this.handleUpdate.bind(this)
 
     this.postponedTimer.onTimeout(() => {
       this.hasTimedoutPostponed = true
@@ -232,6 +233,7 @@ export class UpdatesManager {
 
     // start updates loop in background
     this.updatesLoopActive = true
+    this.client.onServerUpdate.add(this.handleUpdate)
     timers.clearInterval(this.keepAliveInterval)
     this.keepAliveInterval = timers.setInterval(this._onKeepAlive, KEEP_ALIVE_INTERVAL)
     this._loop().catch(err => this.client.onError.emit(unknownToError(err)))
@@ -258,12 +260,16 @@ export class UpdatesManager {
     this.channelDiffTimeouts.clear()
 
     this.updatesLoopActive = false
+    this.client.onServerUpdate.remove(this.handleUpdate)
     this.pendingUpdateContainers.clear()
     this.pendingUnorderedUpdates.clear()
     this.pendingPtsUpdates.clear()
     this.pendingQtsUpdates.clear()
     this.pendingPtsUpdatesPostponed.clear()
     this.pendingQtsUpdatesPostponed.clear()
+    this.noDispatchMsg.clear()
+    this.noDispatchPts.clear()
+    this.noDispatchQts.clear()
     this.postponedTimer.reset()
     this.updatesLoopCv.notify()
   }
@@ -290,6 +296,8 @@ export class UpdatesManager {
   }
 
   handleClientUpdate(update: tl.TypeUpdates, noDispatch = true): void {
+    if (!this.updatesLoopActive) return
+
     if (noDispatch && this.noDispatchEnabled) {
       this._addToNoDispatchIndex(update)
     }
