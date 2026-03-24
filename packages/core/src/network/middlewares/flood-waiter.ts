@@ -77,6 +77,7 @@ export function floodWaiter(options: FloodWaiterOptions): RpcCallMiddleware {
     const method = ctx.request._
     const storedWaitUntil = store ? storage.get(method) : undefined
     const floodSleepThreshold = ctx.params?.floodSleepThreshold ?? maxWait
+    const numRetries = ctx.params?.maxRetryCount ?? maxRetries
 
     if (storedWaitUntil !== undefined) {
       const delta = storedWaitUntil - performance.now()
@@ -98,7 +99,7 @@ export function floodWaiter(options: FloodWaiterOptions): RpcCallMiddleware {
 
     let lastError: mtp.RawMt_rpc_error | undefined
 
-    for (let i = 0; i <= maxRetries; i++) {
+    for (let i = 0; i <= numRetries; i++) {
       const res = await next(ctx)
 
       if (!isTlRpcError(res)) {
