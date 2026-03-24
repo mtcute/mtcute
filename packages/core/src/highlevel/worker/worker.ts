@@ -27,10 +27,11 @@ export interface TelegramWorkerOptions<T extends WorkerCustomMethods> {
    * - `destroy`: destroy the client, terminating the worker
    * - `disconnect`: disconnect the client, but keep the worker running until `forceDestroy` is called
    * - `nothing`: do nothing, lifecycle is managed manually
+   * - function: call this function when the last connection is closed, then execute the action returned by the function
    *
    * @default 'nothing'
    */
-  onLastDisconnected?: 'destroy' | 'disconnect' | 'nothing'
+  onLastDisconnected?: 'destroy' | 'disconnect' | 'nothing' | (() => 'destroy' | 'disconnect' | 'nothing')
   /** additional custom methods to expose */
   customMethods?: T
 }
@@ -248,7 +249,13 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
 
     if (this.activeConnections.size !== 0) return
 
-    switch (this.params.onLastDisconnected ?? 'nothing') {
+    let onLastDisconnected = this.params.onLastDisconnected ?? 'nothing'
+    if (typeof onLastDisconnected === 'function') {
+      onLastDisconnected = onLastDisconnected()
+      return
+    }
+
+    switch (onLastDisconnected) {
       case 'nothing':
         return
       case 'disconnect':
