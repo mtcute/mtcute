@@ -37,7 +37,7 @@ mtcute implements sqlite storages in runtime-specific packages,
 using the best libraries available for each runtime:
  - Node.js: [better-sqlite3](https://www.npmjs.com/package/better-sqlite3)
  - Bun: `bun:sqlite`
- - Deno: [@db/sqlite](https://jsr.io/@db/sqlite)
+ - Deno: `node:sqlite`
 
 ```ts{4}
 import { SqliteStorage } from '@mtcute/node' // or '@mtcute/bun' / '@mtcute/deno'
