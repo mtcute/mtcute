@@ -54,9 +54,6 @@ import {
 import { applyDocumentation, fetchDocumentation, getCachedDocumentation } from './documentation.js'
 import { packTlSchema, unpackTlSchema } from './schema.js'
 
-const README_MD_FILE = join(__dirname, 'README.md')
-const PACKAGE_JSON_FILE = join(__dirname, 'package.json')
-
 // region: cli args
 
 interface CliArgs {
@@ -301,37 +298,6 @@ function input(rl: readline.Interface, q: string): Promise<string> {
 
 // region: other steps
 
-async function updateReadme(currentLayer: number): Promise<void> {
-  const oldReadme = await readFile(README_MD_FILE, 'utf8')
-  const today = new Date().toLocaleDateString('ru')
-  await writeFile(
-    README_MD_FILE,
-    oldReadme.replace(
-      /^Generated from TL layer \*\*\d+\*\* \(last updated on \d+\.\d+\.\d+\)\.$/m,
-      `Generated from TL layer **${currentLayer}** (last updated on ${today}).`,
-    ),
-  )
-}
-
-async function updatePackageVersion(currentLayer: number, bump: boolean): Promise<void> {
-  const packageJson = JSON.parse(await readFile(PACKAGE_JSON_FILE, 'utf8')) as { version: string }
-  const version = packageJson.version
-  let [major, minor] = version.split('.').map(i => Number.parseInt(i))
-
-  if (major === currentLayer) {
-    if (!bump) return
-    minor += 1
-  } else {
-    major = currentLayer
-    minor = 0
-  }
-
-  console.log('Updating package version...')
-  const versionStr = `${major}.${minor}.0`
-  packageJson.version = versionStr
-  await writeFile(PACKAGE_JSON_FILE, JSON.stringify(packageJson, null, 4))
-}
-
 async function overrideInt53(schema: TlFullSchema): Promise<void> {
   console.log('Applying int53 overrides...')
 
@@ -551,14 +517,6 @@ async function main(): Promise<void> {
   // check docs availability
   const cachedDocs = await getCachedDocumentation()
 
-  // check version info
-  const packageJson = JSON.parse(await readFile(PACKAGE_JSON_FILE, 'utf8')) as { version: string }
-  const currentVersion = packageJson.version
-  const [major] = currentVersion.split('.').map(i => Number.parseInt(i))
-  const defaultBump = major === resultLayer
-    ? `${major}.${Number.parseInt(currentVersion.split('.')[1]) + 1}.0`
-    : `${resultLayer}.0.0`
-
   // dry-run: print report and exit
   if (cliArgs.dryRun) {
     console.log('')
@@ -593,12 +551,6 @@ async function main(): Promise<void> {
     console.log('')
     console.log('DOCS:')
     console.log(`  cached: ${cachedDocs ? cachedDocs.updated : 'none'}`)
-
-    console.log('')
-    console.log('VERSION:')
-    console.log(`  current: ${currentVersion}`)
-    console.log(`  layer: ${resultLayer}`)
-    console.log(`  default_bump: ${defaultBump}`)
 
     return
   }
@@ -652,29 +604,6 @@ async function main(): Promise<void> {
 
   console.log('Writing result to file...')
   await writeFile(API_SCHEMA_JSON_FILE, JSON.stringify(packTlSchema(resultSchema, resultLayer)))
-
-  console.log('Updating README.md...')
-  await updateReadme(resultLayer)
-
-  // resolve bump mode
-  let shouldBump: boolean
-  if (cliArgs.bump !== null) {
-    shouldBump = cliArgs.bump
-  } else if (!isTTY) {
-    throw new Error('Specify --bump or --no-bump')
-  } else {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
-    if (major === resultLayer) {
-      console.log('Current version: %s. Bump minor version?', currentVersion)
-      const res = await input(rl, '[Y/n] > ')
-      shouldBump = res.trim().toLowerCase() !== 'n'
-    } else {
-      shouldBump = true
-    }
-    rl.close()
-  }
-
-  await updatePackageVersion(resultLayer, shouldBump)
 
   console.log('Done!')
 }

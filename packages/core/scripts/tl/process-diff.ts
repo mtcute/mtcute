@@ -19,7 +19,7 @@ function fmtArgType(arg: TlArgument): string {
   return stringifyArgumentType(arg.type, arg.typeModifiers)
 }
 
-const DIFF_FILE = join(__dirname, 'diff.json')
+const DIFF_FILE = join(__dirname, '../../src/tl/diff.json')
 
 interface DiffJson {
   layer: [number, number]

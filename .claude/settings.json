@@ -3,9 +3,9 @@
     "allow": [
       "mcp__ide__getDiagnostics",
       "Bash(node packages/core/scripts/generate-client.cjs)",
-      "Bash(pnpm tsx scripts/fetch-api.ts*)",
-      "Bash(pnpm tsx scripts/gen-code.ts)",
-      "Bash(pnpm tsx scripts/process-diff.ts)",
+      "Bash(pnpm tsx scripts/tl/fetch-api.ts*)",
+      "Bash(pnpm tsx scripts/tl/gen-code.ts)",
+      "Bash(pnpm tsx scripts/tl/process-diff.ts)",
       "Bash(pnpm run -w lint:tsc)",
       "Bash(pnpm run -w lint:ci --fix)",
       "Bash(pnpm run -w test*)",
