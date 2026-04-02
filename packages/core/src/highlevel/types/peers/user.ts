@@ -152,6 +152,11 @@ export class User {
     return this.raw.botForumCanManageTopics!
   }
 
+  /** Whether this bot can manage other bots */
+  get canBotManageBots(): boolean {
+    return this.raw.botCanManageBots!
+  }
+
   /** Whether this user has been verified by Telegram */
   get isVerified(): boolean {
     return this.raw.verified!

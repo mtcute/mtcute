@@ -261,6 +261,16 @@ export class FullUser extends User {
     return this.full.noforwardsPeerEnabled!
   }
 
+  /** Whether this user has been flagged by the server as a security risk due to using an unofficial app */
+  get unofficialSecurityRisk(): boolean {
+    return this.full.unofficialSecurityRisk!
+  }
+
+  /** Bot that manages this bot, if any */
+  get botManager(): User | null {
+    return this.full.botManagerId ? new User(this.peers.user(this.full.botManagerId)) : null
+  }
+
   /** Whether the "Gifts" tab should be shown */
   get showGifts(): boolean {
     return this.full.displayGiftsButton!

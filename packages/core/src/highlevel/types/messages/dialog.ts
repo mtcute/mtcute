@@ -257,6 +257,11 @@ export class Dialog {
     return this.raw.unreadReactionsCount
   }
 
+  /** Number of unread poll votes */
+  get unreadPollVotesCount(): number {
+    return this.raw.unreadPollVotesCount
+  }
+
   /**
    * Draft message in this dialog
    */

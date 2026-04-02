@@ -453,6 +453,14 @@ export interface InputMediaInvoice extends CaptionMixin {
   extendedMedia?: InputMediaLike
 }
 
+/** A poll answer */
+export interface InputPollAnswer {
+  /** Answer text */
+  text: InputText
+  /** Media to be attached near the answer */
+  media?: InputMediaLike
+}
+
 /**
  * A simple poll to be sent
  *
@@ -477,7 +485,7 @@ export interface InputMediaPoll extends CaptionMixin {
    * objects, with a single=byte incrementing
    * `option` value.
    */
-  answers: (InputText | tl.TypePollAnswer)[]
+  answers: (InputText | tl.TypePollAnswer | InputPollAnswer)[]
 
   /**
    * Whether this is poll is closed
@@ -526,18 +534,8 @@ export interface InputMediaQuiz extends Omit<InputMediaPoll, 'type'> {
 
   /**
    * Correct answer ID(s) or index(es).
-   *
-   * > **Note**: even though quizzes can actually
-   * > only have exactly one correct answer,
-   * > the API itself has the possibility to pass
-   * > multiple or zero correct answers,
-   * > but that would result in `QUIZ_CORRECT_ANSWERS_TOO_MUCH`
-   * > and `QUIZ_CORRECT_ANSWERS_EMPTY` errors respectively.
-   * >
-   * > But since the API has that option, we also provide it,
-   * > maybe to future-proof this :shrug:
    */
-  correct: MaybeArray<number | Uint8Array>
+  correct: MaybeArray<number>
 
   /**
    * Explanation of the quiz solution

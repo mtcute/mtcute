@@ -3,7 +3,7 @@ import type { ITelegramClient } from '../../client.types.js'
 import type { InputMessageId } from '../../types/index.js'
 import { MtArgumentError, MtTypeAssertionError } from '../../../types/errors.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
-import { assertTypeIs } from '../../../utils/type-assertions.js'
+import { assertTypeIs, assertTypeIsNot } from '../../../utils/type-assertions.js'
 import { MtMessageNotFoundError, normalizeInputMessageId, PeersIndex, Poll } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -49,7 +49,9 @@ export async function sendVote(
     poll = msg.media
     options = options.map((opt) => {
       if (typeof opt === 'number') {
-        return poll!.raw.answers[opt].option
+        const answer = poll!.raw.answers[opt]
+        assertTypeIsNot('Poll.answers', answer, 'inputPollAnswer')
+        return answer.option
       }
 
       return opt

@@ -50,7 +50,7 @@ function parseExports(content: string, file: string): ParsedExport[] {
   const exports: ParsedExport[] = []
 
   // match: optional jsdoc, then export declaration
-  // eslint-disable-next-line regexp/no-super-linear-backtracking, style/max-len
+  // eslint-disable-next-line style/max-len
   const re = /(?<jsdoc>[ \t]*\/\*\*(?:(?!\*\/)[\s\S])*?\*\/\s*)?export (?:declare )?(?<kind>class|interface|type|enum|function|const) (?<name>\w+)/g
 
   let match: RegExpExecArray | null

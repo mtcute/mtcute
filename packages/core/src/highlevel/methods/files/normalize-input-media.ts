@@ -128,15 +128,15 @@ export async function _normalizeInputMedia(
       title: media.title,
       description: media.description,
       photo:
-                typeof media.photo === 'string'
-                  ? {
-                      _: 'inputWebDocument',
-                      url: media.photo,
-                      mimeType: 'image/jpeg',
-                      size: 0,
-                      attributes: [],
-                    }
-                  : media.photo,
+        typeof media.photo === 'string'
+          ? {
+              _: 'inputWebDocument',
+              url: media.photo,
+              mimeType: 'image/jpeg',
+              size: 0,
+              attributes: [],
+            }
+          : media.photo,
       invoice: media.invoice,
       payload: media.payload,
       provider: media.token,
@@ -152,31 +152,31 @@ export async function _normalizeInputMedia(
   }
 
   if (media.type === 'poll' || media.type === 'quiz') {
-    const answers: tl.TypePollAnswer[] = media.answers.map((ans, idx) => {
-      if (typeof ans === 'object' && tl.isAnyPollAnswer(ans)) return ans
+    const answers: tl.TypePollAnswer[] = await Promise.all(media.answers.map((ans) => {
+      if (typeof ans === 'string') return { _: 'inputPollAnswer', text: inputTextToTl(ans) }
+      if (tl.isAnyPollAnswer(ans)) return ans
+      if ('media' in ans && ans.media) {
+        return _normalizeInputMedia(client, ans.media, params).then(m => ({
+          _: 'inputPollAnswer' as const,
+          text: inputTextToTl(ans.text),
+          media: m,
+        }))
+      }
 
       return {
-        _: 'pollAnswer',
-        text: inputTextToTl(ans),
-        // emulate the behaviour of most implementations
-        option: new Uint8Array([48 /* '0' */ + idx]),
+        _: 'inputPollAnswer' as const,
+        text: inputTextToTl(ans.text),
       }
-    })
+    }))
 
-    let correct: Uint8Array[] | undefined
+    let correct: number[] | undefined
     let solution: string | undefined
     let solutionEntities: tl.TypeMessageEntity[] | undefined
 
     if (media.type === 'quiz') {
       let input = media.correct
       if (!Array.isArray(input)) input = [input]
-      correct = input.map((it) => {
-        if (typeof it === 'number') {
-          return answers[it].option
-        }
-
-        return it
-      })
+      correct = input
 
       if (media.solution) {
         [solution, solutionEntities] = await _normalizeInputText(client, media.solution)
@@ -196,6 +196,7 @@ export async function _normalizeInputMedia(
         answers,
         closePeriod: media.closePeriod,
         closeDate: normalizeDate(media.closeDate),
+        hash: Long.ZERO,
       },
       correctAnswers: correct,
       solution,

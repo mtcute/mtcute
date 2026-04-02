@@ -131,12 +131,35 @@ function mapCompatEmojiStatus(obj: tlCompat.TypeEmojiStatus): tl.TypeEmojiStatus
   }
 }
 
+function mapCompatPoll(obj: tlCompat.TypePoll): tl.TypePoll {
+  switch (obj._) {
+    case 'poll_layer223':
+      return {
+        ...obj,
+        _: 'poll',
+        hash: Long.ZERO,
+        // answers are mapped at runtime by wrapped compat readers
+        answers: obj.answers as tl.TypePollAnswer[],
+      }
+    default:
+      return obj
+  }
+}
+
 function mapCompatMessageMedia(obj: tlCompat.TypeMessageMedia): tl.TypeMessageMedia {
   switch (obj._) {
     case 'messageMediaDocument_layer197':
       return replaceType(obj, 'messageMediaDocument')
     case 'messageMediaDice_layer220':
       return replaceType(obj, 'messageMediaDice')
+    case 'messageMediaPhoto_layer223':
+      return replaceType(obj, 'messageMediaPhoto')
+    case 'messageMediaPoll_layer223':
+      return {
+        _: 'messageMediaPoll',
+        poll: mapCompatPoll(obj.poll),
+        results: obj.results as tl.TypePollResults,
+      }
     default:
       return obj
   }
@@ -205,6 +228,12 @@ function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessage
 function mapMessageReplyHeader(obj: tlCompat.TypeMessageReplyHeader): tl.TypeMessageReplyHeader {
   switch (obj._) {
     case 'messageReplyHeader_layer206':
+      return {
+        ...obj,
+        _: 'messageReplyHeader',
+        replyMedia: obj.replyMedia ? mapCompatMessageMedia(obj.replyMedia) : undefined,
+      }
+    case 'messageReplyHeader_layer223':
       return {
         ...obj,
         _: 'messageReplyHeader',
@@ -287,6 +316,8 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
       return mapCompatEmojiStatus(obj)
     case 'messageMediaDocument_layer197':
     case 'messageMediaDice_layer220':
+    case 'messageMediaPhoto_layer223':
+    case 'messageMediaPoll_layer223':
       return mapCompatMessageMedia(obj)
     case 'channelFull_layer197':
     case 'channelFull_layer204':
@@ -312,6 +343,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'userFull_layer210':
     case 'userFull_layer211':
     case 'userFull_layer214':
+    case 'userFull_layer223':
       return replaceType(obj, 'userFull')
     case 'user_layer199':
     case 'user_layer216':
@@ -344,8 +376,10 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'messageService_layer204':
       return mapCompatMessage(obj)
     case 'messageReplyHeader_layer206':
+    case 'messageReplyHeader_layer223':
       return mapMessageReplyHeader(obj)
     case 'storyItem_layer210':
+    case 'storyItem_layer223':
       return {
         ...obj,
         _: 'storyItem',
@@ -377,6 +411,14 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
       return replaceType(obj, 'chatParticipantCreator')
     case 'chatParticipantAdmin_layer222':
       return replaceType(obj, 'chatParticipantAdmin')
+    case 'pollResults_layer223':
+      return replaceType(obj, 'pollResults') as unknown as tl.RawPollResults
+    case 'pollAnswerVoters_layer223':
+      return replaceType(obj, 'pollAnswerVoters')
+    case 'poll_layer223':
+      return mapCompatPoll(obj)
+    case 'pollAnswer_layer223':
+      return replaceType(obj, 'pollAnswer')
     case 'keyboardButton_layer221':
     case 'keyboardButtonUrl_layer221':
     case 'keyboardButtonCallback_layer221':

@@ -96,7 +96,7 @@ Based on the diff, update these files for new/changed TL types:
 > Note: all these tasks may take a long time, use timeout=5m for each to avoid issues
 
 ```bash
-# typecheck and fix any type errors
+# typecheck and fix any type errors (note: workspace-wide `tsc` is broken, avoid using it, use `lint:tsc` script instead)
 pnpm run -w lint:tsc
 
 # run eslint, fix any remaining linting issues

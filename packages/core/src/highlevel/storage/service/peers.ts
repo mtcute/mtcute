@@ -223,6 +223,7 @@ export class PeersService extends BaseService {
             contactRequirePremium: peer.contactRequirePremium,
             botBusiness: peer.botBusiness,
             botHasMainApp: peer.botHasMainApp,
+            botCanManageBots: peer.botCanManageBots,
             photo: peer.applyMinPhoto ? peer.photo : existing.photo,
             status: !existing.status || existing.status._ === 'userStatusEmpty' ? peer.status : existing.status,
             botInfoVersion: peer.botInfoVersion,

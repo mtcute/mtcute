@@ -225,6 +225,9 @@
     "messageActionInviteToGroupCall": [
       "users"
     ],
+    "messageActionManagedBotCreated": [
+      "bot_id"
+    ],
     "messageActionNewCreatorPending": [
       "new_creator_id"
     ],
@@ -343,9 +346,6 @@
     "storyViews": [
       "recent_viewers"
     ],
-    "todoCompletion": [
-      "completed_by"
-    ],
     "updateBotCallbackQuery": [
       "user_id"
     ],
@@ -457,6 +457,10 @@
     "updateInlineBotCallbackQuery": [
       "user_id"
     ],
+    "updateManagedBot": [
+      "user_id",
+      "bot_id"
+    ],
     "updateMonoForumNoPaidException": [
       "channel_id"
     ],
@@ -480,12 +484,10 @@
       "channel_id"
     ],
     "updateReadMonoForumInbox": [
-      "channel_id",
-      "saved_peer_id"
+      "channel_id"
     ],
     "updateReadMonoForumOutbox": [
-      "channel_id",
-      "saved_peer_id"
+      "channel_id"
     ],
     "updateShortChatMessage": [
       "from_id",
@@ -528,7 +530,8 @@
     ],
     "userFull": [
       "id",
-      "personal_channel_id"
+      "personal_channel_id",
+      "bot_manager_id"
     ],
     "userStories": [
       "user_id"

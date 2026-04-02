@@ -6,6 +6,7 @@ import type { Message } from './message.js'
 import Long from 'long'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 
+import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import { Photo } from '../media/photo.js'
 import { parsePeer } from '../peers/peer.js'
 import { User } from '../peers/user.js'
@@ -792,6 +793,30 @@ export interface ActionNoForwardsRequest {
   newValue: boolean
 }
 
+/** An answer was appended to a poll */
+export interface ActionPollAppendAnswer {
+  readonly type: 'poll_append_answer'
+
+  /** The answer that was appended */
+  readonly answer: tl.RawPollAnswer
+}
+
+/** An answer was deleted from a poll */
+export interface ActionPollDeleteAnswer {
+  readonly type: 'poll_delete_answer'
+
+  /** The answer that was deleted */
+  readonly answer: tl.RawPollAnswer
+}
+
+/** A managed bot was created */
+export interface ActionManagedBotCreated {
+  readonly type: 'managed_bot_created'
+
+  /** ID of the created bot */
+  readonly botId: number
+}
+
 /** Group creator has left the group, and a new creator has been assigned but not yet made one */
 export interface ActionNewCreatorPending {
   readonly type: 'new_creator_pending'
@@ -875,6 +900,9 @@ export type MessageAction
     | ActionChangeCreator
     | ActionNoForwardsToggle
     | ActionNoForwardsRequest
+    | ActionPollAppendAnswer
+    | ActionPollDeleteAnswer
+    | ActionManagedBotCreated
     | null
 
 /** @internal */
@@ -1347,6 +1375,23 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         expired: act.expired!,
         prevValue: act.prevValue,
         newValue: act.newValue,
+      }
+    case 'messageActionPollAppendAnswer':
+      assertTypeIsNot('messageActionPollAppendAnswer', act.answer, 'inputPollAnswer')
+      return {
+        type: 'poll_append_answer',
+        answer: act.answer,
+      }
+    case 'messageActionPollDeleteAnswer':
+      assertTypeIsNot('messageActionPollAppendAnswer', act.answer, 'inputPollAnswer')
+      return {
+        type: 'poll_delete_answer',
+        answer: act.answer,
+      }
+    case 'messageActionManagedBotCreated':
+      return {
+        type: 'managed_bot_created',
+        botId: act.botId,
       }
     default:
       return null

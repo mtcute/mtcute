@@ -2,13 +2,14 @@ import type { tl } from '../../../tl/index.js'
 import type { PeersIndex } from '../peers/peers-index.js'
 
 import Long from 'long'
+import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MessageEntity } from '../messages/message-entity.js'
 
 export class PollAnswer {
   constructor(
-    readonly raw: tl.TypePollAnswer,
+    readonly raw: tl.RawPollAnswer,
     readonly result?: tl.RawPollAnswerVoters | undefined,
   ) {}
 
@@ -102,6 +103,7 @@ export class Poll {
     const results = this.results?.results
 
     return this.raw.answers.map((ans, idx) => {
+      assertTypeIs('Poll.answers', ans, 'pollAnswer')
       if (results) {
         return new PollAnswer(ans, results[idx])
       }
@@ -201,6 +203,7 @@ export class Poll {
         answers: this.raw.answers,
         closePeriod: this.raw.closePeriod,
         closeDate: this.raw.closeDate,
+        hash: Long.ZERO,
       },
     }
   }

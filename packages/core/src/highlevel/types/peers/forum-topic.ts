@@ -181,6 +181,11 @@ export class ForumTopic {
     return this.raw.unreadReactionsCount
   }
 
+  /** Number of unread poll votes in the topic */
+  get unreadPollVotesCount(): number {
+    return this.raw.unreadPollVotesCount
+  }
+
   /**
    * Draft message in the topic
    */

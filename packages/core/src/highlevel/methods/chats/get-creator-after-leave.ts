@@ -2,7 +2,7 @@ import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/peers/peer.js'
 import { MtInvalidPeerTypeError } from '../../types/errors.js'
 import { User } from '../../types/peers/user.js'
-import { isInputPeerChannel, isInputPeerChat, isInputPeerUser, toInputChannel } from '../../utils/peer-utils.js'
+import { isInputPeerUser } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -20,20 +20,10 @@ export async function getCreatorAfterLeave(
     throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
   }
 
-  let res
-  if (isInputPeerChannel(peer)) {
-    res = await client.call({
-      _: 'channels.getFutureCreatorAfterLeave',
-      channel: toInputChannel(peer),
-    })
-  } else if (isInputPeerChat(peer)) {
-    res = await client.call({
-      _: 'messages.getFutureChatCreatorAfterLeave',
-      peer,
-    })
-  } else {
-    throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
-  }
+  const res = await client.call({
+    _: 'messages.getFutureChatCreatorAfterLeave',
+    peer,
+  })
 
   if (res._ === 'userEmpty') return null
 

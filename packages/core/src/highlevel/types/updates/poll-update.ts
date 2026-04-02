@@ -1,6 +1,7 @@
 import type { tl } from '../../../tl/index.js'
 
 import type { PeersIndex } from '../peers/peers-index.js'
+import Long from 'long'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Poll } from '../media/poll.js'
@@ -57,11 +58,16 @@ export class PollUpdate {
         id: this.raw.pollId,
         question: { _: 'textWithEntities', text: '', entities: [] },
         answers:
-                    this.raw.results.results?.map(res => ({
-                      _: 'pollAnswer',
-                      text: { _: 'textWithEntities', text: '', entities: [] },
-                      option: res.option,
-                    })) ?? [],
+          this.raw.results.results?.map(res => ({
+            _: 'pollAnswer' as const,
+            text: {
+              _: 'textWithEntities' as const,
+              text: '',
+              entities: [],
+            },
+            option: res.option,
+          })) ?? [],
+        hash: Long.ZERO,
       }
     }
 

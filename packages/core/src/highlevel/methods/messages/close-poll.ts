@@ -38,6 +38,7 @@ export async function closePoll(
         closed: true,
         question: { _: 'textWithEntities', text: '', entities: [] },
         answers: [],
+        hash: Long.ZERO,
       },
     },
   })

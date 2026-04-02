@@ -1,4 +1,3 @@
-/* eslint-disable ts/no-unsafe-assignment */
 import type { TlEntry } from '@mtcute/tl-utils'
 
 import { readFile } from 'node:fs/promises'
