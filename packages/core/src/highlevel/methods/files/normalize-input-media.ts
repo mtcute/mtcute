@@ -157,7 +157,7 @@ export async function _normalizeInputMedia(
       if (typeof ans === 'string') return { _: 'inputPollAnswer', text: inputTextToTl(ans) }
       if (tl.isAnyPollAnswer(ans)) return ans
       if ('media' in ans && ans.media) {
-        return _normalizeInputMedia(client, ans.media, params).then(m => ({
+        return _normalizeInputMedia(client, ans.media, params, true).then(m => ({
           _: 'inputPollAnswer' as const,
           text: inputTextToTl(ans.text),
           media: m,
