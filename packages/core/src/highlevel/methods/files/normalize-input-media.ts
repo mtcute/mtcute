@@ -152,6 +152,7 @@ export async function _normalizeInputMedia(
   }
 
   if (media.type === 'poll' || media.type === 'quiz') {
+    // eslint-disable-next-line ts/await-thenable
     const answers: tl.TypePollAnswer[] = await Promise.all(media.answers.map((ans) => {
       if (typeof ans === 'string') return { _: 'inputPollAnswer', text: inputTextToTl(ans) }
       if (tl.isAnyPollAnswer(ans)) return ans
