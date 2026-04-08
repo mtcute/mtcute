@@ -1,3 +1,4 @@
+import type Long from 'long'
 import type { ITelegramClient } from '../../client.types.js'
 import type { ReplyMarkup } from '../../types/bots/keyboards/index.js'
 import type { InputMediaLike } from '../../types/media/input-media/types.js'
@@ -8,8 +9,8 @@ import type { CommonSendParams } from './send-common.js'
 import { randomLong } from '../../../utils/long-utils.js'
 import { BotKeyboard } from '../../types/bots/keyboards/index.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
-import { _normalizeInputText } from '../misc/normalize-text.js'
 
+import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _findMessageInUpdate } from './find-in-update.js'
 import { _processCommonSendParameters } from './send-common.js'
@@ -30,6 +31,9 @@ export async function sendMedia(
   chatId: InputPeerLike,
   media: InputMediaLike | string,
   params?: CommonSendParams & {
+    /** Override the default random ID, for streaming drafts */
+    randomId?: Long
+
     /**
      * For bots: inline or reply markup or an instruction
      * to hide a reply keyboard or to force a reply.
@@ -92,7 +96,7 @@ export async function sendMedia(
 
   const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
 
-  const randomId = randomLong()
+  const randomId = params.randomId ?? randomLong()
   const res = await client.call(
     {
       _: 'messages.sendMedia',

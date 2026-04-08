@@ -1,5 +1,6 @@
-import type { tl } from '../../../tl/index.js'
+import type Long from 'long'
 
+import type { tl } from '../../../tl/index.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { ReplyMarkup } from '../../types/bots/keyboards/index.js'
 import type { InputText } from '../../types/misc/entities.js'
@@ -14,8 +15,8 @@ import { PeersIndex } from '../../types/peers/index.js'
 import { createDummyUpdate } from '../../updates/utils.js'
 import { inputPeerToPeer } from '../../utils/peer-utils.js'
 import { _getRawPeerBatched } from '../chats/batched-queries.js'
-import { _normalizeInputText } from '../misc/normalize-text.js'
 
+import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _findMessageInUpdate } from './find-in-update.js'
 import { _processCommonSendParameters } from './send-common.js'
@@ -32,6 +33,9 @@ export async function sendText(
   chatId: InputPeerLike,
   text: InputText,
   params?: CommonSendParams & {
+    /** Override the default random ID, for streaming drafts */
+    randomId?: Long
+
     /**
      * For bots: inline or reply markup or an instruction
      * to hide a reply keyboard or to force a reply.
@@ -63,7 +67,7 @@ export async function sendText(
     params,
   )
 
-  const randomId = randomLong()
+  const randomId = params.randomId ?? randomLong()
   const res = await client.call(
     {
       _: 'messages.sendMessage',

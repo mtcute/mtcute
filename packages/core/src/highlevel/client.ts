@@ -11,6 +11,7 @@ import type { GetForumTopicsOffset } from './methods/forums/get-forum-topics.js'
 import type { InputStarGiftAttributeIds, ResaleStarGiftsMeta } from './methods/gifts/get-resale-star-gifts.js'
 import type { StarGiftUpgradeOptions } from './methods/gifts/get-star-gift-upgrade-options.js'
 import type { GetInviteLinksOffset } from './methods/invite-links/get-invite-links.js'
+import type { StreamingDraft } from './methods/messages/create-streaming-draft.js'
 import type { DeleteMessagesParams } from './methods/messages/delete-messages.js'
 import type { ForwardMessageOptions } from './methods/messages/forward-messages.js'
 import type { GetHistoryOffset } from './methods/messages/get-history.js'
@@ -186,6 +187,7 @@ import { iterInviteLinks } from './methods/invite-links/iter-invite-links.js'
 import { revokeInviteLink } from './methods/invite-links/revoke-invite-link.js'
 import { appendTodoList } from './methods/messages/append-todo-list.js'
 import { closePoll } from './methods/messages/close-poll.js'
+import { createStreamingDraft } from './methods/messages/create-streaming-draft.js'
 import { deleteMessages, deleteMessagesById } from './methods/messages/delete-messages.js'
 import { deleteScheduledMessages } from './methods/messages/delete-scheduled-messages.js'
 import { editInlineMessage } from './methods/messages/edit-inline-message.js'
@@ -3740,6 +3742,35 @@ export interface TelegramClient extends ITelegramClient {
       shouldDispatch?: true
     }): Promise<Poll>
   /**
+   * Create a streaming text message draft
+   *
+   * **Available**: 👤 users only
+   *
+   * @param chatId  Chat ID
+   * @param params
+   */
+  createStreamingDraft(
+    chatId: InputPeerLike,
+    params?: {
+    /**
+     * Unique identifier of the business connection on behalf of which the action will be sent
+     */
+      businessConnectionId?: string
+
+      /**
+       * For comment threads, ID of the thread (i.e. top message)
+       */
+      threadId?: number
+
+      /**
+       * Mode of the draft's `send` method
+       *
+       * - `append` - appends the text to the previous draft
+       * - `replace` - replaces the previous draft with the new one
+       */
+      mode?: 'append' | 'replace'
+    }): Promise<StreamingDraft>
+  /**
    * Delete messages by their IDs
    *
    * **Available**: 👤 users only
@@ -4736,10 +4767,13 @@ export interface TelegramClient extends ITelegramClient {
     chatId: InputPeerLike,
     media: InputMediaLike | string,
     params?: CommonSendParams & {
-    /**
-     * For bots: inline or reply markup or an instruction
-     * to hide a reply keyboard or to force a reply.
-     */
+    /** Override the default random ID, for streaming drafts */
+      randomId?: Long
+
+      /**
+       * For bots: inline or reply markup or an instruction
+       * to hide a reply keyboard or to force a reply.
+       */
       replyMarkup?: ReplyMarkup
 
       /**
@@ -4886,10 +4920,13 @@ export interface TelegramClient extends ITelegramClient {
     chatId: InputPeerLike,
     text: InputText,
     params?: CommonSendParams & {
-    /**
-     * For bots: inline or reply markup or an instruction
-     * to hide a reply keyboard or to force a reply.
-     */
+    /** Override the default random ID, for streaming drafts */
+      randomId?: Long
+
+      /**
+       * For bots: inline or reply markup or an instruction
+       * to hide a reply keyboard or to force a reply.
+       */
       replyMarkup?: ReplyMarkup
 
       /**
@@ -7109,6 +7146,9 @@ TelegramClient.prototype.appendTodoList = function (...args) {
 }
 TelegramClient.prototype.closePoll = function (...args) {
   return closePoll(this._client, ...args)
+}
+TelegramClient.prototype.createStreamingDraft = function (...args) {
+  return createStreamingDraft(this._client, ...args)
 }
 TelegramClient.prototype.deleteMessagesById = function (...args) {
   return deleteMessagesById(this._client, ...args)
