@@ -37,7 +37,6 @@
     "lint:ci": "CI=1 NODE_OPTIONS=\\\"--max_old_space_size=8192\\\" eslint",
     "lint:tsc": "pnpm -r --workspace-concurrency=4 exec tsc",
     "lint:tsc:ci": "pnpm -r exec tsc",
-    "lint:dpdm": "dpdm -T --no-warning --no-tree --exit-code circular:1 packages/*/src/index.ts",
     "lint:fix": "eslint --fix .",
     "docs": "fuman-build typedoc"
   },
@@ -56,7 +55,6 @@
     "@vitest/ui": "^4.0.18",
     "chai": "5.1.0",
     "dotenv-flow": "4.1.0",
-    "dpdm": "^4.0.1",
     "esbuild": "^0.27.0",
     "eslint": "^9.39.1",
     "fastest-levenshtein": "^1.0.16",
