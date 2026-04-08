@@ -151,6 +151,9 @@ export interface InputMediaPhoto extends FileMixin, CaptionMixin {
    * Whether this photo should be hidden with a spoiler
    */
   spoiler?: boolean
+
+  /** If this is a live photo, the video representing it */
+  livePhotoVideo?: InputMediaLike
 }
 
 /**

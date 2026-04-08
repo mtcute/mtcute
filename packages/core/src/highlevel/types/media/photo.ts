@@ -1,10 +1,12 @@
 import type { tl } from '../../../tl/index.js'
 
+import type { Video } from './video.js'
 import { MtArgumentError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { FileLocation } from '../files/index.js'
 
+import { parseDocument } from './document-utils.js'
 import { Thumbnail } from './thumbnail.js'
 
 /**
@@ -162,6 +164,16 @@ export class Photo extends FileLocation {
     }
 
     return this.getThumbnail(this._bestSize.type)!.uniqueFileId
+  }
+
+  get livePhotoVideo(): Video | null {
+    if (!this.media?.video) return null
+    if (this.media.video._ !== 'document') return null
+
+    const parsed = parseDocument(this.media.video)
+    if (parsed.type !== 'video') return null
+
+    return parsed
   }
 
   /**

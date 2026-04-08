@@ -26,6 +26,7 @@
  *  - `Location`: Search for geolocations
  *  - `Contact`: Search for contacts
  *  - `Pinned`: Search for pinned messages
+ *  - `Poll`: Search for polls
  */
 export const SearchFilters = {
   Empty: { _: 'inputMessagesFilterEmpty' } as const,
@@ -51,4 +52,5 @@ export const SearchFilters = {
   Location: { _: 'inputMessagesFilterGeo' } as const,
   Contact: { _: 'inputMessagesFilterContacts' } as const,
   Pinned: { _: 'inputMessagesFilterPinned' } as const,
+  Polls: { _: 'inputMessagesFilterPoll' } as const,
 } as const

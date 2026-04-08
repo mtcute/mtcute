@@ -299,6 +299,13 @@ export async function _normalizeInputMedia(
     videoCover = inputMedia.id
   }
 
+  let livePhotoVideo: tl.TypeInputDocument | undefined
+  if (media.type === 'photo' && media.livePhotoVideo) {
+    const inputMedia = await _normalizeInputMedia(client, media.livePhotoVideo, params, true)
+    assertTypeIs('uploadMediaIfNeeded', inputMedia, 'inputMediaDocument')
+    livePhotoVideo = inputMedia.id
+  }
+
   const uploadPeer = params.uploadPeer ?? { _: 'inputPeerSelf' }
 
   const uploadMediaIfNeeded = async (inputMedia: tl.TypeInputMedia, photo: boolean): Promise<tl.TypeInputMedia> => {
@@ -325,6 +332,8 @@ export async function _normalizeInputMedia(
         },
         ttlSeconds: media.ttlSeconds,
         spoiler: media.type === 'video' && media.spoiler,
+        livePhoto: Boolean(livePhotoVideo),
+        video: livePhotoVideo,
       }
     }
     assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaDocument')
@@ -375,9 +384,9 @@ export async function _normalizeInputMedia(
         return uploadMediaIfNeeded(
           {
             _:
-                            parsed.type === tdFileId.FileType.Photo
-                              ? 'inputMediaPhotoExternal'
-                              : 'inputMediaDocumentExternal',
+              parsed.type === tdFileId.FileType.Photo
+                ? 'inputMediaPhotoExternal'
+                : 'inputMediaDocumentExternal',
             url: parsed.location.url,
             ttlSeconds: media.ttlSeconds,
             spoiler,
@@ -411,6 +420,8 @@ export async function _normalizeInputMedia(
       {
         _: 'inputMediaUploadedPhoto',
         file: inputFile,
+        livePhoto: Boolean(livePhotoVideo),
+        video: livePhotoVideo,
         ttlSeconds: media.ttlSeconds,
         spoiler: media.spoiler,
       },
