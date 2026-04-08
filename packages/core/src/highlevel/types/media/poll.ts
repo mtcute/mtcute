@@ -157,6 +157,36 @@ export class Poll {
     return this.raw.multipleChoice!
   }
 
+  /** Whether the current user is the creator of this poll */
+  get isCreator(): boolean {
+    return this.raw.creator!
+  }
+
+  /** Whether new options can be suggested to this poll */
+  get canAddAnswers(): boolean {
+    return !this.raw.closed && !this.raw.openAnswers
+  }
+
+  /** Whether retracting the vote is disabled in this poll */
+  get isRevotingDisabled(): boolean {
+    return this.raw.revotingDisabled!
+  }
+
+  /** Whether answers to this poll should be shuffled before showing to the user */
+  get shuffleAnswers(): boolean {
+    return this.raw.shuffleAnswers!
+  }
+
+  /** Whether the results of this poll are hidden until the end of the poll */
+  get hideResultsUntilClose(): boolean {
+    return this.raw.hideResultsUntilClose!
+  }
+
+  /** Whether the poll has unread votes */
+  get hasUnreaVotes(): boolean {
+    return this.results?.hasUnreadVotes ?? false
+  }
+
   /**
    * Solution for the quiz, only available
    * in case you have already answered
@@ -218,6 +248,10 @@ export class Poll {
         answers: this.raw.answers,
         closePeriod: this.raw.closePeriod,
         closeDate: this.raw.closeDate,
+        openAnswers: this.raw.openAnswers,
+        revotingDisabled: this.raw.revotingDisabled,
+        shuffleAnswers: this.raw.shuffleAnswers,
+        hideResultsUntilClose: this.raw.hideResultsUntilClose,
         hash: Long.ZERO,
       },
     }

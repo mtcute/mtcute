@@ -527,6 +527,18 @@ export interface InputMediaPoll extends CaptionMixin {
    * When `number` is used, UNIX time in ms is expected
    */
   closeDate?: number | Date
+
+  /** Whether participants can suggest new options to the poll */
+  openAnswers?: boolean
+
+  /** Whether retracting the votes should be disabled in the poll */
+  disableRevoting?: boolean
+
+  /** Whether answers to the poll should be shuffled before showing to the user */
+  shuffleAnswers?: boolean
+
+  /** Whether the results of the poll should be hidden until the end of the poll */
+  hideResultsUntilClose?: boolean
 }
 
 /**
