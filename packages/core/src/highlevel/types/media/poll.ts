@@ -1,11 +1,13 @@
 import type { tl } from '../../../tl/index.js'
-import type { PeersIndex } from '../peers/peers-index.js'
+import type { MessageMedia } from '../messages/message-media.js'
 
+import type { PeersIndex } from '../peers/peers-index.js'
 import Long from 'long'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MessageEntity } from '../messages/message-entity.js'
+import { _messageMediaFromTl } from '../messages/message-media.js'
 
 export class PollAnswer {
   constructor(
@@ -61,9 +63,14 @@ export class PollAnswer {
   get correct(): boolean {
     return Boolean(this.result?.correct)
   }
+
+  /** Media attached to this answer, if any */
+  get media(): MessageMedia | null {
+    return this.raw.media ? _messageMediaFromTl(null, this.raw.media) : null
+  }
 }
 
-memoizeGetters(PollAnswer, ['textEntities'])
+memoizeGetters(PollAnswer, ['textEntities', 'media'])
 makeInspectable(PollAnswer)
 
 export class Poll {
@@ -73,6 +80,7 @@ export class Poll {
     readonly raw: tl.TypePoll,
     readonly _peers: PeersIndex,
     readonly results?: tl.RawPollResults | undefined,
+    readonly attachedMedia?: MessageMedia | undefined,
   ) {}
 
   /**
@@ -175,6 +183,11 @@ export class Poll {
     return res
   }
 
+  /** Media attached to the solution, if any */
+  get solutionMedia(): MessageMedia | null {
+    return this.results?.solutionMedia ? _messageMediaFromTl(null, this.results.solutionMedia) : null
+  }
+
   /**
    * Input media TL object generated from this object,
    * to be used inside {@link InputMediaLike} and
@@ -193,6 +206,8 @@ export class Poll {
   get inputMedia(): tl.TypeInputMedia {
     return {
       _: 'inputMediaPoll',
+      attachedMedia: this.attachedMedia?.inputMedia,
+      solutionMedia: this.solutionMedia?.inputMedia,
       poll: {
         _: 'poll',
         closed: false,
@@ -209,5 +224,5 @@ export class Poll {
   }
 }
 
-memoizeGetters(Poll, ['answers', 'solutionEntities', 'questionEntities'])
-makeInspectable(Poll, undefined, ['inputMedia'])
+memoizeGetters(Poll, ['answers', 'solutionEntities', 'questionEntities', 'solutionMedia'])
+makeInspectable(Poll, ['attachedMedia'], ['inputMedia'])

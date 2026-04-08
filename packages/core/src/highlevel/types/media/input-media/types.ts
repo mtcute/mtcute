@@ -476,6 +476,9 @@ export interface InputMediaPoll extends CaptionMixin {
    */
   question: InputText
 
+  /** Media attached to the poll */
+  attachedMedia?: InputMediaLike
+
   /**
    * Answers of the poll.
    *
@@ -541,6 +544,9 @@ export interface InputMediaQuiz extends Omit<InputMediaPoll, 'type'> {
    * Explanation of the quiz solution
    */
   solution?: InputText
+
+  /** Media attached to the solution */
+  solutionMedia?: InputMediaLike
 }
 
 /**

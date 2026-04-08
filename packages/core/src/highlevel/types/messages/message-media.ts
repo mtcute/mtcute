@@ -85,7 +85,12 @@ export function _messageMediaFromTl(peers: PeersIndex | null, m: tl.TypeMessageM
         throw new MtTypeAssertionError("can't create poll without peers index", 'PeersIndex', 'null')
       }
 
-      return new Poll(m.poll, peers, m.results)
+      return new Poll(
+        m.poll,
+        peers,
+        m.results,
+        m.attachedMedia ? _messageMediaFromTl(peers, m.attachedMedia) : undefined,
+      )
     case 'messageMediaInvoice': {
       const extended
         = m.extendedMedia?._ === 'messageExtendedMedia' ? _messageMediaFromTl(peers, m.extendedMedia.media) : null

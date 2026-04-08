@@ -174,6 +174,11 @@ export async function _normalizeInputMedia(
     let solution: string | undefined
     let solutionEntities: tl.TypeMessageEntity[] | undefined
 
+    const [attachedMedia, solutionMedia] = await Promise.all([
+      media.attachedMedia ? _normalizeInputMedia(client, media.attachedMedia, params, true) : undefined,
+      media.type === 'quiz' && media.solutionMedia ? _normalizeInputMedia(client, media.solutionMedia, params, true) : undefined,
+    ])
+
     if (media.type === 'quiz') {
       let input = media.correct
       if (!Array.isArray(input)) input = [input]
@@ -186,6 +191,8 @@ export async function _normalizeInputMedia(
 
     return {
       _: 'inputMediaPoll',
+      attachedMedia,
+      solutionMedia,
       poll: {
         _: 'poll',
         closed: media.closed,
