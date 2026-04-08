@@ -117,6 +117,11 @@ export class RepliedMessageInfo {
     return this.raw.todoItemId ?? null
   }
 
+  /** If this is a reply to a specific poll option, its ID */
+  get pollOption(): Uint8Array | null {
+    return this.raw.pollOption ?? null
+  }
+
   /**
    * If replied-to message is available, chat where the message was sent.
    *

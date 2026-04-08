@@ -32,6 +32,11 @@ export interface CommonSendParams {
   replyToTodoItem?: number
 
   /**
+   * If this is a reply to a specific poll option, ID of that option
+   */
+  replyToPollOption?: Uint8Array
+
+  /**
    * When the chat is a monoforum you are an admin of, you **must** pass an
    * ID of a peer you are sending the message to.
    *
@@ -231,6 +236,7 @@ export async function _processCommonSendParameters(
       quoteOffset: params.quoteOffset,
       monoforumPeerId: params.toMonoforumPeer ? await resolvePeer(client, params.toMonoforumPeer) : undefined,
       todoItemId: params.replyToTodoItem,
+      pollOption: params.replyToPollOption,
     }
   } else if (params.toMonoforumPeer) {
     tlReplyTo = {
