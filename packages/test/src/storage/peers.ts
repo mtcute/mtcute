@@ -47,7 +47,7 @@ export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriv
     complete: TlBinaryWriter.serializeObject(__tlWriterMap, createStub('channel', { id: 123123 })),
   }
 
-  const stupPeerMinUser: IPeersRepository.PeerInfo = { ...stubPeerUser, isMin: true }
+  const stubPeerMinUser: IPeersRepository.PeerInfo = { ...stubPeerUser, isMin: true }
 
   describe('peers', () => {
     it('should be empty by default', async () => {
@@ -84,13 +84,13 @@ export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriv
 
     it('only getById should return min peers', async () => {
       await repo.deleteAll()
-      await repo.store(stupPeerMinUser)
+      await repo.store(stubPeerMinUser)
       await driver.save?.()
 
       expect(await repo.getByUsername('some_user')).toEqual(null)
       expect(await repo.getByPhone('78005553535')).toEqual(null)
 
-      expect(fixPeerInfo(await repo.getById(123123))).toEqual(stupPeerMinUser)
+      expect(fixPeerInfo(await repo.getById(123123))).toEqual(stubPeerMinUser)
     })
   })
 }
