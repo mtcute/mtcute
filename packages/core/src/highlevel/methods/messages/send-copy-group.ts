@@ -1,12 +1,11 @@
-import type { tl } from '../../../tl/index.js'
-
 import type { ITelegramClient } from '../../client.types.js'
+import type { InputMediaLike } from '../../types/index.js'
 import type { Message } from '../../types/messages/message.js'
 import type { InputPeerLike } from '../../types/peers/index.js'
 import type { CommonSendParams } from './send-common.js'
 import { MtArgumentError } from '../../../types/errors.js'
-import { isPresent } from '../../../utils/type-assertions.js'
 
+import { isPresent } from '../../../utils/type-assertions.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { getMessages } from './get-messages.js'
 import { sendMediaGroup } from './send-media-group.js'
@@ -58,16 +57,11 @@ export async function sendCopyGroup(
   return sendMediaGroup(
     client,
     toChatId,
-    msgs.map((msg) => {
-      const raw = msg.raw as tl.RawMessage
-
-      return {
-        type: 'auto',
-        file: msg.media!.inputMedia,
-        caption: raw.message,
-        entities: raw.entities,
-      }
-    }),
+    msgs.map(msg => ({
+      type: 'auto',
+      file: msg.media!.inputMedia,
+      caption: msg.textWithEntities,
+    } satisfies InputMediaLike)),
     rest,
   )
 }
