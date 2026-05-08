@@ -4,6 +4,7 @@ import type {
 } from '../index.js'
 import {
   BotChatJoinRequestUpdate,
+  BotGuestChatQuery,
   BotReactionCountUpdate,
   BotReactionUpdate,
   BotStoppedUpdate,
@@ -47,6 +48,8 @@ export function _parseUpdate({ update, peers }: RawUpdateInfo): ParsedUpdate | n
       return { name: 'chat_member', data: new ChatMemberUpdate(update, peers) }
     case 'updateBotInlineQuery':
       return { name: 'inline_query', data: new InlineQuery(update, peers) }
+    case 'updateBotGuestChatQuery':
+      return { name: 'bot_guest_chat_query', data: new BotGuestChatQuery(update, peers) }
     case 'updateBotInlineSend':
       return { name: 'chosen_inline_result', data: new ChosenInlineResult(update, peers) }
     case 'updateBotCallbackQuery':

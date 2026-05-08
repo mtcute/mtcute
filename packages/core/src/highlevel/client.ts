@@ -28,7 +28,7 @@ import type { InputStarsAmount } from './methods/premium/_normalize-stars-amount
 import type { CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
 import type { CanSendStoryResult } from './methods/stories/can-send-story.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
-import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
+import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotGuestChatQuery, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineMessage, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
 import type { ParsedUpdateHandlerParams } from './updates/parsed.js'
 import type { RawUpdateInfo } from './updates/types.js'
 import type { InputStringSessionData } from './utils/string-session.js'
@@ -49,6 +49,7 @@ import { signIn } from './methods/auth/sign-in.js'
 import { startTest } from './methods/auth/start-test.js'
 import { start } from './methods/auth/start.js'
 import { isSelfPeer } from './methods/auth/utils.js'
+import { answerBotGuestChatQuery } from './methods/bots/answer-bot-guest-chat-query.js'
 import { answerCallbackQuery } from './methods/bots/answer-callback-query.js'
 import { answerInlineQuery } from './methods/bots/answer-inline-query.js'
 import { answerPreCheckoutQuery } from './methods/bots/answer-pre-checkout-query.js'
@@ -370,6 +371,8 @@ export interface TelegramClient extends ITelegramClient {
   readonly onChatMemberUpdate: Emitter<ChatMemberUpdate>
   /** an inline query handler */
   readonly onInlineQuery: Emitter<InlineQuery>
+  /** a bot guest chat query handler */
+  readonly onBotGuestChatQuery: Emitter<BotGuestChatQuery>
   /** a chosen inline result handler */
   readonly onChosenInlineResult: Emitter<ChosenInlineResult>
   /** a callback query handler */
@@ -727,6 +730,16 @@ export interface TelegramClient extends ITelegramClient {
    */
   isSelfPeer(
     peer: tl.TypeInputPeer | tl.TypePeer | tl.TypeInputUser): boolean
+  /**
+   * Answer a bot guest chat query with a result.
+   *
+   * @param queryId  Query ID
+   * @param result  Result of the query
+   * @returns  ID of the inline message that was sent
+   */
+  answerBotGuestChatQuery(
+    queryId: tl.Long | BotGuestChatQuery,
+    result: InputInlineMessage | InputInlineResult): Promise<tl.TypeInputBotInlineMessageID>
   /**
    * Send an answer to a callback query.
    *
@@ -1517,6 +1530,8 @@ export interface TelegramClient extends ITelegramClient {
     }): Promise<void>
   /**
    * Edit the custom rank (title) of a group chat participant.
+   * **Available**: 👤 users only
+   *
    */
   editChatMemberRank(
     params: {
@@ -1703,6 +1718,8 @@ export interface TelegramClient extends ITelegramClient {
    * Get the user who will be made the creator of the chat/channel/supergroup if you were to leave it.
    *
    * You must be the creator of the chat/channel/supergroup to use this method.
+   * **Available**: 👤 users only
+   *
    */
   getCreatorAfterLeave(
     chatId: InputPeerLike): Promise<User | null>
@@ -2155,6 +2172,8 @@ export interface TelegramClient extends ITelegramClient {
    *
    * You must be the creator of the chat to use this method,
    * and your account must have 2FA enabled.
+   * **Available**: 👤 users only
+   *
    */
   transferChatOwnership(
     params: {
@@ -3767,6 +3786,8 @@ export interface TelegramClient extends ITelegramClient {
        *
        * - `append` - appends the text to the previous draft
        * - `replace` - replaces the previous draft with the new one
+       *
+       * @default  `replace`
        */
       mode?: 'append' | 'replace'
     }): Promise<StreamingDraft>
@@ -6521,6 +6542,7 @@ export class TelegramClient implements ITelegramClient {
     ;(this as any).onDeleteMessage = new Emitter()
     ;(this as any).onChatMemberUpdate = new Emitter()
     ;(this as any).onInlineQuery = new Emitter()
+    ;(this as any).onBotGuestChatQuery = new Emitter()
     ;(this as any).onChosenInlineResult = new Emitter()
     ;(this as any).onCallbackQuery = new Emitter()
     ;(this as any).onInlineCallbackQuery = new Emitter()
@@ -6595,6 +6617,9 @@ export class TelegramClient implements ITelegramClient {
                 break
               case 'inline_query':
                 this.onInlineQuery.emit(update.data)
+                break
+              case 'bot_guest_chat_query':
+                this.onBotGuestChatQuery.emit(update.data)
                 break
               case 'chosen_inline_result':
                 this.onChosenInlineResult.emit(update.data)
@@ -6711,6 +6736,9 @@ TelegramClient.prototype.start = function (...args) {
 }
 TelegramClient.prototype.isSelfPeer = function (...args) {
   return isSelfPeer(this._client, ...args)
+}
+TelegramClient.prototype.answerBotGuestChatQuery = function (...args) {
+  return answerBotGuestChatQuery(this._client, ...args)
 }
 TelegramClient.prototype.answerCallbackQuery = function (...args) {
   return answerCallbackQuery(this._client, ...args)

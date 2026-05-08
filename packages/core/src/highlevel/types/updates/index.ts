@@ -1,6 +1,7 @@
 import type { BusinessConnection, Message } from '../../types/index.js'
 
 import { BotChatJoinRequestUpdate } from './bot-chat-join-request.js'
+import { BotGuestChatQuery } from './bot-guest-chat-query.js'
 import { BotReactionCountUpdate, BotReactionUpdate } from './bot-reaction.js'
 import { BotStoppedUpdate } from './bot-stopped.js'
 import { BusinessMessage } from './business-message.js'
@@ -24,6 +25,7 @@ export type { ChatMemberUpdateType } from './chat-member-update.js'
 
 export {
   BotChatJoinRequestUpdate,
+  BotGuestChatQuery,
   BotReactionCountUpdate,
   BotReactionUpdate,
   BotStoppedUpdate,
@@ -55,6 +57,7 @@ export type ParsedUpdate
     | { name: 'delete_message', data: DeleteMessageUpdate }
     | { name: 'chat_member', data: ChatMemberUpdate }
     | { name: 'inline_query', data: InlineQuery }
+    | { name: 'bot_guest_chat_query', data: BotGuestChatQuery }
     | { name: 'chosen_inline_result', data: ChosenInlineResult }
     | { name: 'callback_query', data: CallbackQuery }
     | { name: 'inline_callback_query', data: InlineCallbackQuery }

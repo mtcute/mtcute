@@ -692,6 +692,7 @@ export class UpdatesManager {
             return missing
           }
           if (!(await fetchPeer(msg.viaBotId))) return missing
+          if (!(await fetchPeer(msg.guestchatViaFrom))) return missing
 
           if (msg.entities) {
             for (const ent of msg.entities) {
@@ -787,6 +788,7 @@ export class UpdatesManager {
 
     if (msg._ === 'message') {
       store(msg.viaBotId)
+      store(msg.guestchatViaFrom)
       store(msg.fwdFrom?.fromId)
 
       if (msg.media) {

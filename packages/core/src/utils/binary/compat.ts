@@ -134,6 +134,7 @@ function mapCompatEmojiStatus(obj: tlCompat.TypeEmojiStatus): tl.TypeEmojiStatus
 function mapCompatPoll(obj: tlCompat.TypePoll): tl.TypePoll {
   switch (obj._) {
     case 'poll_layer223':
+    case 'poll_layer224':
       return {
         ...obj,
         _: 'poll',
@@ -251,6 +252,7 @@ function mapCompatMessage(obj: tlCompat.TypeMessage): tl.TypeMessage {
     case 'message_layer216':
     case 'message_layer220':
     case 'message_layer222':
+    case 'message_layer224':
       return {
         ...obj,
         _: 'message',
@@ -373,6 +375,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'message_layer216':
     case 'message_layer220':
     case 'message_layer222':
+    case 'message_layer224':
     case 'messageService_layer204':
       return mapCompatMessage(obj)
     case 'messageReplyHeader_layer206':
@@ -419,6 +422,8 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
       return mapCompatPoll(obj)
     case 'pollAnswer_layer223':
       return replaceType(obj, 'pollAnswer')
+    case 'poll_layer224':
+      return mapCompatPoll(obj)
     case 'keyboardButton_layer221':
     case 'keyboardButtonUrl_layer221':
     case 'keyboardButtonCallback_layer221':

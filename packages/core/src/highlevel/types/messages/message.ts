@@ -354,6 +354,16 @@ export class Message {
   }
 
   /**
+   * For messages sent via a bot guest chat,
+   * the peer who initiated it
+   */
+  get guestChatViaFrom(): Peer | null {
+    if (this.raw._ !== 'message' || !this.raw.guestchatViaFrom) return null
+
+    return parsePeer(this.raw.guestchatViaFrom, this._peers)
+  }
+
+  /**
    * Message text or media caption.
    *
    * Empty string for service messages
@@ -580,5 +590,6 @@ memoizeGetters(Message, [
   'reactions',
   'factCheck',
   'suggestedPost',
+  'guestChatViaFrom',
 ])
 makeInspectable(Message, ['isScheduled'], ['link'])

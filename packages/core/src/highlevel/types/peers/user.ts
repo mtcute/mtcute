@@ -157,6 +157,11 @@ export class User {
     return this.raw.botCanManageBots!
   }
 
+  /** Whether this bot supports bot guest chats */
+  get isBotWithGuestChat(): boolean {
+    return this.raw.botGuestchat!
+  }
+
   /** Whether this user has been verified by Telegram */
   get isVerified(): boolean {
     return this.raw.verified!

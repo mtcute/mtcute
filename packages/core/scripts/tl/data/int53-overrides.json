@@ -8,6 +8,9 @@
   ],
   "class": {
     "_": "Dummy line teehee~",
+    "aiComposeTone": [
+      "author_id"
+    ],
     "attachMenuBot": [
       "bot_id"
     ],

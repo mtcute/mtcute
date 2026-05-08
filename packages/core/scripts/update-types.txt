@@ -5,6 +5,7 @@ message_group = Message[] + State in MessageContext
 delete_message = DeleteMessageUpdate
 chat_member: ChatMemberUpdate = ChatMemberUpdate
 inline_query = InlineQuery in InlineQueryContext
+bot_guest_chat_query = BotGuestChatQuery in BotGuestChatQueryContext
 chosen_inline_result = ChosenInlineResult in ChosenInlineResultContext
 callback_query = CallbackQuery + State in CallbackQueryContext
 inline_callback_query = InlineCallbackQuery + State in InlineCallbackQueryContext

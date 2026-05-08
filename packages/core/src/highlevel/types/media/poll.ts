@@ -187,6 +187,21 @@ export class Poll {
     return this.results?.hasUnreadVotes ?? false
   }
 
+  /** Whether voting in this poll is restricted to channel subscribers */
+  get isSubscribersOnly(): boolean {
+    return this.raw.subscribersOnly!
+  }
+
+  /** ISO2 country codes the poll is restricted to */
+  get countries(): ReadonlyArray<string> | null {
+    return this.raw.countriesIso2 ?? null
+  }
+
+  /** Whether the current user can view extended statistics for this poll */
+  get canViewStats(): boolean {
+    return this.results?.canViewStats ?? false
+  }
+
   /**
    * Solution for the quiz, only available
    * in case you have already answered
@@ -252,6 +267,8 @@ export class Poll {
         revotingDisabled: this.raw.revotingDisabled,
         shuffleAnswers: this.raw.shuffleAnswers,
         hideResultsUntilClose: this.raw.hideResultsUntilClose,
+        subscribersOnly: this.raw.subscribersOnly,
+        countriesIso2: this.raw.countriesIso2,
         hash: Long.ZERO,
       },
     }
