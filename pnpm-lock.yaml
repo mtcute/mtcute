@@ -114,8 +114,8 @@ importers:
         specifier: 0.0.1
         version: 0.0.1
       better-sqlite3:
-        specifier: 12.4.1
-        version: 12.4.1
+        specifier: 12.10.0
+        version: 12.10.0
       chai:
         specifier: ^4.3.10
         version: 4.5.0
@@ -361,15 +361,15 @@ importers:
         specifier: workspace:^
         version: link:../wasm
       better-sqlite3:
-        specifier: ^12.4.1
-        version: 12.4.1
+        specifier: ^12.10.0
+        version: 12.10.0
     devDependencies:
       '@mtcute/test':
         specifier: workspace:^
         version: link:../test
       '@types/better-sqlite3':
-        specifier: 7.6.4
-        version: 7.6.4
+        specifier: 7.6.13
+        version: 7.6.13
 
   packages/postgres:
     dependencies:
@@ -1572,8 +1572,8 @@ packages:
   '@types/argparse@1.0.38':
     resolution: {integrity: sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==}
 
-  '@types/better-sqlite3@7.6.4':
-    resolution: {integrity: sha512-dzrRZCYPXIXfSR1/surNbJ/grU3scTaygS0OMzjlGf71i9sc2fGyHPXXiXmEvNIoE0cGwsanEFMVJxPXmco9Eg==}
+  '@types/better-sqlite3@7.6.13':
+    resolution: {integrity: sha512-NMv9ASNARoKksWtsq/SHakpYAYnhBrQgGD8zkLYk/jaK8jUGn08CfEdTRgYhMypUQAfzSP8W6gNLe0q19/t4VA==}
 
   '@types/bun@1.3.4':
     resolution: {integrity: sha512-EEPTKXHP+zKGPkhRLv+HI0UEX8/o+65hqARxLy8Ov5rIxMBPNTjeZww00CIihrIQGEQBYg+0roO5qOnS/7boGA==}
@@ -1937,9 +1937,9 @@ packages:
     resolution: {integrity: sha512-k9xFKplee6KIio3IDbwj+uaCLpqzOwakOgmqzPezM0sFJlFKcg30vk2wOiAJtkTSfx0SSQDSe8q+mWA/fSH5Zg==}
     hasBin: true
 
-  better-sqlite3@12.4.1:
-    resolution: {integrity: sha512-3yVdyZhklTiNrtg+4WqHpJpFDd+WHTg2oM7UcR80GqL05AOV0xEJzc6qNvFYoEtE+hRp1n9MpN6/+4yhlGkDXQ==}
-    engines: {node: 20.x || 22.x || 23.x || 24.x}
+  better-sqlite3@12.10.0:
+    resolution: {integrity: sha512-CyzaZRQKyHkB2ZInfTTl2nvT33EbDpjkLEbE8/Zck3Ll6O0qqvuGdrJ45HgtH+HykRg88ITY3AdreBGN70aBSQ==}
+    engines: {node: 20.x || 22.x || 23.x || 24.x || 25.x || 26.x}
 
   bindings@1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
@@ -4843,7 +4843,7 @@ snapshots:
       '@mtcute/html-parser': link:packages/html-parser
       '@mtcute/markdown-parser': link:packages/markdown-parser
       '@mtcute/wasm': link:packages/wasm
-      better-sqlite3: 12.4.1
+      better-sqlite3: 12.10.0
     transitivePeerDependencies:
       - ws
 
@@ -5003,7 +5003,7 @@ snapshots:
 
   '@types/argparse@1.0.38': {}
 
-  '@types/better-sqlite3@7.6.4':
+  '@types/better-sqlite3@7.6.13':
     dependencies:
       '@types/node': 24.10.3
 
@@ -5538,7 +5538,7 @@ snapshots:
 
   baseline-browser-mapping@2.9.7: {}
 
-  better-sqlite3@12.4.1:
+  better-sqlite3@12.10.0:
     dependencies:
       bindings: 1.5.0
       prebuild-install: 7.1.3
