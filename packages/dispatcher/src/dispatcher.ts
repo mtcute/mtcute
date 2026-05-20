@@ -30,6 +30,7 @@ import type { UpdateContext } from './context/base.js'
 import type { BusinessMessageContext } from './context/business-message.js'
 
 import type {
+  BotGuestChatQueryContext,
   BusinessCallbackQueryContext,
   CallbackQueryContext,
   ChatJoinRequestUpdateContext,
@@ -44,6 +45,7 @@ import type { filters, UpdateFilter } from './filters/index.js'
 // begin-codegen-imports
 import type {
   BotChatJoinRequestHandler,
+  BotGuestChatQueryHandler,
   BotReactionCountUpdateHandler,
   BotReactionUpdateHandler,
   BotStoppedHandler,
@@ -1230,10 +1232,7 @@ export class Dispatcher<State extends object = never> {
    * @param handler  New message handler
    * @param group  Handler group index
    */
-  onNewMessage(
-    handler: NewMessageHandler<MessageContext, State extends never ? never : UpdateState<State>>['callback'],
-    group?: number,
-  ): void
+  onNewMessage(handler: NewMessageHandler<MessageContext, State extends never ? never : UpdateState<State>>['callback'], group?: number): void
 
   /**
    * Register a new message handler with a filter
@@ -1244,11 +1243,8 @@ export class Dispatcher<State extends object = never> {
    */
   onNewMessage<Mod>(
     filter: UpdateFilter<MessageContext, Mod, State>,
-    handler: NewMessageHandler<
-      filters.Modify<MessageContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: NewMessageHandler<filters.Modify<MessageContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /**
@@ -1260,11 +1256,8 @@ export class Dispatcher<State extends object = never> {
    */
   onNewMessage<Mod>(
     filter: UpdateFilter<MessageContext, Mod>,
-    handler: NewMessageHandler<
-      filters.Modify<MessageContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: NewMessageHandler<filters.Modify<MessageContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /** @internal */
@@ -1278,10 +1271,7 @@ export class Dispatcher<State extends object = never> {
    * @param handler  Edit message handler
    * @param group  Handler group index
    */
-  onEditMessage(
-    handler: EditMessageHandler<MessageContext, State extends never ? never : UpdateState<State>>['callback'],
-    group?: number,
-  ): void
+  onEditMessage(handler: EditMessageHandler<MessageContext, State extends never ? never : UpdateState<State>>['callback'], group?: number): void
 
   /**
    * Register an edit message handler with a filter
@@ -1292,11 +1282,8 @@ export class Dispatcher<State extends object = never> {
    */
   onEditMessage<Mod>(
     filter: UpdateFilter<MessageContext, Mod, State>,
-    handler: EditMessageHandler<
-      filters.Modify<MessageContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: EditMessageHandler<filters.Modify<MessageContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /**
@@ -1308,11 +1295,8 @@ export class Dispatcher<State extends object = never> {
    */
   onEditMessage<Mod>(
     filter: UpdateFilter<MessageContext, Mod>,
-    handler: EditMessageHandler<
-      filters.Modify<MessageContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: EditMessageHandler<filters.Modify<MessageContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /** @internal */
@@ -1326,10 +1310,7 @@ export class Dispatcher<State extends object = never> {
    * @param handler  Message group handler
    * @param group  Handler group index
    */
-  onMessageGroup(
-    handler: MessageGroupHandler<MessageContext, State extends never ? never : UpdateState<State>>['callback'],
-    group?: number,
-  ): void
+  onMessageGroup(handler: MessageGroupHandler<MessageContext, State extends never ? never : UpdateState<State>>['callback'], group?: number): void
 
   /**
    * Register a message group handler with a filter
@@ -1340,11 +1321,8 @@ export class Dispatcher<State extends object = never> {
    */
   onMessageGroup<Mod>(
     filter: UpdateFilter<MessageContext, Mod, State>,
-    handler: MessageGroupHandler<
-      filters.Modify<MessageContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: MessageGroupHandler<filters.Modify<MessageContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /**
@@ -1356,11 +1334,8 @@ export class Dispatcher<State extends object = never> {
    */
   onMessageGroup<Mod>(
     filter: UpdateFilter<MessageContext, Mod>,
-    handler: MessageGroupHandler<
-      filters.Modify<MessageContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: MessageGroupHandler<filters.Modify<MessageContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /** @internal */
@@ -1386,7 +1361,7 @@ export class Dispatcher<State extends object = never> {
   onDeleteMessage<Mod>(
     filter: UpdateFilter<UpdateContext<DeleteMessageUpdate>, Mod>,
     handler: DeleteMessageHandler<filters.Modify<UpdateContext<DeleteMessageUpdate>, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1412,7 +1387,7 @@ export class Dispatcher<State extends object = never> {
   onChatMemberUpdate<Mod>(
     filter: UpdateFilter<UpdateContext<ChatMemberUpdate>, Mod>,
     handler: ChatMemberUpdateHandler<filters.Modify<UpdateContext<ChatMemberUpdate>, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1438,12 +1413,38 @@ export class Dispatcher<State extends object = never> {
   onInlineQuery<Mod>(
     filter: UpdateFilter<InlineQueryContext, Mod>,
     handler: InlineQueryHandler<filters.Modify<InlineQueryContext, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
   onInlineQuery(filter: any, handler?: any, group?: number): void {
     this._addKnownHandler('inline_query', filter, handler, group)
+  }
+
+  /**
+   * Register a bot guest chat query handler without any filters
+   *
+   * @param handler  Bot guest chat query handler
+   * @param group  Handler group index
+   */
+  onBotGuestChatQuery(handler: BotGuestChatQueryHandler['callback'], group?: number): void
+
+  /**
+   * Register a bot guest chat query handler with a filter
+   *
+   * @param filter  Update filter
+   * @param handler  Bot guest chat query handler
+   * @param group  Handler group index
+   */
+  onBotGuestChatQuery<Mod>(
+    filter: UpdateFilter<BotGuestChatQueryContext, Mod>,
+    handler: BotGuestChatQueryHandler<filters.Modify<BotGuestChatQueryContext, Mod>>['callback'],
+    group?: number
+  ): void
+
+  /** @internal */
+  onBotGuestChatQuery(filter: any, handler?: any, group?: number): void {
+    this._addKnownHandler('bot_guest_chat_query', filter, handler, group)
   }
 
   /**
@@ -1464,7 +1465,7 @@ export class Dispatcher<State extends object = never> {
   onChosenInlineResult<Mod>(
     filter: UpdateFilter<ChosenInlineResultContext, Mod>,
     handler: ChosenInlineResultHandler<filters.Modify<ChosenInlineResultContext, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1478,13 +1479,7 @@ export class Dispatcher<State extends object = never> {
    * @param handler  Callback query handler
    * @param group  Handler group index
    */
-  onCallbackQuery(
-    handler: CallbackQueryHandler<
-      CallbackQueryContext,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
-  ): void
+  onCallbackQuery(handler: CallbackQueryHandler<CallbackQueryContext, State extends never ? never : UpdateState<State>>['callback'], group?: number): void
 
   /**
    * Register a callback query handler with a filter
@@ -1495,11 +1490,8 @@ export class Dispatcher<State extends object = never> {
    */
   onCallbackQuery<Mod>(
     filter: UpdateFilter<CallbackQueryContext, Mod, State>,
-    handler: CallbackQueryHandler<
-      filters.Modify<CallbackQueryContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: CallbackQueryHandler<filters.Modify<CallbackQueryContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /**
@@ -1511,11 +1503,8 @@ export class Dispatcher<State extends object = never> {
    */
   onCallbackQuery<Mod>(
     filter: UpdateFilter<CallbackQueryContext, Mod>,
-    handler: CallbackQueryHandler<
-      filters.Modify<CallbackQueryContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: CallbackQueryHandler<filters.Modify<CallbackQueryContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /** @internal */
@@ -1529,13 +1518,7 @@ export class Dispatcher<State extends object = never> {
    * @param handler  Inline callback query handler
    * @param group  Handler group index
    */
-  onInlineCallbackQuery(
-    handler: InlineCallbackQueryHandler<
-      InlineCallbackQueryContext,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
-  ): void
+  onInlineCallbackQuery(handler: InlineCallbackQueryHandler<InlineCallbackQueryContext, State extends never ? never : UpdateState<State>>['callback'], group?: number): void
 
   /**
    * Register an inline callback query handler with a filter
@@ -1546,11 +1529,8 @@ export class Dispatcher<State extends object = never> {
    */
   onInlineCallbackQuery<Mod>(
     filter: UpdateFilter<InlineCallbackQueryContext, Mod, State>,
-    handler: InlineCallbackQueryHandler<
-      filters.Modify<InlineCallbackQueryContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: InlineCallbackQueryHandler<filters.Modify<InlineCallbackQueryContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /**
@@ -1562,11 +1542,8 @@ export class Dispatcher<State extends object = never> {
    */
   onInlineCallbackQuery<Mod>(
     filter: UpdateFilter<InlineCallbackQueryContext, Mod>,
-    handler: InlineCallbackQueryHandler<
-      filters.Modify<InlineCallbackQueryContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: InlineCallbackQueryHandler<filters.Modify<InlineCallbackQueryContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /** @internal */
@@ -1580,13 +1557,7 @@ export class Dispatcher<State extends object = never> {
    * @param handler  Business callback query handler
    * @param group  Handler group index
    */
-  onBusinessCallbackQuery(
-    handler: BusinessCallbackQueryHandler<
-      BusinessCallbackQueryContext,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
-  ): void
+  onBusinessCallbackQuery(handler: BusinessCallbackQueryHandler<BusinessCallbackQueryContext, State extends never ? never : UpdateState<State>>['callback'], group?: number): void
 
   /**
    * Register a business callback query handler with a filter
@@ -1597,11 +1568,8 @@ export class Dispatcher<State extends object = never> {
    */
   onBusinessCallbackQuery<Mod>(
     filter: UpdateFilter<BusinessCallbackQueryContext, Mod, State>,
-    handler: BusinessCallbackQueryHandler<
-      filters.Modify<BusinessCallbackQueryContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: BusinessCallbackQueryHandler<filters.Modify<BusinessCallbackQueryContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /**
@@ -1613,11 +1581,8 @@ export class Dispatcher<State extends object = never> {
    */
   onBusinessCallbackQuery<Mod>(
     filter: UpdateFilter<BusinessCallbackQueryContext, Mod>,
-    handler: BusinessCallbackQueryHandler<
-      filters.Modify<BusinessCallbackQueryContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: BusinessCallbackQueryHandler<filters.Modify<BusinessCallbackQueryContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /** @internal */
@@ -1643,7 +1608,7 @@ export class Dispatcher<State extends object = never> {
   onPollUpdate<Mod>(
     filter: UpdateFilter<UpdateContext<PollUpdate>, Mod>,
     handler: PollUpdateHandler<filters.Modify<UpdateContext<PollUpdate>, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1669,7 +1634,7 @@ export class Dispatcher<State extends object = never> {
   onPollVote<Mod>(
     filter: UpdateFilter<UpdateContext<PollVoteUpdate>, Mod>,
     handler: PollVoteHandler<filters.Modify<UpdateContext<PollVoteUpdate>, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1695,7 +1660,7 @@ export class Dispatcher<State extends object = never> {
   onUserStatusUpdate<Mod>(
     filter: UpdateFilter<UpdateContext<UserStatusUpdate>, Mod>,
     handler: UserStatusUpdateHandler<filters.Modify<UpdateContext<UserStatusUpdate>, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1721,7 +1686,7 @@ export class Dispatcher<State extends object = never> {
   onUserTyping<Mod>(
     filter: UpdateFilter<UpdateContext<UserTypingUpdate>, Mod>,
     handler: UserTypingHandler<filters.Modify<UpdateContext<UserTypingUpdate>, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1747,7 +1712,7 @@ export class Dispatcher<State extends object = never> {
   onHistoryRead<Mod>(
     filter: UpdateFilter<UpdateContext<HistoryReadUpdate>, Mod>,
     handler: HistoryReadHandler<filters.Modify<UpdateContext<HistoryReadUpdate>, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1773,7 +1738,7 @@ export class Dispatcher<State extends object = never> {
   onBotStopped<Mod>(
     filter: UpdateFilter<UpdateContext<BotStoppedUpdate>, Mod>,
     handler: BotStoppedHandler<filters.Modify<UpdateContext<BotStoppedUpdate>, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1799,7 +1764,7 @@ export class Dispatcher<State extends object = never> {
   onBotChatJoinRequest<Mod>(
     filter: UpdateFilter<ChatJoinRequestUpdateContext, Mod>,
     handler: BotChatJoinRequestHandler<filters.Modify<ChatJoinRequestUpdateContext, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1825,7 +1790,7 @@ export class Dispatcher<State extends object = never> {
   onChatJoinRequest<Mod>(
     filter: UpdateFilter<UpdateContext<ChatJoinRequestUpdate>, Mod>,
     handler: ChatJoinRequestHandler<filters.Modify<UpdateContext<ChatJoinRequestUpdate>, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1851,7 +1816,7 @@ export class Dispatcher<State extends object = never> {
   onPreCheckoutQuery<Mod>(
     filter: UpdateFilter<PreCheckoutQueryContext, Mod>,
     handler: PreCheckoutQueryHandler<filters.Modify<PreCheckoutQueryContext, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1877,7 +1842,7 @@ export class Dispatcher<State extends object = never> {
   onStoryUpdate<Mod>(
     filter: UpdateFilter<UpdateContext<StoryUpdate>, Mod>,
     handler: StoryUpdateHandler<filters.Modify<UpdateContext<StoryUpdate>, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1903,7 +1868,7 @@ export class Dispatcher<State extends object = never> {
   onDeleteStory<Mod>(
     filter: UpdateFilter<UpdateContext<DeleteStoryUpdate>, Mod>,
     handler: DeleteStoryHandler<filters.Modify<UpdateContext<DeleteStoryUpdate>, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1929,7 +1894,7 @@ export class Dispatcher<State extends object = never> {
   onBotReactionUpdate<Mod>(
     filter: UpdateFilter<UpdateContext<BotReactionUpdate>, Mod>,
     handler: BotReactionUpdateHandler<filters.Modify<UpdateContext<BotReactionUpdate>, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1955,7 +1920,7 @@ export class Dispatcher<State extends object = never> {
   onBotReactionCountUpdate<Mod>(
     filter: UpdateFilter<UpdateContext<BotReactionCountUpdate>, Mod>,
     handler: BotReactionCountUpdateHandler<filters.Modify<UpdateContext<BotReactionCountUpdate>, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1981,7 +1946,7 @@ export class Dispatcher<State extends object = never> {
   onBusinessConnectionUpdate<Mod>(
     filter: UpdateFilter<UpdateContext<BusinessConnection>, Mod>,
     handler: BusinessConnectionUpdateHandler<filters.Modify<UpdateContext<BusinessConnection>, Mod>>['callback'],
-    group?: number,
+    group?: number
   ): void
 
   /** @internal */
@@ -1995,13 +1960,7 @@ export class Dispatcher<State extends object = never> {
    * @param handler  New business message handler
    * @param group  Handler group index
    */
-  onNewBusinessMessage(
-    handler: NewBusinessMessageHandler<
-      BusinessMessageContext,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
-  ): void
+  onNewBusinessMessage(handler: NewBusinessMessageHandler<BusinessMessageContext, State extends never ? never : UpdateState<State>>['callback'], group?: number): void
 
   /**
    * Register a new business message handler with a filter
@@ -2012,11 +1971,8 @@ export class Dispatcher<State extends object = never> {
    */
   onNewBusinessMessage<Mod>(
     filter: UpdateFilter<BusinessMessageContext, Mod, State>,
-    handler: NewBusinessMessageHandler<
-      filters.Modify<BusinessMessageContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: NewBusinessMessageHandler<filters.Modify<BusinessMessageContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /**
@@ -2028,11 +1984,8 @@ export class Dispatcher<State extends object = never> {
    */
   onNewBusinessMessage<Mod>(
     filter: UpdateFilter<BusinessMessageContext, Mod>,
-    handler: NewBusinessMessageHandler<
-      filters.Modify<BusinessMessageContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: NewBusinessMessageHandler<filters.Modify<BusinessMessageContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /** @internal */
@@ -2046,13 +1999,7 @@ export class Dispatcher<State extends object = never> {
    * @param handler  Edit business message handler
    * @param group  Handler group index
    */
-  onEditBusinessMessage(
-    handler: EditBusinessMessageHandler<
-      BusinessMessageContext,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
-  ): void
+  onEditBusinessMessage(handler: EditBusinessMessageHandler<BusinessMessageContext, State extends never ? never : UpdateState<State>>['callback'], group?: number): void
 
   /**
    * Register an edit business message handler with a filter
@@ -2063,11 +2010,8 @@ export class Dispatcher<State extends object = never> {
    */
   onEditBusinessMessage<Mod>(
     filter: UpdateFilter<BusinessMessageContext, Mod, State>,
-    handler: EditBusinessMessageHandler<
-      filters.Modify<BusinessMessageContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: EditBusinessMessageHandler<filters.Modify<BusinessMessageContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /**
@@ -2079,11 +2023,8 @@ export class Dispatcher<State extends object = never> {
    */
   onEditBusinessMessage<Mod>(
     filter: UpdateFilter<BusinessMessageContext, Mod>,
-    handler: EditBusinessMessageHandler<
-      filters.Modify<BusinessMessageContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: EditBusinessMessageHandler<filters.Modify<BusinessMessageContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /** @internal */
@@ -2097,13 +2038,7 @@ export class Dispatcher<State extends object = never> {
    * @param handler  Business message group handler
    * @param group  Handler group index
    */
-  onBusinessMessageGroup(
-    handler: BusinessMessageGroupHandler<
-      BusinessMessageContext,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
-  ): void
+  onBusinessMessageGroup(handler: BusinessMessageGroupHandler<BusinessMessageContext, State extends never ? never : UpdateState<State>>['callback'], group?: number): void
 
   /**
    * Register a business message group handler with a filter
@@ -2114,11 +2049,8 @@ export class Dispatcher<State extends object = never> {
    */
   onBusinessMessageGroup<Mod>(
     filter: UpdateFilter<BusinessMessageContext, Mod, State>,
-    handler: BusinessMessageGroupHandler<
-      filters.Modify<BusinessMessageContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: BusinessMessageGroupHandler<filters.Modify<BusinessMessageContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /**
@@ -2130,11 +2062,8 @@ export class Dispatcher<State extends object = never> {
    */
   onBusinessMessageGroup<Mod>(
     filter: UpdateFilter<BusinessMessageContext, Mod>,
-    handler: BusinessMessageGroupHandler<
-      filters.Modify<BusinessMessageContext, Mod>,
-      State extends never ? never : UpdateState<State>
-    >['callback'],
-    group?: number,
+    handler: BusinessMessageGroupHandler<filters.Modify<BusinessMessageContext, Mod>, State extends never ? never : UpdateState<State>>['callback'],
+    group?: number
   ): void
 
   /** @internal */
@@ -2159,10 +2088,8 @@ export class Dispatcher<State extends object = never> {
    */
   onDeleteBusinessMessage<Mod>(
     filter: UpdateFilter<UpdateContext<DeleteBusinessMessageUpdate>, Mod>,
-    handler: DeleteBusinessMessageHandler<
-      filters.Modify<UpdateContext<DeleteBusinessMessageUpdate>, Mod>
-    >['callback'],
-    group?: number,
+    handler: DeleteBusinessMessageHandler<filters.Modify<UpdateContext<DeleteBusinessMessageUpdate>, Mod>>['callback'],
+    group?: number
   ): void
 
   /** @internal */

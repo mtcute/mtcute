@@ -1,7 +1,7 @@
 {
   "name": "@mtcute/node",
   "type": "module",
-  "version": "0.29.6",
+  "version": "0.29.7",
   "private": true,
   "description": "Meta-package for Node.js",
   "author": "alina sireneva <alina@tei.su>",
@@ -20,11 +20,11 @@
     "@fuman/utils": "0.0.19",
     "@fuman/net": "0.0.19",
     "@fuman/node": "0.0.19",
-    "better-sqlite3": "^12.4.1"
+    "better-sqlite3": "^12.10.0"
   },
   "devDependencies": {
     "@mtcute/test": "workspace:^",
-    "@types/better-sqlite3": "7.6.4"
+    "@types/better-sqlite3": "7.6.13"
   },
   "fuman": {
     "jsr": "skip"

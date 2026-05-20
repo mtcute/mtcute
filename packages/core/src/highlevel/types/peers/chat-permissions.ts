@@ -155,6 +155,13 @@ export class ChatPermissions {
   }
 
   /**
+   * Whether users can react to messages.
+   */
+  get canSendReactions(): boolean {
+    return !this.raw.sendReactions
+  }
+
+  /**
    * Whether users can change the chat title,
    * photo and other settings.
    */

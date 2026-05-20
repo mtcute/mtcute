@@ -309,16 +309,15 @@ export async function _convertToTl(
           title: obj.title,
           description: obj.description,
           url: obj.hideUrl ? undefined : obj.url,
-          content:
-                        obj.url && obj.hideUrl
-                          ? {
-                              _: 'inputWebDocument',
-                              url: obj.url,
-                              mimeType: 'text/html',
-                              size: 0,
-                              attributes: [],
-                            }
-                          : undefined,
+          content: obj.url && obj.hideUrl
+            ? {
+                _: 'inputWebDocument',
+                url: obj.url,
+                mimeType: 'text/html',
+                size: 0,
+                attributes: [],
+              }
+            : undefined,
           thumb: typeof obj.thumb === 'string' ? normalizeThumb(obj) : obj.thumb,
           sendMessage,
         })

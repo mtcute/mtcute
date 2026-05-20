@@ -140,6 +140,9 @@ export class UpdatesManager {
   cptsMod: Map<number, number> = new Map()
   channelDiffTimeouts: Map<number, timers.Timer> = new Map()
   channelsOpened: Map<number, number> = new Map()
+  // channels we got CHANNEL_PRIVATE for when fetching diff — skip gap handling.
+  // invalidated when an updateChannel for that channel arrives
+  inaccessibleChannels: Set<number> = new Set()
 
   log: Logger
 
@@ -199,6 +202,7 @@ export class UpdatesManager {
     this.stopLoop()
     this.cpts.clear()
     this.cptsMod.clear()
+    this.inaccessibleChannels.clear()
     this.pts = this.qts = this.date = this.seq = undefined
   }
 
@@ -692,6 +696,7 @@ export class UpdatesManager {
             return missing
           }
           if (!(await fetchPeer(msg.viaBotId))) return missing
+          if (!(await fetchPeer(msg.guestchatViaFrom))) return missing
 
           if (msg.entities) {
             for (const ent of msg.entities) {
@@ -787,6 +792,7 @@ export class UpdatesManager {
 
     if (msg._ === 'message') {
       store(msg.viaBotId)
+      store(msg.guestchatViaFrom)
       store(msg.fwdFrom?.fromId)
 
       if (msg.media) {
@@ -1004,9 +1010,17 @@ export class UpdatesManager {
           .catch((err) => {
             this.log.warn('error fetching difference for %d: %e', channelId, err)
 
-            if (tl.RpcError.is('PERSISTENT_TIMESTAMP_INVALID')) {
+            if (tl.RpcError.is(err, 'PERSISTENT_TIMESTAMP_INVALID')) {
               // reset channel pts value
               this.log.warn('received PERSISTENT_TIMESTAMP_INVALID, resetting channel pts value')
+              this.cpts.delete(channelId)
+              this.cptsMod.delete(channelId)
+            }
+
+            if (tl.RpcError.is(err, 'CHANNEL_PRIVATE') || tl.RpcError.is(err, 'CHANNEL_INVALID')) {
+              // bot has no access (e.g. guest chat updates)
+              this.log.debug('channel %d is inaccessible, skipping gap fills until updateChannel', channelId)
+              this.inaccessibleChannels.add(channelId)
               this.cpts.delete(channelId)
               this.cptsMod.delete(channelId)
             }
@@ -1016,7 +1030,7 @@ export class UpdatesManager {
           .then((ok) => {
             requestedDiff.delete(channelId)
 
-            if (!ok) {
+            if (!ok && !this.inaccessibleChannels.has(channelId)) {
               this.log.debug('channel difference for %d failed, falling back to common diff', channelId)
               this._fetchDifferenceLater(requestedDiff)
             }
@@ -1291,6 +1305,14 @@ export class UpdatesManager {
           }, config.expires * 1000)
         } else {
           client.mt.network.config.update(true).catch(err => client.onError.emit(unknownToError(err)))
+        }
+        break
+      }
+      case 'updateChannel': {
+        const channel = pending.peers.chat(upd.channelId)
+        if (channel._ !== 'channelForbidden') {
+          // channel may have become accessible
+          this.inaccessibleChannels.delete(upd.channelId)
         }
         break
       }
@@ -1701,7 +1723,8 @@ export class UpdatesManager {
               )
               continue
             }
-            if (diff < 0) {
+            const isInaccessibleChannel = pending.channelId && this.inaccessibleChannels.has(pending.channelId)
+            if (diff < 0 && !isInaccessibleChannel) {
               // "there's an update gap that must be filled"
               // if the gap is less than 3, put the update into postponed queue
               // otherwise, call getDifference
