@@ -26,6 +26,7 @@
       "lib": [
         "dom",
         "dom.iterable",
+        "deno.ns",
         "WebWorker"
       ]
     }

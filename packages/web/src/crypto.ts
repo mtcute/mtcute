@@ -116,6 +116,6 @@ export class WebCryptoProvider extends BaseCryptoProvider implements ICryptoProv
   }
 
   randomFill(buf: Uint8Array): void {
-    this.crypto.getRandomValues(buf)
+    this.crypto.getRandomValues(buf as Uint8Array<ArrayBuffer>)
   }
 }

@@ -17,7 +17,7 @@ jobs:
       - uses: ./.forgejo/actions/init
       - uses: https://github.com/denoland/setup-deno@v2
         with:
-          deno-version: 2.6.6
+          deno-version: 2.8.1
       - name: 'TypeScript'
         run: pnpm run lint:tsc:ci
       - name: 'ESLint'
@@ -52,7 +52,7 @@ jobs:
       - uses: ./.forgejo/actions/init
       - uses: https://github.com/denoland/setup-deno@v2
         with:
-          deno-version: 2.6.6
+          deno-version: 2.8.1
       - name: 'Run tests'
         run: pnpm run test:deno
   

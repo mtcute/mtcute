@@ -107,6 +107,7 @@ export class MtprotoSession {
   // recent msg ids
   recentOutgoingMsgIds: LruSet<Long> = new LruSet(1000, LongSet)
   recentIncomingMsgIds: LruSet<Long> = new LruSet(1000, LongSet)
+  // <deno-tsignore>
   recentStateRequests: LruMap<Long, Long[]> = new LruMap(1000, LongMap)
 
   // queues
