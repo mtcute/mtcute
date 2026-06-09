@@ -1,12 +1,14 @@
 import type { ReconnectionStrategy } from '@fuman/net'
 import type { tl } from '../tl/index.js'
 import type { BasicDcOption, ICryptoProvider, Logger } from '../utils/index.js'
+import type { ConnectionFloodLimits } from './flood-control.js'
 import type { IPacketCodec, ITelegramConnection, TelegramTransport } from './transports/abstract.js'
 
 import { FramedReader, FramedWriter } from '@fuman/io'
 
 import { ConnectionClosedError, PersistentConnection as FumanPersistentConnection, ip } from '@fuman/net'
 import { Emitter, timers } from '@fuman/utils'
+import { ConnectionFloodController } from './flood-control.js'
 
 export interface PersistentConnectionParams {
   crypto: ICryptoProvider
@@ -15,6 +17,8 @@ export interface PersistentConnectionParams {
   testMode: boolean
   reconnectionStrategy: ReconnectionStrategy
   inactivityTimeout?: number
+  /** if present, each connection gates its connects through its own flood controller */
+  floodControl?: ConnectionFloodLimits
 }
 
 let nextConnectionUid = 0
@@ -42,6 +46,15 @@ export abstract class PersistentConnection {
   _destroyed = false
   _usable = false
 
+  // each connection slot throttles its own connect attempts, mirroring
+  // TDLib's per-SessionProxy flood control. a fresh controller has empty
+  // limiters, so the first connect always passes immediately.
+  protected readonly _floodControl?: ConnectionFloodController
+  // aborts a pending flood-control wait when the connection is being
+  // closed (manually or for good) — otherwise close() would block until
+  // the wait expires, and the connect would still proceed afterwards
+  private _connectAbort?: AbortController
+
   readonly onWait: Emitter<number> = new Emitter()
   readonly onUsable: Emitter<void> = new Emitter()
   readonly onError: Emitter<Error> = new Emitter()
@@ -62,9 +75,21 @@ export abstract class PersistentConnection {
     this._codec = this.params.transport.packetCodec(params.dc)
     this._codec.setup?.(this.params.crypto, this.log)
 
+    if (params.floodControl) {
+      this._floodControl = new ConnectionFloodController(params.floodControl)
+      this._floodControl.setLogger(log.create('flood'))
+    }
+
     this._onInactivityTimeout = this._onInactivityTimeout.bind(this)
     this._fuman = new FumanPersistentConnection({
-      connect: (dc) => {
+      connect: async (dc) => {
+        if (this._floodControl) {
+          if (!this._connectAbort || this._connectAbort.signal.aborted) {
+            this._connectAbort = new AbortController()
+          }
+          this._updateLogPrefix()
+          await this._floodControl.wait(this._connectAbort.signal)
+        }
         this._updateLogPrefix()
         this.log.debug('connecting to %j', dc)
         return params.transport.connect(dc)
@@ -162,6 +187,7 @@ export abstract class PersistentConnection {
   }
 
   async changeTransport(transport: TelegramTransport): Promise<void> {
+    this._connectAbort?.abort()
     await this._fuman.close()
 
     this._codec = transport.packetCodec(this.params.dc)
@@ -191,6 +217,7 @@ export abstract class PersistentConnection {
       timers.clearTimeout(this._inactivityTimeout)
     }
     this._disconnectedManually = true
+    this._connectAbort?.abort()
     await this._fuman.close()
   }
 
@@ -199,6 +226,7 @@ export abstract class PersistentConnection {
       timers.clearTimeout(this._inactivityTimeout)
     }
     this._destroyed = true
+    this._connectAbort?.abort()
     await this._fuman.close()
   }
 
@@ -212,6 +240,7 @@ export abstract class PersistentConnection {
     this.log.info('disconnected because of inactivity for %d', this.params.inactivityTimeout)
     this._inactive = true
     this._inactivityTimeout = null
+    this._connectAbort?.abort()
     Promise.resolve(this._fuman.close()).catch((err) => {
       this.log.warn('error closing transport: %e', err)
     })

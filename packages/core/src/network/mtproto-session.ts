@@ -1,4 +1,4 @@
-import type { Deferred } from '@fuman/utils'
+import type { Deferred, timers } from '@fuman/utils'
 import type { TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import type { mtp, tl } from '../tl/index.js'
 import type {
@@ -6,7 +6,7 @@ import type {
   Logger,
 } from '../utils/index.js'
 import type { ServerSaltManager } from './server-salt.js'
-import { Deque, LruMap, LruSet, timers } from '@fuman/utils'
+import { Deque, LruMap, LruSet } from '@fuman/utils'
 
 import { TlSerializationCounter } from '@mtcute/tl-runtime'
 import Long from 'long'
@@ -140,10 +140,6 @@ export class MtprotoSession {
   initConnectionCalled = false
   authorizationPending = false
 
-  next429Timeout = 1000
-  current429Timeout?: timers.Timer
-  next429ResetTimeout?: timers.Timer
-
   constructor(
     readonly _crypto: ICryptoProvider,
     readonly log: Logger,
@@ -176,7 +172,6 @@ export class MtprotoSession {
       this.resetAuthKey()
     }
 
-    timers.clearTimeout(this.current429Timeout)
     this.resetState(withAuthKey)
   }
 
@@ -340,30 +335,6 @@ export class MtprotoSession {
     else writer.object(content as tl.TlObject)
 
     return messageId
-  }
-
-  onTransportFlood(callback: () => void): void {
-    if (this.current429Timeout) return // already waiting
-
-    // all active queries must be resent after a timeout
-    this.resetLastPing(true)
-
-    const timeout = this.next429Timeout
-
-    this.next429Timeout = Math.min(this.next429Timeout * 2, 32000)
-    timers.clearTimeout(this.current429Timeout)
-    timers.clearTimeout(this.next429ResetTimeout)
-
-    this.current429Timeout = timers.setTimeout(() => {
-      this.current429Timeout = undefined
-      callback()
-    }, timeout)
-    this.next429ResetTimeout = timers.setTimeout(() => {
-      this.next429ResetTimeout = undefined
-      this.next429Timeout = 1000
-    }, 60000)
-
-    this.log.debug('transport flood, waiting for %d ms before proceeding', timeout)
   }
 
   resetLastPing(withTime = false): void {

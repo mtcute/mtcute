@@ -93,7 +93,6 @@ export class SessionConnection extends PersistentConnection {
   readonly onDisconnect: Emitter<void> = new Emitter()
   readonly onKeyChange: Emitter<Uint8Array | null> = new Emitter()
   readonly onTmpKeyChange: Emitter<[Uint8Array, number] | null> = new Emitter()
-  readonly onFloodDone: Emitter<void> = new Emitter()
   readonly onRequestAuth: Emitter<void> = new Emitter()
   readonly onAuthBegin: Emitter<void> = new Emitter()
   readonly onUpdate: Emitter<tl.TypeUpdates> = new Emitter()
@@ -190,7 +189,6 @@ export class SessionConnection extends PersistentConnection {
       this.onDisconnect.clear()
       this.onKeyChange.clear()
       this.onTmpKeyChange.clear()
-      this.onFloodDone.clear()
       this.onRequestAuth.clear()
       this.onAuthBegin.clear()
       this.onUpdate.clear()
@@ -293,7 +291,7 @@ export class SessionConnection extends PersistentConnection {
       this._onAllFailed(`transport error ${error.code}`)
 
       if (error.code === 429) {
-        this._session.onTransportFlood(() => this.onFloodDone.emit())
+        this._floodControl?.addMtprotoError()
 
         return
       }
@@ -1550,6 +1548,7 @@ export class SessionConnection extends PersistentConnection {
     this._online = online
 
     if (online) {
+      this._floodControl?.notifyNetworkUp()
       if (this._inactive) return
       this.reconnect()
     } else {
@@ -1629,10 +1628,6 @@ export class SessionConnection extends PersistentConnection {
     this._flush()
   }
 
-  flushWhenIdle(): void {
-    this._flushTimer.emitWhenIdle()
-  }
-
   private _handleGetStateTimeout = (msgId: Long): void => {
     const pending = this._session.pendingGetStateTimeouts.get(msgId)
 
@@ -1650,14 +1645,12 @@ export class SessionConnection extends PersistentConnection {
       this._disconnectedManually
       || !this._session._authKey.ready
       || this._isPfsBindingPending
-      || this._session.current429Timeout
     ) {
       this.log.debug(
-        'skipping flush, connection is not usable (offline = %b, auth key ready = %b, pfs binding pending = %b, 429 timeout = %b)',
+        'skipping flush, connection is not usable (offline = %b, auth key ready = %b, pfs binding pending = %b)',
         this._disconnectedManually,
         this._session._authKey.ready,
         this._isPfsBindingPending,
-        this._session.current429Timeout,
       )
 
       // it will be flushed once connection is usable

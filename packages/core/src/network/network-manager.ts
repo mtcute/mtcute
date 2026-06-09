@@ -8,14 +8,16 @@ import type { mtp, tl } from '../tl/index.js'
 import type { ICorePlatform } from '../types/platform.js'
 import type { DcOptions, ICryptoProvider, Logger } from '../utils/index.js'
 import type { ConfigManager } from './config-manager.js'
+import type { ConnectionFloodLimits } from './flood-control.js'
 import type { SessionConnectionParams } from './session-connection.js'
 import type { TelegramTransport } from './transports/abstract.js'
-import { defaultReconnectionStrategy } from '@fuman/net'
 
+import { defaultReconnectionStrategy } from '@fuman/net'
 import { asNonNull, composeMiddlewares, Deferred, LruMap } from '@fuman/utils'
 import { MtArgumentError, MtcuteError, MtUnsupportedError } from '../types/index.js'
 import { dropUndefined } from '../utils/index.js'
 import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
+
 import { basic as defaultMiddlewares } from './middlewares/default.js'
 import { MultiSessionConnection } from './multi-session-connection.js'
 import { ServerSaltManager } from './server-salt.js'
@@ -115,6 +117,18 @@ export interface NetworkManagerExtraParams {
    * @default  60000 (1 minute)
    */
   pingInterval?: number
+
+  /**
+   * Per-connection-slot flood-control limits (each socket throttles its own
+   * connect attempts independently, like TDLib). Override only if you
+   * understand the consequences — defaults are derived from TDLib and
+   * should fit most clients.
+   *
+   * See {@link ConnectionFloodLimits} for the limiter taxonomy.
+   *
+   * `false` to disable flood control.
+   */
+  floodControl?: ConnectionFloodLimits | false
 }
 
 /** Options that can be customized when making an RPC call */
@@ -274,6 +288,7 @@ export class DcConnectionManager {
       salts: managerParams.usePfs ? new ServerSaltManager() : this._salts,
       platform: managerParams.platform,
       pingInterval: managerParams.pingInterval ?? 60_000,
+      floodControl: managerParams.floodControl === false ? undefined : managerParams.floodControl ?? {},
     })
 
     const mainParams = baseConnectionParams()

@@ -8,6 +8,27 @@ import { Deferred, Emitter, unknownToError } from '@fuman/utils'
 import { SessionConnection } from './session-connection.js'
 
 export class MultiSessionConnection {
+  static _pickConnection(loads: readonly number[], ready: readonly boolean[]): number {
+    let min = Infinity
+    let minIdx = 0
+    let foundReady = false
+
+    for (let i = 0; i < loads.length; i++) {
+      const isReady = ready[i]
+      if (foundReady && !isReady) continue
+      if (isReady && !foundReady) {
+        foundReady = true
+        min = Infinity
+      }
+      if (loads[i] < min) {
+        min = loads[i]
+        minIdx = i
+      }
+    }
+
+    return minIdx
+  }
+
   private _log: Logger
   private _enforcePfs = false
 
@@ -136,11 +157,6 @@ export class MultiSessionConnection {
       conn.onUsable.add(() => this.onUsable.emit(i))
       conn.onWait.add(() => this.onWait.emit(i))
       conn.onRequestAuth.add(() => this.onRequestAuth.emit(i))
-      conn.onFloodDone.add(() => {
-        this._log.debug('received flood-done from connection %d', i)
-
-        this._connections.forEach(it => it.flushWhenIdle())
-      })
 
       this._connections.push(conn)
       if (this._authKey !== null) conn._session._authKey.setup(this._authKey)
@@ -167,38 +183,20 @@ export class MultiSessionConnection {
     this._destroyed = true
   }
 
-  private _nextConnection = 0
-
   sendRpc<T extends tl.RpcMethod>(
     request: T,
     timeout?: number,
     abortSignal?: AbortSignal,
     chainId?: string | number,
   ): Promise<tl.RpcCallReturn[T['_']] | mtp.RawMt_rpc_error> {
-    // if (this.params.isMainConnection) {
-    // find the least loaded connection
-    let min = Infinity
-    let minIdx = 0
-
-    for (let i = 0; i < this._connections.length; i++) {
-      const conn = this._connections[i]
-      const total = conn._session.queuedRpc.length + conn._session.pendingMessages.size
-
-      if (total < min) {
-        min = total
-        minIdx = i
-      }
-    }
-
-    return this._connections[minIdx].sendRpc(request, timeout, abortSignal, chainId)
-    // }
-
-    // round-robin connections
-    // since they all share the same session, it doesn't matter which one we use
-    // the connection chosen here will only affect the first attempt at sending
-    // return this._connections[
-    //     this._nextConnection++ % this._connections.length
-    // ].sendRpc(request, stack, timeout)
+    const loads = this._connections.map(c => c._session.queuedRpc.length + c._session.pendingMessages.size)
+    const ready = this._connections.map(c => c.isConnected)
+    return this._connections[MultiSessionConnection._pickConnection(loads, ready)].sendRpc(
+      request,
+      timeout,
+      abortSignal,
+      chainId,
+    )
   }
 
   connect(): void {
