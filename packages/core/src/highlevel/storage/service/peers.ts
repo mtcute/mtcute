@@ -222,6 +222,7 @@ export class PeersService extends BaseService {
             storiesUnavailable: peer.storiesUnavailable,
             contactRequirePremium: peer.contactRequirePremium,
             botBusiness: peer.botBusiness,
+            botGuard: peer.botGuard,
             botHasMainApp: peer.botHasMainApp,
             botCanManageBots: peer.botCanManageBots,
             botGuestchat: peer.botGuestchat,

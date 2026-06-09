@@ -4,6 +4,11 @@ import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
+// @exported
+export type DraftMessageInput = Omit<tl.RawDraftMessage, '_' | 'date' | 'richMessage'> & {
+  richMessage?: tl.TypeInputRichMessage
+}
+
 /**
  * Save or delete a draft message associated with some chat
  *
@@ -13,7 +18,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
 export async function saveDraft(
   client: ITelegramClient,
   chatId: InputPeerLike,
-  draft: null | Omit<tl.RawDraftMessage, '_' | 'date'>,
+  draft: null | DraftMessageInput,
 ): Promise<void> {
   const peer = await resolvePeer(client, chatId)
 

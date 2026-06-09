@@ -83,6 +83,188 @@ const WARN_EVERY = 100
 const KEEP_ALIVE_INTERVAL = 15 * 60 * 1000 // 15 minutes
 const UPDATES_TOO_LONG = { _: 'updatesTooLong' } as const
 
+function collectRichTextPeerIds(text: tl.TypeRichText | undefined, peers: Set<number>): void {
+  if (!text) return
+
+  switch (text._) {
+    case 'textEmpty':
+    case 'textPlain':
+    case 'textEmail':
+    case 'textPhone':
+    case 'textImage':
+    case 'textMath':
+    case 'textCustomEmoji':
+      break
+    case 'textBold':
+    case 'textItalic':
+    case 'textUnderline':
+    case 'textStrike':
+    case 'textFixed':
+    case 'textUrl':
+    case 'textSubscript':
+    case 'textSuperscript':
+    case 'textMarked':
+    case 'textAnchor':
+    case 'textSpoiler':
+    case 'textMention':
+    case 'textHashtag':
+    case 'textBotCommand':
+    case 'textCashtag':
+    case 'textAutoUrl':
+    case 'textAutoEmail':
+    case 'textAutoPhone':
+    case 'textBankCard':
+    case 'textDate':
+      collectRichTextPeerIds(text.text, peers)
+      break
+    case 'textConcat':
+      for (const child of text.texts) collectRichTextPeerIds(child, peers)
+      break
+    case 'textMentionName':
+      peers.add(text.userId)
+      collectRichTextPeerIds(text.text, peers)
+      break
+    default:
+      assertNever(text)
+  }
+}
+
+function collectPageCaptionPeerIds(caption: tl.RawPageCaption | undefined, peers: Set<number>): void {
+  if (!caption) return
+
+  collectRichTextPeerIds(caption.text, peers)
+  collectRichTextPeerIds(caption.credit, peers)
+}
+
+function collectPageBlockPeerIds(block: tl.TypePageBlock | undefined, peers: Set<number>): void {
+  if (!block) return
+
+  switch (block._) {
+    case 'pageBlockUnsupported':
+    case 'pageBlockDivider':
+    case 'pageBlockAnchor':
+    case 'pageBlockMath':
+      break
+    case 'pageBlockTitle':
+    case 'pageBlockSubtitle':
+    case 'pageBlockHeader':
+    case 'pageBlockSubheader':
+    case 'pageBlockParagraph':
+    case 'pageBlockPreformatted':
+    case 'pageBlockFooter':
+    case 'pageBlockKicker':
+    case 'pageBlockThinking':
+    case 'pageBlockHeading1':
+    case 'pageBlockHeading2':
+    case 'pageBlockHeading3':
+    case 'pageBlockHeading4':
+    case 'pageBlockHeading5':
+    case 'pageBlockHeading6':
+      collectRichTextPeerIds(block.text, peers)
+      break
+    case 'pageBlockAuthorDate':
+      collectRichTextPeerIds(block.author, peers)
+      break
+    case 'pageBlockList':
+      for (const item of block.items) collectPageListItemPeerIds(item, peers)
+      break
+    case 'pageBlockOrderedList':
+      for (const item of block.items) collectPageListOrderedItemPeerIds(item, peers)
+      break
+    case 'pageBlockBlockquote':
+    case 'pageBlockPullquote':
+      collectRichTextPeerIds(block.text, peers)
+      collectRichTextPeerIds(block.caption, peers)
+      break
+    case 'pageBlockPhoto':
+    case 'pageBlockVideo':
+    case 'pageBlockEmbed':
+    case 'pageBlockAudio':
+    case 'pageBlockMap':
+    case 'inputPageBlockMap':
+      collectPageCaptionPeerIds(block.caption, peers)
+      break
+    case 'pageBlockCover':
+      collectPageBlockPeerIds(block.cover, peers)
+      break
+    case 'pageBlockEmbedPost':
+      for (const child of block.blocks) collectPageBlockPeerIds(child, peers)
+      collectPageCaptionPeerIds(block.caption, peers)
+      break
+    case 'pageBlockCollage':
+    case 'pageBlockSlideshow':
+      for (const child of block.items) collectPageBlockPeerIds(child, peers)
+      collectPageCaptionPeerIds(block.caption, peers)
+      break
+    case 'pageBlockChannel':
+      switch (block.channel._) {
+        case 'chatEmpty':
+        case 'chat':
+        case 'chatForbidden':
+          peers.add(getMarkedPeerId(block.channel.id, 'chat'))
+          break
+        case 'channel':
+        case 'channelForbidden':
+          peers.add(getMarkedPeerId(block.channel.id, 'channel'))
+          break
+        default:
+          assertNever(block.channel)
+      }
+      break
+    case 'pageBlockTable':
+      collectRichTextPeerIds(block.title, peers)
+      for (const row of block.rows) {
+        for (const cell of row.cells) collectRichTextPeerIds(cell.text, peers)
+      }
+      break
+    case 'pageBlockDetails':
+      for (const child of block.blocks) collectPageBlockPeerIds(child, peers)
+      collectRichTextPeerIds(block.title, peers)
+      break
+    case 'pageBlockRelatedArticles':
+      collectRichTextPeerIds(block.title, peers)
+      break
+    case 'pageBlockBlockquoteBlocks':
+      for (const child of block.blocks) collectPageBlockPeerIds(child, peers)
+      collectRichTextPeerIds(block.caption, peers)
+      break
+    default:
+      assertNever(block)
+  }
+}
+
+function collectPageListItemPeerIds(item: tl.TypePageListItem, peers: Set<number>): void {
+  switch (item._) {
+    case 'pageListItemText':
+      collectRichTextPeerIds(item.text, peers)
+      break
+    case 'pageListItemBlocks':
+      for (const block of item.blocks) collectPageBlockPeerIds(block, peers)
+      break
+    default:
+      assertNever(item)
+  }
+}
+
+function collectPageListOrderedItemPeerIds(item: tl.TypePageListOrderedItem, peers: Set<number>): void {
+  switch (item._) {
+    case 'pageListOrderedItemText':
+      collectRichTextPeerIds(item.text, peers)
+      break
+    case 'pageListOrderedItemBlocks':
+      for (const block of item.blocks) collectPageBlockPeerIds(block, peers)
+      break
+    default:
+      assertNever(item)
+  }
+}
+
+function collectRichMessagePeerIds(richMessage: tl.RawRichMessage | undefined, peers: Set<number>): void {
+  if (!richMessage) return
+
+  for (const block of richMessage.blocks) collectPageBlockPeerIds(block, peers)
+}
+
 // todo: fix docs
 export class UpdatesManager {
   updatesLoopActive = false
@@ -706,6 +888,15 @@ export class UpdatesManager {
             }
           }
 
+          if (msg.richMessage) {
+            const richMessagePeers = new Set<number>()
+            collectRichMessagePeerIds(msg.richMessage, richMessagePeers)
+
+            for (const peer of richMessagePeers) {
+              if (!(await fetchPeer(peer))) return missing
+            }
+          }
+
           if (msg.media) {
             switch (msg.media._) {
               case 'messageMediaContact':
@@ -755,6 +946,14 @@ export class UpdatesManager {
             }
           }
         }
+        if ('richMessage' in upd.draft && upd.draft.richMessage) {
+          const richMessagePeers = new Set<number>()
+          collectRichMessagePeerIds(upd.draft.richMessage, richMessagePeers)
+
+          for (const peer of richMessagePeers) {
+            if (!(await fetchPeer(peer))) return missing
+          }
+        }
     }
 
     return missing
@@ -794,6 +993,12 @@ export class UpdatesManager {
       store(msg.viaBotId)
       store(msg.guestchatViaFrom)
       store(msg.fwdFrom?.fromId)
+
+      if (msg.richMessage) {
+        const richMessagePeers = new Set<number>()
+        collectRichMessagePeerIds(msg.richMessage, richMessagePeers)
+        store([...richMessagePeers])
+      }
 
       if (msg.media) {
         switch (msg.media._) {

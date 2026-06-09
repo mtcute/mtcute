@@ -113,6 +113,11 @@ export class User {
     return this.raw.botBusiness!
   }
 
+  /** Whether this bot can approve join requests */
+  get isBotGuard(): boolean {
+    return this.raw.botGuard!
+  }
+
   /** Whether this user is a bot that has access to all messages */
   get isBotWithHistory(): boolean {
     return this.raw.botChatHistory!

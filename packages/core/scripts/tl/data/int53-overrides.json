@@ -59,6 +59,7 @@
     ],
     "channelFull": [
       "id",
+      "guard_bot_id",
       "linked_chat_id",
       "recent_requesters"
     ],
@@ -203,6 +204,9 @@
     "message": [
       "via_bot_id",
       "via_business_bot_id"
+    ],
+    "messages.chatInviteJoinResultWebView": [
+      "bot_id"
     ],
     "messageActionChangeCreator": [
       "new_creator_id"
@@ -349,6 +353,9 @@
     "storyViews": [
       "recent_viewers"
     ],
+    "textMentionName": [
+      "user_id"
+    ],
     "updateBotCallbackQuery": [
       "user_id"
     ],
@@ -454,14 +461,14 @@
     "updateDeleteChannelMessages": [
       "channel_id"
     ],
-    "updateGroupCall": [
-      "chat_id"
-    ],
     "updateInlineBotCallbackQuery": [
       "user_id"
     ],
     "updateManagedBot": [
       "user_id",
+      "bot_id"
+    ],
+    "updateNewBotConnection": [
       "bot_id"
     ],
     "updateMonoForumNoPaidException": [

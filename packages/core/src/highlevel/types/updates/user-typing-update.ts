@@ -71,6 +71,8 @@ export class UserTypingUpdate {
     switch (this.raw.action._) {
       case 'sendMessageTypingAction':
       case 'sendMessageTextDraftAction':
+      case 'inputSendMessageRichMessageDraftAction':
+      case 'sendMessageRichMessageDraftAction':
         return 'typing'
       case 'sendMessageCancelAction':
         return 'cancel'

@@ -264,6 +264,13 @@ export class FullChat extends Chat {
     return this.full._ === 'channelFull' ? this.full.botInfo.map(it => new BotInfo(it)) : []
   }
 
+  /** Bot that approves join requests in this chat, if any */
+  get guardBot(): User | null {
+    if (this.full._ !== 'channelFull' || !this.full.guardBotId) return null
+
+    return new User(this.peers.user(this.full.guardBotId))
+  }
+
   /**
    * For supergroups, ID of the basic group from which this supergroup was upgraded,
    * and the identifier of the last message from the original group.
@@ -392,6 +399,7 @@ memoizeGetters(FullChat, [
   'stickerSet',
   'emojiSet',
   'botInfo',
+  'guardBot',
   'linkedChat',
   'recentRequesters',
   'stories',

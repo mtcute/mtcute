@@ -4,7 +4,7 @@
 import { base64 } from '@fuman/utils'
 import Long from 'long'
 
-const customInspectSymbol = Symbol.for('nodejs.util.inspect.custom')
+export const customInspectSymbol: symbol = Symbol.for('nodejs.util.inspect.custom')
 
 // get all property names. unlike Object.getOwnPropertyNames,
 // also gets inherited property names

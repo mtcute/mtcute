@@ -7,6 +7,8 @@ import type { BaseTelegramClientOptions } from './base.js'
 import type { ITelegramClient } from './client.types.js'
 import type { LogOutResult } from './methods/auth/log-out.js'
 import type { CreateGroupResult } from './methods/chats/create-group.js'
+import type { JoinChatResult } from './methods/chats/join-chat.js'
+import type { DraftMessageInput } from './methods/chats/save-draft.js'
 import type { GetForumTopicsOffset } from './methods/forums/get-forum-topics.js'
 import type { InputStarGiftAttributeIds, ResaleStarGiftsMeta } from './methods/gifts/get-resale-star-gifts.js'
 import type { StarGiftUpgradeOptions } from './methods/gifts/get-star-gift-upgrade-options.js'
@@ -1836,17 +1838,13 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Join a channel or supergroup
    *
-   * When using with invite links, this method may throw RPC error
-   * `INVITE_REQUEST_SENT`, which means that you need to wait for admin approval.
-   * You will get into the chat once they do so.
-   *
    * **Available**: 👤 users only
    *
    * @param chatId
    *   Chat identifier. Either an invite link (`t.me/joinchat/*`), a username (`@username`)
    *   or ID of the linked supergroup or channel.
    */
-  joinChat(chatId: InputPeerLike): Promise<Chat>
+  joinChat(chatId: InputPeerLike): Promise<JoinChatResult>
   /**
    * Kick a user from a chat.
    *
@@ -1965,7 +1963,7 @@ export interface TelegramClient extends ITelegramClient {
    */
   saveDraft(
     chatId: InputPeerLike,
-    draft: null | Omit<tl.RawDraftMessage, '_' | 'date'>): Promise<void>
+    draft: null | DraftMessageInput): Promise<void>
 
   /**
    * Set peer color and optionally background pattern

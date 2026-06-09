@@ -25,6 +25,7 @@ import { _messageMediaFromTl } from './message-media.js'
 import { MessageReactions } from './message-reactions.js'
 import { MessageRepliesInfo } from './message-replies.js'
 import { RepliedMessageInfo } from './replied-message.js'
+import { RichMessage } from './rich-message.js'
 import { SuggestedPostInfo } from './suggested-post.js'
 
 /**
@@ -423,6 +424,11 @@ export class Message {
     }
 
     return _messageMediaFromTl(this._peers, this.raw.media)
+  }
+
+  /** If this message is a rich message, its contents. Mutually exclusive with {@link media} and {@link text} */
+  get richMessage(): RichMessage | null {
+    return this.raw._ === 'message' && this.raw.richMessage !== undefined ? new RichMessage(this.raw.richMessage) : null
   }
 
   /**

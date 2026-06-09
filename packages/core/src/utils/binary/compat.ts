@@ -147,6 +147,75 @@ function mapCompatPoll(obj: tlCompat.TypePoll): tl.TypePoll {
   }
 }
 
+function mapCompatPageListOrderedItem(obj: tlCompat.TypePageListOrderedItem): tl.TypePageListOrderedItem {
+  switch (obj._) {
+    case 'pageListOrderedItemBlocks_layer225':
+      return {
+        ...obj,
+        _: 'pageListOrderedItemBlocks',
+        blocks: obj.blocks.map(mapCompatPageBlock),
+      }
+    case 'pageListOrderedItemText_layer225':
+      return replaceType(obj, 'pageListOrderedItemText')
+    default:
+      return obj
+  }
+}
+
+function mapCompatPageListItem(obj: tlCompat.TypePageListItem): tl.TypePageListItem {
+  switch (obj._) {
+    case 'pageListItemBlocks_layer225':
+      return {
+        ...obj,
+        _: 'pageListItemBlocks',
+        blocks: obj.blocks.map(mapCompatPageBlock),
+      }
+    case 'pageListItemText_layer225':
+      return replaceType(obj, 'pageListItemText')
+    default:
+      return obj
+  }
+}
+
+function mapCompatPageBlock(obj: tlCompat.TypePageBlock): tl.TypePageBlock {
+  switch (obj._) {
+    case 'pageBlockOrderedList_layer225':
+      return {
+        ...obj,
+        _: 'pageBlockOrderedList',
+        items: obj.items.map(mapCompatPageListOrderedItem),
+      }
+    case 'pageBlockList':
+      return {
+        ...obj,
+        items: obj.items.map(mapCompatPageListItem),
+      }
+    case 'pageBlockDetails':
+      return {
+        ...obj,
+        blocks: obj.blocks.map(mapCompatPageBlock),
+      }
+    case 'pageBlockEmbedPost':
+      return {
+        ...obj,
+        blocks: obj.blocks.map(mapCompatPageBlock),
+      }
+    case 'pageBlockCollage':
+    case 'pageBlockSlideshow':
+      return {
+        ...obj,
+        items: obj.items.map(mapCompatPageBlock),
+      }
+    case 'pageBlockCover':
+      return {
+        ...obj,
+        cover: mapCompatPageBlock(obj.cover),
+      }
+    default:
+      return obj
+  }
+}
+
 function mapCompatMessageMedia(obj: tlCompat.TypeMessageMedia): tl.TypeMessageMedia {
   switch (obj._) {
     case 'messageMediaDocument_layer197':
@@ -253,6 +322,7 @@ function mapCompatMessage(obj: tlCompat.TypeMessage): tl.TypeMessage {
     case 'message_layer220':
     case 'message_layer222':
     case 'message_layer224':
+    case 'message_layer225':
       return {
         ...obj,
         _: 'message',
@@ -323,6 +393,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
       return mapCompatMessageMedia(obj)
     case 'channelFull_layer197':
     case 'channelFull_layer204':
+    case 'channelFull_layer225':
       return replaceType(obj, 'channelFull')
     case 'messageActionStarGift_layer197':
     case 'messageActionStarGift_layer211':
@@ -376,6 +447,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'message_layer220':
     case 'message_layer222':
     case 'message_layer224':
+    case 'message_layer225':
     case 'messageService_layer204':
       return mapCompatMessage(obj)
     case 'messageReplyHeader_layer206':
@@ -443,6 +515,16 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'inputKeyboardButtonRequestPeer_layer221':
     case 'keyboardButtonCopy_layer221':
       return mapCompatKeyboardButton(obj)
+    case 'pageBlockOrderedList_layer225':
+      return mapCompatPageBlock(obj)
+    case 'pageListOrderedItemBlocks_layer225':
+      return mapCompatPageListOrderedItem(obj)
+    case 'pageListItemBlocks_layer225':
+      return mapCompatPageListItem(obj)
+    case 'pageListItemText_layer225':
+      return mapCompatPageListItem(obj)
+    case 'pageListOrderedItemText_layer225':
+      return mapCompatPageListOrderedItem(obj)
     default:
       return obj
   }

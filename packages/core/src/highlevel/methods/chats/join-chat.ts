@@ -1,46 +1,71 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
-import { Chat } from '../../types/index.js'
+import { tl } from '../../../tl/index.js'
+import { Chat, PeersIndex, User } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { INVITE_LINK_REGEX } from '../../utils/peer-utils.js'
 import { resolveChannel } from '../users/resolve-peer.js'
 
+// @exported
+/**
+ * Result of {@link joinChat}
+ *
+ * - `status: 'ok'` - the chat was joined successfully
+ * - `status: 'request_sent'` - a join request was sent and needs to be approved by the chat admin
+ * - `status: 'webview'` - a guard bot requested you to open a webview before joining the chat
+ */
+export type JoinChatResult
+  = | { status: 'ok', chat: Chat }
+    | { status: 'request_sent' }
+    | { status: 'webview', bot: User, webview: tl.TypeWebViewResult }
+
 /**
  * Join a channel or supergroup
- *
- * When using with invite links, this method may throw RPC error
- * `INVITE_REQUEST_SENT`, which means that you need to wait for admin approval.
- * You will get into the chat once they do so.
  *
  * @param chatId
  *   Chat identifier. Either an invite link (`t.me/joinchat/*`), a username (`@username`)
  *   or ID of the linked supergroup or channel.
  */
-export async function joinChat(client: ITelegramClient, chatId: InputPeerLike): Promise<Chat> {
-  if (typeof chatId === 'string') {
-    const m = chatId.match(INVITE_LINK_REGEX)
+export async function joinChat(client: ITelegramClient, chatId: InputPeerLike): Promise<JoinChatResult> {
+  let res: tl.messages.TypeChatInviteJoinResult | undefined
+  try {
+    if (typeof chatId === 'string') {
+      const m = chatId.match(INVITE_LINK_REGEX)
 
-    if (m) {
-      const res = await client.call({
-        _: 'messages.importChatInvite',
-        hash: m[1],
+      if (m) {
+        res = await client.call({
+          _: 'messages.importChatInvite',
+          hash: m[1],
+        })
+      }
+    }
+    if (!res) {
+      res = await client.call({
+        _: 'channels.joinChannel',
+        channel: await resolveChannel(client, chatId),
       })
-      assertIsUpdatesGroup('messages.importChatInvite', res)
-
-      client.handleClientUpdate(res)
-
-      return new Chat(res.chats[0])
+    }
+  } catch (e) {
+    if (tl.RpcError.is(e, 'INVITE_REQUEST_SENT')) {
+      return { status: 'request_sent' }
+    } else {
+      throw e
     }
   }
 
-  const res = await client.call({
-    _: 'channels.joinChannel',
-    channel: await resolveChannel(client, chatId),
-  })
+  switch (res._) {
+    case 'messages.chatInviteJoinResultOk':
+      assertIsUpdatesGroup('joinChat', res.updates)
+      client.handleClientUpdate(res.updates)
 
-  assertIsUpdatesGroup('channels.joinChannel', res)
-
-  client.handleClientUpdate(res)
-
-  return new Chat(res.chats[0])
+      return { status: 'ok', chat: new Chat(res.updates.chats[0]) }
+    case 'messages.chatInviteJoinResultWebView': {
+      const peers = PeersIndex.from(res)
+      return {
+        status: 'webview',
+        bot: new User(peers.user(res.botId)),
+        webview: res.webview,
+      }
+    }
+  }
 }
