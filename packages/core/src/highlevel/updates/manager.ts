@@ -2040,6 +2040,7 @@ export class UpdatesManager {
                 localPts,
                 pending.ptsBefore,
               )
+              postponedTimer.emitBefore(pending.timeout!)
             } else {
               log.debug(
                 "gap for postponed %s (cid = %d) wasn't filled, fetching diff (current pts %d, need %d)",
@@ -2135,6 +2136,8 @@ export class UpdatesManager {
               this.qts!,
               pending.qtsBefore,
             )
+            pendingQtsUpdatesPostponed.removeIndex(i)
+            i--
             continue
           }
           if (this.qts! < pending.qtsBefore!) {
@@ -2151,6 +2154,7 @@ export class UpdatesManager {
                 this.qts!,
                 pending.qtsBefore,
               )
+              postponedTimer.emitBefore(pending.timeout!)
             } else {
               log.debug(
                 "gap for postponed %s wasn't filled, fetching diff (current qts %d, need %d)",
