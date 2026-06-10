@@ -7,6 +7,7 @@ import { Bytes, read } from '@fuman/io'
 import { bigint, typed, u8 } from '@fuman/utils'
 
 const MAX_TLS_PACKET_LENGTH = 2878
+const EMPTY = new Uint8Array(0)
 
 // ref: https://github.com/tdlib/td/blob/master/td/mtproto/TlsInit.cpp
 const KEY_MOD = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEDn
@@ -270,28 +271,34 @@ export class FakeTlsPacketCodec implements IPacketCodec {
 
   async decode(reader: Bytes, eof: boolean): Promise<Uint8Array | null> {
     if (eof) return null
-    if (reader.available < 5) return null
 
-    const header = reader.readSync(3)
-    if (header[0] !== 0x17 || header[1] !== 0x03 || header[2] !== 0x03) {
-      throw new Error('Invalid TLS header')
+    // A single inner frame is sliced across multiple TLS records by `encode`,
+    // and those records usually arrive coalesced, so we must consume every
+    // complete record buffered this call and feed each to the inner codec until
+    // it yields a frame. The inner codec is stateful (obfuscation runs an AES-CTR
+    // stream cipher), so a record, once fed, is consumed for good — it must never
+    // be rewound, or the same ciphertext is decrypted twice at different keystream
+    // offsets and the stream desyncs (surfaces as `invalid messageKey`).
+    while (reader.available >= 5) {
+      const header = reader.readSync(3)
+      if (header[0] !== 0x17 || header[1] !== 0x03 || header[2] !== 0x03) {
+        throw new Error('Invalid TLS header')
+      }
+
+      const length = read.uint16be(reader)
+      if (reader.available < length) {
+        // incomplete trailing record — nothing was fed yet, wait for more data
+        reader.rewind(5)
+        break
+      }
+
+      const inner = await this._inner.decode(Bytes.from(reader.readSync(length)), eof)
+      if (inner) return inner
     }
 
-    const length = read.uint16be(reader)
-    if (length < reader.available - 5) {
-      reader.rewind(5)
-      return null
-    }
-
-    const packet = reader.readSync(length)
-    const inner = await this._inner.decode(Bytes.from(packet), eof)
-
-    if (!inner) {
-      reader.rewind(5 + length)
-      return null
-    }
-
-    return inner
+    // no fresh record produced a frame — drain a frame that may already be
+    // buffered inside the (stateful) inner codec
+    return this._inner.decode(Bytes.from(EMPTY), eof)
   }
 
   reset(): void {
