@@ -125,4 +125,36 @@ describe('FakeTlsPacketCodec', () => {
     expect(frames[0]).toEqual(a)
     expect(frames[1]).toEqual(b)
   })
+
+  it('decodes two frames packed into a single TLS record (inner-codec drain path)', async () => {
+    // Both inner-encoded frames (4 + 100 bytes each) fit in one record, so the
+    // second frame surfaces only via the post-loop inner-codec drain.
+    const a = pattern(100, 1)
+    const b = pattern(100, 2)
+    const frames = await decodeFrames([await encodeToWire(a, b)])
+    expect(frames).toHaveLength(2)
+    expect(frames[0]).toEqual(a)
+    expect(frames[1]).toEqual(b)
+  })
+
+  it('round-trips when the final record is exactly full', async () => {
+    // 4 + payload is an exact multiple of MAX_TLS_PACKET_LENGTH, so the last
+    // record is exactly `length` bytes — pins the `reader.available < length` edge.
+    const packet = pattern(2878 * 2 - 4, 7)
+    const frames = await decodeFrames([await encodeToWire(packet)])
+    expect(frames).toHaveLength(1)
+    expect(frames[0]).toEqual(packet)
+  })
+
+  it('throws on a corrupt TLS record header', async () => {
+    const codec = new FakeTlsPacketCodec(await makeStatefulInner())
+    const corrupt = Bytes.from(new Uint8Array([0x16, 0x03, 0x03, 0x00, 0x01, 0xFF]))
+    await expect(codec.decode(corrupt, false)).rejects.toThrow('Invalid TLS header')
+  })
+
+  it('returns null on eof', async () => {
+    const codec = new FakeTlsPacketCodec(await makeStatefulInner())
+    const buf = Bytes.from(new Uint8Array([0x17, 0x03, 0x03, 0x00, 0x01, 0xFF]))
+    expect(await codec.decode(buf, true)).toBe(null)
+  })
 })
