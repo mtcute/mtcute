@@ -1,7 +1,7 @@
 import type { ISyncWritable } from '@fuman/io'
+import type { IAesCtr, ICryptoProvider } from '../../utils/index.js'
 import type { IPacketCodec } from '../transports/index.js'
 import { Bytes, write } from '@fuman/io'
-import { u8 } from '@fuman/utils'
 import { defaultTestCryptoProvider } from '@mtcute/test'
 import { describe, expect, it } from 'vitest'
 
@@ -12,64 +12,48 @@ import { FakeTlsPacketCodec } from './_fake-tls.js'
 // layer) over a uint32le length-prefixed framer. AES-CTR is non-rewindable, so
 // this reproduces the corruption the buggy decode caused by rewinding a record
 // it had already fed to the inner codec — a stateless inner would not surface it.
-async function makeStatefulInner(): Promise<IPacketCodec> {
-  const crypto = await defaultTestCryptoProvider()
-  const key = new Uint8Array(32).fill(0x2B)
-  const iv = new Uint8Array(16).fill(0x17)
-  const enc = crypto.createAesCtr(key, iv, true)
-  const dec = crypto.createAesCtr(key, iv, false)
-  let acc = new Uint8Array(0)
+class StatefulInnerCodec implements IPacketCodec {
+  readonly #enc: IAesCtr
+  readonly #dec: IAesCtr
+  #acc = new Uint8Array(0)
 
-  return {
-    setup() {},
-    tag: async () => new Uint8Array(0),
-    reset() {},
-    async encode(packet: Uint8Array, into: ISyncWritable): Promise<void> {
-      const framed = new Uint8Array(4 + packet.length)
-      new DataView(framed.buffer).setUint32(0, packet.length, true)
-      framed.set(packet, 4)
-      write.bytes(into, enc.process(framed))
-    },
-    async decode(reader: Bytes): Promise<Uint8Array | null> {
-      if (reader.available > 0) {
-        acc = u8.concat2(acc, dec.process(reader.readSync(reader.available)))
-      }
-      if (acc.length < 4) return null
-      const length = new DataView(acc.buffer, acc.byteOffset, acc.byteLength).getUint32(0, true)
-      if (acc.length - 4 < length) return null
-      const out = acc.slice(4, 4 + length)
-      acc = acc.slice(4 + length)
-      return out
-    },
-  } as unknown as IPacketCodec
-}
-
-async function encodeToWire(...packets: Uint8Array[]): Promise<Uint8Array> {
-  const codec = new FakeTlsPacketCodec(await makeStatefulInner())
-  // Set `_tag` to empty so encode does not prepend the obfuscation handshake tag
-  // (in the real flow that is exchanged out of band, never inside a framed payload).
-  await codec.tag()
-  const into = Bytes.alloc(packets.reduce((n, p) => n + p.length, 0) + 256)
-  for (const p of packets) await codec.encode(p, into)
-  return into.result().slice()
-}
-
-// Mirrors @fuman/io FramedReader.read: append a chunk, drain frames via
-// decode()+reclaim() until decode returns null, then read the next chunk.
-async function decodeFrames(chunks: Uint8Array[]): Promise<Uint8Array[]> {
-  const codec = new FakeTlsPacketCodec(await makeStatefulInner())
-  const buffer = Bytes.alloc(64)
-  const frames: Uint8Array[] = []
-  for (const chunk of chunks) {
-    write.bytes(buffer, chunk)
-    for (;;) {
-      const frame = await codec.decode(buffer, false)
-      buffer.reclaim()
-      if (frame === null) break
-      frames.push(frame)
-    }
+  constructor(crypto: ICryptoProvider) {
+    const key = new Uint8Array(32).fill(0x2B)
+    const iv = new Uint8Array(16).fill(0x17)
+    this.#enc = crypto.createAesCtr(key, iv, true)
+    this.#dec = crypto.createAesCtr(key, iv, false)
   }
-  return frames
+
+  tag(): Uint8Array {
+    return new Uint8Array(0)
+  }
+
+  reset(): void {
+    this.#acc = new Uint8Array(0)
+  }
+
+  encode(packet: Uint8Array, into: ISyncWritable): void {
+    const framed = new Uint8Array(4 + packet.length)
+    new DataView(framed.buffer).setUint32(0, packet.length, true)
+    framed.set(packet, 4)
+    write.bytes(into, this.#enc.process(framed))
+  }
+
+  decode(reader: Bytes): Uint8Array | null {
+    if (reader.available > 0) {
+      const chunk = this.#dec.process(reader.readSync(reader.available))
+      const next = new Uint8Array(this.#acc.length + chunk.length)
+      next.set(this.#acc)
+      next.set(chunk, this.#acc.length)
+      this.#acc = next
+    }
+    if (this.#acc.length < 4) return null
+    const length = new DataView(this.#acc.buffer, this.#acc.byteOffset, this.#acc.byteLength).getUint32(0, true)
+    if (this.#acc.length - 4 < length) return null
+    const out = this.#acc.slice(4, 4 + length)
+    this.#acc = this.#acc.slice(4 + length)
+    return out
+  }
 }
 
 function pattern(size: number, seed = 0): Uint8Array {
@@ -84,7 +68,37 @@ function splitInto(wire: Uint8Array, chunk: number): Uint8Array[] {
   return out
 }
 
-describe('FakeTlsPacketCodec', () => {
+describe('FakeTlsPacketCodec', async () => {
+  const crypto = await defaultTestCryptoProvider()
+
+  async function encodeToWire(...packets: Uint8Array[]): Promise<Uint8Array> {
+    const codec = new FakeTlsPacketCodec(new StatefulInnerCodec(crypto))
+    // Set `_tag` to empty so encode does not prepend the obfuscation handshake tag
+    // (in the real flow that is exchanged out of band, never inside a framed payload).
+    await codec.tag()
+    const into = Bytes.alloc(packets.reduce((n, p) => n + p.length, 0) + 256)
+    for (const p of packets) await codec.encode(p, into)
+    return into.result().slice()
+  }
+
+  // Mirrors @fuman/io FramedReader.read: append a chunk, drain frames via
+  // decode()+reclaim() until decode returns null, then read the next chunk.
+  async function decodeFrames(chunks: Uint8Array[]): Promise<Uint8Array[]> {
+    const codec = new FakeTlsPacketCodec(new StatefulInnerCodec(crypto))
+    const buffer = Bytes.alloc(64)
+    const frames: Uint8Array[] = []
+    for (const chunk of chunks) {
+      write.bytes(buffer, chunk)
+      for (;;) {
+        const frame = await codec.decode(buffer, false)
+        buffer.reclaim()
+        if (frame === null) break
+        frames.push(frame)
+      }
+    }
+    return frames
+  }
+
   it('round-trips a small response that fits in one TLS record', async () => {
     const packet = pattern(120)
     const frames = await decodeFrames([await encodeToWire(packet)])
@@ -147,13 +161,13 @@ describe('FakeTlsPacketCodec', () => {
   })
 
   it('throws on a corrupt TLS record header', async () => {
-    const codec = new FakeTlsPacketCodec(await makeStatefulInner())
+    const codec = new FakeTlsPacketCodec(new StatefulInnerCodec(crypto))
     const corrupt = Bytes.from(new Uint8Array([0x16, 0x03, 0x03, 0x00, 0x01, 0xFF]))
     await expect(codec.decode(corrupt, false)).rejects.toThrow('Invalid TLS header')
   })
 
   it('returns null on eof', async () => {
-    const codec = new FakeTlsPacketCodec(await makeStatefulInner())
+    const codec = new FakeTlsPacketCodec(new StatefulInnerCodec(crypto))
     const buf = Bytes.from(new Uint8Array([0x17, 0x03, 0x03, 0x00, 0x01, 0xFF]))
     expect(await codec.decode(buf, true)).toBe(null)
   })

@@ -7,7 +7,6 @@ import { Bytes, read } from '@fuman/io'
 import { bigint, typed, u8 } from '@fuman/utils'
 
 const MAX_TLS_PACKET_LENGTH = 2878
-const EMPTY = new Uint8Array(0)
 
 // ref: https://github.com/tdlib/td/blob/master/td/mtproto/TlsInit.cpp
 const KEY_MOD = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEDn
@@ -224,6 +223,8 @@ export async function generateFakeTlsHeader(
   return writer.finish(secret)
 }
 
+const EMPTY_BYTES = Bytes.from(u8.empty)
+
 /**
  * Fake TLS packet codec, used for some MTProxies.
  *
@@ -272,13 +273,9 @@ export class FakeTlsPacketCodec implements IPacketCodec {
   async decode(reader: Bytes, eof: boolean): Promise<Uint8Array | null> {
     if (eof) return null
 
-    // A single inner frame is sliced across multiple TLS records by `encode`,
-    // and those records usually arrive coalesced, so we must consume every
-    // complete record buffered this call and feed each to the inner codec until
-    // it yields a frame. The inner codec is stateful (obfuscation runs an AES-CTR
-    // stream cipher), so a record, once fed, is consumed for good — it must never
-    // be rewound, or the same ciphertext is decrypted twice at different keystream
-    // offsets and the stream desyncs (surfaces as `invalid messageKey`).
+    // a single inner frame can be sliced across multiple TLS records.
+    // we need to feed as much as possible into the inner codec until it actually yields a frame.
+    // a bit of an abstraction leak, relying on the inner codec to be stateful, but whatever.
     while (reader.available >= 5) {
       const header = reader.readSync(3)
       if (header[0] !== 0x17 || header[1] !== 0x03 || header[2] !== 0x03) {
@@ -287,7 +284,7 @@ export class FakeTlsPacketCodec implements IPacketCodec {
 
       const length = read.uint16be(reader)
       if (reader.available < length) {
-        // incomplete trailing record — nothing was fed yet, wait for more data
+        // incomplete trailing record - wait for more data
         reader.rewind(5)
         break
       }
@@ -296,9 +293,8 @@ export class FakeTlsPacketCodec implements IPacketCodec {
       if (inner) return inner
     }
 
-    // no fresh record produced a frame — drain a frame that may already be
-    // buffered inside the (stateful) inner codec
-    return this._inner.decode(Bytes.from(EMPTY), eof)
+    // try draining the inner codec
+    return this._inner.decode(EMPTY_BYTES, eof)
   }
 
   reset(): void {
