@@ -10,6 +10,7 @@ import type {
   InputInlineMessageGeo,
   InputInlineMessageGeoLive,
   InputInlineMessageMedia,
+  InputInlineMessageRich,
   InputInlineMessageText,
   InputInlineMessageVenue,
   InputInlineMessageWebpage,
@@ -32,6 +33,23 @@ export function text(
   const ret = params as tl.Mutable<InputInlineMessageText>
   ret.type = 'text'
   ret.text = text
+
+  return ret
+}
+
+/**
+ * Create a rich inline message
+ *
+ * @param rich  Input rich message
+ * @param params
+ */
+export function rich(
+  rich: tl.TypeInputRichMessage,
+  params: Omit<InputInlineMessageRich, 'type' | 'content'> = {},
+): InputInlineMessageRich {
+  const ret = params as tl.Mutable<InputInlineMessageRich>
+  ret.type = 'rich'
+  ret.content = rich
 
   return ret
 }
@@ -129,6 +147,12 @@ export async function _convertToTl(
         invertMedia: obj.invertMedia,
       }
     }
+    case 'rich':
+      return {
+        _: 'inputBotInlineMessageRichMessage',
+        replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+        richMessage: obj.content,
+      }
     case 'media': {
       const [message, entities] = await _normalizeInputText(client, obj.text)
 

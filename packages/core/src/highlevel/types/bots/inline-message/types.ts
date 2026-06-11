@@ -1,3 +1,4 @@
+import type { tl } from '../../../../tl/index.js'
 import type {
   InputMediaContact,
   InputMediaGeo,
@@ -36,6 +37,23 @@ export interface InputInlineMessageText {
    * client render the preview above the caption and not below.
    */
   invertMedia?: boolean
+}
+
+/**
+ * Inline message containing a rich message
+ */
+export interface InputInlineMessageRich {
+  type: 'rich'
+
+  /**
+   * Contents of the message
+   */
+  content: tl.TypeInputRichMessage
+
+  /**
+   * Message reply markup
+   */
+  replyMarkup?: ReplyMarkup
 }
 
 /**
@@ -145,3 +163,4 @@ export type InputInlineMessage
     | InputInlineMessageGame
     | InputInlineMessageContact
     | InputInlineMessageWebpage
+    | InputInlineMessageRich
