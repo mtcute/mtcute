@@ -7,6 +7,9 @@ import { Bytes, read } from '@fuman/io'
 import { bigint, typed, u8 } from '@fuman/utils'
 
 const MAX_TLS_PACKET_LENGTH = 2878
+// modern chrome client hello (with X25519MLKEM768 keyshare) is ~1500-1700 bytes;
+// allocate generously and slice to the actual length afterwards
+const MAX_TLS_HELLO_SIZE = 4096
 
 // ref: https://github.com/tdlib/td/blob/master/td/mtproto/TlsInit.cpp
 const KEY_MOD = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEDn
@@ -47,52 +50,95 @@ function _isQuadraticResidue(a: bigint): boolean {
   return r === 1n
 }
 
+/* eslint-disable antfu/consistent-list-newline */
 function executeTlsOperations(h: TlsHelloWriter): void {
-  h.string([0x16, 0x03, 0x01, 0x02, 0x00, 0x01, 0x00, 0x01, 0xFC, 0x03, 0x03])
-  h.zero(32)
+  h.string([0x16, 0x03, 0x01])
+  h.beginScope() // record length
+  h.string([0x01, 0x00]) // handshake type (client hello) + high byte of 24-bit length
+  h.beginScope() // handshake length (low 16 bits)
+  h.string([0x03, 0x03]) // client version
+  h.zero(32) // digest slot (hmac written here, at offset 11)
   h.string([0x20])
-  h.random(32)
+  h.random(32) // session id
   h.string([0x00, 0x20])
   h.grease(0)
-  /* eslint-disable antfu/consistent-list-newline */
   h.string([
     0x13, 0x01, 0x13, 0x02, 0x13, 0x03, 0xC0, 0x2B, 0xC0, 0x2F, 0xC0, 0x2C,
     0xC0, 0x30, 0xCC, 0xA9, 0xCC, 0xA8, 0xC0, 0x13, 0xC0, 0x14, 0x00, 0x9C,
-    0x00, 0x9D, 0x00, 0x2F, 0x00, 0x35, 0x01, 0x00, 0x01, 0x93,
-  ])
+    0x00, 0x9D, 0x00, 0x2F, 0x00, 0x35, 0x01, 0x00,
+  ]) // cipher suites + compression methods (null)
+  h.beginScope() // extensions length
   h.grease(2)
-  h.string([0x00, 0x00, 0x00, 0x00])
-  h.beginScope()
-  h.beginScope()
-  h.string([0x00])
-  h.beginScope()
-  h.domain()
-  h.endScope()
-  h.endScope()
-  h.endScope()
-  h.string([0x00, 0x17, 0x00, 0x00, 0xFF, 0x01, 0x00, 0x01, 0x00, 0x00, 0x0A, 0x00, 0x0A, 0x00, 0x08])
-  h.grease(4)
-  h.string(
-    [
-      0x00, 0x1D, 0x00, 0x17, 0x00, 0x18, 0x00, 0x0B, 0x00, 0x02, 0x01, 0x00,
-      0x00, 0x23, 0x00, 0x00, 0x00, 0x10, 0x00, 0x0E, 0x00, 0x0C, 0x02, 0x68,
-      0x32, 0x08, 0x68, 0x74, 0x74, 0x70, 0x2F, 0x31, 0x2E, 0x31, 0x00, 0x05,
-      0x00, 0x05, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x12, 0x00,
-      0x10, 0x04, 0x03, 0x08, 0x04, 0x04, 0x01, 0x05, 0x03, 0x08, 0x05, 0x05,
-      0x01, 0x08, 0x06, 0x06, 0x01, 0x00, 0x12, 0x00, 0x00, 0x00, 0x33, 0x00,
-      0x2B, 0x00, 0x29,
-    ],
-  )
-  h.grease(4)
-  h.string([0x00, 0x01, 0x00, 0x00, 0x1D, 0x00, 0x20])
-  h.key()
-  h.string([0x00, 0x2D, 0x00, 0x02, 0x01, 0x01, 0x00, 0x2B, 0x00, 0x0B, 0x0A])
-  h.grease(6)
-  h.string([0x03, 0x04, 0x03, 0x03, 0x03, 0x02, 0x03, 0x01, 0x00, 0x1B, 0x00, 0x03, 0x02, 0x00, 0x02])
+  h.string([0x00, 0x00])
+  h.permutation([
+    (w) => { // server_name (SNI)
+      w.string([0x00, 0x00])
+      w.beginScope()
+      w.beginScope()
+      w.string([0x00])
+      w.beginScope()
+      w.domain()
+      w.endScope()
+      w.endScope()
+      w.endScope()
+    },
+    w => w.string([0x00, 0x05, 0x00, 0x05, 0x01, 0x00, 0x00, 0x00, 0x00]), // status_request
+    (w) => { // supported_groups
+      w.string([0x00, 0x0A, 0x00, 0x0C, 0x00, 0x0A])
+      w.grease(4)
+      w.string([0x11, 0xEC, 0x00, 0x1D, 0x00, 0x17, 0x00, 0x18])
+    },
+    w => w.string([0x00, 0x0B, 0x00, 0x02, 0x01, 0x00]), // ec_point_formats
+    w => w.string([ // signature_algorithms
+      0x00, 0x0D, 0x00, 0x12, 0x00, 0x10, 0x04, 0x03, 0x08, 0x04, 0x04, 0x01,
+      0x05, 0x03, 0x08, 0x05, 0x05, 0x01, 0x08, 0x06, 0x06, 0x01,
+    ]),
+    w => w.string([ // application_layer_protocol_negotiation (ALPN)
+      0x00, 0x10, 0x00, 0x0E, 0x00, 0x0C, 0x02, 0x68, 0x32, 0x08, 0x68, 0x74,
+      0x74, 0x70, 0x2F, 0x31, 0x2E, 0x31,
+    ]),
+    w => w.string([0x00, 0x12, 0x00, 0x00]), // signed_certificate_timestamp
+    w => w.string([0x00, 0x17, 0x00, 0x00]), // extended_master_secret
+    w => w.string([0x00, 0x1B, 0x00, 0x03, 0x02, 0x00, 0x02]), // compress_certificate
+    w => w.string([0x00, 0x23, 0x00, 0x00]), // session_ticket
+    (w) => { // supported_versions
+      w.string([0x00, 0x2B, 0x00, 0x07, 0x06])
+      w.grease(6)
+      w.string([0x03, 0x04, 0x03, 0x03])
+    },
+    w => w.string([0x00, 0x2D, 0x00, 0x02, 0x01, 0x01]), // psk_key_exchange_modes
+    (w) => { // key_share
+      w.string([0x00, 0x33, 0x04, 0xEF, 0x04, 0xED])
+      w.grease(4)
+      w.string([0x00, 0x01, 0x00, 0x11, 0xEC, 0x04, 0xC0])
+      w.mlKem768Key()
+      w.key()
+      w.string([0x00, 0x1D, 0x00, 0x20])
+      w.key()
+    },
+    w => w.string([0x44, 0xCD, 0x00, 0x05, 0x00, 0x03, 0x02, 0x68, 0x32]), // application_settings (ALPS)
+    (w) => { // encrypted_client_hello (GREASE)
+      w.string([0xFE, 0x0D])
+      w.beginScope()
+      w.string([0x00, 0x00, 0x01, 0x00, 0x01])
+      w.random(1)
+      w.string([0x00, 0x20])
+      w.random(32)
+      w.beginScope()
+      w.echPayload()
+      w.endScope()
+      w.endScope()
+    },
+    w => w.string([0xFF, 0x01, 0x00, 0x01, 0x00]), // renegotiation_info
+  ])
   h.grease(3)
-  h.string([0x00, 0x01, 0x00, 0x00, 0x15])
-  /* eslint-enable */
+  h.string([0x00, 0x01, 0x00])
+  h.padding()
+  h.endScope() // extensions
+  h.endScope() // handshake
+  h.endScope() // record
 }
+/* eslint-enable antfu/consistent-list-newline */
 
 function initGrease(crypto: ICryptoProvider, size: number): Uint8Array {
   const buf = crypto.randomBytes(size)
@@ -116,44 +162,45 @@ class TlsHelloWriter {
   pos = 0
 
   private _domain: Uint8Array
-  private _grease
+  private _grease: Uint8Array
   private _scopes: number[] = []
 
   constructor(
     readonly crypto: ICryptoProvider,
-    size: number,
     domain: Uint8Array,
+    grease?: Uint8Array,
   ) {
     this._domain = domain
-    this.buf = u8.alloc(size)
+    this.buf = u8.alloc(MAX_TLS_HELLO_SIZE)
     this.dv = typed.toDataView(this.buf)
-    this._grease = initGrease(this.crypto, 7)
+    // shared across permutation sub-writers so grease seeds stay consistent
+    this._grease = grease ?? initGrease(this.crypto, 7)
   }
 
-  string(buf: ArrayLike<number>) {
+  string(buf: ArrayLike<number>): void {
     this.buf.set(buf, this.pos)
     this.pos += buf.length
   }
 
-  random(size: number) {
+  random(size: number): void {
     this.string(this.crypto.randomBytes(size))
   }
 
-  zero(size: number) {
+  zero(size: number): void {
     // since the Uint8Array is initialized with zeros, we can just skip
     this.pos += size
   }
 
-  domain() {
+  domain(): void {
     this.string(this._domain)
   }
 
-  grease(seed: number) {
+  grease(seed: number): void {
     this.buf[this.pos] = this.buf[this.pos + 1] = this._grease[seed]
     this.pos += 2
   }
 
-  key() {
+  key(): void {
     for (;;) {
       const key = this.crypto.randomBytes(32)
       key[31] &= 127
@@ -174,41 +221,92 @@ class TlsHelloWriter {
     }
   }
 
-  beginScope() {
+  // fake X25519MLKEM768 hybrid keyshare's ml-kem-768 part: 384 coefficients
+  // (mod 3329) packed 3 bytes per 2 coefficients, followed by 32 random bytes
+  mlKem768Key(): void {
+    const rnd = this.crypto.randomBytes(384 * 8)
+    const dv = typed.toDataView(rnd)
+
+    for (let i = 0; i < 384; i++) {
+      const a = dv.getUint32(i * 8, true) % 3329
+      const b = dv.getUint32(i * 8 + 4, true) % 3329
+      this.buf[this.pos++] = a & 0xFF
+      this.buf[this.pos++] = (a >> 8) + ((b & 0x0F) << 4)
+      this.buf[this.pos++] = b >> 4
+    }
+
+    this.random(32)
+  }
+
+  // GREASE ECH payload: random bytes of length 144/176/208/240
+  echPayload(): void {
+    this.random(this._randomInt(4) * 32 + 144)
+  }
+
+  beginScope(): void {
     this._scopes.push(this.pos)
     this.pos += 2
   }
 
-  endScope() {
+  endScope(): void {
     const begin = this._scopes.pop()
 
     if (begin === undefined) {
       throw new Error('endScope called without beginScope')
     }
 
-    const end = this.pos
-    const size = end - begin - 2
+    this.dv.setUint16(begin, this.pos - begin - 2)
+  }
 
-    this.dv.setUint16(begin, size)
+  // render each part into its own buffer, then emit them in random order —
+  // mimics chrome's per-connection tls extension shuffling
+  permutation(parts: Array<(w: TlsHelloWriter) => void>): void {
+    const rendered = parts.map((fn) => {
+      const sub = new TlsHelloWriter(this.crypto, this._domain, this._grease)
+      fn(sub)
+      return sub.buf.subarray(0, sub.pos)
+    })
+
+    for (let i = rendered.length - 1; i > 0; i--) {
+      const j = this._randomInt(i + 1)
+      const tmp = rendered[i]
+      rendered[i] = rendered[j]
+      rendered[j] = tmp
+    }
+
+    for (const part of rendered) {
+      this.string(part)
+    }
+  }
+
+  // tls padding extension, only emitted for hellos smaller than 513 bytes
+  padding(): void {
+    if (this.pos >= 513) return
+
+    const size = 513 - this.pos
+    this.string([0x00, 0x15])
+    this.beginScope()
+    this.zero(size)
+    this.endScope()
+  }
+
+  private _randomInt(max: number): number {
+    return typed.toDataView(this.crypto.randomBytes(4)).getUint32(0, true) % max
   }
 
   async finish(secret: Uint8Array): Promise<Uint8Array> {
-    const padSize = 515 - this.pos
+    const data = this.buf.subarray(0, this.pos)
     const unixTime = ~~(Date.now() / 1000)
 
-    this.beginScope()
-    this.zero(padSize)
-    this.endScope()
-
-    const hash = await this.crypto.hmacSha256(this.buf, secret)
+    const hash = await this.crypto.hmacSha256(data, secret)
     const dv = typed.toDataView(hash)
 
     const old = dv.getInt32(28, true)
     dv.setInt32(28, old ^ unixTime, true)
 
-    this.buf.set(hash, 11)
+    data.set(hash, 11)
 
-    return this.buf
+    return data
   }
 }
 
@@ -217,7 +315,7 @@ export async function generateFakeTlsHeader(
   secret: Uint8Array,
   crypto: ICryptoProvider,
 ): Promise<Uint8Array> {
-  const writer = new TlsHelloWriter(crypto, 517, domain)
+  const writer = new TlsHelloWriter(crypto, domain)
   executeTlsOperations(writer)
 
   return writer.finish(secret)
