@@ -116,8 +116,8 @@ export class LongMap<V> extends CustomMap<Long, string, V> {
   }
 }
 const proto = (class LongMap {}).prototype
-// eslint-disable-next-line ts/no-unsafe-assignment
 ;(LongMap.prototype as any)[customInspectSymbol] = function (this: LongMap<any>) {
+  // eslint-disable-next-line ts/no-unsafe-assignment
   const res: Record<string, any> = Object.create(proto)
 
   this.forEach((v, k) => {

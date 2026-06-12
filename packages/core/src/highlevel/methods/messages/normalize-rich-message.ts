@@ -115,7 +115,7 @@ export async function _normalizeInputRichMessage(
 
   function processBlock(node: InputPageBlock | InputPageBlockWithFile): tl.TypePageBlock {
     if ('file' in node) {
-      const block = processBlock(node.block) as tl.TypePageBlock
+      const block = processBlock(node.block)
       fileBlocks.push({ block, media: node.file })
       return block
     }
