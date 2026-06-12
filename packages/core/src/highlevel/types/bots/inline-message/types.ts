@@ -6,6 +6,7 @@ import type {
   InputMediaVenue,
   InputMediaWebpage,
 } from '../../media/index.js'
+import type { InputRichMessage } from '../../messages/rich/index.js'
 import type { InputText } from '../../misc/entities.js'
 import type { ReplyMarkup } from '../index.js'
 
@@ -48,7 +49,7 @@ export interface InputInlineMessageRich {
   /**
    * Contents of the message
    */
-  content: tl.TypeInputRichMessage
+  content: tl.TypeInputRichMessage | InputRichMessage
 
   /**
    * Message reply markup
