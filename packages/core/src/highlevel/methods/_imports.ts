@@ -98,6 +98,7 @@ import {
   PreCheckoutQuery,
   RawDocument,
   ReplyMarkup,
+  RichMediaUploadCache,
   SavedStarGift,
   SentCode,
   StarGift,

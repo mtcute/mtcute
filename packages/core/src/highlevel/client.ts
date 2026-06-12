@@ -13,6 +13,7 @@ import type { GetForumTopicsOffset } from './methods/forums/get-forum-topics.js'
 import type { InputStarGiftAttributeIds, ResaleStarGiftsMeta } from './methods/gifts/get-resale-star-gifts.js'
 import type { StarGiftUpgradeOptions } from './methods/gifts/get-star-gift-upgrade-options.js'
 import type { GetInviteLinksOffset } from './methods/invite-links/get-invite-links.js'
+import type { RichStreamingDraft } from './methods/messages/create-rich-streaming-draft.js'
 import type { StreamingDraft } from './methods/messages/create-streaming-draft.js'
 import type { DeleteMessagesParams } from './methods/messages/delete-messages.js'
 import type { ForwardMessageOptions } from './methods/messages/forward-messages.js'
@@ -30,7 +31,7 @@ import type { InputStarsAmount } from './methods/premium/_normalize-stars-amount
 import type { CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
 import type { CanSendStoryResult } from './methods/stories/can-send-story.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
-import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotGuestChatQuery, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineMessage, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputRichMessage, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
+import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotGuestChatQuery, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineMessage, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputRichMessage, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, RichMediaUploadCache, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
 import type { ParsedUpdateHandlerParams } from './updates/parsed.js'
 import type { RawUpdateInfo } from './updates/types.js'
 import type { InputStringSessionData } from './utils/string-session.js'
@@ -190,6 +191,7 @@ import { iterInviteLinks } from './methods/invite-links/iter-invite-links.js'
 import { revokeInviteLink } from './methods/invite-links/revoke-invite-link.js'
 import { appendTodoList } from './methods/messages/append-todo-list.js'
 import { closePoll } from './methods/messages/close-poll.js'
+import { createRichStreamingDraft } from './methods/messages/create-rich-streaming-draft.js'
 import { createStreamingDraft } from './methods/messages/create-streaming-draft.js'
 import { deleteMessages, deleteMessagesById } from './methods/messages/delete-messages.js'
 import { deleteScheduledMessages } from './methods/messages/delete-scheduled-messages.js'
@@ -3760,6 +3762,39 @@ export interface TelegramClient extends ITelegramClient {
       shouldDispatch?: true
     }): Promise<Poll>
   /**
+   * Create a streaming rich message draft
+   *
+   * **Available**: 👤 users only
+   *
+   * @param chatId  Chat ID
+   * @param params
+   */
+  createRichStreamingDraft(
+    chatId: InputPeerLike,
+    params?: {
+    /**
+     * Unique identifier of the business connection on behalf of which the action will be sent
+     */
+      businessConnectionId?: string
+
+      /** Whether to disable upload cache (exists to prevent uploading the same media multiple times) */
+      disableUploadCache?: boolean
+
+      /**
+       * For comment threads, ID of the thread (i.e. top message)
+       */
+      threadId?: number
+
+      /**
+       * Function that will be called after some part of the media has been uploaded.
+       *
+       * @param id  ID of the file being uploaded
+       * @param uploaded  Number of bytes already uploaded
+       * @param total  Total file size
+       */
+      progressCallback?: (id: string, uploaded: number, total: number) => void
+    }): Promise<RichStreamingDraft>
+  /**
    * Create a streaming text message draft
    *
    * **Available**: 👤 users only
@@ -4942,6 +4977,14 @@ export interface TelegramClient extends ITelegramClient {
        * @param total  Total file size
        */
       progressCallback?: (id: string, uploaded: number, total: number) => void
+
+      /**
+       * Cache for uploaded media, used to avoid re-uploading the same media multiple times.
+       *
+       * Pass a (potentially shared) {@link RichMediaUploadCache} to reuse media uploaded
+       * by an earlier call (e.g. a streaming draft) instead of uploading it again.
+       */
+      uploadCache?: RichMediaUploadCache
     }): Promise<Message>
   /**
    * Send previously scheduled message(s)
@@ -7204,6 +7247,9 @@ TelegramClient.prototype.appendTodoList = function (...args) {
 }
 TelegramClient.prototype.closePoll = function (...args) {
   return closePoll(this._client, ...args)
+}
+TelegramClient.prototype.createRichStreamingDraft = function (...args) {
+  return createRichStreamingDraft(this._client, ...args)
 }
 TelegramClient.prototype.createStreamingDraft = function (...args) {
   return createStreamingDraft(this._client, ...args)

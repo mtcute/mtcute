@@ -22,6 +22,9 @@ export type InputRichMessageMedia
     | InputMediaVideo
     | InputMediaAudio
 
+/** In-memory cache mapping an {@link InputRichMessageMedia} to its uploaded media, used by streaming drafts */
+export type RichMediaUploadCache = Map<unknown, tl.RawInputMediaPhoto | tl.RawInputMediaDocument>
+
 interface InputRichMessageBase {
   /** Whether this message should be rendered RTL */
   rtl?: boolean
