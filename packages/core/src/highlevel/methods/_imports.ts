@@ -73,6 +73,7 @@ import {
   InputPeerLike,
   InputPrivacyRule,
   InputReaction,
+  InputRichMessage,
   InputStarGift,
   InputStickerSet,
   InputStickerSetItem,

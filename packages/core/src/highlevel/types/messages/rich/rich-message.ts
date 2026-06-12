@@ -1,10 +1,10 @@
-import type { tl } from '../../../tl/index.js'
-import type { ParsedDocument } from '../media/document-utils.js'
-import { LongMap } from '../../../utils/long-utils.js'
-import { makeInspectable } from '../../utils/inspectable.js'
-import { memoizeGetters } from '../../utils/memoize.js'
-import { parseDocument } from '../media/document-utils.js'
-import { Photo } from '../media/photo.js'
+import type { tl } from '../../../../tl/index.js'
+import type { ParsedDocument } from '../../media/document-utils.js'
+import { LongMap } from '../../../../utils/long-utils.js'
+import { makeInspectable } from '../../../utils/inspectable.js'
+import { memoizeGetters } from '../../../utils/memoize.js'
+import { parseDocument } from '../../media/document-utils.js'
+import { Photo } from '../../media/photo.js'
 
 export class RichMessage {
   constructor(readonly raw: tl.TypeRichMessage) {}
@@ -29,7 +29,7 @@ export class RichMessage {
     return map
   }
 
-  /** Documents (usually videos) in this message */
+  /** Documents (usually videos and audios) in this message */
   get documents(): LongMap<ParsedDocument> {
     const map = new LongMap<ParsedDocument>()
     for (const photo of this.raw.documents) {

@@ -8,6 +8,17 @@ export type MustEqual<T, V> = (() => T) extends () => V ? ((() => V) extends () 
 
 export type PublicPart<T> = { [K in keyof T]: T[K] }
 
+type ReplaceValue<X, T, V>
+  = X extends T ? T | V
+    : X extends readonly T[]
+      ? X extends T[] ? (T | V)[] : readonly (T | V)[]
+      : X extends object ? ReplaceDeep<X, T, V>
+        : X
+
+export type ReplaceDeep<O, T, V> = {
+  [K in keyof O]: ReplaceValue<O[K], T, V>
+}
+
 export function assertNever(_: never): never {
   throw new Error('Illegal state')
 }

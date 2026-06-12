@@ -669,3 +669,5 @@ export type InputMediaLike
     | InputMediaPaidMedia
     | InputMediaTodoList
     | tl.TypeInputMedia
+    | tl.TypeInputPhoto
+    | tl.TypeInputDocument

@@ -49,6 +49,15 @@ export async function _normalizeInputMedia(
     return media
   }
 
+  if (tl.isAnyInputPhoto(media)) {
+    assertTypeIs('normalizeInputMedia (@ photo)', media, 'inputPhoto')
+    return { _: 'inputMediaPhoto', id: media }
+  }
+  if (tl.isAnyInputDocument(media)) {
+    assertTypeIs('normalizeInputMedia (@ document)', media, 'inputDocument')
+    return { _: 'inputMediaDocument', id: media }
+  }
+
   if (media.type === 'venue') {
     return {
       _: 'inputMediaVenue',
@@ -111,14 +120,13 @@ export async function _normalizeInputMedia(
   if (media.type === 'game') {
     return {
       _: 'inputMediaGame',
-      id:
-                typeof media.game === 'string'
-                  ? {
-                      _: 'inputGameShortName',
-                      botId: { _: 'inputUserSelf' },
-                      shortName: media.game,
-                    }
-                  : media.game,
+      id: typeof media.game === 'string'
+        ? {
+            _: 'inputGameShortName',
+            botId: { _: 'inputUserSelf' },
+            shortName: media.game,
+          }
+        : media.game,
     }
   }
 
@@ -127,16 +135,15 @@ export async function _normalizeInputMedia(
       _: 'inputMediaInvoice',
       title: media.title,
       description: media.description,
-      photo:
-        typeof media.photo === 'string'
-          ? {
-              _: 'inputWebDocument',
-              url: media.photo,
-              mimeType: 'image/jpeg',
-              size: 0,
-              attributes: [],
-            }
-          : media.photo,
+      photo: typeof media.photo === 'string'
+        ? {
+            _: 'inputWebDocument',
+            url: media.photo,
+            mimeType: 'image/jpeg',
+            size: 0,
+            attributes: [],
+          }
+        : media.photo,
       invoice: media.invoice,
       payload: media.payload,
       provider: media.token,

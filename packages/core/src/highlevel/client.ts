@@ -30,7 +30,7 @@ import type { InputStarsAmount } from './methods/premium/_normalize-stars-amount
 import type { CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
 import type { CanSendStoryResult } from './methods/stories/can-send-story.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
-import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotGuestChatQuery, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineMessage, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
+import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotGuestChatQuery, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineMessage, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputRichMessage, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
 import type { ParsedUpdateHandlerParams } from './updates/parsed.js'
 import type { RawUpdateInfo } from './updates/types.js'
 import type { InputStringSessionData } from './utils/string-session.js'
@@ -232,6 +232,7 @@ import { sendPaidReaction } from './methods/messages/send-paid-reaction.js'
 import { quoteWithMedia, quoteWithMediaGroup, quoteWithText } from './methods/messages/send-quote.js'
 import { sendReaction } from './methods/messages/send-reaction.js'
 import { replyMedia, replyMediaGroup, replyText } from './methods/messages/send-reply.js'
+import { sendRichMessage } from './methods/messages/send-rich-message.js'
 import { sendScheduled } from './methods/messages/send-scheduled.js'
 import { sendText } from './methods/messages/send-text.js'
 import { sendTyping } from './methods/messages/send-typing.js'
@@ -4912,6 +4913,37 @@ export interface TelegramClient extends ITelegramClient {
     message: Message,
     ...params: ParametersSkip2<typeof sendMediaGroup>): ReturnType<typeof sendMediaGroup>
   /**
+   * Send a rich message
+   *
+   * **Available**: 👤 users only
+   *
+   * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
+   * @param params  Rich message contents and additional sending parameters
+   */
+  sendRichMessage(
+    chatId: InputPeerLike,
+    params: CommonSendParams & {
+      content: InputRichMessage
+
+      /** Override the default random ID, for streaming drafts */
+      randomId?: Long
+
+      /**
+       * For bots: inline or reply markup or an instruction
+       * to hide a reply keyboard or to force a reply.
+       */
+      replyMarkup?: ReplyMarkup
+
+      /**
+       * Function that will be called after some part has been uploaded.
+       *
+       * @param id  ID of the file being uploaded
+       * @param uploaded  Number of bytes already uploaded
+       * @param total  Total file size
+       */
+      progressCallback?: (id: string, uploaded: number, total: number) => void
+    }): Promise<Message>
+  /**
    * Send previously scheduled message(s)
    *
    * Note that if the message belongs to a media group,
@@ -7334,6 +7366,9 @@ TelegramClient.prototype.replyMedia = function (...args) {
 }
 TelegramClient.prototype.replyMediaGroup = function (...args) {
   return replyMediaGroup(this._client, ...args)
+}
+TelegramClient.prototype.sendRichMessage = function (...args) {
+  return sendRichMessage(this._client, ...args)
 }
 TelegramClient.prototype.sendScheduled = function (...args) {
   return sendScheduled(this._client, ...args)

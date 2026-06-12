@@ -25,7 +25,7 @@ import { _messageMediaFromTl } from './message-media.js'
 import { MessageReactions } from './message-reactions.js'
 import { MessageRepliesInfo } from './message-replies.js'
 import { RepliedMessageInfo } from './replied-message.js'
-import { RichMessage } from './rich-message.js'
+import { RichMessage } from './rich/rich-message.js'
 import { SuggestedPostInfo } from './suggested-post.js'
 
 /**
