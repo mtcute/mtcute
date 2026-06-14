@@ -342,7 +342,7 @@ export async function _normalizeInputMedia(
           fileReference: res.photo.fileReference,
         },
         ttlSeconds: media.ttlSeconds,
-        spoiler: media.type === 'video' && media.spoiler,
+        spoiler: 'spoiler' in media ? media.spoiler : false,
         livePhoto: Boolean(livePhotoVideo),
         video: livePhotoVideo,
       }
