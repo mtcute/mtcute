@@ -11,7 +11,10 @@ import type {
 import { parallelMap } from '@fuman/utils'
 import { MtArgumentError, MtTypeAssertionError } from '../../../types/errors.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
+import { toInputUser } from '../../utils/peer-utils.js'
+import { walkPageBlocks } from '../../utils/walk-page-blocks.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
+import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 interface NormalizeRichMessageParams {
   abortSignal?: AbortSignal
@@ -156,6 +159,16 @@ export async function _normalizeInputRichMessage(
 
   const blocks = input.blocks.map(processBlock)
 
+  const mentionIds = new Set<number>()
+  walkPageBlocks(blocks, {
+    richText: (text) => {
+      if (text._ === 'textMentionName') mentionIds.add(text.userId)
+    },
+  })
+  const users = mentionIds.size
+    ? await resolvePeerMany(client, [...mentionIds], toInputUser)
+    : undefined
+
   // second pass: upload the media and patch the file blocks with the actual IDs
   const uploaded = await parallelMap(
     fileBlocks,
@@ -200,5 +213,6 @@ export async function _normalizeInputRichMessage(
     blocks,
     photos: photos.length ? photos : undefined,
     documents: documents.length ? documents : undefined,
+    users: users?.length ? users : undefined,
   }
 }
