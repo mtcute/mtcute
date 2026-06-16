@@ -73,6 +73,8 @@ jobs:
             $DRY_RUN \
             --with-npm \
             --npm-token=${{ secrets.NPM_TOKEN }} \
+            --with-jsr \
+            --jsr-token=${{ secrets.JSR_TOKEN }} \
             --git-extra-origins=github \
             --with-github-release \
             --github-repo=${{ github.repository }} \
