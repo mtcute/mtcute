@@ -16,8 +16,8 @@ jobs:
   build:
     runs-on: node22
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.forgejo/actions/init
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/init
       - name: Build docs
         run: |
           pnpm run docs
@@ -27,7 +27,7 @@ jobs:
       - name: Deploy
         # only run on releases
         if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor == 'desu-bot'
-        uses: https://github.com/cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_PAGES_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

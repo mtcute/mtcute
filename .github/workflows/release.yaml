@@ -28,14 +28,14 @@ jobs:
       id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_PAT }}
       - if: ${{ github.event.inputs.branch != 'master' }}
         run: git checkout ${{ github.event.inputs.branch }}
-      - uses: ./.forgejo/actions/init
-      - uses: https://github.com/denoland/setup-deno@v2
+      - uses: ./.github/actions/init
+      - uses: denoland/setup-deno@v2
         with:
           deno-version: 2.8.1
       - name: Initialize configs
@@ -52,7 +52,7 @@ jobs:
           echo "  IdentityFile /tmp/bot-key" >> ~/.ssh/config
           chmod 600 /tmp/bot-key
           git remote add github git@github.com:mtcute/mtcute.git
-      
+
       - name: Run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

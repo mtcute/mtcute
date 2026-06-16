@@ -13,9 +13,9 @@ jobs:
     runs-on: node22
     if: github.actor != 'desu-bot' # do not run after release
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.forgejo/actions/init
-      - uses: https://github.com/denoland/setup-deno@v2
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/init
+      - uses: denoland/setup-deno@v2
         with:
           deno-version: 2.8.1
       - name: 'TypeScript'
@@ -31,40 +31,40 @@ jobs:
         node-version: [node20, node22, node24]
     runs-on: ${{ matrix.node-version }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.forgejo/actions/init
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/init
       - name: 'Run tests'
         run: pnpm run test:ci
-  
+
   test-bun:
     runs-on: node22
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.forgejo/actions/init
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/init
       - uses: oven-sh/setup-bun@v2
       - name: 'Run tests'
         run: pnpm run test:bun
-  
+
   test-deno:
     runs-on: node22
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.forgejo/actions/init
-      - uses: https://github.com/denoland/setup-deno@v2
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/init
+      - uses: denoland/setup-deno@v2
         with:
           deno-version: 2.8.1
       - name: 'Run tests'
         run: pnpm run test:deno
-  
+
   test-web:
     runs-on: docker
     container: mcr.microsoft.com/playwright:v1.57.0-noble
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.forgejo/actions/init
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/init
       - name: 'Run tests'
-        uses: https://github.com/nick-fields/retry@v2
+        uses: nick-fields/retry@v2
         with:
           max_attempts: 3
           timeout_minutes: 30
@@ -77,10 +77,10 @@ jobs:
       contents: read
       actions: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.forgejo/actions/init
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/init
       - name: Run end-to-end tests
-        uses: https://github.com/nick-fields/retry@v2
+        uses: nick-fields/retry@v2
         with:
           max_attempts: 3
           timeout_minutes: 10
@@ -101,13 +101,13 @@ jobs:
   #     contents: read
   #     actions: write
   #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: ./.forgejo/actions/init
-  #     - uses: https://github.com/denoland/setup-deno@v1
+  #     - uses: actions/checkout@v6
+  #     - uses: ./.github/actions/init
+  #     - uses: denoland/setup-deno@v1
   #       with:
   #         deno-version: '2'
   #     - name: Run end-to-end tests under Deno
-  #       uses: https://github.com/nick-fields/retry@v2
+  #       uses: nick-fields/retry@v2
   #       with:
   #         max_attempts: 3
   #         timeout_minutes: 10
