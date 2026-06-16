@@ -1,6 +1,9 @@
 name: Run release
 
 on:
+  push:
+    branches:
+      - master
   workflow_dispatch:
     inputs:
       kind:
@@ -31,8 +34,8 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          token: ${{ secrets.BOT_PAT }}
-      - if: ${{ github.event.inputs.branch != 'master' }}
+          token: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
+      - if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch != 'master' }}
         run: git checkout ${{ github.event.inputs.branch }}
       - uses: ./.github/actions/init
       - uses: denoland/setup-deno@v2
@@ -51,7 +54,7 @@ jobs:
           echo "Host github.com" >> ~/.ssh/config
           echo "  IdentityFile /tmp/bot-key" >> ~/.ssh/config
           chmod 600 /tmp/bot-key
-          git remote add github git@github.com:mtcute/mtcute.git
+          git remote add github git@github.com:${{ github.repository }}.git
 
       - name: Run release
         env:
@@ -61,11 +64,16 @@ jobs:
           unset GITHUB_ACTIONS
           unset ACTIONS_ID_TOKEN_REQUEST_URL
 
+          DRY_RUN=
+          KIND="${{ github.event.inputs.kind || 'auto' }}"
+          if [ "${{ github.event_name }}" = "push" ]; then DRY_RUN=--dry-run; KIND=patch; fi
+
           pnpm exec fuman-build release \
-            --kind=${{ github.event.inputs.kind }} \
+            --kind=$KIND \
+            $DRY_RUN \
             --with-npm \
             --npm-token=${{ secrets.NPM_TOKEN }} \
             --git-extra-origins=github \
             --with-github-release \
-            --github-repo=mtcute/mtcute \
+            --github-repo=${{ github.repository }} \
             --github-token=${{ secrets.GH_PAT }}
