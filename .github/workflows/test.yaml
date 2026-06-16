@@ -62,6 +62,8 @@ jobs:
   test-web:
     runs-on: ubuntu-latest
     container: mcr.microsoft.com/playwright:v1.57.0-noble
+    env:
+      HOME: /root
 
     steps:
       - uses: actions/checkout@v6
