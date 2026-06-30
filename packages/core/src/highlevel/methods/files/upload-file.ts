@@ -314,7 +314,12 @@ export async function uploadFile(
           bytes: part,
         } satisfies tl.upload.RawSaveFilePartRequest)
 
-    const result = await client.call(request, { kind: connectionKind, abortSignal })
+    const result = await client.call(request, {
+      kind: connectionKind,
+      maxRetryCount: Infinity,
+      floodSleepThreshold: Infinity,
+      abortSignal,
+    })
     if (!result) throw new Error(`Failed to upload part ${idx}`)
     if (abortSignal?.aborted) return
 

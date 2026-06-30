@@ -5,6 +5,7 @@ import type { ITelegramClient } from '../../client.types.js'
 import type { FileDownloadLocation, FileDownloadParameters } from '../../types/index.js'
 import { ConditionVariable } from '@fuman/utils'
 import { parseFileId } from '@mtcute/file-id'
+import { DownloadDelayGate } from '../../../network/delay-gate.js'
 import { tl } from '../../../tl/index.js'
 import { MtArgumentError, MtUnsupportedError } from '../../../types/errors.js'
 import { toggleChannelIdMark } from '../../../utils/peer-utils.js'
@@ -182,6 +183,7 @@ export async function* downloadAsIterable(
     connectionKind = 'download'
   }
   const poolSize = await client.getPoolSize(connectionKind, dcId)
+  const delayGate = isSmall ? undefined : new DownloadDelayGate()
 
   client.log.debug(
     'Downloading file of size %d from dc %d using %s connection pool (pool size: %d)',
@@ -191,8 +193,51 @@ export async function* downloadAsIterable(
     poolSize,
   )
 
+  const callPart = async (chunk: number): Promise<tl.RpcCallReturn['upload.getFile'] | tl.RpcCallReturn['upload.getWebFile'] | undefined> => {
+    while (true) {
+      try {
+        return await client.call(
+          {
+            _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
+            // eslint-disable-next-line
+            location: location as any,
+            offset: offset + chunkSize * chunk,
+            limit: chunkSize,
+          },
+          {
+            dcId,
+            kind: connectionKind,
+            maxRetryCount: Infinity, // retry until explicitly aborted (or finished)
+            floodSleepThreshold: Infinity,
+            abortSignal,
+          },
+        )
+      } catch (e: unknown) {
+        if (e instanceof DOMException && e.name === 'AbortError') return undefined
+        if (!tl.RpcError.is(e)) throw e
+
+        if (e.is('FILE_MIGRATE_%d')) {
+          dcId = e.newDc
+          continue
+        } else if (e.is('FILEREF_UPGRADE_NEEDED')) {
+          // todo: implement someday
+          // see: https://github.com/LonamiWebs/Telethon/blob/0e8bd8248cc649637b7c392616887c50986427a0/telethon/client/downloads.py#L99
+          throw new MtUnsupportedError('File ref expired!')
+        } else if (e.is('MTPROTO_CLUSTER_INVALID') && dcId != null) {
+          // this is a weird error that happens when we are trying to download a file from a "wrong" media dc
+          // (e.g. this happens when we load media dc ip from session, but the current media dc ip is different)
+          client.log.debug('received cluster invalid error for dc %d, recreating dc', dcId)
+          await client.recreateDc(dcId)
+          continue
+        } else {
+          throw e
+        }
+      }
+    }
+  }
+
   const downloadChunk = async (chunk = nextWorkerChunkIdx++): Promise<void> => {
-    let result: tl.RpcCallReturn['upload.getFile'] | tl.RpcCallReturn['upload.getWebFile']
+    let result: tl.RpcCallReturn['upload.getFile'] | tl.RpcCallReturn['upload.getWebFile'] | undefined
 
     if (ended) {
       return
@@ -203,44 +248,20 @@ export async function* downloadAsIterable(
       await throttlePromise
     }
 
+    if (ended) {
+      return
+    }
+
     try {
-      result = await client.call(
-        {
-          _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
-          // eslint-disable-next-line
-          location: location as any,
-          offset: offset + chunkSize * chunk,
-          limit: chunkSize,
-        },
-        {
-          dcId,
-          kind: connectionKind,
-          maxRetryCount: Infinity, // retry until explicitly aborted (or finished)
-          floodSleepThreshold: Infinity,
-          abortSignal,
-        },
-      )
+      if (delayGate) await delayGate.wait(abortSignal)
+      result = await callPart(chunk)
     } catch (e: unknown) {
       if (e instanceof DOMException && e.name === 'AbortError') return
-      if (!tl.RpcError.is(e)) throw e
+      throw e
+    }
 
-      if (e.is('FILE_MIGRATE_%d')) {
-        dcId = e.newDc
-
-        return downloadChunk(chunk)
-      } else if (e.is('FILEREF_UPGRADE_NEEDED')) {
-        // todo: implement someday
-        // see: https://github.com/LonamiWebs/Telethon/blob/0e8bd8248cc649637b7c392616887c50986427a0/telethon/client/downloads.py#L99
-        throw new MtUnsupportedError('File ref expired!')
-      } else if (e.is('MTPROTO_CLUSTER_INVALID') && dcId != null) {
-        // this is a weird error that happens when we are trying to download a file from a "wrong" media dc
-        // (e.g. this happens when we load media dc ip from session, but the current media dc ip is different)
-        client.log.debug('received cluster invalid error for dc %d, recreating dc', dcId)
-        await client.recreateDc(dcId)
-        return downloadChunk(chunk)
-      } else {
-        throw e
-      }
+    if (!result) {
+      return
     }
 
     if (result._ === 'upload.fileCdnRedirect') {
