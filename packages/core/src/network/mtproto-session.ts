@@ -150,6 +150,8 @@ export class MtprotoSession {
   ) {
     this.log.prefix = `[SESSION ${this._sessionId.toString(16)}] `
 
+    this._salts.setTimeSource(this.getServerTime.bind(this))
+
     this._authKey = new AuthKey(_crypto, log, _readerMap)
     this._authKeyTemp = new AuthKey(_crypto, log, _readerMap)
     this._authKeyTempSecondary = new AuthKey(_crypto, log, _readerMap)
@@ -182,12 +184,18 @@ export class MtprotoSession {
     this._authKeyTempSecondary.reset()
   }
 
-  updateTimeOffset(offset: number): void {
+  updateTimeOffset(offset: number, force = false): void {
+    if (!force && offset <= this._timeOffset) return
+
     this.log.debug('time offset updated: %d', offset)
     this._timeOffset = offset
     // lastMessageId was generated with (potentially) wrong time
     // reset it to avoid bigger issues - at worst, we'll get bad_msg_notification
     this._lastMessageId = Long.ZERO
+  }
+
+  getServerTime(): number {
+    return Math.floor(performance.now() / 1000) + this._timeOffset
   }
 
   /**

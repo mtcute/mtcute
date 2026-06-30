@@ -330,7 +330,7 @@ export async function doAuthorization(
 
   const dhPrime = bigint.fromBytes(serverDhInner.dhPrime)
   const timeOffset = serverDhInner.serverTime - Math.floor(performance.now() / 1000)
-  session.updateTimeOffset(timeOffset)
+  session.updateTimeOffset(timeOffset, true)
 
   const g = BigInt(serverDhInner.g)
   const gA = bigint.fromBytes(serverDhInner.gA)

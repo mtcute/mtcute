@@ -346,7 +346,7 @@ export class SessionConnection extends PersistentConnection {
       .then(([authKey, serverSalt, timeOffset]) => {
         this._session._authKey.setup(authKey)
         this._salts.currentSalt = serverSalt
-        this._session.updateTimeOffset(timeOffset)
+        this._session.updateTimeOffset(timeOffset, true)
 
         this._session.authorizationPending = false
 
@@ -1197,11 +1197,23 @@ export class SessionConnection extends PersistentConnection {
 
   private _onBadMsgNotification(msgId: Long, msg: mtp.RawMt_bad_msg_notification): void {
     switch (msg.errorCode) {
+      case 17: {
+        const serverTime = msgId.high >>> 0
+        const timeOffset = serverTime - Math.floor(performance.now() / 1000)
+
+        this._session.updateTimeOffset(timeOffset, true)
+        this.log.warn(
+          'msg_id too high, server time: %d, corrected offset to %d, resetting session',
+          serverTime,
+          timeOffset,
+        )
+        this._resetSession('msg_id too high')
+        break
+      }
       case 16:
-      case 17:
       case 20: {
         if (msg.errorCode !== 20) {
-          // msg_id is either too high or too low
+          // msg_id is either too low
           // code 20 means msg_id is too old,
           // we just need to resend the message
           const serverTime = msgId.high >>> 0

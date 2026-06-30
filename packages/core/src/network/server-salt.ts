@@ -9,6 +9,12 @@ export class ServerSaltManager {
 
   isFetching = false
 
+  private _getServerTime: () => number = () => Date.now() / 1000
+
+  setTimeSource(fn: () => number): void {
+    this._getServerTime = fn
+  }
+
   shouldFetchSalts(): boolean {
     return !this.isFetching && !this.currentSalt.isZero() && this._futureSalts.length < 2
   }
@@ -16,8 +22,7 @@ export class ServerSaltManager {
   setFutureSalts(salts: mtp.RawMt_future_salt[]): void {
     this._futureSalts = salts
 
-    // todo: we should use adjusted monotonic clock here
-    const now = Date.now() / 1000
+    const now = this._getServerTime()
 
     while (salts.length > 0 && salts[0].validSince <= now) {
       this.currentSalt = salts[0].salt
@@ -35,13 +40,13 @@ export class ServerSaltManager {
     this._timer = timers.setTimeout(() => {
       this.currentSalt = salt.salt
       this._replaceAndScheduleNext()
-    }, salt.validSince * 1000 - Date.now())
+    }, (salt.validSince - this._getServerTime()) * 1000)
   }
 
   private _replaceAndScheduleNext(): void {
     if (this._timer) timers.clearTimeout(this._timer)
 
-    const now = Date.now() / 1000
+    const now = this._getServerTime()
 
     // consume any salts that are already valid
     while (this._futureSalts.length !== 0) {
