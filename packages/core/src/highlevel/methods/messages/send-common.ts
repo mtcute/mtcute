@@ -20,11 +20,15 @@ export interface CommonSendParams {
   /**
    * Message to reply to. Either a message object or message ID.
    *
-   * For forums - can also be an ID of the topic (i.e. its top message ID)
+   * For forums - can also be an ID of the topic (i.e. its top message ID),
+   * but prefer using {@link threadId} for that instead.
    *
    * Can also be a message from another chat, in which case a quote will be sent.
    */
   replyTo?: number | Message
+
+  /** ID of the thread to reply to */
+  threadId?: number
 
   /**
    * If this is a reply to a specific todo item, ID of that item
@@ -226,11 +230,12 @@ export async function _processCommonSendParameters(
 
   let tlReplyTo: tl.TypeInputReplyTo | undefined
 
-  if (replyTo) {
+  if (replyTo || params.threadId) {
     tlReplyTo = {
       _: 'inputReplyToMessage',
-      replyToMsgId: replyTo,
+      replyToMsgId: replyTo ?? params.threadId!,
       replyToPeerId: replyToPeer,
+      topMsgId: params.threadId,
       quoteText: params.quote?.text,
       quoteEntities: params.quote?.entities as tl.TypeMessageEntity[],
       quoteOffset: params.quoteOffset,
