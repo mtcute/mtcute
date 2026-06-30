@@ -43,6 +43,9 @@ export class HttpProxyTcpTransport implements TelegramTransport {
       })
     }
 
+    conn.setNoDelay(true)
+    conn.setKeepAlive(true)
+
     await performHttpProxyHandshake(conn, conn, this.proxy, {
       address: dc.ipAddress,
       port: dc.port,
@@ -65,6 +68,9 @@ export class SocksProxyTcpTransport implements TelegramTransport {
       port: this.proxy.port,
     })
 
+    conn.setNoDelay(true)
+    conn.setKeepAlive(true)
+
     await performSocksHandshake(conn, conn, this.proxy, {
       address: dc.ipAddress,
       port: dc.port,
@@ -80,7 +86,10 @@ export class SocksProxyTcpTransport implements TelegramTransport {
 
 export class MtProxyTcpTransport extends BaseMtProxyTransport {
   async _connectTcp(endpoint: TcpEndpoint): Promise<ITcpConnection> {
-    return connectTcp(endpoint)
+    const conn = await connectTcp(endpoint)
+    conn.setNoDelay(true)
+    conn.setKeepAlive(true)
+    return conn
   }
 }
 

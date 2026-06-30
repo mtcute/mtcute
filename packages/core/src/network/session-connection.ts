@@ -15,6 +15,7 @@ import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
 import {
   EarlyTimer,
+  getRandomInt,
   longFromBuffer,
   randomLong,
   removeFromLongArray,
@@ -85,9 +86,8 @@ export class SessionConnection extends PersistentConnection {
   private _salts: ServerSaltManager
   readonly _session: MtprotoSession
 
-  // todo: we should probably do adaptive ping interval based on rtt like tdlib:
-  // https://github.com/tdlib/td/blob/91aa6c9e4d0774eabf4f8d7f3aa51239032059a6/td/mtproto/SessionConnection.h
   private _pingInterval: number
+  private _randomDelay: number = getRandomInt(5000)
 
   // NB: dont forget to update .reset()
   readonly onDisconnect: Emitter<void> = new Emitter()
@@ -124,6 +124,7 @@ export class SessionConnection extends PersistentConnection {
   }
 
   private _online
+  private _active = false
 
   getAuthKey(temp = false): Uint8Array | null {
     const key = temp ? this._session._authKeyTemp : this._session._authKey
@@ -158,6 +159,12 @@ export class SessionConnection extends PersistentConnection {
     // resend pending state_req-s
     for (const msgId of this._session.pendingGetStateTimeouts.keys()) {
       this._onMessageFailed(msgId, 'connection loss', true)
+    }
+
+    // force re-fetch state for all messages
+    // ! setting getState=0 is safe as it keeps the array sorted
+    for (const rpc of this._session.getStateSchedule.raw) {
+      rpc.getState = 0
     }
 
     this.onDisconnect.emit()
@@ -301,6 +308,9 @@ export class SessionConnection extends PersistentConnection {
   }
 
   protected onConnectionUsable(): void {
+    this._session.lastActivityTime = performance.now()
+    this._active = false
+
     if (this.params.withUpdates) {
       // we must send some user-related rpc to the server to make sure that
       // it will send us updates
@@ -550,6 +560,8 @@ export class SessionConnection extends PersistentConnection {
   private _warnedAboutUpdates = false
 
   protected onMessage(data: Uint8Array): void {
+    this._session.lastActivityTime = performance.now()
+
     if (this._pendingWaitForUnencrypted.length) {
       const int32 = new Int32Array(data.buffer, data.byteOffset, 2)
 
@@ -1174,6 +1186,7 @@ export class SessionConnection extends PersistentConnection {
 
     this.log.debug('received pong: msg_id %l, ping_id %l, rtt = %dms', msgId, pingId, rtt)
     this._session.resetLastPing()
+    this._flushTimer.emitBefore(this._session.lastPingTime + this._pingMustDelay())
   }
 
   private _onBadServerSalt(msg: mtp.RawMt_bad_server_salt): void {
@@ -1640,6 +1653,54 @@ export class SessionConnection extends PersistentConnection {
     this._onMessageFailed(msgId, 'timeout')
   }
 
+  // https://github.com/tdlib/td/blob/master/td/mtproto/SessionConnection.h
+  private _rtt(): number {
+    const rtt = this._session.lastPingRtt
+    if (Number.isNaN(rtt)) return 2000
+    return Math.max(2000, rtt * 1.5 + 1000)
+  }
+
+  private _readDisconnectDelay(): number {
+    return this._active ? this._rtt() * 3.5 : 135000 + this._randomDelay
+  }
+
+  private _pingDisconnectDelay(): number {
+    return this._active && this.params.isMainConnection ? this._rtt() * 2.5 : 135000 + this._randomDelay
+  }
+
+  private _pingMustDelay(): number {
+    return this._active ? this._rtt() : this._pingInterval + this._randomDelay
+  }
+
+  private _isActive(): boolean {
+    if (this._session.queuedRpc.length > 0) return true
+
+    for (const msg of this._session.pendingMessages.values()) {
+      if (msg._ === 'rpc') return true
+    }
+
+    return false
+  }
+
+  private _checkTimeouts(now: number): boolean {
+    if (
+      !this._session.lastPingMsgId.isZero()
+      && now - this._session.lastPingTime > this._pingDisconnectDelay()
+    ) {
+      this.log.warn('ping timeout, no pong for %dms', Math.round(now - this._session.lastPingTime))
+      this._resetSession('ping timeout')
+      return true
+    }
+
+    if (now - this._session.lastActivityTime > this._readDisconnectDelay()) {
+      this.log.warn('read timeout, last read was %dms ago', Math.round(now - this._session.lastActivityTime))
+      this._resetSession('read timeout')
+      return true
+    }
+
+    return false
+  }
+
   private _flush(): void {
     if (
       this._disconnectedManually
@@ -1656,6 +1717,16 @@ export class SessionConnection extends PersistentConnection {
       // it will be flushed once connection is usable
       return
     }
+
+    const now = performance.now()
+    const active = this._online && this._isActive()
+    if (active && !this._active) {
+      this._session.lastActivityTime = now
+      this._session.resetLastPing(true)
+    }
+    this._active = active
+
+    if (this._checkTimeouts(now)) return
 
     try {
       this._doFlush()
@@ -1675,10 +1746,16 @@ export class SessionConnection extends PersistentConnection {
       // between multiple connections using the same session
       this._flushTimer.emitWhenIdle()
     } else {
-      const nextPingTime = this._session.lastPingTime + this._pingInterval
+      const nextPingTime = this._session.lastPingMsgId.isZero()
+        ? this._session.lastPingTime + this._pingMustDelay()
+        : Infinity
       const nextGetScheduleTime = this._session.getStateSchedule.raw[0]?.getState || Infinity
+      const readDeadline = this._session.lastActivityTime + this._readDisconnectDelay()
+      const pingDeadline = this._session.lastPingMsgId.isZero()
+        ? Infinity
+        : this._session.lastPingTime + this._pingDisconnectDelay()
 
-      this._flushTimer.emitBefore(Math.min(nextPingTime, nextGetScheduleTime))
+      this._flushTimer.emitBefore(Math.min(nextPingTime, nextGetScheduleTime, readDeadline, pingDeadline))
     }
   }
 
@@ -1740,21 +1817,12 @@ export class SessionConnection extends PersistentConnection {
       messageCount += 1
     }
 
-    if (now - this._session.lastPingTime > this._pingInterval) {
-      if (!this._session.lastPingMsgId.isZero()) {
-        this.log.warn("didn't receive pong for previous ping (msg_id = %l). are we offline?", this._session.lastPingMsgId)
-        if (!this._disconnectedManually) {
-          this._resetSession('ping timeout')
-        }
-        return
-      }
-
+    if (this._session.lastPingMsgId.isZero() && now - this._session.lastPingTime > this._pingMustDelay()) {
       pingId = randomLong()
       const obj: mtp.RawMt_ping_delay_disconnect = {
         _: 'mt_ping_delay_disconnect',
         pingId,
-        // ÷ 1000 * 1.25
-        disconnectDelay: Math.round(this._pingInterval * 0.00125),
+        disconnectDelay: Math.round(this._pingDisconnectDelay() / 1000) + 2,
       }
 
       this._session.lastPingTime = now

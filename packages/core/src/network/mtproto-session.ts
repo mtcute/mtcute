@@ -135,6 +135,7 @@ export class MtprotoSession {
   lastPingRtt: number = Number.NaN
   lastPingTime = 0
   lastPingMsgId: Long = Long.ZERO
+  lastActivityTime = 0
   lastSessionCreatedUid: Long = Long.ZERO
 
   initConnectionCalled = false
