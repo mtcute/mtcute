@@ -21,6 +21,7 @@ import {
   SortedArray,
 } from '../utils/index.js'
 import { AuthKey } from './auth-key.js'
+import { MessageIdStore } from './message-id-store.js'
 
 export interface PendingRpc {
   method: string
@@ -106,7 +107,7 @@ export class MtprotoSession {
   /// state ///
   // recent msg ids
   recentOutgoingMsgIds: LruSet<Long> = new LruSet(1000, LongSet)
-  recentIncomingMsgIds: LruSet<Long> = new LruSet(1000, LongSet)
+  recentIncomingMsgIds: MessageIdStore = new MessageIdStore()
   // <deno-tsignore>
   recentStateRequests: LruMap<Long, Long[]> = new LruMap(1000, LongMap)
 

@@ -44,6 +44,8 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
 }
 
 const TEMP_AUTH_KEY_EXPIRY = 86400 // 24 hours
+const TEMP_AUTH_KEY_REFRESH_MARGIN = 3600 // refresh 1 hour before expiry
+const TEMP_AUTH_KEY_REFRESH_JITTER = 600 // up to 10 minutes of jitter to desync connections
 const GET_STATE_INTERVAL = 1500 // 1.5 seconds
 const GET_STATE_TIMEOUT = 2500 // 2 seconds
 
@@ -69,6 +71,9 @@ export class SessionConnection extends PersistentConnection {
 
   private _flushTimer = new EarlyTimer()
   private _queuedDestroySession: Long[] = []
+
+  private _needDestroyAuthKey = false
+  private _sentDestroyAuthKey = false
 
   // waitForMessage
   private _pendingWaitForUnencrypted: [Deferred<Uint8Array>, timers.Timer][] = []
@@ -177,6 +182,15 @@ export class SessionConnection extends PersistentConnection {
     this.reset(true)
   }
 
+  destroyAuthKey(): void {
+    if (!this._session._authKey.ready || this._needDestroyAuthKey) return
+
+    this._needDestroyAuthKey = true
+    this._sentDestroyAuthKey = false
+    // ! need to flush now because the session is immediately reset after this call
+    this._flushTimer.emitNow()
+  }
+
   reset(forever = false): void {
     this._session.initConnectionCalled = false
     this._flushTimer.reset()
@@ -190,6 +204,8 @@ export class SessionConnection extends PersistentConnection {
       timers.clearTimeout(timeout)
     }
     this._session.pendingGetStateTimeouts.clear()
+
+    if (this._needDestroyAuthKey) this._sentDestroyAuthKey = false
 
     if (forever) {
       timers.clearTimeout(this._pfsUpdateTimeout)
@@ -523,7 +539,7 @@ export class SessionConnection extends PersistentConnection {
             this.log.debug('temp key is expiring soon')
             this._authorizePfs(true)
           },
-          (TEMP_AUTH_KEY_EXPIRY - 60) * 1000,
+          (TEMP_AUTH_KEY_EXPIRY - TEMP_AUTH_KEY_REFRESH_MARGIN - getRandomInt(TEMP_AUTH_KEY_REFRESH_JITTER)) * 1000,
         )
       })
       .catch((err: Error) => {
@@ -646,15 +662,14 @@ export class SessionConnection extends PersistentConnection {
       return
     }
 
-    if (this._session.recentIncomingMsgIds.has(messageId)) {
-      this.log.debug('ignoring duplicate message %s', messageId)
+    if (!this._session.recentIncomingMsgIds.add(messageId)) {
+      this.log.debug('ignoring duplicate or too old message %s', messageId)
 
       return
     }
     const message = message_ as mtp.TlObject
 
     this.log.debug('received %s (msg_id: %l)', message._, messageId)
-    this._session.recentIncomingMsgIds.add(messageId)
 
     switch (message._) {
       case 'mt_msgs_ack':
@@ -710,6 +725,16 @@ export class SessionConnection extends PersistentConnection {
       case 'mt_destroy_session_none':
         // no point in handling these
         this.log.debug('received %s (msg_id = %l): %j', message._, messageId, message)
+        break
+      case 'mt_destroy_auth_key_ok':
+      case 'mt_destroy_auth_key_none':
+        this.log.info('auth key destroyed: %s', message._)
+        this._needDestroyAuthKey = false
+        this._sentDestroyAuthKey = false
+        break
+      case 'mt_destroy_auth_key_fail':
+        this.log.warn('auth key destruction failed')
+        this._sentDestroyAuthKey = false
         break
       default:
         if (tl.isAnyUpdates(message)) {
@@ -1804,6 +1829,7 @@ export class SessionConnection extends PersistentConnection {
 
     let cancelRpcs: Long[] | null = null
     let destroySessions: Long[] | null = null
+    let destroyAuthKey = false
     let rootMsgId: Long | null = null
 
     const now = performance.now()
@@ -1909,6 +1935,12 @@ export class SessionConnection extends PersistentConnection {
       containerSize += this._queuedDestroySession.length * 28
       destroySessions = this._queuedDestroySession
       this._queuedDestroySession = []
+    }
+
+    if (this._needDestroyAuthKey && !this._sentDestroyAuthKey) {
+      destroyAuthKey = true
+      containerMessageCount += 1
+      containerSize += 20
     }
 
     if (this._salts.shouldFetchSalts()) {
@@ -2058,6 +2090,11 @@ export class SessionConnection extends PersistentConnection {
         this._session.pendingMessages.set(msgId, pending)
         otherPendings.push(pending)
       })
+    }
+
+    if (destroyAuthKey) {
+      this._registerOutgoingMsgId(this._session.writeMessage(writer, { _: 'mt_destroy_auth_key' }))
+      this._sentDestroyAuthKey = true
     }
 
     if (getFutureSaltsRequest) {

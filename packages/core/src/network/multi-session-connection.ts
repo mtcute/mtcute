@@ -211,6 +211,16 @@ export class MultiSessionConnection {
     this.connect()
   }
 
+  get isConnected(): boolean {
+    return this._connections.some(conn => conn.isConnected)
+  }
+
+  destroyAuthKey(): void {
+    const conn = this._connections.find(c => c.isConnected) ?? this._connections[0]
+
+    conn?.destroyAuthKey()
+  }
+
   private _authKey: Uint8Array | null = null
   setAuthKey(authKey: Uint8Array | null): void {
     this._authKey = authKey
