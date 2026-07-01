@@ -15,6 +15,7 @@ export default antfu({
     'e2e/deno/.jsr-data',
     'e2e/node/.verdaccio',
     '.claude/skills/**',
+    '.agents/skills/**',
   ],
   typescript: process.env.CI
     ? {

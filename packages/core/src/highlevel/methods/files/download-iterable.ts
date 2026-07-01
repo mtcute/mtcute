@@ -3,11 +3,12 @@ import type { ConnectionKind } from '../../../network/network-manager.js'
 import type { ITelegramClient } from '../../client.types.js'
 
 import type { FileDownloadLocation, FileDownloadParameters } from '../../types/index.js'
-import { ConditionVariable } from '@fuman/utils'
+import { ConditionVariable, timers } from '@fuman/utils'
 import { parseFileId } from '@mtcute/file-id'
 import { DownloadDelayGate } from '../../../network/delay-gate.js'
 import { tl } from '../../../tl/index.js'
-import { MtArgumentError, MtUnsupportedError } from '../../../types/errors.js'
+import { MtArgumentError, MtTimeoutError, MtUnsupportedError } from '../../../types/errors.js'
+import { combineAbortSignals } from '../../../utils/abort-signal.js'
 import { toggleChannelIdMark } from '../../../utils/peer-utils.js'
 import { FileLocation, MtPeerNotFoundError } from '../../types/index.js'
 import { fileIdToInputFileLocation, fileIdToInputWebFileLocation } from '../../utils/convert-file-id.js'
@@ -142,8 +143,24 @@ export async function* downloadAsIterable(
   const primaryDcId = await client.getPrimaryDcId()
   if (!dcId) dcId = primaryDcId
 
-  const abortSignal = params?.abortSignal
+  const stallTimeout = params?.stallTimeout
+  const stallAbort = stallTimeout != null ? new AbortController() : undefined
+  const abortSignal = stallAbort
+    ? params?.abortSignal
+      ? combineAbortSignals(params.abortSignal, stallAbort.signal)
+      : stallAbort.signal
+    : params?.abortSignal
   let ended = false
+
+  let stallTimer: timers.Timer | undefined
+  const resetStallTimer = stallAbort && stallTimeout != null
+    ? () => {
+        if (stallTimer) timers.clearTimeout(stallTimer)
+        stallTimer = timers.setTimeout(() => {
+          stallAbort.abort(new MtTimeoutError(stallTimeout))
+        }, stallTimeout)
+      }
+    : undefined
 
   const partSizeKb = params?.partSize ?? (fileSize ? determinePartSize(fileSize) : 64)
 
@@ -264,6 +281,8 @@ export async function* downloadAsIterable(
       return
     }
 
+    resetStallTimer?.()
+
     if (result._ === 'upload.fileCdnRedirect') {
       // we shouldnt receive them since cdnSupported is not set in the getFile request.
       // also, i couldnt find any media that would be downloaded from cdn, so even if
@@ -292,6 +311,7 @@ export async function* downloadAsIterable(
   }
 
   let error: unknown
+  resetStallTimer?.()
   void Promise.all(Array.from({
     length: Math.min(poolSize * (isSmall ? 1 : REQUESTS_PER_CONNECTION), numChunks),
   }, downloadChunk))
@@ -316,27 +336,31 @@ export async function* downloadAsIterable(
 
   let position = offset
 
-  while (position < limitBytes) {
-    await nextChunkCv.wait()
+  try {
+    while (position < limitBytes) {
+      await nextChunkCv.wait()
 
-    if (error) throw error
+      if (error) throw error
 
-    while (nextChunkIdx in buffer) {
-      const buf = buffer[nextChunkIdx]
-      delete buffer[nextChunkIdx]
+      while (nextChunkIdx in buffer) {
+        const buf = buffer[nextChunkIdx]
+        delete buffer[nextChunkIdx]
 
-      position += buf.length
+        position += buf.length
 
-      params?.progressCallback?.(position, limitBytes)
+        params?.progressCallback?.(position, limitBytes)
 
-      yield buf
+        yield buf
 
-      nextChunkIdx++
+        nextChunkIdx++
 
-      if (buf.length < chunkSize) {
-        // we received the last chunk
-        return
+        if (buf.length < chunkSize) {
+          // we received the last chunk
+          return
+        }
       }
     }
+  } finally {
+    if (stallTimer) timers.clearTimeout(stallTimer)
   }
 }

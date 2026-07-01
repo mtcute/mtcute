@@ -125,4 +125,14 @@ export interface FileDownloadParameters {
    * Abort signal that can be used to cancel the download.
    */
   abortSignal?: AbortSignal
+
+  /**
+   * If set, the download will be aborted (and an `MtTimeoutError` will be thrown)
+   * if no new chunk has been received within this amount of time (in milliseconds).
+   *
+   * Useful for bulk downloads where some files might be unavailable server-side
+   * (and would otherwise cause the download to hang indefinitely due to the server
+   * repeatedly responding with `FLOOD_WAIT` or `-503 Timeout`).
+   */
+  stallTimeout?: number
 }
