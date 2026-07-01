@@ -39,19 +39,19 @@ As you may have noticed, in MTProto there are only three types of peers:
 users, chats and channels. However, things are not as simple as you may imagine,
 so let's dive a bit deeper.
 
-**[Chat](https://core.telegram.org/class/chat)** is a legacy (aka basic) group. The one which is
+**[Chat](https://core.telegram.org/constructor/chat)** is a legacy (aka basic) group. The one which is
 created by default when you use "Create group" button in official clients.
 Official clients refer to them as "Groups"
 
-**[Channel](https://core.telegram.org/class/channel)** is anything that is not a user,
+**[Channel](https://core.telegram.org/constructor/channel)** is anything that is not a user,
 nor a legacy group. Supergroups, actual broadcast channels and broadcast groups
 are all represented in MTProto as a **Channel** with a different set of flags:
- - A **broadcast channel** is a [Channel](https://core.telegram.org/class/channel) where `.broadcast === true`
+ - A **broadcast channel** is a [Channel](https://core.telegram.org/constructor/channel) where `.broadcast === true`
  - A **supergroup** (also referred to as megagroup) is a
-   [Channel](https://core.telegram.org/class/channel) where `.megagroup === true`
+   [Channel](https://core.telegram.org/constructor/channel) where `.megagroup === true`
  - A **forum** is a supergroup where `.forum === true`
  - A **broadcast group** (also referred to as gigagroup) is a
-   [Channel](https://core.telegram.org/class/channel) where `.gigagroup === true`.
+   [Channel](https://core.telegram.org/constructor/channel) where `.gigagroup === true`.
    They are basically a **supergroup** where default permissions disallow
    sending messages and cannot be changed ([src](https://t.me/tdlibchat/15164)).
 
