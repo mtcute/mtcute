@@ -21,51 +21,37 @@ on:
 
 jobs:
   release:
-    runs-on: node22
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       packages: write
       id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_PAT }}
       - if: ${{ github.event.inputs.branch != 'master' }}
         run: git checkout ${{ github.event.inputs.branch }}
-      - uses: ./.forgejo/actions/init
-      - uses: https://github.com/denoland/setup-deno@v2
+      - uses: ./.github/actions/init
+      - uses: denoland/setup-deno@v2
         with:
           deno-version: 2.8.1
       - name: Initialize configs
-        env:
-          GH_PRIVKEY: ${{ secrets.GH_PRIVKEY }}
         run: |
           git config user.name "mtcute-bot"
           git config user.email mtcute-bot@tei.su
 
-          echo "$GH_PRIVKEY" > /tmp/bot-key
-          mkdir -p ~/.ssh
-          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-          echo "Host github.com" >> ~/.ssh/config
-          echo "  IdentityFile /tmp/bot-key" >> ~/.ssh/config
-          chmod 600 /tmp/bot-key
-          git remote add github git@github.com:mtcute/mtcute.git
-      
       - name: Run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # https://github.com/denoland/deno/issues/32150
-          unset GITHUB_ACTIONS
-          unset ACTIONS_ID_TOKEN_REQUEST_URL
-
           pnpm exec fuman-build release \
             --kind=${{ github.event.inputs.kind }} \
             --with-npm \
+            --with-jsr \
             --npm-token=${{ secrets.NPM_TOKEN }} \
-            --git-extra-origins=github \
             --with-github-release \
             --github-repo=mtcute/mtcute \
-            --github-token=${{ secrets.GH_PAT }}
+            --github-token=${{ secrets.BOT_PAT }}

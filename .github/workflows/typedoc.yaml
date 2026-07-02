@@ -14,10 +14,10 @@ concurrency:
 
 jobs:
   build:
-    runs-on: node22
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.forgejo/actions/init
+      - uses: ./.github/actions/init
       - name: Build docs
         run: |
           pnpm run docs
@@ -26,8 +26,8 @@ jobs:
           echo "ignore-workspace-root-check=true" >> .npmrc
       - name: Deploy
         # only run on releases
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor == 'desu-bot'
-        uses: https://github.com/cloudflare/wrangler-action@v3
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor == 'mtcute-bot'
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_PAGES_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

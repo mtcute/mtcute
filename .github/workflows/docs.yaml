@@ -13,10 +13,15 @@ concurrency:
 
 jobs:
   build:
-    runs-on: node22
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: docs/pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         working-directory: docs
@@ -29,8 +34,8 @@ jobs:
           echo "ignore-workspace-root-check=true" >> ../.npmrc
       - name: Deploy
         # do not run on forks
-        if: github.repository == 'teidesu/mtcute'
-        uses: https://github.com/cloudflare/wrangler-action@v3
+        if: github.repository == 'mtcute/mtcute'
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_PAGES_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -1,0 +1,128 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - '*.md' # ignore changes to readmes
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    if: github.actor != 'mtcute-bot' # do not run after release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/init
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: 2.8.1
+      - name: 'TypeScript'
+        run: pnpm run lint:tsc:ci
+      - name: 'ESLint'
+        run: pnpm run lint:ci
+      - name: 'deno publish --dry-run'
+        run: pnpm exec fuman-build jsr gen-deno-workspace --with-dry-run
+
+  test-node:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/init
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: 'Run tests'
+        run: pnpm run test:ci
+
+  test-bun:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/init
+      - uses: oven-sh/setup-bun@v2
+      - name: 'Run tests'
+        run: pnpm run test:bun
+
+  test-deno:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/init
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: 2.8.1
+      - name: 'Run tests'
+        run: pnpm run test:deno
+
+  test-web:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/init
+      - name: 'Run tests'
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 3
+          timeout_minutes: 30
+          command: pnpm run test:browser
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [lint, test-node, test-web, test-bun, test-deno]
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/init
+      - name: Run end-to-end tests
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 3
+          timeout_minutes: 10
+          command: |
+            set -eauo pipefail
+            export API_ID=${{ secrets.TELEGRAM_API_ID }}
+            export API_HASH=${{ secrets.TELEGRAM_API_HASH }}
+            export SESSION_DC1=${{ secrets.SESSION_DC1 }}
+            export SESSION_DC2=${{ secrets.SESSION_DC2 }}
+            export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+            cd e2e
+            pnpm run test:all
+  e2e-deno:
+    runs-on: ubuntu-latest
+    needs: [e2e]
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/init
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: '2'
+      - name: Run end-to-end tests under Deno
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          timeout_minutes: 10
+          command: |
+            set -eauo pipefail
+            export API_ID=${{ secrets.TELEGRAM_API_ID }}
+            export API_HASH=${{ secrets.TELEGRAM_API_HASH }}
+            export SESSION_DC1=${{ secrets.SESSION_DC1 }}
+            export SESSION_DC2=${{ secrets.SESSION_DC2 }}
+            export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+            cd e2e
+            deno task test:all

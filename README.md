@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/mtcute/mtcute/">
-        <img src="https://raw.githubusercontent.com/mtcute/mtcute/master/.forgejo/logo.svg?new" alt="mtcute logo" title="mtcute" width="480" /><br/>
+        <img src="https://raw.githubusercontent.com/mtcute/mtcute/master/.github/logo.svg?new" alt="mtcute logo" title="mtcute" width="480" /><br/>
     </a><br/>
     <b>modern typescript library for mtproto</b>
     <br>
@@ -10,7 +10,7 @@
     &nbsp;•&nbsp;
     <a href="https://t.me/mt_cute">telegram chat</a>
     <br/><br/>
-    <img src="https://git.stupid.fish/teidesu/mtcute/actions/workflows/test.yaml/badge.svg" alt="Tests CI" />
+    <img src="https://github.com/mtcute/mtcute/actions/workflows/test.yaml/badge.svg" alt="Tests CI" />
     <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmtcute%2Fmtcute%2Fmaster%2Fpackages%2Fcore%2Fsrc%2Ftl%2Fapi-schema.json&query=l&label=tl%20layer" alt="tl layer" />
     <a href="https://www.npmjs.com/search?q=%40mtcute">
         <img src="https://img.shields.io/npm/v/@mtcute/core" alt="npm" />
