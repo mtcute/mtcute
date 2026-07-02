@@ -1,0 +1,20 @@
+inputs:
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '22'
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: pnpm
+    - run: pnpm install --frozen-lockfile
+      shell: bash
+    - name: 'TL codegen'
+      run: pnpm -C packages/core run gen-tl
+      shell: bash

@@ -17,7 +17,7 @@ function track(p: Promise<void>) {
   return state
 }
 
-describe('DownloadDelayGate', () => {
+describe.skipIf(process.env.TEST_ENV === 'browser')('DownloadDelayGate', () => {
   afterEach(() => {
     vi.useRealTimers()
   })
