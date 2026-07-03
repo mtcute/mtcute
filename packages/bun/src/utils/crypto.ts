@@ -12,11 +12,13 @@ import {
   SIMD_AVAILABLE,
 } from '@mtcute/wasm'
 
+import mtcuteSimdWasm from '@mtcute/wasm/mtcute-simd.wasm' with { type: 'file' }
+import mtcuteWasm from '@mtcute/wasm/mtcute.wasm' with { type: 'file' }
+
 export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
   async initialize(): Promise<void> {
-    const file = SIMD_AVAILABLE ? 'mtcute-simd.wasm' : 'mtcute.wasm'
-    const wasmFile = require.resolve(`@mtcute/wasm/${file}`)
-    const wasm = await readFile(wasmFile)
+    const file = SIMD_AVAILABLE ? mtcuteSimdWasm : mtcuteWasm
+    const wasm = await readFile(file)
     initSync(wasm)
   }
 
