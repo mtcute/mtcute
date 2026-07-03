@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "dotenv tsx --trace-warnings --test --test-timeout=300000",
-    "test:all": "find tests -type f -name '*.e2e.ts' -print0 | sort -z | xargs -0 -n1 pnpm run test"
+    "test:all": "find tests -type f -name '*.e2e.ts' -print0 | sort -z | xargs -0 -n1 pnpm run test",
+    "test:bun": "bun test --tsconfig-override=./tsconfig.bun.json --timeout 300000 ./tests/*.e2e.ts"
   },
   "dependencies": {
     "@fuman/utils": "0.0.20",

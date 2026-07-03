@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "mtcute": ["../packages/bun/src/index.ts"],
+      "mtcute/utils.js": ["../packages/bun/src/utils.ts"]
+    }
+  }
+}
