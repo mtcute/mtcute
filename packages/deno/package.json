@@ -13,15 +13,15 @@
         "./methods.js": "./src/methods.ts"
     },
     "dependencies": {
-        "@fuman/utils": "npm:@jsr/fuman__utils@0.0.19",
-        "@fuman/net": "npm:@jsr/fuman__net@0.0.19",
-        "@fuman/io": "npm:@jsr/fuman__io@0.0.19",
-        "@fuman/deno": "npm:@jsr/fuman__deno@0.0.19",
+        "@fuman/utils": "jsr:@fuman/utils@0.0.20",
+        "@fuman/net": "jsr:@fuman/net@0.0.20",
+        "@fuman/io": "jsr:@fuman/io@0.0.20",
+        "@fuman/deno": "jsr:@fuman/deno@0.0.20",
         "@mtcute/core": "workspace:^",
         "@mtcute/html-parser": "workspace:^",
         "@mtcute/markdown-parser": "workspace:^",
         "@mtcute/wasm": "workspace:^",
-        "@std/io": "npm:@jsr/std__io@0.223.0"
+        "@std/io": "jsr:@std/io@0.223.0"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^"

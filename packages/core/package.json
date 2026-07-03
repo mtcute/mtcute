@@ -24,9 +24,9 @@
     "gen-tl": "tsx ./scripts/tl/gen-code.ts"
   },
   "dependencies": {
-    "@fuman/io": "0.0.19",
-    "@fuman/net": "0.0.19",
-    "@fuman/utils": "0.0.19",
+    "@fuman/io": "0.0.20",
+    "@fuman/net": "0.0.20",
+    "@fuman/utils": "0.0.20",
     "@mtcute/file-id": "workspace:^",
     "@mtcute/tl-runtime": "workspace:^",
     "@types/events": "3.0.0",

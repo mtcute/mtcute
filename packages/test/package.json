@@ -24,8 +24,8 @@
   },
   "dependencies": {
     "long": "catalog:",
-    "@fuman/utils": "0.0.19",
-    "@fuman/net": "0.0.19"
+    "@fuman/utils": "0.0.20",
+    "@fuman/net": "0.0.20"
   },
   "devDependencies": {
     "@mtcute/tl-utils": "workspace:^"

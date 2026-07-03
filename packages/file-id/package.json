@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@mtcute/tl-runtime": "workspace:^",
-    "@fuman/utils": "0.0.19",
+    "@fuman/utils": "0.0.20",
     "long": "catalog:"
   }
 }
