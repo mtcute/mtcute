@@ -111,7 +111,10 @@ export class ObfuscatedPacketCodec implements IPacketCodec {
       into.set(this._decryptor!.process(reader.readSync(reader.available)))
     }
 
-    return this._inner.decode(this._decodeBuf, eof)
+    const packet = await this._inner.decode(this._decodeBuf, eof)
+    this._decodeBuf.reclaim()
+
+    return packet
   }
 
   reset(): void {

@@ -1,3 +1,4 @@
+import type { IPacketCodec } from './abstract.js'
 import type { MtProxyInfo } from './obfuscated.js'
 import { Bytes } from '@fuman/io'
 import { hex } from '@fuman/utils'
@@ -197,5 +198,31 @@ describe('ObfuscatedPacketCodec', () => {
     codec.reset()
 
     expect(spyInnerReset).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not retain consumed decode bytes', async () => {
+    const inner: IPacketCodec = {
+      tag: () => new Uint8Array([0xEE, 0xEE, 0xEE, 0xEE]),
+      decode: reader => new Uint8Array(reader.readSync(reader.available)),
+      encode: () => {},
+      reset: () => {},
+    }
+
+    const codec = new ObfuscatedPacketCodec(inner)
+    codec.setup(await defaultTestCryptoProvider(), new LogManager(undefined, defaultPlatform))
+
+    await codec.tag()
+
+    // @ts-expect-error - reading private
+    const decodeBuf = codec._decodeBuf
+    const initialCapacity = decodeBuf.capacity
+
+    for (let i = 0; i < 3000; i++) {
+      await codec.decode(Bytes.from(new Uint8Array(8)), false)
+    }
+
+    expect(decodeBuf.available).toBe(0)
+    expect(decodeBuf.written).toBe(0)
+    expect(decodeBuf.capacity).toBe(initialCapacity)
   })
 })
