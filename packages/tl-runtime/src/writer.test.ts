@@ -1,4 +1,3 @@
-/* eslint-disable ts/no-unsafe-call */
 import type { TlWriterMap } from './writer.js'
 import { hex } from '@fuman/utils'
 import Long from 'long'

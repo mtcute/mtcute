@@ -1,4 +1,4 @@
-/* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument, style/max-len */
+/* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument */
 import type Long from 'long'
 import type { RpcCallOptions } from '../network/index.js'
 import type { tl } from '../tl/index.js'

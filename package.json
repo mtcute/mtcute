@@ -35,8 +35,8 @@
     "test:deno": "deno run -A --unstable-ffi --unstable-sloppy-imports --no-check --unstable-detect-cjs --import-map=.config/deno-import-map.json --node-modules-dir=auto npm:vitest@4.0.18 --config .config/vite.ts",
     "lint": "eslint",
     "lint:ci": "CI=1 NODE_OPTIONS=\\\"--max_old_space_size=8192\\\" eslint",
-    "lint:tsc": "pnpm -r --workspace-concurrency=4 exec tsc",
-    "lint:tsc:ci": "pnpm -r exec tsc",
+    "lint:tsc": "tsc -p tsconfig.lint.json && tsc -p e2e",
+    "lint:tsc:ci": "pnpm run lint:tsc",
     "lint:fix": "eslint --fix .",
     "docs": "fuman-build typedoc"
   },

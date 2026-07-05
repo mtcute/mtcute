@@ -8,8 +8,6 @@ import { MtArgumentError, MtUnsupportedError } from '../../../types/errors.js'
 import { FileLocation } from '../../types/index.js'
 import { downloadChunk } from './download-chunk.js'
 
-/* eslint-disable ts/no-unsafe-assignment, ts/no-unsafe-return, ts/no-unsafe-argument */
-
 describe('downloadChunk', () => {
   const defaultData = defaultCryptoProvider.randomBytes(32 * 1024)
 

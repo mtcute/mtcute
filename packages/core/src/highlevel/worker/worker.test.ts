@@ -1,4 +1,3 @@
-/* eslint-disable ts/no-unsafe-assignment, ts/no-unsafe-argument, ts/no-unsafe-return, ts/no-unsafe-call */
 import type { RpcCallOptions } from '../../network/network-manager.js'
 import type { CurrentUserInfo } from '../storage/service/current-user.js'
 

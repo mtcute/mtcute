@@ -120,4 +120,12 @@ export default antfu({
   // rules: {
   //     'import/extensions': 'off',
   // },
+}, {
+  files: ['**/*.test.ts'],
+  rules: {
+    'ts/no-unsafe-assignment': 'off',
+    'ts/no-unsafe-argument': 'off',
+    'ts/no-unsafe-return': 'off',
+    'ts/no-unsafe-call': 'off',
+  },
 })

@@ -4,8 +4,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { MtArgumentError } from '../../types/errors.js'
 import { createProxyTransportFactory } from './proxy.js'
 
-/* eslint-disable ts/no-unsafe-assignment */
-
 function makeMockTransport(name: string) {
   return vi.fn().mockImplementation(function (this: any, opts: any) {
     this._name = name

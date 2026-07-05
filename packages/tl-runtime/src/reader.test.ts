@@ -1,5 +1,3 @@
-/* eslint-disable ts/no-unsafe-call,ts/no-unsafe-assignment,ts/no-unsafe-return,ts/no-unsafe-argument */
-
 import type { TlReaderMap } from './reader.js'
 import { hex } from '@fuman/utils'
 // import Long from 'long'

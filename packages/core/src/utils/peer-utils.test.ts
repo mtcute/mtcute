@@ -84,7 +84,6 @@ describe('getAllPeersFrom', () => {
   const stubChat = createStub('chat', { id: 789 })
   const stubChannel = createStub('channel', { id: 101112 })
 
-  /* eslint-disable ts/no-unsafe-argument */
   it('should find all peers from objects containing users/chats fields', () => {
     expect([...getAllPeersFrom({ users: [], chats: [] } as any)]).toEqual([])
     expect([
@@ -129,6 +128,4 @@ describe('getAllPeersFrom', () => {
   it('should correctly handle users/chats fields of type number[]', () => {
     expect([...getAllPeersFrom({ users: [123, 456], chats: [123, 456] } as any)]).toEqual([])
   })
-
-  /* eslint-enable ts/no-unsafe-argument */
 })
