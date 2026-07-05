@@ -1220,6 +1220,25 @@ export class UpdatesManager {
     }
   }
 
+  private _consumeNoDispatch(pending: PendingUpdate): boolean {
+    if (!this.noDispatchEnabled) return false
+
+    const upd = pending.update
+    const channelId = pending.channelId ?? 0
+    const msgId
+      = upd._ === 'updateNewMessage'
+        || upd._ === 'updateNewChannelMessage'
+        || upd._ === 'updateBotNewBusinessMessage'
+        ? upd.message.id
+        : undefined
+
+    const foundByMsgId = msgId ? this.noDispatchMsg.get(channelId)?.delete(msgId) : false
+    const foundByPts = this.noDispatchPts.get(channelId)?.delete(pending.pts!)
+    const foundByQts = this.noDispatchQts.delete(pending.qts!)
+
+    return Boolean(foundByMsgId || foundByPts || foundByQts)
+  }
+
   async _onUpdate(
     pending: PendingUpdate,
     requestedDiff: Map<number, Promise<void>>,
@@ -1320,6 +1339,8 @@ export class UpdatesManager {
       }
     }
 
+    const inNoDispatchIndex = this._consumeNoDispatch(pending)
+
     if (isMessageEmpty(upd)) return
 
     // this.rpsProcessing?.hit()
@@ -1413,25 +1434,10 @@ export class UpdatesManager {
     }
 
     // dispatch the update
-    if (this.noDispatchEnabled) {
-      const channelId = pending.channelId ?? 0
-      const msgId
-        = upd._ === 'updateNewMessage'
-          || upd._ === 'updateNewChannelMessage'
-          || upd._ === 'updateBotNewBusinessMessage'
-          ? upd.message.id
-          : undefined
+    if (inNoDispatchIndex) {
+      log.debug('not dispatching %s because it is in no_dispatch index', upd._)
 
-      // we first need to remove it from each index, and then check if it was there
-      const foundByMsgId = msgId && this.noDispatchMsg.get(channelId)?.delete(msgId)
-      const foundByPts = this.noDispatchPts.get(channelId)?.delete(pending.pts!)
-      const foundByQts = this.noDispatchQts.delete(pending.qts!)
-
-      if (foundByMsgId || foundByPts || foundByQts) {
-        log.debug('not dispatching %s because it is in no_dispatch index', upd._)
-
-        return
-      }
+      return
     }
 
     log.debug('dispatching %s (postponed = %s)', upd._, postponed)
@@ -1831,12 +1837,14 @@ export class UpdatesManager {
           }
 
           // channel pts from storage will be available because we loaded it earlier
-          if (!localPts) {
+          if (localPts === undefined) {
             log.warn(
               'local pts not available for postponed %s (cid = %d), skipping',
               upd._,
               pending.channelId,
             )
+            pendingPtsUpdatesPostponed.removeIndex(i)
+            i--
             continue
           }
 

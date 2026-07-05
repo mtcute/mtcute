@@ -39,11 +39,9 @@ export function downloadAsStream(
 
   const cancel = new AbortController()
 
-  if (params?.abortSignal) {
-    params?.abortSignal.addEventListener('abort', () => {
-      cancel.abort()
-    })
-  }
+  const onAbort = () => cancel.abort()
+  params?.abortSignal?.addEventListener('abort', onAbort)
+  const removeAbortListener = () => params?.abortSignal?.removeEventListener('abort', onAbort)
 
   const backpressureCv = new ConditionVariable()
 
@@ -62,13 +60,16 @@ export function downloadAsStream(
         }
 
         controller.close()
-      })().catch(e => controller.error(e))
+      })()
+        .catch(e => controller.error(e))
+        .finally(removeAbortListener)
     },
     pull() {
       backpressureCv.notify()
     },
     cancel() {
       cancel.abort()
+      removeAbortListener()
     },
   }, {
     highWaterMark: params?.highWaterMark,

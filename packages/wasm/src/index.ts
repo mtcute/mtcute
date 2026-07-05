@@ -204,6 +204,7 @@ export function ctr256(ctx: number, data: Uint8Array): Uint8Array {
   mem.set(data, inputPtr)
 
   wasm.ctr256(ctx, inputPtr, data.length, outputPtr)
+  __free(inputPtr)
 
   const result = mem.slice(outputPtr, outputPtr + data.length)
   __free(outputPtr)

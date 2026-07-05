@@ -7,7 +7,7 @@ import type { InputPeerLike } from './peers/index.js'
 import type { HistoryReadUpdate, ParsedUpdate } from './updates/index.js'
 import type { ParametersSkip2 } from './utils.js'
 import { AsyncLock, Deferred, Deque, timers, unknownToError } from '@fuman/utils'
-import { MtArgumentError, MtTimeoutError } from '../../types/errors.js'
+import { MtArgumentError, MtcuteError, MtTimeoutError } from '../../types/errors.js'
 import { getMarkedPeerId } from '../../utils/peer-utils.js'
 import { getPeerDialogs } from '../methods/dialogs/get-peer-dialogs.js'
 import { readHistory } from '../methods/messages/read-history.js'
@@ -207,6 +207,11 @@ export class Conversation {
     state.hasConversations = Boolean(state.pendingConversations.size)
 
     // reset pending status
+    const error = new MtcuteError('Conversation stopped')
+    for (const it of this._queuedNewMessage) this._rejectPending(it, error)
+    for (const it of this._pendingEditMessage.values()) this._rejectPending(it, error)
+    for (const it of this._pendingRead.values()) this._rejectPending(it, error)
+
     this._queuedNewMessage.clear()
     this._pendingNewMessages.clear()
     this._pendingEditMessage.clear()
@@ -214,6 +219,11 @@ export class Conversation {
     this._pendingRead.clear()
 
     this._started = false
+  }
+
+  private _rejectPending(it: QueuedHandler<any>, error: Error): void {
+    if (it.timeout) timers.clearTimeout(it.timeout)
+    it.promise.reject(error)
   }
 
   private _recordMessage(msg: Message, incoming = false): Message {

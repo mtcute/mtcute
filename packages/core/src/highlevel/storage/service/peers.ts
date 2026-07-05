@@ -277,6 +277,8 @@ export class PeersService extends BaseService {
   }
 
   private async _writePending() {
+    this._pendingWritesTimer = null
+
     try {
       await asyncPool(this._pendingWrites.values(), async (dto) => {
         await this._peers.store(dto)

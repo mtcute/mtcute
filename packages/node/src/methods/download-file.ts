@@ -21,6 +21,8 @@ export async function downloadToFile(
   if (location instanceof FileLocation && ArrayBuffer.isView(location.location)) {
     // early return for inline files
     await writeFile(filename, location.location)
+
+    return
   }
 
   const output = createWriteStream(filename)
@@ -33,9 +35,14 @@ export async function downloadToFile(
     })
   }
 
-  for await (const chunk of downloadAsIterable(client, location, params)) {
-    output.write(chunk)
-  }
+  try {
+    for await (const chunk of downloadAsIterable(client, location, params)) {
+      output.write(chunk)
+    }
 
-  output.end()
+    output.end()
+  } catch (e) {
+    output.destroy()
+    throw e
+  }
 }

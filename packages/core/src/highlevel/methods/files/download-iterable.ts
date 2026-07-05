@@ -327,12 +327,13 @@ export async function* downloadAsIterable(
 
   // to avoid MaxListenersExceededWarning we do this instead
   // already sent requests can go to hell (they will get ignored)
-  abortSignal?.addEventListener('abort', () => {
+  const onAbort = () => {
     client.log.debug('download aborted')
-    error = abortSignal.reason
+    error = abortSignal!.reason
     ended = true
     nextChunkCv.notify()
-  })
+  }
+  abortSignal?.addEventListener('abort', onAbort)
 
   let position = offset
 
@@ -362,5 +363,6 @@ export async function* downloadAsIterable(
     }
   } finally {
     if (stallTimer) timers.clearTimeout(stallTimer)
+    abortSignal?.removeEventListener('abort', onAbort)
   }
 }

@@ -20,6 +20,8 @@ export class StateService {
 
   async load(): Promise<void> {
     await this._load.run()
+    if (this._vacuumTimer) return
+
     this._vacuumTimer = timers.setInterval(() => {
       Promise.resolve(this.provider.state.vacuum(Date.now())).catch(() => {})
     }, 300_000)

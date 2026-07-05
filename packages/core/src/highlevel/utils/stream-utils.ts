@@ -5,10 +5,14 @@ export async function streamToBuffer(stream: ReadableStream<Uint8Array>): Promis
 
   const reader = stream.getReader()
 
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    chunks.push(value)
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      chunks.push(value)
+    }
+  } finally {
+    reader.releaseLock()
   }
 
   return u8.concat(chunks)

@@ -692,11 +692,12 @@ export class NetworkManager {
       assertTypeIs('auth.importAuthorization', res, 'auth.authorization')
 
       promise.resolve()
-      this._pendingExports.delete(manager.dcId)
     } catch (e) {
       this._log.warn('failed to export auth to dc %d: %s', manager.dcId, e)
       promise.reject(e)
       throw e
+    } finally {
+      this._pendingExports.delete(manager.dcId)
     }
   }
 
