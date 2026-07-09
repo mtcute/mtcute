@@ -1,0 +1,4 @@
+interface:
+  display_name: "Using mtcute"
+  short_description: "Build bots and MTProto apps with mtcute"
+  default_prompt: "Use $using-mtcute to implement a Telegram bot or MTProto workflow with mtcute."
