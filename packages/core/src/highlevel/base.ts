@@ -136,9 +136,11 @@ export class BaseTelegramClient implements ITelegramClient {
   // used in a hot path, avoid extra function calls
   private _connected = false
   private _connect = asyncResettable(async () => {
-    if (this.#destroyed) throw new Error('Client is destroyed')
+    this._assertNotDestroyed()
     await this._prepare.run()
+    this._assertNotDestroyed()
     await this.mt.connect()
+    this._assertNotDestroyed()
     this._connected = true
   })
 
@@ -179,33 +181,44 @@ export class BaseTelegramClient implements ITelegramClient {
     return this.#destroyed
   }
 
+  private _assertNotDestroyed(): void {
+    // Promise.race timeouts do not cancel their input. Keep this check on both sides of awaited
+    // reconnecting or state-mutating work so a late continuation cannot cross destroy().
+    if (this.#destroyed) throw new Error('Client is destroyed')
+  }
+
   [Symbol.asyncDispose](): Promise<void> {
     return this.destroy()
   }
 
   async notifyLoggedIn(auth: tl.auth.TypeAuthorization | tl.RawUser): Promise<tl.RawUser> {
+    this._assertNotDestroyed()
     const user = this.mt.network.notifyLoggedIn(auth)
 
     this.log.prefix = `[USER ${user.id}] `
     await this.storage.self.storeFrom(user)
 
+    this._assertNotDestroyed()
     this.updates?.notifyLoggedIn()
 
     return user
   }
 
   async notifyLoggedOut(): Promise<void> {
+    this._assertNotDestroyed()
     this.mt.network.notifyLoggedOut()
     this.updates?.notifyLoggedOut()
 
     this.log.prefix = '[USER n/a] '
     await this.storage.self.store(null)
+    this._assertNotDestroyed()
 
     // drop non-primary auth keys because they are no longer valid
     const primaryDc = this.mt.network.getPrimaryDcId()
     for (const dcId of [1, 2, 3, 4, 5]) { // lol
       if (dcId === primaryDc) continue
       await this.mt.storage.provider.authKeys.deleteByDc(dcId)
+      this._assertNotDestroyed()
     }
   }
 
@@ -238,11 +251,14 @@ export class BaseTelegramClient implements ITelegramClient {
     message: MustEqual<T, tl.RpcMethod>,
     params?: RpcCallOptions,
   ): Promise<tl.RpcCallReturn[T['_']]> {
+    this._assertNotDestroyed()
     if (!this._connected) {
       await this._connect.run()
     }
+    this._assertNotDestroyed()
 
     const res = await this.mt.call(message, params)
+    this._assertNotDestroyed()
 
     if (isTlRpcError(res)) {
       const error = makeRpcError(res, new Error().stack ?? '', message._)
@@ -251,6 +267,7 @@ export class BaseTelegramClient implements ITelegramClient {
     }
 
     await this.storage.peers.updatePeersFrom(res)
+    this._assertNotDestroyed()
 
     // eslint-disable-next-line ts/no-unsafe-return
     return res
@@ -372,8 +389,10 @@ export class BaseTelegramClient implements ITelegramClient {
     return this.mt.stopSignal
   }
 
-  changePrimaryDc(dcId: number): Promise<void> {
-    return this.mt.network.changePrimaryDc(dcId)
+  async changePrimaryDc(dcId: number): Promise<void> {
+    this._assertNotDestroyed()
+    await this.mt.network.changePrimaryDc(dcId)
+    this._assertNotDestroyed()
   }
 
   async getMtprotoMessageId(): Promise<Long> {
