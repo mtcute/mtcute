@@ -59,10 +59,15 @@ export function asyncResettable<T extends(...args: any[]) => Promise<any>>(func:
 
     // eslint-disable-next-line ts/no-unsafe-argument
     runningPromise = func(...args)
-    void runningPromise.then(() => {
-      runningPromise = null
-      finished = true
-    })
+    void runningPromise.then(
+      () => {
+        runningPromise = null
+        finished = true
+      },
+      () => {
+        runningPromise = null
+      },
+    )
 
     return runningPromise
   } as T
