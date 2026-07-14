@@ -57,7 +57,7 @@ export async function editForumTopic(
     peer: await resolvePeer(client, chatId),
     topicId: typeof topicId === 'number' ? topicId : topicId.id,
     title,
-    iconEmojiId: icon ? icon ?? Long.ZERO : undefined,
+    iconEmojiId: icon === null ? Long.ZERO : icon,
     closed,
     hidden,
   })
