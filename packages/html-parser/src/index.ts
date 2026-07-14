@@ -511,6 +511,9 @@ function _unparse(
       case 'messageEntityMentionName':
         html.push(`<a href="tg://user?id=${entity.userId}">${entityText}</a>`)
         break
+      case 'messageEntityCustomEmoji':
+        html.push(`<tg-emoji id="${entity.documentId}">${entityText}</tg-emoji>`)
+        break
       case 'messageEntityFormattedDate': {
         const fmt = dateEntityFormatToString(entity)
         html.push(`<tg-time unix="${entity.date}"${fmt ? ` format="${fmt}"` : ''}>${entityText}</tg-time>`)
