@@ -6,7 +6,7 @@ import { parse } from 'csv-parse/sync'
 
 import { ERRORS_JSON_FILE } from './constants.js'
 
-const ERRORS_PAGE_TG = 'https://corefork.telegram.org/api/errors'
+const ERRORS_JSON_TG = 'https://corefork.telegram.org/api/errors.json'
 const ERRORS_PAGE_TELETHON
   = 'https://raw.githubusercontent.com/LonamiWebs/Telethon/v1/telethon_generator/data/errors.csv'
 const baseErrors = {
@@ -28,11 +28,7 @@ interface TelegramErrorsSpec {
 }
 
 async function fetchFromTelegram(errors: TlErrors) {
-  const page = await ffetch(ERRORS_PAGE_TG).text()
-  const jsonUrl = page.match(/can be found <a href="([^"]+)">here »<\/a>/i)?.[1]
-  if (!jsonUrl) throw new Error('Cannot find JSON URL')
-
-  const json = await ffetch(new URL(jsonUrl, ERRORS_PAGE_TG).href).json<TelegramErrorsSpec>()
+  const json = await ffetch(ERRORS_JSON_TG).json<TelegramErrorsSpec>()
 
   // since nobody fucking guarantees that .descriptions
   // will have description for each described here (or vice versa),

@@ -18,7 +18,7 @@ import {
 } from '@mtcute/tl-utils'
 import * as cheerio from 'cheerio'
 
-import jsYaml from 'js-yaml'
+import * as jsYaml from 'js-yaml'
 import {
   API_SCHEMA_JSON_FILE,
   APP_CONFIG_JSON_FILE,
@@ -53,9 +53,9 @@ const ffetch = ffetchBase.extend({
   timeout: 30_000,
 })
 
-function normalizeLinks(url: string, el: cheerio.Cheerio<cheerio.Element>): void {
+function normalizeLinks($: cheerio.CheerioAPI, url: string, el: cheerio.Cheerio<cheerio.Element>): void {
   el.find('a').each((i, _it) => {
-    const it = cheerio.default(_it)
+    const it = $(_it)
     let href = it.attr('href')
     if (!href) return
 
@@ -183,7 +183,7 @@ async function fetchAppConfigDocumentation() {
   const $ = cheerio.load(page)
 
   const fields = $('p:icontains(typical fields included)').nextUntil('h3')
-  normalizeLinks(`${domain}/api/config`, fields)
+  normalizeLinks($, `${domain}/api/config`, fields)
   const fieldNames = fields.filter('h4')
 
   const _example = $('p:icontains(example value)').next('pre').find('code')
@@ -309,6 +309,37 @@ async function fetchAppConfigDocumentation() {
   return result
 }
 
+interface TelegramErrorsSpec {
+  user_only: string[]
+  bot_only: string[]
+}
+
+async function applyMethodsAvailability(
+  schema: TlFullSchema,
+  docs: CachedDocumentation,
+  domain: string,
+): Promise<void> {
+  const spec = await ffetch(`${domain}/api/errors.json`).json<TelegramErrorsSpec>()
+
+  const userOnly = new Set(spec.user_only)
+  const botOnly = new Set(spec.bot_only)
+
+  for (const entry of schema.entries) {
+    if (entry.kind !== 'method') continue
+
+    const available = botOnly.has(entry.name) ? 'bot' : userOnly.has(entry.name) ? 'user' : 'both'
+    const doc = docs.methods[entry.name]
+
+    if (doc) {
+      doc.available = available
+    } else if (available !== 'both') {
+      // absence from both lists only means "both" for methods known to telegram,
+      // and for those not present in the official docs we can't tell
+      docs.methods[entry.name] = { available }
+    }
+  }
+}
+
 export async function fetchDocumentation(
   schema: TlFullSchema,
   layer: number,
@@ -355,7 +386,7 @@ export async function fetchDocumentation(
 
     if (content.text().trim() === 'The page has not been saved') return
 
-    normalizeLinks(url, content)
+    normalizeLinks($, url, content)
 
     const retClass: CachedDocumentationEntry = {}
 
@@ -383,8 +414,6 @@ export async function fetchDocumentation(
     if (entry.kind === 'method') {
       const errorsTable = $('#possible-errors').parent().next('table')
 
-      let userBotRequired = false
-
       errorsTable.find('tr').each((idx, _el) => {
         const el = $(_el)
         const cols = el.find('td')
@@ -394,23 +423,9 @@ export async function fetchDocumentation(
         const name = $(cols[1]).text()
         const comment = $(cols[2]).text()
 
-        if (name === 'USER_BOT_REQUIRED') userBotRequired = true
-
         if (!retClass.throws) retClass.throws = []
         retClass.throws.push({ code, name, comment })
       })
-
-      const botsCanUse = Boolean($('#bots-can-use-this-method').length)
-      const onlyBotsCanUse
-        = botsCanUse && (Boolean(description.match(/[,;]( for)? bots only$/)) || userBotRequired)
-
-      if (onlyBotsCanUse) {
-        retClass.available = 'bot'
-      } else if (botsCanUse) {
-        retClass.available = 'both'
-      } else {
-        retClass.available = 'user'
-      }
     }
 
     ret[entry.kind === 'class' ? 'classes' : 'methods'][entry.name] = retClass
@@ -429,7 +444,7 @@ export async function fetchDocumentation(
 
     if (content.text().trim() === 'The page has not been saved') return
 
-    normalizeLinks(url, content)
+    normalizeLinks($, url, content)
 
     const description = extractDescription($)
     if (description) ret.unions[name] = description
@@ -461,6 +476,9 @@ export async function fetchDocumentation(
     },
   )
 
+  log('📥 Fetching methods availability')
+  await applyMethodsAvailability(schema, ret, domain)
+
   log('✨ Patching descriptions')
 
   const descriptionsYaml = jsYaml.load(await readFile(DESCRIPTIONS_YAML_FILE, 'utf8'))
@@ -482,17 +500,15 @@ export function applyDocumentation(schema: TlFullSchema, docs: CachedDocumentati
     const objIndex = schema[kind]
     const docIndex = docs[kind]
 
-    for (const name in docIndex) {
-      if (!(name in objIndex)) continue
-
+    for (const name in objIndex) {
       const obj = objIndex[name]
-      const doc = docIndex[name]
+      const doc = docIndex[name] as CachedDocumentationEntry | undefined
 
-      obj.comment = doc.comment
-      if (doc.throws) obj.throws = doc.throws
-      if (doc.available) obj.available = doc.available
+      obj.comment = doc?.comment
+      obj.throws = doc?.throws
+      obj.available = doc?.available
 
-      if (doc.arguments) {
+      if (doc?.arguments) {
         const args = doc.arguments
         obj.arguments.forEach((arg) => {
           if (arg.name in args) {

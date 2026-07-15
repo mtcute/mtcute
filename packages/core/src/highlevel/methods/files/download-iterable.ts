@@ -99,6 +99,7 @@ export async function _normalizeFileDownloadLocation(
   }
 }
 
+// @available=both
 /**
  * Download a file and return it as an iterable, which yields file contents
  * in chunks of a given size. Order of the chunks is guaranteed to be

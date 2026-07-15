@@ -17,6 +17,7 @@ import { resolvePeer } from './resolve-peer.js'
  *  - supergroups or channels with enough boosts which you are an admin of
  *  - for bots – users who gave you the appropriate permissions
  */
+// @available=both
 export async function setEmojiStatus(
   client: ITelegramClient,
   params: {

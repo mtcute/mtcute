@@ -305,6 +305,7 @@ export const LAYER = ${layer};\n`
 
       ts += `${indent(indentSize, generateTypescriptDefinitionsForTlEntry(entry, {
         baseNamespace: `${namespace}.`,
+        errors,
         extends: extendsNamespace
           ? {
               ownSchema: schema,

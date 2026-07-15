@@ -141,22 +141,34 @@ function findRawApiUsages(ast, fileName) {
 function findDependencies(ast) {
   const deps = new Set()
 
+  const firstParamName = ast.kind === ts.SyntaxKind.FunctionDeclaration
+    ? ast.parameters[0]?.name?.escapedText
+    : undefined
+
   visitRecursively(
     ast,
     node => node.kind === ts.SyntaxKind.CallExpression,
     (call) => {
-      if (call.expression.kind !== ts.SyntaxKind.PropertyAccessExpression) return
-      const prop = call.expression
+      if (call.expression.kind === ts.SyntaxKind.PropertyAccessExpression) {
+        const prop = call.expression
 
-      if (
-        prop.name.escapedText !== 'call'
-        && prop.name.escapedText !== '_emitError'
-        && prop.name.escapedText !== '_cachePeersFrom'
-        && prop.name.escapedText !== 'importSession'
-        && prop.name.escapedText !== 'emit'
-        && prop.expression.kind === ts.SyntaxKind.ThisKeyword
+        if (
+          prop.name.escapedText !== 'call'
+          && prop.name.escapedText !== '_emitError'
+          && prop.name.escapedText !== '_cachePeersFrom'
+          && prop.name.escapedText !== 'importSession'
+          && prop.name.escapedText !== 'emit'
+          && prop.expression.kind === ts.SyntaxKind.ThisKeyword
+        ) {
+          deps.add(prop.name.escapedText)
+        }
+      } else if (
+        firstParamName
+        && call.expression.kind === ts.SyntaxKind.Identifier
+        && call.arguments[0]?.kind === ts.SyntaxKind.Identifier
+        && call.arguments[0].escapedText === firstParamName
       ) {
-        deps.add(prop.name.escapedText)
+        deps.add(call.expression.escapedText)
       }
     },
   )
@@ -294,6 +306,10 @@ async function processFile(state, fileName) {
       })()
       const rawApiMethods = available === null && findRawApiUsages(stmt, fileName)
       const dependencies = findDependencies(stmt).filter(it => it !== name)
+
+      if (stmt.body && stmt.parameters[0]?.type?.getText() === 'ITelegramClient') {
+        state.methods.byName[name] = { available, rawApiMethods, dependencies }
+      }
 
       if (isInitialize && isExported) {
         throwError(isExported, fileName, 'Initialization methods must not be exported')
@@ -449,6 +465,7 @@ async function main() {
     methods: {
       used: {},
       list: [],
+      byName: {},
     },
     impls: [],
     copy: [],
@@ -523,22 +540,23 @@ withParams(params: RpcCallOptions): this\n`)
       if (!available && !overload) {
         // no @available directive
         // try to determine it automatically
-        const checkDepsAvailability = (deps) => {
+        const checkDepsAvailability = (deps, visited) => {
           return determineCommonAvailability(deps, (name) => {
-            const method = state.methods.list.find(it => it.name === name && !it.overload)
+            if (visited.has(name)) return 'both'
+            visited.add(name)
+
+            const method = state.methods.byName[name]
 
             if (!method) {
-              throwError(
-                func,
-                origName,
-                `Cannot determine availability of ${name}, is it a client method? Please use @available directive manually`,
-              )
+              // likely a const-declared helper (e.g. batched queries) that we can't analyze —
+              // treat as neutral and let the remaining deps decide
+              return 'both'
             }
 
             if (method.available === null) {
               return determineCommonAvailability([
                 determineCommonAvailability(method.rawApiMethods, findMethodAvailability),
-                checkDepsAvailability(method.dependencies),
+                checkDepsAvailability(method.dependencies, visited),
               ])
             }
 
@@ -548,7 +566,7 @@ withParams(params: RpcCallOptions): this\n`)
 
         available = determineCommonAvailability([
           determineCommonAvailability(rawApiMethods, findMethodAvailability),
-          checkDepsAvailability(dependencies),
+          checkDepsAvailability(dependencies, new Set([origName])),
         ])
       }
 

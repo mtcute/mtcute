@@ -192,6 +192,7 @@ export function _normalizeQuickReplyShortcut(
   }
 }
 
+// @available=both
 /**
  * @internal
  * @noemit

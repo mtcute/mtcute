@@ -65,6 +65,7 @@ export async function deleteMessagesById(
   }
 }
 
+// @available=both
 /**
  * Delete one or more {@link Message}
  *

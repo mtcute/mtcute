@@ -18,6 +18,7 @@ import { sendText } from './send-text.js'
  *     If this is a channel post which does not have comments section.
  *     To check if a post has comments, use {@link Message#replies}.hasComments
  */
+// @available=user
 export function commentText(
   client: ITelegramClient,
   message: Message,
@@ -47,6 +48,7 @@ export function commentText(
  *     If this is a channel post which does not have comments section.
  *     To check if a post has comments, use {@link Message#replies}.hasComments
  */
+// @available=user
 export function commentMedia(
   client: ITelegramClient,
   message: Message,
@@ -76,6 +78,7 @@ export function commentMedia(
  *     If this is a channel post which does not have comments section.
  *     To check if a post has comments, use {@link Message#replies}.hasComments
  */
+// @available=user
 export function commentMediaGroup(
   client: ITelegramClient,
   message: Message,

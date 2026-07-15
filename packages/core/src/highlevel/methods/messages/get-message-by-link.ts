@@ -8,6 +8,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
 import { _getDiscussionMessage } from './get-discussion-message.js'
 import { getMessages } from './get-messages.js'
 
+// @available=both
 /**
  * Given a message link (e.g. `t.me/durov/1`), fetch the relevant message.
  */
