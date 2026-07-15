@@ -10,3 +10,5 @@ private/
 coverage
 .rollup.cache
 *.tsbuildinfo
+
+CLAUDE.local.md
