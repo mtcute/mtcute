@@ -22,11 +22,7 @@ export class EarlyTimer {
     timers.clearTimeout(this._timeout)
     this._timeoutTs = performance.now()
 
-    if (typeof queueMicrotask !== 'undefined') {
-      queueMicrotask(this.emitNow)
-    } else {
-      this._timeout = timers.setTimeout(this.emitNow, 0)
-    }
+    queueMicrotask(this.emitNow)
   }
 
   /**
