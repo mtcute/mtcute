@@ -1,7 +1,7 @@
 {
   "name": "@mtcute/e2e-tests",
   "type": "module",
-  "version": "0.30.3",
+  "version": "0.31.0",
   "private": true,
   "fuman": {
     "private": true
