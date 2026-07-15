@@ -138,7 +138,11 @@ export async function signInQr(
           ])
           break
         case 'auth.loginTokenMigrateTo': {
+          // The export request can settle just before the caller aborts. Do not mutate
+          // the client's primary DC after this sign-in operation has ended.
+          abortSignal?.throwIfAborted()
           await client.changePrimaryDc(res.dcId)
+          abortSignal?.throwIfAborted()
 
           let res2: tl.auth.TypeLoginToken
 
