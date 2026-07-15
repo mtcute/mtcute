@@ -1377,8 +1377,12 @@ export class UpdatesManager {
       }
       case 'updateChannel': {
         // note: the server also uses updateChannel for communities
-        const channel = pending.peers.chat(upd.channelId)
-        if (channel._ !== 'channelForbidden' && channel._ !== 'communityForbidden') {
+        // the channel object is not always present in the peers index (e.g. tg does not
+        // always include it in the container's chats[]). in that case, optimistically assume
+        // the channel is accessible - worst case, the next getChannelDifference will fail
+        // with CHANNEL_PRIVATE and re-add it to inaccessibleChannels
+        const channel = pending.peers.chats.get(upd.channelId)
+        if (!channel || (channel._ !== 'channelForbidden' && channel._ !== 'communityForbidden')) {
           // channel may have become accessible
           this.inaccessibleChannels.delete(upd.channelId)
         }
