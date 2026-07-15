@@ -48,13 +48,12 @@ export class EarlyTimer {
   emitBefore(ts: number): void {
     if (!this._timeoutTs || ts < this._timeoutTs) {
       this.reset()
+      // NB: never invoke the handler synchronously, even if the deadline is already past:
+      // on workerd performance.now() is frozen within a task, so a past-due deadline
+      // re-armed from within the handler would recurse infinitely (#148)
       const diff = ts - performance.now()
-      if (diff > 0) {
-        this._timeout = timers.setTimeout(this.emitNow, diff)
-        this._timeoutTs = ts
-      } else {
-        this._handler()
-      }
+      this._timeout = timers.setTimeout(this.emitNow, Math.max(diff, 0))
+      this._timeoutTs = ts
     }
   }
 
