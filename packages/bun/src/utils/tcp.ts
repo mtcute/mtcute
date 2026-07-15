@@ -5,8 +5,8 @@ import { connectTcp } from '@fuman/bun'
 import { IntermediatePacketCodec } from '@mtcute/core'
 
 export class TcpTransport implements TelegramTransport {
-  async connect(dc: BasicDcOption): Promise<ITcpConnection> {
-    const conn = await connectTcp({ address: dc.ipAddress, port: dc.port })
+  async connect(dc: BasicDcOption, abortSignal: AbortSignal): Promise<ITcpConnection> {
+    const conn = await connectTcp({ address: dc.ipAddress, port: dc.port }, abortSignal)
     conn.setNoDelay(true)
     conn.setKeepAlive(true)
     return conn

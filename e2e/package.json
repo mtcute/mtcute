@@ -12,7 +12,7 @@
     "test:bun": "bun test --tsconfig-override=./tsconfig.bun.json --timeout 300000 ./tests/*.e2e.ts"
   },
   "dependencies": {
-    "@fuman/utils": "0.0.20",
+    "@fuman/utils": "0.0.21",
     "chai": "^4.3.10",
     "dotenv-cli": "7.4.4",
     "mtcute": "file:../packages/node",

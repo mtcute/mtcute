@@ -82,7 +82,7 @@ export abstract class PersistentConnection {
 
     this._onInactivityTimeout = this._onInactivityTimeout.bind(this)
     this._fuman = new FumanPersistentConnection({
-      connect: async (dc) => {
+      connect: async (dc, abortSignal) => {
         if (this._floodControl) {
           if (!this._connectAbort || this._connectAbort.signal.aborted) {
             this._connectAbort = new AbortController()
@@ -92,7 +92,7 @@ export abstract class PersistentConnection {
         }
         this._updateLogPrefix()
         this.log.debug('connecting to %j', dc)
-        return params.transport.connect(dc)
+        return params.transport.connect(dc, abortSignal)
       },
       strategy: params.reconnectionStrategy,
       onOpen: this._onOpen.bind(this),

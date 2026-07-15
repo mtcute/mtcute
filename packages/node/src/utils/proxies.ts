@@ -5,7 +5,12 @@ import type { BasicDcOption } from '@mtcute/core/utils.js'
 import type { SecureContextOptions } from 'node:tls'
 import { performHttpProxyHandshake, performSocksHandshake } from '@fuman/net'
 import { connectTcp, connectTls } from '@fuman/node'
-import { BaseMtProxyTransport, createProxyTransportFactory, IntermediatePacketCodec } from '@mtcute/core'
+import {
+  BaseMtProxyTransport,
+  createProxyTransportFactory,
+  IntermediatePacketCodec,
+  performHandshakeWithAbort,
+} from '@mtcute/core'
 
 export type { SocksProxySettings } from '@fuman/net'
 export { HttpProxyConnectionError, SocksProxyConnectionError } from '@fuman/net'
@@ -28,30 +33,29 @@ export interface HttpProxySettings extends FumanHttpProxySettings {
 export class HttpProxyTcpTransport implements TelegramTransport {
   constructor(readonly proxy: HttpProxySettings) {}
 
-  async connect(dc: BasicDcOption): Promise<ITelegramConnection> {
+  async connect(dc: BasicDcOption, abortSignal: AbortSignal): Promise<ITelegramConnection> {
     let conn
     if (this.proxy.tls) {
       conn = await connectTls({
         address: this.proxy.host,
         port: this.proxy.port,
         extraOptions: this.proxy.tlsOptions,
-      })
+      }, abortSignal)
     } else {
       conn = await connectTcp({
         address: this.proxy.host,
         port: this.proxy.port,
-      })
+      }, abortSignal)
     }
 
     conn.setNoDelay(true)
     conn.setKeepAlive(true)
 
-    await performHttpProxyHandshake(conn, conn, this.proxy, {
-      address: dc.ipAddress,
-      port: dc.port,
-    })
-
-    return conn
+    return performHandshakeWithAbort(conn, abortSignal, () =>
+      performHttpProxyHandshake(conn, conn, this.proxy, {
+        address: dc.ipAddress,
+        port: dc.port,
+      }))
   }
 
   packetCodec(): IntermediatePacketCodec {
@@ -62,21 +66,20 @@ export class HttpProxyTcpTransport implements TelegramTransport {
 export class SocksProxyTcpTransport implements TelegramTransport {
   constructor(readonly proxy: SocksProxySettings) {}
 
-  async connect(dc: BasicDcOption): Promise<ITelegramConnection> {
+  async connect(dc: BasicDcOption, abortSignal: AbortSignal): Promise<ITelegramConnection> {
     const conn = await connectTcp({
       address: this.proxy.host,
       port: this.proxy.port,
-    })
+    }, abortSignal)
 
     conn.setNoDelay(true)
     conn.setKeepAlive(true)
 
-    await performSocksHandshake(conn, conn, this.proxy, {
-      address: dc.ipAddress,
-      port: dc.port,
-    })
-
-    return conn
+    return performHandshakeWithAbort(conn, abortSignal, () =>
+      performSocksHandshake(conn, conn, this.proxy, {
+        address: dc.ipAddress,
+        port: dc.port,
+      }))
   }
 
   packetCodec(): IntermediatePacketCodec {
@@ -85,8 +88,8 @@ export class SocksProxyTcpTransport implements TelegramTransport {
 }
 
 export class MtProxyTcpTransport extends BaseMtProxyTransport {
-  async _connectTcp(endpoint: TcpEndpoint): Promise<ITcpConnection> {
-    const conn = await connectTcp(endpoint)
+  async _connectTcp(endpoint: TcpEndpoint, abortSignal: AbortSignal): Promise<ITcpConnection> {
+    const conn = await connectTcp(endpoint, abortSignal)
     conn.setNoDelay(true)
     conn.setKeepAlive(true)
     return conn

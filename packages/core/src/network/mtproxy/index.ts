@@ -6,7 +6,12 @@ import type { IPacketCodec, ITelegramConnection, MtProxyInfo, TelegramTransport 
 import { Bytes, read, write } from '@fuman/io'
 import { base64, hex, typed, u8 } from '@fuman/utils'
 import { MtSecurityError, MtUnsupportedError } from '../../types/errors.js'
-import { IntermediatePacketCodec, ObfuscatedPacketCodec, PaddedIntermediatePacketCodec } from '../transports/index.js'
+import {
+  IntermediatePacketCodec,
+  ObfuscatedPacketCodec,
+  PaddedIntermediatePacketCodec,
+  performHandshakeWithAbort,
+} from '../transports/index.js'
 
 import { FakeTlsPacketCodec, generateFakeTlsHeader } from './_fake-tls.js'
 
@@ -41,7 +46,7 @@ const TLS_START_CLIENT = new Uint8Array([0x14, 0x03, 0x03, 0x00, 0x01, 0x01])
  * Base for a TCP transport that connects via an MTProxy
  */
 export abstract class BaseMtProxyTransport implements TelegramTransport {
-  abstract _connectTcp(endpoint: TcpEndpoint): Promise<ITcpConnection>
+  abstract _connectTcp(endpoint: TcpEndpoint, abortSignal: AbortSignal): Promise<ITcpConnection>
   readonly _proxy: MtProxySettings
 
   private _rawSecret: Uint8Array
@@ -126,14 +131,14 @@ export abstract class BaseMtProxyTransport implements TelegramTransport {
     )
   }
 
-  async connect(): Promise<ITelegramConnection> {
+  async connect(_dc: BasicDcOption, abortSignal: AbortSignal): Promise<ITelegramConnection> {
     const conn = await this._connectTcp({
       address: this._proxy.host,
       port: this._proxy.port,
-    })
+    }, abortSignal)
 
     if (this._fakeTlsDomain) {
-      await this._handleConnectFakeTls(conn)
+      await performHandshakeWithAbort(conn, abortSignal, () => this._handleConnectFakeTls(conn))
     }
 
     return conn

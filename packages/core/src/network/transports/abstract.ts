@@ -1,4 +1,4 @@
-import type { IFrameDecoder, IFrameEncoder } from '@fuman/io'
+import type { IClosable, IFrameDecoder, IFrameEncoder } from '@fuman/io'
 import type { IConnection } from '@fuman/net'
 import type { tl } from '../../tl/index.js'
 
@@ -22,8 +22,36 @@ export interface ITelegramConnection extends IConnection<any, any> {
 
 export interface TelegramTransport {
   setup?(crypto: ICryptoProvider, log: Logger): void
-  connect: (dc: BasicDcOption) => Promise<ITelegramConnection>
+  connect: (dc: BasicDcOption, abortSignal: AbortSignal) => Promise<ITelegramConnection>
   packetCodec: (dc: BasicDcOption) => IPacketCodec
+}
+
+/**
+ * Run a post-connect handshake, closing the connection if `abortSignal`
+ * is aborted before it completes (which in turn makes any pending
+ * reads/writes inside the handshake reject)
+ */
+export async function performHandshakeWithAbort<Connection extends IClosable>(
+  conn: Connection,
+  abortSignal: AbortSignal,
+  handshake: () => Promise<void>,
+): Promise<Connection> {
+  if (abortSignal.aborted) {
+    conn.close()
+    throw abortSignal.reason
+  }
+
+  const onAbort = () => conn.close()
+  abortSignal.addEventListener('abort', onAbort)
+
+  try {
+    await handshake()
+  } finally {
+    abortSignal.removeEventListener('abort', onAbort)
+  }
+
+  abortSignal.throwIfAborted()
+  return conn
 }
 
 /**

@@ -54,14 +54,14 @@ export class WebSocketTransport implements TelegramTransport {
     this._WebSocket = ws
   }
 
-  async connect(dc: BasicDcOption): Promise<ITelegramConnection> {
+  async connect(dc: BasicDcOption, abortSignal: AbortSignal): Promise<ITelegramConnection> {
     const url = `wss://${this._subdomains[dc.id]}.${this._baseDomain}/apiws${dc.testMode ? '_test' : ''}`
 
     return connectWs({
       url,
       implementation: this._WebSocket,
       protocols: 'binary',
-    })
+    }, abortSignal)
   }
 
   packetCodec(): IPacketCodec {
