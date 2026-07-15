@@ -27,7 +27,13 @@ export interface CommonSendParams {
    */
   replyTo?: number | Message
 
-  /** ID of the thread to reply to */
+  /**
+   * ID of the thread (topic) to reply to
+   *
+   * > **Note**: for bots in private chats with "threaded mode" enabled,
+   * > this must be the canonical (user-space) topic ID —
+   * > see the note at {@link createForumTopic}
+   */
   threadId?: number
 
   /**

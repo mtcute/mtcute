@@ -103,7 +103,11 @@ export class RepliedMessageInfo {
     return this.raw.replyToMsgId ?? null
   }
 
-  /** ID of the replies thread where this message belongs to */
+  /**
+   * ID of the replies thread where this message belongs to
+   *
+   * For private chats with "threaded mode" enabled, this is the canonical topic ID
+   */
   get threadId(): number | null {
     if (this.raw.forumTopic) {
       return this.raw.replyToTopId ?? this.raw.replyToMsgId ?? null

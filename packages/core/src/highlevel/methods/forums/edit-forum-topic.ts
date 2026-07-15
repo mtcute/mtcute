@@ -12,7 +12,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * Only admins with `manageTopics` permission can do this.
  *
  * @param chatId  Chat ID or username
- * @param topicId  ID of the topic (i.e. its top message ID)
+ * @param topicId  ID of the topic (i.e. its top message ID, see note at {@link createForumTopic})
  * @returns  Service message about the modification
  */
 export async function editForumTopic(
@@ -21,7 +21,7 @@ export async function editForumTopic(
     /** Chat ID or username */
     chatId: InputPeerLike
 
-    /** ID of the topic (i.e. its top message ID) */
+    /** ID of the topic (i.e. its top message ID, see note at {@link createForumTopic}) */
     topicId: number | ForumTopic
 
     /**

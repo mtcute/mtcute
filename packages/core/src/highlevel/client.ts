@@ -3070,6 +3070,13 @@ export interface TelegramClient extends ITelegramClient {
    *
    * Only admins with `manageTopics` permission can do this.
    *
+   * > **Note**: for bots in private chats with "threaded mode" enabled,
+   * > message IDs are separate for each side of the chat, while the
+   * > canonical topic ID is always issued in the *user's* ID space.
+   * > The `.id` of the returned service message is in the *bot's* ID space,
+   * > and is **not** a valid topic ID — use `.replyToMessage.threadId` instead,
+   * > which is what all other methods (as well as Bot API's `message_thread_id`) expect.
+   *
    * **Available**: 👤 users only
    *
    * @returns  Service message for the created topic
@@ -3111,7 +3118,7 @@ export interface TelegramClient extends ITelegramClient {
    * **Available**: 👤 users only
    *
    * @param chat  Chat or user ID, username, phone number, `"me"` or `"self"`
-   * @param topicId  ID of the topic (i.e. its top message ID)
+   * @param topicId  ID of the topic (i.e. its top message ID, see note at {@link createForumTopic})
    */
   deleteForumTopicHistory(
     chat: InputPeerLike,
@@ -3131,7 +3138,7 @@ export interface TelegramClient extends ITelegramClient {
    * **Available**: 👤 users only
    *
    * @param chatId  Chat ID or username
-   * @param topicId  ID of the topic (i.e. its top message ID)
+   * @param topicId  ID of the topic (i.e. its top message ID, see note at {@link createForumTopic})
    * @returns  Service message about the modification
    */
   editForumTopic(
@@ -3139,7 +3146,7 @@ export interface TelegramClient extends ITelegramClient {
     /** Chat ID or username */
       chatId: InputPeerLike
 
-      /** ID of the topic (i.e. its top message ID) */
+      /** ID of the topic (i.e. its top message ID, see note at {@link createForumTopic}) */
       topicId: number | ForumTopic
 
       /**
@@ -3173,6 +3180,10 @@ export interface TelegramClient extends ITelegramClient {
    * The returned array is aligned with the input IDs.
    * For topics that were deleted (or never existed),
    * `null` will be returned at that position.
+   *
+   * > **Note**: for bots in private chats with "threaded mode" enabled,
+   * > only canonical (user-space) topic IDs are accepted —
+   * > see the note at {@link createForumTopic}
    *
    * **Available**: 👤 users only
    *
@@ -3266,7 +3277,7 @@ export interface TelegramClient extends ITelegramClient {
     /** Chat ID or username */
       chatId: InputPeerLike
 
-      /** ID of the topic (i.e. its top message ID) */
+      /** ID of the topic (i.e. its top message ID, see note at {@link createForumTopic}) */
       topicId: number | ForumTopic
 
       /** Whether the topic should be closed */
@@ -3289,7 +3300,7 @@ export interface TelegramClient extends ITelegramClient {
     params: {
     /** Chat ID or username */
       chatId: InputPeerLike
-      /** ID of the topic (i.e. its top message ID) */
+      /** ID of the topic (i.e. its top message ID, see note at {@link createForumTopic}) */
       topicId: number | ForumTopic
       /** Whether the topic should be pinned */
       pinned: boolean

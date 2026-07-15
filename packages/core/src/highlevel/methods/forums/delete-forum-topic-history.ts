@@ -8,7 +8,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * Delete a forum topic and all its history
  *
  * @param chat  Chat or user ID, username, phone number, `"me"` or `"self"`
- * @param topicId  ID of the topic (i.e. its top message ID)
+ * @param topicId  ID of the topic (i.e. its top message ID, see note at {@link createForumTopic})
  */
 export async function deleteForumTopicHistory(
   client: ITelegramClient,

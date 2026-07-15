@@ -11,6 +11,10 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * For topics that were deleted (or never existed),
  * `null` will be returned at that position.
  *
+ * > **Note**: for bots in private chats with "threaded mode" enabled,
+ * > only canonical (user-space) topic IDs are accepted —
+ * > see the note at {@link createForumTopic}
+ *
  * @param chatId  Chat ID or username
  */
 export async function getForumTopicsById(

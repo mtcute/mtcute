@@ -16,7 +16,7 @@ export async function toggleForumTopicClosed(
     /** Chat ID or username */
     chatId: InputPeerLike
 
-    /** ID of the topic (i.e. its top message ID) */
+    /** ID of the topic (i.e. its top message ID, see note at {@link createForumTopic}) */
     topicId: number | ForumTopic
 
     /** Whether the topic should be closed */
