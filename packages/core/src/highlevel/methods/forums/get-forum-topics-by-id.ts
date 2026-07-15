@@ -7,13 +7,17 @@ import { resolvePeer } from '../users/resolve-peer.js'
 /**
  * Get forum topics by their IDs
  *
+ * The returned array is aligned with the input IDs.
+ * For topics that were deleted (or never existed),
+ * `null` will be returned at that position.
+ *
  * @param chatId  Chat ID or username
  */
 export async function getForumTopicsById(
   client: ITelegramClient,
   chatId: InputPeerLike,
   ids: MaybeArray<number>,
-): Promise<ForumTopic[]> {
+): Promise<(ForumTopic | null)[]> {
   if (!Array.isArray(ids)) ids = [ids]
 
   const res = await client.call({
@@ -22,5 +26,11 @@ export async function getForumTopicsById(
     topics: ids,
   })
 
-  return ForumTopic.parseTlForumTopics(res)
+  const index = new Map<number, ForumTopic>()
+
+  for (const topic of ForumTopic.parseTlForumTopics(res)) {
+    index.set(topic.id, topic)
+  }
+
+  return ids.map(id => index.get(id) ?? null)
 }

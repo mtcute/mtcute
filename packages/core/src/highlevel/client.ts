@@ -1,4 +1,4 @@
-/* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument */
+/* eslint-disable ts/no-unsafe-declaration-merging, ts/no-unsafe-argument, style/max-len */
 import type Long from 'long'
 import type { RpcCallOptions } from '../network/index.js'
 import type { tl } from '../tl/index.js'
@@ -3170,13 +3170,17 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Get forum topics by their IDs
    *
+   * The returned array is aligned with the input IDs.
+   * For topics that were deleted (or never existed),
+   * `null` will be returned at that position.
+   *
    * **Available**: 👤 users only
    *
    * @param chatId  Chat ID or username
    */
   getForumTopicsById(
     chatId: InputPeerLike,
-    ids: MaybeArray<number>): Promise<ForumTopic[]>
+    ids: MaybeArray<number>): Promise<(ForumTopic | null)[]>
   /**
    * Get forum topics
    *
