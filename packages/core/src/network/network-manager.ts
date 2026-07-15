@@ -13,7 +13,7 @@ import type { SessionConnectionParams } from './session-connection.js'
 import type { TelegramTransport } from './transports/abstract.js'
 
 import { defaultReconnectionStrategy } from '@fuman/net'
-import { asNonNull, composeMiddlewares, Deferred, LruMap } from '@fuman/utils'
+import { asNonNull, composeMiddlewares, Deferred, LruMap, noop } from '@fuman/utils'
 import { MtArgumentError, MtcuteError, MtUnsupportedError } from '../types/index.js'
 import { dropUndefined } from '../utils/index.js'
 import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
@@ -502,8 +502,8 @@ export class NetworkManager {
   readonly _reconnectionStrategy: ReconnectionStrategy
   readonly _connectionCount: ConnectionCountDelegate
 
-  protected readonly _dcConnections: Map<number, DcConnectionManager> = new Map()
-  protected _primaryDc?: DcConnectionManager
+  readonly _dcConnections: Map<number, DcConnectionManager> = new Map()
+  _primaryDc?: DcConnectionManager
   protected _primaryDcRecreationPromise?: Deferred<void>
 
   private _updateHandler: (upd: tl.TypeUpdates, fromClient: boolean) => void
@@ -568,10 +568,18 @@ export class NetworkManager {
   }
 
   private _resetOnNetworkChange?: () => void
+  private _destroyed = false
+
+  private _onPrimaryUsable = (): void => this.params.onUsable()
+  private _onPrimaryWait = (): void => this.params.onConnecting()
+  private _onPrimaryUpdate = (update: tl.TypeUpdates): void => this._updateHandler(update, false)
 
   private _switchPrimaryDc(dc: DcConnectionManager) {
     if (this._primaryDc && this._primaryDc !== dc) {
       this._primaryDc.setIsPrimary(false)
+      this._primaryDc.main.onUsable.remove(this._onPrimaryUsable)
+      this._primaryDc.main.onWait.remove(this._onPrimaryWait)
+      this._primaryDc.main.onUpdate.remove(this._onPrimaryUpdate)
     }
 
     this._primaryDc = dc
@@ -579,23 +587,22 @@ export class NetworkManager {
 
     this.params.onConnecting()
 
-    dc.main.onUsable.add(() => {
-      if (dc !== this._primaryDc) return
-      this.params.onUsable()
-    })
-    dc.main.onWait.add(() => {
-      if (dc !== this._primaryDc) return
-      this.params.onConnecting()
-    })
-    dc.main.onUpdate.add((update: tl.TypeUpdates) => {
-      this._updateHandler(update, false)
-    })
+    dc.main.onUsable.remove(this._onPrimaryUsable)
+    dc.main.onWait.remove(this._onPrimaryWait)
+    dc.main.onUpdate.remove(this._onPrimaryUpdate)
+    dc.main.onUsable.add(this._onPrimaryUsable)
+    dc.main.onWait.add(this._onPrimaryWait)
+    dc.main.onUpdate.add(this._onPrimaryUpdate)
 
     return dc.loadKeys().then(() => dc.main.ensureConnected())
   }
 
   private _dcCreationPromise = new Map<number, Promise<void>>()
   async _getOtherDc(dcId: number): Promise<DcConnectionManager> {
+    if (this._destroyed) {
+      throw new MtcuteError('Network manager is destroyed')
+    }
+
     if (!this._dcConnections.has(dcId)) {
       if (this._dcCreationPromise.has(dcId)) {
         await this._dcCreationPromise.get(dcId)
@@ -604,6 +611,9 @@ export class NetworkManager {
       }
 
       const promise = new Deferred<void>()
+      // the deferred is only awaited by concurrent callers (if any),
+      // avoid unhandled rejection when there are none
+      promise.promise.catch(noop)
       this._dcCreationPromise.set(dcId, promise.promise)
 
       this._log.debug('creating new DC %d', dcId)
@@ -625,7 +635,7 @@ export class NetworkManager {
         this._log.debug('dc %d was not created: %e', dcId, e)
         promise.reject(e)
         this._dcCreationPromise.delete(dcId)
-        return this._getOtherDc(dcId)
+        throw e
       }
     }
 
@@ -638,6 +648,10 @@ export class NetworkManager {
    * @param defaultDcs  Default DCs to connect to
    */
   async connect(defaultDcs: DcOptions): Promise<void> {
+    if (this._destroyed) {
+      throw new MtcuteError('Network manager is destroyed')
+    }
+
     if (defaultDcs.main.id !== defaultDcs.media.id) {
       throw new MtArgumentError('Default DCs must be the same')
     }
@@ -791,6 +805,10 @@ export class NetworkManager {
   }
 
   async changePrimaryDc(newDc: number): Promise<void> {
+    if (this._destroyed) {
+      throw new MtcuteError('Network manager is destroyed')
+    }
+
     if (newDc === this._primaryDc?.dcId) return
 
     const options = await this._findDcOptions(newDc)
@@ -986,13 +1004,21 @@ export class NetworkManager {
     return this._primaryDc.dcId
   }
 
-  async destroy(): Promise<void> {
+  async disconnect(): Promise<void> {
+    this._primaryDc = undefined
+
     for (const dc of this._dcConnections.values()) {
       await dc.destroy()
     }
     this._dcConnections.clear()
-    this.config.onUpdated.remove(this._onConfigChanged)
     this._resetOnNetworkChange?.()
+    this._resetOnNetworkChange = undefined
+  }
+
+  async destroy(): Promise<void> {
+    this._destroyed = true
+    await this.disconnect()
+    this.config.onUpdated.remove(this._onConfigChanged)
   }
 
   getMtprotoMessageId(): Long {

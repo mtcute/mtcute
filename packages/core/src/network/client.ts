@@ -317,7 +317,7 @@ export class MtClient {
   }
 
   async disconnect(): Promise<void> {
-    await this.network.destroy()
+    await this.network.disconnect()
     await this.storage.save()
     this._config.destroy()
     this._prepare.reset()
@@ -332,6 +332,7 @@ export class MtClient {
    * **Note**: must be called *after* {@link disconnect}
    */
   async destroy(): Promise<void> {
+    await this.network.destroy()
     await this.storage.destroy()
 
     this.log.debug('client destroyed')

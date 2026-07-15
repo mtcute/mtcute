@@ -1478,6 +1478,10 @@ export class SessionConnection extends PersistentConnection {
     abortSignal?: AbortSignal,
     chainId?: string | number,
   ): Promise<tl.RpcCallReturn[T['_']]> {
+    if (this._destroyed) {
+      return Promise.reject(new MtcuteError('Connection destroyed'))
+    }
+
     if (this._usable && this.params.inactivityTimeout) {
       this._rescheduleInactivity()
     }

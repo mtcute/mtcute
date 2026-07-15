@@ -198,12 +198,22 @@ export abstract class PersistentConnection {
   }
 
   connect(): void {
+    if (this._destroyed) {
+      this.log.warn('tried to connect a destroyed connection, ignoring')
+      return
+    }
+
     this._fuman.connect(this.params.dc)
 
     this._inactive = false
   }
 
   reconnect(): void {
+    if (this._destroyed) {
+      this.log.warn('tried to reconnect a destroyed connection, ignoring')
+      return
+    }
+
     if (this._disconnectedManually) {
       this._disconnectedManually = false
       this.connect()
