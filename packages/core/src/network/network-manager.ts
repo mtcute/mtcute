@@ -50,7 +50,6 @@ export interface NetworkManagerParams {
   onUsable: () => void
   onConnecting: () => void
   onNetworkChanged: (connected: boolean) => void
-  stopSignal: AbortSignal
 }
 
 export type ConnectionCountDelegate = (kind: ConnectionKind, dcId: number, isPremium: boolean) => number
@@ -570,6 +569,12 @@ export class NetworkManager {
   private _resetOnNetworkChange?: () => void
   private _destroyed = false
 
+  private _teardownAbort = new AbortController()
+  /** Signal that is aborted when the network manager is disconnected or destroyed */
+  get teardownSignal(): AbortSignal {
+    return this._teardownAbort.signal
+  }
+
   private _onPrimaryUsable = (): void => this.params.onUsable()
   private _onPrimaryWait = (): void => this.params.onConnecting()
   private _onPrimaryUpdate = (update: tl.TypeUpdates): void => this._updateHandler(update, false)
@@ -654,6 +659,10 @@ export class NetworkManager {
 
     if (defaultDcs.main.id !== defaultDcs.media.id) {
       throw new MtArgumentError('Default DCs must be the same')
+    }
+
+    if (this._teardownAbort.signal.aborted) {
+      this._teardownAbort = new AbortController()
     }
 
     if (this._dcConnections.has(defaultDcs.main.id)) {
@@ -1005,6 +1014,7 @@ export class NetworkManager {
   }
 
   async disconnect(): Promise<void> {
+    this._teardownAbort.abort()
     this._primaryDc = undefined
 
     for (const dc of this._dcConnections.values()) {

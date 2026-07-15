@@ -13,7 +13,8 @@ function flush() {
 
 function makeManager(over: { isPremium?: boolean } = {}) {
   return {
-    params: { isPremium: over.isPremium ?? false, stopSignal: new AbortController().signal },
+    params: { isPremium: over.isPremium ?? false },
+    teardownSignal: new AbortController().signal,
     getPrimaryDcId: () => 2,
     _log: { warn: () => {} },
   } as unknown as RpcCallMiddlewareContext['manager']

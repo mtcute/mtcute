@@ -81,7 +81,7 @@ export function internalErrorsHandler(params: InternalErrorsHandlerOptions): Rpc
         if (waitSeconds > 0) {
           await sleepWithAbort(
             waitSeconds * 1000,
-            combineAbortSignals(ctx.manager.params.stopSignal, ctx.params?.abortSignal),
+            combineAbortSignals(ctx.manager.teardownSignal, ctx.params?.abortSignal),
           )
         }
 

@@ -11,7 +11,8 @@ const internalErr = (code = -503, message = 'Timeout') => ({ _: 'mt_rpc_error', 
 
 function makeManager() {
   return {
-    params: { isPremium: false, stopSignal: new AbortController().signal },
+    params: { isPremium: false },
+    teardownSignal: new AbortController().signal,
     getPrimaryDcId: () => 2,
     _log: { warn: () => {} },
   } as unknown as RpcCallMiddlewareContext['manager']

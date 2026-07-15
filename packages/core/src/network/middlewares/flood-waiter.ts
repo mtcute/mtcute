@@ -86,7 +86,7 @@ export function floodWaiter(options: FloodWaiterOptions): RpcCallMiddleware {
         // flood waits below 2 seconds are "ignored"
         storage.delete(method)
       } else if (delta <= floodSleepThreshold) {
-        await sleepWithAbort(delta, combineAbortSignals(ctx.manager.params.stopSignal, ctx.params?.abortSignal))
+        await sleepWithAbort(delta, combineAbortSignals(ctx.manager.teardownSignal, ctx.params?.abortSignal))
         storage.delete(method)
       } else {
         return {
@@ -146,7 +146,7 @@ export function floodWaiter(options: FloodWaiterOptions): RpcCallMiddleware {
 
           await sleepWithAbort(
             ms,
-            combineAbortSignals(ctx.manager.params.stopSignal, ctx.params?.abortSignal),
+            combineAbortSignals(ctx.manager.teardownSignal, ctx.params?.abortSignal),
           )
           continue
         }

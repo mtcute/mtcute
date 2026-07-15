@@ -61,7 +61,7 @@ export function mediaThrottle(params?: MediaThrottleOptions): RpcCallMiddleware 
     const limiter = getLimiter(kind, dcId, ctx.manager.params.isPremium)
 
     if (!limiter.tryAcquire(bytes)) {
-      const abortSignal = combineAbortSignals(ctx.manager.params.stopSignal, ctx.params?.abortSignal)
+      const abortSignal = combineAbortSignals(ctx.manager.teardownSignal, ctx.params?.abortSignal)
       await limiter.acquire(bytes, abortSignal)
     }
 
