@@ -74,6 +74,40 @@ but **not** users.
 
 In many mtcute APIs, you'll also encounter `Peer` type, which is essentially `Chat | User`.
 
+## Communities
+
+Telegram also has **communities** — collections of linked group chats
+(represented in TL as [community](https://core.telegram.org/constructor/community)).
+
+They are somewhat similar to channels: on the wire they are addressed with
+`InputChannel` (though only in `communities.*` RPC methods), and their IDs
+share the channel [marked ID](#marked-ids) namespace (i.e. `-100...`).
+
+In mtcute, communities are represented as a [Chat](https://ref.mtcute.dev/classes/_mtcute_core.index.Chat) with
+`.chatType === 'community'`, and can be used as an `InputPeerLike` in
+community-related methods:
+
+```ts
+const community = await tg.createCommunity({ title: 'test', chatId: someGroup })
+await tg.linkCommunityPeer({ communityId: community, peerId: anotherGroup })
+
+const full = await tg.getFullChat(community)
+console.log(full.linkedPeers)
+```
+
+Note, however, that communities are **not** fully-fledged peers:
+you can't send messages to them, and they can't appear as `msg.chat` or `msg.sender`.
+Most peer-related methods don't accept them, either.
+
+Chats that are linked to a community expose `.linkedCommunityId`
+(a marked community ID), and the `change_community` service message
+carries the community's `Chat` object itself.
+
+::: warning
+Communities are a fairly recent and rather half-baked feature,
+and the API around them is likely to change in the future.
+:::
+
 ## Fetching peers
 
 Often, you'll need to interact with a peer later, when the respective

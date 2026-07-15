@@ -82,6 +82,8 @@ export function parsePeer(peer: tl.TypePeer | tl.TypeUser | tl.TypeChat, index?:
     case 'channelForbidden':
     case 'chat':
     case 'chatForbidden':
+    case 'community':
+    case 'communityForbidden':
       return new Chat(peer)
     case 'user':
       return new User(peer)

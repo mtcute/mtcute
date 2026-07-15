@@ -11,8 +11,11 @@ import type {
   ChatJoinRequestUpdate,
   ChatMemberUpdate,
   DeleteBusinessMessageUpdate,
+  DeleteEphemeralMessagesUpdate,
   DeleteMessageUpdate,
   DeleteStoryUpdate,
+  EphemeralCallbackQuery,
+  EphemeralMessage,
   HistoryReadUpdate,
   MaybePromise,
   ParsedUpdate,
@@ -57,15 +60,19 @@ import type {
   ChatMemberUpdateHandler,
   ChosenInlineResultHandler,
   DeleteBusinessMessageHandler,
+  DeleteEphemeralMessagesHandler,
   DeleteMessageHandler,
   DeleteStoryHandler,
   EditBusinessMessageHandler,
+  EditEphemeralMessageHandler,
   EditMessageHandler,
+  EphemeralCallbackQueryHandler,
   HistoryReadHandler,
   InlineCallbackQueryHandler,
   InlineQueryHandler,
   MessageGroupHandler,
   NewBusinessMessageHandler,
+  NewEphemeralMessageHandler,
   NewMessageHandler,
   PollUpdateHandler,
   PollVoteHandler,
@@ -2095,6 +2102,110 @@ export class Dispatcher<State extends object = never> {
   /** @internal */
   onDeleteBusinessMessage(filter: any, handler?: any, group?: number): void {
     this._addKnownHandler('delete_business_message', filter, handler, group)
+  }
+
+  /**
+   * Register a new ephemeral message handler without any filters
+   *
+   * @param handler  New ephemeral message handler
+   * @param group  Handler group index
+   */
+  onNewEphemeralMessage(handler: NewEphemeralMessageHandler['callback'], group?: number): void
+
+  /**
+   * Register a new ephemeral message handler with a filter
+   *
+   * @param filter  Update filter
+   * @param handler  New ephemeral message handler
+   * @param group  Handler group index
+   */
+  onNewEphemeralMessage<Mod>(
+    filter: UpdateFilter<UpdateContext<EphemeralMessage>, Mod>,
+    handler: NewEphemeralMessageHandler<filters.Modify<UpdateContext<EphemeralMessage>, Mod>>['callback'],
+    group?: number
+  ): void
+
+  /** @internal */
+  onNewEphemeralMessage(filter: any, handler?: any, group?: number): void {
+    this._addKnownHandler('new_ephemeral_message', filter, handler, group)
+  }
+
+  /**
+   * Register an edit ephemeral message handler without any filters
+   *
+   * @param handler  Edit ephemeral message handler
+   * @param group  Handler group index
+   */
+  onEditEphemeralMessage(handler: EditEphemeralMessageHandler['callback'], group?: number): void
+
+  /**
+   * Register an edit ephemeral message handler with a filter
+   *
+   * @param filter  Update filter
+   * @param handler  Edit ephemeral message handler
+   * @param group  Handler group index
+   */
+  onEditEphemeralMessage<Mod>(
+    filter: UpdateFilter<UpdateContext<EphemeralMessage>, Mod>,
+    handler: EditEphemeralMessageHandler<filters.Modify<UpdateContext<EphemeralMessage>, Mod>>['callback'],
+    group?: number
+  ): void
+
+  /** @internal */
+  onEditEphemeralMessage(filter: any, handler?: any, group?: number): void {
+    this._addKnownHandler('edit_ephemeral_message', filter, handler, group)
+  }
+
+  /**
+   * Register a delete ephemeral messages handler without any filters
+   *
+   * @param handler  Delete ephemeral messages handler
+   * @param group  Handler group index
+   */
+  onDeleteEphemeralMessages(handler: DeleteEphemeralMessagesHandler['callback'], group?: number): void
+
+  /**
+   * Register a delete ephemeral messages handler with a filter
+   *
+   * @param filter  Update filter
+   * @param handler  Delete ephemeral messages handler
+   * @param group  Handler group index
+   */
+  onDeleteEphemeralMessages<Mod>(
+    filter: UpdateFilter<UpdateContext<DeleteEphemeralMessagesUpdate>, Mod>,
+    handler: DeleteEphemeralMessagesHandler<filters.Modify<UpdateContext<DeleteEphemeralMessagesUpdate>, Mod>>['callback'],
+    group?: number
+  ): void
+
+  /** @internal */
+  onDeleteEphemeralMessages(filter: any, handler?: any, group?: number): void {
+    this._addKnownHandler('delete_ephemeral_messages', filter, handler, group)
+  }
+
+  /**
+   * Register an ephemeral callback query handler without any filters
+   *
+   * @param handler  Ephemeral callback query handler
+   * @param group  Handler group index
+   */
+  onEphemeralCallbackQuery(handler: EphemeralCallbackQueryHandler['callback'], group?: number): void
+
+  /**
+   * Register an ephemeral callback query handler with a filter
+   *
+   * @param filter  Update filter
+   * @param handler  Ephemeral callback query handler
+   * @param group  Handler group index
+   */
+  onEphemeralCallbackQuery<Mod>(
+    filter: UpdateFilter<UpdateContext<EphemeralCallbackQuery>, Mod>,
+    handler: EphemeralCallbackQueryHandler<filters.Modify<UpdateContext<EphemeralCallbackQuery>, Mod>>['callback'],
+    group?: number
+  ): void
+
+  /** @internal */
+  onEphemeralCallbackQuery(filter: any, handler?: any, group?: number): void {
+    this._addKnownHandler('ephemeral_callback_query', filter, handler, group)
   }
 
   // end-codegen

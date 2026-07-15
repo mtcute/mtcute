@@ -767,6 +767,18 @@ export class UpdatesManager {
         }
         break
       }
+      case 'updateNewEphemeralMessage':
+      case 'updateEditEphemeralMessage': {
+        const msg = upd.message
+        if (!(await fetchPeer(msg.peerId, true))) return missing
+        if (!(await fetchPeer(msg.fromId))) return missing
+        if (!(await fetchPeer(msg.receiverId))) return missing
+        break
+      }
+      case 'updateEphemeralBotCallbackQuery':
+        if (!(await fetchPeer(upd.peer, true))) return missing
+        if (!(await fetchPeer(upd.userId))) return missing
+        break
       case 'updateDraftMessage':
         if ('entities' in upd.draft && upd.draft.entities) {
           for (const ent of upd.draft.entities) {
@@ -1364,8 +1376,9 @@ export class UpdatesManager {
         break
       }
       case 'updateChannel': {
+        // note: the server also uses updateChannel for communities
         const channel = pending.peers.chat(upd.channelId)
-        if (channel._ !== 'channelForbidden') {
+        if (channel._ !== 'channelForbidden' && channel._ !== 'communityForbidden') {
           // channel may have become accessible
           this.inaccessibleChannels.delete(upd.channelId)
         }

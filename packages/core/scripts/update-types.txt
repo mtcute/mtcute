@@ -28,3 +28,7 @@ new_business_message = BusinessMessage + State in BusinessMessageContext
 edit_business_message = BusinessMessage + State in BusinessMessageContext
 business_message_group = BusinessMessage[] + State in BusinessMessageContext
 delete_business_message = DeleteBusinessMessageUpdate
+new_ephemeral_message = EphemeralMessage
+edit_ephemeral_message = EphemeralMessage
+delete_ephemeral_messages = DeleteEphemeralMessagesUpdate
+ephemeral_callback_query = EphemeralCallbackQuery

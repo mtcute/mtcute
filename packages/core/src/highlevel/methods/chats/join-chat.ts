@@ -13,11 +13,12 @@ import { resolveChannel } from '../users/resolve-peer.js'
  * - `status: 'ok'` - the chat was joined successfully
  * - `status: 'request_sent'` - a join request was sent and needs to be approved by the chat admin
  * - `status: 'webview'` - a guard bot requested you to open a webview before joining the chat
+ *   (use `messages.requestChatJoinWebView` with `queryId` to obtain the webview url)
  */
 export type JoinChatResult
   = | { status: 'ok', chat: Chat }
     | { status: 'request_sent' }
-    | { status: 'webview', bot: User, webview: tl.TypeWebViewResult }
+    | { status: 'webview', bot: User, queryId: tl.Long }
 
 /**
  * Join a channel or supergroup
@@ -64,7 +65,7 @@ export async function joinChat(client: ITelegramClient, chatId: InputPeerLike): 
       return {
         status: 'webview',
         bot: new User(peers.user(res.botId)),
-        webview: res.webview,
+        queryId: res.queryId,
       }
     }
   }

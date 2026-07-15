@@ -1,4 +1,4 @@
-import type { BusinessConnection, Message } from '../../types/index.js'
+import type { BusinessConnection, EphemeralMessage, Message } from '../../types/index.js'
 
 import { BotChatJoinRequestUpdate } from './bot-chat-join-request.js'
 import { BotGuestChatQuery } from './bot-guest-chat-query.js'
@@ -10,8 +10,10 @@ import { ChatJoinRequestUpdate } from './chat-join-request.js'
 import { ChatMemberUpdate } from './chat-member-update.js'
 import { ChosenInlineResult } from './chosen-inline-result.js'
 import { DeleteBusinessMessageUpdate } from './delete-business-message-update.js'
+import { DeleteEphemeralMessagesUpdate } from './delete-ephemeral-messages-update.js'
 import { DeleteMessageUpdate } from './delete-message-update.js'
 import { DeleteStoryUpdate } from './delete-story-update.js'
+import { EphemeralCallbackQuery } from './ephemeral-callback-query.js'
 import { HistoryReadUpdate } from './history-read-update.js'
 import { InlineQuery } from './inline-query.js'
 import { PollUpdate } from './poll-update.js'
@@ -36,8 +38,10 @@ export {
   ChatMemberUpdate,
   ChosenInlineResult,
   DeleteBusinessMessageUpdate,
+  DeleteEphemeralMessagesUpdate,
   DeleteMessageUpdate,
   DeleteStoryUpdate,
+  EphemeralCallbackQuery,
   HistoryReadUpdate,
   InlineCallbackQuery,
   InlineQuery,
@@ -80,5 +84,9 @@ export type ParsedUpdate
     | { name: 'edit_business_message', data: BusinessMessage }
     | { name: 'business_message_group', data: BusinessMessage[] }
     | { name: 'delete_business_message', data: DeleteBusinessMessageUpdate }
+    | { name: 'new_ephemeral_message', data: EphemeralMessage }
+    | { name: 'edit_ephemeral_message', data: EphemeralMessage }
+    | { name: 'delete_ephemeral_messages', data: DeleteEphemeralMessagesUpdate }
+    | { name: 'ephemeral_callback_query', data: EphemeralCallbackQuery }
 
 // end-codegen

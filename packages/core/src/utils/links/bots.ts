@@ -83,6 +83,8 @@ function normalizeBotAdmin(rights?: BotAdminRight[]): string | undefined {
           return 'manage_chat' // idk?
         case 'manageRanks':
           return 'manage_chat' // idk?
+        case 'manageLinkedPeers':
+          return 'manage_chat' // idk?
         default:
           assertNever(it)
           return ''

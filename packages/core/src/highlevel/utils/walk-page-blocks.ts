@@ -48,6 +48,10 @@ function walkRichText(text: tl.TypeRichText | undefined, visitor: PageBlockVisit
     case 'textConcat':
       for (const child of text.texts) walkRichText(child, visitor)
       break
+    case 'textDiff':
+      walkRichText(text.text, visitor)
+      walkRichText(text.oldText, visitor)
+      break
     default:
       assertNever(text)
   }

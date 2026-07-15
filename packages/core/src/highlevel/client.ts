@@ -9,6 +9,7 @@ import type { LogOutResult } from './methods/auth/log-out.js'
 import type { CreateGroupResult } from './methods/chats/create-group.js'
 import type { JoinChatResult } from './methods/chats/join-chat.js'
 import type { DraftMessageInput } from './methods/chats/save-draft.js'
+import type { CommunityParticipantChats } from './methods/communities/get-community-participant-chats.js'
 import type { GetForumTopicsOffset } from './methods/forums/get-forum-topics.js'
 import type { InputStarGiftAttributeIds, ResaleStarGiftsMeta } from './methods/gifts/get-resale-star-gifts.js'
 import type { StarGiftUpgradeOptions } from './methods/gifts/get-star-gift-upgrade-options.js'
@@ -31,7 +32,7 @@ import type { InputStarsAmount } from './methods/premium/_normalize-stars-amount
 import type { CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
 import type { CanSendStoryResult } from './methods/stories/can-send-story.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
-import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotGuestChatQuery, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineMessage, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputRichMessage, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, RichMediaUploadCache, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
+import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotGuestChatQuery, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, CommunityPeerRequest, DeleteBusinessMessageUpdate, DeleteEphemeralMessagesUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, EphemeralCallbackQuery, EphemeralMessage, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineMessage, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputRichMessage, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, RichMediaUploadCache, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
 import type { ParsedUpdateHandlerParams } from './updates/parsed.js'
 import type { RawUpdateInfo } from './updates/types.js'
 import type { InputStringSessionData } from './utils/string-session.js'
@@ -122,6 +123,14 @@ import { toggleJoinToSend } from './methods/chats/toggle-join-to-send.js'
 import { transferChatOwnership } from './methods/chats/transfer-chat-ownership.js'
 import { unarchiveChats } from './methods/chats/unarchive-chats.js'
 import { unbanChatMember } from './methods/chats/unban-chat-member.js'
+import { banCommunityParticipant, unbanCommunityParticipant } from './methods/communities/ban-community-participant.js'
+import { createCommunity } from './methods/communities/create-community.js'
+import { getCommunityLinkRequests } from './methods/communities/get-community-link-requests.js'
+import { getCommunityParticipantChats } from './methods/communities/get-community-participant-chats.js'
+import { getJoinedCommunities } from './methods/communities/get-joined-communities.js'
+import { hideAllCommunityLinkRequests, hideCommunityLinkRequest } from './methods/communities/hide-community-link-request.js'
+import { linkCommunityPeer, unlinkCommunityPeer } from './methods/communities/link-community-peer.js'
+import { toggleCommunityCollapsed } from './methods/communities/toggle-community-collapsed.js'
 import { addContact } from './methods/contacts/add-contact.js'
 import { deleteContacts } from './methods/contacts/delete-contacts.js'
 import { getContacts } from './methods/contacts/get-contacts.js'
@@ -138,6 +147,10 @@ import { getPeerDialogs } from './methods/dialogs/get-peer-dialogs.js'
 import { iterDialogs } from './methods/dialogs/iter-dialogs.js'
 import { joinChatlist } from './methods/dialogs/join-chatlist.js'
 import { setFoldersOrder } from './methods/dialogs/set-folders-order.js'
+import { deleteEphemeralMessage } from './methods/ephemeral/delete-ephemeral-message.js'
+import { editEphemeralMessage } from './methods/ephemeral/edit-ephemeral-message.js'
+import { getEphemeralCallbackAnswer } from './methods/ephemeral/get-ephemeral-callback-answer.js'
+import { sendEphemeralMessage } from './methods/ephemeral/send-ephemeral-message.js'
 import { downloadAsBuffer } from './methods/files/download-buffer.js'
 import { downloadChunk } from './methods/files/download-chunk.js'
 import { _normalizeFileDownloadLocation, downloadAsIterable } from './methods/files/download-iterable.js'
@@ -422,6 +435,14 @@ export interface TelegramClient extends ITelegramClient {
   readonly onBusinessMessageGroup: Emitter<BusinessMessage[]>
   /** a delete business message handler */
   readonly onDeleteBusinessMessage: Emitter<DeleteBusinessMessageUpdate>
+  /** a new ephemeral message handler */
+  readonly onNewEphemeralMessage: Emitter<EphemeralMessage>
+  /** an edit ephemeral message handler */
+  readonly onEditEphemeralMessage: Emitter<EphemeralMessage>
+  /** a delete ephemeral messages handler */
+  readonly onDeleteEphemeralMessages: Emitter<DeleteEphemeralMessagesUpdate>
+  /** an ephemeral callback query handler */
+  readonly onEphemeralCallbackQuery: Emitter<EphemeralCallbackQuery>
   /**
    * Wrap this client so that all RPC calls will use the specified parameters.
    *
@@ -2232,6 +2253,153 @@ export interface TelegramClient extends ITelegramClient {
       participantId: InputPeerLike
     }): Promise<void>
   /**
+   * Ban a participant from a community
+   */
+  banCommunityParticipant(
+    params: {
+    /** Community ID */
+      communityId: InputPeerLike
+
+      /** Participant to ban */
+      participantId: InputPeerLike
+    }): Promise<void>
+  /**
+   * Unban a participant from a community
+   */
+  unbanCommunityParticipant(
+    params: {
+    /** Community ID */
+      communityId: InputPeerLike
+
+      /** Participant to unban */
+      participantId: InputPeerLike
+    }): Promise<void>
+  /**
+   * Create a new community
+   *
+   * @returns  Newly created community
+   */
+  createCommunity(
+    params: {
+    /** Community title */
+      title: string
+
+      /** Chat to link to the community */
+      chatId: InputPeerLike
+
+      /** Community description */
+      about?: string
+
+      /** Whether the community should be hidden */
+      hidden?: boolean
+
+      /**
+       * Whether to dispatch the returned updates
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+    }): Promise<Chat>
+  /**
+   * Get pending peer link requests for a community
+   *
+   * @param communityId  Community ID
+   */
+  getCommunityLinkRequests(
+    communityId: InputPeerLike,
+    params?: {
+    /** Offset for pagination */
+      offset?: string
+
+      /**
+       * Maximum number of requests to fetch
+       *
+       * @default  100
+       */
+      limit?: number
+    }): Promise<ArrayPaginated<CommunityPeerRequest, string>>
+  /**
+   * Get chats linked to a community that the given participant has joined or created
+   */
+  getCommunityParticipantChats(
+    params: {
+    /** Community ID */
+      communityId: InputPeerLike
+
+      /** Participant to fetch the chats for */
+      participantId: InputPeerLike
+    }): Promise<CommunityParticipantChats>
+  /**
+   * Get a list of communities the current user has joined
+   */
+  getJoinedCommunities(): Promise<Chat[]>
+  /**
+   * Approve or decline a peer link request to a community
+   */
+  hideCommunityLinkRequest(
+    params: {
+    /** Community ID */
+      communityId: InputPeerLike
+
+      /** Peer whose link request should be approved/declined */
+      peerId: InputPeerLike
+
+      /** Whether to approve or decline the request */
+      action: 'approve' | 'decline'
+    }): Promise<void>
+  /**
+   * Approve or decline all pending peer link requests to a community
+   */
+  hideAllCommunityLinkRequests(
+    params: {
+    /** Community ID */
+      communityId: InputPeerLike
+
+      /** Whether to approve or decline the requests */
+      action: 'approve' | 'decline'
+    }): Promise<void>
+  /**
+   * Link a chat to a community, or update the visibility of an existing link
+   */
+  linkCommunityPeer(
+    params: {
+    /** Community ID */
+      communityId: InputPeerLike
+
+      /** Chat to link to the community */
+      peerId: InputPeerLike
+
+      /** Whether the chat should be hidden in the community's peer list */
+      hidden?: boolean
+    }): Promise<void>
+  /**
+   * Unlink a chat from a community
+   */
+  unlinkCommunityPeer(
+    params: {
+    /** Community ID */
+      communityId: InputPeerLike
+
+      /** Chat to unlink from the community */
+      peerId: InputPeerLike
+    }): Promise<void>
+  /**
+   * Toggle whether a community is collapsed in the dialogs list
+   */
+  toggleCommunityCollapsed(
+    params: {
+    /** Community ID */
+      communityId: InputPeerLike
+
+      /** Whether the community should be collapsed */
+      collapsed: boolean
+
+      /**
+       * Whether to dispatch the returned updates
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+    }): Promise<void>
+  /**
    * Add an existing Telegram user as a contact
    * **Available**: 👤 users only
    *
@@ -2536,6 +2704,114 @@ export interface TelegramClient extends ITelegramClient {
    * @param order  New order of folders (folder IDs, where default = 0)
    */
   setFoldersOrder(order: number[]): Promise<void>
+  /**
+   * Delete a previously sent ephemeral message
+   */
+  deleteEphemeralMessage(
+    params: {
+    /** Chat where the message was sent */
+      chatId: InputPeerLike
+
+      /** User the message is visible to */
+      receiverId: InputPeerLike
+
+      /** ID of the message to delete */
+      messageId: number
+    }): Promise<void>
+  /**
+   * Edit a previously sent ephemeral message
+   */
+  editEphemeralMessage(
+    params: {
+    /** Chat where the message was sent */
+      chatId: InputPeerLike
+
+      /** User the message is visible to */
+      receiverId: InputPeerLike
+
+      /** ID of the message to edit */
+      messageId: number
+
+      /** New text of the message */
+      text?: InputText
+
+      /** New media of the message */
+      media?: InputMediaLike
+
+      /** New reply markup of the message */
+      replyMarkup?: ReplyMarkup
+
+      /**
+       * Whether to dispatch the returned updates
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+    }): Promise<EphemeralMessage>
+  /**
+   * Request a callback answer from a bot for an ephemeral message,
+   * i.e. click an inline button that contains data.
+   */
+  getEphemeralCallbackAnswer(
+    params: {
+    /** Chat where the ephemeral message was sent */
+      chatId: InputPeerLike
+
+      /** ID of the ephemeral message containing the button */
+      messageId: number
+
+      /** Data contained in the button */
+      data?: string | Uint8Array
+
+      /**
+       * Timeout for the query in ms.
+       *
+       * @default  `10000` (10 sec)
+       */
+      timeout?: number
+
+      /**
+       * Whether to "fire and forget" this request,
+       * in which case the promise will resolve as soon
+       * as the request is sent with an empty response.
+       *
+       * **Note**: any errors will be silently ignored.
+       */
+      fireAndForget?: boolean
+    }): Promise<tl.messages.TypeBotCallbackAnswer>
+  /**
+   * Send an ephemeral message — a message that is only visible
+   * to a single user in a chat and is not persisted in the chat history.
+   *
+   * @param chatId  ID of the chat to send the message to
+   * @param receiverId  ID of the user the message should be visible to
+   * @param text  Text of the message
+   */
+  sendEphemeralMessage(
+    chatId: InputPeerLike,
+    receiverId: InputPeerLike,
+    text: InputText,
+    params?: {
+    /** Media to be attached to the message */
+      media?: InputMediaLike
+
+      /** Message to reply to */
+      replyTo?: number
+
+      /** Ephemeral message to reply to */
+      replyToEphemeral?: number
+
+      /** Reply markup to be attached to the message */
+      replyMarkup?: ReplyMarkup
+
+      /** For guest chat bots, ID of the query that this message is sent in response to */
+      queryId?: tl.Long
+
+      /**
+       * Whether to dispatch the returned updates
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+    }): Promise<EphemeralMessage>
   /**
    * Download a file and return its contents as a Buffer.
    *
@@ -6638,6 +6914,10 @@ export class TelegramClient implements ITelegramClient {
     ;(this as any).onEditBusinessMessage = new Emitter()
     ;(this as any).onBusinessMessageGroup = new Emitter()
     ;(this as any).onDeleteBusinessMessage = new Emitter()
+    ;(this as any).onNewEphemeralMessage = new Emitter()
+    ;(this as any).onEditEphemeralMessage = new Emitter()
+    ;(this as any).onDeleteEphemeralMessages = new Emitter()
+    ;(this as any).onEphemeralCallbackQuery = new Emitter()
     if ('client' in opts) {
       this._client = opts.client
     } else {
@@ -6759,6 +7039,18 @@ export class TelegramClient implements ITelegramClient {
                 break
               case 'delete_business_message':
                 this.onDeleteBusinessMessage.emit(update.data)
+                break
+              case 'new_ephemeral_message':
+                this.onNewEphemeralMessage.emit(update.data)
+                break
+              case 'edit_ephemeral_message':
+                this.onEditEphemeralMessage.emit(update.data)
+                break
+              case 'delete_ephemeral_messages':
+                this.onDeleteEphemeralMessages.emit(update.data)
+                break
+              case 'ephemeral_callback_query':
+                this.onEphemeralCallbackQuery.emit(update.data)
                 break
             }
           },
@@ -7038,6 +7330,39 @@ TelegramClient.prototype.unbanChatMember = function (...args) {
 TelegramClient.prototype.unrestrictChatMember = function (...args) {
   return unbanChatMember(this._client, ...args)
 }
+TelegramClient.prototype.banCommunityParticipant = function (...args) {
+  return banCommunityParticipant(this._client, ...args)
+}
+TelegramClient.prototype.unbanCommunityParticipant = function (...args) {
+  return unbanCommunityParticipant(this._client, ...args)
+}
+TelegramClient.prototype.createCommunity = function (...args) {
+  return createCommunity(this._client, ...args)
+}
+TelegramClient.prototype.getCommunityLinkRequests = function (...args) {
+  return getCommunityLinkRequests(this._client, ...args)
+}
+TelegramClient.prototype.getCommunityParticipantChats = function (...args) {
+  return getCommunityParticipantChats(this._client, ...args)
+}
+TelegramClient.prototype.getJoinedCommunities = function (...args) {
+  return getJoinedCommunities(this._client, ...args)
+}
+TelegramClient.prototype.hideCommunityLinkRequest = function (...args) {
+  return hideCommunityLinkRequest(this._client, ...args)
+}
+TelegramClient.prototype.hideAllCommunityLinkRequests = function (...args) {
+  return hideAllCommunityLinkRequests(this._client, ...args)
+}
+TelegramClient.prototype.linkCommunityPeer = function (...args) {
+  return linkCommunityPeer(this._client, ...args)
+}
+TelegramClient.prototype.unlinkCommunityPeer = function (...args) {
+  return unlinkCommunityPeer(this._client, ...args)
+}
+TelegramClient.prototype.toggleCommunityCollapsed = function (...args) {
+  return toggleCommunityCollapsed(this._client, ...args)
+}
 TelegramClient.prototype.addContact = function (...args) {
   return addContact(this._client, ...args)
 }
@@ -7085,6 +7410,18 @@ TelegramClient.prototype.joinChatlist = function (...args) {
 }
 TelegramClient.prototype.setFoldersOrder = function (...args) {
   return setFoldersOrder(this._client, ...args)
+}
+TelegramClient.prototype.deleteEphemeralMessage = function (...args) {
+  return deleteEphemeralMessage(this._client, ...args)
+}
+TelegramClient.prototype.editEphemeralMessage = function (...args) {
+  return editEphemeralMessage(this._client, ...args)
+}
+TelegramClient.prototype.getEphemeralCallbackAnswer = function (...args) {
+  return getEphemeralCallbackAnswer(this._client, ...args)
+}
+TelegramClient.prototype.sendEphemeralMessage = function (...args) {
+  return sendEphemeralMessage(this._client, ...args)
 }
 TelegramClient.prototype.downloadAsBuffer = function (...args) {
   return downloadAsBuffer(this._client, ...args)

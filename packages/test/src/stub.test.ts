@@ -35,9 +35,12 @@ describe('stub', () => {
   })
 
   it('should correctly generate stubs for optional vectors', () => {
-    expect(createStub('updateChannelPinnedTopics')).toEqual({
-      _: 'updateChannelPinnedTopics',
-      channelId: 0,
+    expect(createStub('updatePinnedForumTopics')).toEqual({
+      _: 'updatePinnedForumTopics',
+      peer: {
+        _: 'peerUser',
+        userId: 0,
+      },
       order: [],
     })
   })

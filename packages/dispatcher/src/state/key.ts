@@ -38,6 +38,7 @@ export const defaultStateKeyDelegate: StateKeyDelegate = (upd): string | null =>
 
     switch (upd.chat.chatType) {
       case 'channel':
+      case 'community':
         return String(upd.chat.id)
       case 'group':
       case 'supergroup':

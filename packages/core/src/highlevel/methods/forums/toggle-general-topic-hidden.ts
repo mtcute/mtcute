@@ -1,7 +1,7 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike, Message } from '../../types/index.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
-import { resolveChannel } from '../users/resolve-peer.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Toggle whether "General" topic in a forum is hidden or not
@@ -27,8 +27,8 @@ export async function toggleGeneralTopicHidden(
 ): Promise<Message> {
   const { chatId, hidden, shouldDispatch } = params
   const res = await client.call({
-    _: 'channels.editForumTopic',
-    channel: await resolveChannel(client, chatId),
+    _: 'messages.editForumTopic',
+    peer: await resolvePeer(client, chatId),
     topicId: 1,
     hidden,
   })

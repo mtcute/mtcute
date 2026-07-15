@@ -6,8 +6,11 @@ import type {
   ChatJoinRequestUpdate,
   ChatMemberUpdate,
   DeleteBusinessMessageUpdate,
+  DeleteEphemeralMessagesUpdate,
   DeleteMessageUpdate,
   DeleteStoryUpdate,
+  EphemeralCallbackQuery,
+  EphemeralMessage,
   HistoryReadUpdate,
   MaybePromise,
   PeersIndex,
@@ -88,6 +91,10 @@ export type NewBusinessMessageHandler<T = BusinessMessageContext, S = never> = P
 export type EditBusinessMessageHandler<T = BusinessMessageContext, S = never> = ParsedUpdateHandler<'edit_business_message', T, S>
 export type BusinessMessageGroupHandler<T = BusinessMessageContext, S = never> = ParsedUpdateHandler<'business_message_group', T, S>
 export type DeleteBusinessMessageHandler<T = UpdateContext<DeleteBusinessMessageUpdate>> = ParsedUpdateHandler<'delete_business_message', T>
+export type NewEphemeralMessageHandler<T = UpdateContext<EphemeralMessage>> = ParsedUpdateHandler<'new_ephemeral_message', T>
+export type EditEphemeralMessageHandler<T = UpdateContext<EphemeralMessage>> = ParsedUpdateHandler<'edit_ephemeral_message', T>
+export type DeleteEphemeralMessagesHandler<T = UpdateContext<DeleteEphemeralMessagesUpdate>> = ParsedUpdateHandler<'delete_ephemeral_messages', T>
+export type EphemeralCallbackQueryHandler<T = UpdateContext<EphemeralCallbackQuery>> = ParsedUpdateHandler<'ephemeral_callback_query', T>
 
 export type UpdateHandler
   = | RawUpdateHandler
@@ -120,5 +127,9 @@ export type UpdateHandler
     | EditBusinessMessageHandler
     | BusinessMessageGroupHandler
     | DeleteBusinessMessageHandler
+    | NewEphemeralMessageHandler
+    | EditEphemeralMessageHandler
+    | DeleteEphemeralMessagesHandler
+    | EphemeralCallbackQueryHandler
 
 // end-codegen

@@ -127,6 +127,8 @@ export function* getAllPeersFrom(obj: tl.TlObject | tl.TlObject[]): Iterable<tl.
     case 'channel':
     case 'chatForbidden':
     case 'channelForbidden':
+    case 'community':
+    case 'communityForbidden':
       yield obj
 
       return
@@ -142,6 +144,8 @@ export function* getAllPeersFrom(obj: tl.TlObject | tl.TlObject[]): Iterable<tl.
       case 'channel':
       case 'chatForbidden':
       case 'channelForbidden':
+      case 'community':
+      case 'communityForbidden':
         yield obj.chat
         break
     }
@@ -153,6 +157,8 @@ export function* getAllPeersFrom(obj: tl.TlObject | tl.TlObject[]): Iterable<tl.
       case 'channel':
       case 'chatForbidden':
       case 'channelForbidden':
+      case 'community':
+      case 'communityForbidden':
         yield obj.channel
         break
     }
@@ -176,6 +182,8 @@ export function* getAllPeersFrom(obj: tl.TlObject | tl.TlObject[]): Iterable<tl.
           case 'channel':
           case 'chatForbidden':
           case 'channelForbidden':
+          case 'community':
+          case 'communityForbidden':
             yield chat
             break
         }

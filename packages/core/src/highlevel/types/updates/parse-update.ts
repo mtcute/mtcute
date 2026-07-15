@@ -16,8 +16,11 @@ import {
   ChatMemberUpdate,
   ChosenInlineResult,
   DeleteBusinessMessageUpdate,
+  DeleteEphemeralMessagesUpdate,
   DeleteMessageUpdate,
   DeleteStoryUpdate,
+  EphemeralCallbackQuery,
+  EphemeralMessage,
   HistoryReadUpdate,
   InlineCallbackQuery,
   InlineQuery,
@@ -110,6 +113,14 @@ export function _parseUpdate({ update, peers }: RawUpdateInfo): ParsedUpdate | n
       return { name: 'delete_business_message', data: new DeleteBusinessMessageUpdate(update, peers) }
     case 'updateBusinessBotCallbackQuery':
       return { name: 'business_callback_query', data: new BusinessCallbackQuery(update, peers) }
+    case 'updateNewEphemeralMessage':
+      return { name: 'new_ephemeral_message', data: new EphemeralMessage(update.message, peers) }
+    case 'updateEditEphemeralMessage':
+      return { name: 'edit_ephemeral_message', data: new EphemeralMessage(update.message, peers) }
+    case 'updateDeleteEphemeralMessages':
+      return { name: 'delete_ephemeral_messages', data: new DeleteEphemeralMessagesUpdate(update, peers) }
+    case 'updateEphemeralBotCallbackQuery':
+      return { name: 'ephemeral_callback_query', data: new EphemeralCallbackQuery(update, peers) }
     default:
       return null
   }

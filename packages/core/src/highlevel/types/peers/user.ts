@@ -1,6 +1,7 @@
 import type { tl } from '../../../tl/index.js'
 
 import { MtArgumentError } from '../../../types/errors.js'
+import { toggleChannelIdMark } from '../../../utils/peer-utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
@@ -481,6 +482,13 @@ export class User {
   /** If this user has paid messages enabled, price of one message in stars */
   get paidMessagePrice(): tl.Long | null {
     return this.raw.sendPaidMessagesStars ?? null
+  }
+
+  /** Marked ID of the community this user (bot) is linked to, if any */
+  get linkedCommunityId(): number | null {
+    if (!this.raw.linkedCommunityId) return null
+
+    return toggleChannelIdMark(this.raw.linkedCommunityId)
   }
 
   /**

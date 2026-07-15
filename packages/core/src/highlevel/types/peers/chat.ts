@@ -1,7 +1,7 @@
 import type { tl } from '../../../tl/index.js'
 
 import { MtArgumentError, MtTypeAssertionError } from '../../../types/errors.js'
-import { getMarkedPeerId } from '../../../utils/peer-utils.js'
+import { getMarkedPeerId, toggleChannelIdMark } from '../../../utils/peer-utils.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MessageEntity } from '../messages/message-entity.js'
@@ -18,8 +18,9 @@ import { ChatPhoto } from './chat-photo.js'
  *  - `channel`: Broadcast channel
  *  - `gigagroup`: Gigagroup aka Broadcast group
  *  - `monoforum`: Monoforum (chat for direct messages to channel administrators)
+ *  - `community`: Community (a collection of linked chats)
  */
-export type ChatType = 'group' | 'supergroup' | 'channel' | 'gigagroup' | 'monoforum'
+export type ChatType = 'group' | 'supergroup' | 'channel' | 'gigagroup' | 'monoforum' | 'community'
 
 /**
  * A chat.
@@ -30,7 +31,13 @@ export class Chat {
   /**
    * Raw peer object that this {@link Chat} represents.
    */
-  readonly raw: tl.RawChat | tl.RawChannel | tl.RawChatForbidden | tl.RawChannelForbidden
+  readonly raw:
+    | tl.RawChat
+    | tl.RawChannel
+    | tl.RawChatForbidden
+    | tl.RawChannelForbidden
+    | tl.RawCommunity
+    | tl.RawCommunityForbidden
 
   constructor(peer: tl.TypeChat) {
     switch (peer._) {
@@ -38,6 +45,8 @@ export class Chat {
       case 'channel':
       case 'chatForbidden':
       case 'channelForbidden':
+      case 'community':
+      case 'communityForbidden':
         break
       default:
         throw new MtTypeAssertionError('peer', 'user | chat | channel', peer._)
@@ -99,6 +108,8 @@ export class Chat {
         }
       case 'channel':
       case 'channelForbidden':
+      case 'community':
+      case 'communityForbidden':
         if ((this.raw as tl.RawChannel).min) {
           return {
             _: 'mtcute.dummyInputPeerMinChannel',
@@ -124,6 +135,9 @@ export class Chat {
       case 'chat':
       case 'chatForbidden':
         return 'group'
+      case 'community':
+      case 'communityForbidden':
+        return 'community'
       case 'channel':
       case 'channelForbidden':
         if (this.raw._ === 'channel' && this.raw.gigagroup) {
@@ -141,10 +155,10 @@ export class Chat {
   }
 
   /**
-   * Whether this chat is a group chat (i.e. not a channel)
+   * Whether this chat is a group chat (i.e. not a channel or a community)
    */
   get isGroup(): boolean {
-    return this.chatType !== 'channel'
+    return this.chatType !== 'channel' && this.chatType !== 'community'
   }
 
   /**
@@ -206,7 +220,9 @@ export class Chat {
    * Consider also checking for {@link isLikelyUnavailable}.
    */
   get isBanned(): boolean {
-    return this.raw._ === 'chatForbidden' || this.raw._ === 'channelForbidden'
+    return this.raw._ === 'chatForbidden'
+      || this.raw._ === 'channelForbidden'
+      || this.raw._ === 'communityForbidden'
   }
 
   /**
@@ -217,9 +233,12 @@ export class Chat {
     switch (this.raw._) {
       case 'chatForbidden':
       case 'channelForbidden':
+      case 'communityForbidden':
         return true
       case 'chat':
         return this.raw.left! || this.raw.deactivated!
+      case 'community':
+        return this.raw.left!
       case 'channel':
         // left = true, meaning we are not a member of it
         // no usernames => likely private
@@ -241,6 +260,7 @@ export class Chat {
     switch (this.raw._) {
       case 'channel':
       case 'chat':
+      case 'community':
         return !this.raw.left
       default:
         return false
@@ -314,6 +334,18 @@ export class Chat {
    */
   get monoforumLinkedChatId(): number | null {
     return this.raw._ === 'channel' ? this.raw.linkedMonoforumId ?? null : null
+  }
+
+  /** Marked ID of the community this channel is linked to, if any */
+  get linkedCommunityId(): number | null {
+    if (this.raw._ !== 'channel' || !this.raw.linkedCommunityId) return null
+
+    return toggleChannelIdMark(this.raw.linkedCommunityId)
+  }
+
+  /** Whether this community is collapsed in the dialogs list */
+  get isCollapsedInDialogs(): boolean {
+    return this.raw._ === 'community' && this.raw.collapsedInDialogs!
   }
 
   /** Chat title */

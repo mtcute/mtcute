@@ -6,8 +6,11 @@ import type {
   ChatJoinRequestUpdate,
   ChatMemberUpdate,
   DeleteBusinessMessageUpdate,
+  DeleteEphemeralMessagesUpdate,
   DeleteMessageUpdate,
   DeleteStoryUpdate,
+  EphemeralCallbackQuery,
+  EphemeralMessage,
   HistoryReadUpdate,
   ParsedUpdate,
   PollUpdate,
@@ -55,6 +58,9 @@ export type UpdateContextType
       | BotReactionCountUpdate
       | BusinessConnection
       | DeleteBusinessMessageUpdate
+      | EphemeralMessage
+      | DeleteEphemeralMessagesUpdate
+      | EphemeralCallbackQuery
     >
 
 /** @internal */

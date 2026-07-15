@@ -1,6 +1,5 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/peers/peer.js'
-import { isInputPeerChannel, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 
 /**
@@ -29,22 +28,12 @@ export async function transferChatOwnership(
     params.password,
   )
 
-  let res
-  if (isInputPeerChannel(peer)) {
-    res = await client.call({
-      _: 'channels.editCreator',
-      channel: toInputChannel(peer),
-      userId: user,
-      password,
-    })
-  } else {
-    res = await client.call({
-      _: 'messages.editChatCreator',
-      peer,
-      userId: user,
-      password,
-    })
-  }
+  const res = await client.call({
+    _: 'messages.editChatCreator',
+    peer,
+    userId: user,
+    password,
+  })
 
   client.handleClientUpdate(res)
 }

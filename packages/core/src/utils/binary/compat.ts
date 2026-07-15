@@ -437,6 +437,20 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
       }
     case 'channelFull_layer211':
       return replaceType(obj, 'channelFull')
+    case 'user_layer227':
+      return {
+        ...obj,
+        _: 'user',
+        emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
+      }
+    case 'channel_layer227':
+      return {
+        ...obj,
+        _: 'channel',
+        emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
+      }
+    case 'botCommand_layer227':
+      return replaceType(obj, 'botCommand')
     case 'phoneCallDiscardReasonAllowGroupCall_layer202':
       // removed constructor in favor of phoneCallDiscardReasonMigrateConferenceCall,
       // which requires extra info we don't have

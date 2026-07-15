@@ -140,7 +140,20 @@ export async function resolvePeer(
           }
         }
       } catch (e) {
-        if (!tl.RpcError.is(e, 'CHANNEL_INVALID')) throw e
+        if (tl.RpcError.is(e, 'COMMUNITY_ID_INVALID')) {
+          // this is a community id, and communities can't be fetched via channels.getChannels.
+          // however, the server allows bots to use access_hash=0 for them
+          // (matching tdlib's CommunityManager::get_input_community)
+          if (client.storage.self.getCached(true)?.isBot) {
+            return {
+              _: 'inputPeerChannel',
+              channelId: bareId,
+              accessHash: Long.ZERO,
+            }
+          }
+        } else if (!tl.RpcError.is(e, 'CHANNEL_INVALID')) {
+          throw e
+        }
       }
       break
     }

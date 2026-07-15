@@ -8,6 +8,7 @@ import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import { Photo } from '../media/photo.js'
+import { Chat } from '../peers/chat.js'
 import { parsePeer } from '../peers/peer.js'
 import { User } from '../peers/user.js'
 import { StarGiftUnique } from '../premium/star-gift-unique.js'
@@ -817,6 +818,14 @@ export interface ActionManagedBotCreated {
   readonly botId: number
 }
 
+/** Community linked to the chat was changed */
+export interface ActionChangeCommunity {
+  readonly type: 'change_community'
+
+  /** The new community, or `null` if the chat was unlinked from a community */
+  readonly community: Chat | null
+}
+
 /** Group creator has left the group, and a new creator has been assigned but not yet made one */
 export interface ActionNewCreatorPending {
   readonly type: 'new_creator_pending'
@@ -903,6 +912,7 @@ export type MessageAction
     | ActionPollAppendAnswer
     | ActionPollDeleteAnswer
     | ActionManagedBotCreated
+    | ActionChangeCommunity
     | null
 
 /** @internal */
@@ -1392,6 +1402,11 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
       return {
         type: 'managed_bot_created',
         botId: act.botId,
+      }
+    case 'messageActionChangeCommunity':
+      return {
+        type: 'change_community',
+        community: act.communityId ? new Chat(this._peers.chat(act.communityId)) : null,
       }
     default:
       return null

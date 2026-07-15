@@ -10,6 +10,7 @@ import { BotInfo } from './bot-info.js'
 import { BotVerification } from './bot-verification.js'
 import { ChatInviteLink } from './chat-invite-link.js'
 import { Chat } from './chat.js'
+import { CommunityPeer } from './community-peer.js'
 import { PeersIndex } from './peers-index.js'
 import { User } from './user.js'
 
@@ -45,7 +46,7 @@ export class FullChat extends Chat {
 
   /** Whether the current user can change the chat's username */
   get canSetUsername(): boolean {
-    return this.full.canSetUsername!
+    return this.full._ !== 'communityFull' && this.full.canSetUsername!
   }
 
   /** Whether the current user can change the chat's sticker set */
@@ -80,6 +81,8 @@ export class FullChat extends Chat {
         return this.full.canDeleteChannel!
       case 'chatFull':
         return this.raw._ === 'chat' && this.raw.creator!
+      case 'communityFull':
+        return this.raw._ === 'community' && this.raw.creator!
     }
   }
 
@@ -151,6 +154,8 @@ export class FullChat extends Chat {
    * Chat's primary invite link, if available
    */
   get inviteLink(): ChatInviteLink | null {
+    if (this.full._ === 'communityFull') return null
+
     switch (this.full.exportedInvite?._) {
       case 'chatInvitePublicJoinRequests':
         return null
@@ -221,12 +226,12 @@ export class FullChat extends Chat {
 
   /** Number of admins in the chat (0 if not available) */
   get adminsCount(): number {
-    return this.full._ === 'channelFull' ? this.full.adminsCount ?? 0 : 0
+    return this.full._ === 'chatFull' ? 0 : this.full.adminsCount ?? 0
   }
 
   /** Number of users kicked from the chat (if available) */
   get kickedCount(): number | null {
-    return this.full._ === 'channelFull' ? this.full.kickedCount ?? null : null
+    return this.full._ === 'chatFull' ? null : this.full.kickedCount ?? null
   }
 
   /** Number of users kicked from the chat (if available) */
@@ -323,7 +328,9 @@ export class FullChat extends Chat {
    * TTL of all messages in this chat, in seconds
    */
   get ttlPeriod(): number | null {
-    return this.full?.ttlPeriod ?? null
+    if (this.full._ === 'communityFull') return null
+
+    return this.full.ttlPeriod ?? null
   }
 
   /** Slowmode delay for this chat, if any */
@@ -391,6 +398,18 @@ export class FullChat extends Chat {
   get paidMessagesAvailable(): boolean {
     return this.full._ === 'channelFull' && this.full.paidMessagesAvailable!
   }
+
+  /** For communities, list of peers linked to it */
+  get linkedPeers(): CommunityPeer[] {
+    if (this.full._ !== 'communityFull') return []
+
+    return this.full.linkedPeers.map(it => new CommunityPeer(it, this.peers))
+  }
+
+  /** For communities, number of pending peer link requests (if available) */
+  get linkRequestsPending(): number | null {
+    return this.full._ === 'communityFull' ? this.full.peerLinkRequestsPending ?? null : null
+  }
 }
 
 memoizeGetters(FullChat, [
@@ -404,5 +423,6 @@ memoizeGetters(FullChat, [
   'recentRequesters',
   'stories',
   'botVerification',
+  'linkedPeers',
 ])
 makeInspectable(FullChat)

@@ -160,6 +160,25 @@ export class PeersService extends BaseService {
         accessHash = peer.accessHash
         break
       }
+      case 'community':
+      case 'communityForbidden': {
+        if (!peer.accessHash) {
+          this._log.warn('received community without access hash: %j', peer)
+
+          return
+        }
+
+        dto = {
+          id: toggleChannelIdMark(peer.id),
+          accessHash: longToFastString(peer.accessHash),
+          isMin: peer._ === 'community' ? peer.min! : false,
+          usernames: [],
+          updated: Date.now(),
+          complete: this._serializeTl(peer),
+        }
+        accessHash = peer.accessHash
+        break
+      }
       default:
         return
     }
@@ -199,6 +218,14 @@ export class PeersService extends BaseService {
             joinToSend: peer.joinToSend,
             joinRequest: peer.joinRequest,
             verified: peer.verified,
+            defaultBannedRights: peer.defaultBannedRights,
+          }
+        } else if (existing._ === 'community' && peer._ === 'community') {
+          // ref: CommunityManager::on_get_community in tdlib
+          newComplete = {
+            ...existing,
+            title: peer.title,
+            photo: peer.photo,
             defaultBannedRights: peer.defaultBannedRights,
           }
         } else if (existing._ === 'user' && peer._ === 'user') {
