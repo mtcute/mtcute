@@ -21,6 +21,58 @@ import { resolvePeer } from '../users/resolve-peer.js'
 import { _findMessageInUpdate } from './find-in-update.js'
 import { _processCommonSendParameters } from './send-common.js'
 
+function _inputReplyToToHeader(
+  replyTo: tl.TypeInputReplyTo | undefined,
+  peer: tl.TypeInputPeer,
+): [tl.TypeMessageReplyHeader | undefined, tl.TypePeer | undefined] {
+  if (!replyTo) return [undefined, undefined]
+
+  switch (replyTo._) {
+    case 'inputReplyToMessage': {
+      const replyToPeerId
+        = replyTo.replyToPeerId && getMarkedPeerId(replyTo.replyToPeerId) !== getMarkedPeerId(peer)
+          ? inputPeerToPeer(replyTo.replyToPeerId)
+          : undefined
+
+      return [
+        {
+          _: 'messageReplyHeader',
+          replyToMsgId: replyTo.replyToMsgId,
+          replyToPeerId,
+          replyToTopId: replyTo.topMsgId,
+          quote: replyTo.quoteText !== undefined ? true : undefined,
+          quoteText: replyTo.quoteText,
+          quoteEntities: replyTo.quoteEntities,
+          quoteOffset: replyTo.quoteOffset,
+          todoItemId: replyTo.todoItemId,
+          pollOption: replyTo.pollOption,
+        },
+        replyTo.monoforumPeerId ? inputPeerToPeer(replyTo.monoforumPeerId) : undefined,
+      ]
+    }
+    case 'inputReplyToStory':
+      return [
+        {
+          _: 'messageReplyStoryHeader',
+          peer: inputPeerToPeer(replyTo.peer),
+          storyId: replyTo.storyId,
+        },
+        undefined,
+      ]
+    case 'inputReplyToMonoForum':
+      return [undefined, inputPeerToPeer(replyTo.monoforumPeerId)]
+    case 'inputReplyToEphemeralMessage':
+      return [
+        {
+          _: 'messageReplyHeader',
+          replyToEphemeral: true,
+          replyToMsgId: replyTo.id,
+        },
+        undefined,
+      ]
+  }
+}
+
 /**
  * Send a text message
  *
@@ -68,6 +120,7 @@ export async function sendText(
   )
 
   const randomId = params.randomId ?? randomLong()
+  const sendAs = params.sendAs ? await resolvePeer(client, params.sendAs) : undefined
   const res = await client.call(
     {
       _: 'messages.sendMessage',
@@ -82,7 +135,7 @@ export async function sendText(
       entities,
       clearDraft: params.clearDraft,
       noforwards: params.forbidForwards,
-      sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
+      sendAs,
       invertMedia: params.invertMedia,
       quickReplyShortcut,
       effect: params.effect,
@@ -98,16 +151,26 @@ export async function sendText(
 
   if (res._ === 'updateShortSentMessage') {
     // todo extract this to updates manager?
+    const [replyToHeader, savedPeerId] = _inputReplyToToHeader(replyTo, peer)
+
     const msg: tl.RawMessage = {
       _: 'message',
       id: res.id,
       peerId: inputPeerToPeer(peer),
-      fromId: { _: 'peerUser', userId: client.storage.self.getCached()!.userId },
+      fromId: sendAs ? inputPeerToPeer(sendAs) : { _: 'peerUser', userId: client.storage.self.getCached()!.userId },
+      savedPeerId,
+      replyTo: replyToHeader,
       message,
       date: res.date,
       out: res.out,
+      silent: params.silent,
+      noforwards: params.forbidForwards,
+      invertMedia: params.invertMedia,
+      effect: params.effect,
       replyMarkup,
+      media: res.media,
       entities: res.entities,
+      ttlPeriod: res.ttlPeriod,
     }
 
     if (!params.shouldDispatch) {
@@ -148,7 +211,28 @@ export async function sendText(
       }
     }
 
-    await Promise.all([fetchPeer(peer), fetchPeer(msg.fromId!)])
+    const peersToFetch: (tl.TypePeer | tl.TypeInputPeer)[] = [peer, msg.fromId!]
+    if (savedPeerId) peersToFetch.push(savedPeerId)
+    if (replyToHeader?._ === 'messageReplyHeader' && replyToHeader.replyToPeerId) {
+      peersToFetch.push(replyToHeader.replyToPeerId)
+    } else if (replyToHeader?._ === 'messageReplyStoryHeader') {
+      peersToFetch.push(replyToHeader.peer)
+    }
+
+    await Promise.all(peersToFetch.map(fetchPeer))
+
+    if (
+      replyToHeader?._ === 'messageReplyHeader'
+      && replyToHeader.replyToTopId
+      // general topic (id 1) doesn't count as a forum topic
+      && replyToHeader.replyToTopId !== 1
+      && msg.peerId._ === 'peerChannel'
+    ) {
+      const chat = peers.chats.get(msg.peerId.channelId)
+      if (chat?._ === 'channel' && chat.forum) {
+        replyToHeader.forumTopic = true
+      }
+    }
 
     const ret = new Message(msg, peers)
 

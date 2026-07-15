@@ -131,4 +131,93 @@ describe('sendText', () => {
       expect(msg.text).toEqual('test')
     })
   })
+
+  it('should carry over fields from the request into updateShortSentMessage', async () => {
+    const client = new StubTelegramClient()
+
+    await client.storage.self.store({
+      userId: stubUser.id,
+      isBot: false,
+      isPremium: false,
+      usernames: [],
+    })
+    await client.registerPeers(stubUser)
+
+    client.respondWith('messages.sendMessage', () =>
+      createStub('updateShortSentMessage', {
+        id: 123,
+        out: true,
+        ttlPeriod: 86400,
+        media: { _: 'messageMediaWebPage', webpage: { _: 'webPageEmpty', id: Long.ZERO } },
+      }))
+
+    await client.with(async () => {
+      const msg = await sendText(client, stubUser.id, 'test', {
+        replyTo: 42,
+        quote: { text: 'quoted' },
+        quoteOffset: 4,
+        silent: true,
+        forbidForwards: true,
+        invertMedia: true,
+        effect: Long.fromInt(789),
+      })
+
+      expect(msg.raw).toMatchObject({
+        id: 123,
+        out: true,
+        silent: true,
+        noforwards: true,
+        invertMedia: true,
+        effect: Long.fromInt(789),
+        ttlPeriod: 86400,
+        media: { _: 'messageMediaWebPage' },
+        replyTo: {
+          _: 'messageReplyHeader',
+          replyToMsgId: 42,
+          quote: true,
+          quoteText: 'quoted',
+          quoteOffset: 4,
+        },
+      })
+    })
+  })
+
+  it('should derive forumTopic flag for forum channels', async () => {
+    const client = new StubTelegramClient()
+
+    const stubForum = createStub('channel', {
+      id: 555333,
+      accessHash: Long.fromBits(111, 222),
+      megagroup: true,
+      forum: true,
+    })
+
+    await client.storage.self.store({
+      userId: stubUser.id,
+      isBot: false,
+      isPremium: false,
+      usernames: [],
+    })
+    await client.registerPeers(stubForum, stubUser)
+
+    client.respondWith('messages.sendMessage', () =>
+      createStub('updateShortSentMessage', {
+        id: 123,
+        out: true,
+      }))
+
+    await client.with(async () => {
+      const msg = await sendText(client, toggleChannelIdMark(stubForum.id), 'test', {
+        replyTo: 42,
+        threadId: 10,
+      })
+
+      expect(msg.raw.replyTo).toMatchObject({
+        _: 'messageReplyHeader',
+        replyToMsgId: 42,
+        replyToTopId: 10,
+        forumTopic: true,
+      })
+    })
+  })
 })
