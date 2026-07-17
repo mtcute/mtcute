@@ -37,7 +37,7 @@ export class RpcError extends Error {
         this.text = text;
     }
 
-    static is(err, text) { return err.constructor === RpcError && (!text || err.text === text); }
+    static is(err, text) { return err != null && err.constructor === RpcError && (!text || err.text === text); }
     is(text) { return this.text === text; }
 }
 RpcError.fromTl = function (obj) {
