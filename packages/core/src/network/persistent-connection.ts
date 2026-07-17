@@ -34,6 +34,8 @@ export abstract class PersistentConnection {
   readonly params: PersistentConnectionParams
 
   private _sendOnceConnected: Uint8Array[] = []
+  // Prevent an older async write from restoring ciphertext after its session was discarded.
+  private _sendGeneration = 0
   private _codec: IPacketCodec
   private _fuman: FumanPersistentConnection<BasicDcOption, ITelegramConnection>
 
@@ -144,12 +146,16 @@ export abstract class PersistentConnection {
     this._writer = new FramedWriter(conn, this._codec)
 
     while (this._sendOnceConnected.length) {
+      const generation = this._sendGeneration
       const data = this._sendOnceConnected.shift()!
 
       try {
         await this._writer.write(data)
       } catch (e) {
-        this._sendOnceConnected.unshift(data)
+        // A session reset may have invalidated this write while it was awaiting the transport.
+        if (generation === this._sendGeneration) {
+          this._sendOnceConnected.unshift(data)
+        }
         throw e
       }
     }
@@ -268,7 +274,17 @@ export abstract class PersistentConnection {
     }
   }
 
+  protected _discardPendingSends(): void {
+    // Invalidate buffered writes and writes that may settle after this synchronous reset.
+    // Clearing the writer also makes new payloads wait for the replacement connection.
+    this._sendGeneration += 1
+    this._sendOnceConnected.length = 0
+    this._writer = undefined
+  }
+
   async send(data: Uint8Array): Promise<void> {
+    const generation = this._sendGeneration
+
     if (this._inactive) {
       this.connect()
     }
@@ -278,6 +294,9 @@ export abstract class PersistentConnection {
       try {
         await this._writer.write(data)
       } catch (e: unknown) {
+        // Recovery already reconnects; a late failure from the old session must not reconnect or requeue again.
+        if (generation !== this._sendGeneration) return
+
         if (!(e instanceof ConnectionClosedError)) {
           this.log.warn('encountered an error while sending, reconnecting: %e', e)
           this._writer = undefined
@@ -285,7 +304,7 @@ export abstract class PersistentConnection {
           this._sendOnceConnected.push(data)
         }
       }
-    } else {
+    } else if (generation === this._sendGeneration) {
       this._sendOnceConnected.push(data)
     }
   }

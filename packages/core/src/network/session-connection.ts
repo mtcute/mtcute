@@ -71,6 +71,8 @@ export class SessionConnection extends PersistentConnection {
 
   private _flushTimer = new EarlyTimer()
   private _queuedDestroySession: Long[] = []
+  // A reentrant flush must not replace the list owned by the flush already in progress.
+  private _activeFlushRpcs: PendingRpc[] | null = null
 
   private _needDestroyAuthKey = false
   private _sentDestroyAuthKey = false
@@ -1743,6 +1745,12 @@ export class SessionConnection extends PersistentConnection {
   }
 
   private _flush(): void {
+    if (this._activeFlushRpcs !== null) {
+      this.log.debug('skipping flush, another flush is already active')
+
+      return
+    }
+
     if (
       this._disconnectedManually
       || !this._session._authKey.ready
@@ -1769,14 +1777,20 @@ export class SessionConnection extends PersistentConnection {
 
     if (this._checkTimeouts(now)) return
 
+    // The caller owns this array until the synchronous flush either completes or is recovered.
+    const activeFlushRpcs: PendingRpc[] = []
+    this._activeFlushRpcs = activeFlushRpcs
+
     try {
-      this._doFlush()
-    } catch (e: any) {
-      this.log.error('flush error: %s', (e as Error).stack)
-      // should not happen unless there's a bug in the code. play safe and reset state
-      this._resetSession('flush error')
+      this._doFlush(activeFlushRpcs)
+    } catch (cause: unknown) {
+      this._recoverFromFlushError(activeFlushRpcs, cause)
 
       return
+    } finally {
+      if (this._activeFlushRpcs === activeFlushRpcs) {
+        this._activeFlushRpcs = null
+      }
     }
 
     // schedule next flush
@@ -1800,7 +1814,39 @@ export class SessionConnection extends PersistentConnection {
     }
   }
 
-  private _doFlush(): void {
+  private _recoverFromFlushError(activeFlushRpcs: PendingRpc[], cause: unknown): void {
+    this.log.error('flush error')
+
+    const error = new MtcuteError('MTProto flush failed')
+    this._activeFlushRpcs = null
+
+    for (const rpc of activeFlushRpcs) {
+      rpc.done = true
+      if (rpc.timeout) {
+        timers.clearTimeout(rpc.timeout)
+        rpc.timeout = undefined
+      }
+      rpc.resetAbortSignal?.()
+      rpc.resetAbortSignal = undefined
+      if (rpc.msgId) this._session.pendingMessages.delete(rpc.msgId)
+      rpc.promise.reject(error)
+    }
+
+    // MtprotoSession.reset() only rejects RPC entries; an abandoned bind would block PFS progress.
+    for (const pending of this._session.pendingMessages.values()) {
+      if (pending._ === 'bind') pending.promise.reject(error)
+    }
+
+    this._discardPendingSends()
+    this._inactivityPendingFlush = false
+    // Do not use _resetSession(): its recovery contract requeues pending RPCs for resend.
+    this.reset()
+    this._session.reset()
+    this.reconnect()
+    this.onError.emit(cause instanceof Error ? cause : error)
+  }
+
+  private _doFlush(rpcToSend: PendingRpc[]): void {
     this.log.debug('flushing send queue. queued rpc: %d', this._session.queuedRpc.length)
 
     // oh bloody hell mate
@@ -1960,7 +2006,6 @@ export class SessionConnection extends PersistentConnection {
     }
 
     let forceContainer = false
-    const rpcToSend: PendingRpc[] = []
 
     while (
       this._session.queuedRpc.length
