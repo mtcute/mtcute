@@ -43,6 +43,18 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
   platform: ICorePlatform
 }
 
+interface PendingUnencryptedMessage {
+  promise: Deferred<Uint8Array>
+  timeout?: timers.Timer
+  abortSignal?: AbortSignal
+  abortListener?: () => void
+}
+
+interface FlushContext {
+  rpcToSend: PendingRpc[]
+  ownsDestroyAuthKeySend: boolean
+}
+
 const TEMP_AUTH_KEY_EXPIRY = 86400 // 24 hours
 const TEMP_AUTH_KEY_REFRESH_MARGIN = 3600 // refresh 1 hour before expiry
 const TEMP_AUTH_KEY_REFRESH_JITTER = 600 // up to 10 minutes of jitter to desync connections
@@ -76,11 +88,12 @@ export class SessionConnection extends PersistentConnection {
   private _sentDestroyAuthKey = false
 
   // waitForMessage
-  private _pendingWaitForUnencrypted: [Deferred<Uint8Array>, timers.Timer][] = []
+  private _pendingWaitForUnencrypted: PendingUnencryptedMessage[] = []
 
   private _usePfs
   private _isPfsBindingPending = false
   private _isPfsBindingPendingInBackground = false
+  private _pfsAuthorizationAbort?: AbortController
   private _pfsUpdateTimeout?: timers.Timer
 
   private _inactivityPendingFlush = false
@@ -131,6 +144,12 @@ export class SessionConnection extends PersistentConnection {
   private _online
   private _active = false
 
+  private _cancelPfsAuthorization(error: Error): void {
+    this._isPfsBindingPending = false
+    this._isPfsBindingPendingInBackground = false
+    this._pfsAuthorizationAbort?.abort(error)
+  }
+
   getAuthKey(temp = false): Uint8Array | null {
     const key = temp ? this._session._authKeyTemp : this._session._authKey
 
@@ -144,10 +163,9 @@ export class SessionConnection extends PersistentConnection {
 
     this.log.debug('use pfs changed to %s', usePfs)
     this._usePfs = usePfs
+    this._cancelPfsAuthorization(new MtcuteError('PFS setting changed'))
 
     if (!usePfs) {
-      this._isPfsBindingPending = false
-      this._isPfsBindingPendingInBackground = false
       this._session._authKeyTemp.reset()
       timers.clearTimeout(this._pfsUpdateTimeout)
     }
@@ -156,10 +174,7 @@ export class SessionConnection extends PersistentConnection {
   }
 
   onClosed(): void {
-    Object.values(this._pendingWaitForUnencrypted).forEach(([prom, timeout]) => {
-      prom.reject(new MtcuteError('Connection closed'))
-      timers.clearTimeout(timeout)
-    })
+    this._rejectPendingWaitForUnencrypted(new MtcuteError('Connection closed'))
 
     // resend pending state_req-s
     for (const msgId of this._session.pendingGetStateTimeouts.keys()) {
@@ -178,6 +193,7 @@ export class SessionConnection extends PersistentConnection {
   }
 
   override async destroy(): Promise<void> {
+    this._cancelPfsAuthorization(new MtcuteError('Connection destroyed'))
     await super.destroy()
     this.reset(true)
   }
@@ -406,8 +422,13 @@ export class SessionConnection extends PersistentConnection {
       this._isPfsBindingPending = true
     }
 
-    doAuthorization(this, this._crypto, TEMP_AUTH_KEY_EXPIRY)
+    const authorizationAbort = new AbortController()
+    this._pfsAuthorizationAbort = authorizationAbort
+    const { signal } = authorizationAbort
+
+    doAuthorization(this, this._crypto, TEMP_AUTH_KEY_EXPIRY, signal)
       .then(async ([tempAuthKey, tempServerSalt]) => {
+        signal.throwIfAborted()
         if (!this._usePfs) {
           this.log.info('pfs has been disabled while generating temp key')
 
@@ -497,9 +518,12 @@ export class SessionConnection extends PersistentConnection {
           tempServerSalt,
           this._session._sessionId,
         )
+        signal.throwIfAborted()
         await this.send(requestEncrypted)
+        signal.throwIfAborted()
 
         const res = await promise.promise
+        signal.throwIfAborted()
 
         this._session.pendingMessages.delete(msgId)
 
@@ -530,7 +554,9 @@ export class SessionConnection extends PersistentConnection {
         this._session.initConnectionCalled = false
 
         this.onTmpKeyChange.emit([tempAuthKey, inner.expiresAt])
+        signal.throwIfAborted()
         this.onConnectionUsable()
+        signal.throwIfAborted()
 
         // set a timeout to update temp auth key in advance to avoid interruption
         this._pfsUpdateTimeout = timers.setTimeout(
@@ -543,8 +569,9 @@ export class SessionConnection extends PersistentConnection {
         )
       })
       .catch((err: Error) => {
-        if (this._destroyed) return
+        if (this._destroyed || signal.aborted) return
         this.log.error('PFS Authorization error: %e', err)
+        if (this._destroyed || signal.aborted) return
 
         if (this._isPfsBindingPendingInBackground) {
           this._isPfsBindingPendingInBackground = false
@@ -555,20 +582,54 @@ export class SessionConnection extends PersistentConnection {
 
         this._isPfsBindingPending = false
         this.handleError(err)
-        this.reconnect()
+        if (!signal.aborted) this.reconnect()
+      })
+      .finally(() => {
+        if (this._pfsAuthorizationAbort === authorizationAbort) {
+          this._pfsAuthorizationAbort = undefined
+        }
       })
   }
 
-  waitForUnencryptedMessage(timeout = 5000): Promise<Uint8Array> {
+  private _removePendingWaitForUnencrypted(pending: PendingUnencryptedMessage): boolean {
+    const index = this._pendingWaitForUnencrypted.indexOf(pending)
+    if (index === -1) return false
+
+    this._pendingWaitForUnencrypted.splice(index, 1)
+    if (pending.timeout) timers.clearTimeout(pending.timeout)
+    if (pending.abortSignal && pending.abortListener) {
+      pending.abortSignal.removeEventListener('abort', pending.abortListener)
+    }
+
+    return true
+  }
+
+  private _rejectPendingWaitForUnencrypted(error: Error): void {
+    for (const pending of this._pendingWaitForUnencrypted.slice()) {
+      if (this._removePendingWaitForUnencrypted(pending)) pending.promise.reject(error)
+    }
+  }
+
+  waitForUnencryptedMessage(timeout = 5000, abortSignal?: AbortSignal): Promise<Uint8Array> {
     if (this._destroyed) {
       return Promise.reject(new MtcuteError('Connection destroyed'))
     }
+    if (abortSignal?.aborted) return Promise.reject(abortSignal.reason)
+
     const promise = new Deferred<Uint8Array>()
-    const timeoutId = timers.setTimeout(() => {
-      promise.reject(new MtTimeoutError(timeout))
-      this._pendingWaitForUnencrypted = this._pendingWaitForUnencrypted.filter(it => it[0] !== promise)
+    const pending: PendingUnencryptedMessage = { promise, abortSignal }
+    pending.timeout = timers.setTimeout(() => {
+      if (this._removePendingWaitForUnencrypted(pending)) {
+        promise.reject(new MtTimeoutError(timeout))
+      }
     }, timeout)
-    this._pendingWaitForUnencrypted.push([promise, timeoutId])
+    if (abortSignal) {
+      pending.abortListener = () => {
+        if (this._removePendingWaitForUnencrypted(pending)) promise.reject(abortSignal.reason)
+      }
+      abortSignal.addEventListener('abort', pending.abortListener, { once: true })
+    }
+    this._pendingWaitForUnencrypted.push(pending)
 
     return promise.promise
   }
@@ -584,9 +645,8 @@ export class SessionConnection extends PersistentConnection {
       if (int32[0] === 0 && int32[1] === 0) {
         // auth_key_id = 0, meaning it's an unencrypted message used for authorization
 
-        const [promise, timeout] = this._pendingWaitForUnencrypted.shift()!
-        timers.clearTimeout(timeout)
-        promise.resolve(data)
+        const pending = this._pendingWaitForUnencrypted[0]
+        if (this._removePendingWaitForUnencrypted(pending)) pending.promise.resolve(data)
 
         return
       }
@@ -1272,13 +1332,15 @@ export class SessionConnection extends PersistentConnection {
   }
 
   private _onNewSessionCreated({ firstMsgId, serverSalt, uniqueId }: mtp.RawMt_new_session_created): void {
-    if (uniqueId.eq(this._session.lastSessionCreatedUid)) {
+    const previousSessionUid = this._session.lastSessionCreatedUid
+    if (uniqueId.eq(previousSessionUid)) {
       this.log.debug('received new_session_created with the same uid = %l, ignoring', uniqueId)
 
       return
     }
 
-    if (!this._session.lastSessionCreatedUid.isZero() && !this.params.disableUpdates) {
+    this._session.lastSessionCreatedUid = uniqueId
+    if (!previousSessionUid.isZero() && !this.params.disableUpdates) {
       // force the client to fetch missed updates
       // when _lastSessionCreatedUid == 0, the connection has
       // just been established, and the client will fetch them anyways
@@ -1630,8 +1692,10 @@ export class SessionConnection extends PersistentConnection {
     if (!onTimeout && rpc.timeout) {
       timers.clearTimeout(rpc.timeout)
     }
+    rpc.timeout = undefined
 
     rpc.resetAbortSignal?.()
+    rpc.resetAbortSignal = undefined
 
     if (onTimeout) {
       rpc.promise.resolve({
@@ -1779,14 +1843,17 @@ export class SessionConnection extends PersistentConnection {
 
     if (this._checkTimeouts(now)) return
 
-    const rpcToSend: PendingRpc[] = []
+    const flushContext: FlushContext = {
+      rpcToSend: [],
+      ownsDestroyAuthKeySend: false,
+    }
 
     try {
-      this._doFlush(rpcToSend)
-    } catch (e: any) {
+      this._doFlush(flushContext)
+    } catch (cause: unknown) {
       // Selected RPCs have left queuedRpc by this point. Restore any that did not
-      // reach pendingMessages so the session reset can retain them for retry.
-      for (const rpc of rpcToSend) {
+      // reach pendingMessages so terminal reset can settle them.
+      for (const rpc of flushContext.rpcToSend) {
         const pending = rpc.msgId ? this._session.pendingMessages.get(rpc.msgId) : undefined
 
         if (pending?._ === 'rpc' && pending.rpc === rpc) continue
@@ -1797,21 +1864,28 @@ export class SessionConnection extends PersistentConnection {
         this._session.enqueueRpc(rpc, true)
       }
 
-      this.log.error('flush error: %s', (e as Error).stack)
-      // should not happen unless there's a bug in the code. play safe and reset state
-      this._resetSession('flush error')
+      const error = cause instanceof Error
+        ? cause
+        : Object.assign(new Error(typeof cause === 'string' ? cause : 'Non-Error value thrown'), { cause })
+      const resetError = new MtcuteError('Session is reset')
+      const ownsFutureSaltRequest = [...this._session.pendingMessages.values()]
+        .some(info => info._ === 'future_salts')
 
-      // _onAllFailed appends registered RPCs after the ones restored above. Rebuild
-      // the queue so the selected prefix keeps its original order.
-      const selectedRpcs = new Set(rpcToSend)
-      const queuedAfterSelection = this._session.queuedRpc.toArray().filter(rpc => !selectedRpcs.has(rpc))
-      this._session.queuedRpc.clear()
-      for (const rpc of rpcToSend) {
-        if (!rpc.cancelled) this._session.queuedRpc.pushBack(rpc)
-      }
-      for (const rpc of queuedAfterSelection) {
-        this._session.queuedRpc.pushBack(rpc)
-      }
+      // Rejecting PFS waiters runs their promise continuations. Invalidate the
+      // owning attempt before resetState rejects either authorization or bind work.
+      this._cancelPfsAuthorization(resetError)
+
+      this._flushTimer.reset()
+      this._session.initConnectionCalled = false
+      this._active = false
+      this._inactivityPendingFlush = false
+      this._queuedDestroySession.length = 0
+      if (ownsFutureSaltRequest) this._salts.isFetching = false
+      if (flushContext.ownsDestroyAuthKeySend) this._sentDestroyAuthKey = false
+      this._session.resetState()
+
+      this.onError.emit(error)
+      this.log.error('flush error: %e', error)
 
       return
     }
@@ -1837,8 +1911,10 @@ export class SessionConnection extends PersistentConnection {
     }
   }
 
-  private _doFlush(rpcToSend: PendingRpc[]): void {
+  private _doFlush(flushContext: FlushContext): void {
     this.log.debug('flushing send queue. queued rpc: %d', this._session.queuedRpc.length)
+
+    const { rpcToSend } = flushContext
 
     // oh bloody hell mate
 
@@ -1993,7 +2069,6 @@ export class SessionConnection extends PersistentConnection {
       getFutureSaltsRequest = TlBinaryWriter.serializeObject(this._writerMap, obj)
       containerSize += getFutureSaltsRequest.length + 16
       containerMessageCount += 1
-      this._salts.isFetching = true
     }
 
     let forceContainer = false
@@ -2134,7 +2209,6 @@ export class SessionConnection extends PersistentConnection {
 
     if (destroyAuthKey) {
       this._registerOutgoingMsgId(this._session.writeMessage(writer, { _: 'mt_destroy_auth_key' }))
-      this._sentDestroyAuthKey = true
     }
 
     if (getFutureSaltsRequest) {
@@ -2271,10 +2345,19 @@ export class SessionConnection extends PersistentConnection {
     )
 
     const enc = this._session.encryptMessage(result)
+    const sessionId = this._session._sessionId
+    if (destroyAuthKey) {
+      flushContext.ownsDestroyAuthKeySend = true
+      this._sentDestroyAuthKey = true
+    }
+    if (getFutureSaltsRequest) this._salts.isFetching = true
     const promise = this.send(enc)
 
     if (this._inactivityPendingFlush && !this._session.hasPendingMessages) {
       void promise.then(() => {
+        // Only the session that initiated this final write may close the transport.
+        if (!this._inactivityPendingFlush || this._session._sessionId.neq(sessionId)) return
+
         this.log.debug('pending messages sent, closing connection')
         this._flushTimer.reset()
         this._inactivityPendingFlush = false
