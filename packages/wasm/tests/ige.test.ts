@@ -47,6 +47,11 @@ describe('aes-ige', () => {
     wasm.__free(reusedPtr)
   })
 
+  it('should accept empty input', () => {
+    expect(ige256Encrypt(new Uint8Array(), key, iv)).toEqual(new Uint8Array())
+    expect(ige256Decrypt(new Uint8Array(), key, iv)).toEqual(new Uint8Array())
+  })
+
   it('should not leak memory', () => {
     const mem = __getWasm().memory.buffer
     const memSize = mem.byteLength

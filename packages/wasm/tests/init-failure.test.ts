@@ -115,7 +115,7 @@ describe.skipIf(process.env.TEST_ENV === 'browser')('WASM initialization', () =>
     })
     initSync(new FakeInstance(initializedExports) as unknown as WebAssembly.Instance)
 
-    expect(createCtr256(new Uint8Array(), new Uint8Array())).toEqual(0xFFFFFFF0)
+    expect(createCtr256(new Uint8Array(32), new Uint8Array(16))).toEqual(0xFFFFFFF0)
   })
 
   it('should align IGE buffers while releasing the original allocation', async () => {

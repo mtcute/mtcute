@@ -177,14 +177,29 @@ export function gunzip(bytes: Uint8Array): Uint8Array {
   }
 }
 
+function validateIge256Inputs(data: Uint8Array, key: Uint8Array, iv: Uint8Array): void {
+  if (data.length % 16 !== 0) {
+    throw new RangeError('AES-IGE data length must be a multiple of 16 bytes')
+  }
+  if (key.length !== 32) {
+    throw new RangeError('AES-IGE key must be exactly 32 bytes')
+  }
+  if (iv.length !== 32) {
+    throw new RangeError('AES-IGE IV must be exactly 32 bytes')
+  }
+}
+
 /**
  * Perform AES-IGE-256 encryption
  *
- * @param data  data to encrypt (must be a multiple of 16 bytes)
+ * @param data  data to encrypt (must be a multiple of 16 bytes; empty data is accepted)
  * @param key  encryption key (32 bytes)
  * @param iv  initialization vector (32 bytes)
+ * @throws  RangeError if data, key, or IV has an invalid length
  */
 export function ige256Encrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array): Uint8Array {
+  validateIge256Inputs(data, key, iv)
+
   const [allocationPtr, inputPtr] = mallocAesBuffers(data.length + data.length)
 
   try {
@@ -206,11 +221,14 @@ export function ige256Encrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array)
 /**
  * Perform AES-IGE-256 decryption
  *
- * @param data  data to decrypt (must be a multiple of 16 bytes)
+ * @param data  data to decrypt (must be a multiple of 16 bytes; empty data is accepted)
  * @param key  encryption key (32 bytes)
  * @param iv  initialization vector (32 bytes)
+ * @throws  RangeError if data, key, or IV has an invalid length
  */
 export function ige256Decrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array): Uint8Array {
+  validateIge256Inputs(data, key, iv)
+
   const [allocationPtr, inputPtr] = mallocAesBuffers(data.length + data.length)
 
   try {
@@ -230,11 +248,22 @@ export function ige256Decrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array)
 }
 
 /**
- * Create a context for AES-CTR-256 en/decryption
+ * Create an AES-CTR-256 encryption or decryption context
  *
  * > **Note**: `freeCtr256` must be called on the returned context when it's no longer needed
+ *
+ * @param key  encryption key (32 bytes)
+ * @param iv  initial counter value (16 bytes)
+ * @throws  RangeError if the key or IV has an invalid length
  */
 export function createCtr256(key: Uint8Array, iv: Uint8Array): number {
+  if (key.length !== 32) {
+    throw new RangeError('AES-CTR key must be exactly 32 bytes')
+  }
+  if (iv.length !== 16) {
+    throw new RangeError('AES-CTR IV must be exactly 16 bytes')
+  }
+
   getUint8Memory().set(key, sharedKeyPtr)
   getUint8Memory().set(iv, sharedIvPtr)
 
@@ -242,17 +271,17 @@ export function createCtr256(key: Uint8Array, iv: Uint8Array): number {
 }
 
 /**
- * Release a context for AES-CTR-256 en/decryption
+ * Release an AES-CTR-256 context
  */
 export function freeCtr256(ctx: number): void {
   wasm.ctr256_free(ctx)
 }
 
 /**
- * Perform AES-CTR-256 en/decryption
+ * Encrypt or decrypt data with AES-CTR-256
  *
  * @param ctx  context returned by `createCtr256`
- * @param data  data to en/decrypt
+ * @param data  data to encrypt or decrypt (any length)
  */
 export function ctr256(ctx: number, data: Uint8Array): Uint8Array {
   const inputPtr = malloc(data.length)
