@@ -5,6 +5,7 @@ import type { InputMediaLike } from '../../types/media/input-media/types.js'
 import { parseFileId, tdFileId } from '@mtcute/file-id'
 import Long from 'long'
 import { tl } from '../../../tl/index.js'
+import { MtArgumentError } from '../../../types/errors.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { isUploadedFile } from '../../types/files/uploaded-file.js'
 import { inputTextToTl } from '../../types/misc/entities.js'
@@ -12,8 +13,8 @@ import { fileIdToInputDocument, fileIdToInputPhoto } from '../../utils/convert-f
 import { normalizeDate } from '../../utils/misc-utils.js'
 import { encodeWaveform } from '../../utils/voice-utils.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
-import { resolvePeer } from '../users/resolve-peer.js'
 
+import { resolvePeer } from '../users/resolve-peer.js'
 import { _normalizeInputFile } from './normalize-input-file.js'
 import { uploadFile } from './upload-file.js'
 
@@ -302,12 +303,35 @@ export async function _normalizeInputMedia(
     mime = uploaded.mime
   }
 
+  const uploadPeer = params.uploadPeer ?? { _: 'inputPeerSelf' }
+
   let videoCover: tl.TypeInputPhoto | undefined
   if (media.type === 'video' && media.cover) {
     const inputMedia = await _normalizeInputMedia(client, media.cover, params)
-    assertTypeIs('uploadMediaIfNeeded', inputMedia, 'inputMediaPhoto')
+    if (inputMedia._ !== 'inputMediaPhoto' && inputMedia._ !== 'inputMediaPhotoExternal' && inputMedia._ !== 'inputMediaUploadedPhoto') {
+      throw new MtArgumentError('media.cover must be a photo')
+    }
 
-    videoCover = inputMedia.id
+    if (inputMedia._ === 'inputMediaPhoto') {
+      videoCover = inputMedia.id
+    } else {
+      const res = await client.call({
+        _: 'messages.uploadMedia',
+        peer: uploadPeer,
+        media: inputMedia,
+        businessConnectionId: params.businessConnectionId,
+      }, { abortSignal: params.abortSignal })
+
+      if (res._ !== 'messageMediaPhoto' || res.photo?._ !== 'photo') {
+        throw new MtArgumentError('media.cover must be a photo')
+      }
+      videoCover = {
+        _: 'inputPhoto',
+        id: res.photo.id,
+        accessHash: res.photo.accessHash,
+        fileReference: res.photo.fileReference,
+      }
+    }
   }
 
   let livePhotoVideo: tl.TypeInputDocument | undefined
@@ -316,8 +340,6 @@ export async function _normalizeInputMedia(
     assertTypeIs('uploadMediaIfNeeded', inputMedia, 'inputMediaDocument')
     livePhotoVideo = inputMedia.id
   }
-
-  const uploadPeer = params.uploadPeer ?? { _: 'inputPeerSelf' }
 
   const uploadMediaIfNeeded = async (inputMedia: tl.TypeInputMedia, photo: boolean): Promise<tl.TypeInputMedia> => {
     if (!uploadMedia) return inputMedia
