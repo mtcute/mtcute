@@ -269,7 +269,7 @@ export async function _normalizeInputMedia(
         title: inputTextToTl(media.title),
         list: media.items.map((it, idx) => ({
           _: 'todoItem',
-          id: idx,
+          id: idx + 1,
           title: inputTextToTl(it),
         })),
       },
