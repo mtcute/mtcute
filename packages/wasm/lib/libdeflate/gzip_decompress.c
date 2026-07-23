@@ -151,8 +151,8 @@ libdeflate_gzip_decompress(struct libdeflate_decompressor *d,
 			   const void *in, size_t in_nbytes,
 			   void *out, size_t out_nbytes_avail)
 {
-	// we're using `libdeflate_zlib_get_output_size` to allocate exactly the
-	// right amount of memory for the output buffer, so this is redundant
+	// For a valid stream, `libdeflate_gzip_get_output_size` provides the exact
+	// output size, so asking for the actual size is redundant.
 	size_t actual_out_nbytes_ret;
 	return libdeflate_gzip_decompress_ex(d, in, in_nbytes,
 					     out, out_nbytes_avail,

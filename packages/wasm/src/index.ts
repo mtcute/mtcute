@@ -27,6 +27,8 @@ let sharedIvPtr!: number
 let cachedUint8Memory: Uint8Array | null = null
 
 const ALLOCATION_FAILURE_MESSAGE = 'WASM memory allocation failed'
+// Matches bundled libdeflate's 10-byte fixed header plus 8-byte footer.
+const GZIP_MIN_OVERHEAD = 18
 const AES_ALIGNMENT = 16
 
 // WebAssembly exposes i32 results as signed JavaScript numbers, but wasm32 pointers and sizes are unsigned.
@@ -150,12 +152,15 @@ export function deflateMaxSize(bytes: Uint8Array, size: number): Uint8Array | nu
 }
 
 /**
- * Try to decompress some data with zlib headers
+ * Try to decompress gzip data
  *
  * @throws  Error if the data is invalid
- * @param defaultCapacity  default capacity of the output buffer. Defaults to `bytes.length * 2`
  */
 export function gunzip(bytes: Uint8Array): Uint8Array {
+  if (bytes.length < GZIP_MIN_OVERHEAD) {
+    throw new Error('gunzip error -- bad data')
+  }
+
   const inputPtr = malloc(bytes.length)
   let outputPtr = 0
   try {
@@ -166,10 +171,13 @@ export function gunzip(bytes: Uint8Array): Uint8Array {
 
     const ret = wasm.libdeflate_gzip_decompress(decompressor, inputPtr, bytes.length, outputPtr, size)
 
-    /* c8 ignore next 3 */
-    if (ret === -1) throw new Error('gunzip error -- bad data')
-    if (ret === -2) throw new Error('gunzip error -- short output')
-    if (ret === -3) throw new Error('gunzip error -- short input') // should never happen
+    if (ret === 1) throw new Error('gunzip error -- bad data')
+    // The bundled wrapper requests the actual output length, so libdeflate cannot return SHORT_OUTPUT.
+    /* c8 ignore next */
+    if (ret === 2) throw new Error('gunzip error -- short output')
+    if (ret === 3) throw new Error('gunzip error -- insufficient output space')
+    /* c8 ignore next */
+    if (ret !== 0) throw new Error(`gunzip error -- unexpected result: ${ret}`)
 
     return getUint8Memory().slice(outputPtr, outputPtr + size)
   } finally {

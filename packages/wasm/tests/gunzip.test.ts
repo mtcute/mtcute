@@ -23,7 +23,28 @@ function gzipSyncWrap(data: Uint8Array) {
 }
 
 describe('gunzip', () => {
-  it('should correctly read zlib headers', () => {
+  it('should reject malformed data', () => {
+    expect(() => gunzip(new Uint8Array(17))).toThrowError(new Error('gunzip error -- bad data'))
+    expect(() => gunzip(new Uint8Array(18))).toThrowError(new Error('gunzip error -- bad data'))
+
+    const underreportedSize = gzipSyncWrap(utf8.encoder.encode('hello world'))
+    new DataView(underreportedSize.buffer, underreportedSize.byteOffset, underreportedSize.byteLength)
+      .setUint32(underreportedSize.byteLength - 4, 10, true)
+
+    const wasm = __getWasm()
+    const reusablePtr = wasm.__malloc(underreportedSize.length)
+    expect(reusablePtr).not.toEqual(0)
+    wasm.__free(reusablePtr)
+
+    expect(() => gunzip(underreportedSize))
+      .toThrowError(new Error('gunzip error -- insufficient output space'))
+
+    const reusedPtr = wasm.__malloc(underreportedSize.length)
+    expect(reusedPtr).toEqual(reusablePtr)
+    wasm.__free(reusedPtr)
+  })
+
+  it('should correctly read the gzip footer', () => {
     const wasm = __getWasm()
     const data = gzipSyncWrap(utf8.encoder.encode('hello world'))
 
@@ -39,6 +60,8 @@ describe('gunzip', () => {
   })
 
   it('should correctly inflate', () => {
+    expect(gunzip(gzipSyncWrap(new Uint8Array()))).toEqual(new Uint8Array())
+
     const data = Array.from({ length: 1000 }, () => 'a').join('')
     const res = gzipSyncWrap(utf8.encoder.encode(data))
 

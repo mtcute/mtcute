@@ -13,7 +13,7 @@ export interface MtcuteWasmModule {
   libdeflate_free_decompressor: (ctx: number) => void
   libdeflate_free_compressor: (ctx: number) => void
 
-  /** @returns if !=0 - error */
+  /** Returns libdeflate_result: 0 success, 1 bad data, 2 short output, or 3 insufficient space. */
   libdeflate_gzip_decompress: (ctx: number, src: number, srcLen: number, dst: number, dstLen: number) => number
   libdeflate_gzip_get_output_size: (src: number, srcLen: number) => number
 
