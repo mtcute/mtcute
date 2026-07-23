@@ -68,6 +68,7 @@ export type PendingMessage
   | {
     _: 'ping'
     pingId: Long
+    sentAt: number
     containerId: Long
   }
   | {
@@ -347,13 +348,22 @@ export class MtprotoSession {
     return messageId
   }
 
-  resetLastPing(withTime = false): void {
+  resetLastPing(withTime = false, keepPending = false): void {
     if (withTime) this.lastPingTime = 0
 
-    if (!this.lastPingMsgId.isZero()) {
+    if (!keepPending && !this.lastPingMsgId.isZero()) {
       this.pendingMessages.delete(this.lastPingMsgId)
     }
 
+    this.lastPingMsgId = Long.ZERO
+  }
+
+  forgetPendingPings(): void {
+    for (const [msgId, info] of this.pendingMessages) {
+      if (info._ === 'ping') this.pendingMessages.delete(msgId)
+    }
+
+    this.lastPingTime = 0
     this.lastPingMsgId = Long.ZERO
   }
 
