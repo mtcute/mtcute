@@ -198,7 +198,7 @@ export class SessionConnection extends PersistentConnection {
 
     // we can normally keep the same session across reconnects,
     // but we do need to reset ping info because we can't be sure it was received
-    this._session.resetLastPing(true)
+    this._session.forgetPendingPings()
 
     for (const timeout of this._session.pendingGetStateTimeouts.values()) {
       timers.clearTimeout(timeout)
@@ -1105,8 +1105,11 @@ export class SessionConnection extends PersistentConnection {
         break
       case 'ping':
         this.log.debug('ping (msg_id = %l) failed because of %s', msgId, reason)
-        // restart ping
-        this._session.resetLastPing(true)
+
+        if (this._session.lastPingMsgId.eq(msgId)) {
+          // restart ping
+          this._session.resetLastPing(true)
+        }
         break
 
       case 'rpc': {
@@ -1202,7 +1205,9 @@ export class SessionConnection extends PersistentConnection {
       this.log.warn('received pong to %l, but expected ping_id = %l (got %l)', msgId, info.pingId, pingId)
     }
 
-    const rtt = performance.now() - this._session.lastPingTime
+    this._session.pendingMessages.delete(msgId)
+
+    const rtt = performance.now() - info.sentAt
     this._session.lastPingRtt = rtt
 
     if (info.containerId.neq(msgId)) {
@@ -1210,8 +1215,11 @@ export class SessionConnection extends PersistentConnection {
     }
 
     this.log.debug('received pong: msg_id %l, ping_id %l, rtt = %dms', msgId, pingId, rtt)
-    this._session.resetLastPing()
-    this._flushTimer.emitBefore(this._session.lastPingTime + this._pingMustDelay())
+
+    if (this._session.lastPingMsgId.eq(msgId)) {
+      this._session.resetLastPing()
+      this._flushTimer.emitBefore(this._session.lastPingTime + this._pingMustDelay())
+    }
   }
 
   private _onBadServerSalt(msg: mtp.RawMt_bad_server_salt): void {
@@ -1763,7 +1771,9 @@ export class SessionConnection extends PersistentConnection {
     const active = this._online && this._isActive()
     if (active && !this._active) {
       this._session.lastActivityTime = now
-      this._session.resetLastPing(true)
+      // the in-flight ping was sent with a much larger disconnect delay, so we can't rely on it
+      // anymore – but we still want to handle its pong when it arrives
+      this._session.resetLastPing(true, true)
     }
     this._active = active
 
@@ -2026,6 +2036,7 @@ export class SessionConnection extends PersistentConnection {
       const pingPending: PendingMessage = {
         _: 'ping',
         pingId: pingId!,
+        sentAt: now,
         containerId: pingMsgId,
       }
       this._session.pendingMessages.set(pingMsgId, pingPending)
