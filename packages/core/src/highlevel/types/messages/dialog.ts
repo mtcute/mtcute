@@ -179,10 +179,17 @@ export class Dialog {
   /**
    * Whether this dialog is muted.
    *
+   * Accounts for both the `silent` flag and the `muteUntil` timestamp
+   * (a peer muted until a future date is considered muted).
+   *
    * If `null`, the default account-level setting should be used.
    */
   get isMuted(): boolean | null {
-    return this.raw.notifySettings.silent ?? null
+    const { silent, muteUntil } = this.raw.notifySettings
+    if (muteUntil !== undefined) {
+      return muteUntil > Date.now() / 1000
+    }
+    return silent ?? null
   }
 
   /**
