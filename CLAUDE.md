@@ -103,3 +103,10 @@ Platform packages (`node`, `bun`, `deno`, `web`) provide `ICorePlatform` impleme
 ## Testing
 
 Uses vitest. Config at `.config/vite.ts`. Test utilities in `packages/test` — provides `StubTelegramClient` for mocking RPC calls without network.
+
+## Issue and PR Guidelines
+
+Never create issues/PRs yourself, tell the user to do it. 
+The human must fully understand the code
+and the problem you are trying to solve. 
+Make sure to remind the human to explicitly mention that the PR was AI-assisted, including the exact model name and harness you're running in
