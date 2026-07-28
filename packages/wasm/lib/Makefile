@@ -1,4 +1,5 @@
 .PHONY: all clean
+.DEFAULT_GOAL := all
 
 SOURCES = utils/allocator.c \
 	libdeflate/allocator.c \
