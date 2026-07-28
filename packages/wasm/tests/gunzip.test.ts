@@ -28,9 +28,14 @@ describe('gunzip', () => {
     const data = gzipSyncWrap(utf8.encoder.encode('hello world'))
 
     const inputPtr = wasm.__malloc(data.length)
-    new Uint8Array(wasm.memory.buffer).set(data, inputPtr)
+    expect(inputPtr).not.toEqual(0)
+    try {
+      new Uint8Array(wasm.memory.buffer).set(data, inputPtr)
 
-    expect(wasm.libdeflate_gzip_get_output_size(inputPtr, data.length)).toEqual(11)
+      expect(wasm.libdeflate_gzip_get_output_size(inputPtr, data.length)).toEqual(11)
+    } finally {
+      wasm.__free(inputPtr)
+    }
   })
 
   it('should correctly inflate', () => {
@@ -55,5 +60,21 @@ describe('gunzip', () => {
     }
 
     expect(__getWasm().memory.buffer.byteLength).toEqual(memSize)
+  })
+
+  it('should release input when output allocation fails', () => {
+    const invalidGzip = new Uint8Array(18)
+    invalidGzip.fill(0xFF, invalidGzip.length - 4)
+
+    const wasm = __getWasm()
+    const reusablePtr = wasm.__malloc(invalidGzip.length)
+    expect(reusablePtr).not.toEqual(0)
+    wasm.__free(reusablePtr)
+
+    expect(() => gunzip(invalidGzip)).toThrowError(new RangeError('WASM memory allocation failed'))
+
+    const reusedPtr = wasm.__malloc(invalidGzip.length)
+    expect(reusedPtr).toEqual(reusablePtr)
+    wasm.__free(reusedPtr)
   })
 })
