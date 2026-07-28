@@ -2,6 +2,7 @@ import type { FileDownloadLocation, FileDownloadParameters, ITelegramClient } fr
 import { createWriteStream, rmSync } from 'node:fs'
 
 import { writeFile } from 'node:fs/promises'
+import { pipeline } from 'node:stream/promises'
 import { FileLocation } from '@mtcute/core'
 import { downloadAsIterable } from '@mtcute/core/methods.js'
 
@@ -36,11 +37,9 @@ export async function downloadToFile(
   }
 
   try {
-    for await (const chunk of downloadAsIterable(client, location, params)) {
-      output.write(chunk)
-    }
-
-    output.end()
+    await pipeline(downloadAsIterable(client, location, params), output, {
+      signal: params?.abortSignal,
+    })
   } catch (e) {
     output.destroy()
     throw e

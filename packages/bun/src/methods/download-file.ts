@@ -20,21 +20,32 @@ export async function downloadToFile(
   if (location instanceof FileLocation && ArrayBuffer.isView(location.location)) {
     // early return for inline files
     await Bun.write(filename, location.location)
+
+    return
   }
 
   const output = Bun.file(filename).writer()
 
+  let ended = false
+  const end = async () => {
+    if (ended) return
+    ended = true
+    await output.end()
+  }
+
   if (params?.abortSignal) {
     params.abortSignal.addEventListener('abort', () => {
       client.log.debug('aborting file download %s - cleaning up', filename)
-      Promise.resolve(output.end()).catch(() => {})
+      end().catch(() => {})
       unlinkSync(filename)
     })
   }
 
-  for await (const chunk of downloadAsIterable(client, location, params)) {
-    output.write(chunk)
+  try {
+    for await (const chunk of downloadAsIterable(client, location, params)) {
+      output.write(chunk)
+    }
+  } finally {
+    await end()
   }
-
-  await output.end()
 }
