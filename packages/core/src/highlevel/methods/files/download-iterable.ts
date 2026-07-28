@@ -365,5 +365,9 @@ export async function* downloadAsIterable(
   } finally {
     if (stallTimer) timers.clearTimeout(stallTimer)
     abortSignal?.removeEventListener('abort', onAbort)
+
+    ended = true
+    for (const idx in buffer) delete buffer[Number(idx)]
+    nextChunkCv.notify()
   }
 }
