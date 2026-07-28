@@ -1779,12 +1779,39 @@ export class SessionConnection extends PersistentConnection {
 
     if (this._checkTimeouts(now)) return
 
+    const rpcToSend: PendingRpc[] = []
+
     try {
-      this._doFlush()
+      this._doFlush(rpcToSend)
     } catch (e: any) {
+      // Selected RPCs have left queuedRpc by this point. Restore any that did not
+      // reach pendingMessages so the session reset can retain them for retry.
+      for (const rpc of rpcToSend) {
+        const pending = rpc.msgId ? this._session.pendingMessages.get(rpc.msgId) : undefined
+
+        if (pending?._ === 'rpc' && pending.rpc === rpc) continue
+        if (rpc.cancelled) continue
+
+        rpc.msgId = undefined
+        rpc.seqNo = undefined
+        this._session.enqueueRpc(rpc, true)
+      }
+
       this.log.error('flush error: %s', (e as Error).stack)
       // should not happen unless there's a bug in the code. play safe and reset state
       this._resetSession('flush error')
+
+      // _onAllFailed appends registered RPCs after the ones restored above. Rebuild
+      // the queue so the selected prefix keeps its original order.
+      const selectedRpcs = new Set(rpcToSend)
+      const queuedAfterSelection = this._session.queuedRpc.toArray().filter(rpc => !selectedRpcs.has(rpc))
+      this._session.queuedRpc.clear()
+      for (const rpc of rpcToSend) {
+        if (!rpc.cancelled) this._session.queuedRpc.pushBack(rpc)
+      }
+      for (const rpc of queuedAfterSelection) {
+        this._session.queuedRpc.pushBack(rpc)
+      }
 
       return
     }
@@ -1810,7 +1837,7 @@ export class SessionConnection extends PersistentConnection {
     }
   }
 
-  private _doFlush(): void {
+  private _doFlush(rpcToSend: PendingRpc[]): void {
     this.log.debug('flushing send queue. queued rpc: %d', this._session.queuedRpc.length)
 
     // oh bloody hell mate
@@ -1970,8 +1997,6 @@ export class SessionConnection extends PersistentConnection {
     }
 
     let forceContainer = false
-    const rpcToSend: PendingRpc[] = []
-
     while (
       this._session.queuedRpc.length
       && containerSize < 32768 // 2^15
