@@ -1,4 +1,4 @@
-import type { Deferred, timers } from '@fuman/utils'
+import type { Deferred } from '@fuman/utils'
 import type { TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import type { mtp, tl } from '../tl/index.js'
 import type {
@@ -6,7 +6,7 @@ import type {
   Logger,
 } from '../utils/index.js'
 import type { ServerSaltManager } from './server-salt.js'
-import { Deque, LruMap, LruSet } from '@fuman/utils'
+import { Deque, LruMap, LruSet, timers } from '@fuman/utils'
 
 import { TlSerializationCounter } from '@mtcute/tl-runtime'
 import Long from 'long'
@@ -217,29 +217,47 @@ export class MtprotoSession {
     // reset session state
 
     if (!keepPending) {
+      const error = new MtcuteError('Session is reset')
+      const rejectedRpcs = new Set<PendingRpc>()
+      const rejectRpc = (rpc: PendingRpc) => {
+        if (rejectedRpcs.has(rpc)) return
+        rejectedRpcs.add(rpc)
+
+        rpc.done = true
+        if (rpc.timeout) {
+          timers.clearTimeout(rpc.timeout)
+          rpc.timeout = undefined
+        }
+        rpc.resetAbortSignal?.()
+        rpc.resetAbortSignal = undefined
+        if (rpc.cancelled) return
+
+        this.log.debug('rejecting pending rpc %s', rpc.method)
+        rpc.promise.reject(error)
+      }
+
       for (const info of this.pendingMessages.values()) {
         if (info._ === 'rpc') {
-          this.log.debug('rejecting pending rpc %s', info.rpc.method)
-          info.rpc.promise.reject(new MtcuteError('Session is reset'))
+          rejectRpc(info.rpc)
+        } else if (info._ === 'bind') {
+          info.promise.reject(error)
         }
       }
       this.pendingMessages.clear()
+
+      while (this.queuedRpc.length) {
+        rejectRpc(this.queuedRpc.popFront()!)
+      }
+
+      for (const timeout of this.pendingGetStateTimeouts.values()) {
+        timers.clearTimeout(timeout)
+      }
+      this.pendingGetStateTimeouts.clear()
     }
 
     this.recentOutgoingMsgIds.clear()
     this.recentIncomingMsgIds.clear()
     this.recentStateRequests.clear()
-
-    if (!keepPending) {
-      while (this.queuedRpc.length) {
-        const rpc = this.queuedRpc.popFront()!
-
-        if (rpc.sent === false) {
-          this.log.debug('rejecting pending rpc %s', rpc.method)
-          rpc.promise.reject(new MtcuteError('Session is reset'))
-        }
-      }
-    }
 
     this.queuedAcks.length = 0
     this.queuedStateReq.length = 0
