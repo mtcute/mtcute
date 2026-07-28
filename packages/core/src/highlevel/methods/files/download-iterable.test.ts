@@ -1,4 +1,5 @@
 import type { tl } from '../../../tl/index.js'
+import { sleep } from '@fuman/utils'
 import { defaultCryptoProvider, StubTelegramClient } from '@mtcute/test'
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
@@ -60,5 +61,33 @@ describe('downloadAsIterable', () => {
     })
 
     expect(balance).toBe(0)
+  })
+
+  it('should stop the workers when the iterator is abandoned', async () => {
+    const fileSize = 64 * 1024 * 1024
+    const client = new StubTelegramClient()
+
+    let requests = 0
+    client.respondWith('upload.getFile', (req) => {
+      requests++
+
+      return {
+        _: 'upload.file',
+        type: { _: 'storage.fileMp4' },
+        mtime: 0,
+        bytes: new Uint8Array(req.limit),
+      }
+    })
+
+    await client.with(async () => {
+      const iter = downloadAsIterable(client, stubLocation, { fileSize })
+      await iter.next()
+      await iter.return()
+
+      const atAbandon = requests
+      await sleep(3000)
+
+      expect(requests - atAbandon).toBeLessThan(64)
+    })
   })
 })
