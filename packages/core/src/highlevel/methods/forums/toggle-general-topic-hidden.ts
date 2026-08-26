@@ -33,5 +33,5 @@ export async function toggleGeneralTopicHidden(
     hidden,
   })
 
-  return _findMessageInUpdate(client, res, false, shouldDispatch)
+  return _findMessageInUpdate(client, res, false, !shouldDispatch)
 }

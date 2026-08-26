@@ -38,5 +38,5 @@ export async function toggleForumTopicClosed(
     closed,
   })
 
-  return _findMessageInUpdate(client, res, false, shouldDispatch)
+  return _findMessageInUpdate(client, res, false, !shouldDispatch)
 }
