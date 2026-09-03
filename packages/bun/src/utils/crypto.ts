@@ -1,6 +1,7 @@
 import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
 import { createCipheriv, createHmac, pbkdf2 } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
 
 import { deflateSync, gunzipSync } from 'node:zlib'
 import { u8 } from '@fuman/utils'
@@ -18,7 +19,7 @@ import mtcuteWasm from '@mtcute/wasm/mtcute.wasm' with { type: 'file' }
 export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
   async initialize(): Promise<void> {
     const file = SIMD_AVAILABLE ? mtcuteSimdWasm : mtcuteWasm
-    const wasm = await readFile(file)
+    const wasm = await readFile(resolve(import.meta.dir, file))
     initSync(wasm)
   }
 
