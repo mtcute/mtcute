@@ -584,6 +584,9 @@ export interface TelegramClient extends ITelegramClient {
       /**
        * Function that will be called when the user has scanned the QR code
        * (i.e. when `updateLoginToken` is received), and the library is finalizing the auth
+       *
+       * Note: `onUrlUpdated` can be invoked again after this callback fires, in case the
+       * authorization fails due to slow network.
        */
       onQrScanned?: () => void
 
