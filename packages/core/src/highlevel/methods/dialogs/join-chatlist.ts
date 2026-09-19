@@ -3,11 +3,11 @@ import type { tl } from '../../../tl/index.js'
 import type { MaybeArray } from '../../../types/utils.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtcuteError } from '../../../types/errors.js'
 import { assertTypeIs, isPresent } from '../../../utils/type-assertions.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
-import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
+import { resolvePeerMany } from '../users/resolve-peer-many.js'
 import { getChatlistPreview } from './get-chatlist-preview.js'
 
 /**
@@ -42,16 +42,16 @@ export async function joinChatlist(
     peers,
   })
 
-  assertIsUpdatesGroup('joinChatlist', res)
+  assertIsUpdatesGroup(res)
   client.handleClientUpdate(res)
 
   const filter = res.updates.find(it => it._ === 'updateDialogFilter')
 
   if (!filter?.filter) {
-    throw new MtTypeAssertionError('joinChatlist', 'updateDialogFilter', 'nothing')
+    throw new MtcuteError('Response does not contain updateDialogFilter')
   }
 
-  assertTypeIs('joinChatlist', filter.filter, 'dialogFilterChatlist')
+  assertTypeIs(filter.filter, 'dialogFilterChatlist')
 
   return filter.filter
 }

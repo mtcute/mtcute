@@ -76,7 +76,7 @@ export async function getChatMembers(
       chatId: chat.chatId,
     })
 
-    assertTypeIs('getChatMember (@ messages.getFullChat)', res.fullChat, 'chatFull')
+    assertTypeIs(res.fullChat, 'chatFull')
 
     let members
       = res.fullChat.participants._ === 'chatParticipantsForbidden' ? [] : res.fullChat.participants.participants
@@ -134,7 +134,7 @@ export async function getChatMembers(
       hash: Long.ZERO,
     })
 
-    assertTypeIs('getChatMembers (@ channels.getParticipants)', res, 'channels.channelParticipants')
+    assertTypeIs(res, 'channels.channelParticipants')
 
     const peers = PeersIndex.from(res)
 

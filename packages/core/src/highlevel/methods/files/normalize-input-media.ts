@@ -52,11 +52,11 @@ export async function _normalizeInputMedia(
   }
 
   if (tl.isAnyInputPhoto(media)) {
-    assertTypeIs('normalizeInputMedia (@ photo)', media, 'inputPhoto')
+    assertTypeIs(media, 'inputPhoto')
     return { _: 'inputMediaPhoto', id: media }
   }
   if (tl.isAnyInputDocument(media)) {
-    assertTypeIs('normalizeInputMedia (@ document)', media, 'inputDocument')
+    assertTypeIs(media, 'inputDocument')
     return { _: 'inputMediaDocument', id: media }
   }
 
@@ -324,7 +324,7 @@ export async function _normalizeInputMedia(
   let livePhotoVideo: tl.TypeInputDocument | undefined
   if (media.type === 'photo' && media.livePhotoVideo) {
     const inputMedia = await _normalizeInputMedia(client, media.livePhotoVideo, params, true)
-    assertTypeIs('uploadMediaIfNeeded', inputMedia, 'inputMediaDocument')
+    assertTypeIs(inputMedia, 'inputMediaDocument')
     livePhotoVideo = inputMedia.id
   }
 
@@ -339,8 +339,8 @@ export async function _normalizeInputMedia(
     }, { abortSignal: params.abortSignal })
 
     if (photo) {
-      assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaPhoto')
-      assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.photo!, 'photo')
+      assertTypeIs(res, 'messageMediaPhoto')
+      assertTypeIs(res.photo!, 'photo')
 
       return {
         _: 'inputMediaPhoto',
@@ -356,8 +356,8 @@ export async function _normalizeInputMedia(
         video: livePhotoVideo,
       }
     }
-    assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaDocument')
-    assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.document!, 'document')
+    assertTypeIs(res, 'messageMediaDocument')
+    assertTypeIs(res.document!, 'document')
 
     return {
       _: 'inputMediaDocument',

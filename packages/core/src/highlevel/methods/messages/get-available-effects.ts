@@ -15,7 +15,7 @@ export async function getAvailableMessageEffects(client: ITelegramClient): Promi
     hash: 0,
   })
 
-  assertTypeIsNot('getAvailableMessageEffects', res, 'messages.availableEffectsNotModified')
+  assertTypeIsNot(res, 'messages.availableEffectsNotModified')
 
   const documentsMap = new LongMap<tl.RawDocument>()
 

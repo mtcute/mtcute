@@ -1,7 +1,7 @@
 import type { tl } from '../../../tl/index.js'
 
 import type { ITelegramClient } from '../../client.types.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtcuteError } from '../../../types/errors.js'
 import { Poll } from '../../types/media/poll.js'
 import { PeersIndex } from '../../types/peers/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
@@ -12,18 +12,17 @@ import { assertIsUpdatesGroup } from '../../updates/utils.js'
  */
 export function _findPollInUpdate(
   client: ITelegramClient,
-  ctx: string,
   res: tl.TypeUpdates,
   noDispatch: boolean,
   knownPoll?: Poll,
 ): Poll {
-  assertIsUpdatesGroup(ctx, res)
+  assertIsUpdatesGroup(res)
 
   client.handleClientUpdate(res, noDispatch)
 
   const upd = res.updates.find((it): it is tl.RawUpdateMessagePoll => it._ === 'updateMessagePoll')
   if (!upd) {
-    throw new MtTypeAssertionError(`${ctx} (@ .updates[*])`, 'updateMessagePoll', 'none')
+    throw new MtcuteError('Response does not contain updateMessagePoll')
   }
 
   if (upd.poll) {
@@ -31,7 +30,7 @@ export function _findPollInUpdate(
   }
 
   if (!knownPoll) {
-    throw new MtTypeAssertionError(`${ctx} (@ .updates[*].poll)`, 'poll', 'undefined')
+    throw new MtcuteError('updateMessagePoll does not contain poll')
   }
 
   const peers = PeersIndex.from({

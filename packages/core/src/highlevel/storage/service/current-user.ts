@@ -109,7 +109,7 @@ export class CurrentUserService extends BaseService {
   }
 
   async storeFrom(user: tl.TypeUser): Promise<CurrentUserInfo> {
-    assertTypeIs('storeFrom', user, 'user')
+    assertTypeIs(user, 'user')
 
     const obj: CurrentUserInfo = {
       userId: user.id,

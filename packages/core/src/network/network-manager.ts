@@ -712,7 +712,7 @@ export class NetworkManager {
         throw new MtcuteError(`Failed to import (${res.errorCode}: ${res.errorMessage})`)
       }
 
-      assertTypeIs('auth.importAuthorization', res, 'auth.authorization')
+      assertTypeIs(res, 'auth.authorization')
 
       promise.resolve()
     } catch (e) {

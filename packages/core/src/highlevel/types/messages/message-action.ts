@@ -1518,13 +1518,13 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         newValue: act.newValue,
       }
     case 'messageActionPollAppendAnswer':
-      assertTypeIsNot('messageActionPollAppendAnswer', act.answer, 'inputPollAnswer')
+      assertTypeIsNot(act.answer, 'inputPollAnswer')
       return {
         type: 'poll_append_answer',
         answer: act.answer,
       }
     case 'messageActionPollDeleteAnswer':
-      assertTypeIsNot('messageActionPollAppendAnswer', act.answer, 'inputPollAnswer')
+      assertTypeIsNot(act.answer, 'inputPollAnswer')
       return {
         type: 'poll_delete_answer',
         answer: act.answer,

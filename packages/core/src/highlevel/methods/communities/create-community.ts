@@ -1,7 +1,7 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
 
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtcuteError } from '../../../types/errors.js'
 import { Chat } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -43,13 +43,13 @@ export async function createCommunity(
     peer: await resolvePeer(client, chatId),
   })
 
-  assertIsUpdatesGroup('communities.create', res)
+  assertIsUpdatesGroup(res)
   client.handleClientUpdate(res, !shouldDispatch)
 
   const community = res.chats.find(it => it._ === 'community')
 
   if (!community) {
-    throw new MtTypeAssertionError('communities.create (@ .chats)', 'community', 'none')
+    throw new MtcuteError('Response does not contain community')
   }
 
   return new Chat(community)

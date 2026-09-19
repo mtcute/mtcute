@@ -30,7 +30,7 @@ export async function createChannel(
     broadcast: true,
   })
 
-  assertIsUpdatesGroup('channels.createChannel', res)
+  assertIsUpdatesGroup(res)
 
   client.handleClientUpdate(res)
 

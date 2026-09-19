@@ -367,15 +367,22 @@ const msgs = res.messages.filter(m => m._ !== 'messageEmpty').map(m => new Messa
 ## Error Handling
 
 ```ts
-import { MtArgumentError } from '../../../types/errors.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtArgumentError, MtcuteError, MtTypeAssertionError } from '../../../types/errors.js'
 import { MtInvalidPeerTypeError } from '../../types/errors.js'
 import { MtMessageNotFoundError } from '../../types/errors.js'
-import { assertTypeIs, assertTypeIsNot } from '../../../utils/type-assertions.js'
+import { assertTrue, assertTypeIs, assertTypeIsNot } from '../../../utils/type-assertions.js'
 
-// Type assertions on TL responses
-assertTypeIsNot('getHistory', res, 'messages.messagesNotModified')
-assertTypeIs('getFullUser', res.fullUser, 'userFull')
+// Type assertions on TL responses (no context string, the stack trace has it)
+assertTypeIsNot(res, 'messages.messagesNotModified')
+assertTypeIs(res.fullUser, 'userFull')
+throw new MtTypeAssertionError('user | channel', res.peer._)
+
+// RPCs returning Bool
+// Note: some methods return `false` which means "not modified", and we shouldn't use assertTrue for that.
+assertTrue('account.updateColor', r)
+
+// Response lacks something expected (not a type mismatch)
+throw new MtcuteError('Response does not contain updateStory')
 
 // Argument validation
 throw new MtArgumentError('mustReply used, but replyTo was not passed')

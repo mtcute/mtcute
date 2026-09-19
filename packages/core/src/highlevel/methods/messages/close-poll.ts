@@ -41,5 +41,5 @@ export async function closePoll(
     },
   })
 
-  return _findPollInUpdate(client, 'messages.editMessage', res, !params.shouldDispatch)
+  return _findPollInUpdate(client, res, !params.shouldDispatch)
 }

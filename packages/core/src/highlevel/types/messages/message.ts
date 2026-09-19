@@ -46,7 +46,7 @@ export class Message {
      */
     readonly isScheduled = false,
   ) {
-    assertTypeIsNot('Message#ctor', raw, 'messageEmpty')
+    assertTypeIsNot(raw, 'messageEmpty')
 
     this.raw = raw
   }

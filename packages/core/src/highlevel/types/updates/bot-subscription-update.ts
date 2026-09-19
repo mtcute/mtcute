@@ -1,7 +1,7 @@
 import type { tl } from '../../../tl/index.js'
 
 import type { PeersIndex } from '../peers/index.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtcuteError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { User } from '../peers/index.js'
@@ -47,7 +47,7 @@ export class BotSubscriptionUpdate {
     if (this.raw.restored) return 'restored'
     if (this.raw.paymentFailed) return 'payment_failed'
 
-    throw new MtTypeAssertionError('updateBotStarsSubscription', 'canceled | restored | paymentFailed', 'none')
+    throw new MtcuteError('updateBotStarsSubscription has none of canceled | restored | paymentFailed')
   }
 }
 

@@ -2,7 +2,7 @@ import type { InputFileLike } from '../files/index.js'
 
 import type { MaskPosition, Sticker, StickerType } from '../media/index.js'
 import { tl } from '../../../tl/index.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtcuteError, MtTypeAssertionError } from '../../../types/errors.js'
 import { LongMap } from '../../../utils/long-utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
@@ -101,11 +101,11 @@ export interface StickerInfo {
 }
 
 function parseStickerOrThrow(doc: tl.TypeDocument): Sticker {
-  assertTypeIs('parseStickerOrThrow', doc, 'document')
+  assertTypeIs(doc, 'document')
   const sticker = parseSticker(doc)
 
   if (!sticker) {
-    throw new MtTypeAssertionError('full.documents', 'sticker', 'not a sticker')
+    throw new MtcuteError('Document is not a sticker')
   }
 
   return sticker
@@ -134,7 +134,7 @@ export class StickerSet {
       this.cover = raw
       this.brief = raw.set
     } else {
-      throw new MtTypeAssertionError('StickerSet', 'messages.stickerSet | stickerSet', raw._)
+      throw new MtTypeAssertionError('messages.stickerSet | stickerSet', raw._)
     }
 
     this.isFull = raw._ === 'messages.stickerSet'

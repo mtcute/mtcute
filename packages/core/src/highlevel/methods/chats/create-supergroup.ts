@@ -44,7 +44,7 @@ export async function createSupergroup(
     ttlPeriod,
   })
 
-  assertIsUpdatesGroup('channels.createChannel', res)
+  assertIsUpdatesGroup(res)
 
   client.handleClientUpdate(res)
 

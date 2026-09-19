@@ -56,7 +56,7 @@ export async function searchPostsGlobal(
     limit,
   })
 
-  assertTypeIsNot('searchHashtag', res, 'messages.messagesNotModified')
+  assertTypeIsNot(res, 'messages.messagesNotModified')
 
   const peers = PeersIndex.from(res)
   const msgs = res.messages.filter(msg => msg._ !== 'messageEmpty').map(msg => new Message(msg, peers))

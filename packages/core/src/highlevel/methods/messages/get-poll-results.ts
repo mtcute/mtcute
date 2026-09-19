@@ -38,5 +38,5 @@ export async function getPollResults(
     pollHash: knownPoll?.hash ?? Long.ZERO,
   })
 
-  return _findPollInUpdate(client, 'messages.getPollResults', res, !params.shouldDispatch, knownPoll)
+  return _findPollInUpdate(client, res, !params.shouldDispatch, knownPoll)
 }

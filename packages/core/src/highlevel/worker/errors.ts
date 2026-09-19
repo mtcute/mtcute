@@ -32,7 +32,6 @@ export function serializeError(error: unknown): SerializedError {
     const _error = error as MtTypeAssertionError
     res.name = 'MtTypeAssertionError'
     res.custom = {
-      context: _error.context,
       expected: _error.expected,
       actual: _error.actual,
     }
@@ -65,7 +64,7 @@ export function serializeError(error: unknown): SerializedError {
     res.name = 'MtInvalidPeerTypeError'
   } else if (ctor === MtEmptyError) {
     res.name = 'MtEmptyError'
-  } else if (ctor instanceof MtcuteError) {
+  } else if (error instanceof MtcuteError) {
     res.name = 'MtcuteError'
   }
 
@@ -77,9 +76,9 @@ export function deserializeError(error: SerializedError): Error {
 
   switch (error.name) {
     case 'MtTypeAssertionError': {
-      const custom = error.custom as { context: string, expected: string, actual: string }
+      const custom = error.custom as { expected: string, actual: string }
 
-      err2 = new MtTypeAssertionError(custom.context, custom.expected, custom.actual)
+      err2 = new MtTypeAssertionError(custom.expected, custom.actual)
       break
     }
     case 'MtTimeoutError': {
@@ -107,16 +106,16 @@ export function deserializeError(error: SerializedError): Error {
       break
     }
     case 'MtArgumentError':
-      err2 = new MtArgumentError()
+      err2 = new MtArgumentError(error.message)
       break
     case 'MtSecurityError':
-      err2 = new MtSecurityError()
+      err2 = new MtSecurityError(error.message)
       break
     case 'MtUnsupportedError':
-      err2 = new MtUnsupportedError()
+      err2 = new MtUnsupportedError(error.message)
       break
     case 'MtPeerNotFoundError':
-      err2 = new MtPeerNotFoundError()
+      err2 = new MtPeerNotFoundError(error.message)
       break
     case 'MtInvalidPeerTypeError':
       err2 = new MtInvalidPeerTypeError('', '')
@@ -126,7 +125,7 @@ export function deserializeError(error: SerializedError): Error {
       err2 = new MtEmptyError()
       break
     case 'MtcuteError':
-      err2 = new MtcuteError()
+      err2 = new MtcuteError(error.message)
       break
     default:
       err2 = new Error(error.message)

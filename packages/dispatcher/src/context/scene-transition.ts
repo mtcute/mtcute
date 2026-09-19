@@ -21,7 +21,7 @@ export class SceneTransitionContext {
       return this.update
     }
 
-    throw new MtTypeAssertionError('SceneTransitionContext.message', 'message', this.update._name)
+    throw new MtTypeAssertionError('message', this.update._name)
   }
 
   /** Get {@link update}, asserting it is a business message-related update */
@@ -30,7 +30,7 @@ export class SceneTransitionContext {
       return this.update
     }
 
-    throw new MtTypeAssertionError('SceneTransitionContext.businessMessage', 'business message', this.update._name)
+    throw new MtTypeAssertionError('business message', this.update._name)
   }
 
   /** Get {@link update}, asserting it is a callback query update */
@@ -39,7 +39,7 @@ export class SceneTransitionContext {
       return this.update
     }
 
-    throw new MtTypeAssertionError('SceneTransitionContext.callbackQuery', 'callback query', this.update._name)
+    throw new MtTypeAssertionError('callback query', this.update._name)
   }
 
   /** Get {@link update}, asserting it is an inline callback query update */
@@ -48,11 +48,7 @@ export class SceneTransitionContext {
       return this.update
     }
 
-    throw new MtTypeAssertionError(
-      'SceneTransitionContext.inlineCallbackQuery',
-      'inline callback query',
-      this.update._name,
-    )
+    throw new MtTypeAssertionError('inline callback query', this.update._name)
   }
 }
 

@@ -1,14 +1,14 @@
 import type { tl } from '../../../tl/index.js'
 
 import type { ITelegramClient } from '../../client.types.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtcuteError } from '../../../types/errors.js'
 import { assertTypeIs, hasValueAtKey } from '../../../utils/type-assertions.js'
 import { PeersIndex, Story } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 
 /** @internal */
 export function _findStoryInUpdate(client: ITelegramClient, res: tl.TypeUpdates): Story {
-  assertIsUpdatesGroup('_findStoryInUpdate', res)
+  assertIsUpdatesGroup(res)
 
   client.handleClientUpdate(res, true)
 
@@ -16,10 +16,10 @@ export function _findStoryInUpdate(client: ITelegramClient, res: tl.TypeUpdates)
   const updateStory = res.updates.find(hasValueAtKey('_', 'updateStory'))
 
   if (!updateStory) {
-    throw new MtTypeAssertionError('_findStoryInUpdate (@ .updates[*])', 'updateStory', 'none')
+    throw new MtcuteError('Response does not contain updateStory')
   }
 
-  assertTypeIs('updateStory.story', updateStory.story, 'storyItem')
+  assertTypeIs(updateStory.story, 'storyItem')
 
   return new Story(updateStory.story, peers)
 }

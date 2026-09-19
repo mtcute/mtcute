@@ -50,7 +50,7 @@ export async function sendReaction(
     big,
   })
 
-  assertIsUpdatesGroup('messages.sendReaction', res)
+  assertIsUpdatesGroup(res)
 
   // normally the group contains 2 updates:
   // updateEdit(Channel)Message

@@ -44,7 +44,7 @@ export async function setMyProfilePhoto(
         id: media,
       })
 
-      assertTypeIs('photos.updateProfilePhoto', res.photo, 'photo')
+      assertTypeIs(res.photo, 'photo')
 
       return new Photo(res.photo)
     }
@@ -56,7 +56,7 @@ export async function setMyProfilePhoto(
     videoStartTs: previewSec,
   })
 
-  assertTypeIs('photos.updateProfilePhoto', res.photo, 'photo')
+  assertTypeIs(res.photo, 'photo')
 
   return new Photo(res.photo)
 }

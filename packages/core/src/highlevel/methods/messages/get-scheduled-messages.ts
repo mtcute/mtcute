@@ -28,7 +28,7 @@ export async function getScheduledMessages(
     id: messageIds,
   })
 
-  assertTypeIsNot('getScheduledMessages', res, 'messages.messagesNotModified')
+  assertTypeIsNot(res, 'messages.messagesNotModified')
 
   const peers = PeersIndex.from(res)
 

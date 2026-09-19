@@ -125,7 +125,7 @@ export async function sendMediaGroup(
     },
   )
 
-  assertIsUpdatesGroup('sendMediaGroup', res)
+  assertIsUpdatesGroup(res)
   client.handleClientUpdate(res)
 
   const peers = PeersIndex.from(res)

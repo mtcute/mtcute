@@ -45,7 +45,7 @@ export async function getSavedMusic(
     hash: Long.ZERO,
   })
 
-  assertTypeIsNot('getSavedMusic', res, 'users.savedMusicNotModified')
+  assertTypeIsNot(res, 'users.savedMusicNotModified')
 
   const files = parseSavedMusic(res.documents)
 
@@ -80,7 +80,7 @@ export async function getSavedMusicById(
     documents: params.ids.map(_normalizeInputDocumentId),
   })
 
-  assertTypeIsNot('getSavedMusicById', res, 'users.savedMusicNotModified')
+  assertTypeIsNot(res, 'users.savedMusicNotModified')
 
   return parseSavedMusic(res.documents)
 }
@@ -94,7 +94,7 @@ export async function getSavedMusicIds(client: ITelegramClient): Promise<tl.Long
     hash: Long.ZERO,
   })
 
-  assertTypeIsNot('getSavedMusicIds', res, 'account.savedMusicIdsNotModified')
+  assertTypeIsNot(res, 'account.savedMusicIdsNotModified')
 
   return res.ids
 }

@@ -56,7 +56,7 @@ export async function upgradeStarGift(
       formId: form.formId,
     })
 
-    assertTypeIs('payments.sendStarsForm', res, 'payments.paymentResult')
+    assertTypeIs(res, 'payments.paymentResult')
 
     updates = res.updates
   } catch (e) {

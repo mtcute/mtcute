@@ -36,7 +36,7 @@ export class ChatMember {
     switch (this.raw._) {
       case 'channelParticipantBanned':
       case 'channelParticipantLeft':
-        assertTypeIs('ChatMember#user (raw.peer)', this.raw.peer, 'peerUser')
+        assertTypeIs(this.raw.peer, 'peerUser')
 
         return new User(this._peers.user(this.raw.peer.userId))
         break

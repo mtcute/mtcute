@@ -496,7 +496,7 @@ function toInlineButton(btn: tl.TypeKeyboardButton): tl.TypeKeyboardInlineButton
   const mapped = btn as unknown as tl.TypeKeyboardButton | tl.TypeKeyboardInlineButton
 
   if (mapped._ !== 'keyboardInlineButton') {
-    throw new MtTypeAssertionError('mapCompatReplyMarkup (@ rows[*].buttons[*])', 'keyboardInlineButton', mapped._)
+    throw new MtTypeAssertionError('keyboardInlineButton', mapped._)
   }
 
   return mapped

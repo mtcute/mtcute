@@ -30,7 +30,7 @@ export async function getAllStories(
     hidden: archived,
   })
 
-  assertTypeIsNot('getAllStories', res, 'stories.allStoriesNotModified')
+  assertTypeIsNot(res, 'stories.allStoriesNotModified')
 
   return new AllStories(res)
 }

@@ -1,6 +1,6 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtcuteError, MtTypeAssertionError } from '../../../types/errors.js'
 import { ChatInviteLink, PeersIndex } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -19,15 +19,11 @@ export async function getPrimaryInviteLink(client: ITelegramClient, chatId: Inpu
   })
 
   if (res.invites[0]?._ !== 'chatInviteExported') {
-    throw new MtTypeAssertionError(
-      'messages.getExportedChatInvites (@ .invites[0])',
-      'chatInviteExported',
-      res.invites[0]?._,
-    )
+    throw new MtTypeAssertionError('chatInviteExported', res.invites[0]?._ ?? 'nothing')
   }
 
   if (!res.invites[0].permanent) {
-    throw new MtTypeAssertionError('messages.getExportedChatInvites (@ .invites[0].permanent)', 'true', 'false')
+    throw new MtcuteError('Primary invite link is not permanent')
   }
 
   const peers = PeersIndex.from(res)

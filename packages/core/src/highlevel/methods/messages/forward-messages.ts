@@ -201,7 +201,7 @@ export async function forwardMessagesById(
       : undefined,
   })
 
-  assertIsUpdatesGroup('messages.forwardMessages', res)
+  assertIsUpdatesGroup(res)
 
   client.handleClientUpdate(res, !params.shouldDispatch)
 

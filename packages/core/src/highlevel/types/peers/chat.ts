@@ -49,7 +49,7 @@ export class Chat {
       case 'communityForbidden':
         break
       default:
-        throw new MtTypeAssertionError('peer', 'user | chat | channel', peer._)
+        throw new MtTypeAssertionError('user | chat | channel', peer._)
     }
 
     this.raw = peer

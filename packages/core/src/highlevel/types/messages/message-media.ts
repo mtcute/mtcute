@@ -6,7 +6,7 @@ import type { Sticker } from '../media/sticker.js'
 import type { Video } from '../media/video.js'
 import type { Voice } from '../media/voice.js'
 import type { PeersIndex } from '../peers/peers-index.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtcuteError } from '../../../types/errors.js'
 import { Contact } from '../media/contact.js'
 import { Dice } from '../media/dice.js'
 import { parseDocument } from '../media/document-utils.js'
@@ -82,7 +82,7 @@ export function _messageMediaFromTl(peers: PeersIndex | null, m: tl.TypeMessageM
       if (!peers) {
         // should only be possible in extended media
         // (and afaik polls can't be there)
-        throw new MtTypeAssertionError("can't create poll without peers index", 'PeersIndex', 'null')
+        throw new MtcuteError("Can't create poll without peers index")
       }
 
       return new Poll(
@@ -101,7 +101,7 @@ export function _messageMediaFromTl(peers: PeersIndex | null, m: tl.TypeMessageM
       if (!peers) {
         // should only be possible in extended media
         // (and afaik stories can't be there)
-        throw new MtTypeAssertionError("can't create story without peers index", 'PeersIndex', 'null')
+        throw new MtcuteError("Can't create story without peers index")
       }
 
       return new MediaStory(m, peers)
@@ -119,7 +119,7 @@ export function _messageMediaFromTl(peers: PeersIndex | null, m: tl.TypeMessageM
     }
     case 'messageMediaToDo':
       if (!peers) {
-        throw new MtTypeAssertionError("can't create todo without peers index", 'PeersIndex', 'null')
+        throw new MtcuteError("Can't create todo without peers index")
       }
 
       return new TodoList(m, peers)

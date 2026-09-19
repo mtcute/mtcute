@@ -12,7 +12,7 @@ describe('getUsers', () => {
 
   client.respondWith('users.getUsers', ({ id }) =>
     id.map((it) => {
-      assertTypeIs('', it, 'inputUser')
+      assertTypeIs(it, 'inputUser')
 
       if (it.userId === 1) return { _: 'userEmpty', id: 1 }
 

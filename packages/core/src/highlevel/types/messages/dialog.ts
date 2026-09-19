@@ -39,7 +39,7 @@ export class Dialog {
    * @param limit  Maximum number of dialogs to parse
    */
   static parseTlDialogs(dialogs: tl.messages.TypeDialogs | tl.messages.TypePeerDialogs, limit?: number): Dialog[] {
-    assertTypeIsNot('parseDialogs', dialogs, 'messages.dialogsNotModified')
+    assertTypeIsNot(dialogs, 'messages.dialogsNotModified')
 
     const peers = PeersIndex.from(dialogs)
 

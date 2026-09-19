@@ -52,7 +52,7 @@ export async function getMessages(
         },
   )
 
-  assertTypeIsNot('getMessages', res, 'messages.messagesNotModified')
+  assertTypeIsNot(res, 'messages.messagesNotModified')
 
   const peers = PeersIndex.from(res)
 

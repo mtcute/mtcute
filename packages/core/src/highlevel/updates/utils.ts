@@ -105,14 +105,11 @@ export function createDummyUpdate(pts: number, ptsCount: number, channelId = 0):
 }
 
 /** @internal */
-export function assertIsUpdatesGroup(
-  ctx: string,
-  upd: tl.TypeUpdates,
-): asserts upd is tl.RawUpdates | tl.RawUpdatesCombined {
+export function assertIsUpdatesGroup(upd: tl.TypeUpdates): asserts upd is tl.RawUpdates | tl.RawUpdatesCombined {
   switch (upd._) {
     case 'updates':
     case 'updatesCombined':
       return
   }
-  throw new MtTypeAssertionError(ctx, 'updates | updatesCombined', upd._)
+  throw new MtTypeAssertionError('updates | updatesCombined', upd._)
 }

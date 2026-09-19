@@ -703,15 +703,15 @@ export function _actionFromTl(
         enabled: e.newValue,
       }
     case 'channelAdminLogEventActionCreateTopic':
-      assertTypeIs('ChannelAdminLogEventActionCreateTopic#topic', e.topic, 'forumTopic')
+      assertTypeIs(e.topic, 'forumTopic')
 
       return {
         type: 'topic_created',
         topic: new ForumTopic(e.topic, peers),
       }
     case 'channelAdminLogEventActionEditTopic':
-      assertTypeIs('ChannelAdminLogEventActionCreateTopic#topic', e.prevTopic, 'forumTopic')
-      assertTypeIs('ChannelAdminLogEventActionCreateTopic#topic', e.newTopic, 'forumTopic')
+      assertTypeIs(e.prevTopic, 'forumTopic')
+      assertTypeIs(e.newTopic, 'forumTopic')
 
       return {
         type: 'topic_edited',
@@ -719,7 +719,7 @@ export function _actionFromTl(
         new: new ForumTopic(e.newTopic, peers),
       }
     case 'channelAdminLogEventActionDeleteTopic':
-      assertTypeIs('ChannelAdminLogEventActionCreateTopic#topic', e.topic, 'forumTopic')
+      assertTypeIs(e.topic, 'forumTopic')
 
       return {
         type: 'topic_deleted',

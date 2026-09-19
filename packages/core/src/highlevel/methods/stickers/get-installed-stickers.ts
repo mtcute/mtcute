@@ -17,7 +17,7 @@ export async function getInstalledStickers(client: ITelegramClient): Promise<Sti
     hash: Long.ZERO,
   })
 
-  assertTypeIs('getInstalledStickers', res, 'messages.allStickers')
+  assertTypeIs(res, 'messages.allStickers')
 
   return res.sets.map(set => new StickerSet(set))
 }

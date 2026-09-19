@@ -30,7 +30,7 @@ export async function sendScheduled(
     id: ids,
   })
 
-  assertIsUpdatesGroup('sendScheduled', res)
+  assertIsUpdatesGroup(res)
   client.handleClientUpdate(res, true)
 
   const peers = PeersIndex.from(res)

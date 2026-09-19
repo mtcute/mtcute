@@ -138,7 +138,7 @@ export class Poll {
     const results = this.results?.results
 
     return this.raw.answers.map((ans) => {
-      assertTypeIs('Poll.answers', ans, 'pollAnswer')
+      assertTypeIs(ans, 'pollAnswer')
 
       return new PollAnswer(ans, this._peers, results?.find(it => typed.equal(it.option, ans.option)))
     })

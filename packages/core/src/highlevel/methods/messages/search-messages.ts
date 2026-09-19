@@ -150,7 +150,7 @@ export async function searchMessages(
     hash: Long.ZERO,
   })
 
-  assertTypeIsNot('searchMessages', res, 'messages.messagesNotModified')
+  assertTypeIsNot(res, 'messages.messagesNotModified')
 
   const peers = PeersIndex.from(res)
 

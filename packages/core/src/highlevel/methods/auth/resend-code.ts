@@ -33,7 +33,7 @@ export async function resendCode(
     { abortSignal },
   )
 
-  assertTypeIs('sendCode', res, 'auth.sentCode')
+  assertTypeIs(res, 'auth.sentCode')
 
   return new SentCode(res)
 }

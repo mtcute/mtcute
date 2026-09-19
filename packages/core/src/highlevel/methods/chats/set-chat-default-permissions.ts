@@ -35,7 +35,7 @@ export async function setChatDefaultPermissions(
     },
   })
 
-  assertIsUpdatesGroup('messages.editChatDefaultBannedRights', res)
+  assertIsUpdatesGroup(res)
 
   client.handleClientUpdate(res)
 

@@ -57,7 +57,7 @@ export async function createGroup(
     users: peers,
   })
 
-  assertIsUpdatesGroup('messages.createChat', updates)
+  assertIsUpdatesGroup(updates)
 
   client.handleClientUpdate(updates)
 

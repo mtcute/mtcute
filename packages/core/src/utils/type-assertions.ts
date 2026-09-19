@@ -1,6 +1,6 @@
 import type { mtp, tl } from '../tl/index.js'
 
-import { MtTypeAssertionError } from '../types/errors.js'
+import { MtcuteError, MtTypeAssertionError } from '../types/errors.js'
 
 // mostly taken from https://github.com/robertmassaioli/ts-is-present
 
@@ -33,38 +33,35 @@ export function hasValueAtKey<const K extends string | number | symbol, const V>
 }
 
 export function assertTypeIs<T extends tl.TlObject, K extends T['_']>(
-  context: string,
   obj: T,
   expected: K,
 ): asserts obj is tl.FindByName<T, K> {
   if (obj._ !== expected) {
-    throw new MtTypeAssertionError(context, expected, obj._)
+    throw new MtTypeAssertionError(expected, obj._)
   }
 }
 
 export function assertTypeIsNot<T extends tl.TlObject, K extends T['_']>(
-  context: string,
   obj: T,
   expectedNot: K,
 ): asserts obj is Exclude<T, tl.FindByName<T, K>> {
   if (obj._ === expectedNot) {
-    throw new MtTypeAssertionError(context, `not ${expectedNot}`, obj._)
+    throw new MtTypeAssertionError(`not ${expectedNot}`, obj._)
   }
 }
 
 export function mtpAssertTypeIs<T extends mtp.TlObject, K extends T['_']>(
-  context: string,
   obj: T,
   expected: K,
 ): asserts obj is mtp.FindByName<T, K> {
   if (obj._ !== expected) {
-    throw new MtTypeAssertionError(context, expected, obj._)
+    throw new MtTypeAssertionError(expected, obj._)
   }
 }
 
-export function assertTrue(context: string, cond: boolean): asserts cond {
+export function assertTrue(method: string, cond: boolean): asserts cond {
   if (!cond) {
-    throw new MtTypeAssertionError(context, 'true', 'false')
+    throw new MtcuteError(`${method} returned false`)
   }
 }
 

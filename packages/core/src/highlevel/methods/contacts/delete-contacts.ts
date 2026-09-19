@@ -28,7 +28,7 @@ export async function deleteContacts(client: ITelegramClient, userIds: MaybeArra
     id: inputPeers,
   })
 
-  assertIsUpdatesGroup('contacts.deleteContacts', res)
+  assertIsUpdatesGroup(res)
 
   client.handleClientUpdate(res)
 

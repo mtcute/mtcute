@@ -18,7 +18,7 @@ export class ChatInviteLink {
     raw: tl.TypeExportedChatInvite,
     readonly _peers?: PeersIndex | undefined,
   ) {
-    assertTypeIsNot('ChatInviteLink', raw, 'chatInvitePublicJoinRequests')
+    assertTypeIsNot(raw, 'chatInvitePublicJoinRequests')
 
     this.raw = raw
   }

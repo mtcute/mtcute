@@ -188,7 +188,7 @@ export async function sendText(
       peersToFetch.push(replyToHeader.peer)
     }
 
-    const peers = await _buildPeersIndex(client, 'sendText', peersToFetch)
+    const peers = await _buildPeersIndex(client, peersToFetch)
 
     if (
       replyToHeader?._ === 'messageReplyHeader'

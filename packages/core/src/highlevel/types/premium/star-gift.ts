@@ -96,11 +96,11 @@ export class StarGift {
 
   /** Sticker associated with the gift */
   get sticker(): Sticker {
-    assertTypeIs('StarGift#sticker', this.raw.sticker, 'document')
+    assertTypeIs(this.raw.sticker, 'document')
     const parsed = parseDocument(this.raw.sticker)
 
     if (parsed.type !== 'sticker') {
-      throw new MtTypeAssertionError('StarGift#sticker', 'sticker', parsed.type)
+      throw new MtTypeAssertionError('sticker', parsed.type)
     }
 
     return parsed

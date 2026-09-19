@@ -28,7 +28,7 @@ export async function getMessageReactionsById(
     id: messages,
   })
 
-  assertIsUpdatesGroup('messages.getMessagesReactions', res)
+  assertIsUpdatesGroup(res)
   client.handleClientUpdate(res)
 
   // normally the group contains updateMessageReactions
@@ -42,7 +42,7 @@ export async function getMessageReactionsById(
   const peers = PeersIndex.from(res)
 
   for (const update of res.updates) {
-    assertTypeIs('messages.getMessagesReactions', update, 'updateMessageReactions')
+    assertTypeIs(update, 'updateMessageReactions')
 
     index[update.msgId] = new MessageReactions(update.msgId, getMarkedPeerId(update.peer), update.reactions, peers)
   }

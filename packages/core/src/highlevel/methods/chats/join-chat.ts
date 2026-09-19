@@ -56,7 +56,7 @@ export async function joinChat(client: ITelegramClient, chatId: InputPeerLike): 
 
   switch (res._) {
     case 'messages.chatInviteJoinResultOk':
-      assertIsUpdatesGroup('joinChat', res.updates)
+      assertIsUpdatesGroup(res.updates)
       client.handleClientUpdate(res.updates)
 
       return { status: 'ok', chat: new Chat(res.updates.chats[0]) }

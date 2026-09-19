@@ -59,7 +59,7 @@ async function _uploadRichMedia(
   }, true)
 
   if (normalized._ !== 'inputMediaPhoto' && normalized._ !== 'inputMediaDocument') {
-    throw new MtTypeAssertionError('sendRichMessage (upload)', 'inputMediaDocument | inputMediaPhoto', normalized._)
+    throw new MtTypeAssertionError('inputMediaDocument | inputMediaPhoto', normalized._)
   }
 
   if (cacheKey !== undefined) params.uploadCache!.set(cacheKey, normalized)
@@ -182,7 +182,7 @@ export async function _normalizeInputRichMessage(
   for (const { block, media } of uploaded) {
     if (media._ === 'inputMediaPhoto') {
       const photo = media.id
-      assertTypeIs('sendRichMessage (upload)', photo, 'inputPhoto')
+      assertTypeIs(photo, 'inputPhoto')
       photos.push(photo)
 
       switch (block._) {
@@ -194,7 +194,7 @@ export async function _normalizeInputRichMessage(
       }
     } else {
       const document = media.id
-      assertTypeIs('sendRichMessage (upload)', document, 'inputDocument')
+      assertTypeIs(document, 'inputDocument')
       documents.push(document)
 
       switch (block._) {

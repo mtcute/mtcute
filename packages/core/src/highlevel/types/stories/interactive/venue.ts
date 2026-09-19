@@ -22,7 +22,7 @@ export class StoryInteractiveVenue extends StoryInteractiveArea {
    * Geolocation of the venue
    */
   get location(): Location {
-    assertTypeIs('StoryInteractiveVenue#location', this.raw.geo, 'geoPoint')
+    assertTypeIs(this.raw.geo, 'geoPoint')
 
     return new Location(this.raw.geo)
   }

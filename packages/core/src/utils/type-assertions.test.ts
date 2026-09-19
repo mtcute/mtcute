@@ -41,23 +41,23 @@ describe('hasValueAtKey', () => {
 
 describe('assertTypeIs', () => {
   it('should not throw for correct types', () => {
-    assertTypeIs('peerUser', { _: 'peerUser', userId: 1 }, 'peerUser')
-    mtpAssertTypeIs('peerUser', { _: 'mt_rpc_answer_unknown' }, 'mt_rpc_answer_unknown')
+    assertTypeIs({ _: 'peerUser', userId: 1 }, 'peerUser')
+    mtpAssertTypeIs({ _: 'mt_rpc_answer_unknown' }, 'mt_rpc_answer_unknown')
   })
 
   it('should throw for incorrect types', () => {
-    expect(() => assertTypeIs('peerUser', { _: 'peerChannel', channelId: 1 } as any, 'peerUser')).toThrow()
+    expect(() => assertTypeIs({ _: 'peerChannel', channelId: 1 } as any, 'peerUser')).toThrow()
 
-    expect(() => mtpAssertTypeIs('peerUser', { _: 'mt_rpc_answer_unknown' } as any, 'peerUser')).toThrow()
+    expect(() => mtpAssertTypeIs({ _: 'mt_rpc_answer_unknown' } as any, 'peerUser')).toThrow()
   })
 })
 
 describe('assertTypeIsNot', () => {
   it('should not throw for correct types', () => {
-    assertTypeIsNot('peerUser', { _: 'peerChannel', channelId: 1 } as any, 'peerUser')
+    assertTypeIsNot({ _: 'peerChannel', channelId: 1 } as any, 'peerUser')
   })
 
   it('should throw for incorrect types', () => {
-    expect(() => assertTypeIsNot('peerUser', { _: 'peerUser', userId: 1 }, 'peerUser')).toThrow()
+    expect(() => assertTypeIsNot({ _: 'peerUser', userId: 1 }, 'peerUser')).toThrow()
   })
 })

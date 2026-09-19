@@ -1,5 +1,5 @@
 import type { ITelegramClient } from '../../client.types.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtcuteError } from '../../../types/errors.js'
 import { hasValueAtKey } from '../../../utils/type-assertions.js'
 import { StoriesStealthMode } from '../../types/stories/stealth-mode.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
@@ -35,13 +35,13 @@ export async function hideMyStoriesViews(
     future,
   })
 
-  assertIsUpdatesGroup('hideMyStoriesViews', res)
+  assertIsUpdatesGroup(res)
   client.handleClientUpdate(res, true)
 
   const upd = res.updates.find(hasValueAtKey('_', 'updateStoriesStealthMode'))
 
   if (!upd) {
-    throw new MtTypeAssertionError('hideMyStoriesViews (@ res.updates[*])', 'updateStoriesStealthMode', 'none')
+    throw new MtcuteError('Response does not contain updateStoriesStealthMode')
   }
 
   return new StoriesStealthMode(upd.stealthMode)

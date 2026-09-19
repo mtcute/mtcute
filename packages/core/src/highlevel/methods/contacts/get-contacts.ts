@@ -12,7 +12,7 @@ export async function getContacts(client: ITelegramClient): Promise<User[]> {
     _: 'contacts.getContacts',
     hash: Long.ZERO,
   })
-  assertTypeIs('getContacts', res, 'contacts.contacts')
+  assertTypeIs(res, 'contacts.contacts')
 
   return res.users.map(user => new User(user))
 }

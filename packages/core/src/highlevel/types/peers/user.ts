@@ -40,7 +40,7 @@ export class User {
   readonly raw: tl.RawUser
 
   constructor(user: tl.TypeUser) {
-    assertTypeIs('User#init', user, 'user')
+    assertTypeIs(user, 'user')
 
     this.raw = user
   }

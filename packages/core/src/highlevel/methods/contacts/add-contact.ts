@@ -55,7 +55,7 @@ export async function addContact(
     note: note ? inputTextToTl(note) : undefined,
   })
 
-  assertIsUpdatesGroup('contacts.addContact', res)
+  assertIsUpdatesGroup(res)
 
   client.handleClientUpdate(res)
 

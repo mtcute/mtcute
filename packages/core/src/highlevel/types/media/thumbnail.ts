@@ -64,7 +64,7 @@ export class Thumbnail extends FileLocation {
     switch (sz._) {
       case 'photoSizeEmpty':
       case 'photoCachedSize':
-        throw new MtTypeAssertionError('sz', 'not (photoSizeEmpty | photoCachedSize)', sz._)
+        throw new MtTypeAssertionError('not (photoSizeEmpty | photoCachedSize)', sz._)
     }
 
     let location: tl.TypeInputFileLocation | Uint8Array | (() => tl.TypeInputFileLocation | Uint8Array)
@@ -116,7 +116,7 @@ export class Thumbnail extends FileLocation {
           }
         } else if (media._ === 'messageExtendedMediaPreview') {
           // according to tdlib and tdesktop sources, sz can only be photoStrippedSize
-          throw new MtTypeAssertionError('messageExtendedMediaPreview#thumb', 'photoStrippedSize', sz._)
+          throw new MtTypeAssertionError('photoStrippedSize', sz._)
         } else {
           location = {
             _: media._ === 'photo' ? 'inputPhotoFileLocation' : 'inputDocumentFileLocation',
@@ -182,7 +182,7 @@ export class Thumbnail extends FileLocation {
    * @throws MtTypeAssertionError  In case {@link raw} is not `tl.RawPhotoPathSize`
    */
   get path(): string {
-    assertTypeIs('Thumbnail#path', this.raw, 'photoPathSize')
+    assertTypeIs(this.raw, 'photoPathSize')
 
     return this._path!
   }

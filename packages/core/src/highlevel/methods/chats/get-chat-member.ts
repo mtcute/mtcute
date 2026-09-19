@@ -38,7 +38,7 @@ export async function getChatMember(
       chatId: chat.chatId,
     })
 
-    assertTypeIs('getChatMember (@ messages.getFullChat)', res.fullChat, 'chatFull')
+    assertTypeIs(res.fullChat, 'chatFull')
 
     const members
       = res.fullChat.participants._ === 'chatParticipantsForbidden' ? [] : res.fullChat.participants.participants

@@ -1,7 +1,7 @@
 import type { tl } from '../../../tl/index.js'
 import type { ITelegramClient } from '../../client.types.js'
 
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtcuteError } from '../../../types/errors.js'
 import { EphemeralMessage, PeersIndex } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 
@@ -15,7 +15,7 @@ export function _findEphemeralMessageInUpdate(
   isEdit = false,
   noDispatch = true,
 ): EphemeralMessage {
-  assertIsUpdatesGroup('_findEphemeralMessageInUpdate', res)
+  assertIsUpdatesGroup(res)
 
   client.handleClientUpdate(res, noDispatch)
 
@@ -28,9 +28,5 @@ export function _findEphemeralMessageInUpdate(
     return new EphemeralMessage(u.message, peers)
   }
 
-  throw new MtTypeAssertionError(
-    '_findEphemeralMessageInUpdate (@ .updates[*])',
-    'updateNewEphemeralMessage | updateEditEphemeralMessage',
-    'none',
-  )
+  throw new MtcuteError('Response does not contain updateNewEphemeralMessage | updateEditEphemeralMessage')
 }

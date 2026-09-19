@@ -59,7 +59,7 @@ export async function buyResaleGift(
     formId: form.formId,
   })
 
-  assertTypeIs('payments.sendStarsForm', res, 'payments.paymentResult')
+  assertTypeIs(res, 'payments.paymentResult')
 
   return _findMessageInUpdate(client, res.updates, false, !shouldDispatch, true)
 }

@@ -1,6 +1,6 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputText, TextWithEntities } from '../../types/misc/entities.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtcuteError } from '../../../types/errors.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 
 /**
@@ -38,7 +38,7 @@ export async function translateText(
   })
 
   if (!res.result[0]) {
-    throw new MtTypeAssertionError('messages.translateResult#result', 'not empty', 'empty')
+    throw new MtcuteError('Translation result is empty')
   }
 
   return {

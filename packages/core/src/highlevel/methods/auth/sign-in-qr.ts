@@ -168,7 +168,7 @@ export async function signInQr(
             throw e
           }
 
-          assertTypeIs('auth.importLoginToken', res2, 'auth.loginTokenSuccess')
+          assertTypeIs(res2, 'auth.loginTokenSuccess')
           break loop
         }
         case 'auth.loginTokenSuccess':
@@ -183,7 +183,7 @@ export async function signInQr(
       },
       { abortSignal },
     )
-    assertTypeIs('users.getUsers', self, 'user')
+    assertTypeIs(self, 'user')
 
     await client.notifyLoggedIn(self)
 

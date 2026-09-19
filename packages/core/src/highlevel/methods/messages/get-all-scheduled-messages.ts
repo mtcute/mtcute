@@ -20,12 +20,12 @@ export async function getAllScheduledMessages(client: ITelegramClient, chatId: I
     hash: Long.ZERO,
   })
 
-  assertTypeIsNot('getScheduledMessages', res, 'messages.messagesNotModified')
+  assertTypeIsNot(res, 'messages.messagesNotModified')
 
   const peers = PeersIndex.from(res)
 
   const ret = res.messages.map((msg) => {
-    assertTypeIsNot('getScheduledMessages', msg, 'messageEmpty')
+    assertTypeIsNot(msg, 'messageEmpty')
 
     return new Message(msg, peers, true)
   })

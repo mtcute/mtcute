@@ -1,7 +1,7 @@
 import type { tl } from '../../../tl/index.js'
 
 import type { ITelegramClient } from '../../client.types.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtcuteError } from '../../../types/errors.js'
 import { Message } from '../../types/messages/index.js'
 import { PeersIndex } from '../../types/peers/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
@@ -43,7 +43,7 @@ export function _findMessageInUpdate(
   allowNull = false,
   randomId?: tl.Long,
 ): Message | null {
-  assertIsUpdatesGroup('_findMessageInUpdate', res)
+  assertIsUpdatesGroup(res)
 
   client.handleClientUpdate(res, noDispatch)
 
@@ -95,9 +95,5 @@ export function _findMessageInUpdate(
 
   if (allowNull) return null
 
-  throw new MtTypeAssertionError(
-    '_findInUpdate (@ .updates[*])',
-    'updateNewMessage | updateNewChannelMessage | updateNewScheduledMessage',
-    'none',
-  )
+  throw new MtcuteError('Response does not contain updateNewMessage | updateNewChannelMessage | updateNewScheduledMessage')
 }

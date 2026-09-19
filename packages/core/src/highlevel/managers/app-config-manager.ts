@@ -38,7 +38,7 @@ export class AppConfigManager {
     const obj = tlJsonToJson((await this._resource.get())!.config)
 
     if (!obj || typeof obj !== 'object') {
-      throw new MtTypeAssertionError('appConfig', 'object', typeof obj)
+      throw new MtTypeAssertionError('object', typeof obj)
     }
 
     this._object = obj as AppConfigSchema

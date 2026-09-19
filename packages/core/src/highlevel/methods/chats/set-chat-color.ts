@@ -2,7 +2,6 @@ import type { tl } from '../../../tl/index.js'
 
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
 import { assertTrue } from '../../../utils/type-assertions.js'
 import { MtInvalidPeerTypeError } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerUser, toInputChannel } from '../../utils/index.js'
@@ -67,7 +66,7 @@ export async function setChatColor(
 
   if (isInputPeerUser(peer)) {
     if (!isSelfPeer(client, peer)) {
-      throw new MtTypeAssertionError('setChatColor', 'self', peer._)
+      throw new MtInvalidPeerTypeError(peer, 'channel | self')
     }
 
     const r = await client.call({
@@ -81,6 +80,8 @@ export async function setChatColor(
     })
 
     assertTrue('account.updateColor', r)
+
+    return
   }
 
   throw new MtInvalidPeerTypeError(peer, 'channel | user')

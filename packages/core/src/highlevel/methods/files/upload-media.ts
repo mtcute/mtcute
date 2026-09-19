@@ -68,21 +68,21 @@ export async function uploadMedia(
     media: normMedia,
   })
 
-  assertTypeIsNot('uploadMedia', res, 'messageMediaEmpty')
+  assertTypeIsNot(res, 'messageMediaEmpty')
 
   switch (normMedia._) {
     case 'inputMediaUploadedPhoto':
     case 'inputMediaPhoto':
     case 'inputMediaPhotoExternal':
-      assertTypeIs('uploadMedia', res, 'messageMediaPhoto')
-      assertTypeIs('uploadMedia', res.photo!, 'photo')
+      assertTypeIs(res, 'messageMediaPhoto')
+      assertTypeIs(res.photo!, 'photo')
 
       return new Photo(res.photo)
     case 'inputMediaUploadedDocument':
     case 'inputMediaDocument':
     case 'inputMediaDocumentExternal':
-      assertTypeIs('uploadMedia', res, 'messageMediaDocument')
-      assertTypeIs('uploadMedia', res.document!, 'document')
+      assertTypeIs(res, 'messageMediaDocument')
+      assertTypeIs(res.document!, 'document')
 
       // eslint-disable-next-line
             return parseDocument(res.document, res) as any

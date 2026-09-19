@@ -13,7 +13,7 @@ export async function getStarGiftOptions(client: ITelegramClient): Promise<StarG
     hash: 0,
   })
 
-  assertTypeIsNot('payments.getStarGifts', res, 'payments.starGiftsNotModified')
+  assertTypeIsNot(res, 'payments.starGiftsNotModified')
 
   const peers = PeersIndex.from(res)
 

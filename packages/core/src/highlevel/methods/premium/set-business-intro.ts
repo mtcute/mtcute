@@ -44,7 +44,7 @@ export async function setBusinessIntro(
       if (isInputMediaSticker(intro.sticker)) {
         const media = await _normalizeInputMedia(client, intro.sticker, undefined, true)
 
-        assertTypeIs('_normalizeInputMedia', media, 'inputMediaDocument')
+        assertTypeIs(media, 'inputMediaDocument')
         sticker = media.id
       } else {
         sticker = await _normalizeFileToDocument(client, intro.sticker, {})

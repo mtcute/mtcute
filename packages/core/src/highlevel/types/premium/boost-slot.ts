@@ -33,7 +33,7 @@ export class BoostSlot {
   get chat(): Chat | null {
     if (!this.raw.peer) return null
 
-    assertTypeIs('BoostSlot.chat', this.raw.peer, 'peerChannel')
+    assertTypeIs(this.raw.peer, 'peerChannel')
 
     return new Chat(this._peers.chat(this.raw.peer.channelId))
   }

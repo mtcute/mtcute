@@ -91,14 +91,14 @@ export async function sendPaidReaction(
     throw new MtcuteError('Could not send paid reaction')
   }
 
-  assertIsUpdatesGroup('messages.sendReaction', res)
+  assertIsUpdatesGroup(res)
 
   // normally the group only contains updateMessageReactions
 
   const peers = PeersIndex.from(res)
   const upd = res.updates[0]
 
-  assertTypeIs('messages.sendPaidReaction (@ .updates[0])', upd, 'updateMessageReactions')
+  assertTypeIs(upd, 'updateMessageReactions')
 
   return new MessageReactions(upd.msgId, getMarkedPeerId(upd.peer), upd.reactions, peers)
 }

@@ -64,7 +64,7 @@ export async function getCallbackQueryMessage(
         },
   )
 
-  assertTypeIsNot('getCallbackQueryMessage', res, 'messages.messagesNotModified')
+  assertTypeIsNot(res, 'messages.messagesNotModified')
 
   if (res.messages[0]._ === 'messageEmpty') {
     return null

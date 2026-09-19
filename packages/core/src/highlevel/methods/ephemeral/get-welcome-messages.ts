@@ -26,7 +26,7 @@ export async function getWelcomeMessages(
     hash: Long.ZERO,
   })
 
-  assertTypeIsNot('getWelcomeMessages', res, 'ephemeral.welcomeMessagesNotModified')
+  assertTypeIsNot(res, 'ephemeral.welcomeMessagesNotModified')
 
   // the response doesn't contain any peers, so we have to fetch them ourselves
   const peersToFetch: (tl.TypePeer | tl.TypeInputPeer)[] = [peer]
@@ -35,7 +35,7 @@ export async function getWelcomeMessages(
     if (msg.peerId) peersToFetch.push(msg.peerId)
   }
 
-  const peers = await _buildPeersIndex(client, 'getWelcomeMessages', peersToFetch)
+  const peers = await _buildPeersIndex(client, peersToFetch)
 
   return res.messages.map(it => new EphemeralMessage(it, peers))
 }

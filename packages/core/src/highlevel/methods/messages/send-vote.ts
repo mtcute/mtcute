@@ -50,7 +50,7 @@ export async function sendVote(
     options = options.map((opt) => {
       if (typeof opt === 'number') {
         const answer = poll!.raw.answers[opt]
-        assertTypeIsNot('Poll.answers', answer, 'inputPollAnswer')
+        assertTypeIsNot(answer, 'inputPollAnswer')
         return answer.option
       }
 
@@ -65,5 +65,5 @@ export async function sendVote(
     options: options as Uint8Array[],
   })
 
-  return _findPollInUpdate(client, 'messages.sendVote', res, true, poll)
+  return _findPollInUpdate(client, res, true, poll)
 }

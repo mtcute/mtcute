@@ -30,7 +30,7 @@ export async function enableCloudPassword(
   }
 
   const algo = pwd.newAlgo
-  assertTypeIs('account.getPassword', algo, 'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow')
+  assertTypeIs(algo, 'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow')
 
   const newHash = await client.computeNewPasswordHash(algo, password)
 

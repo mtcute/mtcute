@@ -16,7 +16,7 @@ export function getMe(client: ITelegramClient): Promise<User> {
       ],
     })
     .then(async ([user]) => {
-      assertTypeIs('getMe (@ users.getUsers)', user, 'user')
+      assertTypeIs(user, 'user')
 
       await client.storage.self.storeFrom(user)
 

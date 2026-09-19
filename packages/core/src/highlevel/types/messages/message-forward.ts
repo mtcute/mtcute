@@ -2,7 +2,7 @@ import type { tl } from '../../../tl/index.js'
 
 import type { Peer, PeerSender } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtcuteError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { parsePeer } from '../peers/peer.js'
@@ -39,7 +39,7 @@ export class MessageForwardInfo {
       return parsePeer(this.raw.fromId, this._peers)
     }
 
-    throw new MtTypeAssertionError('MessageForwardInfo', 'to have fromId or fromName', 'neither')
+    throw new MtcuteError('Forward info has neither fromId nor fromName')
   }
 
   /**

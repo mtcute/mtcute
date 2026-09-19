@@ -30,7 +30,7 @@ export class StoryUpdate {
    * Story that was posted or edited.
    */
   get story(): Story {
-    assertTypeIs('StoryUpdate.story', this.raw.story, 'storyItem')
+    assertTypeIs(this.raw.story, 'storyItem')
 
     return new Story(this.raw.story, this._peers)
   }

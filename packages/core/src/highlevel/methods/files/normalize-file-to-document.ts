@@ -59,8 +59,8 @@ export async function _normalizeFileToDocument(
     true,
   )
 
-  assertTypeIs('_normalizeFileToDocument', media, 'inputMediaDocument')
-  assertTypeIs('_normalizeFileToDocument', media.id, 'inputDocument')
+  assertTypeIs(media, 'inputMediaDocument')
+  assertTypeIs(media.id, 'inputDocument')
 
   return media.id
 }

@@ -49,6 +49,6 @@ export function _storyInteractiveElementFromTl(raw: tl.TypeMediaArea, peers: Pee
       return new StoryInteractiveStarGift(raw)
     case 'inputMediaAreaVenue':
     case 'inputMediaAreaChannelPost':
-      throw new MtTypeAssertionError('StoryInteractiveElement', '!input*', raw._)
+      throw new MtTypeAssertionError('not inputMediaArea*', raw._)
   }
 }

@@ -56,7 +56,7 @@ export function toReactionEmoji(reaction: tl.TypeReaction, allowEmpty?: boolean)
       return '⭐'
     case 'reactionEmpty':
       if (!allowEmpty) {
-        throw new MtTypeAssertionError('toReactionEmoji', 'not reactionEmpty', reaction._)
+        throw new MtTypeAssertionError('not reactionEmpty', reaction._)
       }
 
       return null

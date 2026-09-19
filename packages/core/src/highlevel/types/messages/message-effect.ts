@@ -2,7 +2,7 @@ import type { tl } from '../../../tl/index.js'
 
 import type { LongMap } from '../../../utils/long-utils.js'
 import type { Sticker } from '../media/sticker.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
+import { MtcuteError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { parseSticker } from '../media/document-utils.js'
@@ -47,13 +47,13 @@ export class MessageEffect {
     const document = this.documentsMap.get(this.raw.effectStickerId)
 
     if (!document) {
-      throw new MtTypeAssertionError('MessageEffect.effect', 'document', 'null')
+      throw new MtcuteError(`Effect document ${this.raw.effectStickerId} not found`)
     }
 
     const parsed = parseSticker(document)
 
     if (!parsed) {
-      throw new MtTypeAssertionError('MessageEffect.effect', 'sticker', 'null')
+      throw new MtcuteError('Effect document is not a sticker')
     }
 
     return parsed

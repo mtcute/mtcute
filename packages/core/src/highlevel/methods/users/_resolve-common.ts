@@ -67,7 +67,7 @@ export function _handleContactsResolvedPeer(
         // chats can't have usernames
         // furthermore, our id is a channel id, so it must be a channel
         // this should never happen, unless Telegram goes crazy
-        throw new MtTypeAssertionError('ResolvedPeer#chats', 'channel', found._)
+        throw new MtTypeAssertionError('channel', found._)
       }
 
       if (!found.accessHash) {
@@ -83,7 +83,7 @@ export function _handleContactsResolvedPeer(
     }
   } else {
     // chats can't have usernames
-    throw new MtTypeAssertionError('ResolvedPeer#peer', 'user or channel', res.peer._)
+    throw new MtTypeAssertionError('user | channel', res.peer._)
   }
 
   unreachable()

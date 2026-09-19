@@ -3,6 +3,7 @@ import type { ITelegramClient } from '../../client.types.js'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
+import { MtPeerNotFoundError } from '../../types/errors.js'
 import { PeersIndex } from '../../types/peers/peers-index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _getRawPeerBatched } from './batched-queries.js'
@@ -18,7 +19,6 @@ import { _getRawPeerBatched } from './batched-queries.js'
  */
 export async function _buildPeersIndex(
   client: ITelegramClient,
-  context: string,
   peersToFetch: (tl.TypePeer | tl.TypeInputPeer)[],
 ): Promise<PeersIndex> {
   const peers = new PeersIndex()
@@ -33,7 +33,7 @@ export async function _buildPeersIndex(
     }
 
     if (!cached) {
-      throw new MtTypeAssertionError(`${context} (@ getCompleteById)`, 'user | chat', 'null')
+      throw new MtPeerNotFoundError(`Peer ${id} not found`)
     }
 
     switch (cached._) {
@@ -48,7 +48,6 @@ export async function _buildPeersIndex(
         break
       default:
         throw new MtTypeAssertionError(
-          `${context} (@ getCompleteById)`,
           'user | chat | channel', // not very accurate, but good enough
           cached._,
         )
