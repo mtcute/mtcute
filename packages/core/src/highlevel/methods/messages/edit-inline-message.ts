@@ -1,11 +1,12 @@
 import type { ITelegramClient } from '../../client.types.js'
 
-import type { InputMediaLike, InputText, ReplyMarkup } from '../../types/index.js'
+import type { InputMediaLike, InputRichMessage, InputText, ReplyMarkup, RichMediaUploadCache } from '../../types/index.js'
 import { tl } from '../../../tl/index.js'
 import { BotKeyboard } from '../../types/index.js'
 import { normalizeInlineId } from '../../utils/inline-utils.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
+import { _normalizeInputRichMessage } from './normalize-rich-message.js'
 
 /**
  * Edit sent inline message text, media and reply markup.
@@ -36,6 +37,9 @@ export async function editInlineMessage(
      */
     media?: InputMediaLike
 
+    /** New rich message content */
+    richMessage?: InputRichMessage
+
     /**
      * Whether to disable links preview in this message
      */
@@ -56,12 +60,15 @@ export async function editInlineMessage(
     replyMarkup?: ReplyMarkup
 
     /**
-     * For media, upload progress callback.
+     * For media and rich message attachments, upload progress callback.
      *
      * @param uploaded  Number of bytes uploaded
      * @param total  Total file size in bytes
      */
-    progressCallback?: (uploaded: number, total: number) => void
+    progressCallback?: (uploaded: number, total: number, id?: string) => void
+
+    /** Cache for uploaded rich message media, see {@link createRichStreamingDraft} */
+    uploadCache?: RichMediaUploadCache
   },
 ): Promise<void> {
   let content: string | undefined
@@ -82,6 +89,15 @@ export async function editInlineMessage(
     [content, entities] = await _normalizeInputText(client, params.text)
   }
 
+  const richMessage = params.richMessage
+    ? await _normalizeInputRichMessage(client, { _: 'inputPeerSelf' }, params.richMessage, {
+        progressCallback: params.progressCallback
+          ? (id, uploaded, total) => params.progressCallback?.(uploaded, total, id)
+          : undefined,
+        uploadCache: params.uploadCache,
+      })
+    : undefined
+
   let retries = 3
 
   while (retries--) {
@@ -96,6 +112,7 @@ export async function editInlineMessage(
           entities,
           media,
           invertMedia: params.invertMedia,
+          richMessage,
         },
         { dcId: id.dcId },
       )

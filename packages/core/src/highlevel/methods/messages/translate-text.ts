@@ -13,6 +13,14 @@ export async function translateText(
   client: ITelegramClient,
   text: InputText,
   toLanguage: string,
+  params?: {
+    /**
+     * Tone of the translation
+     *
+     * @default  `"neutral"`
+     */
+    tone?: 'formal' | 'neutral' | 'casual' | (string & {})
+  },
 ): Promise<TextWithEntities> {
   const [message, entities] = await _normalizeInputText(client, text)
 
@@ -26,6 +34,7 @@ export async function translateText(
       },
     ],
     toLang: toLanguage,
+    tone: params?.tone,
   })
 
   if (!res.result[0]) {

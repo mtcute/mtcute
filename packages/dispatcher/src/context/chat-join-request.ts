@@ -1,4 +1,5 @@
 import type { TelegramClient } from '@mtcute/core/client.js'
+import type { ChatJoinRequestQueryAnswer } from '@mtcute/core/methods.js'
 import type { UpdateContext } from './base.js'
 
 import { BotChatJoinRequestUpdate } from '@mtcute/core'
@@ -36,5 +37,10 @@ export class ChatJoinRequestUpdateContext
       user: this.user.inputPeer,
       chatId: this.chat.inputPeer,
     })
+  }
+
+  /** Answer the join query (only if the bot is a guard bot of the chat, see {@link queryId}) */
+  answerQuery(answer: ChatJoinRequestQueryAnswer): Promise<void> {
+    return this.client.answerChatJoinRequestQuery(this, answer)
   }
 }

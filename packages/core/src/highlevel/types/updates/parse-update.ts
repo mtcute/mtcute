@@ -8,11 +8,13 @@ import {
   BotReactionCountUpdate,
   BotReactionUpdate,
   BotStoppedUpdate,
+  BotSubscriptionUpdate,
   BusinessCallbackQuery,
   BusinessConnection,
   BusinessMessage,
   CallbackQuery,
   ChatJoinRequestUpdate,
+  ChatJoinResultUpdate,
   ChatMemberUpdate,
   ChosenInlineResult,
   DeleteBusinessMessageUpdate,
@@ -24,6 +26,7 @@ import {
   HistoryReadUpdate,
   InlineCallbackQuery,
   InlineQuery,
+  ManagedBotUpdate,
   Message,
   PollUpdate,
   PollVoteUpdate,
@@ -81,10 +84,16 @@ export function _parseUpdate({ update, peers }: RawUpdateInfo): ParsedUpdate | n
       return { name: 'history_read', data: new HistoryReadUpdate(update) }
     case 'updateBotStopped':
       return { name: 'bot_stopped', data: new BotStoppedUpdate(update, peers) }
+    case 'updateBotStarsSubscription':
+      return { name: 'bot_subscription', data: new BotSubscriptionUpdate(update, peers) }
     case 'updateBotChatInviteRequester':
       return { name: 'bot_chat_join_request', data: new BotChatJoinRequestUpdate(update, peers) }
     case 'updatePendingJoinRequests':
       return { name: 'chat_join_request', data: new ChatJoinRequestUpdate(update, peers) }
+    case 'updateJoinChatWebViewDecision':
+      return { name: 'chat_join_result', data: new ChatJoinResultUpdate(update, peers) }
+    case 'updateManagedBot':
+      return { name: 'managed_bot', data: new ManagedBotUpdate(update, peers) }
     case 'updateBotPrecheckoutQuery':
       return { name: 'pre_checkout_query', data: new PreCheckoutQuery(update, peers) }
     case 'updateStory': {

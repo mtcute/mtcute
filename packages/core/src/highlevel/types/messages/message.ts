@@ -365,6 +365,37 @@ export class Message {
   }
 
   /**
+   * For messages in a saved messages dialog, marked ID of the peer the dialog belongs to.
+   *
+   * For messages in a monoforum (channel direct messages), marked ID of the peer
+   * the monoforum topic belongs to
+   */
+  get savedPeerId(): number | null {
+    return this.raw.savedPeerId ? getMarkedPeerId(this.raw.savedPeerId) : null
+  }
+
+  /**
+   * Peer identified by {@link savedPeerId}, if available
+   *
+   * > Note: in some cases, only {@link savedPeerId} is available, and not this field,
+   * > in which cases please use `tg.getPeer(savedPeerId)` manually
+   */
+  get savedPeer(): Peer | null {
+    if (!this.raw.savedPeerId) return null
+    if (!this._peers.has(this.raw.savedPeerId)) return null
+
+    return parsePeer(this.raw.savedPeerId, this._peers)
+  }
+
+  /**
+   * If set, the client should offer to summarize this message.
+   * Contains the language code of the original message
+   */
+  get summaryFromLanguage(): string | null {
+    return this.raw._ === 'message' ? this.raw.summaryFromLanguage ?? null : null
+  }
+
+  /**
    * Message text or media caption.
    *
    * Empty string for service messages
@@ -602,5 +633,6 @@ memoizeGetters(Message, [
   'factCheck',
   'suggestedPost',
   'guestChatViaFrom',
+  'savedPeer',
 ])
 makeInspectable(Message, ['isScheduled'], ['link'])

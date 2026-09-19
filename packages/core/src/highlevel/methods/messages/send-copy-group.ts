@@ -11,7 +11,7 @@ import { getMessages } from './get-messages.js'
 import { sendMediaGroup } from './send-media-group.js'
 
 // @exported
-export interface SendCopyGroupParams extends CommonSendParams {
+export interface SendCopyGroupParams extends Omit<CommonSendParams, 'scheduleRepeatPeriod' | 'suggestedPost'> {
   /** Destination chat ID */
   toChatId: InputPeerLike
 }

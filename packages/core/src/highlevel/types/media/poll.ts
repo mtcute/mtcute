@@ -1,17 +1,21 @@
 import type { tl } from '../../../tl/index.js'
 import type { MessageMedia } from '../messages/message-media.js'
 
+import type { Peer } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
+import { typed } from '@fuman/utils'
 import Long from 'long'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MessageEntity } from '../messages/message-entity.js'
 import { _messageMediaFromTl } from '../messages/message-media.js'
+import { parsePeer } from '../peers/peer.js'
 
 export class PollAnswer {
   constructor(
     readonly raw: tl.RawPollAnswer,
+    readonly _peers: PeersIndex,
     readonly result?: tl.RawPollAnswerVoters | undefined,
   ) {}
 
@@ -64,13 +68,28 @@ export class PollAnswer {
     return Boolean(this.result?.correct)
   }
 
+  /** Some of the peers who have chosen this answer, if available */
+  get recentVoters(): ReadonlyArray<Peer> {
+    return this.result?.recentVoters?.map(peer => parsePeer(peer, this._peers)) ?? []
+  }
+
   /** Media attached to this answer, if any */
   get media(): MessageMedia | null {
-    return this.raw.media ? _messageMediaFromTl(null, this.raw.media) : null
+    return this.raw.media ? _messageMediaFromTl(this._peers, this.raw.media) : null
+  }
+
+  /** If this answer was suggested by a participant, the peer who added it */
+  get addedBy(): Peer | null {
+    return this.raw.addedBy ? parsePeer(this.raw.addedBy, this._peers) : null
+  }
+
+  /** If this answer was suggested by a participant, the date when it was added */
+  get date(): Date | null {
+    return this.raw.date ? new Date(this.raw.date * 1000) : null
   }
 }
 
-memoizeGetters(PollAnswer, ['textEntities', 'media'])
+memoizeGetters(PollAnswer, ['textEntities', 'media', 'addedBy', 'recentVoters'])
 makeInspectable(PollAnswer)
 
 export class Poll {
@@ -105,18 +124,23 @@ export class Poll {
   }
 
   /**
+   * Hash of the poll, can be passed to {@link TelegramClient.getPollResults}
+   * to avoid re-fetching the poll itself if it didn't change
+   */
+  get hash(): tl.Long {
+    return this.raw.hash
+  }
+
+  /**
    * List of answers in this poll
    */
   get answers(): ReadonlyArray<PollAnswer> {
     const results = this.results?.results
 
-    return this.raw.answers.map((ans, idx) => {
+    return this.raw.answers.map((ans) => {
       assertTypeIs('Poll.answers', ans, 'pollAnswer')
-      if (results) {
-        return new PollAnswer(ans, results[idx])
-      }
 
-      return new PollAnswer(ans)
+      return new PollAnswer(ans, this._peers, results?.find(it => typed.equal(it.option, ans.option)))
     })
   }
 
@@ -125,6 +149,11 @@ export class Poll {
    */
   get voters(): number {
     return this.results?.totalVoters ?? 0
+  }
+
+  /** Some of the peers who have voted in this poll, if available */
+  get recentVoters(): ReadonlyArray<Peer> {
+    return this.results?.recentVoters?.map(peer => parsePeer(peer, this._peers)) ?? []
   }
 
   /**
@@ -164,7 +193,7 @@ export class Poll {
 
   /** Whether new options can be suggested to this poll */
   get canAddAnswers(): boolean {
-    return !this.raw.closed && !this.raw.openAnswers
+    return !this.raw.closed && Boolean(this.raw.openAnswers)
   }
 
   /** Whether retracting the vote is disabled in this poll */
@@ -183,7 +212,7 @@ export class Poll {
   }
 
   /** Whether the poll has unread votes */
-  get hasUnreaVotes(): boolean {
+  get hasUnreadVotes(): boolean {
     return this.results?.hasUnreadVotes ?? false
   }
 
@@ -230,7 +259,7 @@ export class Poll {
 
   /** Media attached to the solution, if any */
   get solutionMedia(): MessageMedia | null {
-    return this.results?.solutionMedia ? _messageMediaFromTl(null, this.results.solutionMedia) : null
+    return this.results?.solutionMedia ? _messageMediaFromTl(this._peers, this.results.solutionMedia) : null
   }
 
   /**
@@ -252,7 +281,6 @@ export class Poll {
     return {
       _: 'inputMediaPoll',
       attachedMedia: this.attachedMedia?.inputMedia,
-      solutionMedia: this.solutionMedia?.inputMedia,
       poll: {
         _: 'poll',
         closed: false,
@@ -260,7 +288,11 @@ export class Poll {
         publicVoters: this.raw.publicVoters,
         multipleChoice: this.raw.multipleChoice,
         question: this.raw.question,
-        answers: this.raw.answers,
+        answers: this.answers.map(ans => ({
+          _: 'inputPollAnswer',
+          text: ans.raw.text,
+          media: ans.media?.inputMedia,
+        })),
         closePeriod: this.raw.closePeriod,
         closeDate: this.raw.closeDate,
         openAnswers: this.raw.openAnswers,
@@ -275,5 +307,5 @@ export class Poll {
   }
 }
 
-memoizeGetters(Poll, ['answers', 'solutionEntities', 'questionEntities', 'solutionMedia'])
+memoizeGetters(Poll, ['answers', 'solutionEntities', 'questionEntities', 'solutionMedia', 'recentVoters'])
 makeInspectable(Poll, ['attachedMedia'], ['inputMedia'])

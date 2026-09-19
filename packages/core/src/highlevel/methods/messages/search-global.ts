@@ -1,10 +1,11 @@
 import type { tl } from '../../../tl/index.js'
 
 import type { ITelegramClient } from '../../client.types.js'
-import type { ArrayPaginated } from '../../types/index.js'
+import type { ArrayPaginated, InputPeerLike } from '../../types/index.js'
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import { Message, PeersIndex, SearchFilters } from '../../types/index.js'
 import { makeArrayPaginated, normalizeDate } from '../../utils/index.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 
 // @exported
 export interface SearchGlobalOffset {
@@ -69,6 +70,11 @@ export async function searchGlobal(
      * Whether to only search across broadcast channels
      */
     onlyChannels?: boolean
+
+    /**
+     * If passed, only search across chats of the given community
+     */
+    communityId?: InputPeerLike
   },
 ): Promise<ArrayPaginated<Message, SearchGlobalOffset>> {
   if (!params) params = {}
@@ -79,6 +85,7 @@ export async function searchGlobal(
     limit = 100,
     offset: { rate: offsetRate, peer: offsetPeer, id: offsetId } = defaultOffset,
     onlyChannels,
+    communityId,
   } = params
 
   const minDate = normalizeDate(params.minDate) ?? 0
@@ -95,6 +102,7 @@ export async function searchGlobal(
     offsetPeer,
     limit,
     broadcastsOnly: onlyChannels,
+    community: communityId ? await resolveChannel(client, communityId) : undefined,
   })
 
   assertTypeIsNot('searchGlobal', res, 'messages.messagesNotModified')

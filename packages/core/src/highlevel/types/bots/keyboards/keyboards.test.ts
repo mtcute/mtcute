@@ -134,7 +134,7 @@ describe('button normalization', () => {
     expect(BotKeyboard._2dToRows([[BotKeyboard.requestPeer('a', 1, { peerType })]])[0].buttons[0]).toEqual({
       _: 'keyboardButton',
       text: 'a',
-      type: { _: 'buttonTypeRequestPeer', buttonId: 1, peerType, maxQuantity: 1 },
+      type: { _: 'inputButtonTypeRequestPeer', buttonId: 1, peerType, maxQuantity: 1 },
     })
     expect(
       BotKeyboard._2dToRows([[BotKeyboard.requestPeer('a', 1, { peerType, nameRequested: true })]])[0].buttons[0],
@@ -150,17 +150,32 @@ describe('button normalization', () => {
       },
     })
   })
+
+  it('should create request managed bot buttons', () => {
+    expect(
+      BotKeyboard._2dToRows([[BotKeyboard.requestManagedBot('a', 1, { suggestedUsername: 'test_bot' })]])[0].buttons[0],
+    ).toEqual({
+      _: 'keyboardButton',
+      text: 'a',
+      type: {
+        _: 'inputButtonTypeRequestPeer',
+        buttonId: 1,
+        peerType: { _: 'requestPeerTypeCreateBot', botManaged: true, suggestedUsername: 'test_bot' },
+        maxQuantity: 1,
+      },
+    })
+  })
 })
 
 describe('button target validity', () => {
-  // authoritative: a reply row is Vector<KeyboardButton> whose `type` is a ButtonType,
+  // authoritative: a reply row is Vector<KeyboardButton> whose `type` is a ButtonType
+  // (the server only accepts the input variant of request peer buttons),
   // an inline row is Vector<KeyboardInlineButton> whose `type` is an InlineButtonType.
   const BUTTON_TYPE = [
     'buttonTypeDefault',
     'buttonTypeRequestPhone',
     'buttonTypeRequestGeoLocation',
     'buttonTypeRequestPoll',
-    'buttonTypeRequestPeer',
     'inputButtonTypeRequestPeer',
     'buttonTypeSimpleWebView',
   ]
@@ -216,8 +231,6 @@ describe('button target validity', () => {
 
   it('should cover every ButtonType the schema allows', () => {
     const produced = new Set(cases.filter(it => it.reply).map(it => replyRows(it.btn)[0].buttons[0].type._))
-    produced.add('inputButtonTypeRequestPeer')
-
     expect([...produced].sort()).toEqual([...BUTTON_TYPE].sort())
   })
 })

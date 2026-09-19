@@ -220,4 +220,52 @@ describe('sendText', () => {
       })
     })
   })
+
+  it('should pass suggested post and schedule repeat period', async () => {
+    const client = new StubTelegramClient()
+
+    await client.registerPeers(stubUser)
+
+    client.respondWith('messages.sendMessage', (req) => {
+      expect(req.scheduleDate).toBe(1700000000)
+      expect(req.scheduleRepeatPeriod).toBe(86400)
+      expect(req.suggestedPost).toEqual({
+        _: 'suggestedPost',
+        price: { _: 'starsAmount', amount: Long.fromNumber(100), nanos: 0 },
+        scheduleDate: 1700001000,
+      })
+
+      return createStub('updates', {
+        users: [stubUser],
+        updates: [
+          {
+            _: 'updateMessageID',
+            randomId: req.randomId,
+            id: 123,
+          },
+          {
+            _: 'updateNewScheduledMessage',
+            message: createStub('message', {
+              id: 123,
+              message: req.message,
+              peerId: { _: 'peerUser', userId: stubUser.id },
+            }),
+          },
+        ],
+      })
+    })
+
+    await client.with(async () => {
+      const msg = await sendText(client, stubUser.id, 'test', {
+        schedule: new Date(1700000000_000),
+        scheduleRepeatPeriod: 86400,
+        suggestedPost: {
+          price: 100,
+          scheduleDate: new Date(1700001000_000),
+        },
+      })
+
+      expect(msg.id).toEqual(123)
+    })
+  })
 })

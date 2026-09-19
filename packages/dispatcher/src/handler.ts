@@ -2,8 +2,10 @@ import type {
   BotReactionCountUpdate,
   BotReactionUpdate,
   BotStoppedUpdate,
+  BotSubscriptionUpdate,
   BusinessConnection,
   ChatJoinRequestUpdate,
+  ChatJoinResultUpdate,
   ChatMemberUpdate,
   DeleteBusinessMessageUpdate,
   DeleteEphemeralMessagesUpdate,
@@ -12,6 +14,7 @@ import type {
   EphemeralCallbackQuery,
   EphemeralMessage,
   HistoryReadUpdate,
+  ManagedBotUpdate,
   MaybePromise,
   PeersIndex,
   PollUpdate,
@@ -79,8 +82,11 @@ export type UserStatusUpdateHandler<T = UpdateContext<UserStatusUpdate>> = Parse
 export type UserTypingHandler<T = UpdateContext<UserTypingUpdate>> = ParsedUpdateHandler<'user_typing', T>
 export type HistoryReadHandler<T = UpdateContext<HistoryReadUpdate>> = ParsedUpdateHandler<'history_read', T>
 export type BotStoppedHandler<T = UpdateContext<BotStoppedUpdate>> = ParsedUpdateHandler<'bot_stopped', T>
+export type BotSubscriptionHandler<T = UpdateContext<BotSubscriptionUpdate>> = ParsedUpdateHandler<'bot_subscription', T>
 export type BotChatJoinRequestHandler<T = ChatJoinRequestUpdateContext> = ParsedUpdateHandler<'bot_chat_join_request', T>
 export type ChatJoinRequestHandler<T = UpdateContext<ChatJoinRequestUpdate>> = ParsedUpdateHandler<'chat_join_request', T>
+export type ChatJoinResultHandler<T = UpdateContext<ChatJoinResultUpdate>> = ParsedUpdateHandler<'chat_join_result', T>
+export type ManagedBotHandler<T = UpdateContext<ManagedBotUpdate>> = ParsedUpdateHandler<'managed_bot', T>
 export type PreCheckoutQueryHandler<T = PreCheckoutQueryContext> = ParsedUpdateHandler<'pre_checkout_query', T>
 export type StoryUpdateHandler<T = UpdateContext<StoryUpdate>> = ParsedUpdateHandler<'story', T>
 export type DeleteStoryHandler<T = UpdateContext<DeleteStoryUpdate>> = ParsedUpdateHandler<'delete_story', T>
@@ -115,8 +121,11 @@ export type UpdateHandler
     | UserTypingHandler
     | HistoryReadHandler
     | BotStoppedHandler
+    | BotSubscriptionHandler
     | BotChatJoinRequestHandler
     | ChatJoinRequestHandler
+    | ChatJoinResultHandler
+    | ManagedBotHandler
     | PreCheckoutQueryHandler
     | StoryUpdateHandler
     | DeleteStoryHandler

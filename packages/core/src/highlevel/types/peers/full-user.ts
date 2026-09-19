@@ -2,6 +2,7 @@ import type { tl } from '../../../tl/index.js'
 
 import type { Audio } from '../media/audio.js'
 import type { TextWithEntities } from '../misc/entities.js'
+import type { ChatTheme } from './chat-theme.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 
 import { memoizeGetters } from '../../utils/memoize.js'
@@ -10,6 +11,7 @@ import { parseDocument } from '../media/document-utils.js'
 import { Photo } from '../media/photo.js'
 import { BusinessAccount } from '../premium/business-account.js'
 import { BotVerification } from './bot-verification.js'
+import { _chatThemeFromTl } from './chat-theme.js'
 import { Chat } from './chat.js'
 import { PeersIndex } from './peers-index.js'
 import { User } from './user.js'
@@ -335,6 +337,25 @@ export class FullUser extends User {
     if (doc.type !== 'audio') return null
     return doc
   }
+
+  /** Theme of the chat with this user, if set */
+  get theme(): ChatTheme | null {
+    if (!this.full.theme) return null
+    return _chatThemeFromTl(this.full.theme, this.peers)
+  }
+
+  /**
+   * Number of stars that the current user must pay for each message sent to this user,
+   * or `null` if messages are free
+   */
+  get outgoingPaidMessagePrice(): tl.Long | null {
+    return this.full.sendPaidMessagesStars ?? null
+  }
+
+  /** Main tab of the user's profile, if set */
+  get mainTab(): tl.TypeProfileTab | null {
+    return this.full.mainTab ?? null
+  }
 }
 
 memoizeGetters(FullUser, [
@@ -347,5 +368,6 @@ memoizeGetters(FullUser, [
   'botVerification',
   'starsRatingPending',
   'lastSavedMusic',
+  'theme',
 ])
 makeInspectable(FullUser)

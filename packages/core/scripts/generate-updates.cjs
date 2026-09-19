@@ -16,28 +16,16 @@ function camelToSnake(s) {
 }
 
 function parseUpdateTypes() {
-  const lines = fs
-    .readFileSync(path.join(__dirname, 'update-types.txt'), 'utf-8')
-    .split('\n')
-    .map(it => it.trim())
-    .filter(it => it && it[0] !== '#')
+  const entries = JSON.parse(fs.readFileSync(path.join(__dirname, 'update-types.json'), 'utf-8'))
 
-  const ret = []
-
-  for (const line of lines) {
-    const m = line.match(/^([a-z_]+)(?:: ([a-zA-Z]+))? = ([a-zA-Z]+(?:\[\])?)( \+ State)?(?: in ([a-zA-Z]+))?$/)
-    if (!m) throw new Error(`invalid syntax: ${line}`)
-    ret.push({
-      typeName: m[1],
-      handlerTypeName: m[2] || camelToPascal(snakeToCamel(m[1])),
-      updateType: m[3],
-      funcName: m[2] ? m[2][0].toLowerCase() + m[2].substr(1) : snakeToCamel(m[1]),
-      state: Boolean(m[4]),
-      context: m[5] ?? `UpdateContext<${m[3]}>`,
-    })
-  }
-
-  return ret
+  return entries.map(({ name, handler, type, state, context }) => ({
+    typeName: name,
+    handlerTypeName: handler ?? camelToPascal(snakeToCamel(name)),
+    updateType: type,
+    funcName: handler ? handler[0].toLowerCase() + handler.substr(1) : snakeToCamel(name),
+    state: Boolean(state),
+    context: context ?? `UpdateContext<${type}>`,
+  }))
 }
 
 function replaceSections(filename, sections, dir = __dirname) {

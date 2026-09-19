@@ -1,6 +1,6 @@
 import type { tl } from '../../../tl/index.js'
 import type { ITelegramClient } from '../../client.types.js'
-import type { InputWebview } from '../../types/bots/webview.js'
+import type { InputWebview, WebviewPlatform, WebviewThemeParams } from '../../types/bots/webview.js'
 
 import type { InputPeerLike } from '../../types/index.js'
 import { asNonNull } from '@fuman/utils'
@@ -10,6 +10,7 @@ import { longToFastString } from '../../../utils/long-utils.js'
 import { WebviewResult } from '../../types/bots/webview.js'
 import { toInputPeer } from '../../utils/peer-utils.js'
 import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
+import { _normalizeWebviewTheme } from './_normalize-webview-theme.js'
 
 const _getWebviewTimerId = (queryId: tl.Long) => `webview:${longToFastString(queryId)}`
 
@@ -34,60 +35,11 @@ export async function openWebview(
      */
     chat?: InputPeerLike
 
-    /**
-     * Theme parameters to pass to the mini app
-     *
-     * Each value should be a string (hex-encoded RGB, no alpha)
-     */
-    theme?: tl.TypeDataJSON | {
-      // https://corefork.telegram.org/api/bots/webapps#theme-parameters
-      /** Background color */
-      bg_color?: string
-      /** Secondary background color */
-      secondary_bg_color?: string
-      /** Text color */
-      text_color?: string
-      /** Hint text color */
-      hint_color?: string
-      /** Link color */
-      link_color?: string
-      /** Button color */
-      button_color?: string
-      /** Button text color */
-      button_text_color?: string
-      /** Header background color */
-      header_bg_color?: string
-      /** Accent text color */
-      accent_text_color?: string
-      /** Section background color */
-      section_bg_color?: string
-      /** Section header text color */
-      section_header_text_color?: string
-      /** Section separator color */
-      section_separator_color?: string
-      /** Sub title text color */
-      subtitle_text_color?: string
-      /** Text color for destructive action buttons in prompts */
-      destructive_text_color?: string
-    }
+    /** Theme parameters to pass to the mini app */
+    theme?: WebviewThemeParams
 
-    /**
-     * Webview platform to use in the init data
-     *
-     * Some of the known values:
-     *  - `android` - Android clients
-     *  - `ios` - iOS clients
-     *  - `tdesktop` - Telegram Desktop
-     *  - `macos` - Telegram for macOS
-     *  - `unigram` - Unigram
-     */
-    platform:
-      | 'android'
-      | 'ios'
-      | 'tdesktop'
-      | 'macos'
-      | 'unigram'
-      | (string & {})
+    /** Webview platform to use in the init data */
+    platform: WebviewPlatform
   },
 ): Promise<WebviewResult> {
   const {
@@ -100,17 +52,7 @@ export async function openWebview(
 
   const botPeer = await resolveUser(client, bot)
 
-  let themeObj: tl.TypeDataJSON | undefined
-  if (theme) {
-    if ('_' in theme) {
-      themeObj = theme
-    } else {
-      themeObj = {
-        _: 'dataJSON',
-        data: JSON.stringify(theme),
-      }
-    }
-  }
+  const themeObj = _normalizeWebviewTheme(theme)
 
   switch (webview.type) {
     case 'main': {

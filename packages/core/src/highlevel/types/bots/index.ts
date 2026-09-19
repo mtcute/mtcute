@@ -1,3 +1,4 @@
+export * from './bot-access-settings.js'
 export * from './command-scope/index.js'
 export * from './game-high-score.js'
 export * from './inline-message/index.js'

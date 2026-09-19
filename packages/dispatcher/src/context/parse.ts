@@ -2,8 +2,10 @@ import type {
   BotReactionCountUpdate,
   BotReactionUpdate,
   BotStoppedUpdate,
+  BotSubscriptionUpdate,
   BusinessConnection,
   ChatJoinRequestUpdate,
+  ChatJoinResultUpdate,
   ChatMemberUpdate,
   DeleteBusinessMessageUpdate,
   DeleteEphemeralMessagesUpdate,
@@ -12,6 +14,7 @@ import type {
   EphemeralCallbackQuery,
   EphemeralMessage,
   HistoryReadUpdate,
+  ManagedBotUpdate,
   ParsedUpdate,
   PollUpdate,
   PollVoteUpdate,
@@ -51,7 +54,10 @@ export type UpdateContextType
       | UserTypingUpdate
       | HistoryReadUpdate
       | BotStoppedUpdate
+      | BotSubscriptionUpdate
       | ChatJoinRequestUpdate
+      | ChatJoinResultUpdate
+      | ManagedBotUpdate
       | StoryUpdate
       | DeleteStoryUpdate
       | BotReactionUpdate

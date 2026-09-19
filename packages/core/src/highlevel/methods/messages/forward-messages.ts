@@ -1,6 +1,7 @@
 import type { tl } from '../../../tl/index.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
+import type { InputSuggestedPost } from './_normalize-suggested-post.js'
 import { MtArgumentError } from '../../../types/errors.js'
 import { randomLong } from '../../../utils/long-utils.js'
 import { Message, PeersIndex } from '../../types/index.js'
@@ -8,6 +9,7 @@ import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
 
 import { resolvePeer } from '../users/resolve-peer.js'
+import { _normalizeInputSuggestedPost } from './_normalize-suggested-post.js'
 import { _normalizeQuickReplyShortcut } from './send-common.js'
 import { _getTypingTimerId } from './set-typing.js'
 
@@ -39,6 +41,16 @@ export interface ForwardMessageOptions {
    * once the peer is online
    */
   schedule?: Date | number
+
+  /**
+   * Period (in seconds) after which a scheduled message will be sent again.
+   * Only used together with {@link schedule} when forwarding a single message,
+   * requires Telegram Premium.
+   *
+   * Must be one of `86400`, `7 * 86400`, `14 * 86400`, `30 * 86400`,
+   * `91 * 86400`, `182 * 86400`, `365 * 86400` (or additionally `60`, `300` on test servers)
+   */
+  scheduleRepeatPeriod?: number
 
   /**
    * Whether to clear draft after sending this message (only used for caption)
@@ -100,6 +112,18 @@ export interface ForwardMessageOptions {
 
   /** Whether the messages being forwarded are ephemeral messages */
   fromEphemeral?: boolean
+
+  /**
+   * ID of a message effect to use when forwarding a single message to a private chat
+   * (see {@link TelegramClient.getAvailableMessageEffects})
+   */
+  effect?: tl.Long
+
+  /**
+   * When forwarding to a channel direct messages chat, information about
+   * the post suggested to the channel
+   */
+  suggestedPost?: InputSuggestedPost
 }
 
 /**
@@ -165,6 +189,9 @@ export async function forwardMessagesById(
     videoTimestamp,
     allowPaidStars: params.allowPaidMessages,
     fromEphemeral: params.fromEphemeral,
+    effect: params.effect,
+    suggestedPost: _normalizeInputSuggestedPost(params.suggestedPost),
+    scheduleRepeatPeriod: params.scheduleRepeatPeriod,
     topMsgId: toThreadId,
     replyTo: toMonoforumPeer
       ? {

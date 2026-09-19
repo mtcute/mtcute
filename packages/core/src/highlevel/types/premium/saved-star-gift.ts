@@ -125,6 +125,14 @@ export class SavedStarGift {
     return this.raw.prepaidUpgradeHash ?? null
   }
 
+  /**
+   * True, if the upgrade was bought after the gift was sent.
+   * In this case, {@link upgradeStars} must not be added to the gift cost
+   */
+  get upgradeSeparate(): boolean {
+    return this.raw.upgradeSeparate!
+  }
+
   /** Number of the gift for limited-offer gifts */
   get giftNum(): number | null {
     return this.raw.giftNum ?? null

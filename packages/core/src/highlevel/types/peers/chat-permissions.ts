@@ -191,6 +191,20 @@ export class ChatPermissions {
   }
 
   /**
+   * Whether users can edit their own custom tag (rank)
+   */
+  get canEditRank(): boolean {
+    return !this.raw.editRank
+  }
+
+  /**
+   * Whether users can change the chats linked to the community
+   */
+  get canManageLinkedPeers(): boolean {
+    return !this.raw.manageLinkedPeers
+  }
+
+  /**
    * UNIX date until which these permissions are valid,
    * or `null` if forever.
    *

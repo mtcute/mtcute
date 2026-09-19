@@ -341,6 +341,36 @@ export class StarGiftUnique {
     return this.raw.valueUsdAmount ?? null
   }
 
+  /** Estimated value of the gift, in the smallest units of the currency */
+  get value(): { amount: tl.Long, currency: string } | null {
+    if (!this.raw.valueAmount || !this.raw.valueCurrency) return null
+    return { amount: this.raw.valueAmount, currency: this.raw.valueCurrency }
+  }
+
+  /** ID of the regular gift from which this gift was upgraded */
+  get regularGiftId(): tl.Long {
+    return this.raw.giftId
+  }
+
+  /** Whether this gift can only be bought using TON */
+  get isResaleTonOnly(): boolean {
+    return this.raw.resaleTonOnly!
+  }
+
+  /** Whether a chat theme based on this gift is available */
+  get isThemeAvailable(): boolean {
+    return this.raw.themeAvailable!
+  }
+
+  /**
+   * Chat where the chat theme based on this gift is currently installed, if any and available
+   */
+  get themePeer(): Peer | null {
+    if (!this.raw.themePeer) return null
+    if (!this._peers.has(this.raw.themePeer)) return null
+    return parsePeer(this.raw.themePeer, this._peers)
+  }
+
   /** Minimum number of stars required to create a purchase offer for the gift */
   get offerMinStars(): number | null {
     return this.raw.offerMinStars ?? null
@@ -356,4 +386,6 @@ memoizeGetters(StarGiftUnique, [
   'resellPriceStars',
   'resellPriceTon',
   'releasedBy',
+  'value',
+  'themePeer',
 ])

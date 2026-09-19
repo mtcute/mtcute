@@ -67,6 +67,14 @@ export class BotChatJoinRequestUpdate {
   get invite(): ChatInviteLink {
     return new ChatInviteLink(this.raw.invite)
   }
+
+  /**
+   * If the bot is a guard bot of the chat, ID of the join query,
+   * which should be answered with {@link TelegramClient.answerChatJoinRequestQuery}
+   */
+  get queryId(): tl.Long | null {
+    return this.raw.queryId ?? null
+  }
 }
 
 memoizeGetters(BotChatJoinRequestUpdate, ['chat', 'user', 'invite'])

@@ -1,8 +1,9 @@
 import type { tl } from '../../../tl/index.js'
 
 import type { ITelegramClient } from '../../client.types.js'
-import type { InputMediaLike, InputPeerLike, InputPrivacyRule, InputText, Story } from '../../types/index.js'
+import type { InputDocumentId, InputMediaAudio, InputMediaLike, InputPeerLike, InputPrivacyRule, InputText, Story } from '../../types/index.js'
 import { randomLong } from '../../../utils/long-utils.js'
+import { _normalizeFileToDocument } from '../files/normalize-file-to-document.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizePrivacyRules } from '../misc/normalize-privacy-rules.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
@@ -71,9 +72,16 @@ export async function sendStory(
      * IDs of albums to add the story to
      */
     addToAlbums?: number[]
+
+    /**
+     * Music to attach to the story.
+     *
+     * Can be an already uploaded audio file (e.g. File ID), or a new audio to upload
+     */
+    music?: InputMediaAudio | InputDocumentId
   },
 ): Promise<Story> {
-  const { peer = 'me', pinned, forbidForwards, interactiveElements, period, addToAlbums } = params
+  const { peer = 'me', pinned, forbidForwards, interactiveElements, period, addToAlbums, music } = params
   let { media } = params
 
   if (typeof media === 'string') {
@@ -108,6 +116,7 @@ export async function sendStory(
     randomId: randomLong(),
     period,
     albums: addToAlbums,
+    music: music ? await _normalizeFileToDocument(client, music, { uploadPeer: { _: 'inputPeerSelf' } }) : undefined,
   })
 
   return _findStoryInUpdate(client, res)

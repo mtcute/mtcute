@@ -2,11 +2,16 @@ import type { tl } from '../../../tl/index.js'
 
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/index.js'
+import type { InputSuggestedPost } from '../messages/_normalize-suggested-post.js'
+import { _normalizeInputSuggestedPost } from '../messages/_normalize-suggested-post.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 // @exported
-export type DraftMessageInput = Omit<tl.RawDraftMessage, '_' | 'date' | 'richMessage'> & {
+export type DraftMessageInput = Omit<tl.RawDraftMessage, '_' | 'date' | 'richMessage' | 'suggestedPost'> & {
   richMessage?: tl.TypeInputRichMessage
+
+  /** Information about the post suggested to a channel via its direct messages chat */
+  suggestedPost?: InputSuggestedPost
 }
 
 /**
@@ -27,6 +32,7 @@ export async function saveDraft(
       _: 'messages.saveDraft',
       peer,
       ...draft,
+      suggestedPost: _normalizeInputSuggestedPost(draft.suggestedPost),
     })
   } else {
     await client.call({

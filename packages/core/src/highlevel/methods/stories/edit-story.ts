@@ -1,7 +1,8 @@
 import type { tl } from '../../../tl/index.js'
 
 import type { ITelegramClient } from '../../client.types.js'
-import type { InputMediaLike, InputPeerLike, InputPrivacyRule, InputText, Story } from '../../types/index.js'
+import type { InputDocumentId, InputMediaAudio, InputMediaLike, InputPeerLike, InputPrivacyRule, InputText, Story } from '../../types/index.js'
+import { _normalizeFileToDocument } from '../files/normalize-file-to-document.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizePrivacyRules } from '../misc/normalize-privacy-rules.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
@@ -50,9 +51,16 @@ export async function editStory(
      * @default  "Everyone"
      */
     privacyRules?: InputPrivacyRule[]
+
+    /**
+     * Music to attach to the story.
+     *
+     * Can be an already uploaded audio file (e.g. File ID), or a new audio to upload
+     */
+    music?: InputMediaAudio | InputDocumentId
   },
 ): Promise<Story> {
-  const { id, peer = 'me', interactiveElements } = params
+  const { id, peer = 'me', interactiveElements, music } = params
 
   let caption: string | undefined
   let entities: tl.TypeMessageEntity[] | undefined
@@ -83,6 +91,7 @@ export async function editStory(
     caption,
     entities,
     privacyRules,
+    music: music ? await _normalizeFileToDocument(client, music, { uploadPeer: { _: 'inputPeerSelf' } }) : undefined,
   })
 
   return _findStoryInUpdate(client, res)

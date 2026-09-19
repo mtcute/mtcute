@@ -85,20 +85,11 @@ function toReplyButtonType(btn: BotKeyboardButton): tl.TypeButtonType {
     case 'webview':
       return { _: 'buttonTypeSimpleWebView', url: btn.url }
     case 'request_peer':
-      if (btn.nameRequested || btn.usernameRequested || btn.photoRequested) {
-        return {
-          _: 'inputButtonTypeRequestPeer',
-          nameRequested: btn.nameRequested,
-          usernameRequested: btn.usernameRequested,
-          photoRequested: btn.photoRequested,
-          buttonId: btn.buttonId,
-          peerType: btn.peerType,
-          maxQuantity: btn.count ?? 1,
-        }
-      }
-
       return {
-        _: 'buttonTypeRequestPeer',
+        _: 'inputButtonTypeRequestPeer',
+        nameRequested: btn.nameRequested,
+        usernameRequested: btn.usernameRequested,
+        photoRequested: btn.photoRequested,
         buttonId: btn.buttonId,
         peerType: btn.peerType,
         maxQuantity: btn.count ?? 1,

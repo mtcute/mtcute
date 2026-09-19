@@ -169,6 +169,42 @@ export function requestPeer(
 }
 
 /**
+ * Button requesting the user to create a new bot managed by the current bot.
+ * Available only in private chats.
+ *
+ * Once the bot is created, it will be sent to the bot in a service message,
+ * same as with {@link requestPeer}
+ *
+ * Used for reply keyboards, not inline!
+ *
+ * @param text  Text of the button
+ * @param buttonId  ID of the button that will later be passed to the service message
+ */
+export function requestManagedBot(
+  text: string,
+  buttonId: number,
+  params?: ButtonOptions & {
+    /** Suggested name for the bot */
+    suggestedName?: string
+    /** Suggested username for the bot */
+    suggestedUsername?: string
+  },
+): RequestPeerButton {
+  return {
+    type: 'request_peer',
+    text,
+    buttonId,
+    peerType: {
+      _: 'requestPeerTypeCreateBot',
+      botManaged: true,
+      suggestedName: params?.suggestedName,
+      suggestedUsername: params?.suggestedUsername,
+    },
+    style: params?.style,
+  }
+}
+
+/**
  * Create a keyboard button with a link.
  *
  * Used for inline keyboards, not reply!

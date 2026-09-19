@@ -1,13 +1,13 @@
 import type { MaybeArray } from '../../../types/utils.js'
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputMessageId } from '../../types/index.js'
-import { MtArgumentError, MtTypeAssertionError } from '../../../types/errors.js'
+import { MtArgumentError } from '../../../types/errors.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
-import { assertTypeIs, assertTypeIsNot } from '../../../utils/type-assertions.js'
-import { MtMessageNotFoundError, normalizeInputMessageId, PeersIndex, Poll } from '../../types/index.js'
-import { assertIsUpdatesGroup } from '../../updates/utils.js'
+import { assertTypeIsNot } from '../../../utils/type-assertions.js'
+import { MtMessageNotFoundError, normalizeInputMessageId, Poll } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
+import { _findPollInUpdate } from './find-poll-in-update.js'
 import { getMessages } from './get-messages.js'
 
 /**
@@ -65,18 +65,5 @@ export async function sendVote(
     options: options as Uint8Array[],
   })
 
-  assertIsUpdatesGroup('messages.sendVote', res)
-
-  client.handleClientUpdate(res, true)
-
-  const upd = res.updates[0]
-  assertTypeIs('messages.sendVote (@ .updates[0])', upd, 'updateMessagePoll')
-
-  if (!upd.poll) {
-    throw new MtTypeAssertionError('messages.sendVote (@ .updates[0].poll)', 'poll', 'undefined')
-  }
-
-  const peers = PeersIndex.from(res)
-
-  return new Poll(upd.poll, peers, upd.results)
+  return _findPollInUpdate(client, 'messages.sendVote', res, true, poll)
 }

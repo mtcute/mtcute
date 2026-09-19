@@ -6,6 +6,7 @@ import type { MaybeArray, MaybePromise, PartialExcept, PartialOnly } from '../ty
 import type { BaseTelegramClientOptions } from './base.js'
 import type { ITelegramClient } from './client.types.js'
 import type { LogOutResult } from './methods/auth/log-out.js'
+import type { ChatJoinRequestQueryAnswer } from './methods/bots/answer-chat-join-request-query.js'
 import type { CreateGroupResult } from './methods/chats/create-group.js'
 import type { JoinChatResult } from './methods/chats/join-chat.js'
 import type { DraftMessageInput } from './methods/chats/save-draft.js'
@@ -32,7 +33,7 @@ import type { InputStarsAmount } from './methods/premium/_normalize-stars-amount
 import type { CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
 import type { CanSendStoryResult } from './methods/stories/can-send-story.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
-import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotGuestChatQuery, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, CommunityPeerRequest, DeleteBusinessMessageUpdate, DeleteEphemeralMessagesUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, EphemeralCallbackQuery, EphemeralMessage, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineMessage, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputRichMessage, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, RichMediaUploadCache, SavedStarGift, SendableTypingStatus, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
+import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotAccessSettings, BotChatJoinRequestUpdate, BotCommands, BotGuestChatQuery, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BotSubscriptionUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatJoinResultUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, CommunityPeerRequest, DeleteBusinessMessageUpdate, DeleteEphemeralMessagesUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, EphemeralCallbackQuery, EphemeralMessage, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineMessage, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPollAnswer, InputPrivacyRule, InputReaction, InputReplyKeyboardButton, InputRichMessage, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, ManagedBotUpdate, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, RichMediaUploadCache, SavedStarGift, SendableTypingStatus, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, StatsGraph, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewPlatform, WebviewResult, WebviewThemeParams } from './types/index.js'
 import type { ParsedUpdateHandlerParams } from './updates/parsed.js'
 import type { RawUpdateInfo } from './updates/types.js'
 import type { InputStringSessionData } from './utils/string-session.js'
@@ -55,19 +56,28 @@ import { start } from './methods/auth/start.js'
 import { isSelfPeer } from './methods/auth/utils.js'
 import { answerBotGuestChatQuery } from './methods/bots/answer-bot-guest-chat-query.js'
 import { answerCallbackQuery } from './methods/bots/answer-callback-query.js'
+import { answerChatJoinRequestQuery } from './methods/bots/answer-chat-join-request-query.js'
 import { answerInlineQuery } from './methods/bots/answer-inline-query.js'
 import { answerPreCheckoutQuery } from './methods/bots/answer-pre-checkout-query.js'
+import { checkBotUsername } from './methods/bots/check-bot-username.js'
+import { createBot } from './methods/bots/create-bot.js'
 import { deleteMyCommands } from './methods/bots/delete-my-commands.js'
 import { getBotInfo } from './methods/bots/get-bot-info.js'
 import { getBotMenuButton } from './methods/bots/get-bot-menu-button.js'
 import { getCallbackAnswer } from './methods/bots/get-callback-answer.js'
 import { getGameHighScores, getInlineGameHighScores } from './methods/bots/get-game-high-scores.js'
+import { getManagedBotAccessSettings } from './methods/bots/get-managed-bot-access-settings.js'
+import { getManagedBotToken } from './methods/bots/get-managed-bot-token.js'
 import { getMyCommands } from './methods/bots/get-my-commands.js'
+import { getPreparedKeyboardButton } from './methods/bots/get-prepared-keyboard-button.js'
+import { openJoinChatWebview } from './methods/bots/open-join-chat-webview.js'
 import { closeWebview, openWebview } from './methods/bots/open-webview.js'
 import { prepareInlineMessage } from './methods/bots/prepare-inline-message.js'
+import { prepareKeyboardButton } from './methods/bots/prepare-keyboard-button.js'
 import { setBotInfo } from './methods/bots/set-bot-info.js'
 import { setBotMenuButton } from './methods/bots/set-bot-menu-button.js'
 import { setGameScore, setInlineGameScore } from './methods/bots/set-game-score.js'
+import { setManagedBotAccessSettings } from './methods/bots/set-managed-bot-access-settings.js'
 import { setMyCommands } from './methods/bots/set-my-commands.js'
 import { setMyDefaultRights } from './methods/bots/set-my-default-rights.js'
 import { toggleEmojiStatusPermission } from './methods/bots/toggle-emoji-status-permission.js'
@@ -205,11 +215,14 @@ import { hideJoinRequest } from './methods/invite-links/hide-join-request.js'
 import { iterInviteLinkMembers } from './methods/invite-links/iter-invite-link-members.js'
 import { iterInviteLinks } from './methods/invite-links/iter-invite-links.js'
 import { revokeInviteLink } from './methods/invite-links/revoke-invite-link.js'
+import { addPollAnswer } from './methods/messages/add-poll-answer.js'
 import { appendTodoList } from './methods/messages/append-todo-list.js'
 import { closePoll } from './methods/messages/close-poll.js'
 import { createRichStreamingDraft } from './methods/messages/create-rich-streaming-draft.js'
 import { createStreamingDraft } from './methods/messages/create-streaming-draft.js'
 import { deleteMessages, deleteMessagesById } from './methods/messages/delete-messages.js'
+import { deletePollAnswer } from './methods/messages/delete-poll-answer.js'
+import { deleteMessageReactionsFromSender, deleteRecentReactionsFromSender } from './methods/messages/delete-reactions-from-sender.js'
 import { deleteScheduledMessages } from './methods/messages/delete-scheduled-messages.js'
 import { editInlineMessage } from './methods/messages/edit-inline-message.js'
 import { editMessage } from './methods/messages/edit-message.js'
@@ -225,16 +238,21 @@ import { getMessageGroup } from './methods/messages/get-message-group.js'
 import { getMessageReactions, getMessageReactionsById } from './methods/messages/get-message-reactions.js'
 import { getMessagesUnsafe } from './methods/messages/get-messages-unsafe.js'
 import { getMessages } from './methods/messages/get-messages.js'
+import { getPollResults } from './methods/messages/get-poll-results.js'
+import { getPollStats } from './methods/messages/get-poll-stats.js'
 import { getReactionUsers } from './methods/messages/get-reaction-users.js'
 import { getReplyTo } from './methods/messages/get-reply-to.js'
 import { getScheduledMessages } from './methods/messages/get-scheduled-messages.js'
+import { getUnreadPollVotes } from './methods/messages/get-unread-poll-votes.js'
 import { getWebPagePreview } from './methods/messages/get-web-page-preview.js'
 import { iterHistory } from './methods/messages/iter-history.js'
 import { iterReactionUsers } from './methods/messages/iter-reaction-users.js'
 import { iterSearchGlobal } from './methods/messages/iter-search-global.js'
 import { iterSearchMessages } from './methods/messages/iter-search-messages.js'
+import { iterUnreadPollVotes } from './methods/messages/iter-unread-poll-votes.js'
 import { pinMessage } from './methods/messages/pin-message.js'
 import { readHistory } from './methods/messages/read-history.js'
+import { readPollVotes } from './methods/messages/read-poll-votes.js'
 import { readReactions } from './methods/messages/read-reactions.js'
 import { searchGlobal } from './methods/messages/search-global.js'
 import { iterSearchHashtag, searchHashtag } from './methods/messages/search-hashtag.js'
@@ -256,6 +274,7 @@ import { sendText } from './methods/messages/send-text.js'
 import { sendTyping } from './methods/messages/send-typing.js'
 import { sendVote } from './methods/messages/send-vote.js'
 import { setTyping } from './methods/messages/set-typing.js'
+import { approveSuggestedPost, declineSuggestedPost } from './methods/messages/toggle-suggested-post-approval.js'
 import { toggleTodoCompleted } from './methods/messages/toggle-todo-completed.js'
 import { translateMessage } from './methods/messages/translate-message.js'
 import { translateText } from './methods/messages/translate-text.js'
@@ -324,7 +343,7 @@ import { getMyUsername } from './methods/users/get-my-username.js'
 import { getPeerSettings } from './methods/users/get-peer-settings.js'
 import { getProfilePhoto } from './methods/users/get-profile-photo.js'
 import { getProfilePhotos } from './methods/users/get-profile-photos.js'
-import { getSavedMusic } from './methods/users/get-saved-music.js'
+import { getSavedMusic, getSavedMusicById, getSavedMusicIds } from './methods/users/get-saved-music.js'
 import { getUsers } from './methods/users/get-users.js'
 import { isPeerAvailable } from './methods/users/is-peer-available.js'
 import { iterProfilePhotos } from './methods/users/iter-profile-photos.js'
@@ -414,10 +433,16 @@ export interface TelegramClient extends ITelegramClient {
   readonly onHistoryRead: Emitter<HistoryReadUpdate>
   /** a bot stopped handler */
   readonly onBotStopped: Emitter<BotStoppedUpdate>
+  /** a bot subscription handler */
+  readonly onBotSubscription: Emitter<BotSubscriptionUpdate>
   /** a bot chat join request handler */
   readonly onBotChatJoinRequest: Emitter<BotChatJoinRequestUpdate>
   /** a chat join request handler */
   readonly onChatJoinRequest: Emitter<ChatJoinRequestUpdate>
+  /** a chat join result handler */
+  readonly onChatJoinResult: Emitter<ChatJoinResultUpdate>
+  /** a managed bot handler */
+  readonly onManagedBot: Emitter<ManagedBotUpdate>
   /** a pre checkout query handler */
   readonly onPreCheckoutQuery: Emitter<PreCheckoutQuery>
   /** a story update handler */
@@ -820,6 +845,18 @@ export interface TelegramClient extends ITelegramClient {
       url?: string
     }): Promise<void>
   /**
+   * Answer a chat join request query received by a guard bot
+   * (see {@link BotChatJoinRequestUpdate.queryId})
+   *
+   * **Available**: 🤖 bots only
+   *
+   * @param queryId  ID of the query, or the join request update itself
+   * @param answer  Decision about the join request
+   */
+  answerChatJoinRequestQuery(
+    queryId: tl.Long | BotChatJoinRequestUpdate,
+    answer: ChatJoinRequestQueryAnswer): Promise<void>
+  /**
    * Answer an inline query.
    *
    * **Available**: 🤖 bots only
@@ -928,6 +965,40 @@ export interface TelegramClient extends ITelegramClient {
     /** If pre-checkout is rejected, error message to show to the user */
       error?: string
     }): Promise<void>
+  /**
+   * Check whether a username can be used for a new bot
+   * (e.g. when creating it via {@link createBot})
+   *
+   * **Available**: 👤 users only
+   *
+   * @param username  Username to check (must end with `bot`)
+   */
+  checkBotUsername(username: string): Promise<boolean>
+  /**
+   * Create a new bot owned by the current user, which will be managed by another bot
+   * (e.g. after pressing a button created with {@link BotKeyboard.requestManagedBot})
+   *
+   * **Available**: 👤 users only
+   *
+   * @returns  The created bot
+   */
+  createBot(
+    params: {
+    /** Bot that will manage the created bot */
+      manager: InputPeerLike
+
+      /** Name of the bot (1-64 characters) */
+      name: string
+
+      /**
+       * Username of the bot (must end with `bot`).
+       * Use {@link checkBotUsername} to check if it is available
+       */
+      username: string
+
+      /** Whether the bot is created from a `t.me/newbot` deep link */
+      viaDeeplink?: boolean
+    }): Promise<User>
   /**
    * Delete commands for the current bot and the given scope.
    *
@@ -1043,6 +1114,28 @@ export interface TelegramClient extends ITelegramClient {
     messageId: string | tl.TypeInputBotInlineMessageID,
     userId?: InputPeerLike): Promise<GameHighScore[]>
   /**
+   * Get access settings of a bot managed by the current bot
+   *
+   * **Available**: 🤖 bots only
+   *
+   * @param botId  ID of the managed bot
+   */
+  getManagedBotAccessSettings(
+    botId: InputPeerLike): Promise<BotAccessSettings>
+  /**
+   * Get the token of a bot managed by the current bot
+   *
+   * **Available**: 🤖 bots only
+   *
+   * @param botId  ID of the managed bot
+   */
+  getManagedBotToken(
+    botId: InputPeerLike,
+    params?: {
+    /** Whether to revoke the current token and generate a new one */
+      revoke?: boolean
+    }): Promise<string>
+  /**
    * Get a list of current bot's commands for the given command scope
    * and user language. If they are not set, empty set is returned.
    *
@@ -1065,6 +1158,37 @@ export interface TelegramClient extends ITelegramClient {
       langCode?: string
     }): Promise<tl.RawBotCommand[]>
   /**
+   * Get a keyboard button prepared by a bot for the current user
+   * (see {@link prepareKeyboardButton})
+   *
+   * **Available**: 👤 users only
+   *
+   * @param botId  Bot that prepared the button
+   * @param preparedId  ID of the prepared button
+   */
+  getPreparedKeyboardButton(
+    botId: InputPeerLike,
+    preparedId: string): Promise<tl.TypeKeyboardButton>
+
+  /**
+   * Open a webview of a guard bot, after {@link joinChat} returned `status: 'webview'`.
+   *
+   * Once the bot makes a decision, a {@link ChatJoinResultUpdate} will be sent.
+   * **Available**: 👤 users only
+   *
+   */
+  openJoinChatWebview(
+    params: {
+    /** ID of the join query, as returned by {@link joinChat} */
+      queryId: tl.Long
+
+      /** Theme parameters to pass to the mini app */
+      theme?: WebviewThemeParams
+
+      /** Webview platform to use in the init data */
+      platform: WebviewPlatform
+    }): Promise<WebviewResult>
+  /**
    * Open a webview.
    * **Available**: 👤 users only
    *
@@ -1086,60 +1210,11 @@ export interface TelegramClient extends ITelegramClient {
        */
       chat?: InputPeerLike
 
-      /**
-       * Theme parameters to pass to the mini app
-       *
-       * Each value should be a string (hex-encoded RGB, no alpha)
-       */
-      theme?: tl.TypeDataJSON | {
-      // https://corefork.telegram.org/api/bots/webapps#theme-parameters
-      /** Background color */
-        bg_color?: string
-        /** Secondary background color */
-        secondary_bg_color?: string
-        /** Text color */
-        text_color?: string
-        /** Hint text color */
-        hint_color?: string
-        /** Link color */
-        link_color?: string
-        /** Button color */
-        button_color?: string
-        /** Button text color */
-        button_text_color?: string
-        /** Header background color */
-        header_bg_color?: string
-        /** Accent text color */
-        accent_text_color?: string
-        /** Section background color */
-        section_bg_color?: string
-        /** Section header text color */
-        section_header_text_color?: string
-        /** Section separator color */
-        section_separator_color?: string
-        /** Sub title text color */
-        subtitle_text_color?: string
-        /** Text color for destructive action buttons in prompts */
-        destructive_text_color?: string
-      }
+      /** Theme parameters to pass to the mini app */
+      theme?: WebviewThemeParams
 
-      /**
-       * Webview platform to use in the init data
-       *
-       * Some of the known values:
-       *  - `android` - Android clients
-       *  - `ios` - iOS clients
-       *  - `tdesktop` - Telegram Desktop
-       *  - `macos` - Telegram for macOS
-       *  - `unigram` - Unigram
-       */
-      platform:
-        | 'android'
-        | 'ios'
-        | 'tdesktop'
-        | 'macos'
-        | 'unigram'
-        | (string & {})
+      /** Webview platform to use in the init data */
+      platform: WebviewPlatform
     }): Promise<WebviewResult>
   /**
    * Close a webview previously opened by {@link openWebview} method.
@@ -1182,6 +1257,21 @@ export interface TelegramClient extends ITelegramClient {
         channels?: boolean
       }
     }): Promise<tl.messages.TypeBotPreparedInlineMessage>
+  /**
+   * Prepare a keyboard button to be shown to the user later from the bot's mini app.
+   *
+   * Only {@link BotKeyboard.requestPeer} and {@link BotKeyboard.requestManagedBot}
+   * buttons are supported.
+   *
+   * **Available**: 🤖 bots only
+   *
+   * @param userId  User to whom the button will be shown
+   * @param button  The button to prepare
+   * @returns  ID of the prepared button
+   */
+  prepareKeyboardButton(
+    userId: InputPeerLike,
+    button: InputReplyKeyboardButton): Promise<string>
   /**
    * Sets information about a bot the current uzer owns (or the current bot)
    * **Available**: ✅ both users and bots
@@ -1279,6 +1369,22 @@ export interface TelegramClient extends ITelegramClient {
        * This can be useful when fixing mistakes or banning cheaters
        */
       force?: boolean
+    }): Promise<void>
+  /**
+   * Set access settings of a bot managed by the current bot
+   *
+   * **Available**: 🤖 bots only
+   *
+   * @param botId  ID of the managed bot
+   */
+  setManagedBotAccessSettings(
+    botId: InputPeerLike,
+    params: {
+    /** Whether access to the bot should be restricted to its owner and {@link users} */
+      restricted: boolean
+
+      /** Users that can use the bot in addition to its owner (replaces the current list) */
+      users?: InputPeerLike[]
     }): Promise<void>
   /**
    * Set or delete commands for the current bot and the given scope
@@ -1915,7 +2021,15 @@ export interface TelegramClient extends ITelegramClient {
    *
    * @param chatId  Chat ID
    */
-  markChatUnread(chatId: InputPeerLike): Promise<void>
+  markChatUnread(
+    chatId: InputPeerLike,
+    params?: {
+    /**
+     * For saved messages and monoforums (channel direct messages),
+     * peer identifying the topic to mark as unread
+     */
+      topicPeer?: InputPeerLike
+    }): Promise<void>
   /**
    * Inform the library that the user has opened a chat.
    *
@@ -2175,8 +2289,9 @@ export interface TelegramClient extends ITelegramClient {
   /**
    * Set whether a channel/supergroup has join requests enabled.
    *
-   * > **Note**: this method only affects primary invite links.
-   * > Additional invite links may exist with the opposite setting.
+   * > **Note**: by default, this method only affects primary invite links.
+   * > Additional invite links may exist with the opposite setting,
+   * > unless {@link applyToInviteLinks} is passed.
    *
    * **Available**: 👤 users only
    *
@@ -2184,7 +2299,21 @@ export interface TelegramClient extends ITelegramClient {
    * @param [enabled=false]  Whether join requests should be enabled
    */
   toggleJoinRequests(
-    chatId: InputPeerLike, enabled?: boolean): Promise<void>
+    chatId: InputPeerLike, enabled?: boolean,
+    params?: {
+    /**
+     * Bot that will be the guard bot in the group, i.e. will approve or decline
+     * join requests. Ignored if {@link enabled} is `false`.
+     *
+     * The bot must be an admin with `inviteUsers` right, and must be marked as a guard bot.
+     */
+      guardBot?: InputPeerLike
+
+      /**
+       * Whether to apply the change to the existing invite links, including the primary one
+       */
+      applyToInviteLinks?: boolean
+    }): Promise<void>
   /**
    * Set whether a channel/supergroup has join-to-send setting enabled.
    *
@@ -4111,6 +4240,32 @@ export interface TelegramClient extends ITelegramClient {
     chatId: InputPeerLike,
     link: string | ChatInviteLink): Promise<ChatInviteLink>
   /**
+   * Suggest a new answer to a poll.
+   *
+   * Only possible in polls with {@link Poll.canAddAnswers} set
+   * **Available**: 👤 users only
+   *
+   */
+  addPollAnswer(
+    params: InputMessageId & {
+    /** The answer to add */
+      answer: InputText | InputPollAnswer | tl.TypePollAnswer
+
+      /**
+       * Whether to dispatch the updates that will be generated by this call
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+
+      /**
+       * Upload progress callback for the answer media
+       *
+       * @param uploaded  Number of bytes uploaded
+       * @param total  Total file size
+       */
+      progressCallback?: (uploaded: number, total: number) => void
+    }): Promise<void>
+  /**
    * Append item(s) to a todo list
    *
    * **Available**: 👤 users only
@@ -4232,6 +4387,53 @@ export interface TelegramClient extends ITelegramClient {
     messages: Message[],
     params?: DeleteMessagesParams): Promise<void>
   /**
+   * Delete an answer that was suggested to a poll
+   * **Available**: 👤 users only
+   *
+   */
+  deletePollAnswer(
+    params: InputMessageId & {
+    /** Data of the answer to delete (see {@link PollAnswer.data}) */
+      option: Uint8Array
+
+      /**
+       * Whether to dispatch the updates that will be generated by this call
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+    }): Promise<void>
+  /**
+   * Delete all reactions added by the given sender on a message.
+   *
+   * Requires the `deleteMessages` admin right.
+   * **Available**: ✅ both users and bots
+   *
+   */
+  deleteMessageReactionsFromSender(
+    params: InputMessageId & {
+    /** Sender whose reactions should be deleted */
+      sender: InputPeerLike
+
+      /**
+       * Whether to dispatch updates that will be generated by this call.
+       * Doesn't follow `disableNoDispatch`
+       */
+      shouldDispatch?: true
+    }): Promise<void>
+  /**
+   * Delete all recent reactions added by the given sender in a chat.
+   *
+   * Only supported for groups and supergroups, requires the `deleteMessages` admin right.
+   *
+   * **Available**: ✅ both users and bots
+   *
+   * @param chatId  Chat ID
+   * @param senderId  Sender whose reactions should be deleted
+   */
+  deleteRecentReactionsFromSender(
+    chatId: InputPeerLike,
+    senderId: InputPeerLike): Promise<void>
+  /**
    * Delete scheduled messages by their IDs.
    *
    * **Available**: 👤 users only
@@ -4272,6 +4474,9 @@ export interface TelegramClient extends ITelegramClient {
        */
       media?: InputMediaLike
 
+      /** New rich message content */
+      richMessage?: InputRichMessage
+
       /**
        * Whether to disable links preview in this message
        */
@@ -4292,12 +4497,15 @@ export interface TelegramClient extends ITelegramClient {
       replyMarkup?: ReplyMarkup
 
       /**
-       * For media, upload progress callback.
+       * For media and rich message attachments, upload progress callback.
        *
        * @param uploaded  Number of bytes uploaded
        * @param total  Total file size in bytes
        */
-      progressCallback?: (uploaded: number, total: number) => void
+      progressCallback?: (uploaded: number, total: number, id?: string) => void
+
+      /** Cache for uploaded rich message media, see {@link createRichStreamingDraft} */
+      uploadCache?: RichMediaUploadCache
     }): Promise<void>
   /**
    * Edit message text, media, reply markup and schedule date.
@@ -4341,6 +4549,12 @@ export interface TelegramClient extends ITelegramClient {
        * When passing a number, a UNIX time in ms is expected.
        */
       scheduleDate?: Date | number
+
+      /**
+       * For scheduled messages: new period (in seconds) after which
+       * the message will be sent again. Requires Telegram Premium.
+       */
+      scheduleRepeatPeriod?: number
 
       /**
        * For media and rich message attachments, upload progress callback.
@@ -4611,6 +4825,39 @@ export interface TelegramClient extends ITelegramClient {
     chatId: InputPeerLike,
     messageIds: MaybeArray<number>, fromReply?: boolean): Promise<(Message | null)[]>
   /**
+   * Get the latest results of a poll.
+   *
+   * If the message object is passed (or {@link poll} is set), the poll itself
+   * will only be re-fetched if it has changed
+   * **Available**: 👤 users only
+   *
+   */
+  getPollResults(
+    params: InputMessageId & {
+    /** The currently known version of the poll */
+      poll?: Poll
+
+      /**
+       * Whether to dispatch the poll update
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+    }): Promise<Poll>
+  /**
+   * Get statistics of the votes in a poll.
+   *
+   * Only available if {@link Poll.canViewStats} is set
+   *
+   * **Available**: 👤 users only
+   *
+   * @returns  Graph of the votes over time
+   */
+  getPollStats(
+    params: InputMessageId & {
+    /** Whether the graph should be generated for a dark theme */
+      dark?: boolean
+    }): Promise<StatsGraph>
+  /**
    * Get users who have reacted to the message.
    *
    * **Available**: 👤 users only
@@ -4660,6 +4907,54 @@ export interface TelegramClient extends ITelegramClient {
   getScheduledMessages(
     chatId: InputPeerLike,
     messageIds: MaybeArray<number>): Promise<(Message | null)[]>
+  /**
+   * Get messages containing polls with unread votes in a chat
+   *
+   * **Available**: 👤 users only
+   *
+   * @param chatId  Chat ID
+   */
+  getUnreadPollVotes(
+    chatId: InputPeerLike,
+    params?: {
+    /** If passed, only polls in this thread (topic) will be returned */
+      threadId?: number
+
+      /**
+       * Offset message ID. Only messages earlier than this ID will be returned.
+       *
+       * @default  `0` (starting from the latest message)
+       */
+      offset?: number
+
+      /**
+       * Additional offset from {@link offset}, in resulting messages
+       *
+       * @default  `0`
+       */
+      addOffset?: number
+
+      /**
+       * Minimum message ID to return
+       *
+       * @default  `0` (disabled)
+       */
+      minId?: number
+
+      /**
+       * Maximum message ID to return
+       *
+       * @default  `0` (disabled)
+       */
+      maxId?: number
+
+      /**
+       * Maximum number of messages to return
+       *
+       * @default  100
+       */
+      limit?: number
+    }): Promise<ArrayPaginated<Message, number>>
   /**
    * Get a preview of a web page contained in the message
    *
@@ -4777,6 +5072,33 @@ export interface TelegramClient extends ITelegramClient {
       chunkSize?: number
     }): AsyncIterableIterator<Message>
   /**
+   * Iterate over messages containing polls with unread votes in a chat
+   *
+   * Iterable version of {@link getUnreadPollVotes}
+   *
+   * **Available**: 👤 users only
+   *
+   * @param chatId  Chat ID
+   */
+  iterUnreadPollVotes(
+    chatId: InputPeerLike,
+    params?: Parameters<typeof getUnreadPollVotes>[2] & {
+    /**
+     * Limits the number of messages to be retrieved.
+     *
+     * @default  `Infinity`, i.e. all messages are returned
+     */
+      limit?: number
+
+      /**
+       * Chunk size, which will be passed as `limit` parameter
+       * for `messages.getUnreadPollVotes`. Usually you shouldn't care about this.
+       *
+       * @default  `100`
+       */
+      chunkSize?: number
+    }): AsyncIterableIterator<Message>
+  /**
    * Pin a message in a group, supergroup, channel or PM.
    *
    * For supergroups/channels, you must have appropriate permissions,
@@ -4828,6 +5150,25 @@ export interface TelegramClient extends ITelegramClient {
       shouldDispatch?: true
     }): Promise<void>
   /**
+   * Mark all unread poll votes in chat as read.
+   *
+   * **Available**: 👤 users only
+   *
+   * @param chatId  Chat ID
+   */
+  readPollVotes(
+    chatId: InputPeerLike,
+    params?: {
+    /** If passed, only votes in polls in this thread (topic) will be marked as read */
+      threadId?: number
+
+      /**
+       * Whether to dispatch updates that will be generated by this call.
+       * Doesn't follow `disableNoDispatch`
+       */
+      shouldDispatch?: true
+    }): Promise<void>
+  /**
    * Mark all reactions in chat as read.
    *
    * **Available**: 👤 users only
@@ -4838,9 +5179,20 @@ export interface TelegramClient extends ITelegramClient {
     chatId: InputPeerLike,
     params?: {
     /**
-     * Whether to dispatch updates that will be generated by this call.
-     * Doesn't follow `disableNoDispatch`
+     * For forums - read reactions only in the given topic
      */
+      topicId?: number
+
+      /**
+       * For saved messages and monoforums (channel direct messages),
+       * peer identifying the topic to read reactions in
+       */
+      topicPeer?: InputPeerLike
+
+      /**
+       * Whether to dispatch updates that will be generated by this call.
+       * Doesn't follow `disableNoDispatch`
+       */
       shouldDispatch?: true
     }): Promise<void>
   /**
@@ -4894,6 +5246,11 @@ export interface TelegramClient extends ITelegramClient {
        * Whether to only search across broadcast channels
        */
       onlyChannels?: boolean
+
+      /**
+       * If passed, only search across chats of the given community
+       */
+      communityId?: InputPeerLike
     }): Promise<ArrayPaginated<Message, SearchGlobalOffset>>
 
   /**
@@ -5179,7 +5536,7 @@ export interface TelegramClient extends ITelegramClient {
   sendMediaGroup(
     chatId: InputPeerLike,
     medias: (InputMediaLike | string)[],
-    params?: CommonSendParams & {
+    params?: Omit<CommonSendParams, 'scheduleRepeatPeriod' | 'suggestedPost'> & {
     /**
      * Whether to invert media position.
      *
@@ -5515,6 +5872,43 @@ export interface TelegramClient extends ITelegramClient {
       threadId?: number
     }): Promise<void>
   /**
+   * Approve a post suggested to a channel via its direct messages chat
+   * **Available**: ✅ both users and bots
+   *
+   */
+  approveSuggestedPost(
+    params: InputMessageId & {
+    /**
+     * Date when the post should be published, if it wasn't chosen by the suggester.
+     * Must be between `stars_suggested_post_future_min` and `stars_suggested_post_future_max`
+     * seconds in the future (see `client.appConfig`).
+     * When passing a number, a UNIX time in ms is expected.
+     */
+      scheduleDate?: Date | number
+
+      /**
+       * Whether to dispatch the updates caused by this action
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+    }): Promise<void>
+  /**
+   * Decline a post suggested to a channel via its direct messages chat
+   * **Available**: ✅ both users and bots
+   *
+   */
+  declineSuggestedPost(
+    params: InputMessageId & {
+    /** Comment for the author of the suggested post */
+      comment?: string
+
+      /**
+       * Whether to dispatch the updates caused by this action
+       * to the client's update handler.
+       */
+      shouldDispatch?: true
+    }): Promise<void>
+  /**
    * Toggle the completion status of a todo list item(s)
    *
    * **Available**: 👤 users only
@@ -5545,6 +5939,13 @@ export interface TelegramClient extends ITelegramClient {
     params: InputMessageId & {
     /** Target language (two-letter ISO 639-1 language code) */
       toLanguage: string
+
+      /**
+       * Tone of the translation
+       *
+       * @default  `"neutral"`
+       */
+      tone?: 'formal' | 'neutral' | 'casual' | (string & {})
     }): Promise<TextWithEntities>
   /**
    * Translate text to a given language.
@@ -5556,7 +5957,15 @@ export interface TelegramClient extends ITelegramClient {
    */
   translateText(
     text: InputText,
-    toLanguage: string): Promise<TextWithEntities>
+    toLanguage: string,
+    params?: {
+    /**
+     * Tone of the translation
+     *
+     * @default  `"neutral"`
+     */
+      tone?: 'formal' | 'neutral' | 'casual' | (string & {})
+    }): Promise<TextWithEntities>
   /**
    * Unpin all pinned messages in a chat.
    *
@@ -5571,6 +5980,12 @@ export interface TelegramClient extends ITelegramClient {
      * For forums - unpin only messages from the given topic
      */
       topicId?: number
+
+      /**
+       * For saved messages and monoforums (channel direct messages),
+       * unpin only messages from the topic identified by this peer
+       */
+      topicPeer?: InputPeerLike
 
       /**
        * Whether to dispatch updates that will be generated by this call.
@@ -6247,6 +6662,13 @@ export interface TelegramClient extends ITelegramClient {
        * @default  "Everyone"
        */
       privacyRules?: InputPrivacyRule[]
+
+      /**
+       * Music to attach to the story.
+       *
+       * Can be an already uploaded audio file (e.g. File ID), or a new audio to upload
+       */
+      music?: InputMediaAudio | InputDocumentId
     }): Promise<Story>
   /**
    * Get all stories (e.g. to load the top bar)
@@ -6565,6 +6987,13 @@ export interface TelegramClient extends ITelegramClient {
        * IDs of albums to add the story to
        */
       addToAlbums?: number[]
+
+      /**
+       * Music to attach to the story.
+       *
+       * Can be an already uploaded audio file (e.g. File ID), or a new audio to upload
+       */
+      music?: InputMediaAudio | InputDocumentId
     }): Promise<Story>
   /**
    * Toggle whether peer's stories are archived (hidden) or not.
@@ -6721,6 +7150,27 @@ export interface TelegramClient extends ITelegramClient {
       limit?: number
     }): Promise<ArrayPaginated<Audio, number>>
   /**
+   * Get music files saved to the user's profile by their IDs.
+   *
+   * Can be used to check whether the given files are still saved to the profile,
+   * or to refresh their file references. Files that are no longer saved are omitted.
+   * **Available**: 👤 users only
+   *
+   */
+  getSavedMusicById(
+    params: {
+    /** User ID, username, phone number, `"me"` or `"self"` */
+      userId: InputPeerLike
+      /** IDs of the music files */
+      ids: InputDocumentId[]
+    }): Promise<Audio[]>
+  /**
+   * Get IDs of all music files saved to the current user's profile
+   * **Available**: 👤 users only
+   *
+   */
+  getSavedMusicIds(): Promise<tl.Long[]>
+  /**
    * Get information about multiple users.
    * You can retrieve up to 200 users at once.
    *
@@ -6840,7 +7290,11 @@ export interface TelegramClient extends ITelegramClient {
    */
   resolvePhoneNumber(
     phone: string, force?: boolean): Promise<tl.TypeInputPeer>
-
+  /**
+   * Save a music file to the current user's profile
+   * **Available**: 👤 users only
+   *
+   */
   saveMusicToProfile(
     params: {
     /** Audio file to save (or its ID) */
@@ -6856,7 +7310,11 @@ export interface TelegramClient extends ITelegramClient {
        */
       progressCallback?: (uploaded: number, total: number) => void
     }): Promise<void>
-
+  /**
+   * Remove a music file from the current user's profile
+   * **Available**: 👤 users only
+   *
+   */
   unsaveMusicFromProfile(
     params: {
     /** ID of the Audio file to unsave */
@@ -7021,8 +7479,11 @@ export class TelegramClient implements ITelegramClient {
     ;(this as any).onUserTyping = new Emitter()
     ;(this as any).onHistoryRead = new Emitter()
     ;(this as any).onBotStopped = new Emitter()
+    ;(this as any).onBotSubscription = new Emitter()
     ;(this as any).onBotChatJoinRequest = new Emitter()
     ;(this as any).onChatJoinRequest = new Emitter()
+    ;(this as any).onChatJoinResult = new Emitter()
+    ;(this as any).onManagedBot = new Emitter()
     ;(this as any).onPreCheckoutQuery = new Emitter()
     ;(this as any).onStoryUpdate = new Emitter()
     ;(this as any).onDeleteStory = new Emitter()
@@ -7123,11 +7584,20 @@ export class TelegramClient implements ITelegramClient {
               case 'bot_stopped':
                 this.onBotStopped.emit(update.data)
                 break
+              case 'bot_subscription':
+                this.onBotSubscription.emit(update.data)
+                break
               case 'bot_chat_join_request':
                 this.onBotChatJoinRequest.emit(update.data)
                 break
               case 'chat_join_request':
                 this.onChatJoinRequest.emit(update.data)
+                break
+              case 'chat_join_result':
+                this.onChatJoinResult.emit(update.data)
+                break
+              case 'managed_bot':
+                this.onManagedBot.emit(update.data)
                 break
               case 'pre_checkout_query':
                 this.onPreCheckoutQuery.emit(update.data)
@@ -7227,11 +7697,20 @@ TelegramClient.prototype.answerBotGuestChatQuery = function (...args) {
 TelegramClient.prototype.answerCallbackQuery = function (...args) {
   return answerCallbackQuery(this._client, ...args)
 }
+TelegramClient.prototype.answerChatJoinRequestQuery = function (...args) {
+  return answerChatJoinRequestQuery(this._client, ...args)
+}
 TelegramClient.prototype.answerInlineQuery = function (...args) {
   return answerInlineQuery(this._client, ...args)
 }
 TelegramClient.prototype.answerPreCheckoutQuery = function (...args) {
   return answerPreCheckoutQuery(this._client, ...args)
+}
+TelegramClient.prototype.checkBotUsername = function (...args) {
+  return checkBotUsername(this._client, ...args)
+}
+TelegramClient.prototype.createBot = function (...args) {
+  return createBot(this._client, ...args)
 }
 TelegramClient.prototype.deleteMyCommands = function (...args) {
   return deleteMyCommands(this._client, ...args)
@@ -7251,8 +7730,20 @@ TelegramClient.prototype.getGameHighScores = function (...args) {
 TelegramClient.prototype.getInlineGameHighScores = function (...args) {
   return getInlineGameHighScores(this._client, ...args)
 }
+TelegramClient.prototype.getManagedBotAccessSettings = function (...args) {
+  return getManagedBotAccessSettings(this._client, ...args)
+}
+TelegramClient.prototype.getManagedBotToken = function (...args) {
+  return getManagedBotToken(this._client, ...args)
+}
 TelegramClient.prototype.getMyCommands = function (...args) {
   return getMyCommands(this._client, ...args)
+}
+TelegramClient.prototype.getPreparedKeyboardButton = function (...args) {
+  return getPreparedKeyboardButton(this._client, ...args)
+}
+TelegramClient.prototype.openJoinChatWebview = function (...args) {
+  return openJoinChatWebview(this._client, ...args)
 }
 TelegramClient.prototype.openWebview = function (...args) {
   return openWebview(this._client, ...args)
@@ -7262,6 +7753,9 @@ TelegramClient.prototype.closeWebview = function (...args) {
 }
 TelegramClient.prototype.prepareInlineMessage = function (...args) {
   return prepareInlineMessage(this._client, ...args)
+}
+TelegramClient.prototype.prepareKeyboardButton = function (...args) {
+  return prepareKeyboardButton(this._client, ...args)
 }
 TelegramClient.prototype.setBotInfo = function (...args) {
   return setBotInfo(this._client, ...args)
@@ -7274,6 +7768,9 @@ TelegramClient.prototype.setGameScore = function (...args) {
 }
 TelegramClient.prototype.setInlineGameScore = function (...args) {
   return setInlineGameScore(this._client, ...args)
+}
+TelegramClient.prototype.setManagedBotAccessSettings = function (...args) {
+  return setManagedBotAccessSettings(this._client, ...args)
 }
 TelegramClient.prototype.setMyCommands = function (...args) {
   return setMyCommands(this._client, ...args)
@@ -7707,6 +8204,9 @@ TelegramClient.prototype.iterInviteLinks = function (...args) {
 TelegramClient.prototype.revokeInviteLink = function (...args) {
   return revokeInviteLink(this._client, ...args)
 }
+TelegramClient.prototype.addPollAnswer = function (...args) {
+  return addPollAnswer(this._client, ...args)
+}
 TelegramClient.prototype.appendTodoList = function (...args) {
   return appendTodoList(this._client, ...args)
 }
@@ -7724,6 +8224,15 @@ TelegramClient.prototype.deleteMessagesById = function (...args) {
 }
 TelegramClient.prototype.deleteMessages = function (...args) {
   return deleteMessages(this._client, ...args)
+}
+TelegramClient.prototype.deletePollAnswer = function (...args) {
+  return deletePollAnswer(this._client, ...args)
+}
+TelegramClient.prototype.deleteMessageReactionsFromSender = function (...args) {
+  return deleteMessageReactionsFromSender(this._client, ...args)
+}
+TelegramClient.prototype.deleteRecentReactionsFromSender = function (...args) {
+  return deleteRecentReactionsFromSender(this._client, ...args)
 }
 TelegramClient.prototype.deleteScheduledMessages = function (...args) {
   return deleteScheduledMessages(this._client, ...args)
@@ -7776,6 +8285,12 @@ TelegramClient.prototype.getMessagesUnsafe = function (...args) {
 TelegramClient.prototype.getMessages = function (...args) {
   return getMessages(this._client, ...args)
 }
+TelegramClient.prototype.getPollResults = function (...args) {
+  return getPollResults(this._client, ...args)
+}
+TelegramClient.prototype.getPollStats = function (...args) {
+  return getPollStats(this._client, ...args)
+}
 TelegramClient.prototype.getReactionUsers = function (...args) {
   return getReactionUsers(this._client, ...args)
 }
@@ -7784,6 +8299,9 @@ TelegramClient.prototype.getReplyTo = function (...args) {
 }
 TelegramClient.prototype.getScheduledMessages = function (...args) {
   return getScheduledMessages(this._client, ...args)
+}
+TelegramClient.prototype.getUnreadPollVotes = function (...args) {
+  return getUnreadPollVotes(this._client, ...args)
 }
 TelegramClient.prototype.getWebPagePreview = function (...args) {
   return getWebPagePreview(this._client, ...args)
@@ -7800,11 +8318,17 @@ TelegramClient.prototype.iterSearchGlobal = function (...args) {
 TelegramClient.prototype.iterSearchMessages = function (...args) {
   return iterSearchMessages(this._client, ...args)
 }
+TelegramClient.prototype.iterUnreadPollVotes = function (...args) {
+  return iterUnreadPollVotes(this._client, ...args)
+}
 TelegramClient.prototype.pinMessage = function (...args) {
   return pinMessage(this._client, ...args)
 }
 TelegramClient.prototype.readHistory = function (...args) {
   return readHistory(this._client, ...args)
+}
+TelegramClient.prototype.readPollVotes = function (...args) {
+  return readPollVotes(this._client, ...args)
 }
 TelegramClient.prototype.readReactions = function (...args) {
   return readReactions(this._client, ...args)
@@ -7895,6 +8419,12 @@ TelegramClient.prototype.sendVote = function (...args) {
 }
 TelegramClient.prototype.setTyping = function (...args) {
   return setTyping(this._client, ...args)
+}
+TelegramClient.prototype.approveSuggestedPost = function (...args) {
+  return approveSuggestedPost(this._client, ...args)
+}
+TelegramClient.prototype.declineSuggestedPost = function (...args) {
+  return declineSuggestedPost(this._client, ...args)
 }
 TelegramClient.prototype.toggleTodoCompleted = function (...args) {
   return toggleTodoCompleted(this._client, ...args)
@@ -8114,6 +8644,12 @@ TelegramClient.prototype.getProfilePhotos = function (...args) {
 }
 TelegramClient.prototype.getSavedMusic = function (...args) {
   return getSavedMusic(this._client, ...args)
+}
+TelegramClient.prototype.getSavedMusicById = function (...args) {
+  return getSavedMusicById(this._client, ...args)
+}
+TelegramClient.prototype.getSavedMusicIds = function (...args) {
+  return getSavedMusicIds(this._client, ...args)
 }
 TelegramClient.prototype.getUsers = function (...args) {
   return getUsers(this._client, ...args)

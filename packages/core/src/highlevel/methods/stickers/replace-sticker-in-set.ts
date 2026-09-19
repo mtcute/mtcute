@@ -1,9 +1,8 @@
 import type { ITelegramClient } from '../../client.types.js'
 
 import type { InputDocumentId, InputStickerSetItem } from '../../types/index.js'
-import { tdFileId } from '@mtcute/file-id'
 import { StickerSet } from '../../types/index.js'
-import { fileIdToInputDocument } from '../../utils/convert-file-id.js'
+import { _normalizeInputDocumentId } from '../files/normalize-file-to-document.js'
 
 import { _normalizeInputStickerSetItem } from './_utils.js'
 
@@ -33,13 +32,9 @@ export async function replaceStickerInSet(
     progressCallback?: (uploaded: number, total: number) => void
   },
 ): Promise<StickerSet> {
-  if (tdFileId.isFileIdLike(sticker)) {
-    sticker = fileIdToInputDocument(sticker)
-  }
-
   const res = await client.call({
     _: 'stickers.replaceSticker',
-    sticker,
+    sticker: _normalizeInputDocumentId(sticker),
     newSticker: await _normalizeInputStickerSetItem(client, newSticker, params),
   })
 

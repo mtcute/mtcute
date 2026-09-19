@@ -1,9 +1,8 @@
 import type { ITelegramClient } from '../../client.types.js'
 
 import type { InputDocumentId } from '../../types/index.js'
-import { tdFileId } from '@mtcute/file-id'
 import { StickerSet } from '../../types/index.js'
-import { fileIdToInputDocument } from '../../utils/convert-file-id.js'
+import { _normalizeInputDocumentId } from '../files/normalize-file-to-document.js'
 
 /**
  * Move a sticker in a sticker set
@@ -22,13 +21,9 @@ export async function moveStickerInSet(
   sticker: InputDocumentId,
   position: number,
 ): Promise<StickerSet> {
-  if (tdFileId.isFileIdLike(sticker)) {
-    sticker = fileIdToInputDocument(sticker)
-  }
-
   const res = await client.call({
     _: 'stickers.changeStickerPosition',
-    sticker,
+    sticker: _normalizeInputDocumentId(sticker),
     position,
   })
 

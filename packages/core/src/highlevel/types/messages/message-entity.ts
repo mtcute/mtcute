@@ -22,6 +22,10 @@ import { memoizeGetters } from '../../utils/memoize.js'
  *   - 'text_mention': for user mention by name. `.userId` contains the ID of the mentioned user.
  *   - 'blockquote': A blockquote
  *   - 'emoji': A custom emoji. `.emojiId` contains the emoji ID.
+ *   - 'date_time': A formatted date and/or time. `.date` contains the date, other fields describe the formatting.
+ *   - 'diff_insert': A diff addition (e.g. in AI-edited text)
+ *   - 'diff_delete': A diff deletion (e.g. in AI-edited text)
+ *   - 'diff_replace': A diff replacement (e.g. in AI-edited text). `.oldText` contains the replaced text.
  */
 export type MessageEntityParams
   = | {
@@ -40,6 +44,8 @@ export type MessageEntityParams
       | 'spoiler'
       | 'code'
       | 'bank_card'
+      | 'diff_insert'
+      | 'diff_delete'
       | 'unknown'
   }
   | { kind: 'blockquote', collapsible: boolean }
@@ -47,6 +53,27 @@ export type MessageEntityParams
   | { kind: 'text_link', url: string }
   | { kind: 'text_mention', userId: number }
   | { kind: 'emoji', emojiId: tl.Long }
+  | { kind: 'diff_replace', oldText: string }
+  | {
+    kind: 'date_time'
+    date: Date
+    /** Whether the date should be displayed relative to the current time */
+    relative: boolean
+    /** Precision with which the time should be displayed */
+    timePrecision: DateTimePartPrecision
+    /** Precision with which the date should be displayed */
+    datePrecision: DateTimePartPrecision
+    /** Whether the day of the week should be displayed */
+    showDayOfWeek: boolean
+  }
+
+/**
+ * Precision with which to display a part of a date:
+ *   - 'none': don't display
+ *   - 'short': display in a short way (e.g. `17.03.22` or `22:45`)
+ *   - 'long': display in a long way (e.g. `March 17, 2022` or `22:45:00`)
+ */
+export type DateTimePartPrecision = 'none' | 'short' | 'long'
 
 /**
  * Kind of the entity. For more information, see {@link MessageEntityParams}
@@ -130,6 +157,21 @@ export class MessageEntity {
         return { kind: 'emoji', emojiId: this.raw.documentId }
       case 'messageEntityBankCard':
         return { kind: 'bank_card' }
+      case 'messageEntityDiffInsert':
+        return { kind: 'diff_insert' }
+      case 'messageEntityDiffDelete':
+        return { kind: 'diff_delete' }
+      case 'messageEntityDiffReplace':
+        return { kind: 'diff_replace', oldText: this.raw.oldText }
+      case 'messageEntityFormattedDate':
+        return {
+          kind: 'date_time',
+          date: new Date(this.raw.date * 1000),
+          relative: this.raw.relative!,
+          timePrecision: this.raw.longTime ? 'long' : this.raw.shortTime ? 'short' : 'none',
+          datePrecision: this.raw.longDate ? 'long' : this.raw.shortDate ? 'short' : 'none',
+          showDayOfWeek: this.raw.dayOfWeek!,
+        }
     }
 
     return { kind: 'unknown' }

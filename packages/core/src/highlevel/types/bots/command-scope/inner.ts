@@ -86,11 +86,23 @@ export function groupMember(chat: InputPeerLike, user: InputPeerLike): Intermedi
  *
  * @param command  Bot command (without slash)
  * @param description  Command description
+ * @param params  Additional parameters
  */
-export function cmd(command: string, description: string): tl.RawBotCommand {
+export function cmd(
+  command: string,
+  description: string,
+  params?: {
+    /**
+     * Whether the command should send an ephemeral message
+     * (visible only to the user who invoked it) instead of a regular one
+     */
+    ephemeral?: boolean
+  },
+): tl.RawBotCommand {
   return {
     _: 'botCommand',
     command,
     description,
+    ephemeral: params?.ephemeral,
   }
 }

@@ -14,6 +14,7 @@ import {
   BotKeyboard,
   normalizeInputMessageId,
 } from '../../types/index.js'
+import { normalizeDate } from '../../utils/misc-utils.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -62,6 +63,12 @@ export async function editMessage(
      * When passing a number, a UNIX time in ms is expected.
      */
     scheduleDate?: Date | number
+
+    /**
+     * For scheduled messages: new period (in seconds) after which
+     * the message will be sent again. Requires Telegram Premium.
+     */
+    scheduleRepeatPeriod?: number
 
     /**
      * For media and rich message attachments, upload progress callback.
@@ -129,6 +136,8 @@ export async function editMessage(
         })
       : undefined,
     invertMedia: params.invertMedia,
+    scheduleDate: normalizeDate(params.scheduleDate),
+    scheduleRepeatPeriod: params.scheduleRepeatPeriod,
   }, {
     businessConnectionId: params.businessConnectionId,
   })

@@ -4,6 +4,7 @@ import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 
 import { MessageEntity } from './message-entity.js'
+import { SuggestedPostInfo } from './suggested-post.js'
 
 /**
  * A draft message
@@ -55,7 +56,14 @@ export class DraftMessage {
 
     return entities
   }
+
+  /** If this is a draft of a suggested post, information about it */
+  get suggestedPost(): SuggestedPostInfo | null {
+    if (!this.raw.suggestedPost) return null
+
+    return new SuggestedPostInfo(this.raw.suggestedPost)
+  }
 }
 
-memoizeGetters(DraftMessage, ['entities'])
+memoizeGetters(DraftMessage, ['entities', 'suggestedPost'])
 makeInspectable(DraftMessage)

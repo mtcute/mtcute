@@ -4,6 +4,61 @@ import type { InputPeerLike } from '../peers/peer.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 
 /**
+ * Theme parameters to pass to the mini app
+ *
+ * Each value should be a string (hex-encoded RGB, no alpha)
+ */
+export type WebviewThemeParams = tl.TypeDataJSON | {
+  // https://corefork.telegram.org/api/bots/webapps#theme-parameters
+  /** Background color */
+  bg_color?: string
+  /** Secondary background color */
+  secondary_bg_color?: string
+  /** Text color */
+  text_color?: string
+  /** Hint text color */
+  hint_color?: string
+  /** Link color */
+  link_color?: string
+  /** Button color */
+  button_color?: string
+  /** Button text color */
+  button_text_color?: string
+  /** Header background color */
+  header_bg_color?: string
+  /** Accent text color */
+  accent_text_color?: string
+  /** Section background color */
+  section_bg_color?: string
+  /** Section header text color */
+  section_header_text_color?: string
+  /** Section separator color */
+  section_separator_color?: string
+  /** Sub title text color */
+  subtitle_text_color?: string
+  /** Text color for destructive action buttons in prompts */
+  destructive_text_color?: string
+}
+
+/**
+ * Webview platform to use in the init data
+ *
+ * Some of the known values:
+ *  - `android` - Android clients
+ *  - `ios` - iOS clients
+ *  - `tdesktop` - Telegram Desktop
+ *  - `macos` - Telegram for macOS
+ *  - `unigram` - Unigram
+ */
+export type WebviewPlatform
+  = | 'android'
+    | 'ios'
+    | 'tdesktop'
+    | 'macos'
+    | 'unigram'
+    | (string & {})
+
+/**
  * Information about the mini app for {@link openWebview} method
  *
  * - `main` - the ["main"](https://corefork.telegram.org/api/bots/webapps#main-mini-apps) mini-app, configured via BotFather
@@ -118,7 +173,7 @@ export type InputWebview
   }
 
 /**
- * Result of {@link openWebview} method call
+ * Result of {@link openWebview} and {@link openJoinChatWebview} method calls
  */
 export class WebviewResult {
   constructor(

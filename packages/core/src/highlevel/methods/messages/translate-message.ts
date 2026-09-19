@@ -13,9 +13,16 @@ export async function translateMessage(
   params: InputMessageId & {
     /** Target language (two-letter ISO 639-1 language code) */
     toLanguage: string
+
+    /**
+     * Tone of the translation
+     *
+     * @default  `"neutral"`
+     */
+    tone?: 'formal' | 'neutral' | 'casual' | (string & {})
   },
 ): Promise<TextWithEntities> {
-  const { toLanguage } = params
+  const { toLanguage, tone } = params
   const { chatId, message } = normalizeInputMessageId(params)
 
   const res = await client.call({
@@ -23,6 +30,7 @@ export async function translateMessage(
     peer: await resolvePeer(client, chatId),
     id: [message],
     toLang: toLanguage,
+    tone,
   })
 
   return {

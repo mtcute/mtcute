@@ -1,6 +1,7 @@
 import type { tl } from '../../../tl/index.js'
 
 import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
 
 /**
  * A dice or another interactive random emoji.
@@ -160,6 +161,27 @@ export class Dice {
   }
 
   /**
+   * For stake dice, outcome of the game
+   */
+  get gameOutcome(): {
+    /** Seed used to generate the value */
+    seed: Uint8Array
+    /** Amount of TON staked, in nanotons */
+    stakeTonAmount: tl.Long
+    /** Amount of TON gained from the roll, in nanotons */
+    tonAmount: tl.Long
+  } | null {
+    const outcome = this.obj.gameOutcome
+    if (!outcome) return null
+
+    return {
+      seed: outcome.seed,
+      stakeTonAmount: outcome.stakeTonAmount,
+      tonAmount: outcome.tonAmount,
+    }
+  }
+
+  /**
    * Input media TL object generated from this object,
    * to be used inside {@link InputMediaLike} and
    * {@link TelegramClient.sendMedia}
@@ -175,4 +197,5 @@ export class Dice {
   }
 }
 
+memoizeGetters(Dice, ['gameOutcome'])
 makeInspectable(Dice, undefined, ['inputMedia'])

@@ -191,6 +191,11 @@ export class StarGift {
   get background(): tl.TypeStarGiftBackground | null {
     return this.raw.background ?? null
   }
+
+  /** If set, this gift possibly cannot be sent until this date */
+  get lockedUntil(): Date | null {
+    return this.raw.lockedUntilDate ? new Date(this.raw.lockedUntilDate * 1000) : null
+  }
 }
 
 makeInspectable(StarGift)

@@ -313,7 +313,13 @@ export function tableRow(cells: tl.TypePageTableCell[]): tl.RawPageTableRow {
 /** Create a table block */
 export function table(
   rows: tl.TypePageTableRow[],
-  params: { title?: InputRichText, bordered?: boolean, striped?: boolean } = {},
+  params: {
+    title?: InputRichText
+    bordered?: boolean
+    striped?: boolean
+    /** Whether table cells should have smaller paddings */
+    compact?: boolean
+  } = {},
 ): tl.RawPageBlockTable {
   return {
     _: 'pageBlockTable',
@@ -321,6 +327,7 @@ export function table(
     rows,
     bordered: params.bordered,
     striped: params.striped,
+    compact: params.compact,
   }
 }
 

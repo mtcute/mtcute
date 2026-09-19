@@ -16,6 +16,7 @@ import { _buildPeersIndex } from '../chats/build-peers-index.js'
 
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+import { _normalizeInputSuggestedPost } from './_normalize-suggested-post.js'
 import { _findMessageInUpdate } from './find-in-update.js'
 import { _processCommonSendParameters } from './send-common.js'
 
@@ -119,6 +120,7 @@ export async function sendText(
 
   const randomId = params.randomId ?? randomLong()
   const sendAs = params.sendAs ? await resolvePeer(client, params.sendAs) : undefined
+  const suggestedPost = _normalizeInputSuggestedPost(params.suggestedPost)
   const res = await client.call(
     {
       _: 'messages.sendMessage',
@@ -139,6 +141,8 @@ export async function sendText(
       effect: params.effect,
       allowPaidFloodskip: params.allowPaidFloodskip,
       allowPaidStars: params.allowPaidMessages,
+      suggestedPost,
+      scheduleRepeatPeriod: params.scheduleRepeatPeriod,
     },
     {
       chainId,
@@ -169,6 +173,7 @@ export async function sendText(
       media: res.media,
       entities: res.entities,
       ttlPeriod: res.ttlPeriod,
+      suggestedPost,
     }
 
     if (!params.shouldDispatch) {

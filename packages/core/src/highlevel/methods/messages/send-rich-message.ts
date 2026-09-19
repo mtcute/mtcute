@@ -9,6 +9,7 @@ import type { CommonSendParams } from './send-common.js'
 import { randomLong } from '../../../utils/long-utils.js'
 import { BotKeyboard } from '../../types/bots/keyboards/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+import { _normalizeInputSuggestedPost } from './_normalize-suggested-post.js'
 import { _findMessageInUpdate } from './find-in-update.js'
 import { _normalizeInputRichMessage } from './normalize-rich-message.js'
 import { _processCommonSendParameters } from './send-common.js'
@@ -78,6 +79,8 @@ export async function sendRichMessage(
       allowPaidFloodskip: params.allowPaidFloodskip,
       allowPaidStars: params.allowPaidMessages,
       richMessage,
+      suggestedPost: _normalizeInputSuggestedPost(params.suggestedPost),
+      scheduleRepeatPeriod: params.scheduleRepeatPeriod,
     },
     {
       chainId,

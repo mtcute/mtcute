@@ -3,6 +3,7 @@ import type { Message } from '../../types/index.js'
 import { SearchFilters } from '../../types/index.js'
 import { normalizeDate } from '../../utils/index.js'
 
+import { resolveChannel } from '../users/resolve-peer.js'
 import { searchGlobal } from './search-global.js'
 
 /**
@@ -36,6 +37,7 @@ export async function* iterSearchGlobal(
   if (!params) params = {}
 
   const { query = '', filter = SearchFilters.Empty, limit = Infinity, chunkSize = 100, onlyChannels } = params
+  const communityId = params.communityId ? await resolveChannel(client, params.communityId) : undefined
 
   const minDate = normalizeDate(params.minDate) ?? 0
   const maxDate = normalizeDate(params.maxDate) ?? 0
@@ -52,6 +54,7 @@ export async function* iterSearchGlobal(
       maxDate,
       offset,
       onlyChannels,
+      communityId,
     })
 
     if (!res.length) return

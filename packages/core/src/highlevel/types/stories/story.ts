@@ -1,5 +1,6 @@
 import type { tl } from '../../../tl/index.js'
 
+import type { Audio } from '../media/audio.js'
 import type { Video } from '../media/video.js'
 import type { PeersIndex } from '../peers/index.js'
 import type { ReactionEmoji } from '../reactions/index.js'
@@ -182,7 +183,19 @@ export class Story {
   get albums(): number[] {
     return this.raw.albums ?? []
   }
+
+  /**
+   * Music attached to this story, if any
+   */
+  get music(): Audio | null {
+    if (this.raw.music?._ !== 'document') return null
+
+    const doc = parseDocument(this.raw.music)
+    if (doc.type !== 'audio') return null
+
+    return doc
+  }
 }
 
-memoizeGetters(Story, ['entities', 'media', 'interactiveElements', 'interactions'])
+memoizeGetters(Story, ['entities', 'media', 'interactiveElements', 'interactions', 'music'])
 makeInspectable(Story)

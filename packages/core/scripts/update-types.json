@@ -1,0 +1,176 @@
+[
+  {
+    "name": "new_message",
+    "type": "Message",
+    "state": true,
+    "context": "MessageContext"
+  },
+  {
+    "name": "edit_message",
+    "type": "Message",
+    "state": true,
+    "context": "MessageContext"
+  },
+  {
+    "name": "message_group",
+    "type": "Message[]",
+    "state": true,
+    "context": "MessageContext"
+  },
+  {
+    "name": "delete_message",
+    "type": "DeleteMessageUpdate"
+  },
+  {
+    "name": "chat_member",
+    "handler": "ChatMemberUpdate",
+    "type": "ChatMemberUpdate"
+  },
+  {
+    "name": "inline_query",
+    "type": "InlineQuery",
+    "context": "InlineQueryContext"
+  },
+  {
+    "name": "bot_guest_chat_query",
+    "type": "BotGuestChatQuery",
+    "context": "BotGuestChatQueryContext"
+  },
+  {
+    "name": "chosen_inline_result",
+    "type": "ChosenInlineResult",
+    "context": "ChosenInlineResultContext"
+  },
+  {
+    "name": "callback_query",
+    "type": "CallbackQuery",
+    "state": true,
+    "context": "CallbackQueryContext"
+  },
+  {
+    "name": "inline_callback_query",
+    "type": "InlineCallbackQuery",
+    "state": true,
+    "context": "InlineCallbackQueryContext"
+  },
+  {
+    "name": "business_callback_query",
+    "type": "BusinessCallbackQuery",
+    "state": true,
+    "context": "BusinessCallbackQueryContext"
+  },
+  {
+    "name": "poll",
+    "handler": "PollUpdate",
+    "type": "PollUpdate"
+  },
+  {
+    "name": "poll_vote",
+    "type": "PollVoteUpdate"
+  },
+  {
+    "name": "user_status",
+    "handler": "UserStatusUpdate",
+    "type": "UserStatusUpdate"
+  },
+  {
+    "name": "user_typing",
+    "type": "UserTypingUpdate"
+  },
+  {
+    "name": "history_read",
+    "type": "HistoryReadUpdate"
+  },
+  {
+    "name": "bot_stopped",
+    "type": "BotStoppedUpdate"
+  },
+  {
+    "name": "bot_subscription",
+    "type": "BotSubscriptionUpdate"
+  },
+  {
+    "name": "bot_chat_join_request",
+    "type": "BotChatJoinRequestUpdate",
+    "context": "ChatJoinRequestUpdateContext"
+  },
+  {
+    "name": "chat_join_request",
+    "type": "ChatJoinRequestUpdate"
+  },
+  {
+    "name": "chat_join_result",
+    "type": "ChatJoinResultUpdate"
+  },
+  {
+    "name": "managed_bot",
+    "type": "ManagedBotUpdate"
+  },
+  {
+    "name": "pre_checkout_query",
+    "type": "PreCheckoutQuery",
+    "context": "PreCheckoutQueryContext"
+  },
+  {
+    "name": "story",
+    "handler": "StoryUpdate",
+    "type": "StoryUpdate"
+  },
+  {
+    "name": "delete_story",
+    "type": "DeleteStoryUpdate"
+  },
+  {
+    "name": "bot_reaction",
+    "handler": "BotReactionUpdate",
+    "type": "BotReactionUpdate"
+  },
+  {
+    "name": "bot_reaction_count",
+    "handler": "BotReactionCountUpdate",
+    "type": "BotReactionCountUpdate"
+  },
+  {
+    "name": "business_connection",
+    "handler": "BusinessConnectionUpdate",
+    "type": "BusinessConnection"
+  },
+  {
+    "name": "new_business_message",
+    "type": "BusinessMessage",
+    "state": true,
+    "context": "BusinessMessageContext"
+  },
+  {
+    "name": "edit_business_message",
+    "type": "BusinessMessage",
+    "state": true,
+    "context": "BusinessMessageContext"
+  },
+  {
+    "name": "business_message_group",
+    "type": "BusinessMessage[]",
+    "state": true,
+    "context": "BusinessMessageContext"
+  },
+  {
+    "name": "delete_business_message",
+    "type": "DeleteBusinessMessageUpdate"
+  },
+  {
+    "name": "new_ephemeral_message",
+    "type": "EphemeralMessage"
+  },
+  {
+    "name": "edit_ephemeral_message",
+    "type": "EphemeralMessage"
+  },
+  {
+    "name": "delete_ephemeral_messages",
+    "type": "DeleteEphemeralMessagesUpdate"
+  },
+  {
+    "name": "ephemeral_callback_query",
+    "type": "EphemeralCallbackQuery"
+  }
+]

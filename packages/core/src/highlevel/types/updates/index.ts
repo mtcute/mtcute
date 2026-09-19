@@ -4,9 +4,11 @@ import { BotChatJoinRequestUpdate } from './bot-chat-join-request.js'
 import { BotGuestChatQuery } from './bot-guest-chat-query.js'
 import { BotReactionCountUpdate, BotReactionUpdate } from './bot-reaction.js'
 import { BotStoppedUpdate } from './bot-stopped.js'
+import { BotSubscriptionUpdate } from './bot-subscription-update.js'
 import { BusinessMessage } from './business-message.js'
 import { BusinessCallbackQuery, CallbackQuery, InlineCallbackQuery } from './callback-query.js'
 import { ChatJoinRequestUpdate } from './chat-join-request.js'
+import { ChatJoinResultUpdate } from './chat-join-result.js'
 import { ChatMemberUpdate } from './chat-member-update.js'
 import { ChosenInlineResult } from './chosen-inline-result.js'
 import { DeleteBusinessMessageUpdate } from './delete-business-message-update.js'
@@ -16,6 +18,7 @@ import { DeleteStoryUpdate } from './delete-story-update.js'
 import { EphemeralCallbackQuery } from './ephemeral-callback-query.js'
 import { HistoryReadUpdate } from './history-read-update.js'
 import { InlineQuery } from './inline-query.js'
+import { ManagedBotUpdate } from './managed-bot-update.js'
 import { PollUpdate } from './poll-update.js'
 import { PollVoteUpdate } from './poll-vote.js'
 import { PreCheckoutQuery } from './pre-checkout-query.js'
@@ -23,6 +26,7 @@ import { StoryUpdate } from './story-update.js'
 import { UserStatusUpdate } from './user-status-update.js'
 import { UserTypingUpdate } from './user-typing-update.js'
 
+export type { BotSubscriptionStatus } from './bot-subscription-update.js'
 export type { ChatMemberUpdateType } from './chat-member-update.js'
 
 export {
@@ -31,10 +35,12 @@ export {
   BotReactionCountUpdate,
   BotReactionUpdate,
   BotStoppedUpdate,
+  BotSubscriptionUpdate,
   BusinessCallbackQuery,
   BusinessMessage,
   CallbackQuery,
   ChatJoinRequestUpdate,
+  ChatJoinResultUpdate,
   ChatMemberUpdate,
   ChosenInlineResult,
   DeleteBusinessMessageUpdate,
@@ -45,6 +51,7 @@ export {
   HistoryReadUpdate,
   InlineCallbackQuery,
   InlineQuery,
+  ManagedBotUpdate,
   PollUpdate,
   PollVoteUpdate,
   PreCheckoutQuery,
@@ -72,8 +79,11 @@ export type ParsedUpdate
     | { name: 'user_typing', data: UserTypingUpdate }
     | { name: 'history_read', data: HistoryReadUpdate }
     | { name: 'bot_stopped', data: BotStoppedUpdate }
+    | { name: 'bot_subscription', data: BotSubscriptionUpdate }
     | { name: 'bot_chat_join_request', data: BotChatJoinRequestUpdate }
     | { name: 'chat_join_request', data: ChatJoinRequestUpdate }
+    | { name: 'chat_join_result', data: ChatJoinResultUpdate }
+    | { name: 'managed_bot', data: ManagedBotUpdate }
     | { name: 'pre_checkout_query', data: PreCheckoutQuery }
     | { name: 'story', data: StoryUpdate }
     | { name: 'delete_story', data: DeleteStoryUpdate }

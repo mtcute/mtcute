@@ -61,6 +61,7 @@ export function _findMessageInUpdate(
           (
             u._ === 'updateEditMessage'
             || u._ === 'updateEditChannelMessage'
+            || u._ === 'updateNewScheduledMessage'
             || u._ === 'updateBotEditBusinessMessage'
             || u._ === 'updateBotNewBusinessMessage'
           ) // for whatever reason

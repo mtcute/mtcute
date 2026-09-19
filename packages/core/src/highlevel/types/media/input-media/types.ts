@@ -539,6 +539,12 @@ export interface InputMediaPoll extends CaptionMixin {
 
   /** Whether the results of the poll should be hidden until the end of the poll */
   hideResultsUntilClose?: boolean
+
+  /** Whether only subscribers of the channel should be able to vote in the poll */
+  subscribersOnly?: boolean
+
+  /** If passed, only users from these countries (ISO2 codes) will be able to vote in the poll */
+  countries?: string[]
 }
 
 /**

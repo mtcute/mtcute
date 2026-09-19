@@ -404,6 +404,19 @@ export class FullChat extends Chat {
     return this.full._ === 'channelFull' && this.full.paidMessagesAvailable!
   }
 
+  /**
+   * Number of stars that the current user must pay for each message sent to this chat,
+   * or `null` if messages are free
+   */
+  get outgoingPaidMessagePrice(): tl.Long | null {
+    return this.full._ === 'channelFull' ? this.full.sendPaidMessagesStars ?? null : null
+  }
+
+  /** Main tab of the channel's profile, if set */
+  get mainTab(): tl.TypeProfileTab | null {
+    return this.full._ === 'channelFull' ? this.full.mainTab ?? null : null
+  }
+
   /** For communities, list of peers linked to it */
   get linkedPeers(): CommunityPeer[] {
     if (this.full._ !== 'communityFull') return []

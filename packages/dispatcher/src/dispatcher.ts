@@ -7,8 +7,10 @@ import type {
   BotReactionCountUpdate,
   BotReactionUpdate,
   BotStoppedUpdate,
+  BotSubscriptionUpdate,
   BusinessConnection,
   ChatJoinRequestUpdate,
+  ChatJoinResultUpdate,
   ChatMemberUpdate,
   DeleteBusinessMessageUpdate,
   DeleteEphemeralMessagesUpdate,
@@ -17,6 +19,7 @@ import type {
   EphemeralCallbackQuery,
   EphemeralMessage,
   HistoryReadUpdate,
+  ManagedBotUpdate,
   MaybePromise,
   ParsedUpdate,
   PeersIndex,
@@ -52,11 +55,13 @@ import type {
   BotReactionCountUpdateHandler,
   BotReactionUpdateHandler,
   BotStoppedHandler,
+  BotSubscriptionHandler,
   BusinessCallbackQueryHandler,
   BusinessConnectionUpdateHandler,
   BusinessMessageGroupHandler,
   CallbackQueryHandler,
   ChatJoinRequestHandler,
+  ChatJoinResultHandler,
   ChatMemberUpdateHandler,
   ChosenInlineResultHandler,
   DeleteBusinessMessageHandler,
@@ -70,6 +75,7 @@ import type {
   HistoryReadHandler,
   InlineCallbackQueryHandler,
   InlineQueryHandler,
+  ManagedBotHandler,
   MessageGroupHandler,
   NewBusinessMessageHandler,
   NewEphemeralMessageHandler,
@@ -1754,6 +1760,32 @@ export class Dispatcher<State extends object = never> {
   }
 
   /**
+   * Register a bot subscription handler without any filters
+   *
+   * @param handler  Bot subscription handler
+   * @param group  Handler group index
+   */
+  onBotSubscription(handler: BotSubscriptionHandler['callback'], group?: number): void
+
+  /**
+   * Register a bot subscription handler with a filter
+   *
+   * @param filter  Update filter
+   * @param handler  Bot subscription handler
+   * @param group  Handler group index
+   */
+  onBotSubscription<Mod>(
+    filter: UpdateFilter<UpdateContext<BotSubscriptionUpdate>, Mod>,
+    handler: BotSubscriptionHandler<filters.Modify<UpdateContext<BotSubscriptionUpdate>, Mod>>['callback'],
+    group?: number
+  ): void
+
+  /** @internal */
+  onBotSubscription(filter: any, handler?: any, group?: number): void {
+    this._addKnownHandler('bot_subscription', filter, handler, group)
+  }
+
+  /**
    * Register a bot chat join request handler without any filters
    *
    * @param handler  Bot chat join request handler
@@ -1803,6 +1835,58 @@ export class Dispatcher<State extends object = never> {
   /** @internal */
   onChatJoinRequest(filter: any, handler?: any, group?: number): void {
     this._addKnownHandler('chat_join_request', filter, handler, group)
+  }
+
+  /**
+   * Register a chat join result handler without any filters
+   *
+   * @param handler  Chat join result handler
+   * @param group  Handler group index
+   */
+  onChatJoinResult(handler: ChatJoinResultHandler['callback'], group?: number): void
+
+  /**
+   * Register a chat join result handler with a filter
+   *
+   * @param filter  Update filter
+   * @param handler  Chat join result handler
+   * @param group  Handler group index
+   */
+  onChatJoinResult<Mod>(
+    filter: UpdateFilter<UpdateContext<ChatJoinResultUpdate>, Mod>,
+    handler: ChatJoinResultHandler<filters.Modify<UpdateContext<ChatJoinResultUpdate>, Mod>>['callback'],
+    group?: number
+  ): void
+
+  /** @internal */
+  onChatJoinResult(filter: any, handler?: any, group?: number): void {
+    this._addKnownHandler('chat_join_result', filter, handler, group)
+  }
+
+  /**
+   * Register a managed bot handler without any filters
+   *
+   * @param handler  Managed bot handler
+   * @param group  Handler group index
+   */
+  onManagedBot(handler: ManagedBotHandler['callback'], group?: number): void
+
+  /**
+   * Register a managed bot handler with a filter
+   *
+   * @param filter  Update filter
+   * @param handler  Managed bot handler
+   * @param group  Handler group index
+   */
+  onManagedBot<Mod>(
+    filter: UpdateFilter<UpdateContext<ManagedBotUpdate>, Mod>,
+    handler: ManagedBotHandler<filters.Modify<UpdateContext<ManagedBotUpdate>, Mod>>['callback'],
+    group?: number
+  ): void
+
+  /** @internal */
+  onManagedBot(filter: any, handler?: any, group?: number): void {
+    this._addKnownHandler('managed_bot', filter, handler, group)
   }
 
   /**

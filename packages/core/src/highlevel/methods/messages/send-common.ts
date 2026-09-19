@@ -4,6 +4,7 @@ import type { ITelegramClient } from '../../client.types.js'
 import type { Message } from '../../types/messages/message.js'
 import type { TextWithEntities } from '../../types/misc/entities.js'
 import type { InputPeerLike } from '../../types/peers/index.js'
+import type { InputSuggestedPost } from './_normalize-suggested-post.js'
 import { MtArgumentError } from '../../../types/errors.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { MtMessageNotFoundError } from '../../types/errors.js'
@@ -168,6 +169,21 @@ export interface CommonSendParams {
    */
   effect?: tl.Long
   // todo: once we have a caching layer, we can accept an emoji here
+
+  /**
+   * Period (in seconds) after which a scheduled message will be sent again.
+   * Only used together with {@link schedule}, requires Telegram Premium.
+   *
+   * Must be one of `86400`, `7 * 86400`, `14 * 86400`, `30 * 86400`,
+   * `91 * 86400`, `182 * 86400`, `365 * 86400` (or additionally `60`, `300` on test servers)
+   */
+  scheduleRepeatPeriod?: number
+
+  /**
+   * When sending to a channel direct messages chat, information about
+   * the post suggested to the channel
+   */
+  suggestedPost?: InputSuggestedPost
 }
 
 /**

@@ -1,10 +1,12 @@
 import type { tl } from '../../../tl/index.js'
 
+import type { Peer } from '../peers/peer.js'
 import type { PeersIndex } from '../peers/peers-index.js'
 import Long from 'long'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Poll } from '../media/poll.js'
+import { parsePeer } from '../peers/peer.js'
 
 /**
  * Poll state has changed (stopped, somebody
@@ -24,6 +26,21 @@ export class PollUpdate {
    */
   get pollId(): tl.Long {
     return this.raw.pollId
+  }
+
+  /** Chat containing the message with the poll, if available */
+  get chat(): Peer | null {
+    return this.raw.peer ? parsePeer(this.raw.peer, this._peers) : null
+  }
+
+  /** ID of the message containing the poll, if available */
+  get messageId(): number | null {
+    return this.raw.msgId ?? null
+  }
+
+  /** ID of the thread (topic) containing the message with the poll, if available */
+  get threadId(): number | null {
+    return this.raw.topMsgId ?? null
   }
 
   /**
@@ -75,5 +92,5 @@ export class PollUpdate {
   }
 }
 
-memoizeGetters(PollUpdate, ['poll'])
+memoizeGetters(PollUpdate, ['poll', 'chat'])
 makeInspectable(PollUpdate)

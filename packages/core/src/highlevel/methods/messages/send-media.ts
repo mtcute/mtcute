@@ -12,6 +12,7 @@ import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+import { _normalizeInputSuggestedPost } from './_normalize-suggested-post.js'
 import { _findMessageInUpdate } from './find-in-update.js'
 import { _processCommonSendParameters } from './send-common.js'
 
@@ -117,6 +118,8 @@ export async function sendMedia(
       effect: params.effect,
       allowPaidFloodskip: params.allowPaidFloodskip,
       allowPaidStars: params.allowPaidMessages,
+      suggestedPost: _normalizeInputSuggestedPost(params.suggestedPost),
+      scheduleRepeatPeriod: params.scheduleRepeatPeriod,
     },
     {
       chainId,

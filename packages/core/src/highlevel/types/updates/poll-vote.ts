@@ -1,7 +1,6 @@
 import type { tl } from '../../../tl/index.js'
 
 import type { Peer, PeersIndex } from '../peers/index.js'
-import { MtUnsupportedError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { parsePeer } from '../peers/index.js'
@@ -59,23 +58,11 @@ export class PollVoteUpdate {
   }
 
   /**
-   * Indexes of the chosen answers, derived based on observations
-   * described in {@link chosen}.
-   * This might break at any time, but seems to be consistent for now.
-   *
-   * If something does not add up, {@link MtUnsupportedError} is thrown
+   * Indexes of the answers that the user has chosen
+   * (0-based, in the order of {@link Poll.answers})
    */
-  get chosenIndexesAuto(): ReadonlyArray<number> {
-    return this.raw.options.map((buf) => {
-      if (buf.length > 1) {
-        throw new MtUnsupportedError('option had >1 byte')
-      }
-      if (buf[0] < 48 || buf[0] > 57) {
-        throw new MtUnsupportedError('option had first byte out of 0-9 range')
-      }
-
-      return buf[0] - 48
-    })
+  get chosenIndexes(): ReadonlyArray<number> {
+    return this.raw.positions
   }
 }
 

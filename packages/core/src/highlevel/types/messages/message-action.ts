@@ -605,6 +605,12 @@ export interface ActionStarGiftSent {
 
   /** If available, you can pay for this gift's upgrade by passing this hash to `prepayStarGiftUpgrade` */
   prepaidUpgradeHash?: string
+
+  /**
+   * Whether the upgrade was bought after the gift was sent.
+   * In this case, {@link upgradeStars} must not be added to the gift cost
+   */
+  upgradeSeparate: boolean
 }
 
 /** A star gift upgrade was paid for */
@@ -832,6 +838,74 @@ export interface ActionManagedBotCreated {
   readonly botId: number
 }
 
+/**
+ * A suggested post was approved.
+ *
+ * The suggested post itself can be found in {@link Message.replyToMessage}
+ */
+export interface ActionSuggestedPostApproved {
+  readonly type: 'suggested_post_approved'
+
+  /** Price of the post, if it was paid */
+  readonly price?: tl.TypeStarsAmount
+
+  /** Date when the post is expected to be published */
+  readonly scheduleDate?: Date
+}
+
+/**
+ * A suggested post was declined.
+ *
+ * The suggested post itself can be found in {@link Message.replyToMessage}
+ */
+export interface ActionSuggestedPostDeclined {
+  readonly type: 'suggested_post_declined'
+
+  /** Comment left by the channel administrator */
+  readonly comment?: string
+}
+
+/**
+ * A suggested post approval has failed, because the author
+ * of the post didn't have enough funds.
+ *
+ * The suggested post itself can be found in {@link Message.replyToMessage}
+ */
+export interface ActionSuggestedPostApprovalFailed {
+  readonly type: 'suggested_post_approval_failed'
+
+  /** Price of the post */
+  readonly price?: tl.TypeStarsAmount
+}
+
+/**
+ * A suggested post was published for long enough and the payment was received.
+ *
+ * The suggested post itself can be found in {@link Message.replyToMessage}
+ */
+export interface ActionSuggestedPostPaid {
+  readonly type: 'suggested_post_paid'
+
+  /** Amount of Stars/TON received */
+  readonly price: tl.TypeStarsAmount
+}
+
+/**
+ * Payment for a suggested post was refunded.
+ *
+ * The suggested post itself can be found in {@link Message.replyToMessage}
+ */
+export interface ActionSuggestedPostRefunded {
+  readonly type: 'suggested_post_refunded'
+
+  /**
+   * Reason of the refund:
+   * - `post_deleted`: the post was deleted by channel administrators too early
+   * - `payment_refunded`: the payment for the post was refunded by the payer
+   */
+  readonly reason: 'post_deleted' | 'payment_refunded'
+}
+
 /** Community linked to the chat was changed */
 export interface ActionChangeCommunity {
   readonly type: 'change_community'
@@ -928,6 +1002,11 @@ export type MessageAction
     | ActionPollDeleteAnswer
     | ActionManagedBotCreated
     | ActionChangeCommunity
+    | ActionSuggestedPostApproved
+    | ActionSuggestedPostDeclined
+    | ActionSuggestedPostApprovalFailed
+    | ActionSuggestedPostPaid
+    | ActionSuggestedPostRefunded
     | null
 
 /** @internal */
@@ -935,7 +1014,6 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
   // todo - passport
   // messageActionSecureValuesSentMe#1b287353 values:Vector<SecureValue> credentials:SecureCredentialsEncrypted
   // messageActionSecureValuesSent#d95c6154 types:Vector<SecureValueType>
-  // todo: suggested posts
 
   switch (act._) {
     case 'messageActionChatCreate':
@@ -1273,6 +1351,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
 
         savedId: act.savedId,
         prepaidUpgradeHash: act.prepaidUpgradeHash ?? undefined,
+        upgradeSeparate: act.upgradeSeparate!,
       }
     case 'messageActionStarGiftUnique': {
       if (act.gift._ !== 'starGiftUnique') return null
@@ -1361,6 +1440,36 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         cryptoCurrency: act.cryptoCurrency,
         cryptoAmount: act.cryptoAmount,
         transactionId: act.transactionId,
+      }
+    case 'messageActionSuggestedPostApproval':
+      if (act.rejected) {
+        return {
+          type: 'suggested_post_declined',
+          comment: act.rejectComment,
+        }
+      }
+
+      if (act.balanceTooLow) {
+        return {
+          type: 'suggested_post_approval_failed',
+          price: act.price,
+        }
+      }
+
+      return {
+        type: 'suggested_post_approved',
+        price: act.price,
+        scheduleDate: act.scheduleDate ? new Date(act.scheduleDate * 1000) : undefined,
+      }
+    case 'messageActionSuggestedPostSuccess':
+      return {
+        type: 'suggested_post_paid',
+        price: act.price,
+      }
+    case 'messageActionSuggestedPostRefund':
+      return {
+        type: 'suggested_post_refunded',
+        reason: act.payerInitiated ? 'payment_refunded' : 'post_deleted',
       }
     case 'messageActionSuggestBirthday':
       return {

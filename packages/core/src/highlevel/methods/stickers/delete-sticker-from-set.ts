@@ -1,9 +1,8 @@
 import type { ITelegramClient } from '../../client.types.js'
 
 import type { InputDocumentId } from '../../types/index.js'
-import { tdFileId } from '@mtcute/file-id'
 import { StickerSet } from '../../types/index.js'
-import { fileIdToInputDocument } from '../../utils/convert-file-id.js'
+import { _normalizeInputDocumentId } from '../files/normalize-file-to-document.js'
 
 /**
  * Delete a sticker from a sticker set
@@ -19,13 +18,9 @@ export async function deleteStickerFromSet(
   client: ITelegramClient,
   sticker: InputDocumentId,
 ): Promise<StickerSet> {
-  if (tdFileId.isFileIdLike(sticker)) {
-    sticker = fileIdToInputDocument(sticker)
-  }
-
   const res = await client.call({
     _: 'stickers.removeStickerFromSet',
-    sticker,
+    sticker: _normalizeInputDocumentId(sticker),
   })
 
   return new StickerSet(res)
