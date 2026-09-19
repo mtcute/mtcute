@@ -155,6 +155,16 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
       () => client.stopSignal.removeEventListener('abort', onStop),
     )
 
+    const onServerUpdate = (update: Parameters<typeof client.onServerUpdate.emit>[0]) =>
+      this.broadcast({
+        _mtcuteWorkerId: this.workerId,
+        type: 'server_update',
+        update: serializeResult(update),
+      })
+
+    client.onServerUpdate.add(onServerUpdate)
+    this._cleanup.push(() => client.onServerUpdate.remove(onServerUpdate))
+
     if (client.updates) {
       const onRawUpdate = ({ update, peers }: Parameters<typeof client.onRawUpdate.emit>[0]) =>
         this.broadcast({
@@ -168,16 +178,6 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
 
       client.onRawUpdate.add(onRawUpdate)
       this._cleanup.push(() => client.onRawUpdate.remove(onRawUpdate))
-    } else {
-      const onServerUpdate = (update: Parameters<typeof client.onServerUpdate.emit>[0]) =>
-        this.broadcast({
-          _mtcuteWorkerId: this.workerId,
-          type: 'server_update',
-          update: serializeResult(update),
-        })
-
-      client.onServerUpdate.add(onServerUpdate)
-      this._cleanup.push(() => client.onServerUpdate.remove(onServerUpdate))
     }
 
     return this
