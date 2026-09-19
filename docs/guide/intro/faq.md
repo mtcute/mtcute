@@ -264,7 +264,7 @@ You can view a mapping of `NODE_MODULE_VERSION` values to actual Node.js version
 
 ### Try using LTS Node.js
 
-If you are having issues building the library, you can try using LTS Node.js version (20, 22, 24 as of writing).
+If you are having issues building the library, you can try using LTS Node.js version (22, 24, 26 as of writing).
 
 better-sqlite3 comes with pre-built binaries for LTS Node.js versions.
 This will download the necessary binaries automatically in its postinstall script,
