@@ -1,6 +1,7 @@
 import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
 import { createCipheriv, createHmac, pbkdf2 } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 
 import { deflateSync, gunzipSync } from 'node:zlib'
 import { u8 } from '@fuman/utils'
@@ -11,13 +12,16 @@ import {
   initSync,
   SIMD_AVAILABLE,
 } from '@mtcute/wasm'
-
 import mtcuteSimdWasm from '@mtcute/wasm/mtcute-simd.wasm' with { type: 'file' }
 import mtcuteWasm from '@mtcute/wasm/mtcute.wasm' with { type: 'file' }
 
 export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
   async initialize(): Promise<void> {
-    const file = SIMD_AVAILABLE ? mtcuteSimdWasm : mtcuteWasm
+    let file = SIMD_AVAILABLE ? mtcuteSimdWasm : mtcuteWasm
+    // workaround for https://github.com/oven-sh/bun/issues/41780
+    if (file.startsWith('./')) {
+      file = join(import.meta.dir, file)
+    }
     const wasm = await readFile(file)
     initSync(wasm)
   }
