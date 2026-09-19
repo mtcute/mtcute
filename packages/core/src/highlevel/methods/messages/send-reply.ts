@@ -14,6 +14,8 @@ export function replyText(
 ): ReturnType<typeof sendText> {
   const [text, params_ = {}] = params
   params_.replyTo = message.id
+  const threadId = message.replyToMessage?.threadId
+  if (threadId) params_.threadId = threadId
 
   return sendText(client, message.chat.inputPeer, text, params_)
 }
@@ -26,6 +28,8 @@ export function replyMedia(
 ): ReturnType<typeof sendMedia> {
   const [media, params_ = {}] = params
   params_.replyTo = message.id
+  const threadId = message.replyToMessage?.threadId
+  if (threadId) params_.threadId = threadId
 
   return sendMedia(client, message.chat.inputPeer, media, params_)
 }
@@ -38,6 +42,8 @@ export function replyMediaGroup(
 ): ReturnType<typeof sendMediaGroup> {
   const [media, params_ = {}] = params
   params_.replyTo = message.id
+  const threadId = message.replyToMessage?.threadId
+  if (threadId) params_.threadId = threadId
 
   return sendMediaGroup(client, message.chat.inputPeer, media, params_)
 }
