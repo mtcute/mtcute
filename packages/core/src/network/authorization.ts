@@ -187,13 +187,15 @@ export async function doAuthorization(
   connection: SessionConnection,
   crypto: ICryptoProvider,
   expiresIn?: number,
+  abortSignal?: AbortSignal,
 ): Promise<[Uint8Array, Long, number]> {
   const session = connection['_session']
   const readerMap = session._readerMap
   const writerMap = session._writerMap
   const log = connection.log.create('auth')
 
-  function sendPlainMessage(message: mtp.TlObject): Promise<void> {
+  async function sendPlainMessage(message: mtp.TlObject): Promise<void> {
+    abortSignal?.throwIfAborted()
     const length = TlSerializationCounter.countNeededBytes(writerMap, message)
     const writer = TlBinaryWriter.alloc(writerMap, length + 20) // 20 bytes for mtproto header
 
@@ -205,13 +207,18 @@ export async function doAuthorization(
     writer.uint(length)
     writer.object(message)
 
-    return connection.send(writer.result())
+    abortSignal?.throwIfAborted()
+    await connection.send(writer.result())
+    abortSignal?.throwIfAborted()
   }
 
   async function readNext(): Promise<mtp.TlObject> {
+    abortSignal?.throwIfAborted()
+    const message = await connection.waitForUnencryptedMessage(undefined, abortSignal)
+    abortSignal?.throwIfAborted()
     const res = TlBinaryReader.deserializeObject<mtp.TlObject>(
       readerMap,
-      await connection.waitForUnencryptedMessage(),
+      message,
       20, // skip mtproto header
     )
 
@@ -220,6 +227,7 @@ export async function doAuthorization(
     return res
   }
 
+  abortSignal?.throwIfAborted()
   if (expiresIn) log.prefix = '[PFS] '
 
   const nonce = crypto.randomBytes(16)
@@ -253,6 +261,7 @@ export async function doAuthorization(
   }
 
   const [p, q] = await crypto.factorizePQ(resPq.pq)
+  abortSignal?.throwIfAborted()
   log.debug('factorized PQ: PQ = %h, P = %h, Q = %h', resPq.pq, p, q)
 
   const newNonce = crypto.randomBytes(32)

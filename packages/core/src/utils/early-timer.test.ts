@@ -61,6 +61,30 @@ describe('EarlyTimer', () => {
     expect(handler).toHaveBeenCalledOnce()
   })
 
+  it('should cancel an idle emission when reset', async () => {
+    const timer = new EarlyTimer()
+    const handler = vi.fn()
+    timer.onTimeout(handler)
+
+    timer.emitWhenIdle()
+    timer.reset()
+    await Promise.resolve()
+
+    expect(handler).not.toHaveBeenCalled()
+  })
+
+  it('should supersede an earlier idle emission', async () => {
+    const timer = new EarlyTimer()
+    const handler = vi.fn()
+    timer.onTimeout(handler)
+
+    timer.emitWhenIdle()
+    timer.emitWhenIdle()
+    await Promise.resolve()
+
+    expect(handler).toHaveBeenCalledOnce()
+  })
+
   // https://github.com/mtcute/mtcute/issues/148
   it('should not recurse when re-armed with a past-due deadline and a frozen clock', () => {
     // simulate workerd, where performance.now() is frozen within a task
