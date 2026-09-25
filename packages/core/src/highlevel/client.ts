@@ -274,6 +274,7 @@ import { sendText } from './methods/messages/send-text.js'
 import { sendTyping } from './methods/messages/send-typing.js'
 import { sendVote } from './methods/messages/send-vote.js'
 import { setTyping } from './methods/messages/set-typing.js'
+import { stopBotDraft } from './methods/messages/stop-bot-draft.js'
 import { approveSuggestedPost, declineSuggestedPost } from './methods/messages/toggle-suggested-post-approval.js'
 import { toggleTodoCompleted } from './methods/messages/toggle-todo-completed.js'
 import { translateMessage } from './methods/messages/translate-message.js'
@@ -4323,6 +4324,12 @@ export interface TelegramClient extends ITelegramClient {
        */
       threadId?: number
 
+      /** Whether the user should be able to stop the draft generation (see {@link RichStreamingDraft.signal}) */
+      canStop?: boolean
+
+      /** Whether the draft should be kept once the user stops the generation */
+      keepOnStop?: boolean
+
       /**
        * Function that will be called after some part of the media has been uploaded.
        *
@@ -4362,6 +4369,12 @@ export interface TelegramClient extends ITelegramClient {
        * @default  `replace`
        */
       mode?: 'append' | 'replace'
+
+      /** Whether the user should be able to stop the draft generation (see {@link StreamingDraft.signal}) */
+      canStop?: boolean
+
+      /** Whether the draft should be kept once the user stops the generation */
+      keepOnStop?: boolean
     }): Promise<StreamingDraft>
   /**
    * Delete messages by their IDs
@@ -5869,6 +5882,23 @@ export interface TelegramClient extends ITelegramClient {
       /**
        * For comment threads, ID of the thread (i.e. top message)
        */
+      threadId?: number
+    }): Promise<void>
+
+  /**
+   * Stop generation of a streaming draft by a bot
+   * (only available if the bot allowed it, see {@link UserTypingUpdate.canStopDraft})
+   *
+   * **Available**: 👤 users only
+   *
+   * @param chatId  Chat with the bot
+   * @param draftId  ID of the draft to stop (see {@link UserTypingUpdate.draftId})
+   */
+  stopBotDraft(
+    chatId: InputPeerLike,
+    draftId: Long,
+    params?: {
+    /** For bot forum topics, ID of the topic */
       threadId?: number
     }): Promise<void>
   /**
@@ -8419,6 +8449,9 @@ TelegramClient.prototype.sendVote = function (...args) {
 }
 TelegramClient.prototype.setTyping = function (...args) {
   return setTyping(this._client, ...args)
+}
+TelegramClient.prototype.stopBotDraft = function (...args) {
+  return stopBotDraft(this._client, ...args)
 }
 TelegramClient.prototype.approveSuggestedPost = function (...args) {
   return approveSuggestedPost(this._client, ...args)
