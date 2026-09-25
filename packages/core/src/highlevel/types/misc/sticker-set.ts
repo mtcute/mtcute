@@ -1,8 +1,9 @@
 import type { InputFileLike } from '../files/index.js'
 
 import type { MaskPosition, Sticker, StickerType } from '../media/index.js'
+import { asNonNull, isNotNull } from '@fuman/utils'
 import { tl } from '../../../tl/index.js'
-import { MtcuteError, MtTypeAssertionError } from '../../../types/errors.js'
+import { MtTypeAssertionError } from '../../../types/errors.js'
 import { LongMap } from '../../../utils/long-utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
@@ -100,12 +101,12 @@ export interface StickerInfo {
   readonly sticker: Sticker
 }
 
-function parseStickerOrThrow(doc: tl.TypeDocument): Sticker {
+function parseStickerOrNull(doc: tl.TypeDocument): Sticker | null {
   assertTypeIs(doc, 'document')
   const sticker = parseSticker(doc)
 
   if (!sticker) {
-    throw new MtcuteError('Document is not a sticker')
+    return null
   }
 
   return sticker
@@ -230,7 +231,8 @@ export class StickerSet {
     const index = new LongMap<tl.Mutable<StickerInfo>>()
 
     this.full.documents.forEach((doc) => {
-      const sticker = parseStickerOrThrow(doc)
+      const sticker = parseStickerOrNull(doc)
+      if (!sticker) return
 
       const info: tl.Mutable<StickerInfo> = {
         alt: sticker.emoji,
@@ -260,11 +262,11 @@ export class StickerSet {
 
     switch (this.cover._) {
       case 'stickerSetCovered':
-        return [parseStickerOrThrow(this.cover.cover)]
+        return [asNonNull(parseStickerOrNull(this.cover.cover))]
       case 'stickerSetMultiCovered':
-        return this.cover.covers.map(it => parseStickerOrThrow(it))
+        return this.cover.covers.map(it => parseStickerOrNull(it)).filter(isNotNull)
       case 'stickerSetFullCovered':
-        return this.cover.documents.map(it => parseStickerOrThrow(it))
+        return this.cover.documents.map(it => parseStickerOrNull(it)).filter(isNotNull)
       case 'stickerSetNoCovered':
         return []
     }
