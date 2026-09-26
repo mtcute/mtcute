@@ -1,3 +1,4 @@
+import { ip } from '@fuman/net'
 import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
 
 export interface BasicDcOption {
@@ -81,6 +82,47 @@ export const defaultProductionIpv6Dc: DcOptions = {
     id: 2,
     mediaOnly: true,
   },
+}
+
+/**
+ * Built-in production DC addresses, used as a fallback when
+ * the addresses from the server config are unreachable.
+ *
+ * Same as the lists used by tdesktop and TDLib
+ */
+export const builtinProductionDcs: readonly BasicDcOption[] = [
+  { id: 1, ipAddress: '149.154.175.50', port: 443 },
+  { id: 2, ipAddress: '149.154.167.51', port: 443 },
+  { id: 2, ipAddress: '95.161.76.100', port: 443 },
+  { id: 3, ipAddress: '149.154.175.100', port: 443 },
+  { id: 4, ipAddress: '149.154.167.91', port: 443 },
+  { id: 5, ipAddress: '149.154.171.5', port: 443 },
+  { id: 1, ipAddress: '2001:b28:f23d:f001::a', port: 443, ipv6: true },
+  { id: 2, ipAddress: '2001:67c:4e8:f002::a', port: 443, ipv6: true },
+  { id: 3, ipAddress: '2001:b28:f23d:f003::a', port: 443, ipv6: true },
+  { id: 4, ipAddress: '2001:67c:4e8:f004::a', port: 443, ipv6: true },
+  { id: 5, ipAddress: '2001:b28:f23f:f005::a', port: 443, ipv6: true },
+]
+
+/**
+ * Get a string uniquely identifying the address of a DC option (e.g. `[2001:67c:4e8:f002::a]:443`).
+ * IPv6 addresses are normalized, so different notations of the same address give the same key
+ */
+export function getDcOptionAddressKey(dc: BasicDcOption): string {
+  return `${ip.prettify(dc.ipAddress, { encloseIpv6: true })}:${dc.port}`
+}
+
+/** Remove options pointing to the same address, keeping the first one */
+export function dedupeDcOptions(options: readonly BasicDcOption[]): BasicDcOption[] {
+  const seen = new Set<string>()
+
+  return options.filter((opt) => {
+    const key = getDcOptionAddressKey(opt)
+    if (seen.has(key)) return false
+
+    seen.add(key)
+    return true
+  })
 }
 
 export const defaultTestDc: DcOptions = {

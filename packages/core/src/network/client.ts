@@ -269,6 +269,8 @@ export class MtClient {
         emitError: params.onError,
         isPremium: false,
         useIpv6: Boolean(params.useIpv6),
+        // custom defaultDcs may point to a different network, where telegram's addresses make no sense
+        builtinDcFallbacks: !params.testMode && !params.defaultDcs,
         onUsable: this.onUsable.emit.bind(this.onUsable),
         onConnecting: this.onConnecting.emit.bind(this.onConnecting),
         onNetworkChanged: this.onNetworkChanged.emit.bind(this.onNetworkChanged),

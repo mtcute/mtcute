@@ -27,6 +27,50 @@ function sendPing(conn: SessionConnection & Record<string, any>) {
 }
 
 describe('SessionConnection', () => {
+  describe('read timeout', () => {
+    it('should reset the session when nothing was read for too long', async () => {
+      const { client, conn } = await createConnection()
+
+      const reset = vi.spyOn(conn, '_resetSession')
+      conn._session.lastActivityTime = performance.now() - 1_000_000
+      conn['_flush']()
+
+      expect(reset).toHaveBeenCalledWith('read timeout')
+
+      await client.destroy()
+    })
+
+    it('should not reset the session while the socket is not open yet', async () => {
+      const { client, conn } = await createConnection()
+
+      // own property, so that the getter on the prototype stays intact for other tests
+      Object.defineProperty(conn, 'isConnected', { get: () => false })
+      const reset = vi.spyOn(conn, '_resetSession')
+      conn._session.lastActivityTime = performance.now() - 1_000_000
+      conn['_flush']()
+
+      expect(reset).not.toHaveBeenCalled()
+
+      await client.destroy()
+    })
+  })
+
+  describe('authorization', () => {
+    it('should not start the handshake while the socket is not open yet', async () => {
+      const { client, conn } = await createConnection()
+
+      Object.defineProperty(conn, 'isConnected', { get: () => false })
+      const authBegin = vi.fn()
+      conn.onAuthBegin.add(authBegin)
+      conn._authorize()
+
+      expect(conn._session.authorizationPending).toBe(false)
+      expect(authBegin).not.toHaveBeenCalled()
+
+      await client.destroy()
+    })
+  })
+
   describe('ping handling', () => {
     it('should handle pong to a ping that was sent before the connection became active', async () => {
       const { client, conn } = await createConnection()

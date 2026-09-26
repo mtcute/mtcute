@@ -6,7 +6,7 @@ import type { StorageManager } from '../storage/storage.js'
 import type { mtp, tl } from '../tl/index.js'
 
 import type { ICorePlatform } from '../types/platform.js'
-import type { DcOptions, ICryptoProvider, Logger } from '../utils/index.js'
+import type { BasicDcOption, DcOptions, ICryptoProvider, Logger } from '../utils/index.js'
 import type { ConfigManager } from './config-manager.js'
 import type { ConnectionFloodLimits } from './flood-control.js'
 import type { SessionConnectionParams } from './session-connection.js'
@@ -15,7 +15,7 @@ import type { TelegramTransport } from './transports/abstract.js'
 import { defaultReconnectionStrategy } from '@fuman/net'
 import { asNonNull, composeMiddlewares, Deferred, LruMap, noop } from '@fuman/utils'
 import { MtArgumentError, MtcuteError, MtUnsupportedError } from '../types/index.js'
-import { dropUndefined } from '../utils/index.js'
+import { builtinProductionDcs, dropUndefined } from '../utils/index.js'
 import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
 
 import { basic as defaultMiddlewares } from './middlewares/default.js'
@@ -42,6 +42,12 @@ export interface NetworkManagerParams {
   testMode: boolean
   layer: number
   useIpv6: boolean
+  /**
+   * Whether the built-in addresses of Telegram production DCs may be used
+   * as fallbacks when the configured ones are unreachable.
+   * Must be disabled when connecting to other networks
+   */
+  builtinDcFallbacks?: boolean
   readerMap: TlReaderMap
   writerMap: TlWriterMap
   isPremium: boolean
@@ -53,6 +59,12 @@ export interface NetworkManagerParams {
 }
 
 export type ConnectionCountDelegate = (kind: ConnectionKind, dcId: number, isPremium: boolean) => number
+
+/** Addresses to try (in order) when the main/media address of a DC can't be connected to */
+export interface DcFallbacks {
+  main: BasicDcOption[]
+  media: BasicDcOption[]
+}
 
 const defaultConnectionCountDelegate: ConnectionCountDelegate = (kind, dcId, isPremium) => {
   switch (kind) {
@@ -238,6 +250,8 @@ export type RpcCallMiddleware<Result = unknown> = Middleware<RpcCallMiddlewareCo
  */
 export class DcConnectionManager {
   private _salts = new ServerSaltManager()
+  // shared between all connections of this dc, so that they don't all have to wait for the same unreachable address
+  private _dcFailures = new Map<string, number>()
   private _log
 
   /** Main connection pool */
@@ -262,6 +276,8 @@ export class DcConnectionManager {
     readonly _dcs: DcOptions,
     /** Whether this DC is the primary one */
     public isPrimary = false,
+    /** Addresses to fall back to if the ones in `_dcs` are unreachable */
+    readonly _fallbacks?: DcFallbacks | undefined,
   ) {
     this._log = this.manager._log.create('dc-manager')
     this._log.prefix = `[DC ${dcId}] `
@@ -273,6 +289,8 @@ export class DcConnectionManager {
       initConnection: this.manager._initConnectionParams,
       transport: this.manager._transport,
       dc: this._dcs.media,
+      dcFallbacks: this._fallbacks?.media,
+      dcFailures: this._dcFailures,
       testMode: managerParams.testMode,
       reconnectionStrategy: this.manager._reconnectionStrategy,
       layer: managerParams.layer,
@@ -293,6 +311,7 @@ export class DcConnectionManager {
     const mainParams = baseConnectionParams()
     mainParams.isMainConnection = true
     mainParams.dc = _dcs.main
+    mainParams.dcFallbacks = _fallbacks?.main
 
     if (isPrimary) {
       mainParams.inactivityTimeout = undefined
@@ -541,8 +560,8 @@ export class NetworkManager {
     this._storage = params.storage
   }
 
-  private async _findDcOptions(dcId: number): Promise<DcOptions> {
-    const main = await this.config.findOption({
+  private async _findDcOptions(dcId: number): Promise<{ dcs: DcOptions, fallbacks: DcFallbacks }> {
+    const [main, ...mainRest] = await this.config.findOptions({
       dcId,
       allowIpv6: this.params.useIpv6,
       preferIpv6: this.params.useIpv6,
@@ -550,7 +569,7 @@ export class NetworkManager {
       cdn: false,
     })
 
-    const media = await this.config.findOption({
+    const [media, ...mediaRest] = await this.config.findOptions({
       dcId,
       allowIpv6: this.params.useIpv6,
       preferIpv6: this.params.useIpv6,
@@ -563,7 +582,23 @@ export class NetworkManager {
       throw new MtArgumentError(`Could not find DC ${dcId}`)
     }
 
-    return { main, media }
+    const builtin = this._findBuiltinFallbacks(dcId)
+
+    return {
+      dcs: { main, media },
+      fallbacks: {
+        main: [...mainRest, ...builtin],
+        media: [...mediaRest, ...builtin],
+      },
+    }
+  }
+
+  // the config (or the stored primary dc) may only contain addresses that are unreachable
+  // from the current network, so we also try the built-in ones (same as official clients do)
+  private _findBuiltinFallbacks(dcId: number): BasicDcOption[] {
+    if (!this.params.builtinDcFallbacks || this.params.testMode) return []
+
+    return builtinProductionDcs.filter(dc => dc.id === dcId && (!dc.ipv6 || this.params.useIpv6))
   }
 
   private _resetOnNetworkChange?: () => void
@@ -624,9 +659,9 @@ export class NetworkManager {
       this._log.debug('creating new DC %d', dcId)
 
       try {
-        const dcOptions = await this._findDcOptions(dcId)
+        const { dcs, fallbacks } = await this._findDcOptions(dcId)
 
-        const dc = new DcConnectionManager(this, dcId, dcOptions)
+        const dc = new DcConnectionManager(this, dcId, dcs, false, fallbacks)
 
         if (!(await dc.loadKeys())) {
           dc.main.requestAuth()
@@ -672,7 +707,8 @@ export class NetworkManager {
 
     this._resetOnNetworkChange = this.params.platform.onNetworkChanged?.(this.notifyNetworkChanged.bind(this))
 
-    const dc = new DcConnectionManager(this, defaultDcs.main.id, defaultDcs, true)
+    const builtin = this._findBuiltinFallbacks(defaultDcs.main.id)
+    const dc = new DcConnectionManager(this, defaultDcs.main.id, defaultDcs, true, { main: builtin, media: builtin })
     this._dcConnections.set(defaultDcs.main.id, dc)
     await this._switchPrimaryDc(dc)
   }
@@ -820,13 +856,13 @@ export class NetworkManager {
 
     if (newDc === this._primaryDc?.dcId) return
 
-    const options = await this._findDcOptions(newDc)
+    const { dcs, fallbacks } = await this._findDcOptions(newDc)
 
     if (!this._dcConnections.has(newDc)) {
-      this._dcConnections.set(newDc, new DcConnectionManager(this, newDc, options, true))
+      this._dcConnections.set(newDc, new DcConnectionManager(this, newDc, dcs, true, fallbacks))
     }
 
-    await this._storage.dcs.store(options)
+    await this._storage.dcs.store(dcs)
 
     await this._switchPrimaryDc(this._dcConnections.get(newDc)!)
   }
