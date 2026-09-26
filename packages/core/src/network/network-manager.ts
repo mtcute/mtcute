@@ -969,7 +969,7 @@ export class NetworkManager {
 
         res = await multi.sendRpc(message, params?.timeout, params?.abortSignal, params?.chainId)
       }
-    } else if (err === 'AUTH_KEY_UNREGISTERED') {
+    } else if (err === 'AUTH_KEY_UNREGISTERED' || err === 'SESSION_REVOKED') {
       // we can try re-exporting auth from the primary connection
       this._log.debug('exported auth key error, trying re-exporting..')
 
