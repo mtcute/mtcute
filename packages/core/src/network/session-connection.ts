@@ -355,6 +355,15 @@ export class SessionConnection extends PersistentConnection {
       return
     }
 
+    if (!this.isConnected) {
+      // onConnected() will start the authorization once the socket is open,
+      // otherwise the handshake could time out while we are still connecting
+      this.log.debug('_authorize(): not connected yet, deferring')
+      if (this._inactive) this.connect()
+
+      return
+    }
+
     this._session.authorizationPending = true
     this.onAuthBegin.emit()
 
@@ -377,6 +386,7 @@ export class SessionConnection extends PersistentConnection {
         this._session.authorizationPending = false
         if (this._destroyed) return
         this.log.error('Authorization error: %e', err)
+        this._dropQueuedPlainMessages()
         this.handleError(err)
         this.reconnect()
       })
@@ -545,6 +555,7 @@ export class SessionConnection extends PersistentConnection {
       .catch((err: Error) => {
         if (this._destroyed) return
         this.log.error('PFS Authorization error: %e', err)
+        this._dropQueuedPlainMessages()
 
         if (this._isPfsBindingPendingInBackground) {
           this._isPfsBindingPendingInBackground = false
@@ -1777,7 +1788,10 @@ export class SessionConnection extends PersistentConnection {
     }
     this._active = active
 
-    if (this._checkTimeouts(now)) return
+    // read/ping timeouts only make sense for an open socket. while (re)connecting, resetting the session
+    // would only leave messages from the old session in the send queue, to be sent once connected
+    const connected = this.isConnected
+    if (connected && this._checkTimeouts(now)) return
 
     try {
       this._doFlush()
@@ -1801,12 +1815,16 @@ export class SessionConnection extends PersistentConnection {
         ? this._session.lastPingTime + this._pingMustDelay()
         : Infinity
       const nextGetScheduleTime = this._session.getStateSchedule.raw[0]?.getState || Infinity
-      const readDeadline = this._session.lastActivityTime + this._readDisconnectDelay()
-      const pingDeadline = this._session.lastPingMsgId.isZero()
+      const readDeadline = connected
+        ? this._session.lastActivityTime + this._readDisconnectDelay()
+        : Infinity
+      const pingDeadline = !connected || this._session.lastPingMsgId.isZero()
         ? Infinity
         : this._session.lastPingTime + this._pingDisconnectDelay()
 
-      this._flushTimer.emitBefore(Math.min(nextPingTime, nextGetScheduleTime, readDeadline, pingDeadline))
+      const nextFlush = Math.min(nextPingTime, nextGetScheduleTime, readDeadline, pingDeadline)
+      // once connected, onConnectionUsable will schedule a flush anyway
+      if (nextFlush !== Infinity) this._flushTimer.emitBefore(nextFlush)
     }
   }
 

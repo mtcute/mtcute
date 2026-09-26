@@ -63,12 +63,37 @@ describe('NetworkManager', () => {
     })
   })
 
+  describe('built-in dc fallbacks', () => {
+    it('should be used for the primary dc', async () => {
+      const client = new StubTelegramClient()
+      await client.connect()
+
+      const dc = client.mt.network._primaryDc!
+      const fallbacks = dc.main._connections[0].params.dcFallbacks!
+
+      expect(fallbacks.length).toBeGreaterThan(0)
+      expect(fallbacks.every(it => it.id === dc.dcId && !it.ipv6)).toBe(true)
+
+      await client.destroy()
+    })
+
+    it('should not be used with custom defaultDcs', async () => {
+      const custom = { id: 2, ipAddress: '10.0.0.1', port: 443 }
+      const client = new StubTelegramClient({ defaultDcs: { main: custom, media: custom } })
+      await client.connect()
+
+      expect(client.mt.network._primaryDc!.main._connections[0].params.dcFallbacks).toEqual([])
+
+      await client.destroy()
+    })
+  })
+
   describe('_getOtherDc', () => {
     it('should propagate DC creation errors', async () => {
       const client = new StubTelegramClient()
       await client.connect()
 
-      vi.spyOn(client.mt.network.config, 'findOption').mockResolvedValue(undefined)
+      vi.spyOn(client.mt.network.config, 'findOptions').mockResolvedValue([])
 
       await expect(client.mt.call({ _: 'help.getNearestDc' }, { dcId: 9 })).rejects.toThrow('Could not find DC 9')
 
@@ -82,13 +107,13 @@ describe('NetworkManager', () => {
       await client.connect()
 
       const network = client.mt.network
-      vi.spyOn(network.config, 'findOption').mockImplementation(
-        async (params): Promise<tl.RawDcOption> => ({
+      vi.spyOn(network.config, 'findOptions').mockImplementation(
+        async (params): Promise<tl.RawDcOption[]> => [{
           _: 'dcOption',
           id: params.dcId,
           ipAddress: '1.2.3.4',
           port: 443,
-        }),
+        }],
       )
 
       const dc1 = network._primaryDc!

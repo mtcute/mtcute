@@ -1,6 +1,15 @@
 import type { tl } from '../tl/index.js'
 import { AsyncResource } from '@fuman/utils'
 
+export interface FindDcOptionParams {
+  dcId: number
+  allowIpv6?: boolean
+  preferIpv6?: boolean
+  allowMedia?: boolean
+  preferMedia?: boolean
+  cdn?: boolean
+}
+
 /**
  * Config manager is responsible for keeping
  * the current server configuration up-to-date
@@ -22,14 +31,11 @@ export class ConfigManager extends AsyncResource<tl.RawConfig> {
     })
   }
 
-  async findOption(params: {
-    dcId: number
-    allowIpv6?: boolean
-    preferIpv6?: boolean
-    allowMedia?: boolean
-    preferMedia?: boolean
-    cdn?: boolean
-  }): Promise<tl.RawDcOption | undefined> {
+  /**
+   * Find all DC options matching the given params,
+   * ordered from the most preferred to the least preferred
+   */
+  async findOptions(params: FindDcOptionParams): Promise<tl.RawDcOption[]> {
     if (this.isStale) await this.update()
 
     const data = this.getCached()!
@@ -43,20 +49,20 @@ export class ConfigManager extends AsyncResource<tl.RawConfig> {
       return opt.id === params.dcId
     })
 
-    if (params.preferMedia && params.preferIpv6) {
-      const r = options.find(opt => opt.mediaOnly && opt.ipv6)
-      if (r) return r
+    const rank = (opt: tl.RawDcOption): number => {
+      if (params.preferMedia && params.preferIpv6 && opt.mediaOnly && opt.ipv6) return 0
+      if (params.preferMedia && opt.mediaOnly) return 1
+      if (params.preferIpv6 && opt.ipv6) return 2
+
+      return 3
     }
 
-    if (params.preferMedia) {
-      const r = options.find(opt => opt.mediaOnly)
-      if (r) return r
-    }
+    // Array#sort is stable, so the original order is kept within the same rank
+    return options.sort((a, b) => rank(a) - rank(b))
+  }
 
-    if (params.preferIpv6) {
-      const r = options.find(opt => opt.ipv6)
-      if (r) return r
-    }
+  async findOption(params: FindDcOptionParams): Promise<tl.RawDcOption | undefined> {
+    const options = await this.findOptions(params)
 
     return options[0]
   }
