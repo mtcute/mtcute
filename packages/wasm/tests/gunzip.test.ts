@@ -23,17 +23,45 @@ function gzipSyncWrap(data: Uint8Array) {
 }
 
 describe('gunzip', () => {
-  it('should correctly read zlib headers', () => {
+  it('should reject malformed data', () => {
+    expect(() => gunzip(new Uint8Array(17))).toThrowError(new Error('gunzip error -- bad data'))
+    expect(() => gunzip(new Uint8Array(18))).toThrowError(new Error('gunzip error -- bad data'))
+
+    const underreportedSize = gzipSyncWrap(utf8.encoder.encode('hello world'))
+    new DataView(underreportedSize.buffer, underreportedSize.byteOffset, underreportedSize.byteLength)
+      .setUint32(underreportedSize.byteLength - 4, 10, true)
+
+    const wasm = __getWasm()
+    const reusablePtr = wasm.__malloc(underreportedSize.length)
+    expect(reusablePtr).not.toEqual(0)
+    wasm.__free(reusablePtr)
+
+    expect(() => gunzip(underreportedSize))
+      .toThrowError(new Error('gunzip error -- insufficient output space'))
+
+    const reusedPtr = wasm.__malloc(underreportedSize.length)
+    expect(reusedPtr).toEqual(reusablePtr)
+    wasm.__free(reusedPtr)
+  })
+
+  it('should correctly read the gzip footer', () => {
     const wasm = __getWasm()
     const data = gzipSyncWrap(utf8.encoder.encode('hello world'))
 
     const inputPtr = wasm.__malloc(data.length)
-    new Uint8Array(wasm.memory.buffer).set(data, inputPtr)
+    expect(inputPtr).not.toEqual(0)
+    try {
+      new Uint8Array(wasm.memory.buffer).set(data, inputPtr)
 
-    expect(wasm.libdeflate_gzip_get_output_size(inputPtr, data.length)).toEqual(11)
+      expect(wasm.libdeflate_gzip_get_output_size(inputPtr, data.length)).toEqual(11)
+    } finally {
+      wasm.__free(inputPtr)
+    }
   })
 
   it('should correctly inflate', () => {
+    expect(gunzip(gzipSyncWrap(new Uint8Array()))).toEqual(new Uint8Array())
+
     const data = Array.from({ length: 1000 }, () => 'a').join('')
     const res = gzipSyncWrap(utf8.encoder.encode(data))
 
@@ -55,5 +83,21 @@ describe('gunzip', () => {
     }
 
     expect(__getWasm().memory.buffer.byteLength).toEqual(memSize)
+  })
+
+  it('should release input when output allocation fails', () => {
+    const invalidGzip = new Uint8Array(18)
+    invalidGzip.fill(0xFF, invalidGzip.length - 4)
+
+    const wasm = __getWasm()
+    const reusablePtr = wasm.__malloc(invalidGzip.length)
+    expect(reusablePtr).not.toEqual(0)
+    wasm.__free(reusablePtr)
+
+    expect(() => gunzip(invalidGzip)).toThrowError(new RangeError('WASM memory allocation failed'))
+
+    const reusedPtr = wasm.__malloc(invalidGzip.length)
+    expect(reusedPtr).toEqual(reusablePtr)
+    wasm.__free(reusedPtr)
   })
 })
