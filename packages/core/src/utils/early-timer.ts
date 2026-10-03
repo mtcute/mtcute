@@ -7,6 +7,7 @@ import { timers } from '@fuman/utils'
 export class EarlyTimer {
   private _timeout?: timers.Timer
   private _timeoutTs?: number
+  private _generation = 0
 
   private _handler: () => void = () => {}
 
@@ -21,8 +22,11 @@ export class EarlyTimer {
   emitWhenIdle(): void {
     timers.clearTimeout(this._timeout)
     this._timeoutTs = performance.now()
+    const generation = ++this._generation
 
-    queueMicrotask(this.emitNow)
+    queueMicrotask(() => {
+      if (generation === this._generation) this.emitNow()
+    })
   }
 
   /**
@@ -67,6 +71,7 @@ export class EarlyTimer {
   reset(): void {
     timers.clearTimeout(this._timeout)
     this._timeoutTs = undefined
+    this._generation += 1
   }
 
   /**
