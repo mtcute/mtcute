@@ -241,4 +241,54 @@ describe('ConfigManager', () => {
       })
     })
   })
+
+  describe('findOptions', () => {
+    const findOptions = async (
+      options: tl.RawDcOption[],
+      params: Parameters<ConfigManager['findOptions']>[0],
+    ) => {
+      getConfig.mockImplementation(() =>
+        Promise.resolve({
+          ...config,
+          dcOptions: options,
+        }),
+      )
+
+      const cm = new ConfigManager(getConfig)
+      await cm.update()
+
+      return (await cm.findOptions(params)).map(it => it.ipAddress)
+    }
+
+    it('should return all matching options', async () => {
+      expect(await findOptions([
+        createStub('dcOption', { id: 5, ipAddress: '5.5.5.1' }),
+        createStub('dcOption', { id: 4, ipAddress: '4.4.4.4' }),
+        createStub('dcOption', { id: 5, ipAddress: '5.5.5.2', static: true }),
+        createStub('dcOption', { id: 5, ipAddress: '::5', ipv6: true }),
+      ], { dcId: 5 })).toEqual(['5.5.5.1', '5.5.5.2'])
+    })
+
+    it('should order options by preference, keeping the original order otherwise', async () => {
+      const options = [
+        createStub('dcOption', { id: 2, ipAddress: '2.2.2.1' }),
+        createStub('dcOption', { id: 2, ipAddress: '::1', ipv6: true }),
+        createStub('dcOption', { id: 2, ipAddress: '2.2.2.2', mediaOnly: true }),
+        createStub('dcOption', { id: 2, ipAddress: '2.2.2.3' }),
+        createStub('dcOption', { id: 2, ipAddress: '::2', ipv6: true, mediaOnly: true }),
+      ]
+
+      expect(await findOptions(options, { dcId: 2, allowMedia: true, preferMedia: true }))
+        .toEqual(['2.2.2.2', '2.2.2.1', '2.2.2.3'])
+      expect(await findOptions(options, { dcId: 2, allowIpv6: true, preferIpv6: true }))
+        .toEqual(['::1', '2.2.2.1', '2.2.2.3'])
+      expect(await findOptions(options, {
+        dcId: 2,
+        allowIpv6: true,
+        preferIpv6: true,
+        allowMedia: true,
+        preferMedia: true,
+      })).toEqual(['::2', '2.2.2.2', '::1', '2.2.2.1', '2.2.2.3'])
+    })
+  })
 })

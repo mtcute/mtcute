@@ -63,12 +63,123 @@ describe('NetworkManager', () => {
     })
   })
 
+  describe('built-in dc fallbacks', () => {
+    it('should be used for the primary dc', async () => {
+      const client = new StubTelegramClient()
+      await client.connect()
+
+      const dc = client.mt.network._primaryDc!
+      const fallbacks = dc.main._connections[0].params.dcFallbacks!
+
+      expect(fallbacks.length).toBeGreaterThan(0)
+      expect(fallbacks.every(it => it.id === dc.dcId && !it.ipv6)).toBe(true)
+
+      await client.destroy()
+    })
+
+    it('should not be used with custom defaultDcs', async () => {
+      const custom = { id: 2, ipAddress: '10.0.0.1', port: 443 }
+      const client = new StubTelegramClient({ defaultDcs: { main: custom, media: custom } })
+      await client.connect()
+
+      expect(client.mt.network._primaryDc!.main._connections[0].params.dcFallbacks).toEqual([])
+
+      await client.destroy()
+    })
+  })
+
+  describe('fallbackDcs', () => {
+    it('should replace the built-in production addresses', async () => {
+      const fallback = { id: 2, ipAddress: '10.0.0.2', port: 443 }
+      const client = new StubTelegramClient({ fallbackDcs: [fallback] })
+      try {
+        await client.connect()
+        expect(client.mt.network._primaryDc!.main._connections[0].params.dcFallbacks).toEqual([fallback])
+      } finally {
+        await client.destroy()
+      }
+    })
+
+    it('should disable fallbacks for the primary dc with an empty array', async () => {
+      const client = new StubTelegramClient({ fallbackDcs: [] })
+      try {
+        await client.connect()
+        expect(client.mt.network._primaryDc!.main._connections[0].params.dcFallbacks).toEqual([])
+      } finally {
+        await client.destroy()
+      }
+    })
+
+    it('should not use production fallbacks in test mode by default', async () => {
+      const client = new StubTelegramClient({ testMode: true })
+      try {
+        await client.connect()
+        expect(client.mt.network._primaryDc!.main._connections[0].params.dcFallbacks).toEqual([])
+      } finally {
+        await client.destroy()
+      }
+    })
+
+    it.each([false, true])('should filter custom fallbacks with useIpv6=%s', async (useIpv6) => {
+      const custom = { id: 2, ipAddress: '10.0.0.1', port: 443 }
+      const fallback = { id: 2, ipAddress: '10.0.0.2', port: 443 }
+      const media = { id: 2, ipAddress: '10.0.0.3', port: 443, mediaOnly: true }
+      const ipv6 = { id: 2, ipAddress: '::2', port: 443, ipv6: true }
+      const client = new StubTelegramClient({
+        defaultDcs: { main: custom, media: custom },
+        fallbackDcs: [fallback, media, ipv6, { id: 5, ipAddress: '10.0.0.5', port: 443 }],
+        useIpv6,
+      })
+      try {
+        await client.connect()
+        const dc = client.mt.network._primaryDc!
+        expect(dc.main._connections[0].params.dcFallbacks).toEqual(useIpv6 ? [fallback, ipv6] : [fallback])
+        expect(dc.download._connections[0].params.dcFallbacks)
+          .toEqual(useIpv6 ? [fallback, media, ipv6] : [fallback, media])
+      } finally {
+        await client.destroy()
+      }
+    })
+
+    it('should allow explicit fallbacks in test mode', async () => {
+      const fallback = { id: 2, ipAddress: '10.0.0.2', port: 443, testMode: true }
+      const client = new StubTelegramClient({ testMode: true, fallbackDcs: [fallback] })
+      try {
+        await client.connect()
+        expect(client.mt.network._primaryDc!.main._connections[0].params.dcFallbacks).toEqual([fallback])
+      } finally {
+        await client.destroy()
+      }
+    })
+
+    it.each([false, true])('should keep config alternatives with empty fallbackDcs=%s for secondary dcs', async (disabled) => {
+      const fallback = { id: 5, ipAddress: '10.0.0.5', port: 443 }
+      const main: tl.RawDcOption = { _: 'dcOption', id: 5, ipAddress: '10.0.0.1', port: 443 }
+      const media: tl.RawDcOption = { ...main, ipAddress: '10.0.0.2', mediaOnly: true }
+      const configFallback: tl.RawDcOption = { ...main, ipAddress: '10.0.0.3' }
+      const client = new StubTelegramClient({ fallbackDcs: disabled ? [] : [fallback] })
+      try {
+        await client.connect()
+        vi.spyOn(client.mt.network.config, 'findOptions').mockImplementation(async params =>
+          params.allowMedia ? [media, main, configFallback] : [main, configFallback],
+        )
+        const dc = await client.mt.network._getOtherDc(5)
+        expect(dc.main._connections[0].params.dcFallbacks)
+          .toEqual(disabled ? [configFallback] : [configFallback, fallback])
+        expect(dc.download._connections[0].params.dcFallbacks)
+          .toEqual(disabled ? [main, configFallback] : [main, configFallback, fallback])
+      } finally {
+        await client.destroy()
+      }
+    })
+  })
+
   describe('_getOtherDc', () => {
     it('should propagate DC creation errors', async () => {
       const client = new StubTelegramClient()
       await client.connect()
 
-      vi.spyOn(client.mt.network.config, 'findOption').mockResolvedValue(undefined)
+      vi.spyOn(client.mt.network.config, 'findOptions').mockResolvedValue([])
 
       await expect(client.mt.call({ _: 'help.getNearestDc' }, { dcId: 9 })).rejects.toThrow('Could not find DC 9')
 
@@ -82,13 +193,13 @@ describe('NetworkManager', () => {
       await client.connect()
 
       const network = client.mt.network
-      vi.spyOn(network.config, 'findOption').mockImplementation(
-        async (params): Promise<tl.RawDcOption> => ({
+      vi.spyOn(network.config, 'findOptions').mockImplementation(
+        async (params): Promise<tl.RawDcOption[]> => [{
           _: 'dcOption',
           id: params.dcId,
           ipAddress: '1.2.3.4',
           port: 443,
-        }),
+        }],
       )
 
       const dc1 = network._primaryDc!
