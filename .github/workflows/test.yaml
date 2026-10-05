@@ -24,6 +24,8 @@ jobs:
         run: pnpm run lint:ci
       - name: 'deno publish --dry-run'
         run: pnpm exec fuman-build jsr gen-deno-workspace --with-dry-run
+      - name: 'npm publish --dry-run'
+        run: pnpm exec fuman-build publish :all --dry-run --with-build --fixed-version=0.0.0-ci --no-provenance --publish-args=--tag=ci
 
   test-node:
     runs-on: ubuntu-latest

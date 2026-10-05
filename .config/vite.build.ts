@@ -61,6 +61,7 @@ if (typeof globalThis !== 'undefined' && !globalThis._MTCUTE_CJS_DEPRECATION_WAR
       dts({
         // broken; see https://github.com/qmhc/vite-plugin-dts/issues/321, https://github.com/microsoft/rushstack/issues/3557
         // rollupTypes: true,
+        exclude: ['**/*.test.ts', '**/*.test-d.ts', '**/*.test-utils.ts'],
       }),
     ],
   }
