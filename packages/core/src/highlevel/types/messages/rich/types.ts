@@ -2,6 +2,7 @@ import type { tl } from '../../../../tl/index.js'
 import type { ReplaceDeep } from '../../../../types/utils.js'
 import type {
   InputMediaAudio,
+  InputMediaDocument,
   InputMediaPhoto,
   InputMediaVideo,
 } from '../../media/index.js'
@@ -12,6 +13,7 @@ import type {
  * - {@link InputMediaPhoto} (e.g. `InputMedia.photo(...)`)
  * - {@link InputMediaVideo} (e.g. `InputMedia.video(...)`)
  * - {@link InputMediaAudio} (e.g. `InputMedia.audio(...)`)
+ * - {@link InputMediaDocument} (e.g. `InputMedia.document(...)`)
  * - a raw TL object
  */
 export type InputRichMessageMedia
@@ -21,6 +23,7 @@ export type InputRichMessageMedia
     | InputMediaPhoto
     | InputMediaVideo
     | InputMediaAudio
+    | InputMediaDocument
 
 /** In-memory cache mapping an {@link InputRichMessageMedia} to its uploaded media, used by streaming drafts */
 export type RichMediaUploadCache = Map<unknown, tl.RawInputMediaPhoto | tl.RawInputMediaDocument>

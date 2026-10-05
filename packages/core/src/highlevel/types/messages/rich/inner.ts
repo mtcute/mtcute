@@ -1,7 +1,7 @@
 import type { tl } from '../../../../tl/index.js'
 
 import type { InputInlineKeyboardButton } from '../../bots/keyboards/types.js'
-import type { InputMediaAudio, InputMediaPhoto, InputMediaVideo } from '../../media/index.js'
+import type { InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo } from '../../media/index.js'
 import type { InputText } from '../../misc/entities.js'
 import type {
   InputPageBlock,
@@ -415,6 +415,21 @@ export function audio(
     block: {
       _: 'pageBlockAudio',
       audioId: Long.ZERO,
+      caption: normalizeCaption(params.caption),
+    },
+  }
+}
+
+/** Create a document block, uploading the given file */
+export function document(
+  file: string | tl.TypeInputDocument | InputMediaDocument,
+  params: { caption?: InputRichText | InputPageCaption } = {},
+): InputPageBlockWithFile {
+  return {
+    file,
+    block: {
+      _: 'pageBlockDocument',
+      documentId: Long.ZERO,
       caption: normalizeCaption(params.caption),
     },
   }
