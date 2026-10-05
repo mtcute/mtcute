@@ -344,6 +344,7 @@ export abstract class PersistentConnection {
   }
 
   async changeTransport(transport: TelegramTransport): Promise<void> {
+    const reconnect = this._fuman.isConnected || this._fuman.isConnecting || this._fuman.isWaiting
     this._connectAbort?.abort()
     await this._fuman.close()
 
@@ -353,7 +354,7 @@ export abstract class PersistentConnection {
     this._codec.setup?.(this.params.crypto, this.log)
 
     await this._fuman.changeTransport(this._connect)
-    this._fuman.connect(this._fumanAddress)
+    if (reconnect && !this._inactive && !this._disconnectedManually && !this._destroyed) this.connect()
   }
 
   connect(): void {

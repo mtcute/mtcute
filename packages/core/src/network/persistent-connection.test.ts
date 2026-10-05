@@ -32,6 +32,8 @@ async function createConnection(params: {
   dc: BasicDcOption
   dcFallbacks?: BasicDcOption[]
   dcFailures?: Map<string, number>
+  floodControl?: PersistentConnectionParams['floodControl']
+  reconnectionStrategy?: PersistentConnectionParams['reconnectionStrategy']
   connect: (dc: BasicDcOption, signal: AbortSignal) => Promise<ITelegramConnection>
 }) {
   const transport: TelegramTransport = {
@@ -46,13 +48,93 @@ async function createConnection(params: {
     dcFallbacks: params.dcFallbacks,
     dcFailures: params.dcFailures,
     testMode: false,
-    reconnectionStrategy: () => 0,
+    reconnectionStrategy: params.reconnectionStrategy ?? (() => 0),
+    floodControl: params.floodControl,
   })
 }
 
 describe('PersistentConnection', () => {
+  it.each(['idle', 'manual', 'inactivity', 'destroyed'] as const)(
+    'should keep %s connections closed when changing transport',
+    async (state) => {
+      const conn = await createConnection({
+        dc: reachable,
+        connect: async dc => new FakeConnection<BasicDcOption>(dc),
+      })
+      if (state !== 'idle') {
+        conn.connect()
+        await vi.waitFor(() => expect(conn.isConnected).toBe(true))
+        if (state === 'manual') await conn.disconnectManual()
+        if (state === 'inactivity') {
+          conn.setInactivityTimeout(1)
+          await vi.waitFor(() => expect(conn.isConnected).toBe(false))
+        }
+        if (state === 'destroyed') await conn.destroy()
+      }
+      const connect = vi.fn(async (dc: BasicDcOption) => new FakeConnection<BasicDcOption>(dc))
+      try {
+        await conn.changeTransport({ connect, packetCodec: () => new IntermediatePacketCodec() })
+        expect(connect).not.toHaveBeenCalled()
+        if (state !== 'destroyed') {
+          conn.setInactivityTimeout(undefined)
+          if (state === 'manual') conn.reconnect()
+          else conn.connect()
+          await vi.waitFor(() => expect(conn.isConnected).toBe(true))
+          await conn.send(new Uint8Array([1, 2, 3, 4]))
+          expect(connect).toHaveBeenCalledTimes(1)
+        }
+      } finally {
+        await conn.destroy()
+      }
+    },
+  )
+
   afterEach(() => {
     vi.useRealTimers()
+  })
+
+  it('should resume a connection waiting for reconnection backoff when changing transport', async () => {
+    const conn = await createConnection({
+      dc: reachable,
+      connect: async () => { throw new Error('ECONNREFUSED') },
+      reconnectionStrategy: () => 60_000,
+    })
+    try {
+      conn.connect()
+      await vi.waitFor(() => expect(conn.errors).toHaveLength(1))
+      const connect = vi.fn(async (dc: BasicDcOption) => new FakeConnection<BasicDcOption>(dc))
+      await conn.changeTransport({ connect, packetCodec: () => new IntermediatePacketCodec() })
+      await vi.waitFor(() => expect(conn.isConnected).toBe(true))
+      await conn.send(new Uint8Array([1, 2, 3, 4]))
+      expect(connect).toHaveBeenCalledTimes(1)
+    } finally {
+      await conn.destroy()
+    }
+  })
+
+  it('should abort a throttled connect when changing transport and preserve flood control', async () => {
+    const conn = await createConnection({
+      dc: reachable,
+      connect: async dc => new FakeConnection<BasicDcOption>(dc),
+      floodControl: { flood: [{ count: 1, windowMs: 60_000 }] },
+    })
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'performance', 'Date'] })
+    try {
+      conn.connect()
+      await vi.advanceTimersByTimeAsync(0)
+      expect(conn.isConnected).toBe(true)
+      conn.reconnect()
+      await vi.advanceTimersByTimeAsync(0)
+      expect(conn.isConnected).toBe(false)
+      const connect = vi.fn(async (dc: BasicDcOption) => new FakeConnection<BasicDcOption>(dc))
+      await conn.changeTransport({ connect, packetCodec: () => new IntermediatePacketCodec() })
+      expect(connect).not.toHaveBeenCalled()
+      await vi.advanceTimersByTimeAsync(60_000)
+      expect(conn.isConnected).toBe(true)
+      expect(connect).toHaveBeenCalledTimes(1)
+    } finally {
+      await conn.destroy()
+    }
   })
 
   it('should switch to a fallback address when connecting fails', async () => {
