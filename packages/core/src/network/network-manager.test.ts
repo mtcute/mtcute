@@ -88,6 +88,92 @@ describe('NetworkManager', () => {
     })
   })
 
+  describe('fallbackDcs', () => {
+    it('should replace the built-in production addresses', async () => {
+      const fallback = { id: 2, ipAddress: '10.0.0.2', port: 443 }
+      const client = new StubTelegramClient({ fallbackDcs: [fallback] })
+      try {
+        await client.connect()
+        expect(client.mt.network._primaryDc!.main._connections[0].params.dcFallbacks).toEqual([fallback])
+      } finally {
+        await client.destroy()
+      }
+    })
+
+    it('should disable fallbacks for the primary dc with an empty array', async () => {
+      const client = new StubTelegramClient({ fallbackDcs: [] })
+      try {
+        await client.connect()
+        expect(client.mt.network._primaryDc!.main._connections[0].params.dcFallbacks).toEqual([])
+      } finally {
+        await client.destroy()
+      }
+    })
+
+    it('should not use production fallbacks in test mode by default', async () => {
+      const client = new StubTelegramClient({ testMode: true })
+      try {
+        await client.connect()
+        expect(client.mt.network._primaryDc!.main._connections[0].params.dcFallbacks).toEqual([])
+      } finally {
+        await client.destroy()
+      }
+    })
+
+    it.each([false, true])('should filter custom fallbacks with useIpv6=%s', async (useIpv6) => {
+      const custom = { id: 2, ipAddress: '10.0.0.1', port: 443 }
+      const fallback = { id: 2, ipAddress: '10.0.0.2', port: 443 }
+      const media = { id: 2, ipAddress: '10.0.0.3', port: 443, mediaOnly: true }
+      const ipv6 = { id: 2, ipAddress: '::2', port: 443, ipv6: true }
+      const client = new StubTelegramClient({
+        defaultDcs: { main: custom, media: custom },
+        fallbackDcs: [fallback, media, ipv6, { id: 5, ipAddress: '10.0.0.5', port: 443 }],
+        useIpv6,
+      })
+      try {
+        await client.connect()
+        const dc = client.mt.network._primaryDc!
+        expect(dc.main._connections[0].params.dcFallbacks).toEqual(useIpv6 ? [fallback, ipv6] : [fallback])
+        expect(dc.download._connections[0].params.dcFallbacks)
+          .toEqual(useIpv6 ? [fallback, media, ipv6] : [fallback, media])
+      } finally {
+        await client.destroy()
+      }
+    })
+
+    it('should allow explicit fallbacks in test mode', async () => {
+      const fallback = { id: 2, ipAddress: '10.0.0.2', port: 443, testMode: true }
+      const client = new StubTelegramClient({ testMode: true, fallbackDcs: [fallback] })
+      try {
+        await client.connect()
+        expect(client.mt.network._primaryDc!.main._connections[0].params.dcFallbacks).toEqual([fallback])
+      } finally {
+        await client.destroy()
+      }
+    })
+
+    it.each([false, true])('should keep config alternatives with empty fallbackDcs=%s for secondary dcs', async (disabled) => {
+      const fallback = { id: 5, ipAddress: '10.0.0.5', port: 443 }
+      const main: tl.RawDcOption = { _: 'dcOption', id: 5, ipAddress: '10.0.0.1', port: 443 }
+      const media: tl.RawDcOption = { ...main, ipAddress: '10.0.0.2', mediaOnly: true }
+      const configFallback: tl.RawDcOption = { ...main, ipAddress: '10.0.0.3' }
+      const client = new StubTelegramClient({ fallbackDcs: disabled ? [] : [fallback] })
+      try {
+        await client.connect()
+        vi.spyOn(client.mt.network.config, 'findOptions').mockImplementation(async params =>
+          params.allowMedia ? [media, main, configFallback] : [main, configFallback],
+        )
+        const dc = await client.mt.network._getOtherDc(5)
+        expect(dc.main._connections[0].params.dcFallbacks)
+          .toEqual(disabled ? [configFallback] : [configFallback, fallback])
+        expect(dc.download._connections[0].params.dcFallbacks)
+          .toEqual(disabled ? [main, configFallback] : [main, configFallback, fallback])
+      } finally {
+        await client.destroy()
+      }
+    })
+  })
+
   describe('_getOtherDc', () => {
     it('should propagate DC creation errors', async () => {
       const client = new StubTelegramClient()

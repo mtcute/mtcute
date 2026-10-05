@@ -15,7 +15,7 @@ import type { TelegramTransport } from './transports/abstract.js'
 import { defaultReconnectionStrategy } from '@fuman/net'
 import { asNonNull, composeMiddlewares, Deferred, LruMap, noop } from '@fuman/utils'
 import { MtArgumentError, MtcuteError, MtUnsupportedError } from '../types/index.js'
-import { builtinProductionDcs, dropUndefined } from '../utils/index.js'
+import { dropUndefined } from '../utils/index.js'
 import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
 
 import { basic as defaultMiddlewares } from './middlewares/default.js'
@@ -42,12 +42,7 @@ export interface NetworkManagerParams {
   testMode: boolean
   layer: number
   useIpv6: boolean
-  /**
-   * Whether the built-in addresses of Telegram production DCs may be used
-   * as fallbacks when the configured ones are unreachable.
-   * Must be disabled when connecting to other networks
-   */
-  builtinDcFallbacks?: boolean
+  fallbackDcs?: readonly BasicDcOption[]
   readerMap: TlReaderMap
   writerMap: TlWriterMap
   isPremium: boolean
@@ -60,7 +55,6 @@ export interface NetworkManagerParams {
 
 export type ConnectionCountDelegate = (kind: ConnectionKind, dcId: number, isPremium: boolean) => number
 
-/** Addresses to try (in order) when the main/media address of a DC can't be connected to */
 export interface DcFallbacks {
   main: BasicDcOption[]
   media: BasicDcOption[]
@@ -582,23 +576,21 @@ export class NetworkManager {
       throw new MtArgumentError(`Could not find DC ${dcId}`)
     }
 
-    const builtin = this._findBuiltinFallbacks(dcId)
-
     return {
       dcs: { main, media },
       fallbacks: {
-        main: [...mainRest, ...builtin],
-        media: [...mediaRest, ...builtin],
+        main: [...mainRest, ...this._findFallbackDcs(dcId, false)],
+        media: [...mediaRest, ...this._findFallbackDcs(dcId, true)],
       },
     }
   }
 
   // the config (or the stored primary dc) may only contain addresses that are unreachable
-  // from the current network, so we also try the built-in ones (same as official clients do)
-  private _findBuiltinFallbacks(dcId: number): BasicDcOption[] {
-    if (!this.params.builtinDcFallbacks || this.params.testMode) return []
-
-    return builtinProductionDcs.filter(dc => dc.id === dcId && (!dc.ipv6 || this.params.useIpv6))
+  // from the current network, so we also try the supplied fallback addresses
+  private _findFallbackDcs(dcId: number, allowMedia: boolean): BasicDcOption[] {
+    return this.params.fallbackDcs?.filter(dc =>
+      dc.id === dcId && (!dc.ipv6 || this.params.useIpv6) && (allowMedia || !dc.mediaOnly),
+    ) ?? []
   }
 
   private _resetOnNetworkChange?: () => void
@@ -707,8 +699,10 @@ export class NetworkManager {
 
     this._resetOnNetworkChange = this.params.platform.onNetworkChanged?.(this.notifyNetworkChanged.bind(this))
 
-    const builtin = this._findBuiltinFallbacks(defaultDcs.main.id)
-    const dc = new DcConnectionManager(this, defaultDcs.main.id, defaultDcs, true, { main: builtin, media: builtin })
+    const dc = new DcConnectionManager(this, defaultDcs.main.id, defaultDcs, true, {
+      main: this._findFallbackDcs(defaultDcs.main.id, false),
+      media: this._findFallbackDcs(defaultDcs.main.id, true),
+    })
     this._dcConnections.set(defaultDcs.main.id, dc)
     await this._switchPrimaryDc(dc)
   }

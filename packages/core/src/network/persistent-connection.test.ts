@@ -161,6 +161,63 @@ describe('PersistentConnection', () => {
     await conn.destroy()
   })
 
+  it('should deduplicate equivalent addresses, preserving the first option and distinct ports', async () => {
+    const expanded: BasicDcOption = {
+      id: 5,
+      ipAddress: '2001:0b28:f23f:f005:0000:0000:0000:000a',
+      port: 443,
+      ipv6: true,
+    }
+    const compressed = { ...expanded, ipAddress: '2001:b28:f23f:f005::a' }
+    const otherPort = { ...compressed, port: 80 }
+    const attempts: BasicDcOption[] = []
+    const conn = await createConnection({
+      dc: expanded,
+      dcFallbacks: [{ ...expanded, mediaOnly: true }, compressed, otherPort],
+      connect: async (dc) => {
+        attempts.push(dc)
+        if (dc === expanded) throw new Error('ECONNREFUSED')
+        return new FakeConnection<BasicDcOption>(dc)
+      },
+    })
+    try {
+      conn.connect()
+      await vi.waitFor(() => expect(conn.isConnected).toBe(true))
+      expect(attempts).toEqual([expanded, otherPort])
+    } finally {
+      await conn.destroy()
+    }
+  })
+
+  it('should share failures across equivalent ipv6 addresses', async () => {
+    const expanded: BasicDcOption = {
+      id: 5,
+      ipAddress: '2001:0b28:f23f:f005:0000:0000:0000:000a',
+      port: 443,
+      ipv6: true,
+    }
+    const compressed = { ...expanded, ipAddress: '2001:b28:f23f:f005::a' }
+    const dcFailures = new Map<string, number>()
+    const attempts: BasicDcOption[] = []
+    const connect = async (dc: BasicDcOption) => {
+      attempts.push(dc)
+      if (dc !== reachable) throw new Error('ECONNREFUSED')
+      return new FakeConnection<BasicDcOption>(dc)
+    }
+    const first = await createConnection({ dc: expanded, dcFallbacks: [reachable], dcFailures, connect })
+    const second = await createConnection({ dc: compressed, dcFallbacks: [reachable], dcFailures, connect })
+    try {
+      first.connect()
+      await vi.waitFor(() => expect(first.isConnected).toBe(true))
+      second.connect()
+      await vi.waitFor(() => expect(second.isConnected).toBe(true))
+      expect(attempts).toEqual([expanded, reachable, reachable])
+    } finally {
+      await first.destroy()
+      await second.destroy()
+    }
+  })
+
   it('should skip addresses that recently failed for other connections to the same dc', async () => {
     const dcFailures = new Map<string, number>()
     const attempts: string[] = []

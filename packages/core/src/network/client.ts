@@ -7,6 +7,7 @@ import type { MustEqual } from '../types/index.js'
 import type { ICorePlatform } from '../types/platform.js'
 
 import type {
+  BasicDcOption,
   DcOptions,
   ICryptoProvider,
   Logger,
@@ -22,6 +23,7 @@ import { tl } from '../tl/index.js'
 import {
   asyncResettable,
   defaultProductionDc,
+  defaultProductionFallbackDcs,
   defaultProductionIpv6Dc,
   defaultTestDc,
   defaultTestIpv6Dc,
@@ -78,6 +80,14 @@ export interface MtClientOptions {
    * @default  Production DC 2.
    */
   defaultDcs?: DcOptions
+
+  /**
+   * Additional DC addresses to try after the addresses from the server config.
+   * An empty array disables additional fallbacks, keeping addresses from the server config.
+   *
+   * Defaults to {@link defaultProductionFallbackDcs}, unless using test mode or custom {@link defaultDcs}.
+   */
+  fallbackDcs?: readonly BasicDcOption[]
 
   /**
    * Whether to connect to test servers.
@@ -270,7 +280,8 @@ export class MtClient {
         isPremium: false,
         useIpv6: Boolean(params.useIpv6),
         // custom defaultDcs may point to a different network, where telegram's addresses make no sense
-        builtinDcFallbacks: !params.testMode && !params.defaultDcs,
+        fallbackDcs: params.fallbackDcs
+          ?? (!params.testMode && !params.defaultDcs ? defaultProductionFallbackDcs : undefined),
         onUsable: this.onUsable.emit.bind(this.onUsable),
         onConnecting: this.onConnecting.emit.bind(this.onConnecting),
         onNetworkChanged: this.onNetworkChanged.emit.bind(this.onNetworkChanged),

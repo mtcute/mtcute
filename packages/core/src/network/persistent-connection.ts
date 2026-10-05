@@ -9,7 +9,7 @@ import { FramedReader, FramedWriter } from '@fuman/io'
 import { ConnectionClosedError, PersistentConnection as FumanPersistentConnection, ip } from '@fuman/net'
 import { Emitter, timers } from '@fuman/utils'
 import { MtcuteError, MtTimeoutError } from '../types/errors.js'
-import { dedupeDcOptions, getDcOptionAddressKey } from '../utils/dcs.js'
+import { combineAbortSignals } from '../utils/abort-signal.js'
 import { ConnectionFloodController } from './flood-control.js'
 
 // only applied when there are other addresses to try, otherwise we'd just retry the same one.
@@ -22,6 +22,11 @@ const DC_FAILURE_TTL = 600_000
 
 // not reported via handleError, since it's already logged when switching to the next address
 class ConnectTimeoutError extends MtTimeoutError {}
+
+// ! dont use on hot paths, slow
+function getDcOptionAddressKey(dc: BasicDcOption): string {
+  return `${ip.prettify(dc.ipAddress, { encloseIpv6: true })}:${dc.port}`
+}
 
 function isPlainMessage(data: Uint8Array): boolean {
   if (data.length < 8) return false
@@ -120,7 +125,14 @@ export abstract class PersistentConnection {
       this._floodControl.setLogger(log.create('flood'))
     }
 
-    this._dcCandidates = dedupeDcOptions([params.dc, ...(params.dcFallbacks ?? [])])
+    const seen = new Set<string>()
+    this._dcCandidates = [params.dc, ...(params.dcFallbacks ?? [])].filter((dc) => {
+      const key = getDcOptionAddressKey(dc)
+      if (seen.has(key)) return false
+
+      seen.add(key)
+      return true
+    })
     this._fumanAddress = params.dc
 
     this._onInactivityTimeout = this._onInactivityTimeout.bind(this)
@@ -177,22 +189,16 @@ export abstract class PersistentConnection {
     const connectTimeout = Math.min(CONNECT_TIMEOUT * 2 ** round, MAX_CONNECT_TIMEOUT)
     this.log.debug('connecting to %j (timeout: %d ms)', dc, connectTimeout)
 
-    // aborted either from the outside (fuman) or by our timeout
-    const attemptAbort = new AbortController()
-    const onOuterAbort = () => attemptAbort.abort(abortSignal.reason)
-    if (abortSignal.aborted) {
-      onOuterAbort()
-    } else {
-      abortSignal.addEventListener('abort', onOuterAbort)
-    }
+    const timeoutAbort = new AbortController()
+    const attemptSignal = combineAbortSignals(abortSignal, timeoutAbort.signal)
 
     const timeout = timers.setTimeout(
-      () => attemptAbort.abort(new ConnectTimeoutError(connectTimeout)),
+      () => timeoutAbort.abort(new ConnectTimeoutError(connectTimeout)),
       connectTimeout,
     )
 
     try {
-      const conn = await this.params.transport.connect(dc, attemptAbort.signal)
+      const conn = await this.params.transport.connect(dc, attemptSignal)
       this.params.dcFailures?.delete(dcKey)
       this._failedConnects = 0
 
@@ -205,7 +211,7 @@ export abstract class PersistentConnection {
       this._failedConnects += 1
 
       // transports may wrap the abort reason, but _onError needs to recognize our timeout
-      const err = attemptAbort.signal.aborted ? attemptAbort.signal.reason as Error : e as Error
+      const err = attemptSignal.aborted ? attemptSignal.reason as Error : e as Error
       this._switchToNextDc(err)
 
       if (this._failedConnects % this._dcCandidates.length === 0) {
@@ -218,7 +224,6 @@ export abstract class PersistentConnection {
       throw err
     } finally {
       timers.clearTimeout(timeout)
-      abortSignal.removeEventListener('abort', onOuterAbort)
     }
   }
 
@@ -244,7 +249,6 @@ export abstract class PersistentConnection {
     )
   }
 
-  // skip addresses that recently failed for other connections to the same dc
   private _skipFailedDcs(): void {
     const failures = this.params.dcFailures
     if (!failures?.size) return
@@ -265,8 +269,6 @@ export abstract class PersistentConnection {
         return
       }
     }
-
-    // every address has failed recently, keep rotating as usual
   }
 
   /**
