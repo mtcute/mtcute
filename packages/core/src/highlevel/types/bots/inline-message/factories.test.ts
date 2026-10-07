@@ -14,4 +14,15 @@ describe('_convertToTl', () => {
 
     expect(res).toMatchObject({ _: 'inputBotInlineMessageText', noWebpage: true })
   })
+
+  it('should pass accuracy for geo messages', async () => {
+    const client = new StubTelegramClient()
+
+    const res = await BotInlineMessage._convertToTl(
+      client,
+      BotInlineMessage.geo({ latitude: 1, longitude: 2, accuracy: 50 }),
+    )
+
+    expect(res).toMatchObject({ geoPoint: { _: 'inputGeoPoint', lat: 1, long: 2, accuracyRadius: 50 } })
+  })
 })
