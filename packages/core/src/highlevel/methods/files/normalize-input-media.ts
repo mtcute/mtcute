@@ -83,6 +83,7 @@ export async function _normalizeInputMedia(
         _: 'inputGeoPoint',
         lat: media.latitude,
         long: media.longitude,
+        accuracyRadius: media.accuracy,
       },
     }
   }
@@ -94,6 +95,7 @@ export async function _normalizeInputMedia(
         _: 'inputGeoPoint',
         lat: media.latitude,
         long: media.longitude,
+        accuracyRadius: media.accuracy,
       },
       stopped: media.stopped,
       heading: media.heading,
