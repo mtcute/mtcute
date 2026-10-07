@@ -146,6 +146,7 @@ export async function _convertToTl(
         message,
         entities,
         replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+        noWebpage: obj.disableWebPreview,
         invertMedia: obj.invertMedia,
       }
     }
