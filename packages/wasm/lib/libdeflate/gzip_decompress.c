@@ -141,7 +141,7 @@ libdeflate_gzip_decompress_ex(struct libdeflate_decompressor *d,
 	return LIBDEFLATE_SUCCESS;
 }
 
-LIBDEFLATEAPI int32_t
+LIBDEFLATEAPI uint32_t
 libdeflate_gzip_get_output_size(const void* in, size_t in_nbytes) {
 	return get_unaligned_le32((u8*)in + in_nbytes - 4);
 }
