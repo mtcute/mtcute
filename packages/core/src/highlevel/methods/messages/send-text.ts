@@ -195,11 +195,27 @@ export async function sendText(
       && replyToHeader.replyToTopId
       // general topic (id 1) doesn't count as a forum topic
       && replyToHeader.replyToTopId !== 1
-      && msg.peerId._ === 'peerChannel'
     ) {
-      const chat = peers.chats.get(msg.peerId.channelId)
-      if (chat?._ === 'channel' && chat.forum) {
-        replyToHeader.forumTopic = true
+      if (msg.peerId._ === 'peerChannel') {
+        const chat = peers.chats.get(msg.peerId.channelId)
+        if (chat?._ === 'channel' && chat.forum) {
+          replyToHeader.forumTopic = true
+        }
+      } else if (msg.peerId._ === 'peerUser') {
+        // For private chats with "threaded mode" enabled (bot forums),
+        // `replyToTopId` is only present when the caller passed `threadId`,
+        // so its presence reliably marks a topic-targeted send.
+        // The server confirms this on the receiving side (incoming updates
+        // carry `forumTopic: true`), see #153.
+        // Like tdlib, only treat DM threads as forum topics when one of the
+        // parties is a bot — plain threads between two users are not forums.
+        const isSelfBot = client.storage.self.getCached(true)?.isBot ?? false
+        const peerUser = peers.users.get(msg.peerId.userId)
+        const isPeerBot = peerUser?._ === 'user' && (peerUser.bot ?? false)
+
+        if (isSelfBot || isPeerBot) {
+          replyToHeader.forumTopic = true
+        }
       }
     }
 
