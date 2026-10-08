@@ -1,5 +1,6 @@
 export interface MtcuteWasmModule {
   memory: WebAssembly.Memory
+  /** Returns 0 without changing allocator state if the allocation cannot be satisfied. */
   __malloc: (size: number) => number
   __free: (ptr: number) => void
 
@@ -9,8 +10,10 @@ export interface MtcuteWasmModule {
 
   libdeflate_alloc_decompressor: () => number
   libdeflate_alloc_compressor: (level: number) => number
+  libdeflate_free_decompressor: (ctx: number) => void
+  libdeflate_free_compressor: (ctx: number) => void
 
-  /** @returns if !=0 - error */
+  /** Returns libdeflate_result: 0 success, 1 bad data, 2 short output, or 3 insufficient space. */
   libdeflate_gzip_decompress: (ctx: number, src: number, srcLen: number, dst: number, dstLen: number) => number
   libdeflate_gzip_get_output_size: (src: number, srcLen: number) => number
 
@@ -22,7 +25,7 @@ export interface MtcuteWasmModule {
 
   ctr256_alloc: () => number
   ctr256_free: (ctx: number) => void
-  ctr256: (ctx: number, data: number, dataLen: number, out: number) => number
+  ctr256: (ctx: number, data: number, dataLen: number, out: number) => void
 
   sha256: (data: number, dataLen: number) => void
   sha1: (data: number, dataLen: number) => void
