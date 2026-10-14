@@ -44,6 +44,7 @@ export type MessageEntityParams
       | 'spoiler'
       | 'code'
       | 'bank_card'
+      | 'ton_address'
       | 'diff_insert'
       | 'diff_delete'
       | 'unknown'
@@ -157,6 +158,8 @@ export class MessageEntity {
         return { kind: 'emoji', emojiId: this.raw.documentId }
       case 'messageEntityBankCard':
         return { kind: 'bank_card' }
+      case 'messageEntityTonAddress':
+        return { kind: 'ton_address' }
       case 'messageEntityDiffInsert':
         return { kind: 'diff_insert' }
       case 'messageEntityDiffDelete':

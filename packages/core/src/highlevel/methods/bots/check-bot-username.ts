@@ -4,11 +4,19 @@ import type { ITelegramClient } from '../../client.types.js'
  * Check whether a username can be used for a new bot
  * (e.g. when creating it via {@link createBot})
  *
- * @param username  Username to check (must end with `bot`)
+ * @param username  Username to check (must end with `bot`, unless `additional` is set)
  */
-export async function checkBotUsername(client: ITelegramClient, username: string): Promise<boolean> {
+export async function checkBotUsername(
+  client: ITelegramClient,
+  username: string,
+  params?: {
+    /** Whether to check the username for use as an additional username (see {@link addBotUsername}) */
+    additional?: boolean
+  },
+): Promise<boolean> {
   return client.call({
     _: 'bots.checkUsername',
     username,
+    additional: params?.additional,
   })
 }

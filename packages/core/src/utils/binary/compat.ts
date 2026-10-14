@@ -132,6 +132,19 @@ function mapCompatEmojiStatus(obj: tlCompat.TypeEmojiStatus): tl.TypeEmojiStatus
   }
 }
 
+function mapCompatBotVerification(obj: tlCompat.TypeBotVerification): tl.TypeBotVerification {
+  switch (obj._) {
+    case 'botVerification_layer229':
+      return {
+        ...obj,
+        _: 'botVerification',
+        description: { _: 'textWithEntities', text: obj.description, entities: [] },
+      }
+    default:
+      return obj
+  }
+}
+
 function mapCompatPoll(obj: tlCompat.TypePoll): tl.TypePoll {
   switch (obj._) {
     case 'poll_layer223':
@@ -546,7 +559,12 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'channelFull_layer197':
     case 'channelFull_layer204':
     case 'channelFull_layer225':
-      return replaceType(obj, 'channelFull')
+    case 'channelFull_layer211':
+      return {
+        ...obj,
+        _: 'channelFull',
+        botVerification: obj.botVerification ? mapCompatBotVerification(obj.botVerification) : undefined,
+      }
     case 'messageActionStarGift_layer197':
     case 'messageActionStarGift_layer211':
     case 'messageActionStarGiftUnique_layer197':
@@ -563,14 +581,22 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'messageActionStarGiftUnique_layer228':
       return mapCompatMessageAction(obj)
     case 'userFull_layer199':
-      return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
+      return {
+        ...dropFields(obj, ['premiumGifts']),
+        _: 'userFull',
+        botVerification: obj.botVerification ? mapCompatBotVerification(obj.botVerification) : undefined,
+      }
     case 'userFull_layer200':
     case 'userFull_layer209':
     case 'userFull_layer210':
     case 'userFull_layer211':
     case 'userFull_layer214':
     case 'userFull_layer223':
-      return replaceType(obj, 'userFull')
+      return {
+        ...obj,
+        _: 'userFull',
+        botVerification: obj.botVerification ? mapCompatBotVerification(obj.botVerification) : undefined,
+      }
     case 'user_layer199':
     case 'user_layer216':
       return {
@@ -588,8 +614,6 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
         storiesMaxId: obj.storiesMaxId ? { _: 'recentStory', maxId: obj.storiesMaxId } : undefined,
         emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
       }
-    case 'channelFull_layer211':
-      return replaceType(obj, 'channelFull')
     case 'user_layer227':
       return {
         ...obj,
@@ -713,6 +737,16 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
       return mapCompatPageListItem(obj)
     case 'pageListOrderedItemText_layer225':
       return mapCompatPageListOrderedItem(obj)
+    case 'botVerification_layer229':
+      return mapCompatBotVerification(obj)
+    case 'botVerifierSettings_layer229':
+      return {
+        ...obj,
+        _: 'botVerifierSettings',
+        customDescription: obj.customDescription !== undefined
+          ? { _: 'textWithEntities', text: obj.customDescription, entities: [] }
+          : undefined,
+      }
     default:
       return obj
   }

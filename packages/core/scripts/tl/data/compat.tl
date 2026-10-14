@@ -144,3 +144,6 @@ keyboardButtonRequestPhone_layer228#417efd8f flags:# style:flags.10?KeyboardButt
 keyboardButtonCallback_layer228#e62bc960 flags:# requires_password:flags.0?true style:flags.10?KeyboardButtonStyle text:string data:bytes = KeyboardButton;
 keyboardButtonUrl_layer228#d80c25ec flags:# style:flags.10?KeyboardButtonStyle text:string url:string = KeyboardButton;
 keyboardButton_layer228#7d170cff flags:# style:flags.10?KeyboardButtonStyle text:string = KeyboardButton;
+// LAYER 229
+botVerification_layer229#f93cd45c bot_id:int53 icon:long description:string = BotVerification;
+botVerifierSettings_layer229#b0cd6617 flags:# can_modify_custom_description:flags.1?true icon:long company:string custom_description:flags.0?string = BotVerifierSettings;

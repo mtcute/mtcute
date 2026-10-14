@@ -41,6 +41,7 @@ function walkRichText(text: tl.TypeRichText | undefined, visitor: PageBlockVisit
     case 'textAutoEmail':
     case 'textAutoPhone':
     case 'textBankCard':
+    case 'textTonAddress':
     case 'textDate':
     case 'textMentionName':
     case 'textButton':

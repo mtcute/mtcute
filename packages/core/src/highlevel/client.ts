@@ -54,6 +54,7 @@ import { signIn } from './methods/auth/sign-in.js'
 import { startTest } from './methods/auth/start-test.js'
 import { start } from './methods/auth/start.js'
 import { isSelfPeer } from './methods/auth/utils.js'
+import { addBotUsername } from './methods/bots/add-bot-username.js'
 import { answerBotGuestChatQuery } from './methods/bots/answer-bot-guest-chat-query.js'
 import { answerCallbackQuery } from './methods/bots/answer-callback-query.js'
 import { answerChatJoinRequestQuery } from './methods/bots/answer-chat-join-request-query.js'
@@ -74,6 +75,7 @@ import { openJoinChatWebview } from './methods/bots/open-join-chat-webview.js'
 import { closeWebview, openWebview } from './methods/bots/open-webview.js'
 import { prepareInlineMessage } from './methods/bots/prepare-inline-message.js'
 import { prepareKeyboardButton } from './methods/bots/prepare-keyboard-button.js'
+import { removeBotUsername } from './methods/bots/remove-bot-username.js'
 import { setBotInfo } from './methods/bots/set-bot-info.js'
 import { setBotMenuButton } from './methods/bots/set-bot-menu-button.js'
 import { setGameScore, setInlineGameScore } from './methods/bots/set-game-score.js'
@@ -789,6 +791,16 @@ export interface TelegramClient extends ITelegramClient {
   isSelfPeer(
     peer: tl.TypeInputPeer | tl.TypePeer | tl.TypeInputUser): boolean
   /**
+   * Add an additional username to a bot the current user owns
+   *
+   * **Available**: 👤 users only
+   *
+   * @param botId  Bot to add the username to
+   * @param username  Username to add
+   */
+
+  addBotUsername(botId: InputPeerLike, username: string): Promise<void>
+  /**
    * Answer a bot guest chat query with a result.
    *
    * **Available**: 🤖 bots only
@@ -972,9 +984,14 @@ export interface TelegramClient extends ITelegramClient {
    *
    * **Available**: 👤 users only
    *
-   * @param username  Username to check (must end with `bot`)
+   * @param username  Username to check (must end with `bot`, unless `additional` is set)
    */
-  checkBotUsername(username: string): Promise<boolean>
+  checkBotUsername(
+    username: string,
+    params?: {
+    /** Whether to check the username for use as an additional username (see {@link addBotUsername}) */
+      additional?: boolean
+    }): Promise<boolean>
   /**
    * Create a new bot owned by the current user, which will be managed by another bot
    * (e.g. after pressing a button created with {@link BotKeyboard.requestManagedBot})
@@ -1273,6 +1290,19 @@ export interface TelegramClient extends ITelegramClient {
   prepareKeyboardButton(
     userId: InputPeerLike,
     button: InputReplyKeyboardButton): Promise<string>
+  /**
+   * Remove an additional username from a bot the current user owns
+   * (previously added with {@link addBotUsername})
+   *
+   * **Available**: 👤 users only
+   *
+   * @param botId  Bot to remove the username from
+   * @param username  Username to remove
+   */
+
+  removeBotUsername(
+    botId: InputPeerLike,
+    username: string): Promise<void>
   /**
    * Sets information about a bot the current uzer owns (or the current bot)
    * **Available**: ✅ both users and bots
@@ -7721,6 +7751,9 @@ TelegramClient.prototype.start = function (...args) {
 TelegramClient.prototype.isSelfPeer = function (...args) {
   return isSelfPeer(this._client, ...args)
 }
+TelegramClient.prototype.addBotUsername = function (...args) {
+  return addBotUsername(this._client, ...args)
+}
 TelegramClient.prototype.answerBotGuestChatQuery = function (...args) {
   return answerBotGuestChatQuery(this._client, ...args)
 }
@@ -7786,6 +7819,9 @@ TelegramClient.prototype.prepareInlineMessage = function (...args) {
 }
 TelegramClient.prototype.prepareKeyboardButton = function (...args) {
   return prepareKeyboardButton(this._client, ...args)
+}
+TelegramClient.prototype.removeBotUsername = function (...args) {
+  return removeBotUsername(this._client, ...args)
 }
 TelegramClient.prototype.setBotInfo = function (...args) {
   return setBotInfo(this._client, ...args)

@@ -914,6 +914,49 @@ export interface ActionChangeCommunity {
   readonly community: Chat | null
 }
 
+/** TON was transferred to/from a wallet */
+export interface ActionGramTransfer {
+  readonly type: 'gram_transfer'
+
+  /** Amount of TON transferred, in nanotons */
+  amount: tl.Long
+
+  /** Address of the other party */
+  peerAddress: string
+
+  /** Transaction ID */
+  transactionId: string
+
+  /** Comment attached to the transfer */
+  comment?: string
+
+  /** Whether the {@link comment} is encrypted */
+  commentEncrypted: boolean
+}
+
+/** A TON Connect request was sent to the wallet */
+export interface ActionWalletTonConnectRequest {
+  readonly type: 'wallet_ton_connect_request'
+
+  /** Whether the request was accepted */
+  accepted: boolean
+
+  /** Whether the request was declined */
+  declined: boolean
+
+  /** TON Connect session ID */
+  sessionId: tl.Long
+
+  /** Date when the request expires */
+  expires: Date
+
+  topic?: string
+  traceId?: string
+
+  /** Name of the dApp that sent the request */
+  dappName?: string
+}
+
 /** Group creator has left the group, and a new creator has been assigned but not yet made one */
 export interface ActionNewCreatorPending {
   readonly type: 'new_creator_pending'
@@ -1002,6 +1045,8 @@ export type MessageAction
     | ActionPollDeleteAnswer
     | ActionManagedBotCreated
     | ActionChangeCommunity
+    | ActionGramTransfer
+    | ActionWalletTonConnectRequest
     | ActionSuggestedPostApproved
     | ActionSuggestedPostDeclined
     | ActionSuggestedPostApprovalFailed
@@ -1538,6 +1583,26 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
       return {
         type: 'change_community',
         community: act.communityId ? new Chat(this._peers.chat(act.communityId)) : null,
+      }
+    case 'messageActionGramTransfer':
+      return {
+        type: 'gram_transfer',
+        amount: act.amount,
+        peerAddress: act.peerAddress,
+        transactionId: act.transactionId,
+        comment: act.comment,
+        commentEncrypted: act.commentEncrypted!,
+      }
+    case 'messageActionWalletTonConnectRequest':
+      return {
+        type: 'wallet_ton_connect_request',
+        accepted: act.accepted!,
+        declined: act.declined!,
+        sessionId: act.sessionId,
+        expires: new Date(act.expires * 1000),
+        topic: act.topic,
+        traceId: act.traceId,
+        dappName: act.dappName,
       }
     default:
       return null

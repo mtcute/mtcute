@@ -84,4 +84,35 @@ describe('binary/compat', () => {
       },
     })
   })
+  it('should correctly read botVerification from layer 229', () => {
+    const data = hex.decode(
+      '5cd43cf9' // botVerification_layer229
+      + '0100000000000000' // bot_id = 1
+      + '0200000000000000' // icon = 2
+      + '01610000', // description = 'a'
+    )
+    expect(deserializeObjectWithCompat(data)).toEqual({
+      _: 'botVerification',
+      botId: 1,
+      icon: Long.fromInt(2),
+      description: { _: 'textWithEntities', text: 'a', entities: [] },
+    })
+  })
+
+  it('should correctly read botVerifierSettings from layer 229', () => {
+    const data = hex.decode(
+      '1766cdb0' // botVerifierSettings_layer229
+      + '01000000' // flags: custom_description
+      + '0200000000000000' // icon = 2
+      + '01620000' // company = 'b'
+      + '01610000', // custom_description = 'a'
+    )
+    expect(deserializeObjectWithCompat(data)).toEqual({
+      _: 'botVerifierSettings',
+      canModifyCustomDescription: false,
+      icon: Long.fromInt(2),
+      company: 'b',
+      customDescription: { _: 'textWithEntities', text: 'a', entities: [] },
+    })
+  })
 })

@@ -591,6 +591,12 @@
     "userStories": [
       "user_id"
     ],
+    "walletTransactionPeerUser": [
+      "user_id"
+    ],
+    "walletUserAddress": [
+      "user_id"
+    ],
     "webAuthorization": [
       "bot_id"
     ]

@@ -81,6 +81,7 @@ function _entityToRichTextWrapper(entity: tl.TypeMessageEntity, text: string): R
     case 'messageEntityCashtag': return inner => ({ _: 'textCashtag', text: inner })
     case 'messageEntityBotCommand': return inner => ({ _: 'textBotCommand', text: inner })
     case 'messageEntityBankCard': return inner => ({ _: 'textBankCard', text: inner })
+    case 'messageEntityTonAddress': return inner => ({ _: 'textTonAddress', text: inner })
     case 'messageEntityUrl': return inner => ({ _: 'textUrl', text: inner, url: covered(), webpageId: Long.ZERO })
     case 'messageEntityTextUrl': return inner => ({ _: 'textUrl', text: inner, url: entity.url, webpageId: Long.ZERO })
     case 'messageEntityEmail': return inner => ({ _: 'textEmail', text: inner, email: covered() })
@@ -172,6 +173,7 @@ function _richTextNodeToEntity(
     case 'textCashtag': return { _: 'messageEntityCashtag', offset, length }
     case 'textBotCommand': return { _: 'messageEntityBotCommand', offset, length }
     case 'textBankCard': return { _: 'messageEntityBankCard', offset, length }
+    case 'textTonAddress': return { _: 'messageEntityTonAddress', offset, length }
     case 'textUrl': return { _: 'messageEntityTextUrl', offset, length, url: node.url }
     case 'textEmail': return { _: 'messageEntityEmail', offset, length }
     case 'textPhone': return { _: 'messageEntityPhone', offset, length }

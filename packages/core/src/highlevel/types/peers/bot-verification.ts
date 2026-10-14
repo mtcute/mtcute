@@ -1,4 +1,5 @@
 import type { tl } from '../../../tl/index.js'
+import type { TextWithEntities } from '../misc/entities.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 
 /** Information about a bot-issued verification */
@@ -16,7 +17,7 @@ export class BotVerification {
   }
 
   /** Description of the verification */
-  get description(): string {
+  get description(): TextWithEntities {
     return this.raw.description
   }
 }
