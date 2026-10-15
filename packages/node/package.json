@@ -18,8 +18,8 @@
     "@mtcute/markdown-parser": "workspace:^",
     "@mtcute/wasm": "workspace:^",
     "@fuman/utils": "0.0.21",
-    "@fuman/net": "0.0.21",
-    "@fuman/node": "0.0.21",
+    "@fuman/net": "0.0.22",
+    "@fuman/node": "0.0.22",
     "better-sqlite3": "^12.10.0"
   },
   "devDependencies": {

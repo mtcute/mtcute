@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@fuman/io": "0.0.21",
-    "@fuman/net": "0.0.21",
+    "@fuman/net": "0.0.22",
     "@fuman/utils": "0.0.21",
     "@mtcute/file-id": "workspace:^",
     "@mtcute/tl-runtime": "workspace:^",

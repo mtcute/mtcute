@@ -145,14 +145,14 @@ importers:
   packages/bun:
     dependencies:
       '@fuman/bun':
-        specifier: 0.0.21
-        version: 0.0.21
+        specifier: 0.0.22
+        version: 0.0.22
       '@fuman/io':
         specifier: 0.0.21
         version: 0.0.21
       '@fuman/net':
-        specifier: 0.0.21
-        version: 0.0.21
+        specifier: 0.0.22
+        version: 0.0.22
       '@fuman/utils':
         specifier: 0.0.21
         version: 0.0.21
@@ -179,8 +179,8 @@ importers:
         specifier: 0.0.21
         version: 0.0.21
       '@fuman/net':
-        specifier: 0.0.21
-        version: 0.0.21
+        specifier: 0.0.22
+        version: 0.0.22
       '@fuman/utils':
         specifier: 0.0.21
         version: 0.0.21
@@ -201,8 +201,8 @@ importers:
         specifier: 0.0.21
         version: 0.0.21
       '@fuman/net':
-        specifier: 0.0.21
-        version: 0.0.21
+        specifier: 0.0.22
+        version: 0.0.22
       '@fuman/utils':
         specifier: 0.0.21
         version: 0.0.21
@@ -272,14 +272,14 @@ importers:
   packages/deno:
     dependencies:
       '@fuman/deno':
-        specifier: jsr:@fuman/deno@0.0.21
-        version: '@jsr/fuman__deno@0.0.21'
+        specifier: jsr:@fuman/deno@0.0.22
+        version: '@jsr/fuman__deno@0.0.22'
       '@fuman/io':
         specifier: jsr:@fuman/io@0.0.21
         version: '@jsr/fuman__io@0.0.21'
       '@fuman/net':
-        specifier: jsr:@fuman/net@0.0.21
-        version: '@jsr/fuman__net@0.0.21'
+        specifier: jsr:@fuman/net@0.0.22
+        version: '@jsr/fuman__net@0.0.22'
       '@fuman/utils':
         specifier: jsr:@fuman/utils@0.0.21
         version: '@jsr/fuman__utils@0.0.21'
@@ -352,11 +352,11 @@ importers:
   packages/node:
     dependencies:
       '@fuman/net':
-        specifier: 0.0.21
-        version: 0.0.21
+        specifier: 0.0.22
+        version: 0.0.22
       '@fuman/node':
-        specifier: 0.0.21
-        version: 0.0.21(ws@8.18.3)
+        specifier: 0.0.22
+        version: 0.0.22(ws@8.18.3)
       '@fuman/utils':
         specifier: 0.0.21
         version: 0.0.21
@@ -408,8 +408,8 @@ importers:
   packages/test:
     dependencies:
       '@fuman/net':
-        specifier: 0.0.21
-        version: 0.0.21
+        specifier: 0.0.22
+        version: 0.0.22
       '@fuman/utils':
         specifier: 0.0.21
         version: 0.0.21
@@ -469,8 +469,8 @@ importers:
   packages/web:
     dependencies:
       '@fuman/net':
-        specifier: 0.0.21
-        version: 0.0.21
+        specifier: 0.0.22
+        version: 0.0.22
       '@fuman/utils':
         specifier: 0.0.21
         version: 0.0.21
@@ -1270,8 +1270,8 @@ packages:
       typedoc:
         optional: true
 
-  '@fuman/bun@0.0.21':
-    resolution: {integrity: sha512-yWCFrBrZEhpsRu3LBYz5yx8XadTBgagNz1IHThbb+wK4Gj+tYFET6j6juoA+d2M1ff7vVPPfiN9YnkapyFEjbg==}
+  '@fuman/bun@0.0.22':
+    resolution: {integrity: sha512-x0hoj4UOLOxg9wYXj3MfgyFzFFdlX1davZORuLKrt9Vy+Aeif3h7th/YRTz+JacTMRvnGBjc2zMcC4mkvQt4pQ==}
 
   '@fuman/fetch@0.5.0':
     resolution: {integrity: sha512-JRWY1Y/1f9sPP1plwM2knP48R9SRH4+98smzB7i3Kk6kIAy5n3RpHT/nl+Zdo9hM1LAC1A7JLp0T5EN9HlNOfw==}
@@ -1287,8 +1287,19 @@ packages:
   '@fuman/net@0.0.21':
     resolution: {integrity: sha512-4PbDA2f6SfR5CtOs7omZNrrRh1X23KQBI0XmpL/r1fVd726H6+IfhDRxm/fgNKlLgMwe6pGbI/hzt8JU0y0sgw==}
 
+  '@fuman/net@0.0.22':
+    resolution: {integrity: sha512-u48zYIfgbOP2a2A2E5hY+QxKcujyjSTEEF7t4lfZjS8MUhw8JGsFkCpaQdACUfr75lotRrwoayvxR8hHXMLQAQ==}
+
   '@fuman/node@0.0.21':
     resolution: {integrity: sha512-5WS/REgANmPKoqWNAEkEeiw6DlU/7spCOGJ1s+p1eMetkwHlJFA5ZEeoIR9outisBD54EUZxAbAkWIdSbVXK5Q==}
+    peerDependencies:
+      ws: ^8.18.1
+    peerDependenciesMeta:
+      ws:
+        optional: true
+
+  '@fuman/node@0.0.22':
+    resolution: {integrity: sha512-SO9tO9/1doZgvpRL65TJg4e+ptzvT7wyESv5DIuuHeARmuq7OruZ4HtJExy6O1C9g+LzLhy9L2p7hAjd7AdK/g==}
     peerDependencies:
       ws: ^8.18.1
     peerDependenciesMeta:
@@ -1342,14 +1353,14 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@jsr/fuman__deno@0.0.21':
-    resolution: {integrity: sha512-NIg+5JFoYeBaA+IJGUjMOsryVLVtSmeyYczf0VzDNZPRC5OH9fMXoYhm8QiCFQcrbbwArgLojA+sB/MD7xkSYA==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__deno/0.0.21.tgz}
+  '@jsr/fuman__deno@0.0.22':
+    resolution: {integrity: sha512-wrWWmXhsQFaGrXA3MuGDngWA+n3h/swOuCKxmrIeQQqpnMEe3Hlt1pL15G6Zb5kkTm0Fqb8K1zcOFkXbGLqX7Q==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__deno/0.0.22.tgz}
 
   '@jsr/fuman__io@0.0.21':
     resolution: {integrity: sha512-kOqnVA7MFj+qae8sfoLxxw2gTKN2f3a2tL4/jBRSIXyqOV/ZW6zMBzXluNOwF5tIWODKgbS9Awge5c6PdGlPNA==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__io/0.0.21.tgz}
 
-  '@jsr/fuman__net@0.0.21':
-    resolution: {integrity: sha512-nZ4j7cmjCURPOAqtEufDiNgRXLnL/5Zwgesiei1b2emFj4M1p7UCupdaxDDkeThS2uVicGTbCxPuN5crBHUKzQ==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__net/0.0.21.tgz}
+  '@jsr/fuman__net@0.0.22':
+    resolution: {integrity: sha512-UXZirz7c9Z0rBk9K2p+xQ0ehgO/FfZUtzWRRn0++UnVV32I8qmQcvjZmCMHNIFQ0TQ4kTtR4Rye5druDcogbfA==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__net/0.0.22.tgz}
 
   '@jsr/fuman__utils@0.0.21':
     resolution: {integrity: sha512-NfE4ZZx4SxnylZCbXqwpFRwLlDwJos/TRDbd1dUAJ+2PAbeXhmaapnBt+6+BD+47EmrylvIk9JkG9/8B0bHl3w==, tarball: https://npm.jsr.io/~/11/@jsr/fuman__utils/0.0.21.tgz}
@@ -4756,10 +4767,10 @@ snapshots:
       - tough-cookie
       - ws
 
-  '@fuman/bun@0.0.21':
+  '@fuman/bun@0.0.22':
     dependencies:
       '@fuman/io': 0.0.21
-      '@fuman/net': 0.0.21
+      '@fuman/net': 0.0.22
       '@fuman/utils': 0.0.21
 
   '@fuman/fetch@0.5.0':
@@ -4776,10 +4787,23 @@ snapshots:
       '@fuman/io': 0.0.21
       '@fuman/utils': 0.0.21
 
+  '@fuman/net@0.0.22':
+    dependencies:
+      '@fuman/io': 0.0.21
+      '@fuman/utils': 0.0.21
+
   '@fuman/node@0.0.21(ws@8.18.3)':
     dependencies:
       '@fuman/io': 0.0.21
       '@fuman/net': 0.0.21
+      '@fuman/utils': 0.0.21
+    optionalDependencies:
+      ws: 8.18.3
+
+  '@fuman/node@0.0.22(ws@8.18.3)':
+    dependencies:
+      '@fuman/io': 0.0.21
+      '@fuman/net': 0.0.22
       '@fuman/utils': 0.0.21
     optionalDependencies:
       ws: 8.18.3
@@ -4831,17 +4855,17 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@jsr/fuman__deno@0.0.21':
+  '@jsr/fuman__deno@0.0.22':
     dependencies:
       '@jsr/fuman__io': 0.0.21
-      '@jsr/fuman__net': 0.0.21
+      '@jsr/fuman__net': 0.0.22
       '@jsr/fuman__utils': 0.0.21
 
   '@jsr/fuman__io@0.0.21':
     dependencies:
       '@jsr/fuman__utils': 0.0.21
 
-  '@jsr/fuman__net@0.0.21':
+  '@jsr/fuman__net@0.0.22':
     dependencies:
       '@jsr/fuman__io': 0.0.21
       '@jsr/fuman__utils': 0.0.21
@@ -4902,8 +4926,8 @@ snapshots:
 
   '@mtcute/node@file:packages/node(ws@8.18.3)':
     dependencies:
-      '@fuman/net': 0.0.21
-      '@fuman/node': 0.0.21(ws@8.18.3)
+      '@fuman/net': 0.0.22
+      '@fuman/node': 0.0.22(ws@8.18.3)
       '@fuman/utils': 0.0.21
       '@mtcute/core': link:packages/core
       '@mtcute/html-parser': link:packages/html-parser

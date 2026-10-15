@@ -14,9 +14,9 @@
     },
     "dependencies": {
         "@fuman/utils": "jsr:@fuman/utils@0.0.21",
-        "@fuman/net": "jsr:@fuman/net@0.0.21",
+        "@fuman/net": "jsr:@fuman/net@0.0.22",
         "@fuman/io": "jsr:@fuman/io@0.0.21",
-        "@fuman/deno": "jsr:@fuman/deno@0.0.21",
+        "@fuman/deno": "jsr:@fuman/deno@0.0.22",
         "@mtcute/core": "workspace:^",
         "@mtcute/html-parser": "workspace:^",
         "@mtcute/markdown-parser": "workspace:^",
