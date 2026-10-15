@@ -221,6 +221,144 @@ describe('sendText', () => {
     })
   })
 
+  it('should derive forumTopic flag for private threaded chats', async () => {
+    const client = new StubTelegramClient()
+
+    await client.storage.self.store({
+      userId: stubUser.id,
+      isBot: true,
+      isPremium: false,
+      usernames: [],
+    })
+    await client.registerPeers(stubUser)
+
+    client.respondWith('messages.sendMessage', () =>
+      createStub('updateShortSentMessage', {
+        id: 123,
+        out: true,
+      }))
+
+    await client.with(async () => {
+      // bot sends into a private threaded-mode topic (canonical user-space thread id)
+      const msg = await sendText(client, stubUser.id, 'test', {
+        threadId: 96179,
+      })
+
+      expect(msg.raw.replyTo).toMatchObject({
+        _: 'messageReplyHeader',
+        replyToMsgId: 96179,
+        replyToTopId: 96179,
+        forumTopic: true,
+      })
+      expect(msg.isTopicMessage).toEqual(true)
+    })
+  })
+
+  it('should not set forumTopic for plain replies in private chats', async () => {
+    const client = new StubTelegramClient()
+
+    await client.storage.self.store({
+      userId: stubUser.id,
+      isBot: true,
+      isPremium: false,
+      usernames: [],
+    })
+    await client.registerPeers(stubUser)
+
+    client.respondWith('messages.sendMessage', () =>
+      createStub('updateShortSentMessage', {
+        id: 123,
+        out: true,
+      }))
+
+    await client.with(async () => {
+      // plain reply (no threadId) — must NOT be flagged as a topic message
+      const msg = await sendText(client, stubUser.id, 'test', {
+        replyTo: 42,
+      })
+
+      expect(msg.raw.replyTo).toMatchObject({
+        _: 'messageReplyHeader',
+        replyToMsgId: 42,
+      })
+      expect(msg.raw.replyTo && 'forumTopic' in msg.raw.replyTo && msg.raw.replyTo.forumTopic).toBeFalsy()
+      // getter reads `raw.replyTo.forumTopic!` — undefined (not false) when the flag is absent
+      expect(msg.isTopicMessage).toBeFalsy()
+    })
+  })
+
+  it('should not set forumTopic for threads between two users', async () => {
+    const client = new StubTelegramClient()
+
+    await client.storage.self.store({
+      userId: stubUser.id,
+      isBot: false,
+      isPremium: false,
+      usernames: [],
+    })
+    await client.registerPeers(stubUser)
+
+    client.respondWith('messages.sendMessage', () =>
+      createStub('updateShortSentMessage', {
+        id: 123,
+        out: true,
+      }))
+
+    await client.with(async () => {
+      // neither party is a bot — a thread in a user-to-user DM is not a forum topic
+      const msg = await sendText(client, stubUser.id, 'test', {
+        threadId: 42,
+      })
+
+      expect(msg.raw.replyTo).toMatchObject({
+        _: 'messageReplyHeader',
+        replyToMsgId: 42,
+        replyToTopId: 42,
+      })
+      expect(msg.raw.replyTo && 'forumTopic' in msg.raw.replyTo && msg.raw.replyTo.forumTopic).toBeFalsy()
+      expect(msg.isTopicMessage).toBeFalsy()
+    })
+  })
+
+  it('should derive forumTopic flag when the peer is a bot (userbot sending into a bot forum)', async () => {
+    const client = new StubTelegramClient()
+
+    const stubBotUser = createStub('user', {
+      id: 7713244205,
+      accessHash: Long.fromBits(222, 333),
+      bot: true,
+    })
+
+    await client.storage.self.store({
+      userId: stubUser.id,
+      isBot: false,
+      isPremium: false,
+      usernames: [],
+    })
+    await client.registerPeers(stubUser, stubBotUser)
+
+    client.respondWith('messages.sendMessage', () =>
+      createStub('updateShortSentMessage', {
+        id: 123,
+        out: true,
+      }))
+
+    await client.with(async () => {
+      // userbot sends into a threaded-mode topic of a bot's DM chat
+      const msg = await sendText(client, stubBotUser.id, 'test', {
+        threadId: 96179,
+      })
+
+      expect(msg.raw.replyTo).toMatchObject({
+        _: 'messageReplyHeader',
+        replyToMsgId: 96179,
+        replyToTopId: 96179,
+        forumTopic: true,
+      })
+      expect(msg.isTopicMessage).toEqual(true)
+    })
+  })
+
   it('should pass suggested post and schedule repeat period', async () => {
     const client = new StubTelegramClient()
 
