@@ -44,6 +44,21 @@ if (process.env.TEST_ENV === 'bun') {
       unlinkSync(file)
     })
 
+    it('should replace an existing file that is longer than the download', async () => {
+      reset()
+      chunks = [new Uint8Array([1, 2, 3]), new Uint8Array([4, 5])]
+      const file = tmp()
+      await Bun.write(file, new Uint8Array(100).fill(7))
+
+      await downloadToFile(client, file, {} as any)
+
+      // a FileSink writes over the old bytes without truncating them, so the old
+      // file's tail would otherwise be left after the new contents
+      expect(new Uint8Array(await Bun.file(file).arrayBuffer())).toEqual(new Uint8Array([1, 2, 3, 4, 5]))
+
+      unlinkSync(file)
+    })
+
     it('should close the writer when the download fails', async () => {
       reset()
       failAfterChunks = true
