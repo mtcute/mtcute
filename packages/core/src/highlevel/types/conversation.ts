@@ -363,7 +363,7 @@ export class Conversation {
       timeout: timer,
     })
 
-    this._processPendingNewMessages()
+    void this._processPendingNewMessages()
 
     return promise.promise
   }
@@ -557,31 +557,8 @@ export class Conversation {
   private _onNewMessage(msg: Message) {
     if (msg.chat.id !== this._chatId) return
 
-    if (!this._queuedNewMessage.length) {
-      this._pendingNewMessages.pushBack(msg)
-
-      return
-    }
-
-    const it = this._queuedNewMessage.peekFront()!
-
-    // order does matter for new messages
-    void this._lock.acquire().then(async () => {
-      try {
-        if (!it.check || (await it.check(msg))) {
-          if (it.timeout) timers.clearTimeout(it.timeout)
-          it.promise.resolve(msg)
-          this._queuedNewMessage.popFront()
-        }
-      } catch (e: unknown) {
-        this.client.onError.emit(unknownToError(e))
-      }
-
-      this._lastMessage = this._lastReceivedMessage = msg.id
-
-      // this func will *never* error, so no need to use .then
-      this._lock.release()
-    })
+    this._pendingNewMessages.pushBack(msg)
+    void this._processPendingNewMessages()
   }
 
   private _onEditMessage(msg: Message, fromRecent = false) {
@@ -623,13 +600,35 @@ export class Conversation {
     }
   }
 
-  private _processPendingNewMessages() {
-    if (!this._pendingNewMessages.length) return
+  private async _processPendingNewMessages() {
+    // order does matter for new messages
+    const guard = await this._lock.acquire()
 
-    let it
+    try {
+      let it
+      let msg
+      while ((it = this._queuedNewMessage.peekFront()) && (msg = this._pendingNewMessages.peekFront())) {
+        let matches = false
+        try {
+          matches = !it.check || (await it.check(msg))
+        } catch (e: unknown) {
+          this.client.onError.emit(unknownToError(e))
+        }
 
-    while ((it = this._pendingNewMessages.popFront())) {
-      this._onNewMessage(it)
+        if (this._pendingNewMessages.peekFront() !== msg) break
+        if (this._queuedNewMessage.peekFront() !== it) continue
+
+        this._pendingNewMessages.popFront()
+        this._lastMessage = this._lastReceivedMessage = msg.id
+
+        if (matches) {
+          if (it.timeout) timers.clearTimeout(it.timeout)
+          it.promise.resolve(msg)
+          this._queuedNewMessage.popFront()
+        }
+      }
+    } finally {
+      guard.release()
     }
   }
 

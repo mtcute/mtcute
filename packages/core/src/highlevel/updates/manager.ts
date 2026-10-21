@@ -431,7 +431,7 @@ export class UpdatesManager {
   async _fetchUpdatesState(): Promise<void> {
     const { client, lock, log } = this
 
-    await lock.acquire()
+    const guard = await lock.acquire()
 
     log.debug('fetching initial state')
 
@@ -480,7 +480,7 @@ export class UpdatesManager {
     } catch (e) {
       if (tl.RpcError.is(e, 'AUTH_KEY_UNREGISTERED')) {
         // we are logged out, stop updates loop
-        lock.release()
+        guard.release()
         this.log.debug('received AUTH_KEY_UNREGISTERED, stopping updates loop')
         this.stopLoop()
 
@@ -491,11 +491,11 @@ export class UpdatesManager {
         log.error('failed to fetch updates state: %s', e)
       }
 
-      lock.release()
+      guard.release()
       throw e
     }
 
-    lock.release()
+    guard.release()
   }
 
   async _loadUpdatesStorage(): Promise<void> {

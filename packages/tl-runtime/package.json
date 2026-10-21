@@ -12,6 +12,6 @@
   },
   "dependencies": {
     "long": "catalog:",
-    "@fuman/utils": "0.0.21"
+    "@fuman/utils": "0.0.23"
   }
 }

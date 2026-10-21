@@ -251,20 +251,20 @@ export async function uploadFile(
 
   const uploadNextPart = async (): Promise<void> => {
     if (abortSignal?.aborted) return
-    const thisIdx = idx++
 
-    await lock.acquire()
+    const guard = await lock.acquire()
 
-    if (readableEnded) {
-      lock.release()
+    if (readableEnded || idx === partCount) {
+      guard.release()
       return
     }
 
+    const thisIdx = idx++
     let part
     try {
       part = await read.async.exactly(readable, partSize, 'truncate')
     } finally {
-      lock.release()
+      guard.release()
     }
 
     if (abortSignal?.aborted) return
@@ -320,14 +320,12 @@ export async function uploadFile(
       floodSleepThreshold: Infinity,
       abortSignal,
     })
-    if (!result) throw new Error(`Failed to upload part ${idx}`)
+    if (!result) throw new Error(`Failed to upload part ${thisIdx}`)
     if (abortSignal?.aborted) return
 
     pos += part.length
 
     params.progressCallback?.(pos, fileSize)
-
-    if (idx === partCount) return
 
     return uploadNextPart()
   }

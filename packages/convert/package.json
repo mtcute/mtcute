@@ -10,9 +10,9 @@
   "exports": "./src/index.ts",
   "dependencies": {
     "@mtcute/core": "workspace:^",
-    "@fuman/utils": "0.0.21",
-    "@fuman/net": "0.0.22",
-    "@fuman/io": "0.0.21"
+    "@fuman/utils": "0.0.23",
+    "@fuman/net": "0.0.23",
+    "@fuman/io": "0.0.23"
   },
   "peerDependencies": {
     "@mtcute/node": "workspace:^"
