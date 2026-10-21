@@ -343,6 +343,15 @@ export class Chat {
     return toggleChannelIdMark(this.raw.linkedCommunityId)
   }
 
+  /**
+   * ID of the last pinned message in this channel, if available
+   *
+   * **Note**: in some cases this field is only available in {@link FullChat}
+   */
+  get pinnedMsgId(): number | null {
+    return this.raw._ === 'channel' ? this.raw.pinnedMsgId ?? null : null
+  }
+
   /** Whether this community is collapsed in the dialogs list */
   get isCollapsedInDialogs(): boolean {
     return this.raw._ === 'community' && this.raw.collapsedInDialogs!

@@ -356,6 +356,16 @@ export class FullUser extends User {
   get mainTab(): tl.TypeProfileTab | null {
     return this.full.mainTab ?? null
   }
+
+  /** Theme of the screen for sharing a link to this user, if set */
+  get shareTheme(): tl.TypeShareTheme | null {
+    return this.full.shareTheme ?? null
+  }
+
+  /** User's wallet card, if set */
+  get walletCard(): tl.wallet.RawCard | null {
+    return this.full.walletCard ?? null
+  }
 }
 
 memoizeGetters(FullUser, [

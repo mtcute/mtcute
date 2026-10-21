@@ -296,8 +296,8 @@ export class FullChat extends Chat {
   }
 
   /** ID of the last pinned message in the chat */
-  get pinnedMsgId(): number | null {
-    return this.full._ === 'channelFull' ? this.full.pinnedMsgId ?? null : null
+  override get pinnedMsgId(): number | null {
+    return this.full._ === 'communityFull' ? null : this.full.pinnedMsgId ?? null
   }
 
   /**
@@ -415,6 +415,11 @@ export class FullChat extends Chat {
   /** Main tab of the channel's profile, if set */
   get mainTab(): tl.TypeProfileTab | null {
     return this.full._ === 'channelFull' ? this.full.mainTab ?? null : null
+  }
+
+  /** Theme of the screen for sharing a link to this chat, if set */
+  get shareTheme(): tl.TypeShareTheme | null {
+    return this.full._ === 'channelFull' ? this.full.shareTheme ?? null : null
   }
 
   /** For communities, list of peers linked to it */

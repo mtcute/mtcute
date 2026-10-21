@@ -957,6 +957,11 @@ export interface ActionWalletTonConnectRequest {
   dappName?: string
 }
 
+/** A "no paid messages" token was used, allowing the user to send messages for free */
+export interface ActionNoPaidMessagesTokenUsed {
+  readonly type: 'no_paid_messages_token_used'
+}
+
 /** Group creator has left the group, and a new creator has been assigned but not yet made one */
 export interface ActionNewCreatorPending {
   readonly type: 'new_creator_pending'
@@ -1047,6 +1052,7 @@ export type MessageAction
     | ActionChangeCommunity
     | ActionGramTransfer
     | ActionWalletTonConnectRequest
+    | ActionNoPaidMessagesTokenUsed
     | ActionSuggestedPostApproved
     | ActionSuggestedPostDeclined
     | ActionSuggestedPostApprovalFailed
@@ -1603,6 +1609,10 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         topic: act.topic,
         traceId: act.traceId,
         dappName: act.dappName,
+      }
+    case 'messageActionNoPaidMessagesTokenUsed':
+      return {
+        type: 'no_paid_messages_token_used',
       }
     default:
       return null

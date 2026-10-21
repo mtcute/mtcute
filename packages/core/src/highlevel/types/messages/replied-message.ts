@@ -193,6 +193,11 @@ export class RepliedMessageInfo {
     return this.raw.quoteEntities?.map(e => new MessageEntity(e)) ?? []
   }
 
+  /** If this message is a quote of a rich message, rich text of the quote */
+  get quoteRich(): tl.TypeRichText[] | null {
+    return this.raw.quoteRich ?? null
+  }
+
   /**
    * Offset of the start of the {@link quoteText} in the replied-to message.
    *

@@ -4,7 +4,7 @@ import { _normalizeInputStarGift } from './_normalize-input-star-gift.js'
 
 // @available=user
 /**
- * Accept, hide or convert a star gift.
+ * Accept, hide, convert or delete a star gift.
  *
  * @returns  Whether the action was successful
  */
@@ -19,22 +19,24 @@ export async function acceptStarGift(
      *  - `save` - save the gift to your profile
      *  - `hide` - hide the gift from your profile
      *  - `convert` - convert the gift to stars (can't be undone)
+     *  - `delete` - delete the gift without receiving stars for it (can't be undone)
      */
-    action: 'save' | 'hide' | 'convert'
+    action: 'save' | 'hide' | 'convert' | 'delete'
   },
 ): Promise<boolean> {
   const { action } = params
   const inputStarGift = await _normalizeInputStarGift(client, params.gift)
-  return client.call(
-    action === 'convert'
-      ? {
-          _: 'payments.convertStarGift',
-          stargift: inputStarGift,
-        }
-      : {
-          _: 'payments.saveStarGift',
-          unsave: action === 'hide',
-          stargift: inputStarGift,
-        },
-  )
+
+  switch (action) {
+    case 'convert':
+      return client.call({ _: 'payments.convertStarGift', stargift: inputStarGift })
+    case 'delete':
+      return client.call({ _: 'payments.deleteStarGift', stargift: inputStarGift })
+    default:
+      return client.call({
+        _: 'payments.saveStarGift',
+        unsave: action === 'hide',
+        stargift: inputStarGift,
+      })
+  }
 }

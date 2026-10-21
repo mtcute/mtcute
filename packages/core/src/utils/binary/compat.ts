@@ -321,6 +321,7 @@ function mapMessageReplyHeader(obj: tlCompat.TypeMessageReplyHeader): tl.TypeMes
         replyMedia: obj.replyMedia ? mapCompatMessageMedia(obj.replyMedia) : undefined,
       }
     case 'messageReplyHeader_layer223':
+    case 'messageReplyHeader_layer231':
       return {
         ...obj,
         _: 'messageReplyHeader',
@@ -560,6 +561,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'channelFull_layer204':
     case 'channelFull_layer225':
     case 'channelFull_layer211':
+    case 'channelFull_layer231':
       return {
         ...obj,
         _: 'channelFull',
@@ -592,6 +594,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'userFull_layer211':
     case 'userFull_layer214':
     case 'userFull_layer223':
+    case 'userFull_layer231':
       return {
         ...obj,
         _: 'userFull',
@@ -621,6 +624,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
         emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
       }
     case 'channel_layer227':
+    case 'channel_layer231':
       return {
         ...obj,
         _: 'channel',
@@ -643,6 +647,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
       return mapCompatMessage(obj)
     case 'messageReplyHeader_layer206':
     case 'messageReplyHeader_layer223':
+    case 'messageReplyHeader_layer231':
       return mapMessageReplyHeader(obj)
     case 'storyItem_layer210':
     case 'storyItem_layer223':

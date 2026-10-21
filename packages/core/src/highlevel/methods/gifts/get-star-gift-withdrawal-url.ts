@@ -19,10 +19,16 @@ export async function getStarGiftWithdrawalUrl(
     params.password,
   )
 
+  const { tmpPassword } = await client.call({
+    _: 'account.getTmpPassword',
+    password,
+    period: 60,
+  })
+
   const res = await client.call({
     _: 'payments.getStarGiftWithdrawalUrl',
     stargift: await _normalizeInputStarGift(client, params.gift),
-    password,
+    tmpPassword,
   })
 
   return res.url

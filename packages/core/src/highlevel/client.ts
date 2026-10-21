@@ -145,8 +145,10 @@ import { linkCommunityPeer, unlinkCommunityPeer } from './methods/communities/li
 import { toggleCommunityCollapsed } from './methods/communities/toggle-community-collapsed.js'
 import { addContact } from './methods/contacts/add-contact.js'
 import { deleteContacts } from './methods/contacts/delete-contacts.js'
+import { exportNoPaidMessagesToken } from './methods/contacts/export-no-paid-messages-token.js'
 import { getContacts } from './methods/contacts/get-contacts.js'
 import { importContacts } from './methods/contacts/import-contacts.js'
+import { importNoPaidMessagesToken } from './methods/contacts/import-no-paid-messages-token.js'
 import { setContactNote } from './methods/contacts/set-contact-note.js'
 import { createFolder } from './methods/dialogs/create-folder.js'
 import { deleteFolder } from './methods/dialogs/delete-folder.js'
@@ -188,9 +190,11 @@ import { toggleGeneralTopicHidden } from './methods/forums/toggle-general-topic-
 import { _normalizeInputStarGift } from './methods/gifts/_normalize-input-star-gift.js'
 import { acceptStarGift } from './methods/gifts/accept-star-gift.js'
 import { buyResaleGift } from './methods/gifts/buy-resale-gift.js'
+import { displayStarGiftFromLinkedWallet } from './methods/gifts/display-star-gift-from-linked-wallet.js'
 import { getStarGiftResaleOptions } from './methods/gifts/get-resale-star-gifts.js'
 import { getSavedStarGiftsById } from './methods/gifts/get-saved-star-gifts-by-id.js'
 import { getSavedStarGifts } from './methods/gifts/get-saved-star-gifts.js'
+import { getStarGiftDepositInfo } from './methods/gifts/get-star-gift-deposit-info.js'
 import { getStarGiftOptions } from './methods/gifts/get-star-gift-options.js'
 import { getStarGiftUpgradeOptions } from './methods/gifts/get-star-gift-upgrade-options.js'
 import { getStarGiftValue } from './methods/gifts/get-star-gift-value.js'
@@ -205,6 +209,7 @@ import { sendStarGift } from './methods/gifts/send-star-gift.js'
 import { setResaleStarGiftPrice } from './methods/gifts/set-gift-resale-price.js'
 import { transferStarGift } from './methods/gifts/transfer-star-gift.js'
 import { upgradeStarGift } from './methods/gifts/upgrade-star-gift.js'
+import { withdrawStarGiftToLinkedWallet } from './methods/gifts/withdraw-star-gift-to-linked-wallet.js'
 import { createInviteLink } from './methods/invite-links/create-invite-link.js'
 import { editInviteLink } from './methods/invite-links/edit-invite-link.js'
 import { exportInviteLink } from './methods/invite-links/export-invite-link.js'
@@ -2616,6 +2621,32 @@ export interface TelegramClient extends ITelegramClient {
    * @param userIds  User IDs, usernames or phone numbers
    */
   deleteContacts(userIds: MaybeArray<InputPeerLike>): Promise<User[]>
+
+  /**
+   * Export a link that allows other users to send messages to the current user
+   * for free, even if the current user requires payment for incoming messages.
+   * **Available**: 👤 users only
+   *
+   */
+  exportNoPaidMessagesToken(
+    params?: {
+    /**
+     * Whether to revoke previously exported links.
+     * If {@link temporary} is `false`, the permanent link is revoked too,
+     * otherwise only temporary links are revoked
+     */
+      revoke?: boolean
+
+      /** Whether to export a temporary link */
+      temporary?: boolean
+    }): Promise<{
+  /** Token that can be passed to {@link importNoPaidMessagesToken} */
+    token: string
+    /** Link containing the token */
+    url: string
+    /** Date when the token expires, if it is temporary */
+    expires: Date | null
+  }>
   /**
    * Get list of contacts from your Telegram contacts list.
    * **Available**: 👤 users only
@@ -2631,6 +2662,21 @@ export interface TelegramClient extends ITelegramClient {
    */
   importContacts(
     contacts: PartialOnly<Omit<tl.RawInputPhoneContact, '_'>, 'clientId'>[]): Promise<tl.contacts.RawImportedContacts>
+
+  /**
+   * Use a token from a link exported with {@link exportNoPaidMessagesToken}
+   * to be able to send messages to the given user for free.
+   *
+   * Repeated calls have no effect.
+   *
+   * **Available**: 👤 users only
+   *
+   * @param userId  User who exported the token
+   * @param token  The token
+   */
+  importNoPaidMessagesToken(
+    userId: InputPeerLike,
+    token: string): Promise<User>
   /**
    * Set a note for a contact
    *
@@ -3589,7 +3635,7 @@ export interface TelegramClient extends ITelegramClient {
     gift: InputStarGift): Promise<tl.TypeInputSavedStarGift>
 
   /**
-   * Accept, hide or convert a star gift.
+   * Accept, hide, convert or delete a star gift.
    *
    * **Available**: 👤 users only
    *
@@ -3605,8 +3651,9 @@ export interface TelegramClient extends ITelegramClient {
        *  - `save` - save the gift to your profile
        *  - `hide` - hide the gift from your profile
        *  - `convert` - convert the gift to stars (can't be undone)
+       *  - `delete` - delete the gift without receiving stars for it (can't be undone)
        */
-      action: 'save' | 'hide' | 'convert'
+      action: 'save' | 'hide' | 'convert' | 'delete'
     }): Promise<boolean>
 
   buyResaleGift(
@@ -3638,6 +3685,25 @@ export interface TelegramClient extends ITelegramClient {
       /** Message to send along with the gift */
       message?: InputText
     }): Promise<Message | null>
+
+  /**
+   * Show a unique star gift from the current user's TON wallet on a profile page,
+   * or hide it from all profile pages. The gift remains in the wallet.
+   * **Available**: 👤 users only
+   *
+   */
+  displayStarGiftFromLinkedWallet(
+    params: {
+    /** Slug of the unique star gift */
+      slug: string
+
+      /**
+       * Current user or a channel owned by the current user on whose profile the gift will be shown.
+       *
+       * If not passed, the gift will be hidden from all profiles
+       */
+      peer?: InputPeerLike
+    }): Promise<void>
   /**
    * Get a list of star gifts up for resale
    * **Available**: 👤 users only
@@ -3716,6 +3782,37 @@ export interface TelegramClient extends ITelegramClient {
       /** Limit for pagination */
       limit?: number
     }): Promise<ArrayPaginated<SavedStarGift, string>>
+
+  /**
+   * Get information needed to deposit a unique star gift from the current user's
+   * TON wallet to a Telegram account.
+   *
+   * The gift must then be transferred by an internal message from the wallet to `nftAddress`
+   * with `amount` attached and `payload` as the message body.
+   * **Available**: 👤 users only
+   *
+   */
+  getStarGiftDepositInfo(
+    params: {
+    /** Slug of the unique star gift */
+      slug: string
+
+      /** User or channel that will receive the gift */
+      recipient: InputPeerLike
+
+      /** Whether to hide the sender of the gift in the message received by the recipient */
+      hideSender?: boolean
+    }): Promise<{
+  /** Address in TON blockchain to which the message must be sent */
+    nftAddress: string
+    /** Body of the NFT transfer message */
+    payload: Uint8Array
+    /**
+     * Amount of nanotons that must be attached to the message to cover fees.
+     * Excess amount will be returned to the wallet
+     */
+    amount: tl.Long
+  }>
 
   /**
    * Get the list of available star gifts.
@@ -3969,6 +4066,26 @@ export interface TelegramClient extends ITelegramClient {
        */
       shouldDispatch?: true
     }): Promise<Message | null>
+
+  /**
+   * Withdraw a unique star gift to the TON blockchain as an NFT,
+   * directly to the current user's TON wallet (which is created automatically if needed).
+   *
+   * The gift will be received by the wallet a few seconds after the request succeeds.
+   * **Available**: 👤 users only
+   *
+   */
+  withdrawStarGiftToLinkedWallet(
+    params: {
+    /** The star gift to withdraw */
+      gift: InputStarGift
+
+      /** 2FA password */
+      password: string
+
+      /** Whether to keep the gift displayed on the profile after withdrawal */
+      keepOnProfile?: boolean
+    }): Promise<void>
   /**
    * Create an additional invite link for the chat.
    *
@@ -8051,11 +8168,17 @@ TelegramClient.prototype.addContact = function (...args) {
 TelegramClient.prototype.deleteContacts = function (...args) {
   return deleteContacts(this._client, ...args)
 }
+TelegramClient.prototype.exportNoPaidMessagesToken = function (...args) {
+  return exportNoPaidMessagesToken(this._client, ...args)
+}
 TelegramClient.prototype.getContacts = function (...args) {
   return getContacts(this._client, ...args)
 }
 TelegramClient.prototype.importContacts = function (...args) {
   return importContacts(this._client, ...args)
+}
+TelegramClient.prototype.importNoPaidMessagesToken = function (...args) {
+  return importNoPaidMessagesToken(this._client, ...args)
 }
 TelegramClient.prototype.setContactNote = function (...args) {
   return setContactNote(this._client, ...args)
@@ -8183,6 +8306,9 @@ TelegramClient.prototype.acceptStarGift = function (...args) {
 TelegramClient.prototype.buyResaleGift = function (...args) {
   return buyResaleGift(this._client, ...args)
 }
+TelegramClient.prototype.displayStarGiftFromLinkedWallet = function (...args) {
+  return displayStarGiftFromLinkedWallet(this._client, ...args)
+}
 TelegramClient.prototype.getStarGiftResaleOptions = function (...args) {
   return getStarGiftResaleOptions(this._client, ...args)
 }
@@ -8191,6 +8317,9 @@ TelegramClient.prototype.getSavedStarGiftsById = function (...args) {
 }
 TelegramClient.prototype.getSavedStarGifts = function (...args) {
   return getSavedStarGifts(this._client, ...args)
+}
+TelegramClient.prototype.getStarGiftDepositInfo = function (...args) {
+  return getStarGiftDepositInfo(this._client, ...args)
 }
 TelegramClient.prototype.getStarGiftOptions = function (...args) {
   return getStarGiftOptions(this._client, ...args)
@@ -8233,6 +8362,9 @@ TelegramClient.prototype.transferStarGift = function (...args) {
 }
 TelegramClient.prototype.upgradeStarGift = function (...args) {
   return upgradeStarGift(this._client, ...args)
+}
+TelegramClient.prototype.withdrawStarGiftToLinkedWallet = function (...args) {
+  return withdrawStarGiftToLinkedWallet(this._client, ...args)
 }
 TelegramClient.prototype.createInviteLink = function (...args) {
   return createInviteLink(this._client, ...args)
