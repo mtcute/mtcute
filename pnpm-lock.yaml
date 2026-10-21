@@ -111,8 +111,8 @@ importers:
   e2e:
     dependencies:
       '@fuman/utils':
-        specifier: 0.0.21
-        version: 0.0.21
+        specifier: 0.0.23
+        version: 0.0.23
       better-sqlite3:
         specifier: 12.10.0
         version: 12.10.0
@@ -1297,9 +1297,6 @@ packages:
 
   '@fuman/utils@0.0.19':
     resolution: {integrity: sha512-4qVrZ9AjKYztLJsNr1Tp7kL48b22dvVLN1iVW+Me8ZSQ0ILN0qknoxjsczVPReF7+GDWgknNxR2l6ggrA4SZyw==}
-
-  '@fuman/utils@0.0.21':
-    resolution: {integrity: sha512-2N5bPK18uGgZRans+ZQ33SE+xSGj4BZNnJbSUnGdH/i4ADTdz/ziC/16Qy3/Jqzbrwr21IpuKObnELp8DDfkDQ==}
 
   '@fuman/utils@0.0.23':
     resolution: {integrity: sha512-dTpiCi5CLkqfpf2PvsvEyX4WP3dj3r8j/ffm0/H/Xi3atCI4O4wNWhN+nn8th6k24zC1+8ooJJdiSKylepJnag==}
@@ -4788,8 +4785,6 @@ snapshots:
       ws: 8.18.3
 
   '@fuman/utils@0.0.19': {}
-
-  '@fuman/utils@0.0.21': {}
 
   '@fuman/utils@0.0.23': {}
 
