@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/markdown-parser",
     "type": "module",
-    "version": "0.32.5",
+    "version": "0.32.6",
     "private": true,
     "description": "Markdown entities parser for mtcute",
     "author": "alina sireneva <alina@tei.su>",
