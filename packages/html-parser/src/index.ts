@@ -390,12 +390,143 @@ function parse(
   }
 }
 
+/**
+ * Filter for controlling which entity types are unparsed to HTML.
+ * Supports method chaining to build complex filters.
+ *
+ * @example
+ * ```typescript
+ * // Default: unparse all entity types
+ * html.unparse(message, {
+ *   allowedEntityTypes: AllowedEntityTypesFilter.default
+ * })
+ *
+ * // Only bold and italic
+ * html.unparse(message, {
+ *   allowedEntityTypes: AllowedEntityTypesFilter.only('messageEntityBold', 'messageEntityItalic')
+ * })
+ *
+ * // All except custom emoji and spoilers
+ * html.unparse(message, {
+ *   allowedEntityTypes: AllowedEntityTypesFilter.default
+ *     .except('messageEntityCustomEmoji', 'messageEntitySpoiler')
+ * })
+ *
+ * // Start from specific types and add more
+ * html.unparse(message, {
+ *   allowedEntityTypes: AllowedEntityTypesFilter.only('messageEntityBold')
+ *     .add('messageEntityItalic', 'messageEntityCode')
+ * })
+ * ```
+ */
+export class AllowedEntityTypesFilter {
+  private allowed: Set<tl.TypeMessageEntity['_']> | null
+
+  constructor(allowed: Set<tl.TypeMessageEntity['_']> | null = null) {
+    this.allowed = allowed
+  }
+
+  /**
+   * Default filter that allows all entity types
+   */
+  static get default(): AllowedEntityTypesFilter {
+    return new AllowedEntityTypesFilter(null)
+  }
+
+  /**
+   * Create a filter that only allows specific entity types
+   */
+  static only(...types: tl.TypeMessageEntity['_'][]): AllowedEntityTypesFilter {
+    return new AllowedEntityTypesFilter(new Set(types))
+  }
+
+  /**
+   * Add entity types to the allowed list
+   */
+  add(...types: tl.TypeMessageEntity['_'][]): AllowedEntityTypesFilter {
+    if (this.allowed === null) {
+      // Start from all types and add more (no change needed)
+      return this
+    }
+    const newAllowed = new Set(this.allowed)
+    for (const type of types) {
+      newAllowed.add(type)
+    }
+    return new AllowedEntityTypesFilter(newAllowed)
+  }
+
+  /**
+   * Remove entity types from the allowed list
+   */
+  except(...types: tl.TypeMessageEntity['_'][]): AllowedEntityTypesFilter {
+    if (this.allowed === null) {
+      // Start from all types and remove specified ones
+      const allTypes: tl.TypeMessageEntity['_'][] = [
+        'messageEntityBold',
+        'messageEntityItalic',
+        'messageEntityUnderline',
+        'messageEntityStrike',
+        'messageEntityCode',
+        'messageEntityPre',
+        'messageEntitySpoiler',
+        'messageEntityBlockquote',
+        'messageEntityUrl',
+        'messageEntityEmail',
+        'messageEntityTextUrl',
+        'messageEntityMentionName',
+        'inputMessageEntityMentionName',
+        'messageEntityCustomEmoji',
+        'messageEntityFormattedDate',
+      ]
+      const newAllowed = new Set(allTypes)
+      for (const type of types) {
+        newAllowed.delete(type)
+      }
+      return new AllowedEntityTypesFilter(newAllowed)
+    } else {
+      // Remove from existing allowed set
+      const newAllowed = new Set(this.allowed)
+      for (const type of types) {
+        newAllowed.delete(type)
+      }
+      return new AllowedEntityTypesFilter(newAllowed)
+    }
+  }
+
+  /**
+   * Get the allowed entity types array, or undefined if all types are allowed
+   */
+  toArray(): tl.TypeMessageEntity['_'][] | undefined {
+    return this.allowed ? Array.from(this.allowed) : undefined
+  }
+}
+
 /** Options passed to `html.unparse` / `thtml.unparse` */
 export interface HtmlUnparseOptions {
   /**
    * Syntax highlighter to use when un-parsing `pre` tags with language
    */
   syntaxHighlighter?: (code: string, language: string) => string
+
+  /**
+   * Filter to control which entity types are unparsed.
+   * Can be an AllowedEntityTypesFilter instance or an array of allowed entity types.
+   * If not specified, all entity types are unparsed (default behavior).
+   *
+   * @example
+   * ```typescript
+   * // Using filter
+   * html.unparse(message, {
+   *   allowedEntityTypes: AllowedEntityTypesFilter.default.except('messageEntityCustomEmoji')
+   * })
+   *
+   * // Using array
+   * html.unparse(message, {
+   *   allowedEntityTypes: ['messageEntityBold', 'messageEntityItalic']
+   * })
+   * ```
+   */
+  allowedEntityTypes?: AllowedEntityTypesFilter | tl.TypeMessageEntity['_'][]
 }
 
 // internal function that uses recursion to correctly process nested & overlapping entities
@@ -424,6 +555,16 @@ function _unparse(
 
   const html: string[] = []
   let lastOffset = 0
+
+  // Resolve allowed types
+  let allowedTypes: tl.TypeMessageEntity['_'][] | undefined
+  if (params.allowedEntityTypes) {
+    if (params.allowedEntityTypes instanceof AllowedEntityTypesFilter) {
+      allowedTypes = params.allowedEntityTypes.toArray()
+    } else {
+      allowedTypes = params.allowedEntityTypes
+    }
+  }
 
   for (let i = entitiesOffset; i < entities.length; i++) {
     const entity = entities[i]
@@ -458,6 +599,11 @@ function _unparse(
 
     const type = entity._
 
+    // Check if this entity type is allowed
+    if (allowedTypes && !allowedTypes.includes(type)) {
+      skip = true
+    }
+
     let entityText
 
     if (type === 'messageEntityPre') {
@@ -466,59 +612,64 @@ function _unparse(
       entityText = _unparse(keepWhitespace, substr, entities, params, i + 1, offset + relativeOffset, length)
     }
 
-    switch (type) {
-      case 'messageEntityBold':
-      case 'messageEntityItalic':
-      case 'messageEntityUnderline':
-      case 'messageEntityStrike':
-      case 'messageEntityCode':
-      case 'messageEntitySpoiler':
-        {
-          const tag = (
-            {
-              messageEntityBold: 'b',
-              messageEntityItalic: 'i',
-              messageEntityUnderline: 'u',
-              messageEntityStrike: 's',
-              messageEntityCode: 'code',
-              messageEntitySpoiler: 'spoiler',
-            } as const
-          )[type]
-          html.push(`<${tag}>${entityText}</${tag}>`)
+    if (!skip) {
+      switch (type) {
+        case 'messageEntityBold':
+        case 'messageEntityItalic':
+        case 'messageEntityUnderline':
+        case 'messageEntityStrike':
+        case 'messageEntityCode':
+        case 'messageEntitySpoiler':
+          {
+            const tag = (
+              {
+                messageEntityBold: 'b',
+                messageEntityItalic: 'i',
+                messageEntityUnderline: 'u',
+                messageEntityStrike: 's',
+                messageEntityCode: 'code',
+                messageEntitySpoiler: 'spoiler',
+              } as const
+            )[type]
+            html.push(`<${tag}>${entityText}</${tag}>`)
+          }
+          break
+        case 'messageEntityBlockquote':
+          html.push(`<blockquote${entity.collapsed ? ' collapsible' : ''}>${entityText}</blockquote>`)
+          break
+        case 'messageEntityPre':
+          html.push(
+            `<pre${entity.language ? ` language="${entity.language}"` : ''}>${
+              params.syntaxHighlighter && entity.language
+                ? params.syntaxHighlighter(entityText, entity.language)
+                : entityText
+            }</pre>`,
+          )
+          break
+        case 'messageEntityEmail':
+          html.push(`<a href="mailto:${entityText}">${entityText}</a>`)
+          break
+        case 'messageEntityUrl':
+          html.push(`<a href="${entityText}">${entityText}</a>`)
+          break
+        case 'messageEntityTextUrl':
+          html.push(`<a href="${escape(entity.url, true)}">${entityText}</a>`)
+          break
+        case 'messageEntityMentionName':
+          html.push(`<a href="tg://user?id=${entity.userId}">${entityText}</a>`)
+          break
+        case 'messageEntityCustomEmoji':
+          html.push(`<tg-emoji id="${entity.documentId}">${entityText}</tg-emoji>`)
+          break
+        case 'messageEntityFormattedDate': {
+          const fmt = dateEntityFormatToString(entity)
+          html.push(`<tg-time unix="${entity.date}"${fmt ? ` format="${fmt}"` : ''}>${entityText}</tg-time>`)
+          break
         }
-        break
-      case 'messageEntityBlockquote':
-        html.push(`<blockquote${entity.collapsed ? ' collapsible' : ''}>${entityText}</blockquote>`)
-        break
-      case 'messageEntityPre':
-        html.push(
-          `<pre${entity.language ? ` language="${entity.language}"` : ''}>${
-            params.syntaxHighlighter && entity.language
-              ? params.syntaxHighlighter(entityText, entity.language)
-              : entityText
-          }</pre>`,
-        )
-        break
-      case 'messageEntityEmail':
-        html.push(`<a href="mailto:${entityText}">${entityText}</a>`)
-        break
-      case 'messageEntityUrl':
-        html.push(`<a href="${entityText}">${entityText}</a>`)
-        break
-      case 'messageEntityTextUrl':
-        html.push(`<a href="${escape(entity.url, true)}">${entityText}</a>`)
-        break
-      case 'messageEntityMentionName':
-        html.push(`<a href="tg://user?id=${entity.userId}">${entityText}</a>`)
-        break
-      case 'messageEntityFormattedDate': {
-        const fmt = dateEntityFormatToString(entity)
-        html.push(`<tg-time unix="${entity.date}"${fmt ? ` format="${fmt}"` : ''}>${entityText}</tg-time>`)
-        break
+        default:
+          skip = true
+          break
       }
-      default:
-        skip = true
-        break
     }
 
     lastOffset = relativeOffset + (skip ? 0 : length)
