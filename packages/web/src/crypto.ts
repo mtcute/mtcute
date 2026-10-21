@@ -116,6 +116,9 @@ export class WebCryptoProvider extends BaseCryptoProvider implements ICryptoProv
   }
 
   randomFill(buf: Uint8Array): void {
-    this.crypto.getRandomValues(buf as Uint8Array<ArrayBuffer>)
+    // getRandomValues can only fill up to 65536 bytes per call
+    for (let i = 0; i < buf.length; i += 65536) {
+      this.crypto.getRandomValues(buf.subarray(i, i + 65536) as Uint8Array<ArrayBuffer>)
+    }
   }
 }

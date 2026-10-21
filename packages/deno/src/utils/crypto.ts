@@ -90,6 +90,9 @@ export class DenoCryptoProvider extends BaseCryptoProvider implements ICryptoPro
   }
 
   randomFill(buf: Uint8Array): void {
-    crypto.getRandomValues(buf)
+    // getRandomValues can only fill up to 65536 bytes per call
+    for (let i = 0; i < buf.length; i += 65536) {
+      crypto.getRandomValues(buf.subarray(i, i + 65536))
+    }
   }
 }

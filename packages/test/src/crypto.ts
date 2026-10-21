@@ -238,6 +238,12 @@ export function testCryptoProvider(c: ICryptoProvider): void {
       expect([...c.randomBytes(8)]).not.eql([...c.randomBytes(8)])
     })
 
+    it('should fill buffers larger than 64 KiB', () => {
+      const buf = c.randomBytes(200_000)
+
+      expect([...buf.subarray(-16)]).not.eql(Array.from({ length: 16 }, () => 0))
+    })
+
     it('should use randomFill', () => {
       const spy = vi.spyOn(c, 'randomFill')
       c.randomBytes(8)
