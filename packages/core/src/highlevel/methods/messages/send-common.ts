@@ -243,7 +243,7 @@ export async function _processCommonSendParameters(
       throw new MtArgumentError('mustReply used, but replyTo was not passed')
     }
 
-    const msg = await getMessages(client, peer, replyTo)
+    const [msg] = await getMessages(client, peer, replyTo)
 
     if (!msg) {
       throw new MtMessageNotFoundError(getMarkedPeerId(peer), replyTo, 'to reply to')
