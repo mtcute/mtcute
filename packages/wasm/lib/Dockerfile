@@ -2,15 +2,17 @@ FROM alpine:3.18.4 AS build
 
 WORKDIR /src
 
+# Clang invokes wasm-opt after linking when it is available.
 RUN apk add --no-cache lld make clang16 binaryen
 
 COPY crypto /src/crypto
+COPY hash /src/hash
 COPY libdeflate /src/libdeflate
 COPY utils /src/utils
 COPY wasm.h Makefile /src/
 
-RUN make
+RUN make all
 
 FROM scratch AS binaries
-COPY --from=build /src/mtcute.wasm ../
-COPY --from=build /src/mtcute-simd.wasm ../
+COPY --from=build /src/mtcute.wasm /
+COPY --from=build /src/mtcute-simd.wasm /
