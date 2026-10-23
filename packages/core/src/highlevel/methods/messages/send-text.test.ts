@@ -5,6 +5,7 @@ import Long from 'long'
 import { describe, expect, it } from 'vitest'
 
 import { toggleChannelIdMark } from '../../../utils/peer-utils.js'
+import { MtMessageNotFoundError } from '../../types/errors.js'
 import { sendText } from './send-text.js'
 
 const stubUser = createStub('user', {
@@ -404,6 +405,65 @@ describe('sendText', () => {
       })
 
       expect(msg.id).toEqual(123)
+    })
+  })
+
+  describe('mustReply', () => {
+    it('should throw and not send when the message does not exist', async () => {
+      const client = new StubTelegramClient()
+
+      await client.registerPeers(stubUser)
+
+      client.respondWith('messages.getMessages', () =>
+        createStub('messages.messages', {
+          messages: [{ _: 'messageEmpty', id: 42 }],
+        }))
+
+      let sent = false
+      client.respondWith('messages.sendMessage', () => {
+        sent = true
+        return createStub('updateShortSentMessage', { id: 123, out: true })
+      })
+
+      await client.with(async () => {
+        const promise = sendText(client, stubUser.id, 'test', { replyTo: 42, mustReply: true })
+
+        await expect(promise).rejects.toThrow(MtMessageNotFoundError)
+      })
+
+      expect(sent).toBe(false)
+    })
+
+    it('should send the reply when the message exists', async () => {
+      const client = new StubTelegramClient()
+
+      await client.storage.self.store({
+        userId: stubUser.id,
+        isBot: false,
+        isPremium: false,
+        usernames: [],
+      })
+      await client.registerPeers(stubUser)
+
+      client.respondWith('messages.getMessages', () =>
+        createStub('messages.messages', {
+          messages: [createStub('message', { id: 42, peerId: { _: 'peerUser', userId: stubUser.id } })],
+          users: [stubUser],
+        }))
+
+      let replyTo: unknown
+      client.respondWith('messages.sendMessage', (req) => {
+        replyTo = req.replyTo
+        return createStub('updateShortSentMessage', { id: 123, out: true })
+      })
+
+      await client.with(async () => {
+        const msg = await sendText(client, stubUser.id, 'test', { replyTo: 42, mustReply: true })
+
+        expect(msg.id).toEqual(123)
+      })
+
+      expect(replyTo).toMatchObject({ _: 'inputReplyToMessage', replyToMsgId: 42 })
     })
   })
 })
