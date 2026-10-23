@@ -24,6 +24,9 @@ export async function downloadToFile(
     return
   }
 
+  // a FileSink writes from the start of the file without truncating it, so an existing
+  // file longer than the download would keep its old bytes past the end of the new ones
+  await Bun.write(filename, new Uint8Array(0))
   const output = Bun.file(filename).writer()
 
   let ended = false
