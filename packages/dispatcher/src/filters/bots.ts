@@ -42,7 +42,7 @@ export function command(commands: MaybeArray<string | RegExp>, {
   commands.forEach((cmd) => {
     if (typeof cmd !== 'string') cmd = cmd.source
 
-    commandsRe.push(new RegExp(`^(${cmd})(?:\\s|$|@([a-zA-Z0-9_]+?bot)(?:\\s|$))`, caseSensitive ? '' : 'i'))
+    commandsRe.push(new RegExp(`^(${cmd})(?:\\s|$|@([a-zA-Z0-9_]+)(?:\\s|$))`, caseSensitive ? '' : 'i'))
   })
 
   if (prefixes === null) prefixes = []
