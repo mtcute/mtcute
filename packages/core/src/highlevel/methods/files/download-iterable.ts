@@ -340,7 +340,9 @@ export async function* downloadAsIterable(
 
   try {
     while (position < limitBytes) {
-      await nextChunkCv.wait()
+      // the error may have been set while we were suspended at `yield`,
+      // in which case its notify() went unheard and waiting would hang forever
+      if (!error) await nextChunkCv.wait()
 
       if (error) throw error
 
