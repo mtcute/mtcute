@@ -48,14 +48,13 @@ export function downloadAsStream(
   return new ReadableStream<Uint8Array>({
     start(controller) {
       (async () => {
-        const params_ = params as Parameters<typeof downloadAsIterable>[2] ?? {}
-        params_.throttle = () => {
+        const throttle = () => {
           if (controller.desiredSize != null && controller.desiredSize <= 0) {
             return backpressureCv.wait()
           }
         }
 
-        for await (const chunk of downloadAsIterable(client, location, params)) {
+        for await (const chunk of downloadAsIterable(client, location, { ...params, throttle })) {
           controller.enqueue(chunk)
         }
 
