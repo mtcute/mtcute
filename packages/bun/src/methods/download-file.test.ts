@@ -59,6 +59,19 @@ if (process.env.TEST_ENV === 'bun') {
       unlinkSync(file)
     })
 
+    it('should keep the file when the signal is aborted after the download', async () => {
+      reset()
+      const file = tmp()
+      const abort = new AbortController()
+
+      await downloadToFile(client, file, {} as any, { abortSignal: abort.signal })
+      abort.abort()
+
+      expect(await Bun.file(file).exists()).toBe(true)
+
+      unlinkSync(file)
+    })
+
     it('should close the writer when the download fails', async () => {
       reset()
       failAfterChunks = true
