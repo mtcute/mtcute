@@ -83,7 +83,6 @@ describe('downloadAsIterable', () => {
     await client.with(async () => {
       const consume = (async () => {
         for await (const _ of downloadAsIterable(client, stubLocation, { fileSize: 1024 * 1024 })) {
-          // e.g. waiting for a disk write, while the workers fail
           await sleep(200)
         }
       })()

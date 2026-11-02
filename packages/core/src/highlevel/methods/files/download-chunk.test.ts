@@ -129,7 +129,7 @@ describe('downloadChunk', () => {
       await client.with(async () => {
         const result = await downloadChunk(client, {
           location: stubLocation,
-          offset: 1000, // range ends past 1024
+          offset: 1000,
           limit: 100,
         })
 

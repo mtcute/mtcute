@@ -48,8 +48,6 @@ export async function downloadToFile(
       await Promise.resolve(output.write(chunk))
     }
   } finally {
-    // the signal may outlive the download (e.g. AbortSignal.timeout), and aborting it
-    // later must not delete the finished file
     params?.abortSignal?.removeEventListener('abort', onAbort)
     await end()
   }

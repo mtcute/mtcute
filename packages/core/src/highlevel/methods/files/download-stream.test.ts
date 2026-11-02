@@ -40,7 +40,6 @@ describe('downloadAsStream', () => {
       const stream = downloadAsStream(client, stubLocation)
       await sleep(300)
 
-      // the initial batch of workers has gone through, the rest should wait for the reader
       const before = stats.requests
       await sleep(500)
 

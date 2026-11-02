@@ -43,8 +43,6 @@ export async function downloadToFile(
     output.destroy()
     throw e
   } finally {
-    // the signal may outlive the download (e.g. AbortSignal.timeout), and aborting it
-    // later must not delete the finished file
     params?.abortSignal?.removeEventListener('abort', onAbort)
   }
 }

@@ -44,8 +44,6 @@ export async function downloadToFile(
       await writeAll(fd, chunk)
     }
   } finally {
-    // the signal may outlive the download (e.g. AbortSignal.timeout), and aborting it
-    // later must not delete the finished file
     params?.abortSignal?.removeEventListener('abort', onAbort)
     close()
   }
