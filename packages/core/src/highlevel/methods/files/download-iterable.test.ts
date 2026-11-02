@@ -63,6 +63,37 @@ describe('downloadAsIterable', () => {
     expect(balance).toBe(0)
   })
 
+  it('should reject when a worker fails while the consumer is busy', async () => {
+    const client = new StubTelegramClient()
+
+    client.respondWith('upload.getFile', async (req) => {
+      if (Number(req.offset) === 0) {
+        return {
+          _: 'upload.file',
+          type: { _: 'storage.fileMp4' },
+          mtime: 0,
+          bytes: new Uint8Array(req.limit),
+        }
+      }
+
+      await sleep(50)
+      throw new Error('worker failed')
+    })
+
+    await client.with(async () => {
+      const consume = (async () => {
+        for await (const _ of downloadAsIterable(client, stubLocation, { fileSize: 1024 * 1024 })) {
+          await sleep(200)
+        }
+      })()
+      const hang = sleep(2000).then(() => {
+        throw new Error('download hung')
+      })
+
+      await expect(Promise.race([consume, hang])).rejects.toThrow('worker failed')
+    })
+  })
+
   it('should stop the workers when the iterator is abandoned', async () => {
     const fileSize = 64 * 1024 * 1024
     const client = new StubTelegramClient()

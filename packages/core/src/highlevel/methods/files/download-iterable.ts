@@ -340,7 +340,8 @@ export async function* downloadAsIterable(
 
   try {
     while (position < limitBytes) {
-      await nextChunkCv.wait()
+      // fuman ConditionVariable drops notify() when nobody is waiting (e.g. while we are at `yield`)
+      if (!error) await nextChunkCv.wait()
 
       if (error) throw error
 

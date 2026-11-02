@@ -1,6 +1,7 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { FileDownloadLocation, FileDownloadParameters } from '../../types/index.js'
 import { ConditionVariable } from '@fuman/utils'
+import { combineAbortSignals } from '../../../utils/abort-signal.js'
 import { FileLocation } from '../../types/index.js'
 
 import { downloadAsIterable } from './download-iterable.js'
@@ -38,38 +39,32 @@ export function downloadAsStream(
   }
 
   const cancel = new AbortController()
-
-  const onAbort = () => cancel.abort()
-  params?.abortSignal?.addEventListener('abort', onAbort)
-  const removeAbortListener = () => params?.abortSignal?.removeEventListener('abort', onAbort)
-
+  const abortSignal = combineAbortSignals(cancel.signal, params?.abortSignal)
   const backpressureCv = new ConditionVariable()
 
   return new ReadableStream<Uint8Array>({
     start(controller) {
       (async () => {
-        const params_ = params as Parameters<typeof downloadAsIterable>[2] ?? {}
-        params_.throttle = () => {
+        const throttle = () => {
           if (controller.desiredSize != null && controller.desiredSize <= 0) {
             return backpressureCv.wait()
           }
         }
 
-        for await (const chunk of downloadAsIterable(client, location, params)) {
+        for await (const chunk of downloadAsIterable(client, location, { ...params, abortSignal, throttle })) {
           controller.enqueue(chunk)
         }
 
         controller.close()
       })()
         .catch(e => controller.error(e))
-        .finally(removeAbortListener)
+        .finally(() => backpressureCv.notify())
     },
     pull() {
       backpressureCv.notify()
     },
     cancel() {
       cancel.abort()
-      removeAbortListener()
     },
   }, {
     highWaterMark: params?.highWaterMark,

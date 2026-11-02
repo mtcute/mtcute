@@ -66,6 +66,18 @@ if (process.env.TEST_ENV !== 'browser') {
       expect(stream.writableFinished).toBe(true)
     })
 
+    it('should keep the file when the signal is aborted after the download', async () => {
+      setup()
+      failAfterChunks = false
+      const { rmSync } = await import('node:fs')
+      const abort = new AbortController()
+
+      await downloadToFile(client, 'out.bin', {} as any, { abortSignal: abort.signal })
+      abort.abort()
+
+      expect(rmSync).not.toHaveBeenCalled()
+    })
+
     it('should reject rather than hang when the stream errors', async () => {
       setup(cb => cb(new Error('ENOSPC')))
       failAfterChunks = false

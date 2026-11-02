@@ -28,13 +28,12 @@ export async function downloadToFile(
 
   const output = createWriteStream(filename)
 
-  if (params?.abortSignal) {
-    params.abortSignal.addEventListener('abort', () => {
-      client.log.debug('aborting file download %s - cleaning up', filename)
-      output.destroy()
-      rmSync(filename)
-    })
+  const onAbort = () => {
+    client.log.debug('aborting file download %s - cleaning up', filename)
+    output.destroy()
+    rmSync(filename)
   }
+  params?.abortSignal?.addEventListener('abort', onAbort)
 
   try {
     await pipeline(downloadAsIterable(client, location, params), output, {
@@ -43,5 +42,7 @@ export async function downloadToFile(
   } catch (e) {
     output.destroy()
     throw e
+  } finally {
+    params?.abortSignal?.removeEventListener('abort', onAbort)
   }
 }

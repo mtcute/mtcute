@@ -42,6 +42,19 @@ describe.runIf(process.env.TEST_ENV === 'deno')('downloadToFile (deno)', () => {
     Deno.removeSync(file)
   })
 
+  it('should keep the file when the signal is aborted after the download', async () => {
+    reset()
+    const file = tmp()
+    const abort = new AbortController()
+
+    await downloadToFile(client, file, {} as any, { abortSignal: abort.signal })
+    abort.abort()
+
+    expect(Deno.statSync(file).size).toBe(3)
+
+    Deno.removeSync(file)
+  })
+
   it('should close the file when the download fails', async () => {
     reset()
     failAfterChunks = true

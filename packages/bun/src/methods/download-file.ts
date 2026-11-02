@@ -36,19 +36,19 @@ export async function downloadToFile(
     await output.end()
   }
 
-  if (params?.abortSignal) {
-    params.abortSignal.addEventListener('abort', () => {
-      client.log.debug('aborting file download %s - cleaning up', filename)
-      end().catch(() => {})
-      unlinkSync(filename)
-    })
+  const onAbort = () => {
+    client.log.debug('aborting file download %s - cleaning up', filename)
+    end().catch(() => {})
+    unlinkSync(filename)
   }
+  params?.abortSignal?.addEventListener('abort', onAbort)
 
   try {
     for await (const chunk of downloadAsIterable(client, location, params)) {
       await Promise.resolve(output.write(chunk))
     }
   } finally {
+    params?.abortSignal?.removeEventListener('abort', onAbort)
     await end()
   }
 }

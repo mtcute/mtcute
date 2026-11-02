@@ -59,7 +59,7 @@ export async function downloadChunk(
 
   const stripStart = offset - alignedOffset
   if (stripStart > 0) {
-    alignedLimit += 1024 - stripStart
+    alignedLimit += stripStart
   }
 
   if (alignedLimit % 1024 !== 0) {

@@ -122,6 +122,21 @@ describe('downloadChunk', () => {
         expect(result).toEqual(defaultData.subarray(2047, 2047 + 1024))
       })
     })
+
+    it('should handle a short range crossing an alignment boundary', async () => {
+      const client = createClient()
+
+      await client.with(async () => {
+        const result = await downloadChunk(client, {
+          location: stubLocation,
+          offset: 1000,
+          limit: 100,
+        })
+
+        expect(result.byteLength).toBe(100)
+        expect(result).toEqual(defaultData.subarray(1000, 1000 + 100))
+      })
+    })
   })
 
   describe('unaligned limits', () => {
