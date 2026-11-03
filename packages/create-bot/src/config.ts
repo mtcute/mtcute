@@ -8,8 +8,18 @@ export interface UserConfigPersisted {
   apiHash: string
 }
 
+export function getPlatform(): string {
+  let platform = process.platform
+
+  if (['freebsd', 'netbsd', 'openbsd'].includes(platform)) {
+    platform = 'linux' // normalize to linux
+  }
+
+  return platform
+}
+
 export function getConfigFilePath(): string {
-  switch (process.platform) {
+  switch (getPlatform()) {
     case 'linux':
       return path.join(homedir(), '.local', 'share', 'mtcute-create.json')
     case 'darwin':
@@ -18,7 +28,7 @@ export function getConfigFilePath(): string {
       return path.join(process.env.APPDATA!, 'mtcute-create.json')
   }
 
-  throw new Error(`Unsupported platform: ${process.platform}`)
+  throw new Error(`Unsupported platform: ${getPlatform()}`)
 }
 
 export async function readConfig(): Promise<UserConfigPersisted | null> {

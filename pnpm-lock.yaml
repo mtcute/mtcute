@@ -255,9 +255,6 @@ importers:
       inquirer:
         specifier: 9.2.11
         version: 9.2.11
-      openurl:
-        specifier: 1.1.1
-        version: 1.1.1
     devDependencies:
       '@types/cross-spawn':
         specifier: ^6.0.6
@@ -265,9 +262,6 @@ importers:
       '@types/inquirer':
         specifier: ^9.0.6
         version: 9.0.9
-      '@types/openurl':
-        specifier: ^1.0.3
-        version: 1.0.3
 
   packages/deno:
     dependencies:
@@ -1641,9 +1635,6 @@ packages:
 
   '@types/node@24.10.3':
     resolution: {integrity: sha512-gqkrWUsS8hcm0r44yn7/xZeV1ERva/nLgrLxFRUGb7aoNMIJfZJ3AC261zDQuOAKC7MiXai1WCpYc48jAHoShQ==}
-
-  '@types/openurl@1.0.3':
-    resolution: {integrity: sha512-rdWpxNve8iUBizep3BwjGzcdfk2XeXeeFiMwIgLN6dAKxCusfFC6H9XVvfPeNObRFpSgqI+HVmoG7UOB9HEnBQ==}
 
   '@types/pg@8.18.0':
     resolution: {integrity: sha512-gT+oueVQkqnj6ajGJXblFR4iavIXWsGAFCk3dP4Kki5+a9R4NMt0JARdk6s8cUKcfUoqP5dAtDSLU8xYUTFV+Q==}
@@ -3349,9 +3340,6 @@ packages:
   onetime@5.1.2:
     resolution: {integrity: sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==}
     engines: {node: '>=6'}
-
-  openurl@1.1.1:
-    resolution: {integrity: sha512-d/gTkTb1i1GKz5k3XE3XFV/PxQ1k45zDqGP2OA7YhgsaLoqm6qRvARAZOFer1fcXritWlGBRCu/UgeS4HAnXAA==}
 
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
@@ -5128,10 +5116,6 @@ snapshots:
   '@types/node@24.10.3':
     dependencies:
       undici-types: 7.16.0
-
-  '@types/openurl@1.0.3':
-    dependencies:
-      '@types/node': 24.10.3
 
   '@types/pg@8.18.0':
     dependencies:
@@ -7390,8 +7374,6 @@ snapshots:
   onetime@5.1.2:
     dependencies:
       mimic-fn: 2.1.0
-
-  openurl@1.1.1: {}
 
   optionator@0.9.4:
     dependencies:
