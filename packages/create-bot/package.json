@@ -19,13 +19,11 @@
     "cross-spawn": "7.0.3",
     "glob": "11.0.0",
     "handlebars": "4.7.8",
-    "inquirer": "9.2.11",
-    "openurl": "1.1.1"
+    "inquirer": "9.2.11"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
-    "@types/inquirer": "^9.0.6",
-    "@types/openurl": "^1.0.3"
+    "@types/inquirer": "^9.0.6"
   },
   "fuman": {
     "jsr": "skip"

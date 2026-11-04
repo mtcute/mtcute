@@ -4,11 +4,12 @@ import type { PackageManager } from './package-manager.js'
 
 import * as colors from 'colorette'
 import inquirer from 'inquirer'
-import { open } from 'openurl'
 
 import { readConfig, writeConfig } from './config.js'
 import { TELEGRAM_APPS_PAGE } from './constants.js'
 import { getFeatureChoices } from './features/cli.js'
+
+import { open } from './utils.js'
 
 interface UserConfigAnswers {
   reuse?: boolean
