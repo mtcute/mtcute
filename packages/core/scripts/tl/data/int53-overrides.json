@@ -430,6 +430,12 @@
     "updateBotSubscriptionExpire": [
       "user_id"
     ],
+    "updateBotWidgetCopyQuery": [
+      "user_id"
+    ],
+    "updateBotWidgetQuery": [
+      "user_id"
+    ],
     "updateBusinessBotCallbackQuery": [
       "user_id"
     ],
@@ -506,6 +512,9 @@
       "user_id"
     ],
     "updateInlineBotCallbackQuery": [
+      "user_id"
+    ],
+    "updateInlineBotWidgetQuery": [
       "user_id"
     ],
     "updateManagedBot": [

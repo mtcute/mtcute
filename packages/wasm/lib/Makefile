@@ -6,6 +6,7 @@ SOURCES = utils/allocator.c \
 	libdeflate/deflate_decompress.c \
 	libdeflate/gzip_decompress.c \
 	libdeflate/zlib_compress.c \
+	libdeflate/zlib_decompress.c \
 	libdeflate/adler32.c \
 	crypto/aes256.c \
 	crypto/ige256.c \

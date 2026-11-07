@@ -18,6 +18,7 @@ import type {
   InputMediaPhoto,
   InputMediaPoll,
   InputMediaQuiz,
+  InputMediaSharedWidget,
   InputMediaSticker,
   InputMediaStory,
   InputMediaTodoList,
@@ -25,6 +26,7 @@ import type {
   InputMediaVideo,
   InputMediaVoice,
   InputMediaWebpage,
+  InputMediaWidget,
 } from './types.js'
 
 /** Omit `type` and `file` from the given type */
@@ -294,6 +296,37 @@ export function paid(params: OmitTypeAndFile<InputMediaPaidMedia>): InputMediaPa
 export function todo(params: OmitTypeAndFile<InputMediaTodoList>): InputMediaTodoList {
   const ret = params as tl.Mutable<InputMediaTodoList>
   ret.type = 'todo'
+
+  return ret
+}
+
+/**
+ * Create an HTML widget to be sent
+ *
+ * @param html  HTML source of the widget
+ * @param params  Additional parameters
+ */
+export function widget(html: string, params: OmitTypeAndFile<InputMediaWidget, 'html'> = {}): InputMediaWidget {
+  const ret = params as tl.Mutable<InputMediaWidget>
+  ret.type = 'widget'
+  ret.html = html
+
+  return ret
+}
+
+/**
+ * Create a previously created shared widget to be sent
+ *
+ * @param id  ID of the shared widget
+ * @param params  Additional parameters
+ */
+export function sharedWidget(
+  id: tl.Long,
+  params: OmitTypeAndFile<InputMediaSharedWidget, 'widgetId'> = {},
+): InputMediaSharedWidget {
+  const ret = params as tl.Mutable<InputMediaSharedWidget>
+  ret.type = 'shared_widget'
+  ret.widgetId = id
 
   return ret
 }

@@ -4,6 +4,9 @@ import type {
   ChosenInlineResult,
   InlineCallbackQuery,
   InlineQuery,
+  InlineWidgetQuery,
+  SharedWidgetQuery,
+  WidgetQuery,
 } from '@mtcute/core'
 import type { UpdateContextDistributed } from '../context/base.js'
 
@@ -23,6 +26,9 @@ type UpdatesWithText
       | CallbackQuery
       | InlineCallbackQuery
       | BusinessCallbackQuery
+      | WidgetQuery
+      | InlineWidgetQuery
+      | SharedWidgetQuery
     >
 
 function extractText(obj: UpdatesWithText): string | null {
@@ -39,6 +45,11 @@ function extractText(obj: UpdatesWithText): string | null {
     case 'inline_callback_query':
     case 'business_callback_query':
       if (obj.raw.data) return obj.dataStr
+      break
+    case 'widget_query':
+    case 'inline_widget_query':
+    case 'shared_widget_query':
+      return obj.dataStr
   }
 
   return null
@@ -49,7 +60,7 @@ function extractText(obj: UpdatesWithText): string | null {
  *  - for `Message`, `Message.text` is used
  *  - for `InlineQuery`, `InlineQuery.query` is used
  *  - for {@link ChosenInlineResult}, {@link ChosenInlineResult#id} is used
- *  - for callback queries, `dataStr` is used
+ *  - for callback and widget queries, `dataStr` is used
  *
  * When a regex matches, the match array is stored in a
  * type-safe extension field `.match` of the object
@@ -78,7 +89,7 @@ export function regex(regex: RegExp): UpdateFilter<UpdatesWithText, { match: Reg
  *  - for `Message`, `Message.text` is used
  *  - for `InlineQuery`, `InlineQuery.query` is used
  *  - for {@link ChosenInlineResult}, {@link ChosenInlineResult.id} is used
- *  - for callback queries, `dataStr` is used
+ *  - for callback and widget queries, `dataStr` is used
  *
  * @param str  String to be matched
  * @param ignoreCase  Whether string case should be ignored
@@ -98,7 +109,7 @@ export function equals(str: string, ignoreCase = false): UpdateFilter<UpdatesWit
  *  - for `Message`, `Message.text` is used
  *  - for `InlineQuery`, `InlineQuery.query` is used
  *  - for {@link ChosenInlineResult}, {@link ChosenInlineResult.id} is used
- *  - for callback queries, `dataStr` is used
+ *  - for callback and widget queries, `dataStr` is used
  *
  * @param str  Substring to be matched
  * @param ignoreCase  Whether string case should be ignored
@@ -126,7 +137,7 @@ export function contains(str: string, ignoreCase = false): UpdateFilter<UpdatesW
  *  - for `Message`, `Message.text` is used
  *  - for `InlineQuery`, `InlineQuery.query` is used
  *  - for {@link ChosenInlineResult}, {@link ChosenInlineResult.id} is used
- *  - for callback queries, `dataStr` is used
+ *  - for callback and widget queries, `dataStr` is used
  *
  * @param str  Substring to be matched
  * @param ignoreCase  Whether string case should be ignored
@@ -154,7 +165,7 @@ export function startsWith(str: string, ignoreCase = false): UpdateFilter<Update
  *  - for `Message`, `Message.text` is used
  *  - for `InlineQuery`, `InlineQuery.query` is used
  *  - for {@link ChosenInlineResult}, {@link ChosenInlineResult.id} is used
- *  - for callback queries, `dataStr` is used
+ *  - for callback and widget queries, `dataStr` is used
  *
  * @param str  Substring to be matched
  * @param ignoreCase  Whether string case should be ignored

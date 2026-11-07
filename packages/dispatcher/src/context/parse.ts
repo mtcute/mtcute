@@ -21,6 +21,7 @@ import type {
   StoryUpdate,
   UserStatusUpdate,
   UserTypingUpdate,
+  WidgetDataUpdate,
 } from '@mtcute/core'
 import type { TelegramClient } from '@mtcute/core/client.js'
 
@@ -33,6 +34,7 @@ import { ChosenInlineResultContext } from './chosen-inline-result.js'
 import { InlineQueryContext } from './inline-query.js'
 import { MessageContext } from './message.js'
 import { PreCheckoutQueryContext } from './pre-checkout-query.js'
+import { InlineWidgetQueryContext, SharedWidgetQueryContext, WidgetQueryContext } from './widget-query.js'
 
 export type UpdateContextType
   = | MessageContext
@@ -42,6 +44,9 @@ export type UpdateContextType
     | CallbackQueryContext
     | InlineCallbackQueryContext
     | BusinessCallbackQueryContext
+    | WidgetQueryContext
+    | InlineWidgetQueryContext
+    | SharedWidgetQueryContext
     | ChatJoinRequestUpdateContext
     | PreCheckoutQueryContext
     | BusinessMessageContext
@@ -67,6 +72,7 @@ export type UpdateContextType
       | EphemeralMessage
       | DeleteEphemeralMessagesUpdate
       | EphemeralCallbackQuery
+      | WidgetDataUpdate
     >
 
 /** @internal */
@@ -88,6 +94,12 @@ export function _parsedUpdateToContext(client: TelegramClient, update: ParsedUpd
       return new InlineCallbackQueryContext(client, update.data)
     case 'business_callback_query':
       return new BusinessCallbackQueryContext(client, update.data)
+    case 'widget_query':
+      return new WidgetQueryContext(client, update.data)
+    case 'inline_widget_query':
+      return new InlineWidgetQueryContext(client, update.data)
+    case 'shared_widget_query':
+      return new SharedWidgetQueryContext(client, update.data)
     case 'bot_chat_join_request':
       return new ChatJoinRequestUpdateContext(client, update.data)
     case 'pre_checkout_query':

@@ -55,6 +55,8 @@ export async function uploadMedia(
     case 'inputMediaPaidMedia':
     case 'inputMediaTodo':
     case 'inputMediaStakeDice':
+    case 'inputMediaWidget':
+    case 'inputMediaWidgetId':
       throw new MtArgumentError(`This media (${normMedia._}) can't be uploaded`)
   }
 

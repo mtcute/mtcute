@@ -3,8 +3,10 @@ import type {
   InputMediaContact,
   InputMediaGeo,
   InputMediaGeoLive,
+  InputMediaSharedWidget,
   InputMediaVenue,
   InputMediaWebpage,
+  InputMediaWidget,
 } from '../../media/index.js'
 import type { InputRichMessage } from '../../messages/rich/index.js'
 import type { InputText } from '../../misc/entities.js'
@@ -155,6 +157,34 @@ export interface InputInlineMessageWebpage extends InputMediaWebpage {
   invertMedia?: boolean
 }
 
+interface InlineMessageWidgetMixin {
+  /**
+   * Caption of the widget
+   */
+  text?: InputText
+
+  /**
+   * Message reply markup
+   */
+  replyMarkup?: ReplyMarkup
+
+  /**
+   * Whether to render the widget above the caption
+   */
+  invertMedia?: boolean
+}
+
+/**
+ * Inline message containing an HTML widget
+ */
+export interface InputInlineMessageWidget extends Omit<InputMediaWidget, 'caption'>, InlineMessageWidgetMixin {}
+
+/**
+ * Inline message containing a previously created shared widget
+ */
+export interface InputInlineMessageSharedWidget
+  extends Omit<InputMediaSharedWidget, 'caption'>, InlineMessageWidgetMixin {}
+
 export type InputInlineMessage
   = | InputInlineMessageText
     | InputInlineMessageMedia
@@ -165,3 +195,5 @@ export type InputInlineMessage
     | InputInlineMessageContact
     | InputInlineMessageWebpage
     | InputInlineMessageRich
+    | InputInlineMessageWidget
+    | InputInlineMessageSharedWidget

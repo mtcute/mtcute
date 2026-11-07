@@ -42,6 +42,10 @@ describe('gunzip', () => {
     expect(gunzip(res)).toEqual(new Uint8Array(utf8.encoder.encode(data)))
   })
 
+  it('should throw on non-gzip data', () => {
+    expect(() => gunzip(new Uint8Array([0x78, 0x9C, 1, 2, 3, 4, 5, 6, 7, 8]))).toThrow()
+  })
+
   it('should not leak memory', () => {
     const memSize = __getWasm().memory.buffer.byteLength
 

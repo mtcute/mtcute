@@ -321,6 +321,11 @@ export class Chat {
     return this.raw._ === 'channel' && this.raw.forumTabs!
   }
 
+  /** Whether this forum should display threads in a sidebar (server also sets {@link hasForumTabs}) */
+  get hasForumSidebar(): boolean {
+    return this.raw._ === 'channel' && this.raw.forumSidebar!
+  }
+
   /** Whether this broadcast channel has direct messages to channel administrators enabled */
   get hasBroadcastDirect(): boolean {
     return this.raw._ === 'channel' && this.raw.broadcastMessagesAllowed!

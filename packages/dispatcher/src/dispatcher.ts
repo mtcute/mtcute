@@ -30,6 +30,7 @@ import type {
   tl,
   UserStatusUpdate,
   UserTypingUpdate,
+  WidgetDataUpdate,
 } from '@mtcute/core'
 import type { TelegramClient } from '@mtcute/core/client.js'
 import type { UpdateContext } from './context/base.js'
@@ -43,8 +44,11 @@ import type {
   ChosenInlineResultContext,
   InlineCallbackQueryContext,
   InlineQueryContext,
+  InlineWidgetQueryContext,
   MessageContext,
   PreCheckoutQueryContext,
+  SharedWidgetQueryContext,
+  WidgetQueryContext,
 } from './context/index.js'
 import type { UpdateContextType } from './context/parse.js'
 import type { filters, UpdateFilter } from './filters/index.js'
@@ -75,6 +79,7 @@ import type {
   HistoryReadHandler,
   InlineCallbackQueryHandler,
   InlineQueryHandler,
+  InlineWidgetQueryHandler,
   ManagedBotHandler,
   MessageGroupHandler,
   NewBusinessMessageHandler,
@@ -84,10 +89,13 @@ import type {
   PollVoteHandler,
   PreCheckoutQueryHandler,
   RawUpdateHandler,
+  SharedWidgetQueryHandler,
   StoryUpdateHandler,
   UpdateHandler,
   UserStatusUpdateHandler,
   UserTypingHandler,
+  WidgetDataUpdateHandler,
+  WidgetQueryHandler,
 } from './handler.js'
 // end-codegen-imports
 import type { PropagationAction } from './propagation.js'
@@ -1601,6 +1609,110 @@ export class Dispatcher<State extends object = never> {
   /** @internal */
   onBusinessCallbackQuery(filter: any, handler?: any, group?: number): void {
     this._addKnownHandler('business_callback_query', filter, handler, group)
+  }
+
+  /**
+   * Register a widget query handler without any filters
+   *
+   * @param handler  Widget query handler
+   * @param group  Handler group index
+   */
+  onWidgetQuery(handler: WidgetQueryHandler['callback'], group?: number): void
+
+  /**
+   * Register a widget query handler with a filter
+   *
+   * @param filter  Update filter
+   * @param handler  Widget query handler
+   * @param group  Handler group index
+   */
+  onWidgetQuery<Mod>(
+    filter: UpdateFilter<WidgetQueryContext, Mod>,
+    handler: WidgetQueryHandler<filters.Modify<WidgetQueryContext, Mod>>['callback'],
+    group?: number
+  ): void
+
+  /** @internal */
+  onWidgetQuery(filter: any, handler?: any, group?: number): void {
+    this._addKnownHandler('widget_query', filter, handler, group)
+  }
+
+  /**
+   * Register an inline widget query handler without any filters
+   *
+   * @param handler  Inline widget query handler
+   * @param group  Handler group index
+   */
+  onInlineWidgetQuery(handler: InlineWidgetQueryHandler['callback'], group?: number): void
+
+  /**
+   * Register an inline widget query handler with a filter
+   *
+   * @param filter  Update filter
+   * @param handler  Inline widget query handler
+   * @param group  Handler group index
+   */
+  onInlineWidgetQuery<Mod>(
+    filter: UpdateFilter<InlineWidgetQueryContext, Mod>,
+    handler: InlineWidgetQueryHandler<filters.Modify<InlineWidgetQueryContext, Mod>>['callback'],
+    group?: number
+  ): void
+
+  /** @internal */
+  onInlineWidgetQuery(filter: any, handler?: any, group?: number): void {
+    this._addKnownHandler('inline_widget_query', filter, handler, group)
+  }
+
+  /**
+   * Register a shared widget query handler without any filters
+   *
+   * @param handler  Shared widget query handler
+   * @param group  Handler group index
+   */
+  onSharedWidgetQuery(handler: SharedWidgetQueryHandler['callback'], group?: number): void
+
+  /**
+   * Register a shared widget query handler with a filter
+   *
+   * @param filter  Update filter
+   * @param handler  Shared widget query handler
+   * @param group  Handler group index
+   */
+  onSharedWidgetQuery<Mod>(
+    filter: UpdateFilter<SharedWidgetQueryContext, Mod>,
+    handler: SharedWidgetQueryHandler<filters.Modify<SharedWidgetQueryContext, Mod>>['callback'],
+    group?: number
+  ): void
+
+  /** @internal */
+  onSharedWidgetQuery(filter: any, handler?: any, group?: number): void {
+    this._addKnownHandler('shared_widget_query', filter, handler, group)
+  }
+
+  /**
+   * Register a widget data update handler without any filters
+   *
+   * @param handler  Widget data update handler
+   * @param group  Handler group index
+   */
+  onWidgetDataUpdate(handler: WidgetDataUpdateHandler['callback'], group?: number): void
+
+  /**
+   * Register a widget data update handler with a filter
+   *
+   * @param filter  Update filter
+   * @param handler  Widget data update handler
+   * @param group  Handler group index
+   */
+  onWidgetDataUpdate<Mod>(
+    filter: UpdateFilter<UpdateContext<WidgetDataUpdate>, Mod>,
+    handler: WidgetDataUpdateHandler<filters.Modify<UpdateContext<WidgetDataUpdate>, Mod>>['callback'],
+    group?: number
+  ): void
+
+  /** @internal */
+  onWidgetDataUpdate(filter: any, handler?: any, group?: number): void {
+    this._addKnownHandler('widget_data', filter, handler, group)
   }
 
   /**

@@ -9,12 +9,15 @@ import type {
   HistoryReadUpdate,
   InlineCallbackQuery,
   InlineQuery,
+  InlineWidgetQuery,
   MaybeArray,
   Message,
   PollVoteUpdate,
+  SharedWidgetQuery,
   StoryUpdate,
   UserStatusUpdate,
   UserTypingUpdate,
+  WidgetQuery,
 } from '@mtcute/core'
 import type { UpdateContextDistributed } from '../context/base.js'
 
@@ -52,6 +55,9 @@ export const userId: {
     | CallbackQuery
     | InlineCallbackQuery
     | BusinessCallbackQuery
+    | WidgetQuery
+    | InlineWidgetQuery
+    | SharedWidgetQuery
     | PollVoteUpdate
     | BotChatJoinRequestUpdate
   >>
@@ -69,6 +75,9 @@ export const userId: {
     | CallbackQuery
     | InlineCallbackQuery
     | BusinessCallbackQuery
+    | WidgetQuery
+    | InlineWidgetQuery
+    | SharedWidgetQuery
     | PollVoteUpdate
     | BotChatJoinRequestUpdate
   >>

@@ -226,6 +226,15 @@ export function testCryptoProvider(c: ICryptoProvider): void {
     expect(hex.encode(decompressed)).toEqual(hex.encode(data))
   })
 
+  it('should correctly inflate', () => {
+    const data = new Uint8Array(1000).fill(0x42)
+
+    const decompressed = c.inflate(c.gzip(data, 100)!, 1000)
+
+    expect(hex.encode(decompressed)).toEqual(hex.encode(data))
+    expect(() => c.inflate(c.gzip(data, 100)!, 999)).toThrow()
+  })
+
   describe('randomBytes', () => {
     it('should return exactly N bytes', () => {
       expect(c.randomBytes(0).length).eq(0)

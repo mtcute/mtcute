@@ -154,6 +154,11 @@ export class User {
     return this.raw.botForumView!
   }
 
+  /** Whether this bot displays threads in a sidebar */
+  get isBotWithForumSidebar(): boolean {
+    return this.raw.botForumSidebar!
+  }
+
   get canBotManageForumTopics(): boolean {
     return this.raw.botForumCanManageTopics!
   }

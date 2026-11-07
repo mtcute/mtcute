@@ -5,11 +5,12 @@ WORKDIR /src
 RUN apk add --no-cache lld make clang16 binaryen
 
 COPY crypto /src/crypto
+COPY hash /src/hash
 COPY libdeflate /src/libdeflate
 COPY utils /src/utils
 COPY wasm.h Makefile /src/
 
-RUN make
+RUN make all
 
 FROM scratch AS binaries
 COPY --from=build /src/mtcute.wasm ../

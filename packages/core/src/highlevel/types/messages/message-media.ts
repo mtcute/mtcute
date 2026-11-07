@@ -20,6 +20,7 @@ import { MediaStory } from '../media/story.js'
 import { TodoList } from '../media/todo.js'
 import { Venue } from '../media/venue.js'
 import { WebPageMedia } from '../media/web-page.js'
+import { Widget } from '../media/widget.js'
 
 /** A media inside of a {@link Message} */
 export type MessageMedia
@@ -41,6 +42,7 @@ export type MessageMedia
     | MediaStory
     | PaidMedia
     | TodoList
+    | Widget
     | null
 
 export type MessageMediaType = Exclude<MessageMedia, null>['type']
@@ -123,6 +125,8 @@ export function _messageMediaFromTl(peers: PeersIndex | null, m: tl.TypeMessageM
       }
 
       return new TodoList(m, peers)
+    case 'messageMediaWidget':
+      return new Widget(m)
     default:
       return null
   }

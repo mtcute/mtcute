@@ -812,6 +812,17 @@ export class UpdatesManager {
         if (!(await fetchPeer(upd.peer, true))) return missing
         if (!(await fetchPeer(upd.userId))) return missing
         break
+      case 'updateBotWidgetQuery':
+        if (!(await fetchPeer(upd.peer, true))) return missing
+        if (!(await fetchPeer(upd.userId))) return missing
+        break
+      case 'updateInlineBotWidgetQuery':
+      case 'updateBotWidgetCopyQuery':
+        if (!(await fetchPeer(upd.userId))) return missing
+        break
+      case 'updateMessageWidgetData':
+        if (!(await fetchPeer(upd.peer, true))) return missing
+        break
       case 'updateDraftMessage':
         if ('entities' in upd.draft && !(await fetchEntitiesPeers(upd.draft.entities))) return missing
         if ('richMessage' in upd.draft && !(await fetchRichMessagePeers(upd.draft.richMessage))) return missing

@@ -23,6 +23,7 @@ import type {
   tl,
   UserStatusUpdate,
   UserTypingUpdate,
+  WidgetDataUpdate,
 } from '@mtcute/core'
 import type { TelegramClient } from '@mtcute/core/client.js'
 
@@ -36,8 +37,11 @@ import type {
   ChosenInlineResultContext,
   InlineCallbackQueryContext,
   InlineQueryContext,
+  InlineWidgetQueryContext,
   MessageContext,
   PreCheckoutQueryContext,
+  SharedWidgetQueryContext,
+  WidgetQueryContext,
 } from './context/index.js'
 import type { PropagationAction } from './propagation.js'
 
@@ -76,6 +80,10 @@ export type ChosenInlineResultHandler<T = ChosenInlineResultContext> = ParsedUpd
 export type CallbackQueryHandler<T = CallbackQueryContext, S = never> = ParsedUpdateHandler<'callback_query', T, S>
 export type InlineCallbackQueryHandler<T = InlineCallbackQueryContext, S = never> = ParsedUpdateHandler<'inline_callback_query', T, S>
 export type BusinessCallbackQueryHandler<T = BusinessCallbackQueryContext, S = never> = ParsedUpdateHandler<'business_callback_query', T, S>
+export type WidgetQueryHandler<T = WidgetQueryContext> = ParsedUpdateHandler<'widget_query', T>
+export type InlineWidgetQueryHandler<T = InlineWidgetQueryContext> = ParsedUpdateHandler<'inline_widget_query', T>
+export type SharedWidgetQueryHandler<T = SharedWidgetQueryContext> = ParsedUpdateHandler<'shared_widget_query', T>
+export type WidgetDataUpdateHandler<T = UpdateContext<WidgetDataUpdate>> = ParsedUpdateHandler<'widget_data', T>
 export type PollUpdateHandler<T = UpdateContext<PollUpdate>> = ParsedUpdateHandler<'poll', T>
 export type PollVoteHandler<T = UpdateContext<PollVoteUpdate>> = ParsedUpdateHandler<'poll_vote', T>
 export type UserStatusUpdateHandler<T = UpdateContext<UserStatusUpdate>> = ParsedUpdateHandler<'user_status', T>
@@ -115,6 +123,10 @@ export type UpdateHandler
     | CallbackQueryHandler
     | InlineCallbackQueryHandler
     | BusinessCallbackQueryHandler
+    | WidgetQueryHandler
+    | InlineWidgetQueryHandler
+    | SharedWidgetQueryHandler
+    | WidgetDataUpdateHandler
     | PollUpdateHandler
     | PollVoteHandler
     | UserStatusUpdateHandler

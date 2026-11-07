@@ -10,6 +10,7 @@ import {
   gunzip,
   ige256Decrypt,
   ige256Encrypt,
+  inflate,
   initSync,
   sha1,
   sha256,
@@ -61,6 +62,10 @@ export class WebCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 
   gunzip(data: Uint8Array): Uint8Array {
     return gunzip(data)
+  }
+
+  inflate(data: Uint8Array, maxSize: number): Uint8Array {
+    return inflate(data, maxSize)
   }
 
   constructor(params?: WebCryptoProviderOptions) {

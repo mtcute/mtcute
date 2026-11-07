@@ -60,6 +60,26 @@
     "context": "BusinessCallbackQueryContext"
   },
   {
+    "name": "widget_query",
+    "type": "WidgetQuery",
+    "context": "WidgetQueryContext"
+  },
+  {
+    "name": "inline_widget_query",
+    "type": "InlineWidgetQuery",
+    "context": "InlineWidgetQueryContext"
+  },
+  {
+    "name": "shared_widget_query",
+    "type": "SharedWidgetQuery",
+    "context": "SharedWidgetQueryContext"
+  },
+  {
+    "name": "widget_data",
+    "handler": "WidgetDataUpdate",
+    "type": "WidgetDataUpdate"
+  },
+  {
     "name": "poll",
     "handler": "PollUpdate",
     "type": "PollUpdate"

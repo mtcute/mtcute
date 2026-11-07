@@ -3,7 +3,7 @@ import { inflateSync } from 'node:zlib'
 import { utf8 } from '@fuman/utils'
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { __getWasm, deflateMaxSize } from '../src/index.js'
+import { __getWasm, deflateMaxSize, inflate } from '../src/index.js'
 
 import { initWasm } from './init.js'
 
@@ -55,6 +55,43 @@ describe('zlib deflate', () => {
       const res = inflateSyncWrap(deflated!)
 
       expect(utf8.decoder.decode(res)).toEqual(data)
+    }
+
+    expect(__getWasm().memory.buffer.byteLength).toEqual(memSize)
+  })
+})
+
+describe('zlib inflate', () => {
+  it('should correctly inflate data with large compression ratio', () => {
+    const data = utf8.encoder.encode('a'.repeat(100000))
+    const deflated = deflateMaxSize(data, 1000)!
+
+    expect(inflate(deflated, 100000)).toEqual(data)
+  })
+
+  it('should throw if output is larger than maxSize', () => {
+    const data = utf8.encoder.encode('a'.repeat(100000))
+    const deflated = deflateMaxSize(data, 1000)!
+
+    expect(() => inflate(deflated, 99999)).toThrow()
+    expect(() => inflate(deflated, 1000)).toThrow()
+  })
+
+  it('should throw on invalid data', () => {
+    expect(() => inflate(new Uint8Array([0x78, 0x9C, 1, 2, 3, 4, 5, 6]), 1000)).toThrow()
+    expect(() => inflate(utf8.encoder.encode('not zlib at all'), 1000)).toThrow()
+  })
+
+  it('should not leak memory', () => {
+    const data = utf8.encoder.encode('a'.repeat(100000))
+    const deflated = deflateMaxSize(data, 1000)!
+    inflate(deflated, 100000)
+
+    const memSize = __getWasm().memory.buffer.byteLength
+
+    for (let i = 0; i < 100; i++) {
+      expect(inflate(deflated, 100000)).toEqual(data)
+      expect(() => inflate(new Uint8Array([0x78, 0x9C, 1, 2, 3, 4, 5, 6]), 1000)).toThrow()
     }
 
     expect(__getWasm().memory.buffer.byteLength).toEqual(memSize)

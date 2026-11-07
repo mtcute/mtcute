@@ -39,6 +39,7 @@ export interface ICryptoProvider {
 
   gzip: (data: Uint8Array, maxSize: number) => Uint8Array | null
   gunzip: (data: Uint8Array) => Uint8Array
+  inflate: (data: Uint8Array, maxSize: number) => Uint8Array
 
   randomFill: (buf: Uint8Array) => void
   randomBytes: (size: number) => Uint8Array

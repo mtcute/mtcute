@@ -750,6 +750,7 @@ withParams(params: RpcCallOptions): this\n`)
     'getPrimaryDcId',
     'computeSrpParams',
     'computeNewPasswordHash',
+    'inflate',
     'changePrimaryDc',
     'getMtprotoMessageId',
     'recreateDc',

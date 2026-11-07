@@ -14,6 +14,9 @@ export interface MtcuteWasmModule {
   libdeflate_gzip_decompress: (ctx: number, src: number, srcLen: number, dst: number, dstLen: number) => number
   libdeflate_gzip_get_output_size: (src: number, srcLen: number) => number
 
+  /** @returns decompressed size, or negated libdeflate_result on error */
+  libdeflate_zlib_decompress: (ctx: number, src: number, srcLen: number, dst: number, dstLen: number) => number
+
   libdeflate_zlib_compress: (ctx: number, src: number, srcLen: number, dst: number, dstLen: number) => number
 
   ige256_encrypt: (data: number, dataLen: number, out: number) => void

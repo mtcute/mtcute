@@ -368,6 +368,10 @@ export class BaseTelegramClient implements ITelegramClient {
     return computeNewPasswordHash(this.crypto, algo, password)
   }
 
+  async inflate(data: Uint8Array, maxSize: number): Promise<Uint8Array> {
+    return this.crypto.inflate(data, maxSize)
+  }
+
   get stopSignal(): AbortSignal {
     return this.mt.stopSignal
   }

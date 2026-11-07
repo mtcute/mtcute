@@ -16,7 +16,7 @@ export async function updateForumSettings(
   settings: null | {
     /** Whether the supergroup should be a forum */
     isForum: boolean
-    threadsMode: 'list' | 'tabs'
+    threadsMode: 'list' | 'tabs' | 'sidebar'
   },
 ): Promise<void> {
   const res = await client.call({
@@ -24,6 +24,7 @@ export async function updateForumSettings(
     channel: await resolveChannel(client, chatId),
     enabled: settings?.isForum ?? false,
     tabs: settings?.threadsMode === 'tabs',
+    sidebar: settings?.threadsMode === 'sidebar',
   })
   client.handleClientUpdate(res)
 }

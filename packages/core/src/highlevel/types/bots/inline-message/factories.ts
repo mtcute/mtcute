@@ -12,9 +12,11 @@ import type {
   InputInlineMessageGeoLive,
   InputInlineMessageMedia,
   InputInlineMessageRich,
+  InputInlineMessageSharedWidget,
   InputInlineMessageText,
   InputInlineMessageVenue,
   InputInlineMessageWebpage,
+  InputInlineMessageWidget,
 } from './types.js'
 import { assertNever } from '../../../../types/utils.js'
 
@@ -132,6 +134,40 @@ export function webpage(params: Omit<InputInlineMessageWebpage, 'type'>): InputI
   return ret
 }
 
+/**
+ * Create an inline message containing an HTML widget
+ *
+ * @param html  HTML source of the widget
+ * @param params  Additional parameters
+ */
+export function widget(
+  html: string,
+  params: Omit<InputInlineMessageWidget, 'type' | 'html'> = {},
+): InputInlineMessageWidget {
+  const ret = params as tl.Mutable<InputInlineMessageWidget>
+  ret.type = 'widget'
+  ret.html = html
+
+  return ret
+}
+
+/**
+ * Create an inline message containing a previously created shared widget
+ *
+ * @param id  ID of the shared widget
+ * @param params  Additional parameters
+ */
+export function sharedWidget(
+  id: tl.Long,
+  params: Omit<InputInlineMessageSharedWidget, 'type' | 'widgetId'> = {},
+): InputInlineMessageSharedWidget {
+  const ret = params as tl.Mutable<InputInlineMessageSharedWidget>
+  ret.type = 'shared_widget'
+  ret.widgetId = id
+
+  return ret
+}
+
 /** @internal */
 export async function _convertToTl(
   client: ITelegramClient,
@@ -225,6 +261,37 @@ export async function _convertToTl(
         forceSmallMedia: obj.size === 'small',
         optional: !obj.required,
         url: obj.url,
+      }
+    }
+    case 'widget': {
+      const [message, entities] = await _normalizeInputText(client, obj.text)
+
+      return {
+        _: 'inputBotInlineMessageWidget',
+        html: obj.html,
+        width: obj.width ?? 0,
+        height: obj.height ?? 0,
+        allowQueries: obj.allowQueries,
+        sharedWidget: obj.shared,
+        publicData: obj.publicData,
+        chatData: obj.chatData,
+        replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+        invertMedia: obj.invertMedia,
+        message,
+        entities,
+      }
+    }
+    case 'shared_widget': {
+      const [message, entities] = await _normalizeInputText(client, obj.text)
+
+      return {
+        _: 'inputBotInlineMessageWidgetId',
+        widgetId: obj.widgetId,
+        chatData: obj.chatData,
+        replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+        invertMedia: obj.invertMedia,
+        message,
+        entities,
       }
     }
     default:

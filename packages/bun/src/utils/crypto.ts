@@ -3,7 +3,7 @@ import { createCipheriv, createHmac, pbkdf2 } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import { deflateSync, gunzipSync } from 'node:zlib'
+import { deflateSync, gunzipSync, inflateSync } from 'node:zlib'
 import { u8 } from '@fuman/utils'
 import { BaseCryptoProvider } from '@mtcute/core/utils.js'
 import {
@@ -96,6 +96,10 @@ export class BunCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 
   gunzip(data: Uint8Array): Uint8Array {
     return gunzipSync(data) as unknown as Uint8Array
+  }
+
+  inflate(data: Uint8Array, maxSize: number): Uint8Array {
+    return inflateSync(data, { maxOutputLength: maxSize }) as unknown as Uint8Array
   }
 
   randomFill(buf: Uint8Array): void {

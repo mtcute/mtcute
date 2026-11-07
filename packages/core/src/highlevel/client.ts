@@ -33,7 +33,7 @@ import type { InputStarsAmount } from './methods/premium/_normalize-stars-amount
 import type { CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
 import type { CanSendStoryResult } from './methods/stories/can-send-story.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
-import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotAccessSettings, BotChatJoinRequestUpdate, BotCommands, BotGuestChatQuery, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BotSubscriptionUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatJoinResultUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, CommunityPeerRequest, DeleteBusinessMessageUpdate, DeleteEphemeralMessagesUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, EphemeralCallbackQuery, EphemeralMessage, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineMessage, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPollAnswer, InputPrivacyRule, InputReaction, InputReplyKeyboardButton, InputRichMessage, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, ManagedBotUpdate, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, RichMediaUploadCache, SavedStarGift, SendableTypingStatus, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, StatsGraph, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewPlatform, WebviewResult, WebviewThemeParams } from './types/index.js'
+import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotAccessSettings, BotChatJoinRequestUpdate, BotCommands, BotGuestChatQuery, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BotSubscriptionUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatJoinResultUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, CommunityPeerRequest, DeleteBusinessMessageUpdate, DeleteEphemeralMessagesUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, EphemeralCallbackQuery, EphemeralMessage, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InlineWidgetQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineMessage, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPollAnswer, InputPrivacyRule, InputReaction, InputReplyKeyboardButton, InputRichMessage, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, ManagedBotUpdate, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, RichMediaUploadCache, SavedStarGift, SendableTypingStatus, SentCode, SharedWidgetQuery, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, StatsGraph, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewPlatform, WebviewResult, WebviewThemeParams, Widget, WidgetDataUpdate, WidgetQuery } from './types/index.js'
 import type { ParsedUpdateHandlerParams } from './updates/parsed.js'
 import type { RawUpdateInfo } from './updates/types.js'
 import type { InputStringSessionData } from './utils/string-session.js'
@@ -367,6 +367,13 @@ import { setMyUsername } from './methods/users/set-my-username.js'
 import { sendOnline, setOnline } from './methods/users/set-online.js'
 import { unblockUser } from './methods/users/unblock-user.js'
 import { updateProfile } from './methods/users/update-profile.js'
+import { answerWidgetQuery } from './methods/widgets/answer-widget-query.js'
+import { decodeWidgetHtml } from './methods/widgets/decode-widget-html.js'
+import { editInlineMessageWidgetData } from './methods/widgets/edit-inline-message-widget-data.js'
+import { editMessageWidgetData } from './methods/widgets/edit-message-widget-data.js'
+import { editSharedWidgetData } from './methods/widgets/edit-shared-widget-data.js'
+import { getWidgetPublicData } from './methods/widgets/get-widget-public-data.js'
+import { getWidgetQueryAnswer } from './methods/widgets/get-widget-query-answer.js'
 import { Conversation } from './types/conversation.js'
 import { makeParsedUpdateHandler } from './updates/parsed.js'
 // from methods/_init.ts
@@ -429,6 +436,14 @@ export interface TelegramClient extends ITelegramClient {
   readonly onInlineCallbackQuery: Emitter<InlineCallbackQuery>
   /** a business callback query handler */
   readonly onBusinessCallbackQuery: Emitter<BusinessCallbackQuery>
+  /** a widget query handler */
+  readonly onWidgetQuery: Emitter<WidgetQuery>
+  /** an inline widget query handler */
+  readonly onInlineWidgetQuery: Emitter<InlineWidgetQuery>
+  /** a shared widget query handler */
+  readonly onSharedWidgetQuery: Emitter<SharedWidgetQuery>
+  /** a widget data update handler */
+  readonly onWidgetDataUpdate: Emitter<WidgetDataUpdate>
   /** a poll update handler */
   readonly onPollUpdate: Emitter<PollUpdate>
   /** a poll vote handler */
@@ -3606,7 +3621,7 @@ export interface TelegramClient extends ITelegramClient {
     settings: null | {
     /** Whether the supergroup should be a forum */
       isForum: boolean
-      threadsMode: 'list' | 'tabs'
+      threadsMode: 'list' | 'tabs' | 'sidebar'
     }): Promise<void>
   /**
    * Toggle whether "General" topic in a forum is hidden or not
@@ -7628,6 +7643,131 @@ export interface TelegramClient extends ITelegramClient {
        */
       bio?: string
     }): Promise<User>
+  /**
+   * Send an answer to a widget query.
+   *
+   * **Available**: 🤖 bots only
+   *
+   * @param queryId  ID of the widget query, or the query itself
+   * @param result  Result to be sent to the widget (up to 1024 bytes). If not passed, an empty answer is sent
+   */
+
+  answerWidgetQuery(
+    queryId: Long | WidgetQuery | InlineWidgetQuery | SharedWidgetQuery,
+    result?: string): Promise<void>
+  /**
+   * Decompress HTML source of the given widget
+   *
+   * **Available**: ✅ both users and bots
+   *
+   * @param widget  Widget or its {@link Widget.payload}
+   */
+  decodeWidgetHtml(widget: Widget | Uint8Array): Promise<string>
+  /**
+   * Edit state of a widget inside an inline message sent via the bot.
+   *
+   * Fields that are not passed are left unchanged, and an empty string clears the field.
+   * For shared widgets, editing `publicData` changes it for all messages containing the widget.
+   * **Available**: 🤖 bots only
+   *
+   */
+
+  editInlineMessageWidgetData(
+    params: {
+    /**
+     * Inline message ID, either as a TL object, or as a
+     * TDLib and Bot API compatible string
+     */
+      messageId: tl.TypeInputBotInlineMessageID | string
+
+      /** New shared state of the widget (up to 1024 bytes) */
+      publicData?: string
+
+      /** New chat-specific state of the widget (up to 1024 bytes) */
+      chatData?: string
+    }): Promise<void>
+  /**
+   * Edit state of a widget inside a message sent by the bot.
+   *
+   * Fields that are not passed are left unchanged, and an empty string clears the field.
+   * For shared widgets, editing `publicData` changes it for all messages containing the widget.
+   * **Available**: 🤖 bots only
+   *
+   */
+
+  editMessageWidgetData(
+    params: InputMessageId & {
+    /** New shared state of the widget (up to 1024 bytes) */
+      publicData?: string
+
+      /** New chat-specific state of the widget (up to 1024 bytes) */
+      chatData?: string
+    }): Promise<void>
+  /**
+   * Edit shared state of a shared widget by its ID,
+   * changing it for all messages containing the widget.
+   * **Available**: 🤖 bots only
+   *
+   */
+
+  editSharedWidgetData(
+    params: {
+    /** ID of the shared widget */
+      widgetId: tl.Long
+
+      /** New shared state of the widget (up to 1024 bytes) */
+      publicData: string
+
+      /**
+       * Recommended interval (in seconds) at which clients should poll
+       * the shared state (5-3600). Pass `0` to reset to the default (30 seconds)
+       */
+      cacheTime?: number
+    }): Promise<void>
+  /**
+   * Get current shared state of a shared widget inside a message
+   * **Available**: 👤 users only
+   *
+   */
+
+  getWidgetPublicData(
+    params: InputMessageId & {
+    /**
+     * Hash of the shared state known to the client
+     * (e.g. {@link Widget.publicDataHash}), to avoid re-fetching unchanged data
+     *
+     * @default  0
+     */
+      hash?: tl.Long
+    }): Promise<{
+  /** New shared state, or `null` if it did not change (or the widget is not a shared one) */
+    data: string | null
+    /** Hash of the new shared state, or `null` if it did not change */
+    hash: tl.Long | null
+    /** Recommended interval (in seconds) for polling the shared state */
+    period: number
+  }>
+  /**
+   * Send a query to the bot from a widget inside a message
+   * and wait for the bot's answer.
+   *
+   * **Available**: 👤 users only
+   *
+   * @returns  Result returned by the bot, or `null` if the bot sent an empty answer
+   */
+
+  getWidgetQueryAnswer(
+    params: InputMessageId & {
+    /** Data to be sent to the bot (1-64 bytes) */
+      data: string | Uint8Array
+
+      /**
+       * Type of the query
+       *
+       * @default  `{ _: 'widgetQueryTypeData' }`
+       */
+      type?: tl.TypeWidgetQueryType
+    }): Promise<string | null>
 }
 
 export type { TelegramClientOptions }
@@ -7650,6 +7790,10 @@ export class TelegramClient implements ITelegramClient {
     ;(this as any).onCallbackQuery = new Emitter()
     ;(this as any).onInlineCallbackQuery = new Emitter()
     ;(this as any).onBusinessCallbackQuery = new Emitter()
+    ;(this as any).onWidgetQuery = new Emitter()
+    ;(this as any).onInlineWidgetQuery = new Emitter()
+    ;(this as any).onSharedWidgetQuery = new Emitter()
+    ;(this as any).onWidgetDataUpdate = new Emitter()
     ;(this as any).onPollUpdate = new Emitter()
     ;(this as any).onPollVote = new Emitter()
     ;(this as any).onUserStatusUpdate = new Emitter()
@@ -7742,6 +7886,18 @@ export class TelegramClient implements ITelegramClient {
                 break
               case 'business_callback_query':
                 this.onBusinessCallbackQuery.emit(update.data)
+                break
+              case 'widget_query':
+                this.onWidgetQuery.emit(update.data)
+                break
+              case 'inline_widget_query':
+                this.onInlineWidgetQuery.emit(update.data)
+                break
+              case 'shared_widget_query':
+                this.onSharedWidgetQuery.emit(update.data)
+                break
+              case 'widget_data':
+                this.onWidgetDataUpdate.emit(update.data)
                 break
               case 'poll':
                 this.onPollUpdate.emit(update.data)
@@ -8911,6 +9067,27 @@ TelegramClient.prototype.unblockUser = function (...args) {
 TelegramClient.prototype.updateProfile = function (...args) {
   return updateProfile(this._client, ...args)
 }
+TelegramClient.prototype.answerWidgetQuery = function (...args) {
+  return answerWidgetQuery(this._client, ...args)
+}
+TelegramClient.prototype.decodeWidgetHtml = function (...args) {
+  return decodeWidgetHtml(this._client, ...args)
+}
+TelegramClient.prototype.editInlineMessageWidgetData = function (...args) {
+  return editInlineMessageWidgetData(this._client, ...args)
+}
+TelegramClient.prototype.editMessageWidgetData = function (...args) {
+  return editMessageWidgetData(this._client, ...args)
+}
+TelegramClient.prototype.editSharedWidgetData = function (...args) {
+  return editSharedWidgetData(this._client, ...args)
+}
+TelegramClient.prototype.getWidgetPublicData = function (...args) {
+  return getWidgetPublicData(this._client, ...args)
+}
+TelegramClient.prototype.getWidgetQueryAnswer = function (...args) {
+  return getWidgetQueryAnswer(this._client, ...args)
+}
 TelegramClient.prototype.prepare = function (...args) {
   return this._client.prepare(...args)
 }
@@ -8967,6 +9144,9 @@ TelegramClient.prototype.computeSrpParams = function (...args) {
 }
 TelegramClient.prototype.computeNewPasswordHash = function (...args) {
   return this._client.computeNewPasswordHash(...args)
+}
+TelegramClient.prototype.inflate = function (...args) {
+  return this._client.inflate(...args)
 }
 TelegramClient.prototype.changePrimaryDc = function (...args) {
   return this._client.changePrimaryDc(...args)

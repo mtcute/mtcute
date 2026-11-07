@@ -2,7 +2,7 @@ import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/u
 import { Buffer } from 'node:buffer'
 import { createCipheriv, createHash, createHmac, pbkdf2 } from 'node:crypto'
 
-import { deflateSync, gunzipSync } from 'node:zlib'
+import { deflateSync, gunzipSync, inflateSync } from 'node:zlib'
 import { BaseCryptoProvider } from '@mtcute/core/utils.js'
 import { getWasmUrl, ige256Decrypt, ige256Encrypt, initSync } from '@mtcute/wasm'
 
@@ -87,6 +87,10 @@ export class DenoCryptoProvider extends BaseCryptoProvider implements ICryptoPro
 
   gunzip(data: Uint8Array): Uint8Array {
     return toUint8Array(gunzipSync(data))
+  }
+
+  inflate(data: Uint8Array, maxSize: number): Uint8Array {
+    return toUint8Array(inflateSync(data, { maxOutputLength: maxSize }))
   }
 
   randomFill(buf: Uint8Array): void {

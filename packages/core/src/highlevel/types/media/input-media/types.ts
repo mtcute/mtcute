@@ -645,6 +645,63 @@ export interface InputMediaTodoList {
 }
 
 /**
+ * An HTML widget to be sent (bots only)
+ */
+export interface InputMediaWidget extends CaptionMixin {
+  type: 'widget'
+
+  /**
+   * HTML source of the widget (up to 32 KB, and up to 4 KB after zlib compression).
+   *
+   * Must be a single self-contained document without external resources
+   */
+  html: string
+
+  /**
+   * Width of the widget in CSS pixels
+   *
+   * @default  0 (automatic)
+   */
+  width?: number
+
+  /**
+   * Height of the widget in CSS pixels
+   *
+   * @default  0 (automatic)
+   */
+  height?: number
+
+  /** Whether the widget can send queries to the bot */
+  allowQueries?: boolean
+
+  /**
+   * Whether to create a shared widget object, which can later be
+   * re-sent by its ID and whose {@link publicData} is shared
+   * between all messages containing it
+   */
+  shared?: boolean
+
+  /** Initial shared state of the widget (up to 1024 bytes) */
+  publicData?: string
+
+  /** Initial chat-specific state of the widget (up to 1024 bytes) */
+  chatData?: string
+}
+
+/**
+ * A previously created shared widget to be sent (bots only)
+ */
+export interface InputMediaSharedWidget extends CaptionMixin {
+  type: 'shared_widget'
+
+  /** ID of the shared widget */
+  widgetId: tl.Long
+
+  /** Initial chat-specific state of the widget (up to 1024 bytes) */
+  chatData?: string
+}
+
+/**
  * Input media that can be sent somewhere.
  *
  * Note that meta-fields (like `duration`) are only
@@ -674,6 +731,8 @@ export type InputMediaLike
     | InputMediaWebpage
     | InputMediaPaidMedia
     | InputMediaTodoList
+    | InputMediaWidget
+    | InputMediaSharedWidget
     | tl.TypeInputMedia
     | tl.TypeInputPhoto
     | tl.TypeInputDocument

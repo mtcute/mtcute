@@ -265,6 +265,27 @@ export async function _normalizeInputMedia(
     }
   }
 
+  if (media.type === 'widget') {
+    return {
+      _: 'inputMediaWidget',
+      html: media.html,
+      width: media.width ?? 0,
+      height: media.height ?? 0,
+      allowQueries: media.allowQueries,
+      sharedWidget: media.shared,
+      publicData: media.publicData,
+      chatData: media.chatData,
+    }
+  }
+
+  if (media.type === 'shared_widget') {
+    return {
+      _: 'inputMediaWidgetId',
+      widgetId: media.widgetId,
+      chatData: media.chatData,
+    }
+  }
+
   let inputFile: tl.TypeInputFile | undefined
   let thumb: tl.TypeInputFile | undefined
   let mime = 'application/octet-stream'

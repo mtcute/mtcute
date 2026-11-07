@@ -66,6 +66,7 @@ export function createTestWorkerClient(params?: {
     changePrimaryDc: async () => {},
     computeSrpParams: async () => ({ _: 'inputCheckPasswordEmpty' }),
     computeNewPasswordHash: async () => new Uint8Array(),
+    inflate: async () => new Uint8Array(),
     startUpdatesLoop: async () => {},
     stopUpdatesLoop: async () => {},
     // eslint-disable-next-line ts/no-unsafe-return

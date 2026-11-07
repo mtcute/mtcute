@@ -26,14 +26,18 @@ import {
   HistoryReadUpdate,
   InlineCallbackQuery,
   InlineQuery,
+  InlineWidgetQuery,
   ManagedBotUpdate,
   Message,
   PollUpdate,
   PollVoteUpdate,
   PreCheckoutQuery,
+  SharedWidgetQuery,
   StoryUpdate,
   UserStatusUpdate,
   UserTypingUpdate,
+  WidgetDataUpdate,
+  WidgetQuery,
 } from '../index.js'
 
 /** @internal */
@@ -62,6 +66,14 @@ export function _parseUpdate({ update, peers }: RawUpdateInfo): ParsedUpdate | n
       return { name: 'callback_query', data: new CallbackQuery(update, peers) }
     case 'updateInlineBotCallbackQuery':
       return { name: 'inline_callback_query', data: new InlineCallbackQuery(update, peers) }
+    case 'updateBotWidgetQuery':
+      return { name: 'widget_query', data: new WidgetQuery(update, peers) }
+    case 'updateInlineBotWidgetQuery':
+      return { name: 'inline_widget_query', data: new InlineWidgetQuery(update, peers) }
+    case 'updateBotWidgetCopyQuery':
+      return { name: 'shared_widget_query', data: new SharedWidgetQuery(update, peers) }
+    case 'updateMessageWidgetData':
+      return { name: 'widget_data', data: new WidgetDataUpdate(update, peers) }
     case 'updateMessagePoll':
       return { name: 'poll', data: new PollUpdate(update, peers) }
     case 'updateMessagePollVote':

@@ -92,10 +92,9 @@ export function deflateMaxSize(bytes: Uint8Array, size: number): Uint8Array | nu
 }
 
 /**
- * Try to decompress some data with zlib headers
+ * Decompress some data with gzip headers
  *
  * @throws  Error if the data is invalid
- * @param defaultCapacity  default capacity of the output buffer. Defaults to `bytes.length * 2`
  */
 export function gunzip(bytes: Uint8Array): Uint8Array {
   const inputPtr = wasm.__malloc(bytes.length)
@@ -105,14 +104,38 @@ export function gunzip(bytes: Uint8Array): Uint8Array {
   const outputPtr = wasm.__malloc(size)
 
   const ret = wasm.libdeflate_gzip_decompress(decompressor, inputPtr, bytes.length, outputPtr, size)
+  wasm.__free(inputPtr)
 
-  /* c8 ignore next 3 */
-  if (ret === -1) throw new Error('gunzip error -- bad data')
-  if (ret === -2) throw new Error('gunzip error -- short output')
-  if (ret === -3) throw new Error('gunzip error -- short input') // should never happen
+  if (ret !== 0) {
+    wasm.__free(outputPtr)
+    throw new Error(`gunzip error: ${ret}`)
+  }
 
   const result = getUint8Memory().slice(outputPtr, outputPtr + size)
+  wasm.__free(outputPtr)
+
+  return result
+}
+
+/**
+ * Decompress some data with zlib headers
+ *
+ * @throws  Error if the data is invalid or decompresses to more than `maxSize` bytes
+ */
+export function inflate(bytes: Uint8Array, maxSize: number): Uint8Array {
+  const inputPtr = wasm.__malloc(bytes.length)
+  getUint8Memory().set(bytes, inputPtr)
+  const outputPtr = wasm.__malloc(maxSize)
+
+  const ret = wasm.libdeflate_zlib_decompress(decompressor, inputPtr, bytes.length, outputPtr, maxSize)
   wasm.__free(inputPtr)
+
+  if (ret < 0) {
+    wasm.__free(outputPtr)
+    throw new Error(`inflate error: ${-ret}`)
+  }
+
+  const result = getUint8Memory().slice(outputPtr, outputPtr + ret)
   wasm.__free(outputPtr)
 
   return result

@@ -67,6 +67,7 @@ import {
   HistoryReadUpdate,
   InlineCallbackQuery,
   InlineQuery,
+  InlineWidgetQuery,
   InputChatEventFilters,
   InputDialogFolder,
   InputDocumentId,
@@ -112,6 +113,7 @@ import {
   SavedStarGift,
   SendableTypingStatus,
   SentCode,
+  SharedWidgetQuery,
   StarGift,
   StarGiftUnique,
   StarGiftValue,
@@ -140,6 +142,9 @@ import {
   WebviewPlatform,
   WebviewResult,
   WebviewThemeParams,
+  Widget,
+  WidgetDataUpdate,
+  WidgetQuery,
 } from '../types/index.js'
 // @copy
 import { RawUpdateInfo } from '../updates/types.js'

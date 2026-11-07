@@ -166,6 +166,8 @@ export interface ITelegramClient {
   computeSrpParams(request: tl.account.RawPassword, password: string): Promise<tl.RawInputCheckPasswordSRP>
   /** Compute new password hash for the given algorithm and password */
   computeNewPasswordHash(algo: tl.TypePasswordKdfAlgo, password: string): Promise<Uint8Array>
+  /** Decompress zlib-compressed data, throwing if it decompresses to more than `maxSize` bytes */
+  inflate(data: Uint8Array, maxSize: number): Promise<Uint8Array>
   /** Generate a new time-based MTProto message ID */
   getMtprotoMessageId(): Promise<Long>
 

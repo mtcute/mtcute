@@ -25,9 +25,12 @@ import { PreCheckoutQuery } from './pre-checkout-query.js'
 import { StoryUpdate } from './story-update.js'
 import { UserStatusUpdate } from './user-status-update.js'
 import { UserTypingUpdate } from './user-typing-update.js'
+import { WidgetDataUpdate } from './widget-data-update.js'
+import { InlineWidgetQuery, SharedWidgetQuery, WidgetQuery } from './widget-query.js'
 
 export type { BotSubscriptionStatus } from './bot-subscription-update.js'
 export type { ChatMemberUpdateType } from './chat-member-update.js'
+export type { WidgetQueryType, WidgetQueryWallet } from './widget-query.js'
 
 export {
   BotChatJoinRequestUpdate,
@@ -51,13 +54,17 @@ export {
   HistoryReadUpdate,
   InlineCallbackQuery,
   InlineQuery,
+  InlineWidgetQuery,
   ManagedBotUpdate,
   PollUpdate,
   PollVoteUpdate,
   PreCheckoutQuery,
+  SharedWidgetQuery,
   StoryUpdate,
   UserStatusUpdate,
   UserTypingUpdate,
+  WidgetDataUpdate,
+  WidgetQuery,
 }
 
 // begin-codegen
@@ -73,6 +80,10 @@ export type ParsedUpdate
     | { name: 'callback_query', data: CallbackQuery }
     | { name: 'inline_callback_query', data: InlineCallbackQuery }
     | { name: 'business_callback_query', data: BusinessCallbackQuery }
+    | { name: 'widget_query', data: WidgetQuery }
+    | { name: 'inline_widget_query', data: InlineWidgetQuery }
+    | { name: 'shared_widget_query', data: SharedWidgetQuery }
+    | { name: 'widget_data', data: WidgetDataUpdate }
     | { name: 'poll', data: PollUpdate }
     | { name: 'poll_vote', data: PollVoteUpdate }
     | { name: 'user_status', data: UserStatusUpdate }

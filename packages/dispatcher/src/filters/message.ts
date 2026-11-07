@@ -26,6 +26,7 @@ import type {
   Video,
   Voice,
   WebPageMedia,
+  Widget,
 } from '@mtcute/core'
 import type { BusinessMessageContext } from '../context/business-message.js'
 
@@ -122,6 +123,8 @@ export const poll: UpdateFilter<Message, { media: Poll }> = mediaOf('poll')
 export const invoice: UpdateFilter<Message, { media: Invoice }> = mediaOf('invoice')
 /** Filter messages containing a story */
 export const story: UpdateFilter<Message, { media: Story }> = mediaOf('story')
+/** Filter messages containing a widget */
+export const widget: UpdateFilter<Message, { media: Widget }> = mediaOf('widget')
 
 /**
  * Filter messages containing any location (live or static).
