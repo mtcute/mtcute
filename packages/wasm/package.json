@@ -13,7 +13,7 @@
     "./mtcute-simd.wasm": "./src/mtcute-simd.wasm"
   },
   "scripts": {
-    "build:wasm": "docker build --output=lib --target=binaries lib"
+    "build:wasm": "docker build --output=src --target=binaries lib"
   },
   "devDependencies": {
     "@mtcute/core": "workspace:^",

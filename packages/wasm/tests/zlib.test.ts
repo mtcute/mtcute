@@ -36,6 +36,11 @@ describe('zlib deflate', () => {
     expect(res).toBeNull()
   })
 
+  it('should expose allocation failure as a RangeError', () => {
+    expect(() => deflateMaxSize(new Uint8Array(), 0xFFFFFFFF))
+      .toThrowError(new RangeError('WASM memory allocation failed'))
+  })
+
   it('should correctly deflate', () => {
     const data = Array.from({ length: 1000 }, () => 'a').join('')
     const res = deflateMaxSize(utf8.encoder.encode(data), 100)

@@ -28,14 +28,40 @@ describe('aes-ige (simd)', () => {
     expect(hex.encode(aes)).toEqual(hex.encode(data))
   })
 
+  it('should release the allocation when a later operation throws', () => {
+    const wasm = __getWasm()
+    const reusablePtr = wasm.__malloc(data.length + data.length)
+    expect(reusablePtr).not.toEqual(0)
+    wasm.__free(reusablePtr)
+
+    const throwingData = new Proxy(data, {
+      get(target, property) {
+        if (property === '0') throw new Error('copy failed')
+        return Reflect.get(target, property, target)
+      },
+    })
+    expect(() => ige256Encrypt(throwingData, key, iv)).toThrowError(new Error('copy failed'))
+
+    const reusedPtr = wasm.__malloc(data.length + data.length)
+    expect(reusedPtr).toEqual(reusablePtr)
+    wasm.__free(reusedPtr)
+  })
+
+  it('should accept empty input', () => {
+    expect(ige256Encrypt(new Uint8Array(), key, iv)).toEqual(new Uint8Array())
+    expect(ige256Decrypt(new Uint8Array(), key, iv)).toEqual(new Uint8Array())
+  })
+
   it('should not leak memory', () => {
     const mem = __getWasm().memory.buffer
     const memSize = mem.byteLength
+    let decrypted = data
 
     for (let i = 0; i < 10000; i++) {
-      ige256Decrypt(ige256Encrypt(data, key, iv), key, iv)
+      decrypted = ige256Decrypt(ige256Encrypt(data, key, iv), key, iv)
     }
 
+    expect(decrypted).toEqual(data)
     expect(mem.byteLength).toEqual(memSize)
   })
 })

@@ -26,12 +26,71 @@ let sharedKeyPtr!: number
 let sharedIvPtr!: number
 let cachedUint8Memory: Uint8Array | null = null
 
-function initCommon() {
-  compressor = wasm.libdeflate_alloc_compressor(6)
-  decompressor = wasm.libdeflate_alloc_decompressor()
-  sharedOutPtr = wasm.__get_shared_out()
-  sharedKeyPtr = wasm.__get_shared_key_buffer()
-  sharedIvPtr = wasm.__get_shared_iv_buffer()
+const ALLOCATION_FAILURE_MESSAGE = 'WASM memory allocation failed'
+const AES_ALIGNMENT = 16
+
+// WebAssembly exposes i32 results as signed JavaScript numbers, but wasm32 pointers and sizes are unsigned.
+function requireAllocatedPtr(ptr: number): number {
+  const normalizedPtr = ptr >>> 0
+  if (normalizedPtr === 0) {
+    throw new RangeError(ALLOCATION_FAILURE_MESSAGE)
+  }
+
+  return normalizedPtr
+}
+
+function initCommon(nextWasm: MtcuteWasmModule) {
+  const nextCompressor = requireAllocatedPtr(nextWasm.libdeflate_alloc_compressor(6))
+
+  let nextDecompressor = 0
+  let nextSharedOutPtr = 0
+  let nextSharedKeyPtr = 0
+  let nextSharedIvPtr = 0
+  try {
+    nextDecompressor = requireAllocatedPtr(nextWasm.libdeflate_alloc_decompressor())
+
+    nextSharedOutPtr = nextWasm.__get_shared_out() >>> 0
+    nextSharedKeyPtr = nextWasm.__get_shared_key_buffer() >>> 0
+    nextSharedIvPtr = nextWasm.__get_shared_iv_buffer() >>> 0
+  } catch (error) {
+    try {
+      if (nextDecompressor !== 0) {
+        nextWasm.libdeflate_free_decompressor(nextDecompressor)
+      }
+    } finally {
+      nextWasm.libdeflate_free_compressor(nextCompressor)
+    }
+    throw error
+  }
+
+  compressor = nextCompressor
+  decompressor = nextDecompressor
+  sharedOutPtr = nextSharedOutPtr
+  sharedKeyPtr = nextSharedKeyPtr
+  sharedIvPtr = nextSharedIvPtr
+}
+
+function malloc(size: number): number {
+  if (!Number.isSafeInteger(size) || size < 0 || size > 0xFFFFFFFF) {
+    throw new RangeError(ALLOCATION_FAILURE_MESSAGE)
+  }
+
+  return requireAllocatedPtr(wasm.__malloc(size))
+}
+
+function mallocAesBuffers(size: number): [allocationPtr: number, alignedPtr: number] {
+  const allocationPtr = malloc(size + AES_ALIGNMENT - 1)
+  const alignedPtr = Math.ceil(allocationPtr / AES_ALIGNMENT) * AES_ALIGNMENT
+
+  return [allocationPtr, alignedPtr]
+}
+
+function freeAllocations(firstAllocatedPtr: number, secondAllocatedPtr: number): void {
+  try {
+    wasm.__free(secondAllocatedPtr)
+  } finally {
+    wasm.__free(firstAllocatedPtr)
+  }
 }
 
 function getUint8Memory() {
@@ -58,8 +117,9 @@ export function initSync(module: SyncInitInput): void {
     module = new WebAssembly.Instance(module)
   }
 
-  wasm = (module as unknown as WebAssembly.Instance).exports as unknown as MtcuteWasmModule
-  initCommon()
+  const nextWasm = (module as unknown as WebAssembly.Instance).exports as unknown as MtcuteWasmModule
+  initCommon(nextWasm)
+  wasm = nextWasm
 }
 
 /* c8 ignore end */
@@ -70,25 +130,23 @@ export function initSync(module: SyncInitInput): void {
  * @returns null if the compressed data is larger than `size`, otherwise the compressed data
  */
 export function deflateMaxSize(bytes: Uint8Array, size: number): Uint8Array | null {
-  const outputPtr = wasm.__malloc(size)
-  const inputPtr = wasm.__malloc(bytes.length)
+  const outputPtr = malloc(size)
+  let inputPtr = 0
+  try {
+    inputPtr = malloc(bytes.length)
 
-  const mem = getUint8Memory()
-  mem.set(bytes, inputPtr)
+    const mem = getUint8Memory()
+    mem.set(bytes, inputPtr)
 
-  const written = wasm.libdeflate_zlib_compress(compressor, inputPtr, bytes.length, outputPtr, size)
-  wasm.__free(inputPtr)
+    const written = wasm.libdeflate_zlib_compress(compressor, inputPtr, bytes.length, outputPtr, size) >>> 0
+    if (written === 0) {
+      return null
+    }
 
-  if (written === 0) {
-    wasm.__free(outputPtr)
-
-    return null
+    return mem.slice(outputPtr, outputPtr + written)
+  } finally {
+    freeAllocations(outputPtr, inputPtr)
   }
-
-  const result = mem.slice(outputPtr, outputPtr + written)
-  wasm.__free(outputPtr)
-
-  return result
 }
 
 /**
@@ -98,118 +156,148 @@ export function deflateMaxSize(bytes: Uint8Array, size: number): Uint8Array | nu
  * @param defaultCapacity  default capacity of the output buffer. Defaults to `bytes.length * 2`
  */
 export function gunzip(bytes: Uint8Array): Uint8Array {
-  const inputPtr = wasm.__malloc(bytes.length)
-  getUint8Memory().set(bytes, inputPtr)
+  const inputPtr = malloc(bytes.length)
+  let outputPtr = 0
+  try {
+    getUint8Memory().set(bytes, inputPtr)
 
-  const size = wasm.libdeflate_gzip_get_output_size(inputPtr, bytes.length)
-  const outputPtr = wasm.__malloc(size)
+    const size = wasm.libdeflate_gzip_get_output_size(inputPtr, bytes.length) >>> 0
+    outputPtr = malloc(size)
 
-  const ret = wasm.libdeflate_gzip_decompress(decompressor, inputPtr, bytes.length, outputPtr, size)
+    const ret = wasm.libdeflate_gzip_decompress(decompressor, inputPtr, bytes.length, outputPtr, size)
 
-  /* c8 ignore next 3 */
-  if (ret === -1) throw new Error('gunzip error -- bad data')
-  if (ret === -2) throw new Error('gunzip error -- short output')
-  if (ret === -3) throw new Error('gunzip error -- short input') // should never happen
+    /* c8 ignore next 3 */
+    if (ret === -1) throw new Error('gunzip error -- bad data')
+    if (ret === -2) throw new Error('gunzip error -- short output')
+    if (ret === -3) throw new Error('gunzip error -- short input') // should never happen
 
-  const result = getUint8Memory().slice(outputPtr, outputPtr + size)
-  wasm.__free(inputPtr)
-  wasm.__free(outputPtr)
+    return getUint8Memory().slice(outputPtr, outputPtr + size)
+  } finally {
+    freeAllocations(inputPtr, outputPtr)
+  }
+}
 
-  return result
+function validateIge256Inputs(data: Uint8Array, key: Uint8Array, iv: Uint8Array): void {
+  if (data.length % 16 !== 0) {
+    throw new RangeError('AES-IGE data length must be a multiple of 16 bytes')
+  }
+  if (key.length !== 32) {
+    throw new RangeError('AES-IGE key must be exactly 32 bytes')
+  }
+  if (iv.length !== 32) {
+    throw new RangeError('AES-IGE IV must be exactly 32 bytes')
+  }
 }
 
 /**
- * Pefrorm AES-IGE-256 encryption
+ * Perform AES-IGE-256 encryption
  *
- * @param data  data to encrypt (must be a multiple of 16 bytes)
+ * @param data  data to encrypt (must be a multiple of 16 bytes; empty data is accepted)
  * @param key  encryption key (32 bytes)
  * @param iv  initialization vector (32 bytes)
+ * @throws  RangeError if data, key, or IV has an invalid length
  */
 export function ige256Encrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array): Uint8Array {
-  const ptr = wasm.__malloc(data.length + data.length)
+  validateIge256Inputs(data, key, iv)
 
-  const inputPtr = ptr
-  const outputPtr = inputPtr + data.length
+  const [allocationPtr, inputPtr] = mallocAesBuffers(data.length + data.length)
 
-  const mem = getUint8Memory()
-  mem.set(data, inputPtr)
-  mem.set(key, sharedKeyPtr)
-  mem.set(iv, sharedIvPtr)
+  try {
+    const outputPtr = inputPtr + data.length
 
-  wasm.ige256_encrypt(inputPtr, data.length, outputPtr)
-  const result = mem.slice(outputPtr, outputPtr + data.length)
+    const mem = getUint8Memory()
+    mem.set(data, inputPtr)
+    mem.set(key, sharedKeyPtr)
+    mem.set(iv, sharedIvPtr)
 
-  wasm.__free(ptr)
+    wasm.ige256_encrypt(inputPtr, data.length, outputPtr)
 
-  return result
+    return mem.slice(outputPtr, outputPtr + data.length)
+  } finally {
+    wasm.__free(allocationPtr)
+  }
 }
 
 /**
- * Pefrorm AES-IGE-256 decryption
+ * Perform AES-IGE-256 decryption
  *
- * @param data  data to decrypt (must be a multiple of 16 bytes)
+ * @param data  data to decrypt (must be a multiple of 16 bytes; empty data is accepted)
  * @param key  encryption key (32 bytes)
  * @param iv  initialization vector (32 bytes)
+ * @throws  RangeError if data, key, or IV has an invalid length
  */
 export function ige256Decrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array): Uint8Array {
-  const ptr = wasm.__malloc(data.length + data.length)
+  validateIge256Inputs(data, key, iv)
 
-  const inputPtr = ptr
-  const outputPtr = inputPtr + data.length
+  const [allocationPtr, inputPtr] = mallocAesBuffers(data.length + data.length)
 
-  const mem = getUint8Memory()
-  mem.set(data, inputPtr)
-  mem.set(key, sharedKeyPtr)
-  mem.set(iv, sharedIvPtr)
+  try {
+    const outputPtr = inputPtr + data.length
 
-  wasm.ige256_decrypt(inputPtr, data.length, outputPtr)
-  const result = mem.slice(outputPtr, outputPtr + data.length)
+    const mem = getUint8Memory()
+    mem.set(data, inputPtr)
+    mem.set(key, sharedKeyPtr)
+    mem.set(iv, sharedIvPtr)
 
-  wasm.__free(ptr)
+    wasm.ige256_decrypt(inputPtr, data.length, outputPtr)
 
-  return result
+    return mem.slice(outputPtr, outputPtr + data.length)
+  } finally {
+    wasm.__free(allocationPtr)
+  }
 }
 
 /**
- * Create a context for AES-CTR-256 en/decryption
+ * Create an AES-CTR-256 encryption or decryption context
  *
  * > **Note**: `freeCtr256` must be called on the returned context when it's no longer needed
+ *
+ * @param key  encryption key (32 bytes)
+ * @param iv  initial counter value (16 bytes)
+ * @throws  RangeError if the key or IV has an invalid length
  */
 export function createCtr256(key: Uint8Array, iv: Uint8Array): number {
+  if (key.length !== 32) {
+    throw new RangeError('AES-CTR key must be exactly 32 bytes')
+  }
+  if (iv.length !== 16) {
+    throw new RangeError('AES-CTR IV must be exactly 16 bytes')
+  }
+
   getUint8Memory().set(key, sharedKeyPtr)
   getUint8Memory().set(iv, sharedIvPtr)
 
-  return wasm.ctr256_alloc()
+  return requireAllocatedPtr(wasm.ctr256_alloc())
 }
 
 /**
- * Release a context for AES-CTR-256 en/decryption
+ * Release an AES-CTR-256 context
  */
 export function freeCtr256(ctx: number): void {
   wasm.ctr256_free(ctx)
 }
 
 /**
- * Pefrorm AES-CTR-256 en/decryption
+ * Encrypt or decrypt data with AES-CTR-256
  *
  * @param ctx  context returned by `createCtr256`
- * @param data  data to en/decrypt (must be a multiple of 16 bytes)
+ * @param data  data to encrypt or decrypt (any length)
  */
 export function ctr256(ctx: number, data: Uint8Array): Uint8Array {
-  const { __malloc, __free } = wasm
-  const inputPtr = __malloc(data.length)
-  const outputPtr = __malloc(data.length)
+  const inputPtr = malloc(data.length)
+  let outputPtr = 0
+  try {
+    outputPtr = malloc(data.length)
 
-  const mem = getUint8Memory()
-  mem.set(data, inputPtr)
+    const mem = getUint8Memory()
+    mem.set(data, inputPtr)
 
-  wasm.ctr256(ctx, inputPtr, data.length, outputPtr)
-  __free(inputPtr)
+    wasm.ctr256(ctx, inputPtr, data.length, outputPtr)
 
-  const result = mem.slice(outputPtr, outputPtr + data.length)
-  __free(outputPtr)
-
-  return result
+    return mem.slice(outputPtr, outputPtr + data.length)
+  } finally {
+    freeAllocations(inputPtr, outputPtr)
+  }
 }
 
 /**
@@ -218,16 +306,17 @@ export function ctr256(ctx: number, data: Uint8Array): Uint8Array {
  * @param data  data to hash
  */
 export function sha256(data: Uint8Array): Uint8Array {
-  const { __malloc, __free } = wasm
-  const inputPtr = __malloc(data.length)
+  const inputPtr = malloc(data.length)
+  try {
+    const mem = getUint8Memory()
+    mem.set(data, inputPtr)
 
-  const mem = getUint8Memory()
-  mem.set(data, inputPtr)
+    wasm.sha256(inputPtr, data.length)
 
-  wasm.sha256(inputPtr, data.length)
-  __free(inputPtr)
-
-  return mem.slice(sharedOutPtr, sharedOutPtr + 32)
+    return mem.slice(sharedOutPtr, sharedOutPtr + 32)
+  } finally {
+    wasm.__free(inputPtr)
+  }
 }
 
 /**
@@ -236,16 +325,17 @@ export function sha256(data: Uint8Array): Uint8Array {
  * @param data  data to hash
  */
 export function sha1(data: Uint8Array): Uint8Array {
-  const { __malloc, __free } = wasm
-  const inputPtr = __malloc(data.length)
+  const inputPtr = malloc(data.length)
+  try {
+    const mem = getUint8Memory()
+    mem.set(data, inputPtr)
 
-  const mem = getUint8Memory()
-  mem.set(data, inputPtr)
+    wasm.sha1(inputPtr, data.length)
 
-  wasm.sha1(inputPtr, data.length)
-  __free(inputPtr)
-
-  return mem.slice(sharedOutPtr, sharedOutPtr + 20)
+    return mem.slice(sharedOutPtr, sharedOutPtr + 20)
+  } finally {
+    wasm.__free(inputPtr)
+  }
 }
 
 /**
