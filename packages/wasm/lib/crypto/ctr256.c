@@ -7,7 +7,14 @@ struct ctr256_ctx {
 };
 
 WASM_EXPORT struct ctr256_ctx* ctr256_alloc() {
-    struct ctr256_ctx *state = (struct ctr256_ctx *) __malloc(sizeof(struct ctr256_ctx));
+    struct ctr256_ctx *state = (struct ctr256_ctx *) __malloc_aligned(
+        alignof(struct ctr256_ctx),
+        sizeof(struct ctr256_ctx)
+    );
+    if (state == NULL) {
+        return NULL;
+    }
+
     aes256_set_encryption_key(aes_shared_key_buffer, state->expandedKey);
 
     memcpy(state->iv, aes_shared_iv_buffer, AES_BLOCK_SIZE);
@@ -17,10 +24,11 @@ WASM_EXPORT struct ctr256_ctx* ctr256_alloc() {
 }
 
 WASM_EXPORT void ctr256_free(struct ctr256_ctx* ctx) {
-    __free(ctx);
+    __free_aligned(ctx);
 }
 
 WASM_EXPORT void ctr256(struct ctr256_ctx* ctx, uint8_t* in, uint32_t length, uint8_t *out) {
+    // The caller retains ownership of the input and output buffers.
     alignas(16) uint8_t chunk[AES_BLOCK_SIZE];
     uint32_t* expandedKey = ctx->expandedKey;
     uint8_t* iv = ctx->iv;
@@ -46,8 +54,6 @@ WASM_EXPORT void ctr256(struct ctr256_ctx* ctx, uint8_t* in, uint32_t length, ui
             }
         }
     }
-
-    __free(in);
 
     ctx->state = state;
 }
