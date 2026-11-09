@@ -51,9 +51,7 @@ export async function askForConfigPersisted(): Promise<UserConfigPersisted> {
         if (!v) {
           // eslint-disable-next-line no-restricted-globals
           setTimeout(() => {
-            try {
-              open(TELEGRAM_APPS_PAGE)
-            } catch {}
+            open(TELEGRAM_APPS_PAGE).catch(() => {})
           }, 1000)
 
           return [
