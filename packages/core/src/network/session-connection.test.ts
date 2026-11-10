@@ -62,7 +62,7 @@ describe('SessionConnection', () => {
       const data = new Uint8Array(4)
       new DataView(data.buffer).setUint32(0, 0xDEADBEEF, true)
 
-      return new TlBinaryReader(conn._readerMap, data)
+      return new TlBinaryReader(conn['_readerMap'], data)
     }
 
     it('should ack and drop an unreadable object instead of resetting the session', async () => {
@@ -96,7 +96,7 @@ describe('SessionConnection', () => {
       dv.setUint32(0, 0x62D6B459, true) // mt_msgs_ack
       dv.setUint32(4, 0x1CB5C415, true) // vector
       dv.setUint32(8, 0, true) // empty
-      conn['_handleRawMessage'](secondMsgId, 0, new TlBinaryReader(conn._readerMap, ackMessage))
+      conn['_handleRawMessage'](secondMsgId, 0, new TlBinaryReader(conn['_readerMap'], ackMessage))
 
       expect(reset).not.toHaveBeenCalled()
       expect(handle).toHaveBeenCalledTimes(1)
