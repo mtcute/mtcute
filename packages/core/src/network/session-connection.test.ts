@@ -1,6 +1,7 @@
 import type { SessionConnection } from './session-connection.js'
 import { Deferred } from '@fuman/utils'
 import { StubTelegramClient } from '@mtcute/test'
+import { TlBinaryReader } from '@mtcute/tl-runtime'
 import Long from 'long'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -50,6 +51,56 @@ describe('SessionConnection', () => {
       conn['_flush']()
 
       expect(reset).not.toHaveBeenCalled()
+
+      await client.destroy()
+    })
+  })
+
+  describe('unknown objects', () => {
+    function unreadableMessage(conn: SessionConnection & Record<string, any>) {
+      // an object id that is in no reader map, so reading it throws TlUnknownObjectError
+      const data = new Uint8Array(4)
+      new DataView(data.buffer).setUint32(0, 0xDEADBEEF, true)
+
+      return new TlBinaryReader(conn._readerMap, data)
+    }
+
+    it('should ack and drop an unreadable object instead of resetting the session', async () => {
+      const { client, conn } = await createConnection()
+
+      const reset = vi.spyOn(conn, '_resetSession')
+      const ack = vi.spyOn(conn, '_sendAck')
+      const msgId = Long.fromBits(1, 0x5F00_0000) // odd, so it is not ignored as invalid
+
+      conn['_handleRawMessage'](msgId, 0, unreadableMessage(conn))
+
+      // the ack is what stops the server from re-delivering it (and us from looping)
+      expect(ack).toHaveBeenCalledWith(msgId)
+      expect(reset).not.toHaveBeenCalled()
+
+      await client.destroy()
+    })
+
+    it('should keep handling the rest of a container after an unreadable object', async () => {
+      const { client, conn } = await createConnection()
+
+      const handle = vi.spyOn(conn, '_handleMessage')
+      const reset = vi.spyOn(conn, '_resetSession')
+      const firstMsgId = Long.fromBits(1, 0x5F00_0000)
+      const secondMsgId = Long.fromBits(3, 0x5F00_0000)
+
+      conn['_handleRawMessage'](firstMsgId, 0, unreadableMessage(conn))
+      // mt_msgs_ack, which every reader map knows
+      const ackMessage = new Uint8Array(12)
+      const dv = new DataView(ackMessage.buffer)
+      dv.setUint32(0, 0x62D6B459, true) // mt_msgs_ack
+      dv.setUint32(4, 0x1CB5C415, true) // vector
+      dv.setUint32(8, 0, true) // empty
+      conn['_handleRawMessage'](secondMsgId, 0, new TlBinaryReader(conn._readerMap, ackMessage))
+
+      expect(reset).not.toHaveBeenCalled()
+      expect(handle).toHaveBeenCalledTimes(1)
+      expect(handle.mock.calls[0][0]).toBe(secondMsgId)
 
       await client.destroy()
     })

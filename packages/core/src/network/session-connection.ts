@@ -662,8 +662,30 @@ export class SessionConnection extends PersistentConnection {
       return this._onRpcResult(messageId, message)
     }
 
-    // we are safe.. i guess
-    this._handleMessage(messageId, message.object(objectId))
+    let parsed
+
+    try {
+      parsed = message.object(objectId)
+    } catch (err) {
+      if (err instanceof TlUnknownObjectError) {
+        // an object we cannot read (see the layer-downgrade note in _handleMessage's caller).
+        //
+        // resetting the session here would be a livelock: the message is never acked, so the
+        // server re-delivers it on the new session, we reset again, and the connection
+        // reconnects about once a second for as long as the process lives (observed against
+        // a production DC for hours). ack it and drop it instead - the session survives, the
+        // server stops re-sending, and only this one message is lost. sibling messages of the
+        // same container are unaffected, since each is read from its own reader.
+        this.log.warn('ignoring unknown object %s (msg_id: %l)', err.objectId.toString(16), messageId)
+        this._sendAck(messageId)
+
+        return
+      }
+
+      throw err
+    }
+
+    this._handleMessage(messageId, parsed)
   }
 
   private _handleMessage(messageId: Long, message_: unknown): void {
