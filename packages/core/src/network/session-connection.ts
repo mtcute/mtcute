@@ -888,29 +888,56 @@ export class SessionConnection extends PersistentConnection {
 
     const customReader = this._readerMap._results![rpc.method]
 
-    if (resultConstructorId === RPC_ERROR_ID) {
-      // we need to handle this before anything else because otherwise we might
-      // try to use customReader on an error which will inevitably fail or break
-      result = message.object()
-    } else {
-      const objectId = message.peekUint()
-
-      // bruh
-      if (objectId === GZIP_PACKED_ID) {
-        // skip 4 bytes
-        message.pos += 4
-        const inner = this._crypto.gunzip(message.bytes())
-        if (customReader) {
-          result = customReader(new TlBinaryReader(this._readerMap, inner))
-        } else {
-          // eslint-disable-next-line ts/no-unsafe-assignment
-          result = TlBinaryReader.deserializeObject(this._readerMap, inner)
-        }
-      } else if (customReader) {
-        result = customReader(message)
-      } else {
+    try {
+      if (resultConstructorId === RPC_ERROR_ID) {
+        // we need to handle this before anything else because otherwise we might
+        // try to use customReader on an error which will inevitably fail or break
         result = message.object()
+      } else {
+        const objectId = message.peekUint()
+
+        // bruh
+        if (objectId === GZIP_PACKED_ID) {
+          // skip 4 bytes
+          message.pos += 4
+          const inner = this._crypto.gunzip(message.bytes())
+          if (customReader) {
+            result = customReader(new TlBinaryReader(this._readerMap, inner))
+          } else {
+            // eslint-disable-next-line ts/no-unsafe-assignment
+            result = TlBinaryReader.deserializeObject(this._readerMap, inner)
+          }
+        } else if (customReader) {
+          result = customReader(message)
+        } else {
+          result = message.object()
+        }
       }
+    } catch (err) {
+      if (err instanceof TlUnknownObjectError) {
+        // an unreadable result used to propagate to the decrypt catch, which resets the session.
+        // the request is then re-sent, the server answers with the same unreadable result, and it
+        // resets again - a loop that rejects everything in flight with "Session is reset" and
+        // never ends, because retrying cannot help: the type is not in our reader map at all.
+        //
+        // fail just this request instead, and clean it up like a normal completion. this message
+        // was already acked above, so the server will not re-deliver it.
+        this.log.warn(
+          'rejecting %s (%l): unreadable result object %s',
+          rpc.method,
+          reqMsgId,
+          err.objectId.toString(16),
+        )
+        rpc.done = true
+        if (!rpc.cancelled) rpc.promise.reject(err)
+        if (rpc.chainId) this._processPendingChainedFails(rpc.chainId, reqMsgId)
+        this._onMessageAcked(reqMsgId)
+        this._session.pendingMessages.delete(reqMsgId)
+
+        return
+      }
+
+      throw err
     }
 
     // initConnection call was definitely received and
