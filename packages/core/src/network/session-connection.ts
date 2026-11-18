@@ -2045,7 +2045,7 @@ export class SessionConnection extends PersistentConnection {
     const otherPendings: Exclude<PendingMessage, { _: 'rpc' | 'container' | 'bind' }>[] = []
 
     if (ackRequest) {
-      this._registerOutgoingMsgId(this._session.writeMessage(writer, ackRequest))
+      this._registerOutgoingMsgId(this._session.writeMessage(writer, ackRequest, false))
     }
 
     if (pingRequest) {
